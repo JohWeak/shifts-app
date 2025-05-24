@@ -1,3 +1,4 @@
+// backend/src/server.js (добавить новые маршруты)
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -20,6 +21,8 @@ const employeeRoutes = require('./routes/employee.routes');
 const worksiteRoutes = require('./routes/worksite.routes');
 const positionRoutes = require('./routes/position.routes');
 const shiftRoutes = require('./routes/shift.routes');
+const constraintRoutes = require('./routes/constraint.routes'); // NEW
+const scheduleSettingsRoutes = require('./routes/schedule-settings.routes'); // NEW
 
 // Register routes
 app.use('/api/auth', authRoutes);
@@ -27,6 +30,8 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/worksites', worksiteRoutes);
 app.use('/api/positions', positionRoutes);
 app.use('/api/shifts', shiftRoutes);
+app.use('/api/constraints', constraintRoutes); // NEW
+app.use('/api/schedule-settings', scheduleSettingsRoutes); // NEW
 
 // Test route
 app.get('/', (req, res) => {
