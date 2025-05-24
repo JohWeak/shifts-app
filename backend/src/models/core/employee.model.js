@@ -40,17 +40,7 @@ const Employee = sequelize.define('Employee', {
 }, {
     tableName: 'employees',
     timestamps: true
-}, {
-    tableName: 'employees',
-    timestamps: true,
-    defaultScope: {
-        attributes: { exclude: ['password'] } // Globally excluding password
-    },
-    scopes: {
-        withPassword: {
-            attributes: {} // Scope for cases when a password is needed (for example, during login)
-        }
-    }
+    // Убираем defaultScope - больше никаких автоматических исключений
 });
 
 module.exports = Employee;

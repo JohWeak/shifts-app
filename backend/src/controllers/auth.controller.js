@@ -5,7 +5,7 @@ const Employee = require('../models/core/employee.model');
 // Register a new employee
 exports.register = async (req, res) => {
     try {
-        // Check if user already exists
+        // Check if a user already exists
         const existingEmployee = await Employee.findOne({
             where: { email: req.body.email }
         });
@@ -24,7 +24,7 @@ exports.register = async (req, res) => {
             email: req.body.email,
             login: req.body.login,
             password: hashedPassword,
-            // Other fields from request
+            // Other fields from the request
         });
 
         res.status(201).json({
@@ -62,9 +62,12 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Create token
+        const role = employee.status === 'admin' ? 'admin' : 'employee';
+        console.log(`User ${employee.login} logging in with role: ${role}`); // Добавьте для отладки
+
+        // Token creation
         const token = jwt.sign(
-            { id: employee.emp_id, role: employee.status === 'admin' ? 'admin' : 'employee' },
+            { id: employee.emp_id, role },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
@@ -73,8 +76,8 @@ exports.login = async (req, res) => {
             id: employee.emp_id,
             name: `${employee.first_name} ${employee.last_name}`,
             email: employee.email,
-            role: employee.status === 'admin' ? 'admin' : 'employee',
-            token: token
+            role,
+            token
         });
     } catch (error) {
         res.status(500).json({

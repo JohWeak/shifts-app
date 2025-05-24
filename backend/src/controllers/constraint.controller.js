@@ -6,6 +6,16 @@ const { Op } = require('sequelize');
 exports.getEmployeeConstraints = async (req, res) => {
     try {
         const empId = req.params.empId;
+        const requestingUserId = req.userId;
+        const requestingUserRole = req.userRole;
+
+        // Security check: employees can only see their own constraints
+        if (requestingUserRole !== 'admin' && parseInt(empId) !== requestingUserId) {
+            return res.status(403).json({
+                message: 'You can only view your own constraints'
+            });
+        }
+
         const { type, is_permanent, status } = req.query;
 
         // Build filter conditions
@@ -56,6 +66,13 @@ exports.createConstraint = async (req, res) => {
             reason,
             emp_id
         } = req.body;
+
+        // Security check: employees can only create constraints for themselves
+        if (req.userRole !== 'admin' && emp_id !== req.userId) {
+            return res.status(403).json({
+                message: 'You can only create constraints for yourself'
+            });
+        }
 
         // Validate employee exists
         const employee = await Employee.findByPk(emp_id);
