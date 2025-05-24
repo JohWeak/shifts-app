@@ -1,5 +1,6 @@
+// backend/src/models/core/worksite.model.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db.config');
+const sequelize = require('../../config/db.config');
 
 const WorkSite = sequelize.define('WorkSite', {
     site_id: {

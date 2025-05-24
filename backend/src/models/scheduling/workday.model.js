@@ -1,5 +1,6 @@
+// backend/src/models/scheduling/workday.model.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db.config');
+const sequelize = require('../../config/db.config');
 
 const WorkDay = sequelize.define('WorkDay', {
     id: {
@@ -13,7 +14,11 @@ const WorkDay = sequelize.define('WorkDay', {
     },
     pos_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'positions',
+            key: 'pos_id'
+        }
     }
 }, {
     tableName: 'work_days',

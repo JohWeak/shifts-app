@@ -1,7 +1,7 @@
+// backend/src/models/core/employee.model.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db.config');
+const sequelize = require('../../config/db.config');
 
-// Employee model definition based on database schema
 const Employee = sequelize.define('Employee', {
     emp_id: {
         type: DataTypes.INTEGER,
@@ -16,12 +16,6 @@ const Employee = sequelize.define('Employee', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    address: {
-        type: DataTypes.STRING
-    },
-    profession: {
-        type: DataTypes.STRING
-    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -29,9 +23,6 @@ const Employee = sequelize.define('Employee', {
         validate: {
             isEmail: true
         }
-    },
-    phone: {
-        type: DataTypes.STRING
     },
     login: {
         type: DataTypes.STRING,
@@ -43,7 +34,7 @@ const Employee = sequelize.define('Employee', {
         allowNull: false
     },
     status: {
-        type: DataTypes.ENUM('active', 'inactive'),
+        type: DataTypes.ENUM('active', 'inactive', 'admin'),
         defaultValue: 'active'
     }
 }, {

@@ -1,5 +1,6 @@
+// backend/src/models/scheduling/position.model.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db.config');
+const sequelize = require('../../config/db.config');
 
 const Position = sequelize.define('Position', {
     pos_id: {
@@ -18,16 +19,22 @@ const Position = sequelize.define('Position', {
     num_of_emp: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 1
+        defaultValue: 1,
+        comment: 'Number of employees required for this position'
     },
     num_of_shifts: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 1
+        defaultValue: 1,
+        comment: 'Number of shifts per day for this position'
     },
     site_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'work_sites',
+            key: 'site_id'
+        }
     }
 }, {
     tableName: 'positions',
