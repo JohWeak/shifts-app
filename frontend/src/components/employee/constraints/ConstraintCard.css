@@ -1,0 +1,210 @@
+/* frontend/src/components/employee/constraints/ConstraintCard.css */
+.constraint-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.constraint-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #ddd;
+}
+
+.constraint-card.permanent {
+    border-left: 4px solid #9b59b6;
+}
+
+.constraint-card.temporary {
+    border-left: 4px solid #3498db;
+}
+
+/* Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+.type-badge, .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.type-badge {
+    background-color: #34495e;
+}
+
+.status-badge {
+    background-color: #95a5a6;
+}
+
+/* Content */
+.card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 8px;
+}
+
+.value {
+    color: #34495e;
+    font-size: 14px;
+}
+
+/* Priority */
+.priority-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.priority-bar {
+    flex: 1;
+    height: 8px;
+    background: #ecf0f1;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.priority-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #27ae60 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.priority-number {
+    font-weight: 600;
+    font-size: 12px;
+    color: #2c3e50;
+    min-width: 30px;
+}
+
+/* Applies to section */
+.applies-to-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.applies-to-section .value {
+    font-weight: 500;
+}
+
+/* Reason */
+.reason-section {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #3498db;
+}
+
+.reason-text {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 4px 0 0 0;
+    font-style: italic;
+}
+
+/* Permanent indicator */
+.permanent-indicator {
+    text-align: center;
+}
+
+.permanent-badge {
+    background: linear-gradient(45deg, #9b59b6, #8e44ad);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Actions */
+.card-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    background: #fafafa;
+    border-top: 1px solid #eee;
+}
+
+.edit-btn {
+    background: #3498db;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.edit-btn:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background: #e74c3c;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .card-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .card-content {
+        padding: 16px;
+    }
+
+    .card-actions {
+        padding: 12px 16px;
+    }
+}
