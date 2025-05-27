@@ -17,7 +17,7 @@ const LegalConstraint = sequelize.define('LegalConstraint', {
         type: DataTypes.ENUM(
             'max_daily_hours',        // Maximum 12 hours per day
             'min_rest_between_shifts', // Minimum 8 hours between shifts (legal)
-            'weekly_rest',            // Minimum 36 hours weekly rest
+            'weekly_rest',            // Minimum 36-hour weekly rest
             'mandatory_day_off',      // Religious day off
             'max_night_shifts',       // Night shift limitations
             'max_overtime_weekly',    // Maximum 15 overtime hours/week

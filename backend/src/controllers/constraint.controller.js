@@ -1,6 +1,7 @@
 // backend/src/controllers/constraint.controller.js
 const { ConstraintType, Employee, Shift, ScheduleSettings } = require('../models/associations');
 const { Op } = require('sequelize');
+const {query} = require("../config/db.config");
 
 // Get all constraints for a specific employee
 exports.getEmployeeConstraints = async (req, res) => {
@@ -64,7 +65,8 @@ exports.createConstraint = async (req, res) => {
             day_of_week,
             shift_id,
             reason,
-            emp_id
+            emp_id,
+            request_permanent = false  // НОВЫЙ ФЛАГ для запроса постоянного ограничения
         } = req.body;
 
         // Security check: employees can only create constraints for themselves
@@ -88,8 +90,32 @@ exports.createConstraint = async (req, res) => {
             }
         }
 
-        // Check constraint limits for employee
-        if (type === 'cannot_work' && !req.body.is_permanent) {
+        // Validate end_date (только если это временное ограничение с датами)
+        // Clean up date fields - convert empty strings to null
+        const cleanStartDate = start_date && start_date.trim() !== '' ? start_date : null;
+        const cleanEndDate = end_date && end_date.trim() !== '' ? end_date : null;
+
+// Clean up reason field
+        const cleanReason = reason && reason.trim() !== '' ? reason : null;
+
+// Validate dates if provided
+        if (cleanStartDate && cleanEndDate) {
+            if (new Date(cleanEndDate) < new Date(cleanStartDate)) {
+                return res.status(400).json({
+                    message: 'End date cannot be before start date'
+                });
+            }
+        }
+
+        // Для запросов постоянных ограничений - требуем причину
+        if (request_permanent && !reason) {
+            return res.status(400).json({
+                message: 'Reason is required for permanent constraint requests'
+            });
+        }
+
+        // Check constraint limits ТОЛЬКО для временных ограничений (не для запросов постоянных)
+        if (type === 'cannot_work' && !request_permanent) {
             const settings = await ScheduleSettings.findOne({
                 include: [{
                     association: 'workSite',
@@ -101,52 +127,69 @@ exports.createConstraint = async (req, res) => {
                 }]
             });
 
-            if (settings) {
-                // Count existing cannot_work constraints for the current week
-                const weekStart = new Date();
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of the week (Sunday)
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6); // End of week (Saturday)
+            // Значение по умолчанию 3, если настройки не найдены
+            const maxCannotWorkDays = settings?.max_cannot_work_days;
 
-                const existingConstraints = await ConstraintType.count({
-                    where: {
-                        emp_id,
-                        type: 'cannot_work',
-                        is_permanent: false,
-                        [Op.or]: [
-                            {
-                                start_date: {
-                                    [Op.between]: [weekStart, weekEnd]
-                                }
-                            },
-                            {
-                                applies_to: 'day_of_week'
+            // Count existing cannot_work constraints for the current week
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of the week (Sunday)
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6); // End of week (Saturday)
+
+            const existingConstraints = await ConstraintType.count({
+                where: {
+                    emp_id,
+                    type: 'cannot_work',
+                    is_permanent: false,
+                    status: 'approved', // Считаем только одобренные ограничения
+                    [Op.or]: [
+                        {
+                            start_date: {
+                                [Op.between]: [weekStart, weekEnd]
                             }
-                        ]
-                    }
-                });
-
-                if (existingConstraints >= settings.max_cannot_work_days) {
-                    return res.status(400).json({
-                        message: `Cannot exceed ${settings.max_cannot_work_days} 'cannot work' constraints per week`
-                    });
+                        },
+                        {
+                            applies_to: 'day_of_week'
+                        }
+                    ]
                 }
+            });
+
+            if (existingConstraints >= maxCannotWorkDays) {
+                return res.status(400).json({
+                    message: `Cannot exceed ${maxCannotWorkDays} 'cannot work' constraints per week`
+                });
             }
         }
+
+        // Определяем статус ограничения
+        let constraintStatus;
+        let isPermanent = false;
+
+        if (request_permanent) {
+            // Запрос на постоянное ограничение - всегда pending для одобрения админом
+            constraintStatus = 'pending';
+            isPermanent = false; // Станет true только после одобрения админом
+        } else {
+            // Обычное временное ограничение - сразу approved
+            constraintStatus = 'approved';
+            isPermanent = false;
+        }
+
 
         // Create constraint
         const constraint = await ConstraintType.create({
             type,
             priority: priority || 1,
             applies_to,
-            start_date,
-            end_date,
+            start_date: cleanStartDate,
+            end_date: cleanEndDate,
             day_of_week,
             shift_id,
-            reason,
+            reason: cleanReason,
             emp_id,
-            is_permanent: false, // Employees can only create temporary constraints
-            status: (type === 'cannot_work' && reason) || (reason && reason.toLowerCase().includes('permanent')) ? 'pending' : 'approved' // Permanent requests need approval
+            is_permanent: isPermanent,
+            status: constraintStatus
         });
 
         // Fetch the created constraint with associations
@@ -157,8 +200,12 @@ exports.createConstraint = async (req, res) => {
             ]
         });
 
+        const responseMessage = request_permanent
+            ? 'Permanent constraint request submitted for admin approval'
+            : 'Constraint created successfully';
+
         res.status(201).json({
-            message: 'Constraint created successfully',
+            message: responseMessage,
             constraint: createdConstraint
         });
     } catch (error) {
@@ -237,7 +284,7 @@ exports.deleteConstraint = async (req, res) => {
         }
 
         await constraint.destroy();
-        await sequelize.query('COMMIT;');
+        await query('COMMIT;');
         console.log(`Constraint with ID ${id} deleted successfully`);
 
         res.json({ message: 'Constraint deleted successfully' });

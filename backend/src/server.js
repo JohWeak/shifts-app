@@ -23,6 +23,7 @@ const positionRoutes = require('./routes/position.routes');
 const shiftRoutes = require('./routes/shift.routes');
 const constraintRoutes = require('./routes/constraint.routes'); // NEW
 const scheduleSettingsRoutes = require('./routes/schedule-settings.routes'); // NEW
+const scheduleRoutes = require('./routes/schedule.routes');
 
 // Register routes
 app.use('/api/auth', authRoutes);
@@ -32,6 +33,9 @@ app.use('/api/positions', positionRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/constraints', constraintRoutes); // NEW
 app.use('/api/schedule-settings', scheduleSettingsRoutes); // NEW
+
+
+app.use('/api/schedules', scheduleRoutes);
 
 // Test route
 app.get('/', (req, res) => {
@@ -47,7 +51,7 @@ app.listen(PORT, async () => {
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
 
-        // Synchronize all models with database
+        // Synchronize all models with a database
         await sequelize.sync({ alter: true });
         console.log('All models synchronized with database');
     } catch (error) {

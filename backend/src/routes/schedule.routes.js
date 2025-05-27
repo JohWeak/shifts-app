@@ -1,12 +1,19 @@
+// backend/src/routes/schedule.routes.js
 const express = require('express');
-const router = express.Router();
+const scheduleController = require('../controllers/schedule.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-// Временный обработчик для тестирования
+const router = express.Router();
+
+// Employee routes - get weekly schedule for their position
+router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
+
+// Admin routes - get full schedule view
+router.get('/admin/weekly', [verifyToken, isAdmin], scheduleController.getAdminWeeklySchedule);
+
+// Test route
 router.get('/', verifyToken, (req, res) => {
     res.json({ message: 'Schedule API is working' });
 });
-
-// Здесь будут реальные маршруты для работы с расписаниями
 
 module.exports = router;

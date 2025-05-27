@@ -9,7 +9,8 @@ const {
     SchedulePeriod,
     ScheduleSettings,
     ConstraintType,
-    LegalConstraint
+    ScheduleAssignment,
+    LegalConstraint,
 } = require('./index');
 
 // Core relationships
@@ -127,6 +128,48 @@ SchedulePeriod.belongsTo(Employee, {
     as: 'approver'
 });
 
+// Schedule Assignment relationships
+Schedule.hasMany(ScheduleAssignment, {
+    foreignKey: 'schedule_id',
+    as: 'assignments',
+    onDelete: 'CASCADE'
+});
+ScheduleAssignment.belongsTo(Schedule, {
+    foreignKey: 'schedule_id',
+    as: 'schedule'
+});
+
+Employee.hasMany(ScheduleAssignment, {
+    foreignKey: 'emp_id',
+    as: 'scheduleAssignments',
+    onDelete: 'CASCADE'
+});
+ScheduleAssignment.belongsTo(Employee, {
+    foreignKey: 'emp_id',
+    as: 'employee'
+});
+
+Shift.hasMany(ScheduleAssignment, {
+    foreignKey: 'shift_id',
+    as: 'scheduleAssignments',
+    onDelete: 'CASCADE'
+});
+ScheduleAssignment.belongsTo(Shift, {
+    foreignKey: 'shift_id',
+    as: 'shift'
+});
+
+Position.hasMany(ScheduleAssignment, {
+    foreignKey: 'position_id',
+    as: 'scheduleAssignments',
+    onDelete: 'CASCADE'
+});
+ScheduleAssignment.belongsTo(Position, {
+    foreignKey: 'position_id',
+    as: 'position'
+});
+
+// Update exports to include ScheduleAssignment
 module.exports = {
     Employee,
     WorkSite,
@@ -137,5 +180,6 @@ module.exports = {
     SchedulePeriod,
     ScheduleSettings,
     ConstraintType,
-    LegalConstraint
+    LegalConstraint,
+    ScheduleAssignment
 };

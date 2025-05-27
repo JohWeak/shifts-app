@@ -4,6 +4,7 @@ const Position = require('./position.model');
 const Schedule = require('./schedule.model');
 const SchedulePeriod = require('./schedule-period.model');
 const ScheduleSettings = require('./schedule-settings.model');
+const ScheduleAssignment = require('./schedule-assignment.model');
 const WorkDay = require('./workday.model');
 
 module.exports = {
@@ -12,5 +13,6 @@ module.exports = {
     Schedule,
     SchedulePeriod,
     ScheduleSettings,
+    ScheduleAssignment,
     WorkDay
 };
