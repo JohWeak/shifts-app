@@ -16,13 +16,32 @@ exports.getWeeklySchedule = async (req, res) => {
 
         // Calculate week start and end (Sunday to Saturday)
         const targetDate = date ? new Date(date) : new Date();
+
+        // Fix week calculation - ensure we get the correct Sunday
         const weekStart = new Date(targetDate);
-        weekStart.setDate(targetDate.getDate() - targetDate.getDay()); // Sunday
+        const dayOfWeek = targetDate.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+        // If today is Sunday (0), keep the same date
+        // If today is Monday (1), go back 1 day to Sunday
+        // If today is Saturday (6), go back 6 days to Sunday
+        weekStart.setDate(targetDate.getDate() - dayOfWeek);
         weekStart.setHours(0, 0, 0, 0);
 
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6); // Saturday
         weekEnd.setHours(23, 59, 59, 999);
+
+        // Debug logging
+        console.log(`Target date: ${targetDate.toDateString()} (day ${dayOfWeek})`);
+        console.log(`Week start: ${weekStart.toDateString()}`);
+        console.log(`Week end: ${weekEnd.toDateString()}`);
+
+    // Проверяем что вычисления правильные
+        if (weekStart.getDay() !== 0) {
+            console.error('ERROR: Week start is not Sunday!');
+        }
+        if (weekEnd.getDay() !== 6) {
+            console.error('ERROR: Week end is not Saturday!');
+        }
 
         // Find the latest published schedule that covers this week
         const schedule = await Schedule.findOne({
@@ -143,13 +162,33 @@ exports.getAdminWeeklySchedule = async (req, res) => {
 
         // Calculate week start and end
         const targetDate = date ? new Date(date) : new Date();
+
+        // Fix week calculation - ensure we get the correct Sunday
         const weekStart = new Date(targetDate);
-        weekStart.setDate(targetDate.getDate() - targetDate.getDay());
+        const dayOfWeek = targetDate.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+
+        // If today is Sunday (0), keep the same date
+        // If today is Monday (1), go back 1 day to Sunday
+        // If today is Saturday (6), go back 6 days to Sunday
+        weekStart.setDate(targetDate.getDate() - dayOfWeek);
         weekStart.setHours(0, 0, 0, 0);
 
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setDate(weekStart.getDate() + 6); // Saturday
         weekEnd.setHours(23, 59, 59, 999);
+
+        // Debug logging
+        console.log(`Target date: ${targetDate.toDateString()} (day ${dayOfWeek})`);
+        console.log(`Week start: ${weekStart.toDateString()}`);
+        console.log(`Week end: ${weekEnd.toDateString()}`);
+
+        // Проверяем что вычисления правильные
+        if (weekStart.getDay() !== 0) {
+            console.error('ERROR: Week start is not Sunday!');
+        }
+        if (weekEnd.getDay() !== 6) {
+            console.error('ERROR: Week end is not Saturday!');
+        }
 
         // Build where condition for site
         const scheduleWhere = {
