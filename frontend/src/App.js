@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 
 // Import components
-import Login from './components/auth/Login';
+import Login from './components/auth/LoginPage';
 import EmployeeDashboard from './components/employee/Dashboard';
 
 // Protected route component
