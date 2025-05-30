@@ -27,7 +27,8 @@ const ConstraintsSchedule = () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:5000/api/constraints/next-week-template', {
+            // ИЗМЕНИТЬ URL
+            const response = await fetch('http://localhost:5000/api/constraints/weekly-grid', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -41,15 +42,15 @@ const ConstraintsSchedule = () => {
             const data = await response.json();
             setTemplateData(data);
 
-            // Build initial constraints state from template
+            // Build initial constraints state from template с существующими данными
             const initialConstraints = {};
             data.constraints.template.forEach(day => {
                 initialConstraints[day.date] = {
-                    day_status: 'neutral',
+                    day_status: day.day_status || 'neutral', // Загрузить существующий статус дня
                     shifts: {}
                 };
                 day.shifts.forEach(shift => {
-                    initialConstraints[day.date].shifts[shift.shift_type] = shift.status;
+                    initialConstraints[day.date].shifts[shift.shift_type] = shift.status; // Загрузить существующие статусы смен
                 });
             });
             setConstraints(initialConstraints);
@@ -220,9 +221,39 @@ const ConstraintsSchedule = () => {
     };
 
     const handleSubmit = async () => {
-        // TODO: Implement submission logic
-        console.log('Submitting constraints:', constraints);
-        setSubmitted(true);
+        try {
+            const token = localStorage.getItem('token');
+
+            // ИЗМЕНИТЬ URL
+            const response = await fetch('http://localhost:5000/api/constraints/submit-weekly', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    week_start: templateData.week.start,
+                    constraints: constraints
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setSubmitted(true);
+                setLimitError(''); // Очистить ошибки
+                // Можно показать success message
+                console.log('Constraints saved successfully:', result.message);
+            } else {
+                // Показать ошибку от сервера
+                setLimitError(result.error || 'Error saving constraints');
+                triggerShakeEffect();
+            }
+        } catch (error) {
+            console.error('Error submitting constraints:', error);
+            setLimitError('Network error. Please try again.');
+            triggerShakeEffect();
+        }
     };
 
     const handleEdit = () => {

@@ -721,3 +721,275 @@ exports.getConstraintsForPeriod = async (req, res) => {
         });
     }
 };
+
+/**
+ * Get weekly constraints grid with existing employee constraints
+ * Возвращает сетку с уже заполненными ограничениями пользователя
+ */
+exports.getWeeklyConstraintsGrid = async (req, res) => {
+    try {
+        const empId = req.userId;
+        const { weekStart, weekEnd, weekStartStr, weekEndStr } = calculateNextWeekBounds();
+
+        // Получить настройки и лимиты
+        const limits = await getConstraintLimits();
+        const deadline = calculateConstraintDeadline(weekStart, limits.constraint_deadline_hours);
+        const canEdit = dayjs().tz(ISRAEL_TIMEZONE).isBefore(deadline);
+
+        // Получить смены
+        const shifts = await Shift.findAll({
+            attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type'],
+            order: [['start_time', 'ASC']]
+        });
+
+        // Получить существующие ограничения для этой недели
+        const existingConstraints = await ConstraintType.findAll({
+            where: {
+                emp_id: empId,
+                applies_to: 'specific_date',
+                start_date: {
+                    [Op.between]: [weekStartStr, weekEndStr]
+                },
+                is_permanent: false, // Только временные ограничения для этой недели
+                status: 'approved'
+            }
+        });
+
+        console.log(`[WeeklyGrid] Found ${existingConstraints.length} existing constraints for employee ${empId}`);
+
+        // Создать сетку с существующими ограничениями
+        const weekTemplate = [];
+        for (let i = 0; i < 7; i++) {
+            const currentDay = weekStart.add(i, 'day');
+            const dateStr = currentDay.format(DATE_FORMAT);
+            const dayName = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'][currentDay.day()];
+
+            // Найти ограничения для этого дня
+            const dayConstraints = existingConstraints.filter(constraint =>
+                constraint.start_date === dateStr
+            );
+
+            // Проверить есть ли ограничение на весь день (без shift_id)
+            const wholeDayConstraint = dayConstraints.find(c => !c.shift_id);
+
+            // Создать смены с правильными статусами
+            const dayShifts = shifts.map(shift => {
+                let status = 'neutral';
+
+                if (wholeDayConstraint) {
+                    // Если есть ограничение на весь день
+                    status = wholeDayConstraint.type;
+                } else {
+                    // Проверить ограничение на конкретную смену
+                    const shiftConstraint = dayConstraints.find(c => c.shift_id === shift.shift_id);
+                    if (shiftConstraint) {
+                        status = shiftConstraint.type;
+                    }
+                }
+
+                return {
+                    shift_id: shift.shift_id,
+                    shift_name: shift.shift_name,
+                    shift_type: shift.shift_type,
+                    start_time: shift.start_time,
+                    duration: shift.duration,
+                    status: status // 'cannot_work', 'prefer_work', 'neutral'
+                };
+            });
+
+            weekTemplate.push({
+                date: dateStr,
+                day_name: dayName,
+                display_date: currentDay.format('DD/MM'),
+                shifts: dayShifts,
+                day_status: wholeDayConstraint ? wholeDayConstraint.type : 'neutral'
+            });
+        }
+
+        res.json({
+            success: true,
+            week: { start: weekStartStr, end: weekEndStr },
+            constraints: {
+                template: weekTemplate,
+                limits: {
+                    cannot_work_days: limits.cannot_work_days,
+                    prefer_work_days: limits.prefer_work_days
+                },
+                deadline: deadline.toISOString(),
+                can_edit: canEdit,
+                deadline_passed: !canEdit
+            }
+        });
+    } catch (error) {
+        console.error('[WeeklyConstraintsGrid] Error:', error);
+        res.status(500).json({
+            success: false,
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+/**
+ * Submit weekly constraints - replace all constraints for the week
+ * Заменяет ВСЕ ограничения пользователя на эту неделю
+ */
+exports.submitWeeklyConstraints = async (req, res) => {
+    try {
+        const { week_start, constraints } = req.body;
+        const emp_id = req.userId;
+
+        if (!week_start || !constraints) {
+            return res.status(400).json({
+                success: false,
+                error: 'week_start and constraints are required'
+            });
+        }
+
+        // Вычислить конец недели
+        const weekStartDate = dayjs(week_start).tz(ISRAEL_TIMEZONE);
+        const weekEndDate = weekStartDate.add(6, 'day');
+        const weekEndStr = weekEndDate.format(DATE_FORMAT);
+
+        // Получить настройки для валидации лимитов
+        const settings = await ScheduleSettings.findOne();
+        const maxCannotWorkDays = settings?.max_cannot_work_days || 3;
+
+        // Подсчитать ограничения
+        const cannotWorkCount = countConstraintDays(constraints, 'cannot_work');
+        const preferWorkCount = countConstraintDays(constraints, 'prefer_work');
+
+        // Валидация лимитов
+        if (cannotWorkCount > maxCannotWorkDays) {
+            return res.status(400).json({
+                success: false,
+                error: `מקסימום ${maxCannotWorkDays} ימים של "לא יכול לעבוד"`,
+                limits_exceeded: {
+                    type: 'cannot_work',
+                    current: cannotWorkCount,
+                    max: maxCannotWorkDays
+                }
+            });
+        }
+
+        console.log(`[SubmitWeeklyConstraints] Employee ${emp_id} submitting constraints for week ${week_start}`);
+        console.log(`[SubmitWeeklyConstraints] Cannot work: ${cannotWorkCount}/${maxCannotWorkDays}, Prefer work: ${preferWorkCount}`);
+
+        // Начать транзакцию
+        const transaction = await ConstraintType.sequelize.transaction();
+
+        try {
+            // 1. Удалить ВСЕ существующие ограничения для этой недели
+            await ConstraintType.destroy({
+                where: {
+                    emp_id,
+                    applies_to: 'specific_date',
+                    start_date: {
+                        [Op.between]: [week_start, weekEndStr]
+                    },
+                    is_permanent: false
+                },
+                transaction
+            });
+
+            // 2. Создать новые ограничения
+            const constraintsToCreate = [];
+
+            for (const [date, dayConstraints] of Object.entries(constraints)) {
+                // Проверить что дата в правильном диапазоне
+                if (date < week_start || date > weekEndStr) {
+                    continue;
+                }
+
+                // Если весь день имеет статус (не neutral)
+                if (dayConstraints.day_status && dayConstraints.day_status !== 'neutral') {
+                    constraintsToCreate.push({
+                        type: dayConstraints.day_status,
+                        applies_to: 'specific_date',
+                        start_date: date,
+                        emp_id,
+                        is_permanent: false,
+                        status: 'approved',
+                        priority: 1
+                    });
+                } else if (dayConstraints.shifts) {
+                    // Отдельные смены
+                    for (const [shiftType, status] of Object.entries(dayConstraints.shifts)) {
+                        if (status && status !== 'neutral') {
+                            // Найти shift_id по типу смены
+                            const shift = await Shift.findOne({
+                                where: { shift_type: shiftType },
+                                transaction
+                            });
+
+                            if (shift) {
+                                constraintsToCreate.push({
+                                    type: status,
+                                    applies_to: 'specific_date',
+                                    start_date: date,
+                                    shift_id: shift.shift_id,
+                                    emp_id,
+                                    is_permanent: false,
+                                    status: 'approved',
+                                    priority: 1
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Создать новые ограничения если есть что создавать
+            if (constraintsToCreate.length > 0) {
+                await ConstraintType.bulkCreate(constraintsToCreate, { transaction });
+                console.log(`[SubmitWeeklyConstraints] Created ${constraintsToCreate.length} new constraints`);
+            }
+
+            // Подтвердить транзакцию
+            await transaction.commit();
+
+            res.json({
+                success: true,
+                message: 'אילוצים נשמרו בהצלחה',
+                constraints_saved: constraintsToCreate.length,
+                week: {
+                    start: week_start,
+                    end: weekEndStr
+                }
+            });
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+
+    } catch (error) {
+        console.error('[SubmitWeeklyConstraints] Error:', error);
+        res.status(500).json({
+            success: false,
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+/**
+ * Вспомогательная функция для подсчета дней с ограничениями
+ */
+function countConstraintDays(constraints, constraintType) {
+    let count = 0;
+    Object.keys(constraints).forEach(date => {
+        const dayConstraints = constraints[date];
+
+        // Проверить ограничение на весь день
+        if (dayConstraints.day_status === constraintType) {
+            count++;
+        } else if (dayConstraints.shifts) {
+            // Проверить есть ли ограничение на любую смену в этот день
+            const hasShiftConstraint = Object.values(dayConstraints.shifts)
+                .some(status => status === constraintType);
+            if (hasShiftConstraint) {
+                count++;
+            }
+        }
+    });
+    return count;
+}

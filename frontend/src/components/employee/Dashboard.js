@@ -3,8 +3,6 @@ import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
-import ConstraintsList from './constraints/ConstraintsList';
-import CreateConstraint from './constraints/CreateConstraint';
 import WeeklySchedule from './schedule/WeeklySchedule';
 import ConstraintsSchedule from './constraints/ConstraintsSchedule';
 

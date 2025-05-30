@@ -13,6 +13,9 @@ router.delete('/:id', verifyToken, constraintController.deleteConstraint);
 // Get next week template for constraints
 router.get('/next-week-template', verifyToken, constraintController.getNextWeekConstraintsTemplate);
 
+router.get('/weekly-grid', verifyToken, constraintController.getWeeklyConstraintsGrid);
+router.post('/submit-weekly', verifyToken, constraintController.submitWeeklyConstraints);
+
 // Admin-only routes
 router.get('/pending', [verifyToken, isAdmin], constraintController.getPendingConstraints);
 router.put('/:id/review', [verifyToken, isAdmin], constraintController.reviewConstraint);
