@@ -1,0 +1,183 @@
+/* frontend/src/components/employee/constraints/ConstraintsSchedule.css */
+
+.constraints-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    direction: rtl;
+}
+
+/* Constraint Control Buttons */
+.constraint-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.rounded-button {
+    border-radius: 12px !important;
+    padding: 10px 20px;
+    font-weight: bold;
+    min-width: 120px;
+}
+
+/* Constraint Cell Styles */
+.constraint-cell {
+    padding: 0.75rem;
+    text-align: center;
+    position: relative;
+    min-height: 50px;
+    transition: all 0.2s ease;
+}
+
+.constraint-cell.clickable {
+    cursor: pointer;
+}
+
+.constraint-cell.clickable:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+}
+
+/* Constraint Status Colors */
+.constraint-cell.cannot-work {
+    background-color: #f8d7da !important;
+    border-color: #dc3545 !important;
+    color: #721c24;
+}
+
+.constraint-cell.prefer-work {
+    background-color: #d1e7dd !important;
+    border-color: #198754 !important;
+    color: #0f5132;
+}
+
+.constraint-cell.neutral {
+    background-color: #ffffff !important;
+    border-color: #dee2e6 !important;
+    color: #212529;
+}
+
+/* Shift Header Styling */
+.shift-header {
+    background-color: #e8ecef !important;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.table-header {
+    background-color: #6c757d !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+/* Table Borders */
+.table-bordered th,
+.table-bordered td {
+    border: 2px solid #f8f9fb !important;
+    vertical-align: middle;
+}
+
+/* Desktop Constraints Table */
+.desktop-constraints {
+    display: block;
+    width: 100%;
+}
+
+/* Mobile Constraints Table */
+.mobile-constraints {
+    display: none;
+    width: 100%;
+}
+
+/* Shake Animation */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Bootstrap Icons */
+.bi {
+    font-size: 1.1em;
+    margin-bottom: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 767.98px) {
+    .constraints-container {
+        padding: 0.5rem;
+    }
+
+    .display-4 {
+        font-size: 1.8rem;
+    }
+
+    .mobile-constraints {
+        display: block !important;
+    }
+
+    .constraint-controls {
+        gap: 10px;
+    }
+
+    .rounded-button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        min-width: 100px;
+    }
+
+    .constraint-cell {
+        padding: 0.5rem;
+        min-height: 40px;
+    }
+}
+
+/* Card Styling */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Improved table hover effects */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Active button states */
+.btn-danger.rounded-button {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-success.rounded-button {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-danger.rounded-button:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-outline-success.rounded-button:hover {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+/* Disabled state */
+.constraint-cell:not(.clickable) {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 8px;
+    margin-top: 1rem;
+}

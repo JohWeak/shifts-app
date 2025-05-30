@@ -132,3 +132,143 @@
         padding: 20px 16px;
     }
 }
+
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-dropdown {
+    position: relative;
+}
+
+.user-btn {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: transparent !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.user-btn:hover,
+.user-btn:focus,
+.user-btn.show {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: none !important;
+}
+
+.user-menu {
+    min-width: 200px;
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.user-details {
+    padding: 0.25rem 0;
+}
+
+.user-details strong {
+    font-size: 0.95rem;
+    color: #212529;
+}
+
+.user-details small {
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+/* Tab content styling */
+.tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Coming soon section */
+.coming-soon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 2rem;
+}
+
+.coming-soon .display-1 {
+    font-size: 4rem;
+    opacity: 0.3;
+}
+
+.coming-soon h2 {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.coming-soon p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Navigation tabs with icons */
+.nav-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+}
+
+.nav-tab i {
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-info {
+        gap: 10px;
+    }
+
+    .welcome-text {
+        display: none;
+    }
+
+    .nav-tab {
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 10px 15px;
+    }
+
+    .nav-tab i {
+        font-size: 1rem;
+    }
+
+    .coming-soon {
+        min-height: 300px;
+        padding: 1rem;
+    }
+
+    .coming-soon .display-1 {
+        font-size: 3rem;
+    }
+}

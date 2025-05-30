@@ -80,14 +80,14 @@ async function getConstraintLimits() {
         return {
             cannot_work_days: settings?.max_cannot_work_days || 3,
             prefer_work_days: 5, // Default for now, can be added to settings later
-            constraint_deadline_hours: settings?.constraint_deadline_hours || 72
+            constraint_deadline_hours: settings?.constraint_deadline_hours
         };
     } catch (error) {
         console.error('[Constraint Limits] Error:', error);
         return {
             cannot_work_days: 3,
             prefer_work_days: 5,
-            constraint_deadline_hours: 72
+            constraint_deadline_hours: 2
         };
     }
 }
@@ -95,7 +95,7 @@ async function getConstraintLimits() {
 /**
  * Calculate constraint submission deadline
  */
-function calculateConstraintDeadline(weekStart, deadlineHours = 72) {
+function calculateConstraintDeadline(weekStart, deadlineHours = 2) {
     // Deadline is X hours before week start
     const deadline = dayjs(weekStart).tz(ISRAEL_TIMEZONE).subtract(deadlineHours, 'hour');
     return deadline;
