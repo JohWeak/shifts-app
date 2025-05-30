@@ -10,6 +10,8 @@ router.get('/employee/:empId', verifyToken, constraintController.getEmployeeCons
 router.post('/', verifyToken, constraintController.createConstraint);
 router.put('/:id', verifyToken, constraintController.updateConstraint);
 router.delete('/:id', verifyToken, constraintController.deleteConstraint);
+// Get next week template for constraints
+router.get('/next-week-template', verifyToken, constraintController.getNextWeekConstraintsTemplate);
 
 // Admin-only routes
 router.get('/pending', [verifyToken, isAdmin], constraintController.getPendingConstraints);

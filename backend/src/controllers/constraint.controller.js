@@ -2,6 +2,241 @@
 const { ConstraintType, Employee, Shift, ScheduleSettings } = require('../models/associations');
 const { Op } = require('sequelize');
 const {query} = require("../config/db.config");
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Set locale to start week on Sunday
+dayjs.locale({
+    ...dayjs.Ls.en,
+    weekStart: 0
+});
+
+const ISRAEL_TIMEZONE = 'Asia/Jerusalem';
+const DATE_FORMAT = 'YYYY-MM-DD';
+
+/**
+ * Calculate next week boundaries in Israel timezone
+ */
+function calculateNextWeekBounds() {
+    try {
+        // Get current date in Israel timezone
+        const now = dayjs().tz(ISRAEL_TIMEZONE);
+
+        // Calculate next week (add 7 days, then get week bounds)
+        const nextWeek = now.add(7, 'day');
+
+        // Use native JavaScript Date for accurate day calculation
+        const jsDate = new Date(nextWeek.format('YYYY-MM-DD'));
+        const dayOfWeek = jsDate.getDay();
+
+        // Calculate days to subtract to get to Sunday
+        const daysToSubtract = dayOfWeek;
+
+        // Calculate week start (Sunday)
+        const weekStartJs = new Date(jsDate);
+        weekStartJs.setDate(jsDate.getDate() - daysToSubtract);
+
+        // Calculate week end (Saturday)
+        const weekEndJs = new Date(weekStartJs);
+        weekEndJs.setDate(weekStartJs.getDate() + 6);
+
+        // Convert back to dayjs for formatting
+        const weekStart = dayjs(weekStartJs).tz(ISRAEL_TIMEZONE);
+        const weekEnd = dayjs(weekEndJs).tz(ISRAEL_TIMEZONE);
+
+        // Format as strings
+        const weekStartStr = weekStart.format(DATE_FORMAT);
+        const weekEndStr = weekEnd.format(DATE_FORMAT);
+
+        console.log(`[Next Week Calculation] Current: ${now.format('YYYY-MM-DD dddd')}`);
+        console.log(`[Next Week Calculation] Next week: ${weekStartStr} (${weekStart.format('dddd')}) to ${weekEndStr} (${weekEnd.format('dddd')})`);
+
+        return {
+            weekStart,
+            weekEnd,
+            weekStartStr,
+            weekEndStr
+        };
+    } catch (error) {
+        console.error('[Next Week Calculation] Error:', error);
+        throw new Error('Error calculating next week');
+    }
+}
+
+/**
+ * Get constraint limits from schedule settings
+ */
+async function getConstraintLimits() {
+    try {
+        const settings = await ScheduleSettings.findOne({
+            order: [['createdAt', 'DESC']]
+        });
+
+        return {
+            cannot_work_days: settings?.max_cannot_work_days || 3,
+            prefer_work_days: 5, // Default for now, can be added to settings later
+            constraint_deadline_hours: settings?.constraint_deadline_hours || 72
+        };
+    } catch (error) {
+        console.error('[Constraint Limits] Error:', error);
+        return {
+            cannot_work_days: 3,
+            prefer_work_days: 5,
+            constraint_deadline_hours: 72
+        };
+    }
+}
+
+/**
+ * Calculate constraint submission deadline
+ */
+function calculateConstraintDeadline(weekStart, deadlineHours = 72) {
+    // Deadline is X hours before week start
+    const deadline = dayjs(weekStart).tz(ISRAEL_TIMEZONE).subtract(deadlineHours, 'hour');
+    return deadline;
+}
+
+// Get next week schedule template for constraints
+exports.getNextWeekConstraintsTemplate = async (req, res) => {
+    try {
+        const empId = req.userId;
+
+        // Validate employee exists
+        const employee = await Employee.findByPk(empId);
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found'
+            });
+        }
+
+        // Calculate next week boundaries
+        const { weekStart, weekEnd, weekStartStr, weekEndStr } = calculateNextWeekBounds();
+
+        // Get constraint limits and deadline
+        const limits = await getConstraintLimits();
+        const deadline = calculateConstraintDeadline(weekStart, limits.constraint_deadline_hours);
+        const canEdit = dayjs().tz(ISRAEL_TIMEZONE).isBefore(deadline);
+
+        // Get all available shifts
+        const shifts = await Shift.findAll({
+            attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type'],
+            order: [['start_time', 'ASC']]
+        });
+
+        // Get existing constraints for next week
+        const existingConstraints = await ConstraintType.findAll({
+            where: {
+                emp_id: empId,
+                [Op.or]: [
+                    // Specific date constraints in next week
+                    {
+                        applies_to: 'specific_date',
+                        start_date: {
+                            [Op.between]: [weekStartStr, weekEndStr]
+                        }
+                    },
+                    // Day of week constraints (always apply)
+                    {
+                        applies_to: 'day_of_week'
+                    }
+                ]
+            }
+        });
+
+        // Build week template with existing constraints
+        const weekTemplate = [];
+
+        for (let i = 0; i < 7; i++) {
+            const currentDay = weekStart.add(i, 'day');
+            const dateStr = currentDay.format(DATE_FORMAT);
+            const dayName = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'][currentDay.day()];
+            const dayOfWeekName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][currentDay.day()];
+
+            // Check for existing constraints on this day
+            const dayConstraints = existingConstraints.filter(constraint => {
+                return (constraint.applies_to === 'specific_date' && constraint.start_date === dateStr) ||
+                    (constraint.applies_to === 'day_of_week' && constraint.day_of_week === dayOfWeekName);
+            });
+
+            // Build shifts with constraint status
+            const dayShifts = shifts.map(shift => {
+                // Check if this specific shift has a constraint
+                const shiftConstraint = dayConstraints.find(c => c.shift_id === shift.shift_id);
+                // Check if whole day has a constraint (no specific shift)
+                const dayConstraint = dayConstraints.find(c => !c.shift_id);
+
+                let status = 'neutral';
+                if (shiftConstraint) {
+                    status = shiftConstraint.type;
+                } else if (dayConstraint) {
+                    status = dayConstraint.type;
+                }
+
+                return {
+                    shift_id: shift.shift_id,
+                    shift_name: shift.shift_name,
+                    shift_type: shift.shift_type,
+                    start_time: shift.start_time,
+                    duration: shift.duration,
+                    status: status // 'cannot_work', 'prefer_work', 'neutral'
+                };
+            });
+
+            weekTemplate.push({
+                date: dateStr,
+                day_name: dayName,
+                day_of_week: dayOfWeekName,
+                display_date: currentDay.format('DD/MM'),
+                shifts: dayShifts
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Next week constraints template retrieved successfully',
+            week: {
+                start: weekStartStr,
+                end: weekEndStr
+            },
+            constraints: {
+                template: weekTemplate,
+                limits: {
+                    cannot_work_days: limits.cannot_work_days,
+                    prefer_work_days: limits.prefer_work_days
+                },
+                deadline: deadline.toISOString(),
+                can_edit: canEdit,
+                deadline_passed: !canEdit
+            },
+            current_employee: {
+                emp_id: empId,
+                name: `${employee.first_name} ${employee.last_name}`
+            },
+            metadata: {
+                timezone: ISRAEL_TIMEZONE,
+                generated_at: dayjs().tz(ISRAEL_TIMEZONE).toISOString()
+            }
+        });
+
+    } catch (error) {
+        console.error('[GetNextWeekConstraintsTemplate] Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving constraints template',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+
+
+
 
 // Get all constraints for a specific employee
 exports.getEmployeeConstraints = async (req, res) => {
