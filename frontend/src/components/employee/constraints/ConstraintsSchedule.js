@@ -10,6 +10,7 @@ const ConstraintsSchedule = () => {
     const [currentMode, setCurrentMode] = useState('cannot_work'); // 'cannot_work' | 'prefer_work'
     const [constraints, setConstraints] = useState({});
     const [submitted, setSubmitted] = useState(false);
+    const [serverSubmitted, setServerSubmitted] = useState(false);
     const [limitError, setLimitError] = useState('');
     const [shakeEffect, setShakeEffect] = useState(false);
 
@@ -27,7 +28,7 @@ const ConstraintsSchedule = () => {
                 return;
             }
 
-            // ИЗМЕНИТЬ URL
+
             const response = await fetch('http://localhost:5000/api/constraints/weekly-grid', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -41,6 +42,11 @@ const ConstraintsSchedule = () => {
 
             const data = await response.json();
             setTemplateData(data);
+
+            // Установить состояние на основе серверных данных
+            const isAlreadySubmitted = data.constraints.already_submitted;
+            setServerSubmitted(isAlreadySubmitted);
+            setSubmitted(isAlreadySubmitted);
 
             // Build initial constraints state from template с существующими данными
             const initialConstraints = {};
@@ -96,7 +102,7 @@ const ConstraintsSchedule = () => {
 
     const handleCellClick = (date, shiftType = null) => {
         if (!templateData?.constraints?.can_edit || submitted) {
-            return; // Can't edit if deadline passed or already submitted
+            return;
         }
 
         setLimitError('');
@@ -131,18 +137,29 @@ const ConstraintsSchedule = () => {
 
                 // Set new mode
                 dayConstraints.shifts[shiftType] = currentMode;
-
-                // If whole day was in opposite mode, clear it
-                if (dayConstraints.day_status !== 'neutral' && dayConstraints.day_status !== currentMode) {
-                    dayConstraints.day_status = 'neutral';
-                    // Set other shifts to neutral if they were part of day constraint
-                    Object.keys(dayConstraints.shifts).forEach(type => {
-                        if (type !== shiftType && dayConstraints.shifts[type] === dayConstraints.day_status) {
-                            dayConstraints.shifts[type] = 'neutral';
-                        }
-                    });
-                }
             }
+
+            // НОВАЯ ЛОГИКА: Управление статусом всего дня
+            // Проверить все статусы смен после изменения
+            const shiftStatuses = Object.values(dayConstraints.shifts);
+            const uniqueStatuses = [...new Set(shiftStatuses.filter(status => status !== 'neutral'))];
+
+            if (uniqueStatuses.length === 0) {
+                // Все смены neutral - день тоже neutral
+                dayConstraints.day_status = 'neutral';
+            } else if (uniqueStatuses.length === 1 && shiftStatuses.every(status => status === uniqueStatuses[0] || status === 'neutral')) {
+                // Все не-neutral смены имеют одинаковый статус И нет смешения
+                const allSameStatus = shiftStatuses.every(status => status === uniqueStatuses[0]);
+                if (allSameStatus) {
+                    dayConstraints.day_status = uniqueStatuses[0];
+                } else {
+                    dayConstraints.day_status = 'neutral'; // Смешанные статусы
+                }
+            } else {
+                // Смешанные статусы - день neutral
+                dayConstraints.day_status = 'neutral';
+            }
+
         } else {
             // Clicking on whole day
             if (dayConstraints.day_status === currentMode) {
@@ -224,7 +241,7 @@ const ConstraintsSchedule = () => {
         try {
             const token = localStorage.getItem('token');
 
-            // ИЗМЕНИТЬ URL
+
             const response = await fetch('http://localhost:5000/api/constraints/submit-weekly', {
                 method: 'POST',
                 headers: {
@@ -241,6 +258,7 @@ const ConstraintsSchedule = () => {
 
             if (response.ok) {
                 setSubmitted(true);
+                setServerSubmitted(true);
                 setLimitError(''); // Очистить ошибки
                 // Можно показать success message
                 console.log('Constraints saved successfully:', result.message);
@@ -258,6 +276,24 @@ const ConstraintsSchedule = () => {
 
     const handleEdit = () => {
         setSubmitted(false);
+    };
+
+    const handleClearAll = () => {
+        if (!templateData?.constraints?.template) return;
+
+        const clearedConstraints = {};
+        templateData.constraints.template.forEach(day => {
+            clearedConstraints[day.date] = {
+                day_status: 'neutral',
+                shifts: {}
+            };
+            day.shifts.forEach(shift => {
+                clearedConstraints[day.date].shifts[shift.shift_type] = 'neutral';
+            });
+        });
+
+        setConstraints(clearedConstraints);
+        setLimitError('');
     };
 
     if (loading) {
@@ -296,7 +332,7 @@ const ConstraintsSchedule = () => {
         );
     }
 
-    const canEdit = true //templateData.constraints.can_edit && !templateData.constraints.deadline_passed;
+    const canEdit = templateData.constraints.can_edit && !templateData.constraints.deadline_passed && !submitted;
 
     return (
         <Container className={`constraints-container ${shakeEffect ? 'shake' : ''}`}>
@@ -312,14 +348,14 @@ const ConstraintsSchedule = () => {
                 )}
             </div>
 
-            {/* Control Buttons */}
-            {canEdit && !submitted && (
-                <div className="text-center mb-4">
+            {/* Control Buttons and Success Message */}
+            <div className="text-center mb-4" >
+                {!submitted && canEdit ? (
                     <div className="constraint-controls">
                         <Button
                             variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
                             onClick={() => setCurrentMode('cannot_work')}
-                            className="rounded-button"
+                            className="rounded-button me-2"
                         >
                             לא עובד
                         </Button>
@@ -331,14 +367,20 @@ const ConstraintsSchedule = () => {
                             מעדיף לעבוד
                         </Button>
                     </div>
-                </div>
-            )}
+                ) : serverSubmitted ? (
+                    <div className="success-message">
+                        <i className="bi bi-check-circle-fill text-success me-2" style={{ fontSize: '20px' }}></i>
+                        <span className="text-success ">האילוצים נשמרו בהצלחה</span>
+                    </div>
+                ) : null}
+            </div>
+
 
             {/* Desktop Table */}
             <Card className="shadow desktop-constraints d-none d-md-block">
                 <Card.Body className="p-0">
                     <div className="table-responsive">
-                        <Table bordered hover className="mb-0">
+                        <Table bordered className="mb-0">
                             <thead>
                             <tr className="table-header">
                                 <th className="text-center" style={{width: '15%'}}>יום</th>
@@ -424,16 +466,23 @@ const ConstraintsSchedule = () => {
                 </Alert>
             )}
 
-            {/* Submit/Edit Controls */}
+            {/* Submit/Edit/Clear Controls  */}
             <div className="text-center mt-4">
-                {canEdit && (
+                {templateData?.constraints?.can_edit && (
                     <>
                         {!submitted ? (
-                            <Button variant="primary" onClick={handleSubmit} className="rounded-button">
-                                שלח
-                            </Button>
+                            <div className="constraint-controls">
+                                <Button variant="primary" onClick={handleSubmit} className="rounded-button me-2">
+                                    שלח
+                                </Button>
+                                <Button variant="outline-secondary" onClick={handleClearAll} className="rounded-button">
+                                    <i className="bi bi-eraser me-1"></i>
+                                    נקה
+                                </Button>
+                            </div>
                         ) : (
                             <Button variant="secondary" onClick={handleEdit} className="rounded-button">
+                                <i className="bi bi-pencil me-1"></i>
                                 ערוך
                             </Button>
                         )}

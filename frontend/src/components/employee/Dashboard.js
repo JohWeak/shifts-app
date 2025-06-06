@@ -5,12 +5,33 @@ import { useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
 import WeeklySchedule from './schedule/WeeklySchedule';
 import ConstraintsSchedule from './constraints/ConstraintsSchedule';
+import { useSwipeable } from 'react-swipeable';
 
 const EmployeeDashboard = () => {
     const [activeTab, setActiveTab] = useState('schedule');
     const [user, setUser] = useState(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const navigate = useNavigate();
+
+    const tabs = ['schedule', 'constraints', 'permanent-requests'];
+
+    const handlers = useSwipeable({
+        onSwipedLeft: () => {
+            const currentIndex = tabs.indexOf(activeTab);
+            if (currentIndex < tabs.length - 1) {
+                setActiveTab(tabs[currentIndex + 1]);
+            }
+        },
+        onSwipedRight: () => {
+            const currentIndex = tabs.indexOf(activeTab);
+            if (currentIndex > 0) {
+                setActiveTab(tabs[currentIndex - 1]);
+            }
+        },
+        trackMouse: false, // Только для тач-устройств
+        trackTouch: true,
+        delta: 50 // Минимальное расстояние свайпа
+    });
 
     useEffect(() => {
         // Get user info from localStorage
@@ -64,7 +85,6 @@ const EmployeeDashboard = () => {
                                 variant="outline-light"
                                 id="user-dropdown"
                                 className="user-btn"
-                                size="sm"
                             >
                                 <i className="bi bi-person-circle"></i>
                             </Dropdown.Toggle>
@@ -81,43 +101,67 @@ const EmployeeDashboard = () => {
                                     <i className="bi bi-gear me-2"></i>
                                     הגדרות
                                 </Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={handleLogout} className="text-danger">
+                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                    יציאה
+                                </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-
-                        <button onClick={handleLogout} className="logout-btn">
-                            Logout
-                        </button>
                     </div>
                 </div>
             </header>
 
-            {/* Navigation Tabs */}
+            {/* Navigation Tabs - Mobile Version */}
             <nav className="dashboard-nav">
-                <button
-                    className={`nav-tab ${activeTab === 'schedule' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('schedule')}
-                >
-                    <i className="bi bi-calendar-week me-1"></i>
-                    My Schedule
-                </button>
-                <button
-                    className={`nav-tab ${activeTab === 'constraints' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('constraints')}
-                >
-                    <i className="bi bi-clock-history me-1"></i>
-                    Set Constraints
-                </button>
-                <button
-                    className={`nav-tab ${activeTab === 'permanent-requests' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('permanent-requests')}
-                >
-                    <i className="bi bi-file-earmark-text me-1"></i>
-                    Permanent Requests
-                </button>
-            </nav>
+                <div className="nav-tabs-mobile d-md-none">
+                    <button
+                        className={`nav-tab ${activeTab === 'schedule' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('schedule')}
+                    >
+                        <i className="bi bi-calendar-week"></i>
+                    </button>
+                    <button
+                        className={`nav-tab ${activeTab === 'constraints' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('constraints')}
+                    >
+                        <i className="bi bi-clock-history"></i>
+                    </button>
+                    <button
+                        className={`nav-tab ${activeTab === 'permanent-requests' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('permanent-requests')}
+                    >
+                        <i className="bi bi-file-earmark-text"></i>
+                    </button>
+                </div>
 
+                {/* Desktop Navigation */}
+                <div className="d-none d-md-flex w-100">
+                    <button
+                        className={`nav-tab ${activeTab === 'schedule' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('schedule')}
+                    >
+                        <i className="bi bi-calendar-week me-1"></i>
+                        <span className="tab-name">My Schedule</span>
+                    </button>
+                    <button
+                        className={`nav-tab ${activeTab === 'constraints' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('constraints')}
+                    >
+                        <i className="bi bi-clock-history me-1"></i>
+                        <span className="tab-name">Set Constraints</span>
+                    </button>
+                    <button
+                        className={`nav-tab ${activeTab === 'permanent-requests' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('permanent-requests')}
+                    >
+                        <i className="bi bi-file-earmark-text me-1"></i>
+                        <span className="tab-name">Permanent Requests</span>
+                    </button>
+                </div>
+            </nav>
             {/* Content */}
-            <main className="dashboard-content">
+            <main className="dashboard-content" {...handlers}>
                 {/* Tab 1: Current and Next Week Schedule */}
                 {activeTab === 'schedule' && (
                     <div className="tab-content">
@@ -152,5 +196,6 @@ const EmployeeDashboard = () => {
         </div>
     );
 };
+
 
 export default EmployeeDashboard;

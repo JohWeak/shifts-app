@@ -1,4 +1,4 @@
-// backend/src/server.js (добавить новые маршруты)
+// backend/src/server.js
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -51,10 +51,17 @@ app.listen(PORT, async () => {
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
 
-        // Synchronize all models with a database
-        await sequelize.sync({ alter: true });
-        console.log('All models synchronized with database');
+        // ONLY for development
+        if (process.env.NODE_ENV === 'development') {
+            await sequelize.sync({ force: false });
+            console.log('Development mode - skipping auto-sync');
+        }
+
+        // For production, will use migrations:
+        // npx sequelize-cli db:migrate
+
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
 });
+

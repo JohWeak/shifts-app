@@ -1,183 +1,184 @@
-/* frontend/src/components/employee/constraints/ConstraintsSchedule.css */
-
+/* Контейнер ограничений */
 .constraints-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 5px;
     direction: rtl;
 }
 
-/* Constraint Control Buttons */
+/* Анимация встряхивания при ошибке лимитов */
+.constraints-container.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-1px); }
+    20%, 40%, 60%, 80% { transform: translateX(1px); }
+}
+
+/* Кнопки управления ограничениями */
 .constraint-controls {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 16px;
+    align-items: center;
     flex-wrap: wrap;
 }
 
 .rounded-button {
-    border-radius: 12px !important;
-    padding: 10px 20px;
-    font-weight: bold;
     min-width: 120px;
-}
-
-/* Constraint Cell Styles */
-.constraint-cell {
-    padding: 0.75rem;
-    text-align: center;
-    position: relative;
-    min-height: 50px;
     transition: all 0.2s ease;
 }
 
-.constraint-cell.clickable {
+/*.rounded-button:hover {*/
+/*    transform: translateY(-1px);*/
+/*    box-shadow: 0 4px 12px rgba(0,0,0,0.15);*/
+/*}*/
+
+/* Сообщение об успехе */
+.success-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 20px;
+    background-color: #e8f5e8;
+    border-radius: 15px;
+    border: 1px solid transparent;
+    margin: 0 auto;
+    max-width: 300px;
+}
+
+/* ПРАВИЛЬНЫЕ стили для таблицы */
+.desktop-constraints .table,
+.mobile-constraints .table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Равная ширина столбцов */
+.desktop-constraints th,
+.desktop-constraints td {
+    width: 12.5%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.mobile-constraints th,
+.mobile-constraints td {
+    width: 25%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* ПРОСТЫЕ стили для ячеек - БЕЗ FLEX! */
+.constraint-cell {
+    background-color: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px 5px;
+    margin: 3px;
+    transition: all 0.2s ease;
     cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    text-align: center;
 }
 
-.constraint-cell.clickable:hover {
-    opacity: 0.8;
-    transform: scale(1.02);
-}
-
-/* Constraint Status Colors */
 .constraint-cell.cannot-work {
-    background-color: #f8d7da !important;
-    border-color: #dc3545 !important;
-    color: #721c24;
+    background-color: #ffb3c1;
+    /*border-color: #ff1000;*/
+    color: #0c0c0c;
 }
 
 .constraint-cell.prefer-work {
-    background-color: #d1e7dd !important;
-    border-color: #198754 !important;
-    color: #0f5132;
+    background-color: #a9f8dd;
+    /*border-color: #4caf50;*/
+    color: #0c0c0c;
 }
 
 .constraint-cell.neutral {
-    background-color: #ffffff !important;
-    border-color: #dee2e6 !important;
-    color: #212529;
+    background-color: #f6f6f6;
+    /*border-color: #ddd;*/
+    color: #666;
 }
 
-/* Shift Header Styling */
+.constraint-cell.clickable:hover {
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+
+
+}
+
+/* Стили для заголовков */
+
 .shift-header {
-    background-color: #e8ecef !important;
-    font-weight: bold;
-    vertical-align: middle;
+    background-color: #dcdbdb;
+    font-weight: 300;
+    /*color: #4e4f50;*/
+    /*padding: 15px 8px;*/
 }
 
-.table-header {
-    background-color: #6c757d !important;
-    color: white !important;
-    font-weight: bold;
+
+/* Стили для загрузки */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    font-size: 18px;
+    color: #666;
 }
 
-/* Table Borders */
-.table-bordered th,
-.table-bordered td {
-    border: 2px solid #f8f9fb !important;
-    vertical-align: middle;
+
+/* Стили для заголовка страницы */
+.display-4 {
+    font-size: 2.2rem !important;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
 }
 
-/* Desktop Constraints Table */
-.desktop-constraints {
-    display: block;
-    width: 100%;
+.text-muted {
+    font-size: 1rem;
+    /*margin-bottom: 1rem;*/
 }
 
-/* Mobile Constraints Table */
-.mobile-constraints {
-    display: none;
-    width: 100%;
-}
-
-/* Shake Animation */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
-
-.shake {
-    animation: shake 0.5s ease-in-out;
-}
-
-/* Bootstrap Icons */
-.bi {
-    font-size: 1.1em;
-    margin-bottom: 2px;
-}
-
-/* Responsive Design */
-@media (max-width: 767.98px) {
-    .constraints-container {
-        padding: 0.5rem;
-    }
-
-    .display-4 {
-        font-size: 1.8rem;
-    }
-
-    .mobile-constraints {
-        display: block !important;
-    }
-
-    .constraint-controls {
-        gap: 10px;
-    }
-
-    .rounded-button {
-        font-size: 0.9rem;
-        padding: 8px 16px;
-        min-width: 100px;
-    }
-
-    .constraint-cell {
-        padding: 0.5rem;
-        min-height: 40px;
-    }
-}
-
-/* Card Styling */
-.card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border: 1px solid rgba(0, 0, 0, 0.125);
-}
-
-/* Improved table hover effects */
-.table-hover tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.075);
-}
-
-/* Active button states */
-.btn-danger.rounded-button {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-.btn-success.rounded-button {
-    background-color: #198754;
-    border-color: #198754;
-}
-
-.btn-outline-danger.rounded-button:hover {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-.btn-outline-success.rounded-button:hover {
-    background-color: #198754;
-    border-color: #198754;
-}
-
-/* Disabled state */
+/* Стили для отключенного состояния */
 .constraint-cell:not(.clickable) {
-    opacity: 0.7;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
-/* Alert styling */
-.alert {
-    border-radius: 8px;
-    margin-top: 1rem;
+.constraint-cell:not(.clickable):hover {
+    transform: none;
+    box-shadow: none;
+
 }
+
+/*@media (max-width: 768px) {*/
+/*    .constraints-container {*/
+/*        padding: 15px 10px;*/
+/*    }*/
+
+/*    .constraint-controls {*/
+/*        gap: 12px;*/
+/*    }*/
+
+/*    .rounded-button {*/
+/*        min-width: 100px;*/
+/*        padding: 8px 16px;*/
+/*        font-size: 14px;*/
+/*    }*/
+
+/*    .constraint-cell {*/
+/*        padding: 12px 4px;*/
+/*        margin: 2px;*/
+/*    }*/
+
+/*    .success-message {*/
+/*        max-width: 280px;*/
+/*        padding: 10px 16px;*/
+/*        font-size: 14px;*/
+/*    }*/
+/*}*/

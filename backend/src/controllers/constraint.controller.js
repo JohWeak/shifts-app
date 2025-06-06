@@ -80,14 +80,14 @@ async function getConstraintLimits() {
         return {
             cannot_work_days: settings?.max_cannot_work_days || 3,
             prefer_work_days: 5, // Default for now, can be added to settings later
-            constraint_deadline_hours: settings?.constraint_deadline_hours
+            constraint_deadline_hours: 72 //settings?.constraint_deadline_hours
         };
     } catch (error) {
         console.error('[Constraint Limits] Error:', error);
         return {
             cannot_work_days: 3,
             prefer_work_days: 5,
-            constraint_deadline_hours: 2
+            constraint_deadline_hours: 72
         };
     }
 }
@@ -95,7 +95,7 @@ async function getConstraintLimits() {
 /**
  * Calculate constraint submission deadline
  */
-function calculateConstraintDeadline(weekStart, deadlineHours = 2) {
+function calculateConstraintDeadline(weekStart, deadlineHours = 72) {
     // Deadline is X hours before week start
     const deadline = dayjs(weekStart).tz(ISRAEL_TIMEZONE).subtract(deadlineHours, 'hour');
     return deadline;
@@ -734,7 +734,7 @@ exports.getWeeklyConstraintsGrid = async (req, res) => {
         // Получить настройки и лимиты
         const limits = await getConstraintLimits();
         const deadline = calculateConstraintDeadline(weekStart, limits.constraint_deadline_hours);
-        const canEdit = dayjs().tz(ISRAEL_TIMEZONE).isBefore(deadline);
+        const canEdit = true;// dayjs().tz(ISRAEL_TIMEZONE).isBefore(deadline);
 
         // Получить смены
         const shifts = await Shift.findAll({
@@ -756,6 +756,21 @@ exports.getWeeklyConstraintsGrid = async (req, res) => {
         });
 
         console.log(`[WeeklyGrid] Found ${existingConstraints.length} existing constraints for employee ${empId}`);
+
+        // Проверить есть ли уже поданные ограничения для этой недели
+        const hasSubmittedConstraints = await ConstraintType.count({
+            where: {
+                emp_id: empId,
+                applies_to: 'specific_date',
+                start_date: {
+                    [Op.between]: [weekStartStr, weekEndStr]
+                },
+                is_permanent: false,
+                status: 'approved'
+            }
+        });
+
+        console.log(`[WeeklyGrid] Employee ${empId} has ${hasSubmittedConstraints} submitted constraints for week ${weekStartStr}`);
 
         // Создать сетку с существующими ограничениями
         const weekTemplate = [];
@@ -796,6 +811,26 @@ exports.getWeeklyConstraintsGrid = async (req, res) => {
                     status: status // 'cannot_work', 'prefer_work', 'neutral'
                 };
             });
+            // Определить day_status на основе смен
+            let calculatedDayStatus = 'neutral';
+
+            if (wholeDayConstraint) {
+                // Если есть ограничение на весь день
+                calculatedDayStatus = wholeDayConstraint.type;
+            } else {
+                // Проверить статусы всех смен
+                const shiftStatuses = dayShifts.map(s => s.status);
+                const nonNeutralStatuses = shiftStatuses.filter(s => s !== 'neutral');
+                const uniqueStatuses = [...new Set(nonNeutralStatuses)];
+
+                if (uniqueStatuses.length === 1 && shiftStatuses.every(s => s === uniqueStatuses[0])) {
+                    // Все смены имеют одинаковый статус
+                    calculatedDayStatus = uniqueStatuses[0];
+                } else {
+                    // Смешанные статусы или все neutral
+                    calculatedDayStatus = 'neutral';
+                }
+            }
 
             weekTemplate.push({
                 date: dateStr,
@@ -817,7 +852,8 @@ exports.getWeeklyConstraintsGrid = async (req, res) => {
                 },
                 deadline: deadline.toISOString(),
                 can_edit: canEdit,
-                deadline_passed: !canEdit
+                deadline_passed: !canEdit,
+                already_submitted: hasSubmittedConstraints > 0
             }
         });
     } catch (error) {
