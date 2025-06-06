@@ -938,15 +938,21 @@ exports.submitWeeklyConstraints = async (req, res) => {
 
                 // Если весь день имеет статус (не neutral)
                 if (dayConstraints.day_status && dayConstraints.day_status !== 'neutral') {
-                    constraintsToCreate.push({
-                        type: dayConstraints.day_status,
-                        applies_to: 'specific_date',
-                        start_date: date,
-                        emp_id,
-                        is_permanent: false,
-                        status: 'approved',
-                        priority: 1
-                    });
+                    // Если весь день имеет статус - создать запись для КАЖДОЙ смены
+                    const allShifts = await Shift.findAll({ transaction });
+
+                    for (const shift of allShifts) {
+                        constraintsToCreate.push({
+                            type: dayConstraints.day_status,
+                            applies_to: 'specific_date',
+                            start_date: date,
+                            shift_id: shift.shift_id, // ВСЕГДА указываем shift_id
+                            emp_id,
+                            is_permanent: false,
+                            status: 'approved',
+                            priority: 1
+                        });
+                    }
                 } else if (dayConstraints.shifts) {
                     // Отдельные смены
                     for (const [shiftType, status] of Object.entries(dayConstraints.shifts)) {
@@ -1011,21 +1017,23 @@ exports.submitWeeklyConstraints = async (req, res) => {
  * Вспомогательная функция для подсчета дней с ограничениями
  */
 function countConstraintDays(constraints, constraintType) {
-    let count = 0;
+    const daysWithConstraint = new Set(); // Используем Set для уникальных дат
+
     Object.keys(constraints).forEach(date => {
         const dayConstraints = constraints[date];
 
         // Проверить ограничение на весь день
         if (dayConstraints.day_status === constraintType) {
-            count++;
+            daysWithConstraint.add(date);
         } else if (dayConstraints.shifts) {
             // Проверить есть ли ограничение на любую смену в этот день
             const hasShiftConstraint = Object.values(dayConstraints.shifts)
                 .some(status => status === constraintType);
             if (hasShiftConstraint) {
-                count++;
+                daysWithConstraint.add(date);
             }
         }
     });
-    return count;
+
+    return daysWithConstraint.size; // Количество уникальных дней
 }

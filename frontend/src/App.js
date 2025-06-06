@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
+import AdminDashboard from './components/admin/Dashboard';
 
 // Import components
 import Login from './components/auth/LoginPage';
@@ -48,12 +49,12 @@ function App() {
                             }
                         />
 
-                        {/* Admin routes (placeholder) */}
+                        {/* Admin routes  */}
                         <Route
                             path="/admin/dashboard"
                             element={
                                 <ProtectedRoute allowedRole="admin">
-                                    <div>Admin Dashboard (To be implemented)</div>
+                                    <AdminDashboard />
                                 </ProtectedRoute>
                             }
                         />

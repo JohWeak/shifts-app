@@ -6,6 +6,7 @@ const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const weekOfYear = require('dayjs/plugin/weekOfYear');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
+const ScheduleGeneratorService = require('../services/schedule-generator.service');
 
 // Configure Day.js plugins
 dayjs.extend(utc);
@@ -409,6 +410,224 @@ exports.getAdminWeeklySchedule = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error retrieving admin weekly schedule',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+exports.generateNextWeekSchedule = async (req, res) => {
+    try {
+        const siteId = req.body.site_id || 1; // TODO: получать из пользователя
+
+        // Рассчитать следующую неделю
+        const nextWeekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
+
+        console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${nextWeekStart}`);
+
+        const result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, nextWeekStart);
+
+        if (result.success) {
+            res.json({
+                success: true,
+                message: 'Schedule generated successfully',
+                data: result.schedule,
+                stats: result.stats
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: 'Failed to generate schedule',
+                error: result.error
+            });
+        }
+
+    } catch (error) {
+        console.error('[ScheduleController] Error generating schedule:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+exports.getAllSchedules = async (req, res) => {
+    try {
+        const { page = 1, limit = 10, site_id } = req.query;
+
+        const whereClause = {};
+        if (site_id) {
+            whereClause.site_id = site_id;
+        }
+
+        const schedules = await Schedule.findAndCountAll({
+            where: whereClause,
+            limit: parseInt(limit),
+            offset: (page - 1) * limit,
+            order: [['start_date', 'DESC']],
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_name']
+            }]
+        });
+
+        res.json({
+            success: true,
+            data: schedules.rows,
+            pagination: {
+                current_page: parseInt(page),
+                total_pages: Math.ceil(schedules.count / limit),
+                total_items: schedules.count,
+                per_page: parseInt(limit)
+            }
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error getting schedules:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving schedules',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+// Получить детали конкретного расписания
+exports.getScheduleDetails = async (req, res) => {
+    try {
+        const { scheduleId } = req.params;
+
+        // Получить основную информацию о расписании
+        const schedule = await Schedule.findByPk(scheduleId, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_name']
+            }]
+        });
+
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+
+        // Получить все назначения для этого расписания
+        const assignments = await ScheduleAssignment.findAll({
+            where: { schedule_id: scheduleId },
+            include: [
+                {
+                    model: Employee,
+                    as: 'employee',
+                    attributes: ['emp_id', 'first_name', 'last_name']
+                },
+                {
+                    model: Shift,
+                    as: 'shift',
+                    attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type']
+                },
+                {
+                    model: Position,
+                    as: 'position',
+                    attributes: ['pos_id', 'pos_name', 'profession']
+                }
+            ],
+            order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
+        });
+
+        // Группировать назначения по дням
+        const assignmentsByDate = {};
+        assignments.forEach(assignment => {
+            console.log('Processing assignment:', assignment);
+            console.log('Type of work_date:', typeof assignment.work_date);
+            console.log('Value of work_date:', assignment.work_date);
+            const date = assignment.work_date.toISOString().split('T')[0];
+            if (!assignmentsByDate[date]) {
+                assignmentsByDate[date] = [];
+            }
+            assignmentsByDate[date].push({
+                id: assignment.id,
+                employee: assignment.employee,
+                shift: assignment.shift,
+                position: assignment.position,
+                status: assignment.status,
+                notes: assignment.notes
+            });
+        });
+
+        // Статистика
+        const stats = {
+            total_assignments: assignments.length,
+            employees_used: [...new Set(assignments.map(a => a.emp_id))].length,
+            coverage_by_day: Object.keys(assignmentsByDate).reduce((acc, date) => {
+                acc[date] = assignmentsByDate[date].length;
+                return acc;
+            }, {})
+        };
+
+        res.json({
+            success: true,
+            data: {
+                schedule: {
+                    id: schedule.id,
+                    start_date: schedule.start_date,
+                    end_date: schedule.end_date,
+                    status: schedule.status,
+                    work_site: schedule.workSite,
+                    created_at: schedule.createdAt,
+                    metadata: schedule.text_file ? JSON.parse(schedule.text_file) : null
+                },
+                assignments_by_date: assignmentsByDate,
+                statistics: stats
+            }
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error getting schedule details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving schedule details',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+// Обновить статус расписания (draft -> published)
+exports.updateScheduleStatus = async (req, res) => {
+    try {
+        const { scheduleId } = req.params;
+        const { status } = req.body;
+
+        if (!['draft', 'published', 'archived'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status. Must be: draft, published, or archived'
+            });
+        }
+
+        const schedule = await Schedule.findByPk(scheduleId);
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+
+        await schedule.update({ status });
+
+        res.json({
+            success: true,
+            message: `Schedule status updated to ${status}`,
+            data: schedule
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error updating schedule status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating schedule status',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }

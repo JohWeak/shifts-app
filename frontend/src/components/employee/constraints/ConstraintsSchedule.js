@@ -15,6 +15,20 @@ const ConstraintsSchedule = () => {
     const [shakeEffect, setShakeEffect] = useState(false);
 
     useEffect(() => {
+        // Обработчик для неперехваченных ошибок
+        const handleUnhandledRejection = (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            // Не показывать ошибку пользователю, только логировать
+        };
+
+        window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+        return () => {
+            window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+        };
+    }, []);
+
+    useEffect(() => {
         fetchConstraintsTemplate();
     }, []);
 
@@ -41,6 +55,9 @@ const ConstraintsSchedule = () => {
             }
 
             const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load constraints');
+            }
             setTemplateData(data);
 
             // Установить состояние на основе серверных данных
@@ -64,6 +81,8 @@ const ConstraintsSchedule = () => {
         } catch (err) {
             console.error('Error fetching constraints template:', err);
             setError(err.message);
+            setTemplateData(null);
+            setConstraints({});
         } finally {
             setLoading(false);
         }
@@ -241,6 +260,11 @@ const ConstraintsSchedule = () => {
         try {
             const token = localStorage.getItem('token');
 
+            if (!token) {
+                setLimitError('No authentication token found');
+                return;
+            }
+
 
             const response = await fetch('http://localhost:5000/api/constraints/submit-weekly', {
                 method: 'POST',
@@ -263,9 +287,10 @@ const ConstraintsSchedule = () => {
                 // Можно показать success message
                 console.log('Constraints saved successfully:', result.message);
             } else {
-                // Показать ошибку от сервера
-                setLimitError(result.error || 'Error saving constraints');
+                const errorMessage = result.error || `Server error: ${response.status}`;
+                setLimitError(errorMessage);
                 triggerShakeEffect();
+                console.error('Server error:', errorMessage);
             }
         } catch (error) {
             console.error('Error submitting constraints:', error);
