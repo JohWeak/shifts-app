@@ -1,12 +1,12 @@
-// backend/src/services/cp-sat-bridge.service.js
-/**
- * Заглушка для CP-SAT Bridge
- * Этот файл нужен для совместимости, но CP-SAT функциональность отключена
- */
+// backend/src/services/cp-sat-bridge.service.js - ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ
+const { spawn } = require('child_process');
+const fs = require('fs').promises;
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const CONSTRAINTS = require('../config/scheduling-constraints');
 
 class CPSATBridge {
     async prepareScheduleData(siteId, weekStart) {
-        // Подготовка данных (копия из advanced-scheduler)
         const {
             Employee,
             Shift,
@@ -36,7 +36,11 @@ class CPSATBridge {
 
         const settings = await ScheduleSettings.findOne({
             where: { site_id: siteId }
-        }) || { max_shifts_per_day: 1 };
+        }) || {
+            max_shifts_per_day: CONSTRAINTS.SOFT_CONSTRAINTS.max_shifts_per_day,
+            max_hours_per_week: CONSTRAINTS.SOFT_CONSTRAINTS.max_hours_per_week,
+            max_consecutive_work_days: CONSTRAINTS.SOFT_CONSTRAINTS.max_consecutive_work_days
+        };
 
         const constraints = await EmployeeConstraint.findAll({
             where: {
@@ -106,17 +110,89 @@ class CPSATBridge {
         };
     }
 
+    async callPythonOptimizer(data) {
+        const tempDir = path.join(__dirname, '..', 'temp');
+        await fs.mkdir(tempDir, { recursive: true });
+
+        const sessionId = uuidv4();
+        const inputFile = path.join(tempDir, `input_${sessionId}.json`);
+        const outputFile = path.join(tempDir, `output_${sessionId}.json`);
+        const pythonScript = path.join(__dirname, 'cp_sat_optimizer.py');
+
+        try {
+            // Записать входные данные
+            await fs.writeFile(inputFile, JSON.stringify(data, null, 2));
+
+            // Запустить Python скрипт
+            const result = await this.runPythonScript(pythonScript, inputFile, outputFile);
+
+            // Прочитать результат
+            const outputData = await fs.readFile(outputFile, 'utf8');
+            const parsedResult = JSON.parse(outputData);
+
+            // Очистить временные файлы
+            await Promise.all([
+                fs.unlink(inputFile).catch(() => {}),
+                fs.unlink(outputFile).catch(() => {})
+            ]);
+
+            return parsedResult;
+
+        } catch (error) {
+            // Очистить временные файлы при ошибке
+            await Promise.all([
+                fs.unlink(inputFile).catch(() => {}),
+                fs.unlink(outputFile).catch(() => {})
+            ]);
+            throw error;
+        }
+    }
+
+    runPythonScript(scriptPath, inputFile, outputFile) {
+        return new Promise((resolve, reject) => {
+            const pythonProcess = spawn('python', [
+                scriptPath,
+                '--input', inputFile,
+                '--output', outputFile
+            ]);
+
+            let stdout = '';
+            let stderr = '';
+
+            pythonProcess.stdout.on('data', (data) => {
+                stdout += data.toString();
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                stderr += data.toString();
+            });
+
+            pythonProcess.on('close', (code) => {
+                if (code === 0) {
+                    console.log('[CP-SAT Bridge] Python script output:', stdout);
+                    resolve({ code, stdout, stderr });
+                } else {
+                    console.error('[CP-SAT Bridge] Python script failed:', stderr);
+                    reject(new Error(`Python script failed with code ${code}: ${stderr}`));
+                }
+            });
+
+            pythonProcess.on('error', (error) => {
+                reject(new Error(`Failed to start Python process: ${error.message}`));
+            });
+        });
+    }
+
     async saveSchedule(siteId, weekStart, assignments) {
         const { Schedule, ScheduleAssignment } = require('../models/associations');
-        const { Op } = require('sequelize');  // ✅ ДОБАВИТЬ ЭТУ СТРОКУ
+        const { Op } = require('sequelize');
         const dayjs = require('dayjs');
 
         const weekEnd = dayjs(weekStart).add(6, 'day').format('YYYY-MM-DD');
 
-        // ✅ ДОБАВИТЬ КОД ОЧИСТКИ
+        // Очистка старых назначений
         console.log(`[CP-SAT Bridge] Clearing existing assignments for week ${weekStart}...`);
 
-        // Находим и удаляем старые расписания для этой недели
         const existingSchedules = await Schedule.findAll({
             where: {
                 site_id: siteId,
@@ -126,7 +202,6 @@ class CPSATBridge {
             }
         });
 
-        // Удаляем связанные назначения (каскадно удалятся через FK)
         for (const schedule of existingSchedules) {
             await ScheduleAssignment.destroy({
                 where: { schedule_id: schedule.id }
@@ -141,7 +216,7 @@ class CPSATBridge {
             status: 'draft',
             text_file: JSON.stringify({
                 generated_at: new Date().toISOString(),
-                algorithm: 'Advanced-Heuristic',
+                algorithm: 'CP-SAT-Python',
                 timezone: 'Asia/Jerusalem'
             })
         };
@@ -155,7 +230,7 @@ class CPSATBridge {
             position_id: assignment.position_id,
             work_date: new Date(assignment.date),
             status: 'scheduled',
-            notes: `Generated by Advanced optimizer - ${index + 1}`
+            notes: `Generated by CP-SAT optimizer - ${index + 1}`
         }));
 
         await ScheduleAssignment.bulkCreate(scheduleAssignments);
@@ -191,17 +266,50 @@ class CPSATBridge {
             total_assignments: assignments.length,
             employees_assigned: Object.keys(employeeStats).length,
             employee_stats: employeeStats,
-            algorithm: 'Advanced-Heuristic'
+            algorithm: 'CP-SAT-Python'
         };
     }
 
-    // Заглушка для CP-SAT (не работает без Python)
     static async generateOptimalSchedule(siteId, weekStart) {
-        return {
-            success: false,
-            error: 'CP-SAT requires Python and OR-Tools installation',
-            algorithm: 'CP-SAT-Disabled'
-        };
+        try {
+            console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
+
+            const bridge = new CPSATBridge();
+
+            // 1. Подготовка данных
+            const data = await bridge.prepareScheduleData(siteId, weekStart);
+
+            // 2. Вызов Python оптимизатора
+            const pythonResult = await bridge.callPythonOptimizer(data);
+
+            if (!pythonResult.success) {
+                return {
+                    success: false,
+                    error: pythonResult.error,
+                    algorithm: 'CP-SAT-Python'
+                };
+            }
+
+            // 3. Сохранение результатов
+            const savedSchedule = await bridge.saveSchedule(siteId, weekStart, pythonResult.schedule);
+
+            return {
+                success: true,
+                schedule: savedSchedule,
+                stats: bridge.calculateScheduleStats(pythonResult.schedule),
+                algorithm: 'CP-SAT-Python',
+                solve_time: pythonResult.solve_time,
+                status: pythonResult.status
+            };
+
+        } catch (error) {
+            console.error('[CP-SAT Bridge] Error:', error);
+            return {
+                success: false,
+                error: error.message,
+                algorithm: 'CP-SAT-Python'
+            };
+        }
     }
 }
 

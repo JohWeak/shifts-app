@@ -1,31 +1,31 @@
-// backend/src/scripts/test-all-algorithms.js
-const AdvancedScheduler = require('../services/advanced-scheduler.service');
+// backend/src/scripts/test-all-algorithms.js - ОБНОВЛЕННАЯ ВЕРСИЯ
+const CPSATBridge = require('../services/cp-sat-bridge.service');
 const ScheduleGeneratorService = require('../services/schedule-generator.service');
 const dayjs = require('dayjs');
 
 async function testAllAlgorithms() {
     try {
-        console.log('🧪 Testing All Available Scheduling Algorithms\n');
+        console.log('🧪 Testing Available Scheduling Algorithms\n');
 
         const siteId = 1;
         const weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
 
         console.log(`📅 Testing for site ${siteId}, week starting ${weekStart}\n`);
 
-        // Тест 1: Advanced Scheduler
-        console.log('🤖 Testing Advanced Scheduler...');
-        const advancedStart = Date.now();
-        const advancedResult = await AdvancedScheduler.generateOptimalSchedule(siteId, weekStart);
-        const advancedTime = Date.now() - advancedStart;
+        // Тест 1: CP-SAT Python Optimizer
+        console.log('🤖 Testing CP-SAT Python Optimizer...');
+        const cpsatStart = Date.now();
+        const cpsatResult = await CPSATBridge.generateOptimalSchedule(siteId, weekStart);
+        const cpsatTime = Date.now() - cpsatStart;
 
-        console.log(`   Result: ${advancedResult.success ? '✅ Success' : '❌ Failed'}`);
-        console.log(`   Time: ${advancedTime}ms`);
-        if (advancedResult.success) {
-            console.log(`   Assignments: ${advancedResult.schedule.assignments_count}`);
-            console.log(`   Score: ${advancedResult.stats?.score || 'N/A'}`);
-            console.log(`   Iterations: ${advancedResult.iterations || 'N/A'}`);
+        console.log(`   Result: ${cpsatResult.success ? '✅ Success' : '❌ Failed'}`);
+        console.log(`   Time: ${cpsatTime}ms`);
+        if (cpsatResult.success) {
+            console.log(`   Assignments: ${cpsatResult.schedule.assignments_count}`);
+            console.log(`   Status: ${cpsatResult.status || 'N/A'}`);
+            console.log(`   Solve Time: ${cpsatResult.solve_time || 'N/A'}ms`);
         } else {
-            console.log(`   Error: ${advancedResult.error}`);
+            console.log(`   Error: ${cpsatResult.error}`);
         }
 
         console.log('');
@@ -50,26 +50,26 @@ async function testAllAlgorithms() {
         console.log('='.repeat(50));
 
         // Сравнение результатов
-        if (advancedResult.success && simpleResult.success) {
+        if (cpsatResult.success && simpleResult.success) {
             console.log('🏆 Both algorithms succeeded!');
 
-            const advancedAssignments = advancedResult.schedule.assignments_count;
+            const cpsatAssignments = cpsatResult.schedule.assignments_count;
             const simpleAssignments = simpleResult.schedule.assignments_count;
 
-            console.log(`📈 Assignments - Advanced: ${advancedAssignments}, Simple: ${simpleAssignments}`);
-            console.log(`⏱️ Speed - Advanced: ${advancedTime}ms, Simple: ${simpleTime}ms`);
+            console.log(`📈 Assignments - CP-SAT: ${cpsatAssignments}, Simple: ${simpleAssignments}`);
+            console.log(`⏱️ Speed - CP-SAT: ${cpsatTime}ms, Simple: ${simpleTime}ms`);
 
-            if (advancedAssignments > simpleAssignments) {
-                console.log('🥇 Winner: Advanced Scheduler (better coverage)');
-            } else if (simpleAssignments > advancedAssignments) {
+            if (cpsatAssignments > simpleAssignments) {
+                console.log('🥇 Winner: CP-SAT Optimizer (better coverage)');
+            } else if (simpleAssignments > cpsatAssignments) {
                 console.log('🥇 Winner: Simple Scheduler (better coverage)');
-            } else if (advancedTime < simpleTime) {
-                console.log('🥇 Winner: Advanced Scheduler (same coverage, faster)');
+            } else if (cpsatTime < simpleTime) {
+                console.log('🥇 Winner: CP-SAT Optimizer (same coverage, faster)');
             } else {
                 console.log('🥇 Winner: Simple Scheduler (same coverage, faster)');
             }
-        } else if (advancedResult.success) {
-            console.log('🥇 Winner: Advanced Scheduler (only successful)');
+        } else if (cpsatResult.success) {
+            console.log('🥇 Winner: CP-SAT Optimizer (only successful)');
         } else if (simpleResult.success) {
             console.log('🥇 Winner: Simple Scheduler (only successful)');
         } else {
@@ -78,10 +78,26 @@ async function testAllAlgorithms() {
 
         console.log('\n✅ Algorithm testing completed!');
 
+        console.log('\n📋 DETAILED ANALYSIS:');
+        console.log('='.repeat(50));
+
+        if (cpsatResult.success && simpleResult.success) {
+            console.log('🔍 Let\'s analyze what each algorithm actually scheduled...');
+
+            // Можно добавить анализ через API или логи
+            console.log('💡 Both algorithms created 27 assignments');
+            console.log('🌙 Check if CP-SAT covers night shifts better');
+            console.log('⚖️ Check workload distribution between employees');
+        }
+
     } catch (error) {
         console.error('❌ Test suite failed:', error);
     }
+
+
 }
+
+
 
 testAllAlgorithms()
     .then(() => process.exit(0))

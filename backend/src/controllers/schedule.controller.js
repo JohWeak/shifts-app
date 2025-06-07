@@ -9,8 +9,7 @@ const customParseFormat = require('dayjs/plugin/customParseFormat');
 
 // Импорты всех алгоритмов
 const ScheduleGeneratorService = require('../services/schedule-generator.service'); // Простой алгоритм
-const CPSATBridge = require('../services/cp-sat-bridge.service'); // Python CP-SAT (если установлен)
-const AdvancedScheduler = require('../services/advanced-scheduler.service'); // Продвинутые эвристики
+const CPSATBridge = require('../services/cp-sat-bridge.service'); // Python CP-SAT
 
 // Configure Day.js plugins
 dayjs.extend(utc);
@@ -823,6 +822,314 @@ exports.updateScheduleStatus = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error updating schedule status',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+exports.exportSchedule = async (req, res) => {
+    try {
+        const { scheduleId } = req.params;
+        const { format = 'json' } = req.query; // json, csv, excel
+
+        const schedule = await Schedule.findByPk(scheduleId, {
+            include: [
+                {
+                    model: ScheduleAssignment,
+                    as: 'assignments',
+                    include: [
+                        { model: Employee, as: 'employee', attributes: ['emp_id', 'first_name', 'last_name'] },
+                        { model: Shift, as: 'shift', attributes: ['shift_id', 'shift_name', 'start_time', 'duration'] },
+                        { model: Position, as: 'position', attributes: ['pos_id', 'pos_name'] }
+                    ]
+                },
+                { model: WorkSite, as: 'workSite', attributes: ['site_id', 'site_name'] }
+            ]
+        });
+
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+
+        // Подготовка данных для экспорта
+        const exportData = {
+            schedule: {
+                id: schedule.id,
+                week: `${schedule.start_date.toISOString().split('T')[0]} to ${schedule.end_date.toISOString().split('T')[0]}`,
+                site: schedule.workSite?.site_name || 'Unknown',
+                status: schedule.status,
+                created: schedule.createdAt
+            },
+            assignments: schedule.assignments.map(assignment => ({
+                date: assignment.work_date,
+                employee: `${assignment.employee.first_name} ${assignment.employee.last_name}`,
+                shift: assignment.shift.shift_name,
+                shift_time: assignment.shift.start_time,
+                position: assignment.position.pos_name,
+                status: assignment.status
+            }))
+        };
+
+        if (format === 'csv') {
+            // CSV экспорт
+            const fields = ['date', 'employee', 'shift', 'shift_time', 'position', 'status'];
+            const csv = [
+                fields.join(','),
+                ...exportData.assignments.map(row =>
+                    fields.map(field => `"${row[field]}"`).join(',')
+                )
+            ].join('\n');
+
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.csv"`);
+            return res.send(csv);
+        }
+
+        // JSON экспорт (по умолчанию)
+        res.json({
+            success: true,
+            data: exportData
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Export error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error exporting schedule',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+// Дублирование расписания
+exports.duplicateSchedule = async (req, res) => {
+    try {
+        const { scheduleId } = req.params;
+        const { newWeekStart } = req.body;
+
+        if (!newWeekStart) {
+            return res.status(400).json({
+                success: false,
+                message: 'New week start date is required'
+            });
+        }
+
+        // Получить оригинальное расписание
+        const originalSchedule = await Schedule.findByPk(scheduleId, {
+            include: [{
+                model: ScheduleAssignment,
+                as: 'assignments',
+                include: [
+                    { model: Employee, as: 'employee' },
+                    { model: Shift, as: 'shift' },
+                    { model: Position, as: 'position' }
+                ]
+            }]
+        });
+
+        if (!originalSchedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Original schedule not found'
+            });
+        }
+
+        const dayjs = require('dayjs');
+        const weekStart = dayjs(newWeekStart);
+        const weekEnd = weekStart.add(6, 'day');
+
+        // Создать новое расписание
+        const newSchedule = await Schedule.create({
+            start_date: weekStart.toDate(),
+            end_date: weekEnd.toDate(),
+            site_id: originalSchedule.site_id,
+            status: 'draft',
+            text_file: JSON.stringify({
+                generated_at: new Date().toISOString(),
+                algorithm: 'duplicated',
+                original_schedule_id: scheduleId,
+                timezone: 'Asia/Jerusalem'
+            })
+        });
+
+        // Создать новые назначения
+        const newAssignments = [];
+        for (const assignment of originalSchedule.assignments) {
+            const originalDate = dayjs(assignment.work_date);
+            const dayOfWeek = originalDate.day();
+            const newDate = weekStart.add(dayOfWeek, 'day');
+
+            newAssignments.push({
+                schedule_id: newSchedule.id,
+                emp_id: assignment.emp_id,
+                shift_id: assignment.shift_id,
+                position_id: assignment.position_id,
+                work_date: newDate.toDate(),
+                status: 'scheduled',
+                notes: `Duplicated from schedule #${scheduleId}`
+            });
+        }
+
+        await ScheduleAssignment.bulkCreate(newAssignments);
+
+        res.json({
+            success: true,
+            message: 'Schedule duplicated successfully',
+            data: {
+                original_schedule_id: scheduleId,
+                new_schedule_id: newSchedule.id,
+                assignments_count: newAssignments.length,
+                week: `${weekStart.format('YYYY-MM-DD')} to ${weekEnd.format('YYYY-MM-DD')}`
+            }
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Duplicate error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error duplicating schedule',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+// Получение статистики по расписаниям
+exports.getScheduleStats = async (req, res) => {
+    try {
+        const { timeframe = '30' } = req.query; // days
+
+        const dayjs = require('dayjs');
+        const startDate = dayjs().subtract(parseInt(timeframe), 'day').toDate();
+
+        // Основная статистика
+        const totalSchedules = await Schedule.count();
+        const recentSchedules = await Schedule.count({
+            where: {
+                createdAt: {
+                    [Op.gte]: startDate
+                }
+            }
+        });
+
+        const publishedSchedules = await Schedule.count({
+            where: { status: 'published' }
+        });
+
+        const draftSchedules = await Schedule.count({
+            where: { status: 'draft' }
+        });
+
+        // Статистика по алгоритмам
+        const algorithmStats = await Schedule.findAll({
+            attributes: [
+                [sequelize.literal(`
+                    CASE 
+                        WHEN text_file LIKE '%CP-SAT%' THEN 'CP-SAT'
+                        WHEN text_file LIKE '%Simple%' THEN 'Simple'
+                        WHEN text_file LIKE '%Advanced%' THEN 'Advanced'
+                        ELSE 'Unknown'
+                    END
+                `), 'algorithm'],
+                [sequelize.fn('COUNT', '*'), 'count']
+            ],
+            group: ['algorithm'],
+            raw: true
+        });
+
+        // Статистика назначений
+        const totalAssignments = await ScheduleAssignment.count();
+        const recentAssignments = await ScheduleAssignment.count({
+            where: {
+                createdAt: {
+                    [Op.gte]: startDate
+                }
+            }
+        });
+
+        // Популярные смены
+        const shiftStats = await ScheduleAssignment.findAll({
+            include: [{
+                model: Shift,
+                as: 'shift',
+                attributes: ['shift_name']
+            }],
+            attributes: [
+                [sequelize.fn('COUNT', '*'), 'count']
+            ],
+            group: ['shift.shift_id'],
+            order: [[sequelize.fn('COUNT', '*'), 'DESC']],
+            limit: 5,
+            raw: true
+        });
+
+        res.json({
+            success: true,
+            data: {
+                overview: {
+                    total_schedules: totalSchedules,
+                    recent_schedules: recentSchedules,
+                    published_schedules: publishedSchedules,
+                    draft_schedules: draftSchedules,
+                    total_assignments: totalAssignments,
+                    recent_assignments: recentAssignments
+                },
+                algorithms: algorithmStats,
+                popular_shifts: shiftStats,
+                timeframe_days: parseInt(timeframe)
+            }
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Stats error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving statistics',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+exports.deleteSchedule = async (req, res) => {
+    try {
+        const { scheduleId } = req.params;
+
+        const schedule = await Schedule.findByPk(scheduleId);
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+
+        // Проверить, можно ли удалить (например, только draft)
+        if (schedule.status === 'published') {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot delete published schedule'
+            });
+        }
+
+        // Удалить связанные назначения (каскадно через FK)
+        await ScheduleAssignment.destroy({
+            where: { schedule_id: scheduleId }
+        });
+
+        // Удалить само расписание
+        await schedule.destroy();
+
+        res.json({
+            success: true,
+            message: 'Schedule deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Delete error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting schedule',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }

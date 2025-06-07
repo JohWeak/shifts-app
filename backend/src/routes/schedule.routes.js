@@ -18,4 +18,32 @@ router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.upd
 // NEW: Algorithm comparison and testing
 router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
 
+// Получить все расписания
+router.get('/', scheduleController.getAllSchedules);
+
+// Получить детали конкретного расписания
+router.get('/:scheduleId', scheduleController.getScheduleDetails);
+
+// Генерация нового расписания
+router.post('/generate', scheduleController.generateNextWeekSchedule);
+
+// НОВЫЕ РОУТЫ:
+// Сравнение алгоритмов
+router.post('/compare-algorithms', scheduleController.compareAllAlgorithms);
+
+// Обновление статуса расписания
+router.put('/:scheduleId/status', scheduleController.updateScheduleStatus);
+
+// Экспорт расписания
+router.get('/:scheduleId/export', scheduleController.exportSchedule);
+
+// Дублирование расписания
+router.post('/:scheduleId/duplicate', scheduleController.duplicateSchedule);
+
+// Статистика по расписаниям
+router.get('/stats/overview', scheduleController.getScheduleStats);
+
+router.delete('/:scheduleId', scheduleController.deleteSchedule);
+
+
 module.exports = router;

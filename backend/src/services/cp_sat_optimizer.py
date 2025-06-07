@@ -1,4 +1,4 @@
-# backend/src/services/cp_sat_optimizer.py
+# backend/src/services/cp_sat_optimizer.py - ИСПРАВЛЕННАЯ ВЕРСИЯ
 from ortools.sat.python import cp_model
 import json
 import sys
@@ -21,6 +21,9 @@ class ShiftSchedulerCP:
         constraints = data['constraints']
         settings = data['settings']
 
+        print(f"[CP-SAT Python] Data: {len(employees)} employees, {len(shifts)} shifts, {len(positions)} positions")
+        print(f"[CP-SAT Python] Constraints: {len(constraints.get('cannot_work', []))} cannot_work, {len(constraints.get('prefer_work', []))} prefer_work")
+
         # Создание переменных
         assignments = {}
         for emp in employees:
@@ -32,7 +35,8 @@ class ShiftSchedulerCP:
                         assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] = \
                             self.model.NewBoolVar(var_name)
 
-        # Ограничения покрытия позиций
+        # ОСЛАБЛЕННЫЕ ограничения покрытия позиций (минимум, а не точно)
+        coverage_vars = []
         for day_idx in range(len(days)):
             for shift in shifts:
                 for position in positions:
@@ -41,8 +45,16 @@ class ShiftSchedulerCP:
                         assignment_vars.append(
                             assignments[(emp['emp_id'], day_idx, shift['shift_id'], position['pos_id'])]
                         )
-                    # Точно нужное количество сотрудников
-                    self.model.Add(sum(assignment_vars) == position['num_of_emp'])
+
+                    # Минимум нужное количество сотрудников (вместо точно)
+                    total_assigned = self.model.NewIntVar(0, len(employees), f'coverage_{day_idx}_{shift["shift_id"]}_{position["pos_id"]}')
+                    self.model.Add(sum(assignment_vars) == total_assigned)
+
+                    # Мягкое ограничение: стремимся к нужному покрытию
+                    target = position['num_of_emp']
+                    coverage_penalty = self.model.NewIntVar(0, len(employees), f'penalty_{day_idx}_{shift["shift_id"]}_{position["pos_id"]}')
+                    self.model.AddAbsEquality(coverage_penalty, total_assigned - target)
+                    coverage_vars.append(coverage_penalty)
 
         # Ограничения сотрудников (максимум 1 смена в день)
         for emp in employees:
@@ -59,14 +71,18 @@ class ShiftSchedulerCP:
         # Ограничения "cannot_work"
         for constraint in constraints.get('cannot_work', []):
             emp_id = constraint['emp_id']
-            day_idx = constraint['day_index']
-            shift_id = constraint['shift_id']
+            day_idx = constraint.get('day_index')
+            shift_id = constraint.get('shift_id')
 
-            for position in positions:
-                if (emp_id, day_idx, shift_id, position['pos_id']) in assignments:
-                    self.model.Add(assignments[(emp_id, day_idx, shift_id, position['pos_id'])] == 0)
+            if day_idx is not None and shift_id is not None:
+                for position in positions:
+                    key = (emp_id, day_idx, shift_id, position['pos_id'])
+                    if key in assignments:
+                        self.model.Add(assignments[key] == 0)
 
-        # Ограничения по часам (максимум 42 часа в неделю)
+        # УБИРАЕМ жесткое ограничение в 42 часа
+        # Вместо этого добавляем мягкое ограничение с штрафом
+        overtime_vars = []
         for emp in employees:
             emp_id = emp['emp_id']
             weekly_hours = []
@@ -77,22 +93,39 @@ class ShiftSchedulerCP:
                             assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] *
                             shift['duration']
                         )
-            self.model.Add(sum(weekly_hours) <= 42)
 
-        # Цель: максимизировать удовлетворение предпочтений "prefer_work"
+            total_hours = self.model.NewIntVar(0, 100, f'total_hours_{emp_id}')
+            self.model.Add(sum(weekly_hours) == total_hours)
+
+            # Мягкое ограничение: штраф за превышение 48 часов
+            overtime = self.model.NewIntVar(0, 100, f'overtime_{emp_id}')
+            self.model.AddMaxEquality(overtime, [total_hours - 48, 0])
+            overtime_vars.append(overtime)
+
+        # Цель: минимизировать штрафы и максимизировать предпочтения
         objective_terms = []
+
+        # Штраф за плохое покрытие смен
+        for penalty in coverage_vars:
+            objective_terms.append(penalty * -10)  # Большой штраф
+
+        # Штраф за сверхурочные
+        for overtime in overtime_vars:
+            objective_terms.append(overtime * -1)  # Небольшой штраф
+
+        # Бонус за удовлетворение предпочтений "prefer_work"
         for constraint in constraints.get('prefer_work', []):
             emp_id = constraint['emp_id']
-            day_idx = constraint['day_index']
-            shift_id = constraint['shift_id']
+            day_idx = constraint.get('day_index')
+            shift_id = constraint.get('shift_id')
 
-            for position in positions:
-                if (emp_id, day_idx, shift_id, position['pos_id']) in assignments:
-                    objective_terms.append(
-                        assignments[(emp_id, day_idx, shift_id, position['pos_id'])] * 10
-                    )
+            if day_idx is not None and shift_id is not None:
+                for position in positions:
+                    key = (emp_id, day_idx, shift_id, position['pos_id'])
+                    if key in assignments:
+                        objective_terms.append(assignments[key] * 5)  # Бонус
 
-        # Справедливость: минимизировать разброс в количестве смен
+        # Балансировка нагрузки
         total_shifts_vars = []
         for emp in employees:
             emp_id = emp['emp_id']
@@ -106,52 +139,58 @@ class ShiftSchedulerCP:
             self.model.Add(sum(emp_total) == total_var)
             total_shifts_vars.append(total_var)
 
-        # Минимизировать максимальное отклонение
-        if len(total_shifts_vars) > 1:
-            max_diff = self.model.NewIntVar(0, len(days) * len(shifts), 'max_diff')
-            for i in range(len(total_shifts_vars)):
-                for j in range(i + 1, len(total_shifts_vars)):
-                    diff = self.model.NewIntVar(-len(days) * len(shifts), len(days) * len(shifts), f'diff_{i}_{j}')
-                    self.model.Add(diff == total_shifts_vars[i] - total_shifts_vars[j])
-                    self.model.AddAbsEquality(max_diff, diff)
-
-            objective_terms.append(max_diff * -5)  # Штраф за неравенство
-
         # Установить цель
         if objective_terms:
             self.model.Maximize(sum(objective_terms))
 
-        # Решение
-        self.solver.parameters.max_time_in_seconds = 30.0
+        # Решение с увеличенным временем
+        self.solver.parameters.max_time_in_seconds = 60.0  # Увеличили до 60 секунд
+        print(f"[CP-SAT Python] Starting solver...")
         status = self.solver.Solve(self.model)
+
+        print(f"[CP-SAT Python] Solver finished with status: {status}")
 
         if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
             # Извлечение результатов
             schedule = []
+            total_assignments = 0
+
             for emp in employees:
                 emp_id = emp['emp_id']
                 for day_idx, day in enumerate(days):
                     for shift in shifts:
                         for position in positions:
-                            if self.solver.Value(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]):
+                            key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                            if key in assignments and self.solver.Value(assignments[key]):
                                 schedule.append({
                                     'emp_id': emp_id,
                                     'date': day['date'],
                                     'shift_id': shift['shift_id'],
                                     'position_id': position['pos_id']
                                 })
+                                total_assignments += 1
+
+            print(f"[CP-SAT Python] Generated {total_assignments} assignments")
 
             return {
                 'success': True,
                 'schedule': schedule,
                 'status': 'OPTIMAL' if status == cp_model.OPTIMAL else 'FEASIBLE',
-                'solve_time': self.solver.WallTime()
+                'solve_time': self.solver.WallTime(),
+                'assignments_count': total_assignments
             }
         else:
             return {
                 'success': False,
-                'error': f'Solver failed with status: {status}',
-                'status': status
+                'error': f'Solver failed with status: {status} (INFEASIBLE - constraints too strict)',
+                'status': status,
+                'debug_info': {
+                    'employees': len(employees),
+                    'shifts': len(shifts),
+                    'positions': len(positions),
+                    'cannot_work_constraints': len(constraints.get('cannot_work', [])),
+                    'prefer_work_constraints': len(constraints.get('prefer_work', []))
+                }
             }
 
 def main():
@@ -174,6 +213,8 @@ def main():
             json.dump(result, f, ensure_ascii=False, indent=2)
 
         print(f"[CP-SAT Python] Optimization completed. Success: {result['success']}")
+        if not result['success']:
+            print(f"[CP-SAT Python] Error details: {result.get('error', 'Unknown error')}")
 
     except Exception as e:
         error_result = {

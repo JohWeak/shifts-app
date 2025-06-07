@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import AdminDashboard from './components/admin/Dashboard';
+import ScheduleManagement from './components/admin/ScheduleManagement';
 
 // Import components
 import Login from './components/auth/LoginPage';
@@ -50,6 +51,14 @@ function App() {
                         />
 
                         {/* Admin routes  */}
+                        <Route
+                            path="/admin/schedules"
+                            element={
+                                <ProtectedRoute allowedRole="admin">
+                                    <ScheduleManagement />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route
                             path="/admin/dashboard"
                             element={

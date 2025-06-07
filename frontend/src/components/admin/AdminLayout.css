@@ -1,0 +1,489 @@
+/* frontend/src/components/admin/AdminLayout.css */
+
+/* === ОСНОВНЫЕ ПЕРЕМЕННЫЕ === */
+:root {
+    --admin-primary: #0066cc;
+    --admin-primary-dark: #0052a3;
+    --admin-secondary: #6c757d;
+    --admin-success: #28a745;
+    --admin-warning: #ffc107;
+    --admin-danger: #dc3545;
+    --admin-light: #f8f9fa;
+    --admin-dark: #343a40;
+    --admin-white: #ffffff;
+    --admin-border: #dee2e6;
+    --admin-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --admin-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --admin-border-radius: 0.5rem;
+    --admin-transition: all 0.15s ease-in-out;
+    --admin-sidebar-width: 280px;
+}
+
+/* === ОСНОВНОЙ ЛЕЙАУТ === */
+.admin-layout {
+    min-height: 100vh;
+    background-color: var(--admin-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* === TOP NAVBAR === */
+.admin-navbar {
+    border-bottom: 1px solid var(--admin-border);
+    background-color: var(--admin-white) !important;
+    height: 64px;
+    z-index: 1030;
+}
+
+.brand-logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--admin-dark) !important;
+    text-decoration: none;
+}
+
+.brand-text {
+    color: var(--admin-dark);
+}
+
+.brand-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.mobile-menu-btn {
+    border: 1px solid var(--admin-border);
+    color: var(--admin-secondary);
+}
+
+.mobile-menu-btn:hover {
+    background-color: var(--admin-light);
+    border-color: var(--admin-secondary);
+    color: var(--admin-dark);
+}
+
+/* === USER DROPDOWN === */
+.user-dropdown-btn {
+    background-color: var(--admin-white) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-border-radius);
+    padding: 0.5rem 1rem;
+    transition: var(--admin-transition);
+}
+
+.user-dropdown-btn:hover,
+.user-dropdown-btn:focus {
+    background-color: var(--admin-light) !important;
+    border-color: var(--admin-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+.user-avatar {
+    font-size: 1.5rem;
+    color: var(--admin-secondary);
+}
+
+.user-dropdown-menu {
+    border: none;
+    border-radius: var(--admin-border-radius);
+    box-shadow: var(--admin-shadow-lg);
+    min-width: 200px;
+}
+
+/* Убираем стрелку у dropdown toggle */
+.no-caret::after {
+    display: none !important;
+}
+
+/* Улучшенные dropdown меню */
+.dropdown-menu {
+    border-radius: var(--admin-border-radius);
+    box-shadow: var(--admin-shadow-lg);
+    border: none;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transition: var(--admin-transition);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background-color: var(--admin-light);
+    color: var(--admin-primary);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+/* Прогресс бары для статистики */
+.progress-sm {
+    height: 4px;
+}
+
+/* === MAIN CONTAINER === */
+.admin-main-container {
+    min-height: calc(100vh - 64px);
+}
+
+/* === DESKTOP SIDEBAR === */
+.admin-sidebar-desktop {
+    width: var(--admin-sidebar-width);
+    min-width: var(--admin-sidebar-width);
+    background-color: var(--admin-white);
+    border-right: 1px solid var(--admin-border);
+    height: calc(100vh - 64px);
+    position: sticky;
+    top: 64px;
+}
+
+.sidebar-content {
+    height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem 0;
+}
+
+.sidebar-header {
+    padding: 0 1rem 1rem 1rem;
+}
+
+.sidebar-title {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+/* === NAVIGATION === */
+.admin-nav {
+    padding: 0 1rem;
+}
+
+.admin-nav-item {
+    margin-bottom: 0.25rem;
+}
+
+.admin-nav-link {
+    border: none !important;
+    border-radius: var(--admin-border-radius) !important;
+    padding: 0.75rem 1rem !important;
+    color: var(--admin-secondary) !important;
+    text-decoration: none !important;
+    transition: var(--admin-transition) !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 500 !important;
+    position: relative;
+}
+
+.nav-link-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.nav-icon-text {
+    display: flex;
+    align-items: center;
+}
+
+.nav-icon {
+    font-size: 1.1rem;
+    margin-right: 0.75rem;
+    color: inherit;
+}
+
+.nav-text {
+    font-size: 0.875rem;
+}
+
+.nav-badge {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Hover состояние */
+.admin-nav-link:hover {
+    background-color: var(--admin-light) !important;
+    color: var(--admin-primary) !important;
+    transform: translateX(2px);
+}
+
+/* Активное состояние */
+.admin-nav-link.active {
+    background-color: var(--admin-primary) !important;
+    color: var(--admin-white) !important;
+    box-shadow: var(--admin-shadow);
+}
+
+.admin-nav-link.active .nav-icon,
+.admin-nav-link.active .nav-text {
+    color: var(--admin-white) !important;
+}
+
+.admin-nav-link.active:hover {
+    background-color: var(--admin-primary-dark) !important;
+    transform: translateX(0);
+}
+
+/* === CONTENT AREA === */
+.admin-content-area {
+    background-color: var(--admin-light);
+    min-height: calc(100vh - 64px);
+}
+
+.admin-main-content {
+    padding: 2rem;
+    max-width: 100%;
+}
+
+/* === MOBILE SIDEBAR (OFFCANVAS) === */
+.admin-mobile-sidebar {
+    --bs-offcanvas-width: 280px;
+}
+
+.admin-mobile-sidebar .offcanvas-header {
+    background-color: var(--admin-white);
+    border-bottom: 1px solid var(--admin-border);
+    padding: 1.25rem 1.5rem;
+}
+
+.admin-mobile-sidebar .offcanvas-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--admin-dark);
+}
+
+.mobile-sidebar-content {
+    background-color: var(--admin-white);
+    height: 100%;
+}
+
+/* === RESPONSIVE DESIGN === */
+
+/* Tablets и маленькие ноутбуки */
+@media (max-width: 1199.98px) {
+    .admin-main-content {
+        padding: 1.5rem;
+    }
+
+    .admin-sidebar-desktop {
+        width: 260px;
+        min-width: 260px;
+    }
+}
+
+/* Планшеты в портретной ориентации */
+@media (max-width: 991.98px) {
+    .admin-main-content {
+        padding: 1rem;
+    }
+
+    .brand-text {
+        display: none;
+    }
+}
+
+/* Мобильные устройства */
+@media (max-width: 767.98px) {
+    .admin-main-content {
+        padding: 1rem 0.75rem;
+    }
+
+    .brand-badge {
+        display: none;
+    }
+
+    .user-dropdown-btn span {
+        display: none !important;
+    }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 575.98px) {
+    .admin-main-content {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .admin-navbar .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* === ДОПОЛНИТЕЛЬНЫЕ КОМПОНЕНТЫ === */
+
+/* Улучшенные карточки */
+.card {
+    border: none;
+    border-radius: var(--admin-border-radius);
+    box-shadow: var(--admin-shadow);
+    transition: var(--admin-transition);
+}
+
+.card:hover {
+    box-shadow: var(--admin-shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Улучшенные кнопки */
+.btn {
+    border-radius: var(--admin-border-radius);
+    font-weight: 500;
+    transition: var(--admin-transition);
+}
+
+.btn-primary {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--admin-primary-dark);
+    border-color: var(--admin-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+}
+
+.btn-outline-primary {
+    color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    transform: translateY(-1px);
+}
+
+/* Улучшенные алерты */
+.alert {
+    border: none;
+    border-radius: var(--admin-border-radius);
+    font-weight: 500;
+}
+
+/* Улучшенные таблицы */
+.table {
+    border-radius: var(--admin-border-radius);
+    overflow: hidden;
+    box-shadow: var(--admin-shadow);
+}
+
+.table thead th {
+    background-color: var(--admin-light);
+    border-bottom: 2px solid var(--admin-border);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--admin-secondary);
+}
+
+.table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 102, 204, 0.05);
+}
+
+/* Улучшенные badge */
+.badge {
+    font-weight: 500;
+    border-radius: calc(var(--admin-border-radius) * 0.5);
+}
+
+/* Модальные окна */
+.modal-content {
+    border: none;
+    border-radius: var(--admin-border-radius);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--admin-border);
+    background-color: var(--admin-light);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--admin-border);
+    background-color: var(--admin-light);
+}
+
+/* Формы */
+.form-control,
+.form-select {
+    border-radius: var(--admin-border-radius);
+    border: 1px solid var(--admin-border);
+    transition: var(--admin-transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+/* Прогресс бары */
+.progress {
+    border-radius: var(--admin-border-radius);
+    background-color: var(--admin-light);
+}
+
+.progress-bar {
+    border-radius: var(--admin-border-radius);
+}
+
+/* Навигационные табы */
+.nav-tabs {
+    border-bottom: 2px solid var(--admin-border);
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-radius: var(--admin-border-radius) var(--admin-border-radius) 0 0;
+    color: var(--admin-secondary);
+    font-weight: 500;
+    transition: var(--admin-transition);
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: var(--admin-primary);
+    background-color: var(--admin-light);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--admin-primary);
+    background-color: var(--admin-white);
+    border-color: var(--admin-border) var(--admin-border) var(--admin-white);
+    border-bottom: 2px solid var(--admin-primary);
+}
+
+/* Scrollbar стилизация для webkit браузеров */
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: var(--admin-border);
+    border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-secondary);
+}
