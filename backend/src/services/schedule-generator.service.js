@@ -1,8 +1,8 @@
-// backend/src/services/schedule-generator.service.js
+// backend/src/services/schedule-generator.service.js (обновленная версия)
 const {
     Employee,
     Shift,
-    ConstraintType,
+    EmployeeConstraint,  // НОВАЯ МОДЕЛЬ
     ScheduleSettings,
     ScheduleAssignment,
     Position
@@ -15,21 +15,13 @@ class ScheduleGeneratorService {
 
     /**
      * Генерировать расписание на неделю
-     * @param {number} siteId - ID рабочего объекта
-     * @param {string} weekStart - Дата начала недели (YYYY-MM-DD)
-     * @returns {Object} Результат генерации
      */
     static async generateWeeklySchedule(siteId, weekStart) {
         try {
             console.log(`[ScheduleGenerator] Starting generation for site ${siteId}, week ${weekStart}`);
 
-            // 1. Подготовка данных
             const data = await this.prepareScheduleData(siteId, weekStart);
-
-            // 2. Генерация расписания
             const schedule = await this.generateOptimalSchedule(data);
-
-            // 3. Сохранение результата
             const savedSchedule = await this.saveSchedule(siteId, weekStart, schedule);
 
             return {
@@ -55,44 +47,44 @@ class ScheduleGeneratorService {
 
         console.log(`[ScheduleGenerator] Preparing data for week ${weekStart} - ${weekEnd}`);
 
-        // Получить всех активных сотрудников
+        // Get all active employees
         const employees = await Employee.findAll({
             where: {status: 'active'},
             attributes: ['emp_id', 'first_name', 'last_name']
         });
 
-        // Получить все смены
+        // Get all shifts
         const shifts = await Shift.findAll({
             attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type', 'is_night_shift'],
             order: [['start_time', 'ASC']]
         });
 
-        // Получить позиции для этого объекта
+        // Get positions for this site
         const positions = await Position.findAll({
             where: {site_id: siteId},
             attributes: ['pos_id', 'pos_name', 'num_of_emp', 'num_of_shifts']
         });
 
-        // Получить настройки планирования
+        // Get schedule settings
         const settings = await ScheduleSettings.findOne({
             where: {site_id: siteId}
         });
 
-        // Получить ограничения сотрудников на эту неделю
-        const constraints = await ConstraintType.findAll({
+        // Get employee constraints for this week (UPDATED)
+        const constraints = await EmployeeConstraint.findAll({
             where: {
-                status: 'approved',
+                status: 'active',
                 [Op.or]: [
-                    // Постоянные ограничения
+                    // Permanent constraints
                     {
                         is_permanent: true,
                         applies_to: 'day_of_week'
                     },
-                    // Временные ограничения на эту неделю
+                    // Temporary constraints for this week
                     {
                         is_permanent: false,
                         applies_to: 'specific_date',
-                        start_date: {
+                        target_date: {
                             [Op.between]: [weekStart, weekEnd]
                         }
                     }
@@ -119,7 +111,7 @@ class ScheduleGeneratorService {
     }
 
     /**
-     * Обработать ограничения в удобный формат
+     * Process constraints into convenient format (UPDATED)
      */
     static processConstraints(constraints, weekStart) {
         const processed = {};
@@ -132,15 +124,15 @@ class ScheduleGeneratorService {
             }
 
             if (constraint.applies_to === 'specific_date') {
-                // Временное ограничение
-                const date = constraint.start_date;
+                // Temporary constraint
+                const date = constraint.target_date;
                 if (!processed[empId][date]) {
                     processed[empId][date] = {};
                 }
-                processed[empId][date][constraint.shift_id] = constraint.type;
+                processed[empId][date][constraint.shift_id] = constraint.constraint_type;
 
             } else if (constraint.applies_to === 'day_of_week') {
-                // Постоянное ограничение - применить ко всем дням недели этого типа
+                // Permanent constraint - apply to all days of this type in the week
                 for (let i = 0; i < 7; i++) {
                     const currentDate = dayjs(weekStart).add(i, 'day');
                     const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][currentDate.day()];
@@ -150,7 +142,7 @@ class ScheduleGeneratorService {
                         if (!processed[empId][dateStr]) {
                             processed[empId][dateStr] = {};
                         }
-                        processed[empId][dateStr][constraint.shift_id] = constraint.type;
+                        processed[empId][dateStr][constraint.shift_id] = constraint.constraint_type;
                     }
                 }
             }
@@ -167,38 +159,23 @@ class ScheduleGeneratorService {
         const {weekStart, employees, shifts, positions, settings, constraints} = data;
         const schedule = [];
 
-        console.log(`[ScheduleGenerator] ==================== GENERATION START ====================`);
-        console.log(`[ScheduleGenerator] employees.length: ${employees.length}`);
-        console.log(`[ScheduleGenerator] shifts.length: ${shifts.length}`);
-        console.log(`[ScheduleGenerator] positions.length: ${positions.length}`);
+        console.log(`[ScheduleGenerator] Starting optimal schedule generation...`);
 
-        // Для каждого дня недели
+        // For each day of the week
         for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
             const currentDate = dayjs(weekStart).add(dayOffset, 'day');
             const dateStr = currentDate.format('YYYY-MM-DD');
             const dayName = currentDate.format('dddd');
 
-            if (employees.length === 0) {
-                throw new Error('No employees available for scheduling');
-            }
-
-            if (shifts.length === 0) {
-                throw new Error('No shifts configured');
-            }
-
-            if (positions.length === 0) {
-                throw new Error('No positions configured');
-            }
-
             console.log(`[ScheduleGenerator] Processing ${dayName} ${dateStr}`);
 
-            // Для каждой смены в этот день
+            // For each shift in this day
             for (const shift of shifts) {
-                // Для каждой позиции
+                // For each position
                 for (const position of positions) {
                     const requiredEmployees = position.num_of_emp;
 
-                    // Найти лучших сотрудников для этой смены
+                    // Find best employees for this shift
                     const assignedEmployeeIds = await this.assignOptimalEmployees(
                         dateStr,
                         shift,
@@ -210,20 +187,18 @@ class ScheduleGeneratorService {
                         schedule
                     );
 
-                    // Добавить назначения в расписание
+                    // Add assignments to schedule
                     assignedEmployeeIds.forEach(empId => {
-                        if (empId) { // Проверить что empId не undefined
+                        if (empId) {
                             schedule.push({
                                 date: dateStr,
-                                emp_id: empId, // ← ИСПРАВЛЕНО: теперь берем из assignedEmployeeIds
+                                emp_id: empId,
                                 shift_id: shift.shift_id,
                                 position_id: position.pos_id,
                                 status: 'scheduled'
                             });
 
                             console.log(`[ScheduleGenerator] Added assignment: emp_id=${empId}, shift=${shift.shift_name}, position=${position.pos_name}, date=${dateStr}`);
-                        } else {
-                            console.warn(`[ScheduleGenerator] ⚠️ No employee assigned for ${dateStr} ${shift.shift_name} position ${position.pos_name}`);
                         }
                     });
                 }
@@ -234,112 +209,63 @@ class ScheduleGeneratorService {
         return schedule;
     }
 
-    /**
-     * Найти оптимальных сотрудников для конкретной смены
-     */
     static async assignOptimalEmployees(date, shift, position, requiredCount, employees, constraints, settings, existingSchedule) {
-
-        console.log(`[ScheduleGenerator] 🔍 assignOptimalEmployees called:`);
-        console.log(`  - date: ${date}`);
-        console.log(`  - shift: ${shift.shift_name} (ID: ${shift.shift_id})`);
-        console.log(`  - position: ${position.pos_name} (ID: ${position.pos_id})`);
-        console.log(`  - requiredCount: ${requiredCount}`);
-        console.log(`  - total employees: ${employees.length}`);
-
-        // Получить список доступных сотрудников
+        // Get available employees
         const availableEmployees = [];
 
         for (const emp of employees) {
             const isAvailable = this.isEmployeeAvailable(emp.emp_id, date, shift, constraints, settings, existingSchedule);
-            console.log(`  - Employee ${emp.emp_id} (${emp.first_name}): available = ${isAvailable}`);
-
             if (isAvailable) {
                 availableEmployees.push(emp);
             }
         }
 
-        console.log(`[ScheduleGenerator] Available employees: ${availableEmployees.length}/${employees.length}`);
-
-        // Если нет доступных сотрудников
         if (availableEmployees.length === 0) {
             console.warn(`[ScheduleGenerator] No available employees for ${date} ${shift.shift_name}`);
             return [];
         }
 
-        // Если недостаточно доступных сотрудников
-        if (availableEmployees.length < requiredCount) {
-            console.warn(`[ScheduleGenerator] Not enough available employees for ${date} ${shift.shift_name}. Need: ${requiredCount}, Available: ${availableEmployees.length}`);
-            // Возвращаем тех, кто есть, а не пустой массив
-        }
-
-        // Отсортировать сотрудников по приоритету
+        // Sort employees by priority
         const sortedEmployees = availableEmployees
-            .map(emp => {
-                const priority = this.calculateEmployeePriority(emp.emp_id, date, shift, constraints, existingSchedule);
-                console.log(`  - Employee ${emp.emp_id} (${emp.first_name}) priority: ${priority}`);
-                return {
-                    emp_id: emp.emp_id,           // ← ИСПРАВЛЕНИЕ: явно сохраняем emp_id
-                    first_name: emp.first_name,   // ← ИСПРАВЛЕНИЕ: сохраняем имя для отладки
-                    last_name: emp.last_name,     // ← ИСПРАВЛЕНИЕ: сохраняем фамилию для отладки
-                    priority: priority
-                };
-            })
+            .map(emp => ({
+                emp_id: emp.emp_id,
+                priority: this.calculateEmployeePriority(emp.emp_id, date, shift, constraints, existingSchedule)
+            }))
             .sort((a, b) => b.priority - a.priority);
 
-        console.log(`[ScheduleGenerator] Sorted employees by priority:`, sortedEmployees.map(e => `${e.emp_id}:${e.priority}`));
-
-        // Выбрать лучших сотрудников
+        // Select best employees
         const actualCount = Math.min(requiredCount, availableEmployees.length);
         const selectedEmployees = sortedEmployees
             .slice(0, actualCount)
             .map(emp => emp.emp_id);
 
-        console.log(`[ScheduleGenerator] 🎯 Selected ${selectedEmployees.length}/${requiredCount} employees: [${selectedEmployees.join(', ')}]`);
-
         return selectedEmployees;
     }
 
-    /**
-     * Проверить доступность сотрудника для смены
-     */
     static isEmployeeAvailable(empId, date, shift, constraints, settings, existingSchedule) {
-
-        console.log(`    🔍 Checking availability for employee ${empId} on ${date} ${shift.shift_name}:`);
-
-        // 1. Проверить ограничения сотрудника
+        // 1. Check employee constraints
         const empConstraints = constraints[empId] || {};
         const dayConstraints = empConstraints[date] || {};
 
-        console.log(`      - Employee constraints for ${date}:`, dayConstraints);
-
-        // Если есть ограничение "cannot_work" на эту смену
+        // If employee has 'cannot_work' constraint for this shift
         if (dayConstraints[shift.shift_id] === 'cannot_work') {
-            console.log(`      ❌ Employee has 'cannot_work' constraint for shift ${shift.shift_id}`);
             return false;
         }
 
-        // 2. Проверить не назначен ли уже на другую смену в этот день
+        // 2. Check if already assigned to another shift this day
         const dayAssignments = existingSchedule.filter(assignment =>
             assignment.emp_id === empId && assignment.date === date
         );
-
-        console.log(`      - Existing assignments for ${date}: ${dayAssignments.length}`);
 
         if (dayAssignments.length >= settings.max_shifts_per_day) {
             return false;
         }
 
-        // 3. Проверить отдых между сменами
+        // 3. Check rest period between shifts
         if (!this.checkRestPeriod(empId, date, shift, settings, existingSchedule)) {
-            console.log(`      ❌ Employee already has ${dayAssignments.length} shifts (max: ${settings.max_shifts_per_day})`);
             return false;
         }
 
-        // 4. Проверить максимальные рабочие дни подряд
-        if (!this.checkConsecutiveWorkDays(empId, date, settings, existingSchedule)) {
-            return false;
-        }
-        console.log(`      ✅ Employee is available`);
         return true;
     }
 
@@ -347,59 +273,44 @@ class ScheduleGeneratorService {
      * Рассчитать приоритет сотрудника для смены
      */
     static calculateEmployeePriority(empId, date, shift, constraints, existingSchedule) {
-        let priority = 100; // Базовый приоритет
+        let priority = 100;
 
-        // 1. Бонус за предпочтение работать
+        // 1. Bonus for preferring to work
         const empConstraints = constraints[empId] || {};
         const dayConstraints = empConstraints[date] || {};
 
         if (dayConstraints[shift.shift_id] === 'prefer_work') {
-            priority += 50; // Большой бонус
-            console.log(`      - Prefer work bonus: +50 (total: ${priority})`);
+            priority += 50; // Big bonus
         }
 
-        // 2. Штраф за количество уже назначенных смен на этой неделе
+        // 2. Penalty for number of already assigned shifts this week
         const weekAssignments = existingSchedule.filter(assignment => assignment.emp_id === empId);
         const weekPenalty = weekAssignments.length * 5;
         priority -= weekPenalty;
-        console.log(`      - Week assignments penalty: -${weekPenalty} (${weekAssignments.length} shifts, total: ${priority})`);
 
-        // 3. Бонус за разнообразие смен (избегать одних и тех же смен)
+        // 3. Bonus for shift variety (avoid same shifts)
         const sameShiftCount = weekAssignments.filter(assignment => assignment.shift_id === shift.shift_id).length;
         const varietyPenalty = sameShiftCount * 10;
         priority -= varietyPenalty;
-        console.log(`      - Same shift penalty: -${varietyPenalty} (${sameShiftCount} same shifts, total: ${priority})`);
 
-        console.log(`    📊 Final priority for employee ${empId}: ${priority}`);
         return priority;
     }
 
-    /**
-     * Проверить период отдыха между сменами
-     */
     static checkRestPeriod(empId, date, shift, settings, existingSchedule) {
-        // Найти предыдущую смену сотрудника
+        // Find previous shift for this employee
         const previousDay = dayjs(date).subtract(1, 'day').format('YYYY-MM-DD');
         const previousAssignment = existingSchedule.find(assignment =>
             assignment.emp_id === empId && assignment.date === previousDay
         );
 
         if (!previousAssignment) {
-            return true; // Нет предыдущей смены
+            return true; // No previous shift
         }
 
-        // Использовать RestCalculatorService для проверки
-        // TODO: Реализовать более детальную проверку с точным временем
-        return true; // Пока упрощенно
+        // TODO: Implement detailed rest period check
+        return true; // Simplified for now
     }
 
-    /**
-     * Проверить максимальные рабочие дни подряд
-     */
-    static checkConsecutiveWorkDays(empId, date, settings, existingSchedule) {
-        // TODO: Реализовать проверку consecutive work days
-        return true; // Пока упрощенно
-    }
 
     /**
      * Сохранить расписание в базу данных
@@ -408,19 +319,8 @@ class ScheduleGeneratorService {
         const weekEnd = dayjs(weekStart).add(6, 'day').format('YYYY-MM-DD');
 
         try {
-            console.log(`[ScheduleGenerator] ==================== SAVE SCHEDULE START ====================`);
-            console.log(`[ScheduleGenerator] siteId: ${siteId}, weekStart: ${weekStart}, weekEnd: ${weekEnd}`);
-            console.log(`[ScheduleGenerator] assignments.length: ${assignments.length}`);
-
-            if (assignments.length > 0) {
-                console.log(`[ScheduleGenerator] First assignment:`, assignments[0]);
-            }
-
-            // Проверим доступность модели Schedule
             const { Schedule } = require('../models/associations');
-            console.log(`[ScheduleGenerator] Schedule model loaded successfully`);
 
-            // Данные для создания Schedule
             const scheduleData = {
                 start_date: new Date(weekStart),
                 end_date: new Date(weekEnd),
@@ -428,54 +328,27 @@ class ScheduleGeneratorService {
                 status: 'draft',
                 text_file: JSON.stringify({
                     generated_at: new Date().toISOString(),
-                    algorithm: 'optimal_assignment',
+                    algorithm: 'optimal_assignment_v2',
                     timezone: 'Asia/Jerusalem'
                 })
             };
 
-            console.log(`[ScheduleGenerator] Creating Schedule with data:`, scheduleData);
-
-            // STEP 1: Создать основную запись Schedule
+            // Create main Schedule record
             const schedule = await Schedule.create(scheduleData);
-            console.log(`[ScheduleGenerator] ✅ Schedule created successfully with ID: ${schedule.id}`);
 
-            // STEP 2: Подготовить ScheduleAssignment данные
-            console.log(`[ScheduleGenerator] Preparing ${assignments.length} ScheduleAssignment records...`);
+            // Prepare ScheduleAssignment data
+            const scheduleAssignments = assignments.map((assignment, index) => ({
+                schedule_id: schedule.id,
+                emp_id: assignment.emp_id,
+                shift_id: assignment.shift_id,
+                position_id: assignment.position_id,
+                work_date: new Date(assignment.date),
+                status: 'scheduled',
+                notes: `Generated automatically v2 - ${index + 1}`
+            }));
 
-            const scheduleAssignments = assignments.map((assignment, index) => {
-                const assignmentData = {
-                    schedule_id: schedule.id,
-                    emp_id: assignment.emp_id,
-                    shift_id: assignment.shift_id,
-                    position_id: assignment.position_id,
-                    work_date: new Date(assignment.date),
-                    status: 'scheduled',
-                    notes: `Generated automatically - ${index + 1}`
-                };
-
-                // Проверить каждое поле
-                Object.keys(assignmentData).forEach(key => {
-                    if (assignmentData[key] === undefined || assignmentData[key] === null) {
-                        console.error(`[ScheduleGenerator] ❌ Assignment ${index} has null/undefined field '${key}':`, assignmentData);
-                        throw new Error(`Assignment ${index} missing field: ${key}`);
-                    }
-                });
-
-                if (index < 3) { // Показать первые 3 для отладки
-                    console.log(`[ScheduleGenerator] Assignment ${index}:`, assignmentData);
-                }
-
-                return assignmentData;
-            });
-
-            console.log(`[ScheduleGenerator] All ${scheduleAssignments.length} assignments prepared successfully`);
-
-            // STEP 3: Создать ScheduleAssignment записи
-            console.log(`[ScheduleGenerator] Creating ScheduleAssignment records...`);
+            // Create ScheduleAssignment records
             await ScheduleAssignment.bulkCreate(scheduleAssignments);
-            console.log(`[ScheduleGenerator] ✅ ScheduleAssignment records created successfully`);
-
-            console.log(`[ScheduleGenerator] ==================== SAVE SCHEDULE SUCCESS ====================`);
 
             return {
                 schedule_id: schedule.id,
@@ -484,12 +357,7 @@ class ScheduleGeneratorService {
             };
 
         } catch (error) {
-            console.error(`[ScheduleGenerator] ❌ ==================== SAVE SCHEDULE ERROR ====================`);
-            console.error(`[ScheduleGenerator] Error message: ${error.message}`);
-            console.error(`[ScheduleGenerator] Error stack:`, error.stack);
-            console.error(`[ScheduleGenerator] SQL State:`, error.parent?.sqlState);
-            console.error(`[ScheduleGenerator] SQL Message:`, error.parent?.sqlMessage);
-            console.error(`[ScheduleGenerator] Full error:`, error);
+            console.error(`[ScheduleGenerator] Save error:`, error);
             throw error;
         }
     }

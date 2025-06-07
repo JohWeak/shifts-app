@@ -1,15 +1,14 @@
-// backend/src/models/associations.js
+// backend/src/models/associations.js (исправленная версия)
 const {
     Employee,
     WorkSite,
     Position,
     Shift,
     Schedule,
-    WorkDay,
-    SchedulePeriod,
     ScheduleSettings,
-    ConstraintType,
     ScheduleAssignment,
+    EmployeeConstraint,
+    EmployeeQualification,
     LegalConstraint,
 } = require('./index');
 
@@ -24,58 +23,41 @@ Position.belongsTo(WorkSite, {
     as: 'workSite'
 });
 
-// Position and WorkDay relationships
-Position.hasMany(WorkDay, {
-    foreignKey: 'pos_id',
-    as: 'workDays',
-    onDelete: 'CASCADE'
-});
-WorkDay.belongsTo(Position, {
-    foreignKey: 'pos_id',
-    as: 'position'
-});
-
 // Employee and Constraint relationships
-Employee.hasMany(ConstraintType, {
+Employee.hasMany(EmployeeConstraint, {
     foreignKey: 'emp_id',
-    as: 'constraintTypes',
+    as: 'constraints',
     onDelete: 'CASCADE'
 });
-ConstraintType.belongsTo(Employee, {
+EmployeeConstraint.belongsTo(Employee, {
     foreignKey: 'emp_id',
     as: 'employee'
 });
 
-// Employee and Shift relationships
-Employee.hasMany(Shift, {
+// Employee and Qualifications relationships
+Employee.hasMany(EmployeeQualification, {
     foreignKey: 'emp_id',
-    as: 'shifts',
-    onDelete: 'SET NULL'
+    as: 'qualifications',
+    onDelete: 'CASCADE'
 });
-Shift.belongsTo(Employee, {
+EmployeeQualification.belongsTo(Employee, {
     foreignKey: 'emp_id',
     as: 'employee'
 });
+
+// УБИРАЕМ эти связи - теперь назначения только через ScheduleAssignment!
+// Employee.hasMany(Shift, { ... }) - УДАЛЕНО
+// Shift.belongsTo(Employee, { ... }) - УДАЛЕНО
 
 // Shift and Constraint relationships
-Shift.hasMany(ConstraintType, {
+Shift.hasMany(EmployeeConstraint, {
     foreignKey: 'shift_id',
-    as: 'constraintTypes',
+    as: 'constraints',
     onDelete: 'CASCADE'
 });
-ConstraintType.belongsTo(Shift, {
+EmployeeConstraint.belongsTo(Shift, {
     foreignKey: 'shift_id',
     as: 'shift'
-});
-
-// Admin approval relationships
-Employee.hasMany(ConstraintType, {
-    foreignKey: 'approved_by',
-    as: 'approvedConstraints'
-});
-ConstraintType.belongsTo(Employee, {
-    foreignKey: 'approved_by',
-    as: 'approver'
 });
 
 // WorkSite and Schedule relationships
@@ -89,16 +71,6 @@ Schedule.belongsTo(WorkSite, {
     as: 'workSite'
 });
 
-// Schedule period relationships
-WorkSite.hasMany(SchedulePeriod, {
-    foreignKey: 'site_id',
-    as: 'schedulePeriods'
-});
-SchedulePeriod.belongsTo(WorkSite, {
-    foreignKey: 'site_id',
-    as: 'workSite'
-});
-
 // Schedule settings relationships
 WorkSite.hasOne(ScheduleSettings, {
     foreignKey: 'site_id',
@@ -107,25 +79,6 @@ WorkSite.hasOne(ScheduleSettings, {
 ScheduleSettings.belongsTo(WorkSite, {
     foreignKey: 'site_id',
     as: 'workSite'
-});
-
-// Creator and approver relationships for schedule periods
-Employee.hasMany(SchedulePeriod, {
-    foreignKey: 'created_by',
-    as: 'createdSchedulePeriods'
-});
-Employee.hasMany(SchedulePeriod, {
-    foreignKey: 'approved_by',
-    as: 'approvedSchedulePeriods'
-});
-
-SchedulePeriod.belongsTo(Employee, {
-    foreignKey: 'created_by',
-    as: 'creator'
-});
-SchedulePeriod.belongsTo(Employee, {
-    foreignKey: 'approved_by',
-    as: 'approver'
 });
 
 // Schedule Assignment relationships
@@ -169,17 +122,15 @@ ScheduleAssignment.belongsTo(Position, {
     as: 'position'
 });
 
-// Update exports to include ScheduleAssignment
 module.exports = {
     Employee,
     WorkSite,
     Position,
     Shift,
     Schedule,
-    WorkDay,
-    SchedulePeriod,
     ScheduleSettings,
-    ConstraintType,
-    LegalConstraint,
-    ScheduleAssignment
+    ScheduleAssignment,
+    EmployeeConstraint,
+    EmployeeQualification,
+    LegalConstraint
 };

@@ -14,4 +14,8 @@ router.delete('/:id', [verifyToken, isAdmin], employeeController.delete);
 // Employee constraints
 router.get('/:id/constraints', verifyToken, employeeController.getConstraints);
 
+// NEW: Employee qualifications routes
+router.get('/:id/qualifications', verifyToken, employeeController.getQualifications);
+router.post('/:id/qualifications', [verifyToken, isAdmin], employeeController.addQualification);
+
 module.exports = router;

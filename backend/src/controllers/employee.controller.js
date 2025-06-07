@@ -1,4 +1,4 @@
-const { Employee } = require('../models/associations');
+const { Employee, EmployeeConstraint, EmployeeQualification } = require('../models/associations');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 
@@ -139,15 +139,20 @@ exports.delete = async (req, res) => {
     }
 };
 
-// Get employee's constraints
+// Get employee's constraints (UPDATED)
 exports.getConstraints = async (req, res) => {
     try {
         const id = req.params.id;
         const employee = await Employee.findByPk(id, {
             include: [
                 {
-                    association: 'constraints',
-                    include: [{ association: 'shift' }]
+                    model: EmployeeConstraint,  // UPDATED: используем новую модель
+                    as: 'constraints',
+                    include: [{
+                        model: Shift,
+                        as: 'shift',
+                        attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type']
+                    }]
                 }
             ]
         });
@@ -160,6 +165,64 @@ exports.getConstraints = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             message: 'Error retrieving employee constraints',
+            error: error.message
+        });
+    }
+};
+
+// NEW: Get employee's qualifications
+exports.getQualifications = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const employee = await Employee.findByPk(id, {
+            include: [
+                {
+                    model: EmployeeQualification,
+                    as: 'qualifications'
+                }
+            ]
+        });
+
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        res.json(employee.qualifications);
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error retrieving employee qualifications',
+            error: error.message
+        });
+    }
+};
+
+// NEW: Add qualification to employee
+exports.addQualification = async (req, res) => {
+    try {
+        const empId = req.params.id;
+        const { qualification_name, level, certified_date, expires_date } = req.body;
+
+        // Validate employee exists
+        const employee = await Employee.findByPk(empId);
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        const qualification = await EmployeeQualification.create({
+            emp_id: empId,
+            qualification_name,
+            level,
+            certified_date,
+            expires_date
+        });
+
+        res.status(201).json({
+            message: 'Qualification added successfully',
+            qualification
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error adding qualification',
             error: error.message
         });
     }

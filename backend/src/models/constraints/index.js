@@ -1,8 +1,8 @@
 // backend/src/models/constraints/index.js
-const ConstraintType = require('./constraint-type.model');
+const EmployeeConstraint = require('./employee-constraint.model');
 const LegalConstraint = require('./legal-constraint.model');
 
 module.exports = {
-    ConstraintType,
+    EmployeeConstraint,
     LegalConstraint
 };

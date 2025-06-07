@@ -1,28 +1,21 @@
-// backend/src/routes/schedule.routes.js
+// backend/src/routes/schedule.routes.js (финальная версия)
 const express = require('express');
-const router = express.Router();
 const scheduleController = require('../controllers/schedule.controller');
-const { verifyToken, isAdmin} = require('../middlewares/auth.middleware');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-// Генерировать расписание
-router.post('/generate', verifyToken, scheduleController.generateNextWeekSchedule);
+const router = express.Router();
 
-// Employee routes - get weekly schedule for their position
+// Employee routes
 router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
 
-// Admin routes - get full schedule view
+// Admin routes
 router.get('/admin/weekly', [verifyToken, isAdmin], scheduleController.getAdminWeeklySchedule);
+router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
+router.get('/list', [verifyToken, isAdmin], scheduleController.getAllSchedules);
+router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
+router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
 
-// Получить все расписания
-router.get('/', verifyToken, scheduleController.getAllSchedules);
-
-// Получить детали расписания
-router.get('/:scheduleId', verifyToken, scheduleController.getScheduleDetails);
-
-// Обновить статус расписания
-router.put('/:scheduleId/status', verifyToken, scheduleController.updateScheduleStatus);
-
-
-
+// NEW: Algorithm comparison and testing
+router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
 
 module.exports = router;
