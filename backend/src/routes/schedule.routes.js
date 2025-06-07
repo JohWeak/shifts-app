@@ -1,49 +1,40 @@
-// backend/src/routes/schedule.routes.js (финальная версия)
+// backend/src/routes/schedule.routes.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
 const express = require('express');
 const scheduleController = require('../controllers/schedule.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-// Employee routes
+// === EMPLOYEE ROUTES (для обычных сотрудников) ===
+//router.get('/my-schedule', verifyToken, scheduleController.getMySchedule);
 router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
 
-// Admin routes
-router.get('/admin/weekly', [verifyToken, isAdmin], scheduleController.getAdminWeeklySchedule);
-router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
-router.get('/list', [verifyToken, isAdmin], scheduleController.getAllSchedules);
-router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
-router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
-
-// NEW: Algorithm comparison and testing
-router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
-
+// === ADMIN ROUTES (только для администраторов) ===
 // Получить все расписания
-router.get('/', scheduleController.getAllSchedules);
+router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
 
 // Получить детали конкретного расписания
-router.get('/:scheduleId', scheduleController.getScheduleDetails);
+router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
 
 // Генерация нового расписания
-router.post('/generate', scheduleController.generateNextWeekSchedule);
+router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
 
-// НОВЫЕ РОУТЫ:
 // Сравнение алгоритмов
-router.post('/compare-algorithms', scheduleController.compareAllAlgorithms);
+router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
 
 // Обновление статуса расписания
-router.put('/:scheduleId/status', scheduleController.updateScheduleStatus);
+router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
 
 // Экспорт расписания
-router.get('/:scheduleId/export', scheduleController.exportSchedule);
+router.get('/:scheduleId/export', [verifyToken, isAdmin], scheduleController.exportSchedule);
 
 // Дублирование расписания
-router.post('/:scheduleId/duplicate', scheduleController.duplicateSchedule);
+router.post('/:scheduleId/duplicate', [verifyToken, isAdmin], scheduleController.duplicateSchedule);
+
+// Удаление расписания
+router.delete('/:scheduleId', [verifyToken, isAdmin], scheduleController.deleteSchedule);
 
 // Статистика по расписаниям
-router.get('/stats/overview', scheduleController.getScheduleStats);
-
-router.delete('/:scheduleId', scheduleController.deleteSchedule);
-
+router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getScheduleStats);
 
 module.exports = router;

@@ -1,14 +1,20 @@
-// frontend/src/App.js
+// frontend/src/App.js - ОБНОВЛЕННАЯ ВЕРСИЯ
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
-import AdminDashboard from './components/admin/Dashboard';
-import ScheduleManagement from './components/admin/ScheduleManagement';
 
 // Import components
 import Login from './components/auth/LoginPage';
 import EmployeeDashboard from './components/employee/Dashboard';
+
+// Admin components
+import ScheduleManagement from './components/admin/ScheduleManagement';
+import Dashboard from './components/admin/Dashboard'; // Старый дашборд переименуем
+import AlgorithmSettings from './components/admin/AlgorithmSettings';
+import EmployeeManagement from './components/admin/EmployeeManagement';
+import SystemSettings from './components/admin/SystemSettings';
+import Reports from './components/admin/Reports';
 
 // Protected route component
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -22,7 +28,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
     if (allowedRole && user?.role !== allowedRole) {
         // Redirect to appropriate dashboard based on role
         if (user?.role === 'admin') {
-            return <Navigate to="/admin/dashboard" />;
+            return <Navigate to="/admin/schedules" />; // ✅ Админ идет сразу на расписания
         } else {
             return <Navigate to="/employee/dashboard" />;
         }
@@ -50,7 +56,15 @@ function App() {
                             }
                         />
 
-                        {/* Admin routes  */}
+                        {/* Admin routes */}
+                        <Route
+                            path="/admin/dashboard"
+                            element={
+                                <ProtectedRoute allowedRole="admin">
+                                    <Dashboard />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route
                             path="/admin/schedules"
                             element={
@@ -60,15 +74,40 @@ function App() {
                             }
                         />
                         <Route
-                            path="/admin/dashboard"
+                            path="/admin/algorithms"
                             element={
                                 <ProtectedRoute allowedRole="admin">
-                                    <AdminDashboard />
+                                    <AlgorithmSettings />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/employees"
+                            element={
+                                <ProtectedRoute allowedRole="admin">
+                                    <EmployeeManagement />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/settings"
+                            element={
+                                <ProtectedRoute allowedRole="admin">
+                                    <SystemSettings />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/reports"
+                            element={
+                                <ProtectedRoute allowedRole="admin">
+                                    <Reports />
                                 </ProtectedRoute>
                             }
                         />
 
-                        {/* Default redirect */}
+                        {/* Default redirects */}
+                        <Route path="/admin" element={<Navigate to="/admin/schedules" />} />
                         <Route path="/" element={<Navigate to="/login" />} />
                     </Routes>
                 </div>

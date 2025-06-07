@@ -1,26 +1,22 @@
-// frontend/src/components/admin/Dashboard.js
+// frontend/src/components/admin/Dashboard.js - ОБНОВЛЕННАЯ ВЕРСИЯ
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, Alert, Spinner } from 'react-bootstrap';
-import './AdminDashboard.css';
+import AdminLayout from './AdminLayout';
+import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
-const AdminDashboard = () => {
-    const [schedules, setSchedules] = useState([]);
+const Dashboard = () => {
+    const navigate = useNavigate();
+    const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedSchedule, setSelectedSchedule] = useState(null);
-    const [scheduleDetails, setScheduleDetails] = useState(null);
-    const [generating, setGenerating] = useState(false);
 
     useEffect(() => {
-        fetchSchedules();
+        fetchStats();
     }, []);
 
-    const fetchSchedules = async () => {
+    const fetchStats = async () => {
         try {
-            setLoading(true);
             const token = localStorage.getItem('token');
-
-            const response = await fetch('http://localhost:5000/api/schedules', {
+            const response = await fetch('http://localhost:5000/api/schedules/stats/overview', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -29,202 +25,176 @@ const AdminDashboard = () => {
 
             if (response.ok) {
                 const result = await response.json();
-                setSchedules(result.data);
-            } else {
-                setError('Failed to fetch schedules');
+                setStats(result.data);
             }
-        } catch (err) {
-            setError('Network error: ' + err.message);
+        } catch (error) {
+            console.error('Error fetching stats:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const generateNewSchedule = async () => {
-        try {
-            setGenerating(true);
-            const token = localStorage.getItem('token');
-
-            const response = await fetch('http://localhost:5000/api/schedules/generate', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ site_id: 1 })
-            });
-
-            if (response.ok) {
-                await fetchSchedules(); // Refresh list
-                setError(null);
-            } else {
-                const result = await response.json();
-                setError(result.message || 'Failed to generate schedule');
-            }
-        } catch (err) {
-            setError('Network error: ' + err.message);
-        } finally {
-            setGenerating(false);
-        }
-    };
-
-    const viewScheduleDetails = async (scheduleId) => {
-        try {
-            const token = localStorage.getItem('token');
-
-            const response = await fetch(`http://localhost:5000/api/schedules/${scheduleId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                setSelectedSchedule(scheduleId);
-                setScheduleDetails(result.data);
-            } else {
-                setError('Failed to fetch schedule details');
-            }
-        } catch (err) {
-            setError('Network error: ' + err.message);
-        }
-    };
-
-    const getStatusBadge = (status) => {
-        const variants = {
-            draft: 'secondary',
-            published: 'success',
-            archived: 'warning'
-        };
-        return <Badge bg={variants[status] || 'secondary'}>{status}</Badge>;
-    };
-
-    const formatDate = (date) => {
-        return new Date(date).toLocaleDateString('he-IL');
-    };
-
-    if (loading) {
-        return (
-            <Container className="text-center mt-5">
-                <Spinner animation="border" />
-                <p className="mt-2">טוען נתונים...</p>
-            </Container>
-        );
-    }
-
     return (
-        <Container fluid className="admin-dashboard">
-            <Row>
-                <Col>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1>ניהול לוחות זמנים</h1>
-                        <Button
-                            variant="primary"
-                            onClick={generateNewSchedule}
-                            disabled={generating}
-                        >
-                            {generating ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-2" />
-                                    מייצר...
-                                </>
-                            ) : (
-                                'ייצור לוח זמנים חדש'
-                            )}
-                        </Button>
-                    </div>
+        <AdminLayout>
+            <Container fluid className="px-0">
+                <div className="mb-4">
+                    <h1 className="h3 mb-2 text-dark fw-bold">
+                        <i className="bi bi-speedometer2 me-2 text-primary"></i>
+                        Dashboard Overview
+                    </h1>
+                    <p className="text-muted mb-0">Quick overview of your scheduling system</p>
+                </div>
 
-                    {error && (
-                        <Alert variant="danger" className="mb-4">
-                            {error}
-                        </Alert>
-                    )}
-                </Col>
-            </Row>
-
-            <Row>
-                <Col lg={selectedSchedule ? 6 : 12}>
-                    <Card>
-                        <Card.Header>
-                            <h5>לוחות זמנים קיימים</h5>
-                        </Card.Header>
-                        <Card.Body>
-                            {schedules.length === 0 ? (
-                                <p className="text-muted">אין לוחות זמנים</p>
-                            ) : (
-                                <Table responsive hover>
-                                    <thead>
-                                    <tr>
-                                        <th>תאריך תחילה</th>
-                                        <th>תאריך סיום</th>
-                                        <th>סטטוס</th>
-                                        <th>פעולות</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {schedules.map(schedule => (
-                                        <tr key={schedule.id}>
-                                            <td>{formatDate(schedule.start_date)}</td>
-                                            <td>{formatDate(schedule.end_date)}</td>
-                                            <td>{getStatusBadge(schedule.status)}</td>
-                                            <td>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline-primary"
-                                                    onClick={() => viewScheduleDetails(schedule.id)}
-                                                >
-                                                    צפייה
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </Table>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </Col>
-
-                {selectedSchedule && scheduleDetails && (
-                    <Col lg={6}>
-                        <Card>
-                            <Card.Header>
-                                <h5>פרטי לוח זמנים</h5>
-                                <small className="text-muted">
-                                    {formatDate(scheduleDetails.schedule.start_date)} - {formatDate(scheduleDetails.schedule.end_date)}
-                                </small>
-                            </Card.Header>
+                <Row>
+                    <Col lg={3} md={6} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100">
                             <Card.Body>
-                                <div className="mb-3">
-                                    <strong>סטטוס:</strong> {getStatusBadge(scheduleDetails.schedule.status)}
-                                    <br />
-                                    <strong>סה"כ משמרות:</strong> {scheduleDetails.statistics.total_assignments}
-                                    <br />
-                                    <strong>עובדים בשימוש:</strong> {scheduleDetails.statistics.employees_used}
-                                </div>
-
-                                <h6>משמרות לפי יום:</h6>
-                                {Object.entries(scheduleDetails.assignments_by_date).map(([date, assignments]) => (
-                                    <div key={date} className="mb-3">
-                                        <strong>{formatDate(date)}:</strong>
-                                        <ul className="list-unstyled ms-3">
-                                            {assignments.map(assignment => (
-                                                <li key={assignment.id} className="small">
-                                                    {assignment.employee.first_name} {assignment.employee.last_name} -
-                                                    {assignment.shift.shift_name} ({assignment.position.pos_name})
-                                                </li>
-                                            ))}
-                                        </ul>
+                                <div className="d-flex align-items-center">
+                                    <div className="bg-primary bg-opacity-10 rounded p-3 me-3">
+                                        <i className="bi bi-calendar-week text-primary fs-4"></i>
                                     </div>
-                                ))}
+                                    <div>
+                                        <div className="text-muted small">Total Schedules</div>
+                                        <div className="h4 mb-0">{stats?.overview.total_schedules || 0}</div>
+                                    </div>
+                                </div>
                             </Card.Body>
                         </Card>
                     </Col>
-                )}
-            </Row>
-        </Container>
+
+                    <Col lg={3} md={6} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100">
+                            <Card.Body>
+                                <div className="d-flex align-items-center">
+                                    <div className="bg-success bg-opacity-10 rounded p-3 me-3">
+                                        <i className="bi bi-check-circle text-success fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted small">Published</div>
+                                        <div className="h4 mb-0">{stats?.overview.published_schedules || 0}</div>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    <Col lg={3} md={6} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100">
+                            <Card.Body>
+                                <div className="d-flex align-items-center">
+                                    <div className="bg-warning bg-opacity-10 rounded p-3 me-3">
+                                        <i className="bi bi-file-earmark text-warning fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted small">Draft</div>
+                                        <div className="h4 mb-0">{stats?.overview.draft_schedules || 0}</div>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    <Col lg={3} md={6} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100">
+                            <Card.Body>
+                                <div className="d-flex align-items-center">
+                                    <div className="bg-info bg-opacity-10 rounded p-3 me-3">
+                                        <i className="bi bi-people text-info fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted small">Total Assignments</div>
+                                        <div className="h4 mb-0">{stats?.overview.total_assignments || 0}</div>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col lg={8} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100">
+                            <Card.Header className="bg-light border-0">
+                                <h5 className="mb-0">Quick Actions</h5>
+                            </Card.Header>
+                            <Card.Body>
+                                <Row>
+                                    <Col md={6} className="mb-3">
+                                        <Button
+                                            variant="primary"
+                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            onClick={() => navigate('/admin/schedules')}
+                                        >
+                                            <i className="bi bi-calendar-week me-2"></i>
+                                            Manage Schedules
+                                        </Button>
+                                    </Col>
+                                    <Col md={6} className="mb-3">
+                                        <Button
+                                            variant="outline-primary"
+                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            onClick={() => navigate('/admin/employees')}
+                                        >
+                                            <i className="bi bi-people me-2"></i>
+                                            Manage Employees
+                                        </Button>
+                                    </Col>
+                                    <Col md={6} className="mb-3">
+                                        <Button
+                                            variant="outline-success"
+                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            onClick={() => navigate('/admin/algorithms')}
+                                        >
+                                            <i className="bi bi-cpu me-2"></i>
+                                            Algorithm Settings
+                                        </Button>
+                                    </Col>
+                                    <Col md={6} className="mb-3">
+                                        <Button
+                                            variant="outline-info"
+                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            onClick={() => navigate('/admin/reports')}
+                                        >
+                                            <i className="bi bi-graph-up me-2"></i>
+                                            View Reports
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    <Col lg={4} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100">
+                            <Card.Header className="bg-light border-0">
+                                <h5 className="mb-0">System Status</h5>
+                            </Card.Header>
+                            <Card.Body>
+                                <div className="mb-3">
+                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                        <span className="small">Scheduling Service</span>
+                                        <Badge bg="success">Online</Badge>
+                                    </div>
+                                </div>
+                                <div className="mb-3">
+                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                        <span className="small">CP-SAT Algorithm</span>
+                                        <Badge bg="success">Available</Badge>
+                                    </div>
+                                </div>
+                                <div className="mb-3">
+                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                        <span className="small">Database</span>
+                                        <Badge bg="success">Connected</Badge>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            </Container>
+        </AdminLayout>
     );
 };
 
-export default AdminDashboard;
+export default Dashboard;
