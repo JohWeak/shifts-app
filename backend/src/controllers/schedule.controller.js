@@ -6,7 +6,6 @@ const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const weekOfYear = require('dayjs/plugin/weekOfYear');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
-const ScheduleGeneratorService = require('../services/schedule-generator.service');
 
 // Импорты всех алгоритмов
 const ScheduleGeneratorService = require('../services/schedule-generator.service'); // Простой алгоритм

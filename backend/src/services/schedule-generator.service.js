@@ -5,6 +5,7 @@ const {
     EmployeeConstraint,  // НОВАЯ МОДЕЛЬ
     ScheduleSettings,
     ScheduleAssignment,
+    Schedule,
     Position
 } = require('../models/associations');
 const RestCalculatorService = require('./rest-calculator.service');
@@ -316,10 +317,30 @@ class ScheduleGeneratorService {
      * Сохранить расписание в базу данных
      */
     static async saveSchedule(siteId, weekStart, assignments) {
-        const weekEnd = dayjs(weekStart).add(6, 'day').format('YYYY-MM-DD');
-
+        const { Op } = require('sequelize');
         try {
-            const { Schedule } = require('../models/associations');
+            const weekEnd = dayjs(weekStart).add(6, 'day').format('YYYY-MM-DD');
+
+            // **ДОБАВЛЯЕМ ОЧИСТКУ СТАРЫХ НАЗНАЧЕНИЙ**
+            console.log(`[ScheduleGenerator] Clearing existing assignments for week ${weekStart}...`);
+
+            // Находим и удаляем старые расписания для этой недели
+            const existingSchedules = await Schedule.findAll({
+                where: {
+                    site_id: siteId,
+                    start_date: {
+                        [Op.between]: [weekStart, weekEnd]
+                    }
+                }
+            });
+
+            // Удаляем связанные назначения (каскадно удалятся через FK)
+            for (const schedule of existingSchedules) {
+                await ScheduleAssignment.destroy({
+                    where: { schedule_id: schedule.id }
+                });
+                await schedule.destroy();
+            }
 
             const scheduleData = {
                 start_date: new Date(weekStart),

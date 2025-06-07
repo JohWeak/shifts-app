@@ -108,9 +108,31 @@ class CPSATBridge {
 
     async saveSchedule(siteId, weekStart, assignments) {
         const { Schedule, ScheduleAssignment } = require('../models/associations');
+        const { Op } = require('sequelize');  // ✅ ДОБАВИТЬ ЭТУ СТРОКУ
         const dayjs = require('dayjs');
 
         const weekEnd = dayjs(weekStart).add(6, 'day').format('YYYY-MM-DD');
+
+        // ✅ ДОБАВИТЬ КОД ОЧИСТКИ
+        console.log(`[CP-SAT Bridge] Clearing existing assignments for week ${weekStart}...`);
+
+        // Находим и удаляем старые расписания для этой недели
+        const existingSchedules = await Schedule.findAll({
+            where: {
+                site_id: siteId,
+                start_date: {
+                    [Op.between]: [weekStart, weekEnd]
+                }
+            }
+        });
+
+        // Удаляем связанные назначения (каскадно удалятся через FK)
+        for (const schedule of existingSchedules) {
+            await ScheduleAssignment.destroy({
+                where: { schedule_id: schedule.id }
+            });
+            await schedule.destroy();
+        }
 
         const scheduleData = {
             start_date: new Date(weekStart),
