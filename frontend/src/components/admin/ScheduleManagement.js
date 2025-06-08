@@ -1,5 +1,6 @@
 // frontend/src/components/admin/ScheduleManagement.js
 import React, {useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Card,
     Button,
@@ -23,6 +24,7 @@ import {
 import AdminLayout from './AdminLayout';
 
 const ScheduleManagement = () => {
+    const navigate = useNavigate();
     const [schedules, setSchedules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -438,6 +440,11 @@ const ScheduleManagement = () => {
         );
     };
 
+    const handleEditPosition = (scheduleId, positionId) => {
+        // Переход на страницу редактирования с параметром позиции
+        navigate(`/admin/schedule/${scheduleId}/edit?position=${positionId}`);
+    };
+
     return (
         <AdminLayout>
             <Container fluid className="px-0">
@@ -607,15 +614,6 @@ const ScheduleManagement = () => {
                                                                     <i className="bi bi-eye"></i>
                                                                 </Button>
 
-                                                                <Button
-                                                                    variant="primary"
-                                                                    size="sm"
-                                                                    onClick={() => window.location.href = `/admin/schedule/${schedule.id}/edit`}
-                                                                    className="d-flex align-items-center"
-                                                                    title="Edit Schedule"
-                                                                >
-                                                                    <i className="bi bi-pencil"></i>
-                                                                </Button>
 
                                                                 {schedule.status === 'draft' && (
                                                                     <Button
@@ -692,9 +690,10 @@ const ScheduleManagement = () => {
                             >
                                 {scheduleDetails && (
                                     <div className="p-4">
-                                        <Row>
-                                            <Col lg={4} className="mb-4">
-                                                <Card className="h-100 border-0 bg-light">
+                                        {/* Schedule Information сверху */}
+                                        <Row className="mb-4">
+                                            <Col xs={12}>
+                                                <Card className="border-0 bg-light">
                                                     <Card.Header className="bg-transparent border-0 pb-0">
                                                         <h5 className="mb-0 d-flex align-items-center">
                                                             <i className="bi bi-info-circle me-2 text-primary"></i>
@@ -702,125 +701,132 @@ const ScheduleManagement = () => {
                                                         </h5>
                                                     </Card.Header>
                                                     <Card.Body>
-                                                        <div className="mb-3">
-                                                            <div className="small text-muted mb-1">Status</div>
-                                                            <div>{getStatusBadge(scheduleDetails.schedule.status)}</div>
-                                                        </div>
-                                                        <div className="mb-3">
-                                                            <div className="small text-muted mb-1">Total Assignments
-                                                            </div>
-                                                            <div
-                                                                className="h4 mb-0 text-primary">{scheduleDetails.statistics.total_assignments}</div>
-                                                        </div>
-                                                        <div className="mb-3">
-                                                            <div className="small text-muted mb-1">Employees Used</div>
-                                                            <div
-                                                                className="h5 mb-0">{scheduleDetails.statistics.employees_used}</div>
-                                                        </div>
-                                                        <div className="mb-3">
-                                                            <div className="small text-muted mb-1">Algorithm</div>
-                                                            <div>{getAlgorithmBadge(scheduleDetails.schedule.metadata?.algorithm)}</div>
-                                                        </div>
-                                                        <div className="mb-3">
-                                                            <div className="small text-muted mb-1">Week Period</div>
-                                                            <div className="small">
-                                                                {formatDate(scheduleDetails.schedule.start_date)} - {formatDate(scheduleDetails.schedule.end_date)}
-                                                            </div>
-                                                        </div>
-                                                    </Card.Body>
-                                                </Card>
-
-                                                <Card className="mt-3 border-0 bg-light">
-                                                    <Card.Header className="bg-transparent border-0 pb-0">
-                                                        <h6 className="mb-0 d-flex align-items-center">
-                                                            <i className="bi bi-bar-chart me-2 text-success"></i>
-                                                            Daily Coverage
-                                                        </h6>
-                                                    </Card.Header>
-                                                    <Card.Body>
-                                                        {Object.entries(scheduleDetails.statistics.coverage_by_day).map(([date, count]) => (
-                                                            <div key={date} className="mb-3">
-                                                                <div
-                                                                    className="d-flex justify-content-between align-items-center mb-1">
-                                                                    <span
-                                                                        className="small fw-medium">{formatDate(date)}</span>
-                                                                    <Badge bg="primary"
-                                                                           className="small">{count}</Badge>
+                                                        <Row>
+                                                            <Col md={2} className="mb-3">
+                                                                <div className="small text-muted mb-1">Status</div>
+                                                                <div>{getStatusBadge(scheduleDetails.schedule.status)}</div>
+                                                            </Col>
+                                                            <Col md={2} className="mb-3">
+                                                                <div className="small text-muted mb-1">Total Assignments</div>
+                                                                <div className="h4 mb-0 text-primary">{scheduleDetails.statistics.total_assignments}</div>
+                                                            </Col>
+                                                            <Col md={2} className="mb-3">
+                                                                <div className="small text-muted mb-1">Employees Used</div>
+                                                                <div className="h5 mb-0">{scheduleDetails.statistics.employees_used}</div>
+                                                            </Col>
+                                                            <Col md={3} className="mb-3">
+                                                                <div className="small text-muted mb-1">Algorithm</div>
+                                                                <div>{getAlgorithmBadge(scheduleDetails.schedule.metadata?.algorithm)}</div>
+                                                            </Col>
+                                                            <Col md={3} className="mb-3">
+                                                                <div className="small text-muted mb-1">Week Period</div>
+                                                                <div className="small">
+                                                                    {formatDate(scheduleDetails.schedule.start_date)} - {formatDate(scheduleDetails.schedule.end_date)}
                                                                 </div>
-                                                                <ProgressBar
-                                                                    now={(count / Math.max(...Object.values(scheduleDetails.statistics.coverage_by_day))) * 100}
-                                                                    variant="primary"
-                                                                    className="progress-sm"
-                                                                />
-                                                            </div>
-                                                        ))}
+                                                            </Col>
+                                                        </Row>
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
+                                        </Row>
 
-                                            <Col lg={8}>
-                                                <Card className="h-100 border-0">
+                                        {/* Schedule Tables by Position внизу */}
+                                        <Row>
+                                            <Col xs={12}>
+                                                <Card className="border-0">
                                                     <Card.Header className="bg-light border-0">
                                                         <h5 className="mb-0 d-flex align-items-center">
                                                             <i className="bi bi-calendar-week me-2 text-primary"></i>
-                                                            Weekly Schedule
+                                                            Weekly Schedule by Position
                                                         </h5>
                                                     </Card.Header>
-                                                    <Card.Body style={{maxHeight: '700px', overflowY: 'auto'}}>
-                                                        {Object.entries(scheduleDetails.assignments_by_date).map(([date, assignments]) => (
-                                                            <div key={date} className="mb-4">
-                                                                <div className="d-flex align-items-center mb-3">
-                                                                    <div
-                                                                        className="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                                                                        <i className="bi bi-calendar-day text-primary"></i>
+                                                    <Card.Body>
+                                                        {/* Здесь будут таблицы по позициям */}
+                                                        {scheduleDetails.schedule_matrix ?
+                                                            Object.entries(scheduleDetails.schedule_matrix).map(([positionId, positionData]) => (
+                                                                <div key={positionId} className="mb-4">
+                                                                    {/* Заголовок с кнопкой Edit */}
+                                                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                                                        <h6 className="text-primary mb-0">
+                                                                            {positionData.position.name} - {positionData.position.profession}
+                                                                            <small className="text-muted ms-2">
+                                                                                (Requires {positionData.position.num_of_emp} employees per shift)
+                                                                            </small>
+                                                                        </h6>
+                                                                        <Button
+                                                                            variant="outline-primary"
+                                                                            size="sm"
+                                                                            onClick={() => handleEditPosition(scheduleDetails.schedule.id, positionId)}
+                                                                            className="d-flex align-items-center"
+                                                                        >
+                                                                            <i className="bi bi-pencil me-1"></i>
+                                                                            Edit Position
+                                                                        </Button>
                                                                     </div>
-                                                                    <div>
-                                                                        <h6 className="mb-0 text-primary">{formatDate(date)}</h6>
-                                                                        <small
-                                                                            className="text-muted">{assignments.length} assignments</small>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="ms-4">
-                                                                    {assignments.length === 0 ? (
-                                                                        <div
-                                                                            className="text-muted small p-3 bg-light rounded">
-                                                                            No assignments for this day
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="row g-2">
-                                                                            {assignments.map(assignment => (
-                                                                                <div key={assignment.id}
-                                                                                     className="col-md-6">
-                                                                                    <div
-                                                                                        className="card border-0 bg-light p-3">
-                                                                                        <div
-                                                                                            className="d-flex justify-content-between align-items-start">
-                                                                                            <div>
-                                                                                                <div
-                                                                                                    className="fw-semibold mb-1">
-                                                                                                    {assignment.employee.first_name} {assignment.employee.last_name}
-                                                                                                </div>
-                                                                                                <div
-                                                                                                    className="small text-muted">
-                                                                                                    {assignment.position.pos_name}
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <Badge
-                                                                                                bg={assignment.shift.shift_type === 'morning' ? 'info' :
-                                                                                                    assignment.shift.shift_type === 'night' ? 'dark' : 'warning'}
-                                                                                                className="small"
-                                                                                            >
-                                                                                                {assignment.shift.shift_name}
-                                                                                            </Badge>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
+
+                                                                    {/* Таблица для этой позиции */}
+                                                                    <div className="table-responsive">
+                                                                        <table className="table table-bordered">
+                                                                            <thead className="table-light">
+                                                                            <tr>
+                                                                                <th style={{width: '120px'}}>Shift</th>
+                                                                                {/* Динамические заголовки дней */}
+                                                                                {Array.from({length: 7}, (_, dayIndex) => {
+                                                                                    const date = new Date(scheduleDetails.schedule.start_date);
+                                                                                    date.setDate(date.getDate() + dayIndex);
+                                                                                    const dayName = date.toLocaleDateString('en-US', {weekday: 'short'});
+                                                                                    const dayMonth = date.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit'});
+                                                                                    return (
+                                                                                        <th key={dayIndex}>
+                                                                                            {dayName} {dayMonth}
+                                                                                        </th>
+                                                                                    );
+                                                                                })}
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            {scheduleDetails.all_shifts?.map(shift => (
+                                                                                <tr key={shift.shift_id}>
+                                                                                    <td className={`shift-${shift.shift_type} text-center fw-bold`}>
+                                                                                        {shift.shift_name}<br/>
+                                                                                        <small>{shift.start_time} ({shift.duration}h)</small>
+                                                                                    </td>
+                                                                                    {/* 7 дней недели */}
+                                                                                    {Array.from({length: 7}, (_, dayIndex) => {
+                                                                                        const date = new Date(scheduleDetails.schedule.start_date);
+                                                                                        date.setDate(date.getDate() + dayIndex);
+                                                                                        const dateStr = date.toISOString().split('T')[0];
+
+                                                                                        const cellData = positionData.schedule?.[dateStr]?.[shift.shift_id];
+                                                                                        const assignments = cellData?.assignments || [];
+
+                                                                                        return (
+                                                                                            <td key={dayIndex} className="text-center">
+                                                                                                {assignments.map(assignment => (
+                                                                                                    <div key={assignment.id} className="small fw-bold text-primary">
+                                                                                                        {assignment.employee.name}
+                                                                                                    </div>
+                                                                                                ))}
+                                                                                                {assignments.length === 0 && (
+                                                                                                    <span className="text-muted">-</span>
+                                                                                                )}
+                                                                                            </td>
+                                                                                        );
+                                                                                    })}
+                                                                                </tr>
                                                                             ))}
-                                                                        </div>
-                                                                    )}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        ))}
+                                                            )) : (
+                                                                <div className="text-center text-muted p-4">
+                                                                    No schedule matrix data available.
+                                                                    <br />
+                                                                    <small>Make sure the backend returns schedule_matrix in the response.</small>
+                                                                </div>
+                                                            )
+                                                        }
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
