@@ -1,40 +1,32 @@
-// backend/src/routes/schedule.routes.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
+// backend/src/routes/schedule.routes.js - ИСПРАВЛЕННЫЙ ПОРЯДОК РОУТОВ
 const express = require('express');
 const scheduleController = require('../controllers/schedule.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-// === EMPLOYEE ROUTES (для обычных сотрудников) ===
-//router.get('/my-schedule', verifyToken, scheduleController.getMySchedule);
+// === EMPLOYEE ROUTES ===
 router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
 
-// === ADMIN ROUTES (только для администраторов) ===
-// Получить все расписания
-router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
+// === ADMIN ROUTES (ВАЖНО: специфичные роуты ПЕРЕД динамическими) ===
 
-// Получить детали конкретного расписания
-router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
+// Статистика - ПЕРЕД /:scheduleId
+router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getScheduleStats);
 
-// Генерация нового расписания
+// Генерация и сравнение - ПЕРЕД /:scheduleId
 router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
-
-// Сравнение алгоритмов
 router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
 
-// Обновление статуса расписания
-router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
+// Получить все расписания - ПЕРЕД /:scheduleId
+router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
 
-// Экспорт расписания
+// Действия с конкретным расписанием - scheduleId роуты ПОСЛЕ всех остальных
 router.get('/:scheduleId/export', [verifyToken, isAdmin], scheduleController.exportSchedule);
-
-// Дублирование расписания
 router.post('/:scheduleId/duplicate', [verifyToken, isAdmin], scheduleController.duplicateSchedule);
-
-// Удаление расписания
+router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
 router.delete('/:scheduleId', [verifyToken, isAdmin], scheduleController.deleteSchedule);
 
-// Статистика по расписаниям
-router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getScheduleStats);
+// Получить детали расписания - САМЫЙ ПОСЛЕДНИЙ
+router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
 
 module.exports = router;
