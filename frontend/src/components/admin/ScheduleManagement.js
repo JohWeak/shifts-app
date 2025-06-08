@@ -607,6 +607,16 @@ const ScheduleManagement = () => {
                                                                     <i className="bi bi-eye"></i>
                                                                 </Button>
 
+                                                                <Button
+                                                                    variant="primary"
+                                                                    size="sm"
+                                                                    onClick={() => window.location.href = `/admin/schedule/${schedule.id}/edit`}
+                                                                    className="d-flex align-items-center"
+                                                                    title="Edit Schedule"
+                                                                >
+                                                                    <i className="bi bi-pencil"></i>
+                                                                </Button>
+
                                                                 {schedule.status === 'draft' && (
                                                                     <Button
                                                                         variant="outline-success"

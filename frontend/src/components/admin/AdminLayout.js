@@ -43,7 +43,7 @@ const AdminLayout = ({ children }) => {
             key: 'dashboard',
             label: 'Dashboard',
             icon: 'speedometer2',
-            path: '/admin/dashboard',
+            path: '/admin',
             badge: null
         },
         {

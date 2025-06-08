@@ -1,52 +1,60 @@
-// frontend/src/App.js - ОБНОВЛЕННАЯ ВЕРСИЯ
+// frontend/src/App.js - PROFESSIONAL VERSION
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 
-// Import components
+// Authentication
 import Login from './components/auth/LoginPage';
+
+// Employee Components
 import EmployeeDashboard from './components/employee/Dashboard';
 
-// Admin components
+// Admin Components
+import AdminDashboard from './components/admin/Dashboard';
 import ScheduleManagement from './components/admin/ScheduleManagement';
-import Dashboard from './components/admin/Dashboard'; // Старый дашборд переименуем
+import ScheduleDetailsEditor from './components/admin/ScheduleDetailsEditor';
 import AlgorithmSettings from './components/admin/AlgorithmSettings';
 import EmployeeManagement from './components/admin/EmployeeManagement';
 import SystemSettings from './components/admin/SystemSettings';
 import Reports from './components/admin/Reports';
 
-// Protected route component
+/**
+ * Protected Route Wrapper
+ * Handles authentication and role-based access control
+ */
 const ProtectedRoute = ({ children, allowedRole }) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isAuthenticated = !!localStorage.getItem('token');
 
+    // Redirect to login if not authenticated
     if (!isAuthenticated) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
 
+    // Role-based redirection
     if (allowedRole && user?.role !== allowedRole) {
-        // Redirect to appropriate dashboard based on role
-        if (user?.role === 'admin') {
-            return <Navigate to="/admin/schedules" />; // ✅ Админ идет сразу на расписания
-        } else {
-            return <Navigate to="/employee/dashboard" />;
-        }
+        const redirectPath = user?.role === 'admin' ? '/admin' : '/employee/dashboard';
+        return <Navigate to={redirectPath} replace />;
     }
 
     return children;
 };
 
+/**
+ * Main Application Component
+ * Defines routing structure and authentication flow
+ */
 function App() {
     return (
         <Provider store={store}>
             <Router>
                 <div className="app">
                     <Routes>
-                        {/* Public routes */}
+                        {/* Public Routes */}
                         <Route path="/login" element={<Login />} />
 
-                        {/* Employee routes */}
+                        {/* Employee Routes */}
                         <Route
                             path="/employee/dashboard"
                             element={
@@ -56,15 +64,16 @@ function App() {
                             }
                         />
 
-                        {/* Admin routes */}
+                        {/* Admin Routes */}
                         <Route
-                            path="/admin/dashboard"
+                            path="/admin"
                             element={
                                 <ProtectedRoute allowedRole="admin">
-                                    <Dashboard />
+                                    <AdminDashboard />
                                 </ProtectedRoute>
                             }
                         />
+
                         <Route
                             path="/admin/schedules"
                             element={
@@ -73,6 +82,16 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
+
+                        <Route
+                            path="/admin/schedule/:scheduleId/edit"
+                            element={
+                                <ProtectedRoute allowedRole="admin">
+                                    <ScheduleDetailsEditor />
+                                </ProtectedRoute>
+                            }
+                        />
+
                         <Route
                             path="/admin/algorithms"
                             element={
@@ -81,6 +100,7 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
+
                         <Route
                             path="/admin/employees"
                             element={
@@ -89,6 +109,7 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
+
                         <Route
                             path="/admin/settings"
                             element={
@@ -97,6 +118,7 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
+
                         <Route
                             path="/admin/reports"
                             element={
@@ -106,9 +128,11 @@ function App() {
                             }
                         />
 
-                        {/* Default redirects */}
-                        <Route path="/admin" element={<Navigate to="/admin/schedules" />} />
-                        <Route path="/" element={<Navigate to="/login" />} />
+                        {/* Default Redirects */}
+                        <Route path="/" element={<Navigate to="/login" replace />} />
+
+                        {/* Fallback for unmatched routes */}
+                        <Route path="*" element={<Navigate to="/login" replace />} />
                     </Routes>
                 </div>
             </Router>

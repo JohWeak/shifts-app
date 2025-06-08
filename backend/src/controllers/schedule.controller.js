@@ -1,5 +1,5 @@
 // backend/src/controllers/schedule.controller.js - Production version
-const { Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite } = require('../models/associations');
+const { Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite, EmployeePreference } = require('../models/associations');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -731,35 +731,96 @@ exports.getScheduleDetails = async (req, res) => {
             order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
         });
 
-        // Группировать назначения по дням
-        const assignmentsByDate = {};
-        assignments.forEach(assignment => {
-            console.log('Processing assignment:', assignment);
-            console.log('Type of work_date:', typeof assignment.work_date);
-            console.log('Value of work_date:', assignment.work_date);
-            const date = dayjs(assignment.work_date).format('YYYY-MM-DD');
-            if (!assignmentsByDate[date]) {
-                assignmentsByDate[date] = [];
+        // Получить все позиции для данного сайта
+        const allPositions = await Position.findAll({
+            where: { site_id: schedule.site_id },
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name']
+            }]
+        });
+
+        // Получить все смены
+        const allShifts = await Shift.findAll({
+            order: [['start_time', 'ASC']]
+        });
+
+        // Получить всех активных сотрудников для данного сайта
+        const allEmployees = await Employee.findAll({
+            where: { status: 'active' },
+            attributes: ['emp_id', 'first_name', 'last_name', 'email']
+        });
+
+        // Создать матрицу расписания
+        const scheduleMatrix = {};
+
+        allPositions.forEach(position => {
+            scheduleMatrix[position.pos_id] = {
+                position: {
+                    id: position.pos_id,
+                    name: position.pos_name,
+                    profession: position.profession,
+                    num_of_emp: position.num_of_emp,
+                    num_of_shifts: position.num_of_shifts
+                },
+                schedule: {}
+            };
+
+            // Создать структуру для каждого дня недели
+            for (let i = 0; i < 7; i++) {
+                const date = dayjs(schedule.start_date).add(i, 'day').format('YYYY-MM-DD');
+                scheduleMatrix[position.pos_id].schedule[date] = {};
+
+                // Создать ячейки для каждой смены
+                allShifts.forEach(shift => {
+                    scheduleMatrix[position.pos_id].schedule[date][shift.shift_id] = {
+                        shift_info: {
+                            id: shift.shift_id,
+                            name: shift.shift_name,
+                            start_time: shift.start_time,
+                            duration: shift.duration,
+                            shift_type: shift.shift_type
+                        },
+                        assignments: []
+                    };
+                });
             }
-            assignmentsByDate[date].push({
-                id: assignment.id,
-                employee: assignment.employee,
-                shift: assignment.shift,
-                position: assignment.position,
-                status: assignment.status,
-                notes: assignment.notes
-            });
+        });
+
+        // Заполнить матрицу существующими назначениями
+        assignments.forEach(assignment => {
+            const date = dayjs(assignment.work_date).format('YYYY-MM-DD');
+            const posId = assignment.position.pos_id;
+            const shiftId = assignment.shift.shift_id;
+
+            if (scheduleMatrix[posId] && scheduleMatrix[posId].schedule[date] &&
+                scheduleMatrix[posId].schedule[date][shiftId]) {
+                scheduleMatrix[posId].schedule[date][shiftId].assignments.push({
+                    id: assignment.id,
+                    employee: {
+                        emp_id: assignment.employee.emp_id,
+                        name: `${assignment.employee.first_name} ${assignment.employee.last_name}`
+                    },
+                    status: assignment.status,
+                    notes: assignment.notes
+                });
+            }
         });
 
         // Статистика
         const stats = {
             total_assignments: assignments.length,
             employees_used: [...new Set(assignments.map(a => a.emp_id))].length,
-            coverage_by_day: Object.keys(assignmentsByDate).reduce((acc, date) => {
-                acc[date] = assignmentsByDate[date].length;
-                return acc;
-            }, {})
+            coverage_by_day: {}
         };
+
+        // Подсчитать покрытие по дням
+        for (let i = 0; i < 7; i++) {
+            const date = dayjs(schedule.start_date).add(i, 'day').format('YYYY-MM-DD');
+            const dayAssignments = assignments.filter(a => dayjs(a.work_date).format('YYYY-MM-DD') === date);
+            stats.coverage_by_day[date] = dayAssignments.length;
+        }
 
         res.json({
             success: true,
@@ -773,7 +834,9 @@ exports.getScheduleDetails = async (req, res) => {
                     created_at: schedule.createdAt,
                     metadata: schedule.text_file ? JSON.parse(schedule.text_file) : null
                 },
-                assignments_by_date: assignmentsByDate,
+                schedule_matrix: scheduleMatrix,
+                all_employees: allEmployees,
+                all_shifts: allShifts,
                 statistics: stats
             }
         });
@@ -1291,3 +1354,144 @@ function selectBestResult(comparison) {
 
     return best;
 }
+
+exports.getRecommendedEmployees = async (req, res) => {
+    try {
+        const { scheduleId, date, shiftId, positionId } = req.query;
+
+        // Получить расписание и его параметры
+        const schedule = await Schedule.findByPk(scheduleId, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite'
+            }]
+        });
+
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+
+        // Получить всех активных сотрудников
+        const employees = await Employee.findAll({
+            where: { status: 'active' },
+            attributes: ['emp_id', 'first_name', 'last_name', 'email']
+        });
+
+        // Получить preferences для данной даты
+        const preferences = await EmployeePreference.findAll({
+            where: {
+                emp_id: { [Op.in]: employees.map(e => e.emp_id) },
+                [Op.or]: [
+                    {
+                        preference_type: 'specific_date',
+                        start_date: date
+                    },
+                    {
+                        preference_type: 'day_of_week',
+                        day_of_week: dayjs(date).day()
+                    }
+                ],
+                status: 'active'
+            }
+        });
+
+        // Получить существующие назначения на эту дату
+        const existingAssignments = await ScheduleAssignment.findAll({
+            where: {
+                schedule_id: scheduleId,
+                work_date: date
+            },
+            include: [{
+                model: Shift,
+                as: 'shift',
+                attributes: ['shift_id', 'start_time', 'duration']
+            }]
+        });
+
+        // Получить информацию о целевой смене
+        const targetShift = await Shift.findByPk(shiftId);
+
+        // Проанализировать каждого сотрудника
+        const employeeRecommendations = employees.map(employee => {
+            const empPreferences = preferences.filter(p => p.emp_id === employee.emp_id);
+            const empAssignments = existingAssignments.filter(a => a.emp_id === employee.emp_id);
+
+            // Определить статус доступности
+            let availabilityStatus = 'available';
+            let reason = '';
+            let priority = 1; // 0 = preferred, 1 = neutral, 2 = cannot_work, 3 = violates_constraints
+
+            // Проверить preferences
+            const relevantPreference = empPreferences.find(p =>
+                (p.preference_type === 'specific_date') ||
+                (p.preference_type === 'day_of_week')
+            );
+
+            if (relevantPreference) {
+                if (relevantPreference.preference === 'prefer_work') {
+                    priority = 0;
+                    availabilityStatus = 'preferred';
+                } else if (relevantPreference.preference === 'cannot_work') {
+                    priority = 2;
+                    availabilityStatus = 'cannot_work';
+                    reason = 'Employee marked as unavailable';
+                }
+            }
+
+            // Проверить конфликты с существующими назначениями (упрощенная проверка)
+            const hasConflict = empAssignments.length > 0; // Если уже назначен в этот день
+
+            if (hasConflict) {
+                priority = 3;
+                availabilityStatus = 'conflict';
+                reason = 'Already assigned on this date';
+            }
+
+            return {
+                emp_id: employee.emp_id,
+                name: `${employee.first_name} ${employee.last_name}`,
+                email: employee.email,
+                availability_status: availabilityStatus,
+                priority: priority,
+                reason: reason,
+                preferences: empPreferences.map(p => ({
+                    type: p.preference,
+                    period: p.preference_type
+                }))
+            };
+        });
+
+        // Сортировать по приоритету
+        const sortedEmployees = employeeRecommendations.sort((a, b) => a.priority - b.priority);
+
+        // Группировать по статусу
+        const groupedEmployees = {
+            preferred: sortedEmployees.filter(e => e.availability_status === 'preferred'),
+            available: sortedEmployees.filter(e => e.availability_status === 'available'),
+            cannot_work: sortedEmployees.filter(e => e.availability_status === 'cannot_work'),
+            violates_constraints: sortedEmployees.filter(e => e.availability_status === 'conflict')
+        };
+
+        res.json({
+            success: true,
+            data: {
+                date: date,
+                shift_id: shiftId,
+                position_id: positionId,
+                recommendations: groupedEmployees,
+                total_employees: employees.length
+            }
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error getting recommended employees:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error getting employee recommendations',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};

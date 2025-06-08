@@ -1,4 +1,5 @@
-// backend/src/routes/schedule.routes.js - ИСПРАВЛЕННЫЙ ПОРЯДОК РОУТОВ
+// backend/src/routes/schedule.routes.js - ЗАМЕНИТЬ ВЕСЬ ФАЙЛ
+
 const express = require('express');
 const scheduleController = require('../controllers/schedule.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
@@ -19,6 +20,9 @@ router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.co
 
 // Получить все расписания - ПЕРЕД /:scheduleId
 router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
+
+// Рекомендации сотрудников - ПЕРЕД /:scheduleId
+router.get('/recommendations/employees', [verifyToken, isAdmin], scheduleController.getRecommendedEmployees);
 
 // Действия с конкретным расписанием - scheduleId роуты ПОСЛЕ всех остальных
 router.get('/:scheduleId/export', [verifyToken, isAdmin], scheduleController.exportSchedule);

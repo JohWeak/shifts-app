@@ -123,7 +123,7 @@ const Dashboard = () => {
                                         <Button
                                             variant="primary"
                                             className="w-100 d-flex align-items-center justify-content-center"
-                                            onClick={() => navigate('/admin/schedules')}
+                                            onClick={() => navigate('/admin/schedules/list')}
                                         >
                                             <i className="bi bi-calendar-week me-2"></i>
                                             Manage Schedules

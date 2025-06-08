@@ -42,7 +42,7 @@ const EmployeeDashboard = () => {
 
             // Redirect if user is admin
             if (parsedUser.role === 'admin') {
-                navigate('/admin/dashboard');
+                navigate('/admin');
             }
         } else {
             navigate('/login');

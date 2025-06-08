@@ -1,0 +1,53 @@
+/* frontend/src/components/admin/ScheduleDetailsEditor.css */
+.schedule-editor {
+    direction: rtl;
+    padding: 1rem;
+}
+
+.schedule-table {
+    font-size: 0.9rem;
+}
+
+.schedule-cell {
+    min-height: 60px;
+    vertical-align: middle;
+    padding: 8px;
+    transition: background-color 0.2s;
+}
+
+.schedule-cell:hover {
+    background-color: #f8f9fa !important;
+}
+
+.empty-cell {
+    background-color: #fff3cd;
+    border: 2px dashed #ffc107;
+}
+
+.understaffed-cell {
+    background-color: #f8d7da;
+    border: 2px solid #dc3545;
+}
+
+.employee-assignment {
+    margin-bottom: 4px;
+    padding: 2px 4px;
+    background-color: rgba(13, 110, 253, 0.1);
+    border-radius: 3px;
+}
+
+.shift-morning {
+    background-color: #fff3cd !important;
+}
+
+.shift-day {
+    background-color: #d1ecf1 !important;
+}
+
+.shift-night {
+    background-color: #cce5ff !important;
+}
+
+.table-dark th {
+    border-color: #495057 !important;
+}
