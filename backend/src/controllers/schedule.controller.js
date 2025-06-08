@@ -737,7 +737,7 @@ exports.getScheduleDetails = async (req, res) => {
             console.log('Processing assignment:', assignment);
             console.log('Type of work_date:', typeof assignment.work_date);
             console.log('Value of work_date:', assignment.work_date);
-            const date = assignment.work_date.toISOString().split('T')[0];
+            const date = dayjs(assignment.work_date).format('YYYY-MM-DD');
             if (!assignmentsByDate[date]) {
                 assignmentsByDate[date] = [];
             }
