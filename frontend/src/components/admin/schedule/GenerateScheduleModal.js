@@ -1,7 +1,7 @@
 // frontend/src/components/admin/schedule/GenerateScheduleModal.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, ProgressBar } from 'react-bootstrap';
-import { MESSAGES } from '../../../i18n/messages';
+import { useMessages } from '../../../i18n/messages';
 import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from '../../../constants/scheduleConstants';
 import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
 import AlertMessage from '../common/AlertMessage';
@@ -14,6 +14,7 @@ const GenerateScheduleModal = ({
                                    onGenerate,
                                    generating = false
                                }) => {
+    const messages = useMessages('en');
     const [settings, setSettings] = useState(DEFAULT_GENERATION_SETTINGS);
     const [workSites, setWorkSites] = useState([]);
     const [modalAlert, setModalAlert] = useState(null);
@@ -54,7 +55,7 @@ const GenerateScheduleModal = ({
         } catch (err) {
             setModalAlert({
                 type: 'warning',
-                message: MESSAGES.COULD_NOT_LOAD_WORK_SITES
+                message: messages.COULD_NOT_LOAD_WORK_SITES
             });
         }
     };
@@ -68,7 +69,7 @@ const GenerateScheduleModal = ({
         if (!isValid && e.target.value) {
             setModalAlert({
                 type: 'warning',
-                message: MESSAGES.WEEK_START_SUNDAY_WARNING
+                message: messages.WEEK_START_SUNDAY_WARNING
             });
         }
 
@@ -105,7 +106,7 @@ const GenerateScheduleModal = ({
             <Modal.Header closeButton={!generating}>
                 <Modal.Title>
                     <i className="bi bi-plus-circle me-2"></i>
-                    {MESSAGES.GENERATE_SCHEDULE}
+                    {messages.GENERATE_SCHEDULE}
                 </Modal.Title>
             </Modal.Header>
 
@@ -116,7 +117,7 @@ const GenerateScheduleModal = ({
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-semibold">
                                     <i className="bi bi-calendar me-2"></i>
-                                    {MESSAGES.WEEK_START_DATE}
+                                    {messages.WEEK_START_DATE}
                                 </Form.Label>
                                 <Form.Control
                                     type="date"
@@ -126,7 +127,7 @@ const GenerateScheduleModal = ({
                                     className={!isValidWeekStart && settings.weekStart ? 'is-invalid' : ''}
                                 />
                                 <Form.Text className="text-muted">
-                                    {MESSAGES.FUTURE_DATES_ONLY}
+                                    {messages.FUTURE_DATES_ONLY}
                                 </Form.Text>
                             </Form.Group>
                         </Col>
@@ -135,10 +136,10 @@ const GenerateScheduleModal = ({
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-semibold">
                                     <i className="bi bi-building me-2"></i>
-                                    {MESSAGES.WORK_SITE}
+                                    {messages.WORK_SITE}
                                 </Form.Label>
                                 {api.loading ? (
-                                    <LoadingSpinner message={MESSAGES.LOADING_WORK_SITES} className="py-2" />
+                                    <LoadingSpinner message={messages.LOADING_WORK_SITES} className="py-2" />
                                 ) : (
                                     <Form.Select
                                         value={settings.site_id}
@@ -148,7 +149,7 @@ const GenerateScheduleModal = ({
                                         }))}
                                     >
                                         {workSites.length === 0 ? (
-                                            <option value="">{MESSAGES.NO_WORK_SITES}</option>
+                                            <option value="">{messages.NO_WORK_SITES}</option>
                                         ) : (
                                             workSites.map(site => (
                                                 <option key={site.site_id} value={site.site_id}>
@@ -159,7 +160,7 @@ const GenerateScheduleModal = ({
                                     </Form.Select>
                                 )}
                                 <Form.Text className="text-muted">
-                                    {MESSAGES.SELECT_WORK_SITE}
+                                    {messages.SELECT_WORK_SITE}
                                 </Form.Text>
                             </Form.Group>
                         </Col>
@@ -168,7 +169,7 @@ const GenerateScheduleModal = ({
                     <Form.Group className="mb-3">
                         <Form.Label className="fw-semibold">
                             <i className="bi bi-cpu me-2"></i>
-                            {MESSAGES.ALGORITHM}
+                            {messages.ALGORITHM}
                         </Form.Label>
                         <Form.Select
                             value={settings.algorithm}
@@ -178,17 +179,17 @@ const GenerateScheduleModal = ({
                             }))}
                         >
                             <option value={ALGORITHM_TYPES.AUTO}>
-                                {MESSAGES.ALGORITHM_AUTO_DESC}
+                                {messages.ALGORITHM_AUTO_DESC}
                             </option>
                             <option value={ALGORITHM_TYPES.CP_SAT}>
-                                {MESSAGES.ALGORITHM_CP_SAT_DESC}
+                                {messages.ALGORITHM_CP_SAT_DESC}
                             </option>
                             <option value={ALGORITHM_TYPES.SIMPLE}>
-                                {MESSAGES.ALGORITHM_SIMPLE_DESC}
+                                {messages.ALGORITHM_SIMPLE_DESC}
                             </option>
                         </Form.Select>
                         <Form.Text className="text-muted">
-                            {MESSAGES.ALGORITHM_HELP}
+                            {messages.ALGORITHM_HELP}
                         </Form.Text>
                     </Form.Group>
                 </Form>
@@ -204,7 +205,7 @@ const GenerateScheduleModal = ({
                     <div className="mt-4">
                         <div className="d-flex align-items-center mb-2">
                             <div className="spinner-border spinner-border-sm me-2" role="status" />
-                            <span>{MESSAGES.GENERATION_IN_PROGRESS}</span>
+                            <span>{messages.GENERATION_IN_PROGRESS}</span>
                         </div>
                         <ProgressBar
                             animated
@@ -215,7 +216,7 @@ const GenerateScheduleModal = ({
                         <div className="alert alert-info mb-0">
                             <small>
                                 <i className="bi bi-info-circle me-1"></i>
-                                {MESSAGES.GENERATION_INFO}
+                                {messages.GENERATION_INFO}
                             </small>
                         </div>
                     </div>
@@ -229,7 +230,7 @@ const GenerateScheduleModal = ({
                         onClick={handleClose}
                         disabled={generating}
                     >
-                        {MESSAGES.CANCEL}
+                        {messages.CANCEL}
                     </Button>
 
                     <Button
@@ -240,12 +241,12 @@ const GenerateScheduleModal = ({
                         {generating ? (
                             <>
                                 <div className="spinner-border spinner-border-sm me-2" role="status" />
-                                {MESSAGES.GENERATING}
+                                {messages.GENERATING}
                             </>
                         ) : (
                             <>
                                 <i className="bi bi-play-fill me-2"></i>
-                                {MESSAGES.GENERATE_SCHEDULE}
+                                {messages.GENERATE_SCHEDULE}
                             </>
                         )}
                     </Button>
@@ -257,14 +258,14 @@ const GenerateScheduleModal = ({
                         {!isValidWeekStart && settings.weekStart && (
                             <small className="text-danger d-block">
                                 <i className="bi bi-exclamation-circle me-1"></i>
-                                {MESSAGES.SELECT_SUNDAY_TO_ENABLE}
+                                {messages.SELECT_SUNDAY_TO_ENABLE}
                             </small>
                         )}
 
                         {workSites.length === 0 && !api.loading && (
                             <small className="text-danger d-block">
                                 <i className="bi bi-exclamation-triangle me-1"></i>
-                                {MESSAGES.NO_WORK_SITES_AVAILABLE}
+                                {messages.NO_WORK_SITES_AVAILABLE}
                             </small>
                         )}
                     </div>

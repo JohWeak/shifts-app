@@ -1,7 +1,7 @@
 // frontend/src/components/admin/schedule/PositionScheduleEditor.js
 import React from 'react';
 import { Table, Badge, Button, Spinner } from 'react-bootstrap';
-import { MESSAGES, interpolateMessage } from '../../../i18n/messages';
+import {interpolateMessage, useMessages} from '../../../i18n/messages';
 
 const PositionScheduleEditor = ({
                                     positionId,
@@ -17,6 +17,7 @@ const PositionScheduleEditor = ({
                                     onRemovePendingChange,
                                     readOnly = false
                                 }) => {
+    const messages = useMessages('en');
     const hasPendingChanges = Object.values(pendingChanges).some(
         change => change.positionId === positionId
     );
@@ -102,7 +103,7 @@ const PositionScheduleEditor = ({
                                     {change.empName}
                                 </span>
                                 <Badge bg="success" size="sm" className="me-1">
-                                    {MESSAGES.NEW}
+                                    {messages.NEW}
                                 </Badge>
                                 {isEditing && (
                                     <Button
@@ -125,7 +126,7 @@ const PositionScheduleEditor = ({
                     {/* Add employee button */}
                     {isEditing && isEmpty && (
                         <div className="text-muted">
-                            <i className="bi bi-plus-circle"></i> {MESSAGES.ADD_EMPLOYEE}
+                            <i className="bi bi-plus-circle"></i> {messages.ADD_EMPLOYEE}
                         </div>
                     )}
 
@@ -133,7 +134,7 @@ const PositionScheduleEditor = ({
                     {isEditing && isUnderstaffed && !isEmpty && (
                         <div className="text-warning">
                             <small>
-                                {interpolateMessage(MESSAGES.NEED_MORE_EMPLOYEES, {
+                                {interpolateMessage(messages.NEED_MORE_EMPLOYEES, {
                                     count: positionData.position.num_of_emp - totalAssignments
                                 })}
                             </small>
@@ -153,7 +154,7 @@ const PositionScheduleEditor = ({
                         {positionData.position.name} - {positionData.position.profession}
                         {hasPendingChanges && (
                             <Badge bg="warning" className="ms-2">
-                                {MESSAGES.UNSAVED_CHANGES}
+                                {messages.UNSAVED_CHANGES}
                             </Badge>
                         )}
                         {readOnly && (
@@ -164,7 +165,7 @@ const PositionScheduleEditor = ({
                         )}
                     </h6>
                     <small className="text-muted">
-                        {interpolateMessage(MESSAGES.REQUIRED_EMPLOYEES, {
+                        {interpolateMessage(messages.REQUIRED_EMPLOYEES, {
                             count: positionData.position.num_of_emp
                         })}
                     </small>
@@ -179,7 +180,7 @@ const PositionScheduleEditor = ({
                                 disabled={savingChanges}
                             >
                                 <i className="bi bi-pencil me-1"></i>
-                                {MESSAGES.EDIT}
+                                {messages.EDIT}
                             </Button>
                         ) : (
                             <>
@@ -197,7 +198,7 @@ const PositionScheduleEditor = ({
                                     ) : (
                                         <>
                                             <i className="bi bi-check me-1"></i>
-                                            {MESSAGES.SAVE}
+                                            {messages.SAVE}
                                         </>
                                     )}
                                 </Button>
@@ -207,7 +208,7 @@ const PositionScheduleEditor = ({
                                     onClick={() => onToggleEdit(positionId)}
                                     disabled={savingChanges}
                                 >
-                                    {MESSAGES.CANCEL}
+                                    {messages.CANCEL}
                                 </Button>
                             </>
                         )
@@ -220,13 +221,13 @@ const PositionScheduleEditor = ({
                 <thead>
                 <tr>
                     <th className="shift-header">Shift</th>
-                    <th>{MESSAGES.SUNDAY}</th>
-                    <th>{MESSAGES.MONDAY}</th>
-                    <th>{MESSAGES.TUESDAY}</th>
-                    <th>{MESSAGES.WEDNESDAY}</th>
-                    <th>{MESSAGES.THURSDAY}</th>
-                    <th>{MESSAGES.FRIDAY}</th>
-                    <th>{MESSAGES.SATURDAY}</th>
+                    <th>{messages.SUNDAY}</th>
+                    <th>{messages.MONDAY}</th>
+                    <th>{messages.TUESDAY}</th>
+                    <th>{messages.WEDNESDAY}</th>
+                    <th>{messages.THURSDAY}</th>
+                    <th>{messages.FRIDAY}</th>
+                    <th>{messages.SATURDAY}</th>
                 </tr>
                 </thead>
                 <tbody>

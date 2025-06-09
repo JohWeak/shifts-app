@@ -25,7 +25,7 @@ const ScheduleDetailsView = ({
     const [exportMessage, setExportMessage] = useState(null);
 
     const api = useScheduleAPI();
-    const messages = useMessages('ru'); // Using Russian messages
+    const messages = useMessages('en');
 
     if (!scheduleDetails) return null;
 
@@ -119,19 +119,19 @@ const ScheduleDetailsView = ({
                     <Row>
                         <Col md={8}>
                             <h5>
-                                {messages.SCHEDULE_WEEK}: {new Date(scheduleDetails.schedule.start_date).toLocaleDateString()} - {' '}
+                                {messages.WEEK}: {new Date(scheduleDetails.schedule.start_date).toLocaleDateString()} - {' '}
                                 {new Date(scheduleDetails.schedule.end_date).toLocaleDateString()}
                             </h5>
                             <p className="text-muted mb-0">
-                                {messages.SCHEDULE_SITE}: {scheduleDetails.schedule.work_site?.site_name || 'Unknown'} | {' '}
-                                {messages.SCHEDULE_STATUS}: <Badge bg={getStatusBadgeVariant(scheduleDetails.schedule.status)}>
+                                {messages.SITE}: {scheduleDetails.schedule.work_site?.site_name || 'Unknown'} | {' '}
+                                {messages.STATUS}: <Badge bg={getStatusBadgeVariant(scheduleDetails.schedule.status)}>
                                 <i className={`bi bi-${scheduleDetails.schedule.status === SCHEDULE_STATUS.PUBLISHED ? 'check-circle' : 'clock'} me-1`}></i>
                                 {getStatusText(scheduleDetails.schedule.status)}
                             </Badge>
                                 {scheduleDetails.schedule.status === SCHEDULE_STATUS.PUBLISHED && (
                                     <small className="text-success ms-2">
                                         <i className="bi bi-eye me-1"></i>
-                                        {messages.VISIBLE_TO_EMPLOYEES}
+                                        Visible to employees
                                     </small>
                                 )}
                             </p>
@@ -178,7 +178,7 @@ const ScheduleDetailsView = ({
                                         disabled={api.loading || Object.keys(pendingChanges).length > 0}
                                     >
                                         <i className="bi bi-check-circle me-1"></i>
-                                        {messages.PUBLISH_SCHEDULE}
+                                        {messages.PUBLISH}
                                     </Button>
                                 ) : (
                                     <Button
@@ -188,7 +188,7 @@ const ScheduleDetailsView = ({
                                         disabled={api.loading}
                                     >
                                         <i className="bi bi-pencil me-1"></i>
-                                        {messages.UNPUBLISH_EDIT}
+                                        {messages.UNPUBLISH}
                                     </Button>
                                 )}
                             </div>
@@ -198,7 +198,7 @@ const ScheduleDetailsView = ({
                                 <div className="mt-2">
                                     <small className="text-warning">
                                         <i className="bi bi-exclamation-triangle me-1"></i>
-                                        {messages.SAVE_BEFORE_PUBLISH}
+                                        Save all changes before publishing
                                     </small>
                                 </div>
                             )}
@@ -213,7 +213,7 @@ const ScheduleDetailsView = ({
                     <h6 className="mb-0">{messages.POSITION_SCHEDULES}</h6>
                     {Object.keys(pendingChanges).length > 0 && (
                         <Badge bg="warning">
-                            {Object.keys(pendingChanges).length} несохраненных изменений
+                            {Object.keys(pendingChanges).length} pending changes
                         </Badge>
                     )}
                 </Card.Header>
@@ -253,9 +253,9 @@ const ScheduleDetailsView = ({
                 show={showPublishModal}
                 onHide={() => setShowPublishModal(false)}
                 onConfirm={handlePublish}
-                title="Опубликовать расписание"
+                title="Publish Schedule"
                 message={messages.CONFIRM_PUBLISH}
-                confirmText={messages.PUBLISH_SCHEDULE}
+                confirmText={messages.PUBLISH}
                 confirmVariant="success"
                 isLoading={api.loading}
             />
@@ -264,9 +264,9 @@ const ScheduleDetailsView = ({
                 show={showUnpublishModal}
                 onHide={() => setShowUnpublishModal(false)}
                 onConfirm={handleUnpublish}
-                title="Снять с публикации"
-                message={messages.CONFIRM_UNPUBLISH}
-                confirmText={messages.UNPUBLISH_EDIT}
+                title="Unpublish Schedule"
+                message="Are you sure you want to unpublish this schedule?"
+                confirmText={messages.UNPUBLISH}
                 confirmVariant="warning"
                 isLoading={api.loading}
             />

@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Container, Button, Tabs, Tab } from 'react-bootstrap';
 import AdminLayout from './AdminLayout';
-import { MESSAGES } from '../../i18n/messages';
+import { useMessages } from '../../i18n/messages';
 
 // Custom Hooks
 import useScheduleState from '../../hooks/useScheduleState';
@@ -30,6 +30,9 @@ import './ScheduleManagement.css';
  * Orchestrates the entire schedule management workflow
  */
 const ScheduleManagement = () => {
+    // Get messages for internationalization
+    const messages = useMessages('en');
+
     // Initialize state and operations
     const state = useScheduleState();
     const operations = useScheduleOperations(state);
@@ -75,6 +78,7 @@ const ScheduleManagement = () => {
                 <Container fluid className="px-0">
                     {/* Page Header */}
                     <ScheduleHeader
+                        messages={messages}
                         onGenerateClick={() => state.setShowGenerateModal(true)}
                         onCompareClick={() => operations.handleCompareAlgorithms()}
                         generating={state.generating}
@@ -93,7 +97,7 @@ const ScheduleManagement = () => {
                         onSelect={(k) => state.setActiveTab(k)}
                         className="mb-4"
                     >
-                        <Tab eventKey="overview" title={MESSAGES.SCHEDULE_OVERVIEW}>
+                        <Tab eventKey="overview" title={messages.SCHEDULES || 'Schedules'}>
                             <ScheduleOverviewTable
                                 schedules={state.schedules}
                                 loading={operations.apiLoading}
@@ -104,7 +108,7 @@ const ScheduleManagement = () => {
 
                         <Tab
                             eventKey="view"
-                            title={MESSAGES.SCHEDULE_DETAILS}
+                            title={messages.SCHEDULE_DETAILS || 'Schedule Details'}
                             disabled={!state.selectedSchedule}
                         >
                             <ScheduleDetailsView
@@ -139,14 +143,16 @@ const ScheduleManagement = () => {
  * Schedule Header Component
  * Separated for better organization
  */
-const ScheduleHeader = ({ onGenerateClick, onCompareClick, generating, comparing }) => (
+const ScheduleHeader = ({ messages, onGenerateClick, onCompareClick, generating, comparing }) => (
     <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
         <div className="mb-3 mb-md-0">
             <h1 className="h3 mb-2 text-dark fw-bold">
                 <i className="bi bi-calendar-week me-2 text-primary"></i>
-                {MESSAGES.SCHEDULE_MANAGEMENT}
+                {messages.SCHEDULE_MANAGEMENT || 'Schedule Management'}
             </h1>
-            <p className="text-muted mb-0">{MESSAGES.CREATE_MANAGE_SCHEDULES}</p>
+            <p className="text-muted mb-0">
+                {messages.CREATE_MANAGE_SCHEDULES || 'Create and manage work schedules'}
+            </p>
         </div>
         <div className="d-flex flex-column flex-sm-row gap-2">
             <Button
@@ -158,12 +164,12 @@ const ScheduleHeader = ({ onGenerateClick, onCompareClick, generating, comparing
                 {comparing ? (
                     <>
                         <div className="spinner-border spinner-border-sm me-2" role="status" />
-                        Comparing...
+                        {messages.COMPARING || 'Comparing...'}
                     </>
                 ) : (
                     <>
                         <i className="bi bi-speedometer2 me-2"></i>
-                        {MESSAGES.COMPARE_ALGORITHMS}
+                        {messages.COMPARE_ALGORITHMS || 'Compare Algorithms'}
                     </>
                 )}
             </Button>
@@ -174,7 +180,7 @@ const ScheduleHeader = ({ onGenerateClick, onCompareClick, generating, comparing
                 className="d-flex align-items-center justify-content-center"
             >
                 <i className="bi bi-plus-circle me-2"></i>
-                {MESSAGES.GENERATE_SCHEDULE}
+                {messages.GENERATE_SCHEDULE || 'Generate Schedule'}
             </Button>
         </div>
     </div>

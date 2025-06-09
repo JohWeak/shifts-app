@@ -1,156 +1,157 @@
-// frontend/src/components/admin/schedule/EmployeeSelectionModal.js
+// frontend/src/components/admin/schedule/CompareAlgorithmsModal.js
 import React from 'react';
-import { Modal, Button, Spinner, Badge } from 'react-bootstrap';
-import { MESSAGES } from '../../../i18n/messages';
+import { Modal, Button, Table, Badge, Alert } from 'react-bootstrap';
+import { useMessages } from '../../../i18n/messages';
 
-const EmployeeSelectionModal = ({
-                                    show,
-                                    onHide,
-                                    recommendations,
-                                    loading,
-                                    selectedCell,
-                                    onEmployeeSelect
-                                }) => {
-    if (!selectedCell) return null;
+const CompareAlgorithmsModal = ({ show, onHide, results, onUseAlgorithm }) => {
+    const messages = useMessages('en');
 
-    const handleEmployeeSelect = (empId, empName) => {
-        onEmployeeSelect(empId, empName);
-        onHide();
+    const getAlgorithmBadge = (algorithm) => {
+        const variants = {
+            'cp-sat': 'primary',
+            'simple': 'success',
+            'auto': 'info'
+        };
+        return <Badge bg={variants[algorithm] || 'secondary'}>{algorithm}</Badge>;
     };
 
-    const renderEmployeeSection = (title, employees, variant, buttonVariant, showOverride = false) => {
-        if (!employees || employees.length === 0) return null;
+    const formatExecutionTime = (time) => {
+        if (!time) return 'N/A';
+        return `${time}ms`;
+    };
 
-        return (
-            <>
-                <h6 className={`text-${variant}`}>
-                    {title} ({employees.length})
-                </h6>
-                <div className="mb-4 employee-list">
-                    {employees.map(emp => (
-                        <div key={emp.emp_id} className="employee-item">
-                            <div>
-                                <strong>{emp.first_name} {emp.last_name}</strong>
-                                <br/>
-                                <small className="text-muted">ID: {emp.emp_id}</small>
-                                {emp.constraint_reason && (
-                                    <>
-                                        <br/>
-                                        <small className="text-warning">{emp.constraint_reason}</small>
-                                    </>
-                                )}
-                            </div>
-                            <Button
-                                size="sm"
-                                variant={buttonVariant}
-                                onClick={() => handleEmployeeSelect(emp.emp_id, `${emp.first_name} ${emp.last_name}`)}
-                                disabled={!showOverride && variant === 'danger'}
-                            >
-                                {showOverride ? 'Override' : MESSAGES.SELECT}
-                            </Button>
-                        </div>
-                    ))}
-                </div>
-            </>
-        );
+    const formatCoverage = (assignments, total) => {
+        if (!total) return 'N/A';
+        const percentage = Math.round((assignments / total) * 100);
+        return `${percentage}%`;
+    };
+
+    const getBestAlgorithm = () => {
+        if (!results) return null;
+
+        // Simple logic to determine best algorithm
+        const algorithms = Object.keys(results).filter(key => key !== 'recommended');
+        if (algorithms.length === 0) return null;
+
+        // Find algorithm with highest assignment count and success
+        let best = algorithms[0];
+        let bestScore = 0;
+
+        algorithms.forEach(alg => {
+            const result = results[alg];
+            if (result.success) {
+                const score = result.assignments || 0;
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = alg;
+                }
+            }
+        });
+
+        return best;
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg">
+        <Modal show={show} onHide={onHide} size="xl">
             <Modal.Header closeButton>
                 <Modal.Title>
-                    <i className="bi bi-person-plus me-2"></i>
-                    Select Employee
+                    <i className="bi bi-speedometer2 me-2"></i>
+                    {messages.COMPARE_ALGORITHMS}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
-                {loading ? (
+                {!results ? (
                     <div className="text-center py-4">
-                        <Spinner animation="border" />
-                        <div className="mt-2">Loading recommendations...</div>
-                    </div>
-                ) : recommendations ? (
-                    <div>
-                        {/* Cell Information */}
-                        <div className="mb-4 p-3 bg-light rounded">
-                            <h6 className="mb-2">
-                                <i className="bi bi-info-circle me-2"></i>
-                                Assignment Details
-                            </h6>
-                            <div className="row">
-                                <div className="col-sm-4"><strong>Position:</strong></div>
-                                <div className="col-sm-8">{selectedCell.positionName || 'Position'}</div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-4"><strong>Date:</strong></div>
-                                <div className="col-sm-8">{new Date(selectedCell.date).toLocaleDateString()}</div>
-                            </div>
-                            <div className="row">
-                                <div className="col-sm-4"><strong>Shift:</strong></div>
-                                <div className="col-sm-8">{selectedCell.shiftName || 'Shift'}</div>
-                            </div>
-                        </div>
-
-                        {/* Available Employees */}
-                        {renderEmployeeSection(
-                            MESSAGES.AVAILABLE,
-                            recommendations.recommendations.available,
-                            'success',
-                            'outline-primary'
-                        )}
-
-                        {/* Preferred Employees */}
-                        {renderEmployeeSection(
-                            MESSAGES.PREFERRED,
-                            recommendations.recommendations.preferred,
-                            'primary',
-                            'primary'
-                        )}
-
-                        {/* Cannot Work */}
-                        {renderEmployeeSection(
-                            MESSAGES.CANNOT_WORK,
-                            recommendations.recommendations.cannot_work,
-                            'danger',
-                            'outline-danger'
-                        )}
-
-                        {/* Violates Constraints */}
-                        {renderEmployeeSection(
-                            MESSAGES.VIOLATES_CONSTRAINTS,
-                            recommendations.recommendations.violates_constraints,
-                            'warning',
-                            'outline-warning',
-                            true
-                        )}
-
-                        {/* No recommendations */}
-                        {(!recommendations.recommendations.available?.length &&
-                            !recommendations.recommendations.preferred?.length &&
-                            !recommendations.recommendations.cannot_work?.length &&
-                            !recommendations.recommendations.violates_constraints?.length) && (
-                            <div className="text-center py-4">
-                                <i className="bi bi-person-x display-4 text-muted"></i>
-                                <h5 className="mt-3">{MESSAGES.NO_RECOMMENDATIONS_AVAILABLE}</h5>
-                                <p className="text-muted">No employees found for this assignment.</p>
-                            </div>
-                        )}
+                        <div className="spinner-border mb-3" role="status"></div>
+                        <h5>{messages.COMPARING}</h5>
+                        <p className="text-muted">{messages.GENERATION_INFO}</p>
                     </div>
                 ) : (
-                    <div className="text-center py-4">
-                        <div>{MESSAGES.NO_RECOMMENDATIONS_AVAILABLE}</div>
-                    </div>
+                    <>
+                        <Alert variant="info" className="mb-4">
+                            <h6 className="mb-2">
+                                <i className="bi bi-info-circle me-2"></i>
+                                {messages.ALGORITHM_COMPARISON_RESULTS}
+                            </h6>
+                            <p className="mb-0">{messages.BEST_ALGORITHM_INFO}</p>
+                        </Alert>
+
+                        <Table responsive striped>
+                            <thead>
+                            <tr>
+                                <th>{messages.ALGORITHM}</th>
+                                <th>{messages.STATUS}</th>
+                                <th>{messages.ASSIGNMENTS}</th>
+                                <th>{messages.EXECUTION_TIME}</th>
+                                <th>{messages.COVERAGE}</th>
+                                <th className="text-center">{messages.ACTIONS}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {Object.entries(results)
+                                .filter(([key]) => key !== 'recommended')
+                                .map(([algorithm, result]) => (
+                                    <tr key={algorithm} className={getBestAlgorithm() === algorithm ? 'table-success' : ''}>
+                                        <td>
+                                            {getAlgorithmBadge(algorithm)}
+                                            {getBestAlgorithm() === algorithm && (
+                                                <Badge bg="warning" className="ms-2">
+                                                    {messages.BEST_ALGORITHM}
+                                                </Badge>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {result.success ? (
+                                                <Badge bg="success">Success</Badge>
+                                            ) : (
+                                                <Badge bg="danger">Failed</Badge>
+                                            )}
+                                        </td>
+                                        <td>{result.assignments || 0}</td>
+                                        <td>{formatExecutionTime(result.execution_time)}</td>
+                                        <td>{formatCoverage(result.assignments, result.total_slots)}</td>
+                                        <td className="text-center">
+                                            <Button
+                                                variant={getBestAlgorithm() === algorithm ? 'success' : 'outline-primary'}
+                                                size="sm"
+                                                onClick={() => onUseAlgorithm(algorithm)}
+                                                disabled={!result.success}
+                                            >
+                                                <i className="bi bi-check-circle me-1"></i>
+                                                {messages.SELECT}
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+
+                        {results.recommended && (
+                            <Alert variant="success">
+                                <strong>{messages.RECOMMENDATION}:</strong> {results.recommended}
+                            </Alert>
+                        )}
+                    </>
                 )}
             </Modal.Body>
 
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>
-                    {MESSAGES.CANCEL}
+                    {messages.CANCEL}
                 </Button>
+                {results && getBestAlgorithm() && (
+                    <Button
+                        variant="primary"
+                        onClick={() => onUseAlgorithm(getBestAlgorithm())}
+                    >
+                        <i className="bi bi-rocket me-2"></i>
+                        {messages.USE_ALGORITHM.replace('{algorithm}', getBestAlgorithm())}
+                    </Button>
+                )}
             </Modal.Footer>
         </Modal>
     );
 };
 
-export default EmployeeSelectionModal;
+export default CompareAlgorithmsModal;

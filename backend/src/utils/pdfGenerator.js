@@ -26,24 +26,6 @@ class PDFGenerator {
                 GENERATED_LABEL: 'Generated',
                 NO_ASSIGNMENTS: 'No assignments for this day',
                 PDF_GENERATION_ERROR: 'Failed to generate PDF'
-            },
-            ru: {
-                WORK_SCHEDULE_TITLE: 'Рабочее расписание',
-                GENERATED_ON: 'Создано',
-                SITE_LABEL: 'Объект',
-                WEEK_LABEL: 'Неделя',
-                STATUS_LABEL: 'Статус',
-                TOTAL_ASSIGNMENTS_LABEL: 'Всего назначений',
-                EMPLOYEE_HEADER: 'Сотрудник',
-                POSITION_HEADER: 'Должность',
-                SHIFT_HEADER: 'Смена',
-                TIME_HEADER: 'Время',
-                STATUS_HEADER: 'Статус',
-                SYSTEM_NAME: 'Система управления расписанием',
-                EXPORT_ID_LABEL: 'ID экспорта',
-                GENERATED_LABEL: 'Создано',
-                NO_ASSIGNMENTS: 'Нет назначений на этот день',
-                PDF_GENERATION_ERROR: 'Не удалось сгенерировать PDF'
             }
         };
         return messages[lang] || messages.en;
@@ -147,17 +129,35 @@ class PDFGenerator {
 
     groupAssignmentsByDate(assignments) {
         return assignments.reduce((acc, assignment) => {
-            const date = new Date(assignment.date).toLocaleDateString();
-            if (!acc[date]) {
-                acc[date] = [];
+            // Fix date parsing - ensure we get a valid date string
+            let dateStr;
+            try {
+                const date = new Date(assignment.date);
+                if (isNaN(date.getTime())) {
+                    // If date is invalid, try different parsing
+                    dateStr = assignment.date;
+                } else {
+                    dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+                }
+            } catch (error) {
+                console.warn('[PDFGenerator] Date parsing error:', error, assignment.date);
+                dateStr = assignment.date;
             }
-            acc[date].push(assignment);
+
+            if (!acc[dateStr]) {
+                acc[dateStr] = [];
+            }
+            acc[dateStr].push(assignment);
             return acc;
         }, {});
     }
 
     generateHeader(data) {
-        const currentDate = new Date().toLocaleDateString();
+        const currentDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
 
         return `
         <div class="header">
@@ -193,14 +193,27 @@ class PDFGenerator {
     }
 
     generateScheduleContent(sortedDates, assignmentsByDate) {
-        return sortedDates.map(date => {
-            const assignments = assignmentsByDate[date];
-            const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+        return sortedDates.map(dateStr => {
+            const assignments = assignmentsByDate[dateStr];
+
+            // Format date for display
+            let formattedDate;
+            try {
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                    formattedDate = date.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                } else {
+                    formattedDate = dateStr; // Fallback to original string
+                }
+            } catch (error) {
+                console.warn('[PDFGenerator] Date formatting error:', error);
+                formattedDate = dateStr;
+            }
 
             return `
             <div class="day-section">
@@ -431,7 +444,7 @@ class PDFGenerator {
                 }
             }
         `;
-    }cd
+    }
 }
 
 module.exports = PDFGenerator;

@@ -1,7 +1,7 @@
 // frontend/src/components/admin/schedule/DeleteConfirmationModal.js
 import React from 'react';
 import { Modal, Button, Alert, Badge, Spinner } from 'react-bootstrap';
-import { MESSAGES } from '../../../i18n/messages';
+import { useMessages } from '../../../i18n/messages';
 
 const DeleteConfirmationModal = ({
                                      show,
@@ -10,6 +10,8 @@ const DeleteConfirmationModal = ({
                                      onConfirm,
                                      onCancel
                                  }) => {
+    const messages = useMessages('en');
+
     if (!schedule) return null;
 
     return (
@@ -22,18 +24,18 @@ const DeleteConfirmationModal = ({
             <Modal.Header closeButton={!deleting}>
                 <Modal.Title className="text-danger">
                     <i className="bi bi-exclamation-triangle me-2"></i>
-                    {MESSAGES.CONFIRM_DELETION}
+                    {messages.CONFIRM_DELETION}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
                 <Alert variant="warning" className="mb-3">
                     <i className="bi bi-exclamation-triangle me-2"></i>
-                    <strong>Warning:</strong> {MESSAGES.DELETE_WARNING}
+                    <strong>Warning:</strong> {messages.DELETE_WARNING}
                 </Alert>
 
                 <p className="mb-3">
-                    {MESSAGES.DELETE_CONFIRMATION_TEXT}
+                    {messages.DELETE_CONFIRMATION_TEXT}
                 </p>
 
                 <div className="schedule-info bg-light p-3 rounded">
@@ -61,7 +63,7 @@ const DeleteConfirmationModal = ({
                 </div>
 
                 <p className="mt-3 text-muted">
-                    {MESSAGES.DELETE_ASSIGNMENTS_WARNING}
+                    {messages.DELETE_ASSIGNMENTS_WARNING}
                 </p>
             </Modal.Body>
 
@@ -71,7 +73,7 @@ const DeleteConfirmationModal = ({
                     onClick={onCancel}
                     disabled={deleting}
                 >
-                    {MESSAGES.CANCEL}
+                    {messages.CANCEL}
                 </Button>
                 <Button
                     variant="danger"
@@ -81,12 +83,12 @@ const DeleteConfirmationModal = ({
                     {deleting ? (
                         <>
                             <Spinner size="sm" className="me-2" />
-                            {MESSAGES.DELETING}
+                            {messages.DELETING}
                         </>
                     ) : (
                         <>
                             <i className="bi bi-trash me-2"></i>
-                            {MESSAGES.DELETE_SCHEDULE}
+                            {messages.DELETE_SCHEDULE}
                         </>
                     )}
                 </Button>

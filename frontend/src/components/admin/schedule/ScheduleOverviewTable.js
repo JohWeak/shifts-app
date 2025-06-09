@@ -1,7 +1,7 @@
 // frontend/src/components/admin/schedule/ScheduleOverviewTable.js
 import React, { useState } from 'react';
 import { Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
-import { MESSAGES } from '../../../i18n/messages';
+import { useMessages } from '../../../i18n/messages';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
@@ -18,6 +18,7 @@ const ScheduleOverviewTable = ({
                                    onViewDetails,
                                    onScheduleDeleted
                                }) => {
+    const messages = useMessages('en');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [scheduleToDelete, setScheduleToDelete] = useState(null);
     const api = useScheduleAPI();
@@ -48,7 +49,7 @@ const ScheduleOverviewTable = ({
     if (loading) {
         return (
             <LoadingSpinner
-                message={MESSAGES.LOADING_SCHEDULES}
+                message={messages.LOADING_SCHEDULES}
             />
         );
     }
@@ -58,8 +59,8 @@ const ScheduleOverviewTable = ({
             <Card>
                 <Card.Body className="text-center py-5">
                     <i className="bi bi-calendar-x display-1 text-muted"></i>
-                    <h4>{MESSAGES.NO_SCHEDULES_FOUND}</h4>
-                    <p>{MESSAGES.GENERATE_FIRST_SCHEDULE}</p>
+                    <h4>{messages.NO_SCHEDULES_FOUND}</h4>
+                    <p>{messages.GENERATE_FIRST_SCHEDULE}</p>
                 </Card.Body>
             </Card>
         );
@@ -72,11 +73,11 @@ const ScheduleOverviewTable = ({
                     <Table responsive hover>
                         <thead>
                         <tr>
-                            <th>{MESSAGES.WEEK}</th>
-                            <th>{MESSAGES.STATUS}</th>
-                            <th>{MESSAGES.SITE}</th>
-                            <th>{MESSAGES.CREATED}</th>
-                            <th>{MESSAGES.ACTIONS}</th>
+                            <th>{messages.WEEK}</th>
+                            <th>{messages.STATUS}</th>
+                            <th>{messages.SITE}</th>
+                            <th>{messages.CREATED}</th>
+                            <th>{messages.ACTIONS}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -98,7 +99,7 @@ const ScheduleOverviewTable = ({
                                             variant="outline-primary"
                                             size="sm"
                                             onClick={() => onViewDetails(schedule.id)}
-                                            title={MESSAGES.VIEW_DETAILS}
+                                            title={messages.VIEW_DETAILS}
                                         >
                                             <i className="bi bi-eye"></i>
                                         </Button>
@@ -109,7 +110,7 @@ const ScheduleOverviewTable = ({
                                                 size="sm"
                                                 onClick={() => handleDeleteClick(schedule)}
                                                 disabled={api.loading}
-                                                title={MESSAGES.DELETE_SCHEDULE}
+                                                title={messages.DELETE_SCHEDULE}
                                             >
                                                 {api.loading && scheduleToDelete?.id === schedule.id ? (
                                                     <Spinner size="sm" />
@@ -129,12 +130,12 @@ const ScheduleOverviewTable = ({
 
             <ConfirmationModal
                 show={showDeleteModal}
-                title={MESSAGES.CONFIRM_DELETION}
-                message={MESSAGES.DELETE_CONFIRMATION_TEXT}
+                title={messages.CONFIRM_DELETION}
+                message={messages.DELETE_CONFIRMATION_TEXT}
                 onConfirm={handleDeleteConfirm}
                 onCancel={handleDeleteCancel}
                 loading={api.loading}
-                confirmText={MESSAGES.DELETE_SCHEDULE}
+                confirmText={messages.DELETE_SCHEDULE}
                 variant="danger"
             >
                 {scheduleToDelete && (
@@ -160,7 +161,7 @@ const ScheduleOverviewTable = ({
                     </div>
                 )}
                 <p className="mt-3 text-muted">
-                    {MESSAGES.DELETE_ASSIGNMENTS_WARNING}
+                    {messages.DELETE_ASSIGNMENTS_WARNING}
                 </p>
             </ConfirmationModal>
         </>
