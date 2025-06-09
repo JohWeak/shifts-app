@@ -152,6 +152,23 @@ export const MESSAGES = {
     DELETE_SCHEDULE_ERROR: 'Error deleting schedule: {error}',
     CANNOT_DELETE_PUBLISHED: 'Cannot delete published schedule',
     DELETING: 'Deleting...',
+
+    // Publish Schedule
+    PUBLISH_SCHEDULE: 'Publish Schedule',
+    UNPUBLISH_EDIT: 'Unpublish & Edit',
+    PUBLISHED_VISIBLE: 'Published and visible to employees',
+    SAVE_CHANGES_BEFORE_PUBLISH: 'Save all changes before publishing',
+    READ_ONLY_PUBLISHED: 'Read-only (Published)',
+    SCHEDULE_STATUS_UPDATED: 'Schedule status updated successfully!',
+    PUBLISH_CONFIRMATION: 'Are you sure you want to publish this schedule? Once published, it will be visible to all employees and editing will be restricted.',
+    PUBLISHING_EFFECTS: 'Publishing Effects:',
+
+// Publishing effects list
+    EFFECT_VISIBLE_TO_EMPLOYEES: 'Schedule becomes visible to all employees',
+    EFFECT_EDITING_RESTRICTED: 'Editing becomes restricted (can be unpublished if needed)',
+    EFFECT_NOTIFICATIONS: 'Employees will receive notifications about their assignments',
+    EFFECT_APPEARS_IN_DASHBOARDS: 'Schedule appears in employee dashboards and mobile apps',
+
 };
 
 
