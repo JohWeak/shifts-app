@@ -42,6 +42,9 @@ const ScheduleManagement = () => {
     const [loadingWorkSites, setLoadingWorkSites] = useState(false);
     const [modalError, setModalError] = useState(null);
     const [isValidWeekStart, setIsValidWeekStart] = useState(true);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [scheduleToDelete, setScheduleToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
 
 
@@ -196,7 +199,66 @@ const ScheduleManagement = () => {
         }
     };
 
-    // НОВАЯ ФУНКЦИЯ: Генерация расписания
+    // Функция удаления расписания
+    const deleteSchedule = async () => {
+        try {
+            setDeleting(true);
+            const token = localStorage.getItem('token');
+
+            console.log('Deleting schedule:', scheduleToDelete.id);
+
+            const response = await fetch(`http://localhost:5000/api/schedules/${scheduleToDelete.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Delete result:', result);
+
+                setError({
+                    type: 'success',
+                    message: `Schedule for week ${new Date(scheduleToDelete.start_date).toLocaleDateString()} - ${new Date(scheduleToDelete.end_date).toLocaleDateString()} has been deleted successfully.`
+                });
+
+                // Refresh the schedules list
+                await fetchSchedules();
+
+                // Close modal
+                setShowDeleteModal(false);
+                setScheduleToDelete(null);
+
+                // If we were viewing this schedule, close the details tab
+                if (selectedSchedule === scheduleToDelete.id) {
+                    setSelectedSchedule(null);
+                    setScheduleDetails(null);
+                    setActiveTab('overview');
+                }
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete schedule');
+            }
+        } catch (err) {
+            console.error('Error deleting schedule:', err);
+            setError({
+                type: 'danger',
+                message: `Error deleting schedule: ${err.message}`
+            });
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+// Функция подтверждения удаления
+    const confirmDelete = (schedule) => {
+        setScheduleToDelete(schedule);
+        setShowDeleteModal(true);
+    };
+
+    // Генерация расписания
     const generateSchedule = async () => {
         try {
             setGenerating(true);
@@ -817,17 +879,39 @@ const ScheduleManagement = () => {
                                                         {schedule.status}
                                                     </Badge>
                                                 </td>
-                                                {/* ИСПРАВЛЕНИЕ: правильное обращение к site_name */}
                                                 <td>{schedule.workSite?.site_name || schedule.site_name || 'Unknown'}</td>
                                                 <td>{new Date(schedule.createdAt).toLocaleDateString()}</td>
                                                 <td>
-                                                    <Button
-                                                        variant="outline-primary"
-                                                        size="sm"
-                                                        onClick={() => viewScheduleDetails(schedule.id)}
-                                                    >
-                                                        View Details
-                                                    </Button>
+                                                    <div className="d-flex gap-2 align-items-center">
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            size="sm"
+                                                            onClick={() => viewScheduleDetails(schedule.id)}
+                                                            title="View Details"
+                                                        >
+                                                            <i className="bi bi-eye"></i>
+                                                        </Button>
+
+                                                        {/* Кнопка удаления */}
+                                                        <Button
+                                                            variant="outline-danger"
+                                                            size="sm"
+                                                            onClick={() => confirmDelete(schedule)}
+                                                            disabled={deleting}
+                                                            title={
+                                                                schedule.status === 'published'
+                                                                    ? "Cannot delete published schedule"
+                                                                    : "Delete Schedule"
+                                                            }
+                                                            className={schedule.status === 'published' ? 'd-none' : ''} // Скрыть для опубликованных
+                                                        >
+                                                            {deleting && scheduleToDelete?.id === schedule.id ? (
+                                                                <Spinner size="sm" />
+                                                            ) : (
+                                                                <i className="bi bi-trash"></i>
+                                                            )}
+                                                        </Button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -1248,6 +1332,88 @@ const ScheduleManagement = () => {
                             Use {comparisonResults?.best_algorithm} Algorithm
                         </Button>
                     )}
+                </Modal.Footer>
+            </Modal>
+            {/* Delete Confirmation Modal */}
+            <Modal
+                show={showDeleteModal}
+                onHide={() => !deleting && setShowDeleteModal(false)}
+                centered
+                className="delete-confirmation-modal"
+            >
+                <Modal.Header closeButton={!deleting}>
+                    <Modal.Title className="text-danger">
+                        <i className="bi bi-exclamation-triangle me-2"></i>
+                        Confirm Schedule Deletion
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {scheduleToDelete && (
+                        <div>
+                            <Alert variant="warning" className="mb-3">
+                                <i className="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Warning:</strong> This action cannot be undone.
+                            </Alert>
+
+                            <p className="mb-3">
+                                Are you sure you want to delete the schedule for:
+                            </p>
+
+                            <div className="schedule-info bg-light p-3 rounded">
+                                <div className="row">
+                                    <div className="col-sm-4"><strong>Week:</strong></div>
+                                    <div className="col-sm-8">
+                                        {new Date(scheduleToDelete.start_date).toLocaleDateString()} - {' '}
+                                        {new Date(scheduleToDelete.end_date).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-sm-4"><strong>Site:</strong></div>
+                                    <div className="col-sm-8">
+                                        {scheduleToDelete.workSite?.site_name || scheduleToDelete.site_name || 'Unknown'}
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-sm-4"><strong>Status:</strong></div>
+                                    <div className="col-sm-8">
+                                        <Badge bg={scheduleToDelete.status === 'draft' ? 'warning' : 'secondary'}>
+                                            {scheduleToDelete.status}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="mt-3 text-muted">
+                                All employee assignments for this schedule will also be permanently removed.
+                            </p>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={deleting}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="danger"
+                        onClick={deleteSchedule}
+                        disabled={deleting}
+                    >
+                        {deleting ? (
+                            <>
+                                <Spinner size="sm" className="me-2" />
+                                Deleting...
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-trash me-2"></i>
+                                Delete Schedule
+                            </>
+                        )}
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </AdminLayout>

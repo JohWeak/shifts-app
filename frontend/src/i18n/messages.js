@@ -38,7 +38,7 @@ export const MESSAGES = {
     CANNOT_WORK: 'Cannot Work',
     VIOLATES_CONSTRAINTS: 'Violates Constraints',
 
-    // Days of Week
+    // Days of the Week
     SUNDAY: 'Sunday',
     MONDAY: 'Monday',
     TUESDAY: 'Tuesday',
@@ -141,6 +141,17 @@ export const MESSAGES = {
     WEEK_START_SUNDAY_WARNING: 'Schedule weeks should start on Sunday. Consider selecting a Sunday date.',
     FUTURE_DATES_ONLY: 'Select the Sunday that starts the week to schedule. Future dates only.',
     COULD_NOT_LOAD_WORK_SITES: 'Could not load work sites. Using default site.',
+
+    // Delete Schedule
+    DELETE_SCHEDULE: 'Delete Schedule',
+    CONFIRM_DELETION: 'Confirm Schedule Deletion',
+    DELETE_WARNING: 'Warning: This action cannot be undone.',
+    DELETE_CONFIRMATION_TEXT: 'Are you sure you want to delete the schedule for:',
+    DELETE_ASSIGNMENTS_WARNING: 'All employee assignments for this schedule will also be permanently removed.',
+    SCHEDULE_DELETED_SUCCESS: 'Schedule for week {week} has been deleted successfully.',
+    DELETE_SCHEDULE_ERROR: 'Error deleting schedule: {error}',
+    CANNOT_DELETE_PUBLISHED: 'Cannot delete published schedule',
+    DELETING: 'Deleting...',
 };
 
 
@@ -152,7 +163,7 @@ export const MESSAGES = {
  * @returns {string} - Interpolated message
  */
 export const interpolateMessage = (message, variables = {}) => {
-    return message.replace(/\{(\w+)\}/g, (match, key) => {
+    return message.replace(/\{(\w+)}/g, (match, key) => {
         return variables[key] !== undefined ? variables[key] : match;
     });
 };

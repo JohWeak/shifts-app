@@ -467,6 +467,58 @@
     justify-content: center;
 }
 
+/* Delete confirmation modal */
+.delete-confirmation-modal .modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.delete-confirmation-modal .modal-title {
+    font-weight: 600;
+}
+
+.delete-confirmation-modal .schedule-info {
+    border: 1px solid #dee2e6;
+}
+
+.delete-confirmation-modal .row {
+    margin-bottom: 0.5rem;
+}
+
+.delete-confirmation-modal .row:last-child {
+    margin-bottom: 0;
+}
+
+/* Action buttons styling */
+.table td .d-flex {
+    gap: 0.5rem;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* Disabled state for published schedules */
+.btn:disabled.d-none {
+    display: none !important;
+}
+
+/* Trash icon hover effect */
+.btn-outline-danger .bi-trash {
+    transition: transform 0.2s ease;
+}
+
+.btn-outline-danger:hover .bi-trash {
+    transform: scale(1.1);
+}
+
+/* Alert in modal */
+.delete-confirmation-modal .alert {
+    border: none;
+    border-left: 4px solid #ffc107;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .comparison-modal .modal-dialog {
