@@ -1,6 +1,6 @@
 // backend/src/controllers/schedule.controller.js - Production version
-const { Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite, EmployeePreference } = require('../models/associations');
-const { Op } = require('sequelize');
+const {Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite} = require('../models/associations');
+const {Op} = require('sequelize');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
@@ -126,7 +126,7 @@ function formatDisplayDate(dateStr) {
 exports.getWeeklySchedule = async (req, res) => {
     try {
         const empId = req.userId;
-        const { date } = req.query;
+        const {date} = req.query;
 
         // Validate employee exists
         const employee = await Employee.findByPk(empId);
@@ -138,13 +138,13 @@ exports.getWeeklySchedule = async (req, res) => {
         }
 
         // Calculate week boundaries using Israel timezone
-        const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
+        const {weekStartStr, weekEndStr} = calculateWeekBounds(date);
 
         // Find published schedule for this week
         const schedule = await Schedule.findOne({
             where: {
-                start_date: { [Op.lte]: weekEndStr },
-                end_date: { [Op.gte]: weekStartStr },
+                start_date: {[Op.lte]: weekEndStr},
+                end_date: {[Op.gte]: weekStartStr},
                 status: 'published'
             },
             order: [['createdAt', 'DESC']]
@@ -265,15 +265,15 @@ exports.getWeeklySchedule = async (req, res) => {
 // Get schedule for admin view (all positions, all employees)
 exports.getAdminWeeklySchedule = async (req, res) => {
     try {
-        const { date, site_id } = req.query;
+        const {date, site_id} = req.query;
 
         // Calculate week boundaries
-        const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
+        const {weekStartStr, weekEndStr} = calculateWeekBounds(date);
 
         // Build where condition for site
         const scheduleWhere = {
-            start_date: { [Op.lte]: weekEndStr },
-            end_date: { [Op.gte]: weekStartStr },
+            start_date: {[Op.lte]: weekEndStr},
+            end_date: {[Op.gte]: weekStartStr},
             status: 'published'
         };
 
@@ -520,7 +520,7 @@ exports.selectBestAlgorithm = async () => {
 
 exports.checkPythonAvailability = async () => {
     return new Promise((resolve) => {
-        const { spawn } = require('child_process');
+        const {spawn} = require('child_process');
 
         const pythonCheck = spawn('python', ['--version']);
 
@@ -647,7 +647,7 @@ exports.selectBestResult = (comparison) => {
 
 exports.getAllSchedules = async (req, res) => {
     try {
-        const { page = 1, limit = 10, site_id } = req.query;
+        const {page = 1, limit = 10, site_id} = req.query;
 
         const whereClause = {};
         if (site_id) {
@@ -690,7 +690,7 @@ exports.getAllSchedules = async (req, res) => {
 // Получить детали конкретного расписания
 exports.getScheduleDetails = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
+        const {scheduleId} = req.params;
 
         // Получить основную информацию о расписании
         const schedule = await Schedule.findByPk(scheduleId, {
@@ -710,7 +710,7 @@ exports.getScheduleDetails = async (req, res) => {
 
         // Получить все назначения для этого расписания
         const assignments = await ScheduleAssignment.findAll({
-            where: { schedule_id: scheduleId },
+            where: {schedule_id: scheduleId},
             include: [
                 {
                     model: Employee,
@@ -733,7 +733,7 @@ exports.getScheduleDetails = async (req, res) => {
 
         // Получить все позиции для данного сайта
         const allPositions = await Position.findAll({
-            where: { site_id: schedule.site_id },
+            where: {site_id: schedule.site_id},
             include: [{
                 model: WorkSite,
                 as: 'workSite',
@@ -748,7 +748,7 @@ exports.getScheduleDetails = async (req, res) => {
 
         // Получить всех активных сотрудников для данного сайта
         const allEmployees = await Employee.findAll({
-            where: { status: 'active' },
+            where: {status: 'active'},
             attributes: ['emp_id', 'first_name', 'last_name', 'email']
         });
 
@@ -854,8 +854,8 @@ exports.getScheduleDetails = async (req, res) => {
 // Обновить статус расписания (draft -> published)
 exports.updateScheduleStatus = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { status } = req.body;
+        const {scheduleId} = req.params;
+        const {status} = req.body;
 
         if (!['draft', 'published', 'archived'].includes(status)) {
             return res.status(400).json({
@@ -872,7 +872,7 @@ exports.updateScheduleStatus = async (req, res) => {
             });
         }
 
-        await schedule.update({ status });
+        await schedule.update({status});
 
         res.json({
             success: true,
@@ -890,12 +890,73 @@ exports.updateScheduleStatus = async (req, res) => {
     }
 };
 
+exports.updateScheduleAssignments = async (req, res) => {
+    try {
+        const {scheduleId} = req.params;
+        const {changes} = req.body;
+
+        console.log('[ScheduleController] Updating assignments for schedule:', scheduleId);
+        console.log('[ScheduleController] Changes:', changes);
+
+        const schedule = await Schedule.findByPk(scheduleId);
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found'
+            });
+        }
+
+        // Process each change
+        for (const change of changes) {
+            if (change.action === 'assign') {
+                // Add new assignment
+                await ScheduleAssignment.create({
+                    schedule_id: scheduleId,
+                    emp_id: change.empId,
+                    shift_id: change.shiftId,
+                    position_id: change.positionId,
+                    work_date: change.date,
+                    status: 'scheduled',
+                    notes: 'Manually assigned via edit interface'
+                });
+                console.log(`[ScheduleController] Added assignment: ${change.empName} to ${change.date} ${change.shiftId}`);
+
+            } else if (change.action === 'remove') {
+                // Remove existing assignment
+                const deleted = await ScheduleAssignment.destroy({
+                    where: {
+                        id: change.assignmentId,
+                        schedule_id: scheduleId
+                    }
+                });
+                console.log(`[ScheduleController] Removed assignment ID: ${change.assignmentId}, deleted: ${deleted}`);
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Successfully processed ${changes.length} changes`,
+            data: {
+                changesProcessed: changes.length
+            }
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error updating assignments:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating schedule assignments',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
 
 // Дублирование расписания
 exports.duplicateSchedule = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { newWeekStart } = req.body;
+        const {scheduleId} = req.params;
+        const {newWeekStart} = req.body;
 
         if (!newWeekStart) {
             return res.status(400).json({
@@ -910,9 +971,9 @@ exports.duplicateSchedule = async (req, res) => {
                 model: ScheduleAssignment,
                 as: 'assignments',
                 include: [
-                    { model: Employee, as: 'employee' },
-                    { model: Shift, as: 'shift' },
-                    { model: Position, as: 'position' }
+                    {model: Employee, as: 'employee'},
+                    {model: Shift, as: 'shift'},
+                    {model: Position, as: 'position'}
                 ]
             }]
         });
@@ -986,7 +1047,7 @@ exports.duplicateSchedule = async (req, res) => {
 
 exports.deleteSchedule = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
+        const {scheduleId} = req.params;
 
         const schedule = await Schedule.findByPk(scheduleId);
         if (!schedule) {
@@ -1006,7 +1067,7 @@ exports.deleteSchedule = async (req, res) => {
 
         // Удалить связанные назначения (каскадно через FK)
         await ScheduleAssignment.destroy({
-            where: { schedule_id: scheduleId }
+            where: {schedule_id: scheduleId}
         });
 
         // Удалить само расписание
@@ -1028,12 +1089,11 @@ exports.deleteSchedule = async (req, res) => {
 };
 
 
-
 // Экспорт расписания
 exports.exportSchedule = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { format = 'json' } = req.query;
+        const {scheduleId} = req.params;
+        const {format = 'json'} = req.query;
 
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [
@@ -1041,12 +1101,12 @@ exports.exportSchedule = async (req, res) => {
                     model: ScheduleAssignment,
                     as: 'assignments',
                     include: [
-                        { model: Employee, as: 'employee', attributes: ['emp_id', 'first_name', 'last_name'] },
-                        { model: Shift, as: 'shift', attributes: ['shift_id', 'shift_name', 'start_time', 'duration'] },
-                        { model: Position, as: 'position', attributes: ['pos_id', 'pos_name'] }
+                        {model: Employee, as: 'employee', attributes: ['emp_id', 'first_name', 'last_name']},
+                        {model: Shift, as: 'shift', attributes: ['shift_id', 'shift_name', 'start_time', 'duration']},
+                        {model: Position, as: 'position', attributes: ['pos_id', 'pos_name']}
                     ]
                 },
-                { model: WorkSite, as: 'workSite', attributes: ['site_id', 'site_name'] }
+                {model: WorkSite, as: 'workSite', attributes: ['site_id', 'site_name']}
             ]
         });
 
@@ -1109,8 +1169,8 @@ exports.exportSchedule = async (req, res) => {
 // Дублирование расписания
 exports.duplicateSchedule = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { newWeekStart } = req.body;
+        const {scheduleId} = req.params;
+        const {newWeekStart} = req.body;
 
         if (!newWeekStart) {
             return res.status(400).json({
@@ -1195,7 +1255,7 @@ exports.duplicateSchedule = async (req, res) => {
 // Получение статистики
 exports.getScheduleStats = async (req, res) => {
     try {
-        const { timeframe = '30' } = req.query;
+        const {timeframe = '30'} = req.query;
         const sequelize = require('../config/db.config');
 
         const startDate = dayjs().subtract(parseInt(timeframe), 'day').toDate();
@@ -1204,22 +1264,22 @@ exports.getScheduleStats = async (req, res) => {
         const totalSchedules = await Schedule.count();
         const recentSchedules = await Schedule.count({
             where: {
-                createdAt: { [Op.gte]: startDate }
+                createdAt: {[Op.gte]: startDate}
             }
         });
 
         const publishedSchedules = await Schedule.count({
-            where: { status: 'published' }
+            where: {status: 'published'}
         });
 
         const draftSchedules = await Schedule.count({
-            where: { status: 'draft' }
+            where: {status: 'draft'}
         });
 
         const totalAssignments = await ScheduleAssignment.count();
         const recentAssignments = await ScheduleAssignment.count({
             where: {
-                createdAt: { [Op.gte]: startDate }
+                createdAt: {[Op.gte]: startDate}
             }
         });
 
@@ -1357,7 +1417,9 @@ function selectBestResult(comparison) {
 
 exports.getRecommendedEmployees = async (req, res) => {
     try {
-        const { scheduleId, date, shiftId, positionId } = req.query;
+        const {scheduleId, date, shiftId, positionId} = req.query;
+
+        console.log('[ScheduleController] Getting recommendations for:', {scheduleId, date, shiftId, positionId});
 
         // Получить расписание и его параметры
         const schedule = await Schedule.findByPk(scheduleId, {
@@ -1376,26 +1438,8 @@ exports.getRecommendedEmployees = async (req, res) => {
 
         // Получить всех активных сотрудников
         const employees = await Employee.findAll({
-            where: { status: 'active' },
+            where: {status: 'active'},
             attributes: ['emp_id', 'first_name', 'last_name', 'email']
-        });
-
-        // Получить preferences для данной даты
-        const preferences = await EmployeePreference.findAll({
-            where: {
-                emp_id: { [Op.in]: employees.map(e => e.emp_id) },
-                [Op.or]: [
-                    {
-                        preference_type: 'specific_date',
-                        start_date: date
-                    },
-                    {
-                        preference_type: 'day_of_week',
-                        day_of_week: dayjs(date).day()
-                    }
-                ],
-                status: 'active'
-            }
         });
 
         // Получить существующие назначения на эту дату
@@ -1411,42 +1455,21 @@ exports.getRecommendedEmployees = async (req, res) => {
             }]
         });
 
-        // Получить информацию о целевой смене
-        const targetShift = await Shift.findByPk(shiftId);
-
-        // Проанализировать каждого сотрудника
+        // Простая логика рекомендаций без EmployeePreference
         const employeeRecommendations = employees.map(employee => {
-            const empPreferences = preferences.filter(p => p.emp_id === employee.emp_id);
             const empAssignments = existingAssignments.filter(a => a.emp_id === employee.emp_id);
 
             // Определить статус доступности
             let availabilityStatus = 'available';
             let reason = '';
-            let priority = 1; // 0 = preferred, 1 = neutral, 2 = cannot_work, 3 = violates_constraints
+            let priority = 1; // 0 = preferred, 1 = neutral, 2 = cannot_work
 
-            // Проверить preferences
-            const relevantPreference = empPreferences.find(p =>
-                (p.preference_type === 'specific_date') ||
-                (p.preference_type === 'day_of_week')
-            );
-
-            if (relevantPreference) {
-                if (relevantPreference.preference === 'prefer_work') {
-                    priority = 0;
-                    availabilityStatus = 'preferred';
-                } else if (relevantPreference.preference === 'cannot_work') {
-                    priority = 2;
-                    availabilityStatus = 'cannot_work';
-                    reason = 'Employee marked as unavailable';
-                }
-            }
-
-            // Проверить конфликты с существующими назначениями (упрощенная проверка)
-            const hasConflict = empAssignments.length > 0; // Если уже назначен в этот день
+            // Проверить конфликты с существующими назначениями
+            const hasConflict = empAssignments.length > 0;
 
             if (hasConflict) {
-                priority = 3;
-                availabilityStatus = 'conflict';
+                priority = 2;
+                availabilityStatus = 'cannot_work';
                 reason = 'Already assigned on this date';
             }
 
@@ -1456,11 +1479,7 @@ exports.getRecommendedEmployees = async (req, res) => {
                 email: employee.email,
                 availability_status: availabilityStatus,
                 priority: priority,
-                reason: reason,
-                preferences: empPreferences.map(p => ({
-                    type: p.preference,
-                    period: p.preference_type
-                }))
+                reason: reason
             };
         });
 
@@ -1472,7 +1491,7 @@ exports.getRecommendedEmployees = async (req, res) => {
             preferred: sortedEmployees.filter(e => e.availability_status === 'preferred'),
             available: sortedEmployees.filter(e => e.availability_status === 'available'),
             cannot_work: sortedEmployees.filter(e => e.availability_status === 'cannot_work'),
-            violates_constraints: sortedEmployees.filter(e => e.availability_status === 'conflict')
+            violates_constraints: []
         };
 
         res.json({
@@ -1495,3 +1514,4 @@ exports.getRecommendedEmployees = async (req, res) => {
         });
     }
 };
+

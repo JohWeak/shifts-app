@@ -136,36 +136,36 @@ const ScheduleDetailsEditor = () => {
                 {/* Header */}
                 <Row className="mb-4">
                     <Col>
-                        <Card>
-                            <Card.Header className="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h4>עריכת לוח זמנים - {scheduleData.schedule.work_site?.site_name}</h4>
-                                    <small className="text-muted">
-                                        {formatDate(scheduleData.schedule.start_date)} - {formatDate(scheduleData.schedule.end_date)}
-                                    </small>
-                                </div>
-                                <div>
-                                    {getStatusBadge(scheduleData.schedule.status)}
-                                    <Button
-                                        variant="outline-secondary"
-                                        size="sm"
-                                        className="ms-2"
-                                        onClick={() => navigate('/admin')}
-                                    >
-                                        חזרה לדשבורד
-                                    </Button>
-                                </div>
+                        <Card className="border-0 bg-light">
+                            <Card.Header className="bg-transparent border-0 pb-0">
+                                <h5 className="mb-0 d-flex align-items-center">
+                                    <i className="bi bi-info-circle me-2 text-primary"></i>
+                                    Schedule Information
+                                </h5>
                             </Card.Header>
                             <Card.Body>
                                 <Row>
-                                    <Col md={4}>
-                                        <strong>סה"כ משמרות:</strong> {scheduleData.statistics.total_assignments}
+                                    <Col md={2} className="mb-3">
+                                        <div className="small text-muted mb-1">Status</div>
+                                        <div>{getStatusBadge(scheduleData.schedule.status)}</div>
                                     </Col>
-                                    <Col md={4}>
-                                        <strong>עובדים בשימוש:</strong> {scheduleData.statistics.employees_used}
+                                    <Col md={2} className="mb-3">
+                                        <div className="small text-muted mb-1">Total Assignments</div>
+                                        <div className="h4 mb-0 text-primary">{scheduleData.statistics.total_assignments}</div>
                                     </Col>
-                                    <Col md={4}>
-                                        <strong>אלגוריתם:</strong> {scheduleData.schedule.metadata?.algorithm || 'N/A'}
+                                    <Col md={2} className="mb-3">
+                                        <div className="small text-muted mb-1">Employees Used</div>
+                                        <div className="h5 mb-0">{scheduleData.statistics.employees_used}</div>
+                                    </Col>
+                                    <Col md={3} className="mb-3">
+                                        <div className="small text-muted mb-1">Algorithm</div>
+                                        <div className="small">{scheduleData.schedule.metadata?.algorithm || 'N/A'}</div>
+                                    </Col>
+                                    <Col md={3} className="mb-3">
+                                        <div className="small text-muted mb-1">Week Period</div>
+                                        <div className="small">
+                                            {new Date(scheduleData.schedule.start_date).toLocaleDateString('en-US')} - {new Date(scheduleData.schedule.end_date).toLocaleDateString('en-US')}
+                                        </div>
                                     </Col>
                                 </Row>
                             </Card.Body>
@@ -174,85 +174,104 @@ const ScheduleDetailsEditor = () => {
                 </Row>
 
                 {/* Schedule Tables by Position */}
-                {Object.entries(scheduleData.schedule_matrix).map(([positionId, positionData]) => (
-                    <Row key={positionId} className="mb-4">
-                        <Col>
-                            <Card>
-                                <Card.Header>
-                                    <h5>{positionData.position.name} - {positionData.position.profession}</h5>
-                                    <small className="text-muted">
-                                        נדרש: {positionData.position.num_of_emp} עובדים לכל משמרת
-                                    </small>
-                                </Card.Header>
-                                <Card.Body className="p-0">
-                                    <div className="table-responsive">
-                                        <Table bordered hover className="mb-0 schedule-table">
-                                            <thead>
-                                            <tr className="table-dark">
-                                                <th style={{width: '120px'}}>משמרת</th>
-                                                {dates.map(date => (
-                                                    <th key={date} className="text-center">
-                                                        {formatDate(date)}
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {scheduleData.all_shifts.map(shift => (
-                                                <tr key={shift.shift_id}>
-                                                    <td className={`shift-${shift.shift_type} text-center fw-bold`}>
-                                                        {shift.shift_name}
-                                                        <br/>
-                                                        <small>{shift.start_time} ({shift.duration}ש)</small>
-                                                    </td>
+                {scheduleData.schedule_matrix && Object.entries(scheduleData.schedule_matrix)
+                    .filter(([positionId]) => !focusPositionId || positionId === focusPositionId)
+                    .map(([positionId, positionData]) => (
+                        <Row key={positionId} className="mb-4" id={`position-${positionId}`}>
+                            <Col>
+                                <Card className="border-0">
+                                    <Card.Header className="bg-light border-0">
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 className="mb-0 d-flex align-items-center">
+                                                    <i className="bi bi-calendar-week me-2 text-primary"></i>
+                                                    {positionData.position.name} - {positionData.position.profession}
+                                                </h5>
+                                                <small className="text-muted">
+                                                    Required: {positionData.position.num_of_emp} employees per shift
+                                                </small>
+                                            </div>
+                                            <Button
+                                                variant="outline-secondary"
+                                                size="sm"
+                                                onClick={() => navigate('/admin/schedules')}
+                                            >
+                                                <i className="bi bi-arrow-left me-1"></i>
+                                                Back to Schedules
+                                            </Button>
+                                        </div>
+                                    </Card.Header>
+                                    <Card.Body className="p-0">
+                                        <div className="table-responsive">
+                                            <Table bordered hover className="mb-0 schedule-table">
+                                                <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '120px' }}>Shift</th>
                                                     {dates.map(date => {
-                                                        const cellData = positionData.schedule[date]?.[shift.shift_id];
-                                                        const assignments = cellData?.assignments || [];
-                                                        const isEmpty = assignments.length === 0;
-                                                        const isUnderstaffed = assignments.length < positionData.position.num_of_emp;
-
+                                                        const dayName = new Date(date).toLocaleDateString('en-US', {weekday: 'short'});
+                                                        const dayMonth = new Date(date).toLocaleDateString('en-US', {day: '2-digit', month: '2-digit'});
                                                         return (
-                                                            <td
-                                                                key={`${date}-${shift.shift_id}`}
-                                                                className={`schedule-cell ${isEmpty ? 'empty-cell' : ''} ${isUnderstaffed ? 'understaffed-cell' : ''}`}
-                                                                onClick={() => handleCellClick(date, shift.shift_id, positionId)}
-                                                                style={{cursor: 'pointer', minHeight: '60px'}}
-                                                            >
-                                                                {assignments.map(assignment => (
-                                                                    <div key={assignment.id}
-                                                                         className="employee-assignment">
-                                                                        <small
-                                                                            className="fw-bold">{assignment.employee.name}</small>
-                                                                        {assignment.status !== 'scheduled' && (
-                                                                            <Badge bg="info" size="sm" className="ms-1">
-                                                                                {assignment.status}
-                                                                            </Badge>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-                                                                {isEmpty && (
-                                                                    <div className="text-muted">
-                                                                        <i className="fas fa-plus"></i> הוספת עובד
-                                                                    </div>
-                                                                )}
-                                                                {isUnderstaffed && !isEmpty && (
-                                                                    <div className="text-warning">
-                                                                        <small>חסר {positionData.position.num_of_emp - assignments.length} עובדים</small>
-                                                                    </div>
-                                                                )}
-                                                            </td>
+                                                            <th key={date} className="text-center">
+                                                                {dayName} {dayMonth}
+                                                            </th>
                                                         );
                                                     })}
                                                 </tr>
-                                            ))}
-                                            </tbody>
-                                        </Table>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    </Row>
-                ))}
+                                                </thead>
+                                                <tbody>
+                                                {scheduleData.all_shifts.map(shift => (
+                                                    <tr key={shift.shift_id}>
+                                                        <td className={`shift-${shift.shift_type} text-center fw-bold`}>
+                                                            {shift.shift_name}
+                                                            <br />
+                                                            <small>{shift.start_time} ({shift.duration}h)</small>
+                                                        </td>
+                                                        {dates.map(date => {
+                                                            const cellData = positionData.schedule[date]?.[shift.shift_id];
+                                                            const assignments = cellData?.assignments || [];
+                                                            const isEmpty = assignments.length === 0;
+                                                            const isUnderstaffed = assignments.length < positionData.position.num_of_emp;
+
+                                                            return (
+                                                                <td
+                                                                    key={`${date}-${shift.shift_id}`}
+                                                                    className={`schedule-cell ${isEmpty ? 'empty-cell' : ''} ${isUnderstaffed ? 'understaffed-cell' : ''}`}
+                                                                    onClick={() => handleCellClick(date, shift.shift_id, positionId)}
+                                                                    style={{ cursor: 'pointer', minHeight: '60px' }}
+                                                                >
+                                                                    {assignments.map(assignment => (
+                                                                        <div key={assignment.id} className="employee-assignment">
+                                                                            <small className="fw-bold">{assignment.employee.name}</small>
+                                                                            {assignment.status !== 'scheduled' && (
+                                                                                <Badge bg="info" size="sm" className="ms-1">
+                                                                                    {assignment.status}
+                                                                                </Badge>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+                                                                    {isEmpty && (
+                                                                        <div className="text-muted">
+                                                                            <i className="bi bi-plus-circle"></i> Add Employee
+                                                                        </div>
+                                                                    )}
+                                                                    {isUnderstaffed && !isEmpty && (
+                                                                        <div className="text-warning">
+                                                                            <small>Need {positionData.position.num_of_emp - assignments.length} more</small>
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </Table>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    ))}
 
                 {/* Employee Selection Modal */}
                 <Modal show={showEmployeeModal} onHide={() => setShowEmployeeModal(false)} size="lg">

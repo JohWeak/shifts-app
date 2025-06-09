@@ -1,4 +1,4 @@
-// frontend/src/App.js - PROFESSIONAL VERSION
+// frontend/src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -13,7 +13,6 @@ import EmployeeDashboard from './components/employee/Dashboard';
 // Admin Components
 import AdminDashboard from './components/admin/Dashboard';
 import ScheduleManagement from './components/admin/ScheduleManagement';
-import ScheduleDetailsEditor from './components/admin/ScheduleDetailsEditor';
 import AlgorithmSettings from './components/admin/AlgorithmSettings';
 import EmployeeManagement from './components/admin/EmployeeManagement';
 import SystemSettings from './components/admin/SystemSettings';
@@ -79,15 +78,6 @@ function App() {
                             element={
                                 <ProtectedRoute allowedRole="admin">
                                     <ScheduleManagement />
-                                </ProtectedRoute>
-                            }
-                        />
-
-                        <Route
-                            path="/admin/schedule/:scheduleId/edit"
-                            element={
-                                <ProtectedRoute allowedRole="admin">
-                                    <ScheduleDetailsEditor />
                                 </ProtectedRoute>
                             }
                         />

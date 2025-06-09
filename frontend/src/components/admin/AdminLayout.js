@@ -84,7 +84,15 @@ const AdminLayout = ({ children }) => {
     ];
 
     const currentRoute = location.pathname;
-    const activeItem = navigationItems.find(item => currentRoute.startsWith(item.path));
+    const isActiveRoute = (itemPath) => {
+        if (itemPath === '/admin') {
+            // Для Dashboard проверяем точное совпадение
+            return currentRoute === '/admin';
+        } else {
+            // Для остальных используем startsWith
+            return currentRoute.startsWith(itemPath);
+        }
+    };
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -96,7 +104,7 @@ const AdminLayout = ({ children }) => {
             {navigationItems.map(item => (
                 <Nav.Item key={item.key} className="admin-nav-item">
                     <Nav.Link
-                        className={`admin-nav-link ${currentRoute.startsWith(item.path) ? 'active' : ''}`}
+                        className={`admin-nav-link ${isActiveRoute(item.path) ? 'active' : ''}`}
                         onClick={() => handleNavigation(item.path)}
                     >
                         <div className="nav-link-content">

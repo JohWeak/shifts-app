@@ -34,6 +34,16 @@ const ScheduleManagement = () => {
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
 
+    // Состояния для редактирования:
+    const [editMode, setEditMode] = useState(false);
+    const [editingPositions, setEditingPositions] = useState(new Set());
+    const [pendingChanges, setPendingChanges] = useState({});
+    const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+    const [selectedCell, setSelectedCell] = useState(null);
+    const [recommendations, setRecommendations] = useState(null);
+    const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+    const [savingChanges, setSavingChanges] = useState(false);
+
     // Generation settings
     const [generateSettings, setGenerateSettings] = useState({
         siteId: 1,
@@ -211,39 +221,37 @@ const ScheduleManagement = () => {
         }
     };
 
-    const publishSchedule = async (scheduleId) => {
-        try {
-            const token = localStorage.getItem('token');
+    const publishSchedule = async () => {
+        if (Object.keys(pendingChanges).length > 0) {
+            setError({
+                type: 'warning',
+                message: 'Please save all pending changes before publishing'
+            });
+            return;
+        }
 
-            const response = await fetch(`http://localhost:5000/api/schedules/${scheduleId}/status`, {
+        try {
+            const response = await fetch(`/api/schedules/${selectedSchedule}/status`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({status: 'published'})
+                body: JSON.stringify({ status: 'published' })
             });
 
             if (response.ok) {
+                await fetchSchedules();
+                await viewScheduleDetails(selectedSchedule);
                 setError({
                     type: 'success',
                     message: 'Schedule published successfully!'
-                });
-                await fetchSchedules();
-                if (scheduleDetails && selectedSchedule === scheduleId) {
-                    await viewScheduleDetails(scheduleId);
-                }
-            } else {
-                const result = await response.json();
-                setError({
-                    type: 'danger',
-                    message: result.message || 'Failed to publish schedule'
                 });
             }
         } catch (err) {
             setError({
                 type: 'danger',
-                message: 'Network error: ' + err.message
+                message: 'Error publishing schedule'
             });
         }
     };
@@ -440,10 +448,210 @@ const ScheduleManagement = () => {
         );
     };
 
-    const handleEditPosition = (scheduleId, positionId) => {
-        // Переход на страницу редактирования с параметром позиции
-        navigate(`/admin/schedule/${scheduleId}/edit?position=${positionId}`);
+    const toggleEditPosition = (positionId) => {
+        const newEditingPositions = new Set(editingPositions);
+        if (newEditingPositions.has(positionId)) {
+            newEditingPositions.delete(positionId);
+        } else {
+            newEditingPositions.add(positionId);
+        }
+        setEditingPositions(newEditingPositions);
     };
+    const handleCellClick = (date, shiftId, positionId) => {
+        if (!editingPositions.has(positionId)) return;
+
+        setSelectedCell({ date, shiftId, positionId });
+        setShowEmployeeModal(true);
+        fetchEmployeeRecommendations(date, shiftId, positionId);
+    };
+
+    const fetchEmployeeRecommendations = async (date, shiftId, positionId) => {
+        setLoadingRecommendations(true);
+        try {
+            const params = new URLSearchParams({
+                scheduleId: selectedSchedule,
+                date,
+                shiftId,
+                positionId
+            });
+
+            const response = await fetch(`http://localhost:5000/api/schedules/recommendations/employees?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                setRecommendations(result.data);
+            } else {
+                console.error('Failed to fetch recommendations');
+                // Fallback - создаем структуру из all_employees
+                const allEmployees = scheduleDetails?.all_employees || [];
+                const formattedEmployees = allEmployees.map(emp => ({
+                    emp_id: emp.emp_id,
+                    name: `${emp.first_name} ${emp.last_name}`,
+                    email: emp.email,
+                    availability_status: 'available',
+                    priority: 1
+                }));
+
+                setRecommendations({
+                    recommendations: {
+                        available: formattedEmployees,
+                        preferred: [],
+                        cannot_work: [],
+                        violates_constraints: []
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Error fetching recommendations:', err);
+            // Fallback - создаем структуру из all_employees
+            const allEmployees = scheduleDetails?.all_employees || [];
+            const formattedEmployees = allEmployees.map(emp => ({
+                emp_id: emp.emp_id,
+                name: `${emp.first_name} ${emp.last_name}`,
+                email: emp.email,
+                availability_status: 'available',
+                priority: 1
+            }));
+
+            setRecommendations({
+                recommendations: {
+                    available: formattedEmployees,
+                    preferred: [],
+                    cannot_work: [],
+                    violates_constraints: []
+                }
+            });
+        } finally {
+            setLoadingRecommendations(false);
+        }
+    };
+
+    const handleEmployeeAssign = (empId, empName) => {
+        const { date, shiftId, positionId } = selectedCell;
+        const changeKey = `${positionId}-${date}-${shiftId}-add-${empId}`;
+
+        console.log('Adding employee:', { empId, empName, date, shiftId, positionId });
+
+        setPendingChanges(prev => ({
+            ...prev,
+            [changeKey]: {
+                action: 'assign',
+                empId,
+                empName,
+                date,
+                shiftId,
+                positionId
+            }
+        }));
+
+        setShowEmployeeModal(false);
+        setSelectedCell(null);
+    };
+
+    const handleEmployeeRemove = (date, shiftId, positionId, assignmentId) => {
+        console.log('Removing employee:', { date, shiftId, positionId, assignmentId });
+
+        const changeKey = `${positionId}-${date}-${shiftId}-remove-${assignmentId}`;
+
+        setPendingChanges(prev => ({
+            ...prev,
+            [changeKey]: {
+                action: 'remove',
+                assignmentId,
+                date,
+                shiftId,
+                positionId
+            }
+        }));
+    };
+
+    const savePositionChanges = async (positionId) => {
+        setSavingChanges(true);
+        try {
+            const positionChanges = Object.values(pendingChanges).filter(
+                change => change.positionId === positionId
+            );
+
+            console.log('Saving changes for position:', positionId);
+            console.log('All pending changes:', pendingChanges);
+            console.log('Position changes:', positionChanges);
+            console.log('Selected schedule:', selectedSchedule);
+
+            if (positionChanges.length === 0) {
+                setError({
+                    type: 'info',
+                    message: 'No changes to save'
+                });
+                toggleEditPosition(positionId);
+                setSavingChanges(false);
+                return;
+            }
+
+            const url = `http://localhost:5000/api/schedules/${selectedSchedule}/update-assignments`;
+            console.log('Making request to:', url);
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    changes: positionChanges
+                })
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Save result:', result);
+
+                // Обновляем локальные данные
+                await viewScheduleDetails(selectedSchedule);
+
+                // Удаляем изменения для этой позиции из pending
+                const newPendingChanges = { ...pendingChanges };
+                Object.keys(newPendingChanges).forEach(key => {
+                    if (newPendingChanges[key].positionId === positionId) {
+                        delete newPendingChanges[key];
+                    }
+                });
+                setPendingChanges(newPendingChanges);
+
+                toggleEditPosition(positionId);
+
+                setError({
+                    type: 'success',
+                    message: `Position changes saved successfully! (${result.data.changesProcessed} changes)`
+                });
+            } else {
+                const errorData = await response.json();
+                console.error('Save error:', errorData);
+                setError({
+                    type: 'danger',
+                    message: errorData.message || 'Failed to save changes'
+                });
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+            setError({
+                type: 'danger',
+                message: 'Error saving changes: ' + err.message
+            });
+        } finally {
+            setSavingChanges(false);
+        }
+    };
+
+
 
     return (
         <AdminLayout>
@@ -743,90 +951,234 @@ const ScheduleManagement = () => {
                                                     <Card.Body>
                                                         {/* Здесь будут таблицы по позициям */}
                                                         {scheduleDetails.schedule_matrix ?
-                                                            Object.entries(scheduleDetails.schedule_matrix).map(([positionId, positionData]) => (
-                                                                <div key={positionId} className="mb-4">
-                                                                    {/* Заголовок с кнопкой Edit */}
-                                                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                                                        <h6 className="text-primary mb-0">
-                                                                            {positionData.position.name} - {positionData.position.profession}
-                                                                            <small className="text-muted ms-2">
-                                                                                (Requires {positionData.position.num_of_emp} employees per shift)
-                                                                            </small>
-                                                                        </h6>
-                                                                        <Button
-                                                                            variant="outline-primary"
-                                                                            size="sm"
-                                                                            onClick={() => handleEditPosition(scheduleDetails.schedule.id, positionId)}
-                                                                            className="d-flex align-items-center"
-                                                                        >
-                                                                            <i className="bi bi-pencil me-1"></i>
-                                                                            Edit Position
-                                                                        </Button>
-                                                                    </div>
+                                                            Object.entries(scheduleDetails.schedule_matrix).map(([positionId, positionData]) => {
+                                                                const isEditing = editingPositions.has(positionId);
+                                                                const hasPendingChanges = Object.values(pendingChanges).some(
+                                                                    change => change.positionId === positionId
+                                                                );
 
-                                                                    {/* Таблица для этой позиции */}
-                                                                    <div className="table-responsive">
-                                                                        <table className="table table-bordered">
-                                                                            <thead className="table-light">
-                                                                            <tr>
-                                                                                <th style={{width: '120px'}}>Shift</th>
-                                                                                {/* Динамические заголовки дней */}
-                                                                                {Array.from({length: 7}, (_, dayIndex) => {
-                                                                                    const date = new Date(scheduleDetails.schedule.start_date);
-                                                                                    date.setDate(date.getDate() + dayIndex);
-                                                                                    const dayName = date.toLocaleDateString('en-US', {weekday: 'short'});
-                                                                                    const dayMonth = date.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit'});
-                                                                                    return (
-                                                                                        <th key={dayIndex}>
-                                                                                            {dayName} {dayMonth}
-                                                                                        </th>
-                                                                                    );
-                                                                                })}
-                                                                            </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                            {scheduleDetails.all_shifts?.map(shift => (
-                                                                                <tr key={shift.shift_id}>
-                                                                                    <td className={`shift-${shift.shift_type} text-center fw-bold`}>
-                                                                                        {shift.shift_name}<br/>
-                                                                                        <small>{shift.start_time} ({shift.duration}h)</small>
-                                                                                    </td>
-                                                                                    {/* 7 дней недели */}
+                                                                return (
+                                                                    <div key={positionId} className="mb-4">
+                                                                        {/* Header with Edit/Save button */}
+                                                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                                                            <div>
+                                                                                <h6 className="text-primary mb-0">
+                                                                                    {positionData.position.name} - {positionData.position.profession}
+                                                                                    {hasPendingChanges && (
+                                                                                        <Badge bg="warning" className="ms-2">
+                                                                                            Unsaved changes
+                                                                                        </Badge>
+                                                                                    )}
+                                                                                </h6>
+                                                                                <small className="text-muted">
+                                                                                    Required: {positionData.position.num_of_emp} employees per shift
+                                                                                </small>
+                                                                            </div>
+                                                                            <div className="d-flex gap-2">
+                                                                                {!isEditing ? (
+                                                                                    <Button
+                                                                                        variant="outline-primary"
+                                                                                        size="sm"
+                                                                                        onClick={() => toggleEditPosition(positionId)}
+                                                                                        disabled={scheduleDetails.schedule.status === 'published'}
+                                                                                    >
+                                                                                        <i className="bi bi-pencil me-1"></i>
+                                                                                        Edit
+                                                                                    </Button>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Button
+                                                                                            variant="success"
+                                                                                            size="sm"
+                                                                                            onClick={() => savePositionChanges(positionId)}
+                                                                                            disabled={savingChanges}
+                                                                                        >
+                                                                                            <i className="bi bi-check-lg me-1"></i>
+                                                                                            {savingChanges ? 'Saving...' : 'Save'}
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                            variant="outline-secondary"
+                                                                                            size="sm"
+                                                                                            onClick={() => toggleEditPosition(positionId)}
+                                                                                        >
+                                                                                            <i className="bi bi-x-lg me-1"></i>
+                                                                                            Cancel
+                                                                                        </Button>
+                                                                                    </>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Table */}
+                                                                        <div className="table-responsive">
+                                                                            <table className="table table-bordered">
+                                                                                <thead className="table-light">
+                                                                                <tr>
+                                                                                    <th style={{width: '120px'}}>Shift</th>
                                                                                     {Array.from({length: 7}, (_, dayIndex) => {
                                                                                         const date = new Date(scheduleDetails.schedule.start_date);
                                                                                         date.setDate(date.getDate() + dayIndex);
-                                                                                        const dateStr = date.toISOString().split('T')[0];
-
-                                                                                        const cellData = positionData.schedule?.[dateStr]?.[shift.shift_id];
-                                                                                        const assignments = cellData?.assignments || [];
-
+                                                                                        const dayName = date.toLocaleDateString('en-US', {weekday: 'short'});
+                                                                                        const dayMonth = date.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit'});
                                                                                         return (
-                                                                                            <td key={dayIndex} className="text-center">
-                                                                                                {assignments.map(assignment => (
-                                                                                                    <div key={assignment.id} className="small fw-bold text-primary">
-                                                                                                        {assignment.employee.name}
-                                                                                                    </div>
-                                                                                                ))}
-                                                                                                {assignments.length === 0 && (
-                                                                                                    <span className="text-muted">-</span>
-                                                                                                )}
-                                                                                            </td>
+                                                                                            <th key={dayIndex} className="text-center">
+                                                                                                {dayName} {dayMonth}
+                                                                                            </th>
                                                                                         );
                                                                                     })}
                                                                                 </tr>
-                                                                            ))}
-                                                                            </tbody>
-                                                                        </table>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                {scheduleDetails.all_shifts?.map(shift => (
+                                                                                    <tr key={shift.shift_id}>
+                                                                                        <td className={`shift-${shift.shift_type} text-center fw-bold`}>
+                                                                                            {shift.shift_name}<br/>
+                                                                                            <small>{shift.start_time} ({shift.duration}h)</small>
+                                                                                        </td>
+                                                                                        {Array.from({length: 7}, (_, dayIndex) => {
+                                                                                            const date = new Date(scheduleDetails.schedule.start_date);
+                                                                                            date.setDate(date.getDate() + dayIndex);
+                                                                                            const dateStr = date.toISOString().split('T')[0];
+
+                                                                                            const cellData = positionData.schedule?.[dateStr]?.[shift.shift_id];
+                                                                                            const assignments = cellData?.assignments || [];
+
+                                                                                            // Check for pending changes
+                                                                                            const changeKey = `${positionId}-${dateStr}-${shift.shift_id}`;
+                                                                                            const pendingAssignments = Object.values(pendingChanges).filter(change =>
+                                                                                                change.action === 'assign' &&
+                                                                                                change.positionId === positionId &&
+                                                                                                change.date === dateStr &&
+                                                                                                change.shiftId === shift.shift_id
+                                                                                            );
+
+                                                                                            const isEmpty = assignments.length === 0 && pendingAssignments.length === 0;
+                                                                                            const isUnderstaffed = (assignments.length + pendingAssignments.length) < positionData.position.num_of_emp;
+
+                                                                                            return (
+                                                                                                <td
+                                                                                                    key={dayIndex}
+                                                                                                    className={`text-center ${isEditing ? 'position-relative' : ''} ${isEmpty && isEditing ? 'table-warning' : ''}`}
+                                                                                                    style={{
+                                                                                                        cursor: isEditing ? 'pointer' : 'default',
+                                                                                                        minHeight: '60px',
+                                                                                                        position: 'relative'
+                                                                                                    }}
+                                                                                                    onClick={() => isEditing && handleCellClick(dateStr, shift.shift_id, positionId)}
+                                                                                                >
+                                                                                                    {/* Existing assignments */}
+                                                                                                    {assignments.map(assignment => {
+                                                                                                        // Check if this assignment is marked for removal
+                                                                                                        const isMarkedForRemoval = Object.values(pendingChanges).some(
+                                                                                                            change => change.action === 'remove' && change.assignmentId === assignment.id
+                                                                                                        );
+
+                                                                                                        if (isMarkedForRemoval) {
+                                                                                                            return (
+                                                                                                                <div key={assignment.id} className="d-flex justify-content-between align-items-center mb-1 p-1 bg-danger bg-opacity-25 rounded">
+                                                                                                                    <small className="fw-bold text-danger text-decoration-line-through">
+                                                                                                                        {assignment.employee.name}
+                                                                                                                    </small>
+                                                                                                                    <Badge bg="danger" size="sm">Removed</Badge>
+                                                                                                                </div>
+                                                                                                            );
+                                                                                                        }
+
+                                                                                                        return (
+                                                                                                            <div key={assignment.id} className="d-flex justify-content-between align-items-center mb-1 p-1 bg-light rounded">
+                                                                                                                <small className="fw-bold">{assignment.employee.name}</small>
+                                                                                                                {isEditing && (
+                                                                                                                    <Button
+                                                                                                                        variant="outline-danger"
+                                                                                                                        size="sm"
+                                                                                                                        onClick={(e) => {
+                                                                                                                            e.stopPropagation();
+                                                                                                                            handleEmployeeRemove(dateStr, shift.shift_id, positionId, assignment.id);
+                                                                                                                        }}
+                                                                                                                        style={{ padding: '0.1rem 0.3rem', fontSize: '0.7rem' }}
+                                                                                                                    >
+                                                                                                                        ×
+                                                                                                                    </Button>
+                                                                                                                )}
+                                                                                                            </div>
+                                                                                                        );
+                                                                                                    })}
+
+                                                                                                    {/* Pending assignments */}
+                                                                                                    {pendingAssignments.map((change, index) => (
+                                                                                                        <div key={`pending-${index}`} className="d-flex justify-content-between align-items-center mb-1 p-1 bg-success bg-opacity-25 rounded">
+                                                                                                            <small className="fw-bold text-success">{change.empName}</small>
+                                                                                                            <div>
+                                                                                                                <Badge bg="success" size="sm" className="me-1">New</Badge>
+                                                                                                                {isEditing && (
+                                                                                                                    <Button
+                                                                                                                        variant="outline-danger"
+                                                                                                                        size="sm"
+                                                                                                                        onClick={(e) => {
+                                                                                                                            e.stopPropagation();
+                                                                                                                            // Remove pending change
+                                                                                                                            const changeKey = `${positionId}-${dateStr}-${shift.shift_id}-add-${change.empId}`;
+                                                                                                                            setPendingChanges(prev => {
+                                                                                                                                const newChanges = { ...prev };
+                                                                                                                                delete newChanges[changeKey];
+                                                                                                                                return newChanges;
+                                                                                                                            });
+                                                                                                                        }}
+                                                                                                                        style={{ padding: '0.1rem 0.3rem', fontSize: '0.7rem' }}
+                                                                                                                    >
+                                                                                                                        ×
+                                                                                                                    </Button>
+                                                                                                                )}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    ))}
+
+                                                                                                    {/* Add employee button */}
+                                                                                                    {isEditing && isEmpty && (
+                                                                                                        <div className="text-muted">
+                                                                                                            <i className="bi bi-plus-circle"></i> Add Employee
+                                                                                                        </div>
+                                                                                                    )}
+
+                                                                                                    {isEditing && isUnderstaffed && !isEmpty && (
+                                                                                                        <div className="text-warning">
+                                                                                                            <small>Need {positionData.position.num_of_emp - assignments.length - (pendingChange ? 1 : 0)} more</small>
+                                                                                                        </div>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                            );
+                                                                                        })}
+                                                                                    </tr>
+                                                                                ))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            )) : (
+                                                                );
+                                                            }) : (
                                                                 <div className="text-center text-muted p-4">
-                                                                    No schedule matrix data available.
-                                                                    <br />
-                                                                    <small>Make sure the backend returns schedule_matrix in the response.</small>
+                                                                    No schedule data available
                                                                 </div>
                                                             )
                                                         }
+                                                        {/* Publish Button */}
+                                                        {scheduleDetails.schedule.status === 'draft' && (
+                                                            <div className="text-center mt-4">
+                                                                <Button
+                                                                    variant="success"
+                                                                    onClick={publishSchedule}
+                                                                    disabled={Object.keys(pendingChanges).length > 0}
+                                                                >
+                                                                    <i className="bi bi-check-circle me-2"></i>
+                                                                    Publish Schedule
+                                                                </Button>
+                                                                {Object.keys(pendingChanges).length > 0 && (
+                                                                    <div className="text-warning mt-2">
+                                                                        <small>Save all changes before publishing</small>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
@@ -901,7 +1253,7 @@ const ScheduleManagement = () => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="fw-semibold">
+                                        <Form.Label className="fw-semibold" >
                                             <i className="bi bi-building me-2"></i>
                                             Site ID
                                         </Form.Label>
@@ -947,7 +1299,82 @@ const ScheduleManagement = () => {
                     </Modal.Footer>
                 </Modal>
             </Container>
+            {/* Employee Selection Modal - ДОБАВЬ ЗДЕСЬ */}
+            <Modal show={showEmployeeModal} onHide={() => setShowEmployeeModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Select Employee for Shift</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedCell && (
+                        <div className="mb-3">
+                            <strong>Date:</strong> {new Date(selectedCell.date).toLocaleDateString('en-US')} <br />
+                            <strong>Shift:</strong> {scheduleDetails.all_shifts.find(s => s.shift_id == selectedCell.shiftId)?.shift_name}
+                        </div>
+                    )}
+
+                    {loadingRecommendations ? (
+                        <div className="text-center">Loading recommendations...</div>
+                    ) : recommendations ? (
+                        <div>
+                            {/* Available Employees */}
+                            {recommendations.recommendations?.available?.length > 0 && (
+                                <div className="mb-4">
+                                    <h6 className="text-primary">Available Employees</h6>
+                                    {recommendations.recommendations.available.map(emp => (
+                                        <div key={emp.emp_id} className="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                                            <div>
+                                                <strong>{emp.name}</strong>
+                                                <br />
+                                                <small className="text-muted">ID: {emp.emp_id}</small>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="primary"
+                                                onClick={() => handleEmployeeAssign(emp.emp_id, emp.name)}
+                                            >
+                                                Select
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Show all employees if no recommendations */}
+                            {(!recommendations.recommendations?.available || recommendations.recommendations.available.length === 0) && scheduleDetails.all_employees && (
+                                <div className="mb-4">
+                                    <h6 className="text-secondary">All Employees</h6>
+                                    {scheduleDetails.all_employees.map(emp => (
+                                        <div key={emp.emp_id} className="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                                            <div>
+                                                <strong>{emp.first_name} {emp.last_name}</strong>
+                                                <br />
+                                                <small className="text-muted">ID: {emp.emp_id}</small>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="outline-primary"
+                                                onClick={() => handleEmployeeAssign(emp.emp_id, `${emp.first_name} ${emp.last_name}`)}
+                                            >
+                                                Select
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div>No recommendations available</div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEmployeeModal(false)}>
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
         </AdminLayout>
+
     );
 };
 
