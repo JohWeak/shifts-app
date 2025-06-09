@@ -442,6 +442,31 @@
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
 }
 
+/* Invalid date field styling */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Disabled button with better styling */
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Help text styling */
+.generation-help-text {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.text-danger small,
+.text-warning small {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .comparison-modal .modal-dialog {
@@ -457,3 +482,4 @@
         gap: 0.5rem;
     }
 }
+

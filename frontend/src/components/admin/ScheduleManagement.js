@@ -38,6 +38,12 @@ const ScheduleManagement = () => {
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
+    const [workSites, setWorkSites] = useState([]);
+    const [loadingWorkSites, setLoadingWorkSites] = useState(false);
+    const [modalError, setModalError] = useState(null);
+    const [isValidWeekStart, setIsValidWeekStart] = useState(true);
+
+
 
     // Edit mode states
     const [editMode, setEditMode] = useState(false);
@@ -56,15 +62,76 @@ const ScheduleManagement = () => {
         weekStart: '',
         generatePeriod: 'next-week'
     });
+    // Функция валидации даты - проверяет, что это воскресенье
+    const validateWeekStartDate = (dateString) => {
+        if (!dateString) return false;
+
+        const selectedDate = new Date(dateString);
+        const dayOfWeek = selectedDate.getDay();
+        return dayOfWeek === 0; // 0 = Sunday
+    };
+
+    const closeModal = () => {
+        setShowGenerateModal(false);
+        setModalError(null);
+        setIsValidWeekStart(true); // Сбросить состояние валидности
+    };
 
     useEffect(() => {
         fetchSchedules();
-        // Set default week start to next week
+        fetchWorkSites();
+
+        // Set default week start to next week (Sunday)
         const nextWeek = new Date();
         nextWeek.setDate(nextWeek.getDate() + 7);
-        const nextWeekString = nextWeek.toISOString().split('T')[0];
-        setGenerateSettings(prev => ({...prev, weekStart: nextWeekString}));
+
+        // Найти ближайшее воскресенье
+        const daysUntilSunday = (7 - nextWeek.getDay()) % 7;
+        nextWeek.setDate(nextWeek.getDate() + daysUntilSunday);
+
+        const nextSundayString = nextWeek.toISOString().split('T')[0];
+
+        setGenerateSettings(prev => ({...prev, weekStart: nextSundayString}));
+        setIsValidWeekStart(true); // По умолчанию будет валидная дата
     }, []);
+
+    const fetchWorkSites = async () => {
+        try {
+            setLoadingWorkSites(true);
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('http://localhost:5000/api/worksites', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const sites = await response.json();
+                console.log('Work Sites loaded:', sites);
+                setWorkSites(sites);
+
+                // Если есть sites и не выбран site_id, выбрать первый
+                if (sites.length > 0 && !generateSettings.site_id) {
+                    setGenerateSettings(prev => ({
+                        ...prev,
+                        site_id: sites[0].site_id
+                    }));
+                }
+            } else {
+                throw new Error('Failed to fetch work sites');
+            }
+        } catch (err) {
+            console.error('Error fetching work sites:', err);
+            setError({
+                type: 'warning',
+                message: 'Could not load work sites. Using default site.'
+            });
+        } finally {
+            setLoadingWorkSites(false);
+        }
+    };
 
     const fetchSchedules = async () => {
         try {
@@ -475,10 +542,9 @@ const ScheduleManagement = () => {
                                     )}
                                 </Button>
                                 <Button
-                                    variant="outline-secondary"
-                                    size="sm"
-                                    onClick={() => toggleEditPosition(positionId)}
-                                    disabled={savingChanges}
+                                    variant="secondary"
+                                    onClick={closeModal}
+                                    disabled={generating}
                                 >
                                     {MESSAGES.CANCEL}
                                 </Button>
@@ -867,7 +933,12 @@ const ScheduleManagement = () => {
                 </Modal>
 
                 {/* Generate Schedule Modal */}
-                <Modal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} size="lg">
+                <Modal
+                    show={showGenerateModal}
+                    onHide={closeModal}
+                    size="lg"
+                    className="generation-modal"
+                >
                     <Modal.Header closeButton>
                         <Modal.Title>
                             <i className="bi bi-plus-circle me-2"></i>
@@ -886,13 +957,35 @@ const ScheduleManagement = () => {
                                         <Form.Control
                                             type="date"
                                             value={generateSettings.weekStart}
-                                            onChange={(e) => setGenerateSettings(prev => ({
-                                                ...prev,
-                                                weekStart: e.target.value
-                                            }))}
+                                            onChange={(e) => {
+                                                const selectedDate = new Date(e.target.value);
+                                                const dayOfWeek = selectedDate.getDay();
+                                                const isValidDate = validateWeekStartDate(e.target.value);
+
+                                                // Обновить состояние валидности
+                                                setIsValidWeekStart(isValidDate);
+
+                                                // Очистить предыдущее предупреждение
+                                                setModalError(null);
+
+                                                // Если выбрали не воскресенье, показать предупреждение в модале
+                                                if (!isValidDate && e.target.value) {
+                                                    setModalError({
+                                                        type: 'warning',
+                                                        message: 'Please select a Sunday to start the schedule week. The generation button will be disabled until a valid date is selected.'
+                                                    });
+                                                }
+
+                                                setGenerateSettings(prev => ({
+                                                    ...prev,
+                                                    weekStart: e.target.value
+                                                }));
+                                            }}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            className={!isValidWeekStart && generateSettings.weekStart ? 'is-invalid' : ''}
                                         />
                                         <Form.Text className="text-muted">
-                                            Select the Sunday that starts the week to schedule.
+                                            Select the Sunday that starts the week to schedule. Future dates only.
                                         </Form.Text>
                                     </Form.Group>
                                 </Col>
@@ -900,19 +993,30 @@ const ScheduleManagement = () => {
                                     <Form.Group className="mb-3">
                                         <Form.Label className="fw-semibold">
                                             <i className="bi bi-building me-2"></i>
-                                            Site ID
+                                            Work Site
                                         </Form.Label>
-                                        <Form.Control
-                                            type="number"
+                                        <Form.Select
                                             value={generateSettings.site_id}
                                             onChange={(e) => setGenerateSettings(prev => ({
                                                 ...prev,
-                                                site_id: parseInt(e.target.value) || 1
+                                                site_id: parseInt(e.target.value)
                                             }))}
-                                            min="1"
-                                        />
+                                            disabled={loadingWorkSites}
+                                        >
+                                            {loadingWorkSites ? (
+                                                <option value="">Loading work sites...</option>
+                                            ) : workSites.length === 0 ? (
+                                                <option value="">No work sites available</option>
+                                            ) : (
+                                                workSites.map(site => (
+                                                    <option key={site.site_id} value={site.site_id}>
+                                                        {site.site_name}
+                                                    </option>
+                                                ))
+                                            )}
+                                        </Form.Select>
                                         <Form.Text className="text-muted">
-                                            The workplace site to generate schedule for.
+                                            Select the workplace site to generate schedule for.
                                         </Form.Text>
                                     </Form.Group>
                                 </Col>
@@ -938,6 +1042,20 @@ const ScheduleManagement = () => {
                                     Choose the scheduling algorithm. Auto mode will select the best available option.
                                 </Form.Text>
                             </Form.Group>
+                            {/* Modal-specific alerts */}
+                            {modalError && (
+                                <Alert
+                                    variant={modalError.type || 'warning'}
+                                    className="mt-3 mb-0"
+                                    dismissible
+                                    onClose={() => setModalError(null)}
+                                >
+                                    <i className={`bi bi-${modalError.type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2`}></i>
+                                    {modalError.message}
+                                </Alert>
+                            )}
+
+                            {/* Generation Progress */}
 
                             {/* Generation Progress */}
                             {generating && (
@@ -965,7 +1083,10 @@ const ScheduleManagement = () => {
                     <Modal.Footer>
                         <Button
                             variant="secondary"
-                            onClick={() => setShowGenerateModal(false)}
+                            onClick={() => {
+                                setShowGenerateModal(false);
+                                setModalError(null); // Очистить предупреждения
+                            }}
                             disabled={generating}
                         >
                             {MESSAGES.CANCEL}
@@ -973,7 +1094,13 @@ const ScheduleManagement = () => {
                         <Button
                             variant="primary"
                             onClick={generateSchedule}
-                            disabled={generating || !generateSettings.weekStart}
+                            disabled={
+                                generating ||
+                                !generateSettings.weekStart ||
+                                !isValidWeekStart ||
+                                loadingWorkSites ||
+                                workSites.length === 0
+                            }
                         >
                             {generating ? (
                                 <>
@@ -987,6 +1114,33 @@ const ScheduleManagement = () => {
                                 </>
                             )}
                         </Button>
+                        {/* Подсказка для пользователя */}
+                        {!isValidWeekStart && generateSettings.weekStart && (
+                            <div className="text-center mt-2">
+                                <small className="text-danger">
+                                    <i className="bi bi-exclamation-circle me-1"></i>
+                                    Please select a Sunday to enable schedule generation
+                                </small>
+                            </div>
+                        )}
+
+                        {loadingWorkSites && (
+                            <div className="text-center mt-2">
+                                <small className="text-muted">
+                                    <Spinner size="sm" className="me-1" />
+                                    Loading work sites...
+                                </small>
+                            </div>
+                        )}
+
+                        {workSites.length === 0 && !loadingWorkSites && (
+                            <div className="text-center mt-2">
+                                <small className="text-danger">
+                                    <i className="bi bi-exclamation-triangle me-1"></i>
+                                    No work sites available
+                                </small>
+                            </div>
+                        )}
                     </Modal.Footer>
                 </Modal>
             </Container>

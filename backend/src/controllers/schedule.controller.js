@@ -421,47 +421,58 @@ exports.getAdminWeeklySchedule = async (req, res) => {
 exports.generateNextWeekSchedule = async (req, res) => {
     try {
         const siteId = req.body.site_id || 1;
-        const algorithm = req.body.algorithm || 'auto'; // 'auto', 'cp-sat', 'advanced', 'simple'
-        const nextWeekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
+        const algorithm = req.body.algorithm || 'auto';
 
-        console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${nextWeekStart}, algorithm: ${algorithm}`);
+        // ИСПРАВЛЕНИЕ: использовать переданную дату или следующую неделю по умолчанию
+        let weekStart;
+        if (req.body.week_start) {
+            // Используем переданную дату
+            weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
+            console.log(`[ScheduleController] Using provided week start: ${weekStart}`);
+        } else {
+            // Fallback на следующую неделю
+            weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
+            console.log(`[ScheduleController] Using next week default: ${weekStart}`);
+        }
 
+        console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
+
+        // Остальной код функции остается без изменений...
         let result;
         let selectedAlgorithm = algorithm;
 
         // Автоматический выбор лучшего доступного алгоритма
         if (algorithm === 'auto') {
-            selectedAlgorithm = await this.selectBestAlgorithm();
+            selectedAlgorithm = await exports.selectBestAlgorithm();
             console.log(`[ScheduleController] Auto-selected algorithm: ${selectedAlgorithm}`);
         }
 
-        // Выполнение планирования
+        // Выполнение планирования - ИСПОЛЬЗОВАТЬ weekStart вместо nextWeekStart
         switch (selectedAlgorithm) {
             case 'cp-sat':
                 try {
-                    result = await CPSATBridge.generateOptimalSchedule(siteId, nextWeekStart);
+                    result = await CPSATBridge.generateOptimalSchedule(siteId, weekStart);
                     if (!result.success) {
-                        console.warn(`[ScheduleController] CP-SAT failed, falling back to advanced`);
-                        result = await AdvancedScheduler.generateOptimalSchedule(siteId, nextWeekStart);
-                        result.fallback = 'cp-sat-to-advanced';
+                        console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
+                        result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart);
+                        result.fallback = 'cp-sat-to-simple';
                     }
                 } catch (error) {
-                    console.warn(`[ScheduleController] CP-SAT error, falling back to advanced: ${error.message}`);
-                    result = await AdvancedScheduler.generateOptimalSchedule(siteId, nextWeekStart);
-                    result.fallback = 'cp-sat-to-advanced';
+                    console.warn(`[ScheduleController] CP-SAT error, falling back to simple: ${error.message}`);
+                    result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart);
+                    result.fallback = 'cp-sat-to-simple';
                     result.originalError = error.message;
                 }
                 break;
 
-
             case 'simple':
-                result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, nextWeekStart);
+                result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart);
                 break;
 
             default:
                 return res.status(400).json({
                     success: false,
-                    message: `Unknown algorithm: ${selectedAlgorithm}. Available: cp-sat, advanced, simple, auto`
+                    message: `Unknown algorithm: ${selectedAlgorithm}. Available: cp-sat, simple, auto`
                 });
         }
 
@@ -498,7 +509,7 @@ exports.generateNextWeekSchedule = async (req, res) => {
         console.error('[ScheduleController] Error generating schedule:', error);
         res.status(500).json({
             success: false,
-            message: 'Internal server error during schedule generation',
+            message: 'Error generating schedule',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
@@ -548,14 +559,21 @@ exports.checkPythonAvailability = async () => {
 exports.compareAllAlgorithms = async (req, res) => {
     try {
         const siteId = req.body.site_id || 1;
-        const nextWeekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
 
-        console.log(`[ScheduleController] Comparing algorithms for site ${siteId}, week ${nextWeekStart}`);
+        // ИСПРАВЛЕНИЕ: использовать переданную дату
+        let weekStart;
+        if (req.body.week_start) {
+            weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
+        } else {
+            weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
+        }
+
+        console.log(`[ScheduleController] Comparing algorithms for site ${siteId}, week ${weekStart}`);
 
         // Запустить только доступные алгоритмы
         const results = await Promise.allSettled([
-            CPSATBridge.generateOptimalSchedule(siteId, nextWeekStart),
-            ScheduleGeneratorService.generateWeeklySchedule(siteId, nextWeekStart)
+            CPSATBridge.generateOptimalSchedule(siteId, weekStart),
+            ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart)
         ]);
 
         console.log('Raw results:', results.map((r, i) => ({
@@ -590,7 +608,7 @@ exports.compareAllAlgorithms = async (req, res) => {
             message: 'Algorithm comparison completed',
             comparison: comparison,
             saved_schedule: bestResult ? bestResult.value.schedule : null,
-            week: nextWeekStart
+            week: weekStart
         });
 
     } catch (error) {

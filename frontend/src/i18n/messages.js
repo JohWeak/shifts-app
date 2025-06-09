@@ -51,6 +51,9 @@ export const MESSAGES = {
     ERROR_SAVING_CHANGES: 'Error saving changes: {error}',
     INTERNAL_SERVER_ERROR: 'Internal server error',
     SCHEDULE_NOT_FOUND: 'Schedule not found',
+    SELECT_SUNDAY_REQUIRED: 'Please select a Sunday to start the schedule week. The generation button will be disabled until a valid date is selected.',
+    SELECT_SUNDAY_TO_ENABLE: 'Please select a Sunday to enable schedule generation',
+    NO_WORK_SITES_AVAILABLE: 'No work sites available',
 
     // Loading Messages
     LOADING_SCHEDULES: 'Loading schedules...',
@@ -129,6 +132,15 @@ export const MESSAGES = {
     EMPLOYEES_USED: 'Employees Used',
     ASSIGNMENTS: 'Assignments',
     CONSTRAINT_VIOLATIONS: 'constraint violations',
+
+    // Work Sites
+    WORK_SITE: 'Work Site',
+    SELECT_WORK_SITE: 'Select the workplace site to generate schedule for.',
+    LOADING_WORK_SITES: 'Loading work sites...',
+    NO_WORK_SITES: 'No work sites available',
+    WEEK_START_SUNDAY_WARNING: 'Schedule weeks should start on Sunday. Consider selecting a Sunday date.',
+    FUTURE_DATES_ONLY: 'Select the Sunday that starts the week to schedule. Future dates only.',
+    COULD_NOT_LOAD_WORK_SITES: 'Could not load work sites. Using default site.',
 };
 
 
