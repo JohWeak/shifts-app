@@ -453,9 +453,6 @@ exports.generateNextWeekSchedule = async (req, res) => {
                 }
                 break;
 
-            case 'advanced':
-                result = await AdvancedScheduler.generateOptimalSchedule(siteId, nextWeekStart);
-                break;
 
             case 'simple':
                 result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, nextWeekStart);
@@ -514,7 +511,7 @@ exports.selectBestAlgorithm = async () => {
     if (pythonAvailable) {
         return 'cp-sat';
     } else {
-        return 'advanced';
+        return 'simple';
     }
 };
 
@@ -553,29 +550,39 @@ exports.compareAllAlgorithms = async (req, res) => {
         const siteId = req.body.site_id || 1;
         const nextWeekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
 
-        console.log(`[ScheduleController] Comparing all algorithms for site ${siteId}, week ${nextWeekStart}`);
+        console.log(`[ScheduleController] Comparing algorithms for site ${siteId}, week ${nextWeekStart}`);
 
-        // Запустить все алгоритмы параллельно
+        // Запустить только доступные алгоритмы
         const results = await Promise.allSettled([
             CPSATBridge.generateOptimalSchedule(siteId, nextWeekStart),
-            AdvancedScheduler.generateOptimalSchedule(siteId, nextWeekStart),
             ScheduleGeneratorService.generateWeeklySchedule(siteId, nextWeekStart)
         ]);
 
+        console.log('Raw results:', results.map((r, i) => ({
+            index: i,
+            status: r.status,
+            success: r.status === 'fulfilled' ? r.value?.success : false
+        })));
+
         const comparison = {
-            cp_sat: this.formatComparisonResult(results[0], 'CP-SAT'),
-            advanced: this.formatComparisonResult(results[1], 'Advanced'),
-            simple: this.formatComparisonResult(results[2], 'Simple')
+            'cp-sat': this.formatComparisonResult(results[0], 'CP-SAT'),
+            'simple': this.formatComparisonResult(results[1], 'Simple')
         };
+
+        console.log('Formatted comparison:', comparison);
 
         // Выбрать лучший результат
         const bestAlgorithm = this.selectBestResult(comparison);
+        console.log('Best algorithm selected:', bestAlgorithm);
+
         comparison.recommended = bestAlgorithm;
 
         // Сохранить лучший результат
+        const algorithmNames = ['cp-sat', 'simple'];
         const bestResult = results.find((result, index) => {
-            const algorithmNames = ['cp_sat', 'advanced', 'simple'];
-            return algorithmNames[index] === bestAlgorithm && result.status === 'fulfilled' && result.value.success;
+            return algorithmNames[index] === bestAlgorithm &&
+                result.status === 'fulfilled' &&
+                result.value?.success;
         });
 
         res.json({
@@ -615,34 +622,33 @@ exports.formatComparisonResult = (result, algorithmName) => {
 };
 
 exports.selectBestResult = (comparison) => {
-    // Приоритет: успешность > качество > скорость
-    const algorithms = ['cp_sat', 'advanced', 'simple'];
+    // Только доступные алгоритмы
+    const algorithms = ['cp-sat', 'simple'];
 
-    // Найти успешные алгоритмы
-    const successful = algorithms.filter(alg => comparison[alg].status === 'success');
+    const successful = algorithms.filter(alg =>
+        comparison[alg] && comparison[alg].status === 'success'
+    );
 
     if (successful.length === 0) {
-        return 'none';
+        return 'simple'; // Fallback на простой алгоритм
     }
 
-    // Если только один успешный - выбрать его
     if (successful.length === 1) {
         return successful[0];
     }
 
-    // Выбрать по качеству (больше назначений = лучше)
-    let best = successful[0];
-    let bestScore = comparison[best].stats?.total_assignments || 0;
+    // CP-SAT приоритетнее при равных результатах
+    if (successful.includes('cp-sat')) {
+        const cpSatScore = comparison['cp-sat'].stats?.total_assignments || 0;
+        const simpleScore = comparison['simple'].stats?.total_assignments || 0;
 
-    successful.forEach(alg => {
-        const score = comparison[alg].stats?.total_assignments || 0;
-        if (score > bestScore) {
-            best = alg;
-            bestScore = score;
+        // Если CP-SAT работает и результат не хуже - выбираем его
+        if (cpSatScore >= simpleScore) {
+            return 'cp-sat';
         }
-    });
+    }
 
-    return best;
+    return 'simple';
 };
 
 exports.getAllSchedules = async (req, res) => {
@@ -1323,12 +1329,12 @@ exports.compareAllAlgorithms = async (req, res) => {
 
         // Форматирование результатов
         const comparison = {
-            cp_sat: formatComparisonResult(results[0], 'CP-SAT'),
-            simple: formatComparisonResult(results[1], 'Simple')
+            'cp-sat': exports.formatComparisonResult(results[0], 'CP-SAT'),
+            'simple': exports.formatComparisonResult(results[1], 'Simple')  // Ключ simple
         };
 
         // Выбрать лучший результат
-        const bestAlgorithm = selectBestResult(comparison);
+        const bestAlgorithm = exports.selectBestResult(comparison);
         comparison.recommended = bestAlgorithm;
 
         // Сохранить лучший результат, если он есть
@@ -1362,6 +1368,33 @@ exports.compareAllAlgorithms = async (req, res) => {
     }
 };
 
+exports.formatComparisonResult = (result, algorithmName) => {
+    // Нормализация названий алгоритмов
+    const normalizeAlgorithmName = (name) => {
+        if (name === 'CP-SAT' || name === 'cp_sat') return 'cp-sat';
+        if (name === 'Simple' || name === 'simple') return 'simple';
+        return name.toLowerCase();
+    };
+
+    if (result.status === 'fulfilled' && result.value.success) {
+        return {
+            status: 'success',
+            algorithm: normalizeAlgorithmName(result.value.algorithm || algorithmName),
+            stats: result.value.stats,
+            solve_time: result.value.solveTime || result.value.solve_time || 'N/A',
+            score: result.value.score || 'N/A',
+            assignments_count: result.value.schedule?.assignments_count || 0
+        };
+    } else {
+        return {
+            status: 'failed',
+            algorithm: normalizeAlgorithmName(algorithmName),
+            error: result.status === 'rejected' ?
+                result.reason.message : result.value.error
+        };
+    }
+};
+
 // Вспомогательные функции для сравнения алгоритмов
 function formatComparisonResult(result, algorithmName) {
     if (result.status === 'fulfilled' && result.value.success) {
@@ -1384,36 +1417,47 @@ function formatComparisonResult(result, algorithmName) {
     }
 }
 
-function selectBestResult(comparison) {
-    // Приоритет: успешность > качество > скорость
-    const algorithms = ['cp_sat', 'simple'];
+exports.selectBestResult = (comparison) => {
+    console.log('Selecting best result from:', Object.keys(comparison)); // Debug log
 
-    // Найти успешные алгоритмы
-    const successful = algorithms.filter(alg => comparison[alg].status === 'success');
+    // Только доступные алгоритмы
+    const algorithms = ['cp-sat', 'simple'];
+
+    const successful = algorithms.filter(alg => {
+        const result = comparison[alg];
+        return result && result.status === 'success'; // Добавить проверку на существование
+    });
+
+    console.log('Successful algorithms:', successful); // Debug log
 
     if (successful.length === 0) {
-        return 'none';
+        console.log('No successful algorithms, defaulting to simple');
+        return 'simple'; // Fallback на простой алгоритм
     }
 
-    // Если только один успешный - выбрать его
     if (successful.length === 1) {
+        console.log('Only one successful algorithm:', successful[0]);
         return successful[0];
     }
 
-    // Выбрать по качеству (больше назначений = лучше)
-    let best = successful[0];
-    let bestScore = comparison[best].assignments_count || 0;
+    // CP-SAT приоритетнее при равных результатах
+    if (successful.includes('cp-sat')) {
+        const cpSatResult = comparison['cp-sat'];
+        const simpleResult = comparison['simple'];
 
-    successful.forEach(alg => {
-        const score = comparison[alg].assignments_count || 0;
-        if (score > bestScore) {
-            best = alg;
-            bestScore = score;
+        const cpSatScore = cpSatResult?.stats?.total_assignments || cpSatResult?.assignments_count || 0;
+        const simpleScore = simpleResult?.stats?.total_assignments || simpleResult?.assignments_count || 0;
+
+        console.log('Scores - CP-SAT:', cpSatScore, 'Simple:', simpleScore);
+
+        // Если CP-SAT работает и результат не хуже - выбираем его
+        if (cpSatScore >= simpleScore) {
+            return 'cp-sat';
         }
-    });
+    }
 
-    return best;
-}
+    return 'simple';
+};
 
 exports.getRecommendedEmployees = async (req, res) => {
     try {

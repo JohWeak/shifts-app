@@ -1,0 +1,459 @@
+/* frontend/src/components/admin/ScheduleManagement.css */
+
+/* Schedule table styling */
+.schedule-table {
+    font-size: 0.9rem;
+}
+
+.schedule-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    vertical-align: middle;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+.schedule-table td {
+    vertical-align: middle;
+    border: 1px solid #dee2e6;
+    min-height: 60px;
+    position: relative;
+}
+
+/* Shift type colors */
+.shift-morning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.shift-evening {
+    background-color: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+}
+
+.shift-night {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.shift-header {
+    min-width: 120px;
+    font-weight: 600;
+}
+
+/* Edit mode styling */
+.schedule-table td[style*="cursor: pointer"]:hover {
+    background-color: #e3f2fd !important;
+    transition: background-color 0.2s ease;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+/* Employee assignment styling */
+.employee-assignment {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 2px 0;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.employee-assignment.pending {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.employee-assignment.removing {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+    text-decoration: line-through;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.7rem;
+}
+
+/* Modal improvements */
+.modal-lg {
+    max-width: 800px;
+}
+
+.employee-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.employee-item {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.employee-item:hover {
+    background-color: #f8f9fa;
+}
+
+.employee-item:last-child {
+    border-bottom: none;
+}
+
+/* Alert styling */
+.alert {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Button improvements */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-group .btn {
+    margin-right: 0.5rem;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+
+/* Loading states */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .schedule-table {
+        font-size: 0.8rem;
+    }
+
+    .shift-header {
+        min-width: 100px;
+    }
+
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .employee-assignment {
+        font-size: 0.7rem;
+        padding: 2px 4px;
+    }
+}
+
+/* Animation for pending changes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.employee-assignment.pending {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Tooltip improvements */
+.tooltip {
+    font-size: 0.8rem;
+}
+
+/* Card improvements */
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+/* Tab improvements */
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 2px solid #0d6efd;
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #0d6efd;
+    border-color: transparent;
+}
+
+/* Generation Modal Styles */
+.generation-modal .modal-body {
+    padding: 2rem;
+}
+
+.generation-modal .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.generation-modal .form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.generation-modal .form-control,
+.generation-modal .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.generation-modal .form-control:focus,
+.generation-modal .form-select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Progress indicators */
+.generation-progress {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.generation-progress .progress {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+/* Alert improvements for generation */
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+    border-radius: 0.5rem;
+}
+
+/* Modal header improvements */
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1.5rem 1.5rem 1rem;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+    color: #495057;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+/* Button improvements */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    opacity: 0.65;
+}
+
+/* Form icons */
+.form-label i {
+    color: #6c757d;
+    margin-right: 0.5rem;
+}
+
+/* Responsive improvements for modals */
+@media (max-width: 576px) {
+    .modal-lg {
+        max-width: 95%;
+        margin: 1rem auto;
+    }
+
+    .generation-modal .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding: 1rem;
+    }
+}
+
+/* Loading state improvements */
+.generating-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 0.375rem;
+}
+
+/* Success and error states */
+.alert-success {
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+    color: #0f5132;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+    color: #842029;
+}
+
+/* Table improvements for schedule overview */
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Badge improvements */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+.badge.bg-success {
+    background-color: #198754 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Comparison Modal Styles */
+.comparison-modal .modal-dialog {
+    max-width: 800px; /* Уменьшить с xl размера */
+}
+
+.comparison-modal .modal-body {
+    padding: 2rem 1.5rem;
+}
+
+.comparison-modal .row.justify-content-center {
+    gap: 1rem; /* Добавить промежуток между карточками */
+}
+
+.comparison-modal .card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.comparison-modal .card:hover {
+    transform: translateY(-2px);
+}
+
+.comparison-modal .card.border-success {
+    border-width: 2px;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .comparison-modal .modal-dialog {
+        max-width: 95%;
+        margin: 1rem auto;
+    }
+
+    .comparison-modal .modal-body {
+        padding: 1rem;
+    }
+
+    .comparison-modal .row.justify-content-center {
+        gap: 0.5rem;
+    }
+}
