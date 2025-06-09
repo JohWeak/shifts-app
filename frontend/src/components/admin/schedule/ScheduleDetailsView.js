@@ -1,10 +1,10 @@
 // frontend/src/components/admin/schedule/ScheduleDetailsView.js
 import React, { useState } from 'react';
-import { Card, Row, Col, Badge, Button, Spinner } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Button, Spinner, Alert } from 'react-bootstrap';
 import PositionScheduleEditor from './PositionScheduleEditor';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { SCHEDULE_STATUS } from '../../../constants/scheduleConstants';
-import { MESSAGES } from '../../../i18n/messages';
+import { useMessages } from '../../../i18n/messages';
 import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
 
 const ScheduleDetailsView = ({
@@ -22,7 +22,10 @@ const ScheduleDetailsView = ({
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [showUnpublishModal, setShowUnpublishModal] = useState(false);
     const [exporting, setExporting] = useState(false);
+    const [exportMessage, setExportMessage] = useState(null);
+
     const api = useScheduleAPI();
+    const messages = useMessages('ru'); // Using Russian messages
 
     if (!scheduleDetails) return null;
 
@@ -48,68 +51,123 @@ const ScheduleDetailsView = ({
         }
     };
 
-    const handleExport = async () => {
+    const handleExport = async (format = 'pdf') => {
         try {
             setExporting(true);
-            const result = await api.exportSchedule(scheduleDetails.schedule.id, 'pdf');
+            setExportMessage(null);
+
+            const result = await api.exportSchedule(scheduleDetails.schedule.id, format);
 
             if (result.success) {
-                console.log('Schedule exported successfully:', result.filename);
+                setExportMessage({
+                    type: 'success',
+                    text: `${messages.EXPORT_SUCCESS}: ${result.filename}`
+                });
+
+                // Clear success message after 3 seconds
+                setTimeout(() => setExportMessage(null), 3000);
             }
         } catch (err) {
             console.error('Error exporting schedule:', err);
-            alert(`Error exporting schedule: ${err.message}`);
+            setExportMessage({
+                type: 'error',
+                text: `${messages.EXPORT_ERROR}: ${err.message}`
+            });
+
+            // Clear error message after 5 seconds
+            setTimeout(() => setExportMessage(null), 5000);
         } finally {
             setExporting(false);
         }
     };
 
+    const getStatusBadgeVariant = (status) => {
+        return status === SCHEDULE_STATUS.PUBLISHED ? 'success' : 'warning';
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case SCHEDULE_STATUS.PUBLISHED:
+                return messages.SCHEDULE_STATUS_PUBLISHED;
+            case SCHEDULE_STATUS.DRAFT:
+                return messages.SCHEDULE_STATUS_DRAFT;
+            case SCHEDULE_STATUS.ARCHIVED:
+                return messages.SCHEDULE_STATUS_ARCHIVED;
+            default:
+                return status;
+        }
+    };
+
     return (
         <div>
+            {/* Export Message Alert */}
+            {exportMessage && (
+                <Alert
+                    variant={exportMessage.type === 'success' ? 'success' : 'danger'}
+                    className="mb-3"
+                    dismissible
+                    onClose={() => setExportMessage(null)}
+                >
+                    <i className={`bi bi-${exportMessage.type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2`}></i>
+                    {exportMessage.text}
+                </Alert>
+            )}
+
             {/* Schedule Header */}
             <Card className="mb-4">
                 <Card.Body>
                     <Row>
                         <Col md={8}>
                             <h5>
-                                Week: {new Date(scheduleDetails.schedule.start_date).toLocaleDateString()} - {' '}
+                                {messages.SCHEDULE_WEEK}: {new Date(scheduleDetails.schedule.start_date).toLocaleDateString()} - {' '}
                                 {new Date(scheduleDetails.schedule.end_date).toLocaleDateString()}
                             </h5>
                             <p className="text-muted mb-0">
-                                Site: {scheduleDetails.schedule.work_site?.site_name || 'Unknown'} | {' '}
-                                Status: <Badge bg={scheduleDetails.schedule.status === SCHEDULE_STATUS.PUBLISHED ? 'success' : 'warning'}>
+                                {messages.SCHEDULE_SITE}: {scheduleDetails.schedule.work_site?.site_name || 'Unknown'} | {' '}
+                                {messages.SCHEDULE_STATUS}: <Badge bg={getStatusBadgeVariant(scheduleDetails.schedule.status)}>
                                 <i className={`bi bi-${scheduleDetails.schedule.status === SCHEDULE_STATUS.PUBLISHED ? 'check-circle' : 'clock'} me-1`}></i>
-                                {scheduleDetails.schedule.status.charAt(0).toUpperCase() + scheduleDetails.schedule.status.slice(1)}
+                                {getStatusText(scheduleDetails.schedule.status)}
                             </Badge>
                                 {scheduleDetails.schedule.status === SCHEDULE_STATUS.PUBLISHED && (
                                     <small className="text-success ms-2">
                                         <i className="bi bi-eye me-1"></i>
-                                        Visible to employees
+                                        {messages.VISIBLE_TO_EMPLOYEES}
                                     </small>
                                 )}
                             </p>
                         </Col>
                         <Col md={4} className="text-end">
                             <div className="d-flex gap-2 justify-content-end flex-wrap">
-                                {/* Export Button */}
-                                <Button
-                                    variant="outline-secondary"
-                                    size="sm"
-                                    onClick={handleExport}
-                                    disabled={api.loading || exporting}
-                                >
-                                    {exporting ? (
-                                        <>
-                                            <Spinner size="sm" className="me-1" />
-                                            Exporting...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i className="bi bi-download me-1"></i>
-                                            Export PDF
-                                        </>
-                                    )}
-                                </Button>
+                                {/* Export Buttons */}
+                                <div className="btn-group">
+                                    <Button
+                                        variant="outline-secondary"
+                                        size="sm"
+                                        onClick={() => handleExport('pdf')}
+                                        disabled={api.loading || exporting}
+                                    >
+                                        {exporting ? (
+                                            <>
+                                                <Spinner size="sm" className="me-1" />
+                                                {messages.EXPORTING}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-file-earmark-pdf me-1"></i>
+                                                {messages.EXPORT_PDF}
+                                            </>
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="outline-secondary"
+                                        size="sm"
+                                        onClick={() => handleExport('csv')}
+                                        disabled={api.loading || exporting}
+                                    >
+                                        <i className="bi bi-file-earmark-spreadsheet me-1"></i>
+                                        {messages.EXPORT_CSV}
+                                    </Button>
+                                </div>
 
                                 {/* Publish/Unpublish Buttons */}
                                 {canPublish() ? (
@@ -120,7 +178,7 @@ const ScheduleDetailsView = ({
                                         disabled={api.loading || Object.keys(pendingChanges).length > 0}
                                     >
                                         <i className="bi bi-check-circle me-1"></i>
-                                        Publish Schedule
+                                        {messages.PUBLISH_SCHEDULE}
                                     </Button>
                                 ) : (
                                     <Button
@@ -130,7 +188,7 @@ const ScheduleDetailsView = ({
                                         disabled={api.loading}
                                     >
                                         <i className="bi bi-pencil me-1"></i>
-                                        Unpublish & Edit
+                                        {messages.UNPUBLISH_EDIT}
                                     </Button>
                                 )}
                             </div>
@@ -140,7 +198,7 @@ const ScheduleDetailsView = ({
                                 <div className="mt-2">
                                     <small className="text-warning">
                                         <i className="bi bi-exclamation-triangle me-1"></i>
-                                        Save all changes before publishing
+                                        {messages.SAVE_BEFORE_PUBLISH}
                                     </small>
                                 </div>
                             )}
@@ -152,72 +210,65 @@ const ScheduleDetailsView = ({
             {/* Position Schedules */}
             <Card>
                 <Card.Header className="d-flex justify-content-between align-items-center">
-                    <h6 className="mb-0">Position Schedules</h6>
-                    {!canEdit() && (
-                        <Badge bg="info" className="ms-2">
-                            <i className="bi bi-lock me-1"></i>
-                            Read-only (Published)
+                    <h6 className="mb-0">{messages.POSITION_SCHEDULES}</h6>
+                    {Object.keys(pendingChanges).length > 0 && (
+                        <Badge bg="warning">
+                            {Object.keys(pendingChanges).length} несохраненных изменений
                         </Badge>
                     )}
                 </Card.Header>
                 <Card.Body>
-                    {scheduleDetails.schedule_matrix &&
-                        Object.entries(scheduleDetails.schedule_matrix).map(([positionId, positionData]) => (
+                    {scheduleDetails.positions && scheduleDetails.positions.length > 0 ? (
+                        scheduleDetails.positions.map(position => (
                             <PositionScheduleEditor
-                                key={positionId}
-                                positionId={positionId}
-                                positionData={positionData}
-                                scheduleDetails={scheduleDetails}
-                                isEditing={editingPositions.has(positionId) && canEdit()}
-                                pendingChanges={pendingChanges}
-                                savingChanges={savingChanges}
-                                onToggleEdit={canEdit() ? onToggleEditPosition : () => {}}
-                                onSaveChanges={onSavePositionChanges}
-                                onCellClick={canEdit() ? onCellClick : () => {}}
+                                key={position.pos_id}
+                                position={position}
+                                assignments={scheduleDetails.assignments.filter(
+                                    assignment => assignment.pos_id === position.pos_id
+                                )}
+                                employees={scheduleDetails.employees}
+                                shifts={scheduleDetails.shifts}
+                                isEditing={editingPositions[position.pos_id]}
+                                pendingChanges={pendingChanges[position.pos_id] || {}}
+                                savingChanges={savingChanges[position.pos_id]}
+                                canEdit={canEdit()}
+                                onToggleEdit={() => onToggleEditPosition(position.pos_id)}
+                                onSaveChanges={() => onSavePositionChanges(position.pos_id)}
+                                onCellClick={onCellClick}
                                 onEmployeeRemove={onEmployeeRemove}
                                 onRemovePendingChange={onRemovePendingChange}
-                                readOnly={!canEdit()}
                             />
                         ))
-                    }
+                    ) : (
+                        <div className="text-center text-muted py-4">
+                            <i className="bi bi-person-workspace fs-1 mb-3 d-block"></i>
+                            <p>{messages.NO_POSITIONS}</p>
+                        </div>
+                    )}
                 </Card.Body>
             </Card>
 
-            {/* Publish Confirmation Modal */}
+            {/* Confirmation Modals */}
             <ConfirmationModal
                 show={showPublishModal}
-                title="Publish Schedule"
-                message="Are you sure you want to publish this schedule?"
+                onHide={() => setShowPublishModal(false)}
                 onConfirm={handlePublish}
-                onCancel={() => setShowPublishModal(false)}
-                loading={api.loading}
-                confirmText="Publish Schedule"
-                variant="success"
-                showWarning={false}
-            >
-                <div className="bg-light p-3 rounded mb-3">
-                    <h6 className="mb-2">
-                        <i className="bi bi-info-circle me-2"></i>
-                        Publishing Effects:
-                    </h6>
-                    <ul className="mb-0 small">
-                        <li>Schedule becomes visible to all employees</li>
-                        <li>Editing becomes restricted (can be unpublished if needed)</li>
-                        <li>Employees will receive notifications about their assignments</li>
-                        <li>Schedule appears in employee dashboards and mobile apps</li>
-                    </ul>
-                </div>
-            </ConfirmationModal>
-            {/* Unpublish Confirmation Modal */}
+                title="Опубликовать расписание"
+                message={messages.CONFIRM_PUBLISH}
+                confirmText={messages.PUBLISH_SCHEDULE}
+                confirmVariant="success"
+                isLoading={api.loading}
+            />
+
             <ConfirmationModal
                 show={showUnpublishModal}
-                title="Unpublish Schedule"
-                message="Are you sure you want to unpublish this schedule? It will become hidden from employees and editable again."
+                onHide={() => setShowUnpublishModal(false)}
                 onConfirm={handleUnpublish}
-                onCancel={() => setShowUnpublishModal(false)}
-                loading={api.loading}
-                confirmText="Unpublish Schedule"
-                variant="warning"
+                title="Снять с публикации"
+                message={messages.CONFIRM_UNPUBLISH}
+                confirmText={messages.UNPUBLISH_EDIT}
+                confirmVariant="warning"
+                isLoading={api.loading}
             />
         </div>
     );

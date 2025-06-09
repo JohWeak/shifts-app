@@ -6,6 +6,9 @@ const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const weekOfYear = require('dayjs/plugin/weekOfYear');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
+const puppeteer = require('puppeteer');
+const PDFGenerator = require('../utils/pdfGenerator');
+const path = require('path');
 
 // Импорты всех алгоритмов
 const ScheduleGeneratorService = require('../services/schedule-generator.service'); // Простой алгоритм
@@ -1116,8 +1119,8 @@ exports.deleteSchedule = async (req, res) => {
 // Экспорт расписания
 exports.exportSchedule = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
-        const {format = 'json'} = req.query;
+        const { scheduleId } = req.params;
+        const { format = 'pdf', lang = 'en' } = req.query;
 
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [
@@ -1125,12 +1128,28 @@ exports.exportSchedule = async (req, res) => {
                     model: ScheduleAssignment,
                     as: 'assignments',
                     include: [
-                        {model: Employee, as: 'employee', attributes: ['emp_id', 'first_name', 'last_name']},
-                        {model: Shift, as: 'shift', attributes: ['shift_id', 'shift_name', 'start_time', 'duration']},
-                        {model: Position, as: 'position', attributes: ['pos_id', 'pos_name']}
+                        {
+                            model: Employee,
+                            as: 'employee',
+                            attributes: ['emp_id', 'first_name', 'last_name']
+                        },
+                        {
+                            model: Shift,
+                            as: 'shift',
+                            attributes: ['shift_id', 'shift_name', 'start_time', 'duration']
+                        },
+                        {
+                            model: Position,
+                            as: 'position',
+                            attributes: ['pos_id', 'pos_name']
+                        }
                     ]
                 },
-                {model: WorkSite, as: 'workSite', attributes: ['site_id', 'site_name']}
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                }
             ]
         });
 
@@ -1141,7 +1160,7 @@ exports.exportSchedule = async (req, res) => {
             });
         }
 
-        // Подготовка данных для экспорта
+        // Prepare export data structure
         const exportData = {
             schedule: {
                 id: schedule.id,
@@ -1161,7 +1180,7 @@ exports.exportSchedule = async (req, res) => {
         };
 
         if (format === 'csv') {
-            // CSV экспорт
+            // CSV export logic
             const fields = ['date', 'employee', 'shift', 'shift_time', 'position', 'status'];
             const csv = [
                 fields.join(','),
@@ -1175,6 +1194,17 @@ exports.exportSchedule = async (req, res) => {
             return res.send(csv);
         }
 
+        if (format === 'pdf') {
+            // Generate PDF using the PDFGenerator class
+            const pdfGenerator = new PDFGenerator(lang);
+            const pdfBuffer = await pdfGenerator.generateSchedulePDF(exportData);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.pdf"`);
+            return res.send(pdfBuffer);
+        }
+
+        // Default JSON export
         res.json({
             success: true,
             data: exportData

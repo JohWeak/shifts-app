@@ -169,7 +169,7 @@ export const useScheduleAPI = () => {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    // Убираем Content-Type для файловых запросов
+                    // No Content-Type header for file downloads
                 }
             });
 
@@ -183,45 +183,39 @@ export const useScheduleAPI = () => {
                 }
             }
 
-            // Получаем имя файла из заголовков ответа
+            // Get filename from response headers
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `schedule-${scheduleId}.${format}`;
 
             if (contentDisposition) {
-                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                if (filenameMatch) {
-                    filename = filenameMatch[1].replace(/['"]/g, '');
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"])(.*?)\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[3]) {
+                    filename = filenameMatch[3];
                 }
             }
 
-            // Правильно обрабатываем blob
+            // Convert response to blob
             const blob = await response.blob();
 
-            // Проверяем, что blob не пустой
-            if (blob.size === 0) {
-                throw new Error('Received empty file');
-            }
+            // Create download link and trigger download
+            const url = window.URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = filename;
 
-            // Создаем URL и скачиваем файл
-            const url = window.URL.createObjectURL(new Blob([blob], {
-                type: response.headers.get('Content-Type') || 'application/pdf'
-            }));
+            // Append to body, click, and remove
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.style.display = 'none';
+            // Clean up the URL object
+            window.URL.revokeObjectURL(url);
 
-            document.body.appendChild(link);
-            link.click();
-
-            // Очищаем ресурсы
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-
-            return { success: true, filename };
+            return {
+                success: true,
+                filename: filename,
+                message: 'Schedule exported successfully'
+            };
         });
     };
 
