@@ -1,7 +1,12 @@
 // frontend/src/hooks/useScheduleOperations.js
+import { useState } from 'react';
 import { useScheduleAPI } from './useScheduleAPI';
 import { MESSAGES, interpolateMessage } from '../i18n/messages';
-import { generateChangeKey } from '../utils/scheduleUtils';
+
+// Утилита для генерации ключей изменений
+const generateChangeKey = (positionId, date, shiftId, action, empId) => {
+    return `${positionId}-${date}-${shiftId}-${action}-${empId}`;
+};
 
 export const useScheduleOperations = (state) => {
     const {
@@ -18,8 +23,11 @@ export const useScheduleOperations = (state) => {
         setShowComparisonModal,
         setShowEmployeeModal,
         setSelectedCell,
+        setSelectedPosition,
+        setIsModalOpen,
         showAlert,
         toggleEditPosition,
+        isCellEditing,
         clearPendingChangesForPosition,
         resetScheduleView
     } = state;
@@ -95,7 +103,6 @@ export const useScheduleOperations = (state) => {
         try {
             await api.updateScheduleStatus(scheduleId, newStatus);
 
-            // Обновляем статус в локальном списке расписаний без перезагрузки
             setSchedules(prevSchedules =>
                 prevSchedules.map(schedule =>
                     schedule.id === scheduleId
@@ -104,7 +111,6 @@ export const useScheduleOperations = (state) => {
                 )
             );
 
-            // Обновляем детали расписания если они открыты
             if (state.selectedSchedule === scheduleId && state.scheduleDetails) {
                 setScheduleDetails(prevDetails => ({
                     ...prevDetails,
@@ -123,66 +129,167 @@ export const useScheduleOperations = (state) => {
         }
     };
 
-    const handleCellClick = async (positionId, date, shiftId) => {
-        if (!state.editingPositions.has(positionId)) return;
+    const handleCellClick = (date, positionId, shiftId) => {
+        console.log('handleCellClick called:', { date, positionId, shiftId });
 
-        setSelectedCell({ positionId, date, shiftId });
-        setLoadingRecommendations(true);
-        setShowEmployeeModal(true);
+        if (isCellEditing && isCellEditing(date, positionId, shiftId)) {
+            console.log('Cell is in editing mode, not opening modal');
+            return;
+        }
 
+        setSelectedPosition({
+            date,
+            positionId,
+            shiftId,
+            key: `${date}-${positionId}-${shiftId}`
+        });
+        setIsModalOpen(true);
+        console.log('Modal should open now');
+    };
+
+    // ИСПРАВЛЕНО: handleRemoveEmployee для существующих работников
+    const handleRemoveEmployee = async (date, positionId, shiftId, empId) => {
         try {
-            const allEmployees = state.scheduleDetails?.all_employees || [];
+            console.log('=== handleRemoveEmployee (SIMPLE) ===');
+            console.log('Removing employee:', { date, positionId, shiftId, empId });
 
-            const formattedEmployees = allEmployees.map(emp => ({
-                emp_id: emp.emp_id,
-                first_name: emp.first_name,
-                last_name: emp.last_name,
-                email: emp.email,
-                availability_status: 'available',
-                priority: 1
-            }));
+            // Проверим, это pending assignment или существующий работник
+            const pendingAssignmentKey = Object.keys(state.pendingChanges).find(key => {
+                const change = state.pendingChanges[key];
+                return change.action === 'assign' &&
+                    change.empId === empId &&
+                    change.date === date &&
+                    change.shiftId === shiftId &&
+                    change.positionId === positionId;
+            });
 
-            setRecommendations({
-                recommendations: {
-                    available: formattedEmployees,
-                    preferred: [],
-                    cannot_work: [],
-                    violates_constraints: []
-                }
-            });
-        } catch (err) {
-            console.error('Error getting recommendations:', err);
-            setRecommendations({
-                recommendations: {
-                    available: [],
-                    preferred: [],
-                    cannot_work: [],
-                    violates_constraints: []
-                }
-            });
-        } finally {
-            setLoadingRecommendations(false);
+            if (pendingAssignmentKey) {
+                // Удаляем pending assignment
+                setPendingChanges(prev => {
+                    const newChanges = { ...prev };
+                    delete newChanges[pendingAssignmentKey];
+                    return newChanges;
+                });
+                showAlert('success', 'Employee removed');
+                return;
+            }
+
+            // Для существующего работника - добавляем в pending removals
+            const existingAssignment = state.scheduleDetails?.assignments?.find(assignment =>
+                assignment.position_id === positionId &&
+                assignment.shift_id === shiftId &&
+                assignment.work_date === date &&
+                assignment.emp_id === empId
+            );
+
+            if (existingAssignment) {
+                const changeKey = generateChangeKey(positionId, date, shiftId, 'remove', empId);
+
+                setPendingChanges(prev => ({
+                    ...prev,
+                    [changeKey]: {
+                        action: 'remove',
+                        empId,
+                        assignmentId: existingAssignment.id,
+                        date,
+                        shiftId,
+                        positionId
+                    }
+                }));
+
+                showAlert('success', 'Employee removed');
+            }
+        } catch (error) {
+            console.error('Error removing employee:', error);
+            showAlert('danger', 'Error removing employee');
         }
     };
 
+// НОВАЯ функция для клика на работника (замена)
+    const handleEmployeeClick = (date, positionId, shiftId, currentEmpId) => {
+        console.log('handleEmployeeClick for replacement:', { date, positionId, shiftId, currentEmpId });
+
+        // Сохраняем информацию о текущем работнике для замены
+        setSelectedPosition({
+            date,
+            positionId,
+            shiftId,
+            key: `${date}-${positionId}-${shiftId}`,
+            replaceEmployeeId: currentEmpId // Добавляем ID работника для замены
+        });
+        setIsModalOpen(true);
+    };
+
+
+    // ИСПРАВЛЕНО: handleEmployeeAssign для назначения работников
     const handleEmployeeAssign = (empId, empName) => {
-        const { date, shiftId, positionId } = state.selectedCell;
-        const changeKey = generateChangeKey(positionId, date, shiftId, 'add', empId);
+        if (!state.selectedPosition) {
+            showAlert('danger', MESSAGES.en.NO_POSITION_SELECTED);
+            return;
+        }
 
-        setPendingChanges(prev => ({
-            ...prev,
-            [changeKey]: {
-                action: 'assign',
-                empId,
-                empName,
-                date,
-                shiftId,
-                positionId
+        const { date, shiftId, positionId, replaceEmployeeId } = state.selectedPosition;
+
+        console.log('=== handleEmployeeAssign (WITH REPLACEMENT) ===');
+        console.log('New employee:', { empId, empName });
+        console.log('Replace employee ID:', replaceEmployeeId);
+
+        // Если это замена существующего работника
+        if (replaceEmployeeId) {
+            console.log('Replacing existing employee');
+
+            // Сначала удаляем старого работника
+            const existingAssignment = state.scheduleDetails?.assignments?.find(assignment =>
+                assignment.position_id === positionId &&
+                assignment.shift_id === shiftId &&
+                assignment.work_date === date &&
+                assignment.emp_id === replaceEmployeeId
+            );
+
+            if (existingAssignment) {
+                const removeKey = generateChangeKey(positionId, date, shiftId, 'remove', replaceEmployeeId);
+                const assignKey = generateChangeKey(positionId, date, shiftId, 'assign', empId);
+
+                setPendingChanges(prev => ({
+                    ...prev,
+                    [removeKey]: {
+                        action: 'remove',
+                        empId: replaceEmployeeId,
+                        assignmentId: existingAssignment.id,
+                        date,
+                        shiftId,
+                        positionId
+                    },
+                    [assignKey]: {
+                        action: 'assign',
+                        empId,
+                        empName,
+                        date,
+                        shiftId,
+                        positionId
+                    }
+                }));
             }
-        }));
+        } else {
+            // Обычное назначение на пустую ячейку
+            const changeKey = generateChangeKey(positionId, date, shiftId, 'assign', empId);
 
-        setShowEmployeeModal(false);
-        setSelectedCell(null);
+            setPendingChanges(prev => ({
+                ...prev,
+                [changeKey]: {
+                    action: 'assign',
+                    empId,
+                    empName,
+                    date,
+                    shiftId,
+                    positionId
+                }
+            }));
+        }
+
+        setIsModalOpen(false);
+        setSelectedPosition(null);
+        showAlert('success', replaceEmployeeId ? 'Employee replaced' : 'Employee assigned');
     };
 
     const handleEmployeeRemove = (date, shiftId, positionId, assignmentId) => {
@@ -207,10 +314,12 @@ export const useScheduleOperations = (state) => {
             );
 
             if (positionChanges.length === 0) {
-                showAlert('info', MESSAGES.NO_CHANGES_TO_SAVE);
+                showAlert('info', MESSAGES.en.NO_CHANGES_TO_SAVE);
                 toggleEditPosition(positionId);
                 return;
             }
+
+            console.log('Saving position changes:', positionChanges);
 
             const result = await api.updateScheduleAssignments(state.selectedSchedule, positionChanges);
 
@@ -218,11 +327,11 @@ export const useScheduleOperations = (state) => {
             clearPendingChangesForPosition(positionId);
             toggleEditPosition(positionId);
 
-            showAlert('success', interpolateMessage(MESSAGES.POSITION_CHANGES_SAVED, {
+            showAlert('success', interpolateMessage(MESSAGES.en.POSITION_CHANGES_SAVED, {
                 count: result?.changesProcessed || positionChanges.length
             }));
         } catch (err) {
-            showAlert('danger', interpolateMessage(MESSAGES.ERROR_SAVING_CHANGES, {
+            showAlert('danger', interpolateMessage(MESSAGES.en.ERROR_SAVING_CHANGES, {
                 error: err.message
             }));
         }
@@ -235,13 +344,14 @@ export const useScheduleOperations = (state) => {
         handleCompareAlgorithms,
         handleScheduleDeleted,
         handleCellClick,
+        handleEmployeeClick,
+        handleRemoveEmployee,
         handleEmployeeAssign,
         handleEmployeeRemove,
         handleSavePositionChanges,
         handleScheduleStatusUpdate,
         apiLoading: api.loading,
         apiError: api.error
-
     };
 };
 

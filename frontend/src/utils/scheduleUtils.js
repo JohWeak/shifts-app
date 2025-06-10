@@ -104,6 +104,8 @@ export const countPendingChangesForPosition = (pendingChanges, positionId) => {
  * @param {string} entityId - Employee or Assignment ID
  * @returns {string} - Change key
  */
-export const generateChangeKey = (positionId, date, shiftId, action, entityId) => {
-    return `${positionId}-${date}-${shiftId}-${action}-${entityId}`;
+export const generateChangeKey = (positionId, date, shiftId, action, empId) => {
+    const key = `${positionId}-${date}-${shiftId}-${action}-${empId}`;
+    console.log('Generated change key:', key);
+    return key;
 };

@@ -1,90 +1,380 @@
 /* frontend/src/components/admin/ScheduleManagement.css */
 
-/* Schedule table styling */
+/* ==============================================
+   CSS CUSTOM PROPERTIES (VARIABLES)
+   ============================================== */
+:root {
+    /* Colors */
+    --primary-color: #0d6efd;
+    --primary-hover: #0b5ed7;
+    --primary-focus: #0a58ca;
+    --success-color: #198754;
+    --success-light: #d1e7dd;
+    --success-border: #badbcc;
+    --success-text: #0f5132;
+    --warning-color: #ffc107;
+    --warning-light: #fff3cd;
+    --warning-border: #ffecb5;
+    --warning-text: #856404;
+    --danger-color: #dc3545;
+    --danger-light: #f8d7da;
+    --danger-border: #f5c2c7;
+    --danger-text: #842029;
+    --info-color: #0dcaf0;
+    --info-light: #d1ecf1;
+    --info-border: #bee5eb;
+    --info-text: #0c5460;
+
+    /* Neutral Colors */
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #6c757d;
+    --gray-600: #495057;
+    --gray-700: #343a40;
+    --gray-800: #212529;
+    --white: #ffffff;
+    --black: #000000;
+
+    /* Background Colors */
+    --bg-light: var(--gray-100);
+    --bg-white: var(--white);
+    --bg-hover: rgba(0, 0, 0, 0.075);
+    --bg-editing-hover: #e3f2fd;
+
+    /* Border Colors */
+    --border-color: var(--gray-300);
+    --border-light: var(--gray-200);
+    --border-radius: 0.375rem;
+    --border-radius-sm: 0.25rem;
+    --border-radius-lg: 0.5rem;
+    --border-radius-xl: 0.75rem;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --spacing-2xl: 2rem;
+    --spacing-3xl: 3rem;
+
+    /* Typography */
+    --font-size-xs: 0.7rem;
+    --font-size-sm: 0.8rem;
+    --font-size-base: 0.9rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.25rem;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    /* Z-indexes */
+    --z-dropdown: 1000;
+    --z-modal: 1050;
+    --z-tooltip: 1070;
+
+    /* Layout */
+    --container-max-width: 1200px;
+    --sidebar-width: 250px;
+    --header-height: 60px;
+
+    /* Schedule Cell */
+    --cell-min-height: 60px;
+    --cell-min-height-mobile: 40px;
+    --shift-header-width: 120px;
+    --shift-header-width-mobile: 100px;
+}
+
+/* ==============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================== */
+/* Mobile: max-width: 576px */
+/* Tablet: max-width: 768px */
+/* Desktop: max-width: 992px */
+/* Large: max-width: 1200px */
+
+/* ==============================================
+   BASE SCHEDULE TABLE STYLES
+   ============================================== */
 .schedule-table {
-    font-size: 0.9rem;
+    font-size: var(--font-size-base);
+    width: 100%;
+    border-collapse: collapse;
 }
 
 .schedule-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
+    background-color: var(--bg-light);
+    font-weight: var(--font-weight-semibold);
     vertical-align: middle;
     text-align: center;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .schedule-table td {
-    vertical-align: middle;
-    border: 1px solid #dee2e6;
-    min-height: 60px;
+    vertical-align: top;
+    border: 1px solid var(--border-color);
+    min-height: var(--cell-min-height);
     position: relative;
+    padding: var(--spacing-sm);
+    transition: background-color var(--transition-normal);
 }
 
-/* Shift type colors */
+/* ==============================================
+   SHIFT TYPE STYLES
+   ============================================== */
+.shift-header {
+    min-width: var(--shift-header-width);
+    background-color: var(--bg-light);
+    font-weight: var(--font-weight-medium);
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
 .shift-morning {
-    background-color: #fff3cd;
-    border-left: 4px solid #ffc107;
+    background-color: var(--warning-light);
+    border-left: 4px solid var(--warning-color);
+}
+
+.shift-day {
+    background-color: var(--info-light);
+    border-left: 4px solid var(--info-color);
 }
 
 .shift-evening {
-    background-color: #d1ecf1;
+    background-color: var(--info-light);
     border-left: 4px solid #17a2b8;
 }
 
 .shift-night {
-    background-color: #d4edda;
-    border-left: 4px solid #28a745;
+    background-color: var(--success-light);
+    border-left: 4px solid var(--success-color);
+    color: var(--success-text);
 }
 
-.shift-header {
-    min-width: 120px;
-    font-weight: 600;
+/* ==============================================
+   SCHEDULE CELL INTERACTIVE STYLES
+   ============================================== */
+.schedule-cell {
+    min-height: var(--cell-min-height);
+    vertical-align: top;
+    transition: background-color var(--transition-normal);
+    position: relative;
 }
 
-/* Edit mode styling */
-.schedule-table td[style*="cursor: pointer"]:hover {
-    background-color: #e3f2fd !important;
-    transition: background-color 0.2s ease;
+.schedule-cell.editing-mode {
+    cursor: pointer;
+    position: relative;
+    overflow: visible;
 }
 
-.table-warning {
-    background-color: #fff3cd !important;
+.schedule-cell.editing-mode:hover {
+    background-color: var(--bg-editing-hover);
 }
 
-/* Employee assignment styling */
-.employee-assignment {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 4px 8px;
-    margin: 2px 0;
-    font-size: 0.8rem;
+.schedule-cell.table-warning {
+    background-color: var(--warning-light);
+}
+
+.schedule-cell.table-info {
+    background-color: var(--info-light);
+}
+
+.schedule-cell.table-success {
+    background-color: var(--success-light);
+}
+
+.schedule-cell .empty-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: var(--cell-min-height);
+}
+
+.schedule-cell .empty-cell:hover {
+    transform: scale(1.05);
+    transition: transform var(--transition-normal);
+}
+
+.schedule-cell .employees-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* ==============================================
+   EMPLOYEE ITEM STYLES
+   ============================================== */
+.employee-item {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    border: 1px solid var(--border-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: var(--font-size-sm);
+    position: relative;
+    z-index: 1;
 }
 
-.employee-assignment.pending {
-    background-color: #d4edda;
-    border-color: #28a745;
-    color: #155724;
+.employee-item.pending-assignment {
+    background: rgba(13, 202, 240, 0.1);
+    border-left: 3px solid var(--info-color);
+    animation: fadeIn var(--transition-slow);
 }
 
-.employee-assignment.removing {
-    background-color: #f8d7da;
-    border-color: #dc3545;
-    color: #721c24;
-    text-decoration: line-through;
+.employee-item.pending-removal {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid var(--warning-color);
 }
 
-/* Badge styling */
-.badge {
-    font-size: 0.7rem;
+.employee-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Modal improvements */
+.employee-name.employee-clickable {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.employee-name.employee-clickable:hover {
+    color: var(--primary-color);
+}
+
+/* ==============================================
+   BUTTON STYLES
+   ============================================== */
+.remove-btn {
+    position: relative;
+    z-index: 20;
+    opacity: 0.7;
+    transition: all var(--transition-normal);
+    border: 1px solid var(--danger-color);
+    background: var(--white);
+    color: var(--danger-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.remove-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    background: var(--danger-color);
+    color: var(--white);
+}
+
+.remove-btn:focus {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-focus);
+}
+
+.btn-primary:disabled {
+    background-color: var(--gray-500);
+    border-color: var(--gray-500);
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+}
+
+.btn-group .btn {
+    margin-right: var(--spacing-sm);
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+
+/* ==============================================
+   POSITION EDITOR STYLES
+   ============================================== */
+.position-schedule-editor {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    background: var(--bg-white);
+    margin-bottom: var(--spacing-lg);
+}
+
+.position-schedule-editor .alert-info {
+    border-left: 4px solid var(--info-color);
+    background-color: var(--info-light);
+    border-color: var(--info-border);
+    color: var(--info-text);
+}
+
+/* ==============================================
+   MODAL STYLES
+   ============================================== */
 .modal-lg {
     max-width: 800px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+}
+
+.modal-header .modal-title {
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-600);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl);
+}
+
+.modal-body .list-group-item {
+    border-left: 4px solid transparent;
+    transition: border-color var(--transition-normal);
+    padding: var(--spacing-md);
+}
+
+.modal-body .list-group-item:hover {
+    border-left-color: var(--primary-color);
+    background-color: var(--bg-light);
 }
 
 .employee-list {
@@ -92,100 +382,196 @@
     overflow-y: auto;
 }
 
-.employee-item {
-    padding: 12px;
-    border-bottom: 1px solid #dee2e6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background-color 0.2s ease;
-}
-
-.employee-item:hover {
-    background-color: #f8f9fa;
-}
-
-.employee-item:last-child {
-    border-bottom: none;
-}
-
-/* Alert styling */
+/* ==============================================
+   ALERT STYLES
+   ============================================== */
 .alert {
     border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 .alert-success {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: var(--success-light);
+    border-color: var(--success-border);
+    color: var(--success-text);
 }
 
 .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: var(--danger-light);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
 }
 
 .alert-warning {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: var(--warning-light);
+    border-color: var(--warning-border);
+    color: var(--warning-text);
 }
 
 .alert-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
+    background-color: var(--info-light);
+    border-color: var(--info-border);
+    color: var(--info-text);
 }
 
-/* Button improvements */
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
+/* ==============================================
+   CARD STYLES
+   ============================================== */
+.card {
+    border: none;
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--border-radius-lg);
 }
 
-.btn-group .btn {
-    margin-right: 0.5rem;
+.card-header {
+    background-color: var(--bg-light);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
 
-.btn-group .btn:last-child {
-    margin-right: 0;
+/* ==============================================
+   TAB STYLES
+   ============================================== */
+.nav-tabs {
+    border-bottom: 2px solid var(--border-color);
 }
 
-/* Loading states */
-.loading-overlay {
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--gray-500);
+    font-weight: var(--font-weight-medium);
+    transition: color var(--transition-fast);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-color);
+    border-color: transparent;
+}
+
+/* ==============================================
+   TABLE IMPROVEMENTS
+   ============================================== */
+.table th {
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--bg-light);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bg-hover);
+}
+
+/* ==============================================
+   BADGE STYLES
+   ============================================== */
+.badge {
+    font-weight: var(--font-weight-medium);
+    padding: 0.5em 0.75em;
+    font-size: var(--font-size-xs);
+}
+
+.badge.bg-success {
+    background-color: var(--success-color);
+}
+
+.badge.bg-warning {
+    background-color: var(--warning-color);
+    color: var(--black);
+}
+
+.badge.bg-info {
+    background-color: var(--info-color);
+}
+
+.badge.bg-secondary {
+    background-color: var(--gray-500);
+}
+
+/* ==============================================
+   LOADING STATES
+   ============================================== */
+.loading-overlay,
+.generating-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: var(--z-dropdown);
+    border-radius: var(--border-radius);
 }
 
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .schedule-table {
-        font-size: 0.8rem;
-    }
-
-    .shift-header {
-        min-width: 100px;
-    }
-
-    .btn-sm {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.8rem;
-    }
-
-    .employee-assignment {
-        font-size: 0.7rem;
-        padding: 2px 4px;
-    }
+.loading-spinner {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Animation for pending changes */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-3xl) 0;
+    color: var(--gray-500);
+}
+
+/* ==============================================
+   FORM STYLES
+   ============================================== */
+.generation-modal .modal-body {
+    padding: var(--spacing-2xl);
+}
+
+.generation-modal .form-label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-sm);
+}
+
+.generation-modal .form-text {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+    margin-top: var(--spacing-xs);
+}
+
+.generation-modal .form-control,
+.generation-modal .form-select {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.generation-modal .form-control:focus,
+.generation-modal .form-select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* ==============================================
+   ANIMATIONS
+   ============================================== */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -197,341 +583,206 @@
     }
 }
 
-.employee-assignment.pending {
-    animation: fadeIn 0.3s ease-in-out;
+.employee-assignment.pending,
+.employee-item.pending-assignment {
+    animation: fadeIn var(--transition-slow);
 }
 
-/* Tooltip improvements */
-.tooltip {
-    font-size: 0.8rem;
-}
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
 
-/* Card improvements */
-.card {
-    border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    border-radius: 8px 8px 0 0 !important;
-}
-
-/* Tab improvements */
-.nav-tabs {
-    border-bottom: 2px solid #dee2e6;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    color: #6c757d;
-    font-weight: 500;
-}
-
-.nav-tabs .nav-link.active {
-    color: #0d6efd;
-    border-bottom: 2px solid #0d6efd;
-    background-color: transparent;
-}
-
-.nav-tabs .nav-link:hover {
-    color: #0d6efd;
-    border-color: transparent;
-}
-
-/* Generation Modal Styles */
-.generation-modal .modal-body {
-    padding: 2rem;
-}
-
-.generation-modal .form-label {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.5rem;
-}
-
-.generation-modal .form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-}
-
-.generation-modal .form-control,
-.generation-modal .form-select {
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem;
-    padding: 0.75rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.generation-modal .form-control:focus,
-.generation-modal .form-select:focus {
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-/* Progress indicators */
-.generation-progress {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-.generation-progress .progress {
-    height: 0.5rem;
-    border-radius: 0.25rem;
-}
-
-/* Alert improvements for generation */
-.alert-info {
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-    color: #0c5460;
-    border-radius: 0.5rem;
-}
-
-/* Modal header improvements */
-.modal-header {
-    border-bottom: 1px solid #dee2e6;
-    padding: 1.5rem 1.5rem 1rem;
-}
-
-.modal-header .modal-title {
-    font-weight: 600;
-    color: #495057;
-}
-
-.modal-footer {
-    border-top: 1px solid #dee2e6;
-    padding: 1rem 1.5rem 1.5rem;
-}
-
-/* Button improvements */
-.btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-    font-weight: 500;
-}
-
-.btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
-}
-
-.btn-primary:disabled {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    opacity: 0.65;
-}
-
-/* Form icons */
-.form-label i {
-    color: #6c757d;
-    margin-right: 0.5rem;
-}
-
-/* Responsive improvements for modals */
+/* Mobile Devices (max-width: 576px) */
 @media (max-width: 576px) {
+    :root {
+        --cell-min-height: var(--cell-min-height-mobile);
+        --shift-header-width: var(--shift-header-width-mobile);
+        --font-size-base: var(--font-size-sm);
+        --spacing-lg: var(--spacing-md);
+        --spacing-xl: var(--spacing-lg);
+        --spacing-2xl: var(--spacing-xl);
+    }
+
+    .schedule-table {
+        font-size: var(--font-size-sm);
+    }
+
+    .shift-header {
+        min-width: var(--shift-header-width-mobile);
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+
+    .employee-item {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs);
+    }
+
+    .remove-btn {
+        width: 16px;
+        height: 16px;
+        font-size: 8px;
+    }
+
     .modal-lg {
         max-width: 95%;
-        margin: 1rem auto;
+        margin: var(--spacing-lg) auto;
     }
 
     .generation-modal .modal-body {
-        padding: 1rem;
+        padding: var(--spacing-lg);
     }
 
     .modal-header,
     .modal-footer {
-        padding: 1rem;
+        padding: var(--spacing-lg);
+    }
+
+    .position-schedule-editor {
+        padding: var(--spacing-md);
+    }
+
+    .btn-sm {
+        padding: var(--spacing-xs);
+        font-size: var(--font-size-xs);
     }
 }
 
-/* Loading state improvements */
-.generating-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    border-radius: 0.375rem;
-}
-
-/* Success and error states */
-.alert-success {
-    background-color: #d1e7dd;
-    border-color: #badbcc;
-    color: #0f5132;
-}
-
-.alert-danger {
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
-    color: #842029;
-}
-
-/* Table improvements for schedule overview */
-.table th {
-    font-weight: 600;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.075);
-}
-
-/* Badge improvements */
-.badge {
-    font-weight: 500;
-    padding: 0.5em 0.75em;
-}
-
-.badge.bg-success {
-    background-color: #198754 !important;
-}
-
-.badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-}
-
-.badge.bg-secondary {
-    background-color: #6c757d !important;
-}
-
-/* Comparison Modal Styles */
-.comparison-modal .modal-dialog {
-    max-width: 800px; /* Уменьшить с xl размера */
-}
-
-.comparison-modal .modal-body {
-    padding: 2rem 1.5rem;
-}
-
-.comparison-modal .row.justify-content-center {
-    gap: 1rem; /* Добавить промежуток между карточками */
-}
-
-.comparison-modal .card {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    transition: transform 0.2s ease;
-}
-
-.comparison-modal .card:hover {
-    transform: translateY(-2px);
-}
-
-.comparison-modal .card.border-success {
-    border-width: 2px;
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
-}
-
-/* Invalid date field styling */
-.form-control.is-invalid {
-    border-color: #dc3545;
-    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
-}
-
-/* Disabled button with better styling */
-.btn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
-
-/* Help text styling */
-.generation-help-text {
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-}
-
-.text-danger small,
-.text-warning small {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Delete confirmation modal */
-.delete-confirmation-modal .modal-header {
-    border-bottom: 1px solid #dee2e6;
-}
-
-.delete-confirmation-modal .modal-title {
-    font-weight: 600;
-}
-
-.delete-confirmation-modal .schedule-info {
-    border: 1px solid #dee2e6;
-}
-
-.delete-confirmation-modal .row {
-    margin-bottom: 0.5rem;
-}
-
-.delete-confirmation-modal .row:last-child {
-    margin-bottom: 0;
-}
-
-/* Action buttons styling */
-.table td .d-flex {
-    gap: 0.5rem;
-}
-
-.btn-outline-danger:hover {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: white;
-}
-
-/* Disabled state for published schedules */
-.btn:disabled.d-none {
-    display: none !important;
-}
-
-/* Trash icon hover effect */
-.btn-outline-danger .bi-trash {
-    transition: transform 0.2s ease;
-}
-
-.btn-outline-danger:hover .bi-trash {
-    transform: scale(1.1);
-}
-
-/* Alert in modal */
-.delete-confirmation-modal .alert {
-    border: none;
-    border-left: 4px solid #ffc107;
-}
-
-/* Responsive adjustments */
+/* Tablet Devices (max-width: 768px) */
 @media (max-width: 768px) {
+    .schedule-table th,
+    .schedule-table td {
+        padding: var(--spacing-sm);
+    }
+
+    .employee-name {
+        font-size: var(--font-size-sm);
+    }
+
     .comparison-modal .modal-dialog {
         max-width: 95%;
-        margin: 1rem auto;
+        margin: var(--spacing-lg) auto;
     }
 
     .comparison-modal .modal-body {
-        padding: 1rem;
+        padding: var(--spacing-lg);
     }
 
     .comparison-modal .row.justify-content-center {
-        gap: 0.5rem;
+        gap: var(--spacing-sm);
+    }
+
+    .card-header,
+    .card-body {
+        padding: var(--spacing-md);
     }
 }
 
+/* Desktop Devices (max-width: 992px) */
+@media (max-width: 992px) {
+    .modal-lg {
+        max-width: 90%;
+    }
+
+    .position-schedule-editor {
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* Large Screens (max-width: 1200px) */
+@media (max-width: 1200px) {
+    .container-fluid {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+}
+
+/* ==============================================
+   UTILITY CLASSES
+   ============================================== */
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.transition-all {
+    transition: all var(--transition-normal);
+}
+
+.shadow-sm {
+    box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+    box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg);
+}
+
+/* ==============================================
+   PRINT STYLES
+   ============================================== */
+@media print {
+    .btn,
+    .modal,
+    .nav-tabs,
+    .remove-btn {
+        display: none !important;
+    }
+
+    .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .schedule-table th,
+    .schedule-table td {
+        border: 1px solid var(--black);
+        padding: var(--spacing-sm);
+    }
+
+    .position-schedule-editor {
+        break-inside: avoid;
+        margin-bottom: var(--spacing-lg);
+    }
+}
+
+/* ==============================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for better accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .schedule-cell,
+    .employee-item {
+        border-width: 2px;
+    }
+
+    .btn {
+        border-width: 2px;
+    }
+}

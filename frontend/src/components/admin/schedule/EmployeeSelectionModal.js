@@ -1,138 +1,157 @@
-// frontend/src/components/admin/schedule/CompareAlgorithmsModal.js
-import React from 'react';
-import { Modal, Button, Table, Badge, Alert } from 'react-bootstrap';
+// frontend/src/components/admin/schedule/EmployeeSelectionModal.js
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, ListGroup, Badge, Spinner, Alert, Form } from 'react-bootstrap';
 import { useMessages } from '../../../i18n/messages';
+import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
 
-const CompareAlgorithmsModal = ({ show, onHide, results, onUseAlgorithm }) => {
+const EmployeeSelectionModal = ({
+                                    show,
+                                    onHide,
+                                    selectedPosition,
+                                    onEmployeeSelect,
+                                    scheduleDetails
+                                }) => {
     const messages = useMessages('en');
+    const api = useScheduleAPI();
 
-    const getAlgorithmBadge = (algorithm) => {
-        const variants = {
-            'cp-sat': 'primary',
-            'simple': 'success',
-            'auto': 'info'
-        };
-        return <Badge bg={variants[algorithm] || 'secondary'}>{algorithm}</Badge>;
+    const [availableEmployees, setAvailableEmployees] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Fetch available employees when modal opens
+    useEffect(() => {
+        if (show && selectedPosition) {
+            fetchAvailableEmployees();
+        } else {
+            // Reset state when modal closes
+            setAvailableEmployees([]);
+            setError(null);
+            setSearchTerm('');
+        }
+    }, [show, selectedPosition]);
+
+    const fetchAvailableEmployees = async () => {
+        if (!selectedPosition) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            console.log('Fetching available employees for:', selectedPosition);
+
+            // For now, we'll use all employees from scheduleDetails
+            // In a real app, this would filter based on availability, constraints, etc.
+            const employees = scheduleDetails?.employees || [];
+
+            // Filter out employees already assigned to this shift
+            const currentAssignments = scheduleDetails?.assignments?.filter(assignment =>
+                assignment.position_id === selectedPosition.positionId &&
+                assignment.shift_id === selectedPosition.shiftId &&
+                assignment.work_date === selectedPosition.date
+            ) || [];
+
+            const assignedEmployeeIds = currentAssignments.map(a => a.emp_id);
+            const available = employees.filter(emp => !assignedEmployeeIds.includes(emp.emp_id));
+
+            setAvailableEmployees(available);
+        } catch (err) {
+            console.error('Error fetching available employees:', err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const formatExecutionTime = (time) => {
-        if (!time) return 'N/A';
-        return `${time}ms`;
+    const handleEmployeeSelect = (employee) => {
+        console.log('Employee selected:', employee);
+        onEmployeeSelect(employee.emp_id, `${employee.first_name} ${employee.last_name}`);
     };
 
-    const formatCoverage = (assignments, total) => {
-        if (!total) return 'N/A';
-        const percentage = Math.round((assignments / total) * 100);
-        return `${percentage}%`;
-    };
+    // Filter employees based on search term
+    const filteredEmployees = availableEmployees.filter(employee =>
+        `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const getBestAlgorithm = () => {
-        if (!results) return null;
+    const getModalTitle = () => {
+        if (!selectedPosition) return messages.SELECT_EMPLOYEE;
 
-        // Simple logic to determine best algorithm
-        const algorithms = Object.keys(results).filter(key => key !== 'recommended');
-        if (algorithms.length === 0) return null;
+        const date = new Date(selectedPosition.date).toLocaleDateString();
+        const shift = scheduleDetails?.shifts?.find(s => s.shift_id === selectedPosition.shiftId);
+        const position = scheduleDetails?.positions?.find(p => p.pos_id === selectedPosition.positionId);
 
-        // Find algorithm with highest assignment count and success
-        let best = algorithms[0];
-        let bestScore = 0;
-
-        algorithms.forEach(alg => {
-            const result = results[alg];
-            if (result.success) {
-                const score = result.assignments || 0;
-                if (score > bestScore) {
-                    bestScore = score;
-                    best = alg;
-                }
-            }
-        });
-
-        return best;
+        return `${messages.SELECT_EMPLOYEE} - ${position?.pos_name} (${shift?.shift_name}, ${date})`;
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="xl">
+        <Modal show={show} onHide={onHide} size="lg" centered>
             <Modal.Header closeButton>
-                <Modal.Title>
-                    <i className="bi bi-speedometer2 me-2"></i>
-                    {messages.COMPARE_ALGORITHMS}
-                </Modal.Title>
+                <Modal.Title>{getModalTitle()}</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
-                {!results ? (
+                {/* Search Filter */}
+                <Form.Group className="mb-3">
+                    <Form.Control
+                        type="text"
+                        placeholder="Search employees..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        disabled={loading}
+                    />
+                </Form.Group>
+
+                {/* Loading State */}
+                {loading && (
                     <div className="text-center py-4">
-                        <div className="spinner-border mb-3" role="status"></div>
-                        <h5>{messages.COMPARING}</h5>
-                        <p className="text-muted">{messages.GENERATION_INFO}</p>
+                        <Spinner animation="border" />
+                        <div className="mt-2">{messages.LOADING_EMPLOYEES}</div>
                     </div>
-                ) : (
-                    <>
-                        <Alert variant="info" className="mb-4">
-                            <h6 className="mb-2">
-                                <i className="bi bi-info-circle me-2"></i>
-                                {messages.ALGORITHM_COMPARISON_RESULTS}
-                            </h6>
-                            <p className="mb-0">{messages.BEST_ALGORITHM_INFO}</p>
-                        </Alert>
+                )}
 
-                        <Table responsive striped>
-                            <thead>
-                            <tr>
-                                <th>{messages.ALGORITHM}</th>
-                                <th>{messages.STATUS}</th>
-                                <th>{messages.ASSIGNMENTS}</th>
-                                <th>{messages.EXECUTION_TIME}</th>
-                                <th>{messages.COVERAGE}</th>
-                                <th className="text-center">{messages.ACTIONS}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {Object.entries(results)
-                                .filter(([key]) => key !== 'recommended')
-                                .map(([algorithm, result]) => (
-                                    <tr key={algorithm} className={getBestAlgorithm() === algorithm ? 'table-success' : ''}>
-                                        <td>
-                                            {getAlgorithmBadge(algorithm)}
-                                            {getBestAlgorithm() === algorithm && (
-                                                <Badge bg="warning" className="ms-2">
-                                                    {messages.BEST_ALGORITHM}
-                                                </Badge>
-                                            )}
-                                        </td>
-                                        <td>
-                                            {result.success ? (
-                                                <Badge bg="success">Success</Badge>
-                                            ) : (
-                                                <Badge bg="danger">Failed</Badge>
-                                            )}
-                                        </td>
-                                        <td>{result.assignments || 0}</td>
-                                        <td>{formatExecutionTime(result.execution_time)}</td>
-                                        <td>{formatCoverage(result.assignments, result.total_slots)}</td>
-                                        <td className="text-center">
-                                            <Button
-                                                variant={getBestAlgorithm() === algorithm ? 'success' : 'outline-primary'}
-                                                size="sm"
-                                                onClick={() => onUseAlgorithm(algorithm)}
-                                                disabled={!result.success}
-                                            >
-                                                <i className="bi bi-check-circle me-1"></i>
-                                                {messages.SELECT}
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
+                {/* Error State */}
+                {error && (
+                    <Alert variant="danger">
+                        <i className="bi bi-exclamation-triangle me-2"></i>
+                        {error}
+                    </Alert>
+                )}
 
-                        {results.recommended && (
-                            <Alert variant="success">
-                                <strong>{messages.RECOMMENDATION}:</strong> {results.recommended}
-                            </Alert>
-                        )}
-                    </>
+                {/* No Employees Available */}
+                {!loading && !error && filteredEmployees.length === 0 && (
+                    <Alert variant="info">
+                        <i className="bi bi-info-circle me-2"></i>
+                        {searchTerm ? 'No employees match your search.' : messages.NO_AVAILABLE_EMPLOYEES}
+                    </Alert>
+                )}
+
+                {/* Employee List */}
+                {!loading && !error && filteredEmployees.length > 0 && (
+                    <ListGroup>
+                        {filteredEmployees.map(employee => (
+                            <ListGroup.Item
+                                key={employee.emp_id}
+                                action
+                                onClick={() => handleEmployeeSelect(employee)}
+                                className="d-flex justify-content-between align-items-center"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <div>
+                                    <div className="fw-bold">
+                                        {employee.first_name} {employee.last_name}
+                                    </div>
+                                    <small className="text-muted">
+                                        ID: {employee.emp_id} | Status: {employee.status}
+                                    </small>
+                                </div>
+                                <div>
+                                    <Badge bg="success">
+                                        {messages.AVAILABLE}
+                                    </Badge>
+                                </div>
+                            </ListGroup.Item>
+                        ))}
+                    </ListGroup>
                 )}
             </Modal.Body>
 
@@ -140,18 +159,9 @@ const CompareAlgorithmsModal = ({ show, onHide, results, onUseAlgorithm }) => {
                 <Button variant="secondary" onClick={onHide}>
                     {messages.CANCEL}
                 </Button>
-                {results && getBestAlgorithm() && (
-                    <Button
-                        variant="primary"
-                        onClick={() => onUseAlgorithm(getBestAlgorithm())}
-                    >
-                        <i className="bi bi-rocket me-2"></i>
-                        {messages.USE_ALGORITHM.replace('{algorithm}', getBestAlgorithm())}
-                    </Button>
-                )}
             </Modal.Footer>
         </Modal>
     );
 };
 
-export default CompareAlgorithmsModal;
+export default EmployeeSelectionModal;

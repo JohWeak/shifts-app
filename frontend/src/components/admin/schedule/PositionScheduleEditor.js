@@ -1,33 +1,38 @@
 // frontend/src/components/admin/schedule/PositionScheduleEditor.js
 import React from 'react';
-import { Table, Badge, Button, Spinner } from 'react-bootstrap';
-import { interpolateMessage, useMessages } from '../../../i18n/messages';
+import { Table, Button, Badge, Spinner } from 'react-bootstrap';
+import ScheduleCell from './ScheduleCell';
+import { useMessages, interpolateMessage } from '../../../i18n/messages';
 
 const PositionScheduleEditor = ({
                                     position,
                                     assignments = [],
                                     employees = [],
                                     shifts = [],
-                                    scheduleDetails,
-                                    isEditing = false, // Добавим default значение
-                                    pendingChanges = {}, // Добавим default значение
-                                    savingChanges = false, // Добавим default значение
+                                    isEditing = false,
+                                    pendingChanges = {},
+                                    savingChanges = false,
                                     canEdit = true,
                                     onToggleEdit,
                                     onSaveChanges,
                                     onCellClick,
+                                    onEmployeeClick,
                                     onEmployeeRemove,
-                                    onRemovePendingChange
+                                    onRemovePendingChange,
+                                    scheduleDetails
                                 }) => {
     const messages = useMessages('en');
 
-    // Логирование для отладки
-    console.log('PositionScheduleEditor render:', {
+    // Debug logging
+    console.log('PositionScheduleEditor props:', {
         positionId: position?.pos_id,
+        positionName: position?.pos_name,
         isEditing,
         canEdit,
-        hasToggleEdit: !!onToggleEdit,
-        pendingChangesCount: Object.keys(pendingChanges).length
+        hasOnToggleEdit: !!onToggleEdit,
+        pendingChangesCount: Object.keys(pendingChanges).length,
+        // ДОБАВИМ: показываем сами pending changes
+        pendingChanges: pendingChanges
     });
 
     if (!position) {
@@ -55,14 +60,20 @@ const PositionScheduleEditor = ({
         date.setDate(date.getDate() + dayIndex);
         const dateStr = date.toISOString().split('T')[0];
 
-        // Найти назначения для этой позиции, смены и даты
+        // Find assignments for this position, shift and date
         const cellAssignments = assignments.filter(assignment =>
             assignment.position_id === position.pos_id &&
             assignment.shift_id === shift.shift_id &&
             assignment.work_date === dateStr
         );
 
-        // Проверить наличие pending changes
+        // Get employees for assignments
+        const cellEmployees = cellAssignments.map(assignment => {
+            const employee = employees.find(emp => emp.emp_id === assignment.emp_id);
+            return employee ? { ...employee, assignment_id: assignment.id } : null;
+        }).filter(Boolean);
+
+        // ИСПРАВЛЕНО: Check pending changes - фильтруем для этой конкретной ячейки
         const pendingAssignments = Object.values(pendingChanges).filter(change =>
             change.action === 'assign' &&
             change.positionId === position.pos_id &&
@@ -77,93 +88,36 @@ const PositionScheduleEditor = ({
             change.shiftId === shift.shift_id
         );
 
-        const currentAssignments = cellAssignments.length - pendingRemovals.length;
-        const totalAssignments = currentAssignments + pendingAssignments.length;
-        const isEmpty = totalAssignments === 0;
-        const isUnderstaffed = totalAssignments < position.num_of_emp;
+        // Логирование для отладки
+        if (pendingAssignments.length > 0 || pendingRemovals.length > 0) {
+            console.log(`Cell [${shift.shift_name}][${dateStr}] pending changes:`, {
+                assignments: pendingAssignments,
+                removals: pendingRemovals
+            });
+        }
+
+        const currentEmployees = cellEmployees.length - pendingRemovals.length;
+        const totalEmployees = currentEmployees + pendingAssignments.length;
+        const isUnderstaffed = totalEmployees < position.num_of_emp;
+
+        console.log('Rendering cell with onRemoveEmployee:', !!onEmployeeRemove);
 
         return (
-            <td
+            <ScheduleCell
                 key={dayIndex}
-                className={`text-center ${isEditing ? 'position-relative' : ''} ${isEmpty && isEditing ? 'table-warning' : ''}`}
-                style={{
-                    cursor: isEditing ? 'pointer' : 'default',
-                    minWidth: '120px',
-                    verticalAlign: 'middle'
-                }}
-                onClick={() => {
-                    if (isEditing && onCellClick) {
-                        onCellClick({
-                            positionId: position.pos_id,
-                            shiftId: shift.shift_id,
-                            date: dateStr,
-                            position: position.pos_name,
-                            shift: shift.shift_name
-                        });
-                    }
-                }}
-            >
-                {/* Отображение назначений */}
-                <div className="assignments-container">
-                    {cellAssignments.map(assignment => (
-                        <div key={assignment.id} className="assignment-item mb-1">
-                            <Badge bg="primary" className="d-flex justify-content-between align-items-center">
-                                <span>{assignment.employee.first_name} {assignment.employee.last_name}</span>
-                                {isEditing && onEmployeeRemove && (
-                                    <button
-                                        type="button"
-                                        className="btn-close btn-close-white ms-2"
-                                        aria-label="Remove"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEmployeeRemove(assignment.id, position.pos_id);
-                                        }}
-                                        style={{ fontSize: '0.6em' }}
-                                    ></button>
-                                )}
-                            </Badge>
-                        </div>
-                    ))}
-
-                    {/* Отображение pending assignments */}
-                    {pendingAssignments.map((change, index) => (
-                        <div key={`pending-${index}`} className="assignment-item mb-1">
-                            <Badge bg="success" className="d-flex justify-content-between align-items-center">
-                                <span>{change.empName}</span>
-                                <small className="ms-1">(New)</small>
-                                {onRemovePendingChange && (
-                                    <button
-                                        type="button"
-                                        className="btn-close btn-close-white ms-2"
-                                        aria-label="Remove"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onRemovePendingChange(change.changeKey, position.pos_id);
-                                        }}
-                                        style={{ fontSize: '0.6em' }}
-                                    ></button>
-                                )}
-                            </Badge>
-                        </div>
-                    ))}
-
-                    {/* Показать если нужно больше сотрудников */}
-                    {isUnderstaffed && isEditing && (
-                        <div className="text-muted small">
-                            {interpolateMessage(messages.NEED_MORE_EMPLOYEES, {
-                                count: position.num_of_emp - totalAssignments
-                            })}
-                        </div>
-                    )}
-
-                    {/* Показать + если ячейка пустая и в режиме редактирования */}
-                    {isEmpty && isEditing && (
-                        <div className="text-muted">
-                            <i className="bi bi-plus-circle fs-4"></i>
-                        </div>
-                    )}
-                </div>
-            </td>
+                date={dateStr}
+                positionId={position.pos_id}
+                shiftId={shift.shift_id}
+                employees={cellEmployees}
+                pendingAssignments={pendingAssignments}
+                pendingRemovals={pendingRemovals}
+                isEditing={isEditing}
+                isUnderstaffed={isUnderstaffed}
+                requiredEmployees={position.num_of_emp}
+                onCellClick={onCellClick}
+                onEmployeeClick={onEmployeeClick}
+                onRemoveEmployee={onEmployeeRemove}
+            />
         );
     };
 
@@ -179,13 +133,13 @@ const PositionScheduleEditor = ({
                         })}
                         {hasPendingChanges && (
                             <Badge bg="warning" className="ms-2">
-                                {messages.UNSAVED_CHANGES}
+                                {messages.UNSAVED_CHANGES} ({Object.keys(pendingChanges).length})
                             </Badge>
                         )}
                     </small>
                 </div>
                 <div>
-                    {/* Добавим подробное логирование для кнопки Edit */}
+                    {/* Edit button */}
                     {canEdit && !isEditing && (
                         <Button
                             variant="outline-primary"
@@ -205,6 +159,7 @@ const PositionScheduleEditor = ({
                         </Button>
                     )}
 
+                    {/* Save/Cancel buttons */}
                     {isEditing && (
                         <>
                             <Button
@@ -249,11 +204,11 @@ const PositionScheduleEditor = ({
                 </div>
             </div>
 
-            {/* Добавим индикатор режима редактирования */}
+            {/* Editing mode indicator */}
             {isEditing && (
                 <div className="alert alert-info mb-3">
                     <i className="bi bi-pencil me-2"></i>
-                    Editing mode active for {position.pos_name}. Click on cells to assign employees.
+                    {messages.EDIT_MODE} for {position.pos_name}. {messages.CLICK_TO_ASSIGN || 'Click on cells to assign employees'}
                 </div>
             )}
 
@@ -274,7 +229,7 @@ const PositionScheduleEditor = ({
                 <tbody>
                 {shifts.map(shift => (
                     <tr key={shift.shift_id}>
-                        <td className={`shift-${shift.shift_type} text-center fw-bold`}>
+                        <td className={`shift-${shift.shift_type} text-center`}>
                             {shift.shift_name}<br/>
                             <small>{shift.start_time} ({shift.duration}h)</small>
                         </td>

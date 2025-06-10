@@ -15,6 +15,7 @@ const ScheduleDetailsView = ({
                                  onToggleEditPosition,
                                  onSavePositionChanges,
                                  onCellClick,
+                                 onEmployeeClick,
                                  onEmployeeRemove,
                                  onRemovePendingChange,
                                  onStatusUpdate
@@ -243,17 +244,32 @@ const ScheduleDetailsView = ({
                                 )}
                                 employees={scheduleDetails.employees}
                                 shifts={scheduleDetails.all_shifts || scheduleDetails.shifts}
-                                isEditing={editingPositions[position.pos_id] || false} // Добавим fallback
-                                pendingChanges={pendingChanges[position.pos_id] || {}}
-                                savingChanges={savingChanges[position.pos_id] || false} // Добавим fallback
+                                isEditing={editingPositions[position.pos_id] || false}
+                                pendingChanges={Object.fromEntries(
+                                    Object.entries(pendingChanges).filter(([key, change]) =>
+                                        change.positionId === position.pos_id
+                                    )
+                                )}
+                                savingChanges={savingChanges[position.pos_id] || false}
                                 canEdit={canEdit()}
                                 onToggleEdit={() => {
-                                    console.log('Toggle edit called for position:', position.pos_id); // Добавим логирование
+                                    console.log('Toggle edit called for position:', position.pos_id);
                                     onToggleEditPosition(position.pos_id);
                                 }}
                                 onSaveChanges={() => onSavePositionChanges(position.pos_id)}
                                 onCellClick={onCellClick}
-                                onEmployeeRemove={onEmployeeRemove}
+                                onEmployeeClick={onEmployeeClick}
+                                // ИСПРАВЛЕНО: Создаем правильную функцию-обертку
+                                onEmployeeRemove={(date, positionId, shiftId, empId) => {
+                                    console.log('ScheduleDetailsView: onEmployeeRemove called with:', { date, positionId, shiftId, empId });
+
+                                    // Создаем обертку для правильного вызова функции из operations
+                                    if (onEmployeeRemove) {
+                                        onEmployeeRemove(date, positionId, shiftId, empId);
+                                    } else {
+                                        console.error('onEmployeeRemove function not provided to ScheduleDetailsView');
+                                    }
+                                }}
                                 onRemovePendingChange={onRemovePendingChange}
                                 scheduleDetails={scheduleDetails}
                             />

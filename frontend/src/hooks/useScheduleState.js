@@ -19,12 +19,14 @@ export const useScheduleState = () => {
     const [comparing, setComparing] = useState(false);
 
     // Edit mode states
-    const [editingPositions, setEditingPositions] = useState(new Set());
+    const [editingPositions, setEditingPositions] = useState({});
     const [pendingChanges, setPendingChanges] = useState({});
     const [savingChanges, setSavingChanges] = useState(false);
 
     // Employee selection states
     const [selectedCell, setSelectedCell] = useState(null);
+    const [selectedPosition, setSelectedPosition] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [recommendations, setRecommendations] = useState(null);
     const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
@@ -45,7 +47,6 @@ export const useScheduleState = () => {
     };
 
     const toggleEditPosition = (positionId) => {
-
         console.log('toggleEditPosition called with:', positionId);
         console.log('Current editingPositions:', editingPositions);
 
@@ -59,12 +60,45 @@ export const useScheduleState = () => {
         });
     };
 
+    // NEW: Functions for managing editing positions with date-position-shift keys (for cell editing)
+    const [editingCells, setEditingCells] = useState(new Set());
+
+    const startEditingCell = (date, positionId, shiftId) => {
+        const key = `${date}-${positionId}-${shiftId}`;
+        setEditingCells(prev => new Set([...prev, key]));
+    };
+
+    const stopEditingCell = (date, positionId, shiftId) => {
+        const key = `${date}-${positionId}-${shiftId}`;
+        setEditingCells(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(key);
+            return newSet;
+        });
+    };
+
+    const isCellEditing = (date, positionId, shiftId) => {
+        const key = `${date}-${positionId}-${shiftId}`;
+        return editingCells.has(key);
+    };
+
     const removePendingChange = (changeKey) => {
         setPendingChanges(prev => {
             const newChanges = { ...prev };
             delete newChanges[changeKey];
             return newChanges;
         });
+    };
+
+    // ИСПРАВЛЕНО: Функция для получения pending changes для конкретной позиции
+    const getPendingChangesForPosition = (positionId) => {
+        const positionChanges = {};
+        Object.keys(pendingChanges).forEach(key => {
+            if (pendingChanges[key].positionId === positionId) {
+                positionChanges[key] = pendingChanges[key];
+            }
+        });
+        return positionChanges;
     };
 
     const clearPendingChangesForPosition = (positionId) => {
@@ -83,7 +117,8 @@ export const useScheduleState = () => {
         setSelectedSchedule(null);
         setScheduleDetails(null);
         setActiveTab('overview');
-        setEditingPositions(new Set());
+        setEditingPositions({});
+        setEditingCells(new Set());
         setPendingChanges({});
     };
 
@@ -91,7 +126,9 @@ export const useScheduleState = () => {
         setShowGenerateModal(false);
         setShowComparisonModal(false);
         setShowEmployeeModal(false);
+        setIsModalOpen(false);
         setSelectedCell(null);
+        setSelectedPosition(null);
     };
 
     return {
@@ -116,12 +153,18 @@ export const useScheduleState = () => {
         setComparing,
         editingPositions,
         setEditingPositions,
+        editingCells,
+        setEditingCells,
         pendingChanges,
         setPendingChanges,
         savingChanges,
         setSavingChanges,
         selectedCell,
         setSelectedCell,
+        selectedPosition,
+        setSelectedPosition,
+        isModalOpen,
+        setIsModalOpen,
         recommendations,
         setRecommendations,
         loadingRecommendations,
@@ -137,7 +180,11 @@ export const useScheduleState = () => {
         clearAlert,
         showAlert,
         toggleEditPosition,
+        startEditingCell,
+        stopEditingCell,
+        isCellEditing,
         removePendingChange,
+        getPendingChangesForPosition,
         clearPendingChangesForPosition,
         resetScheduleView,
         closeAllModals

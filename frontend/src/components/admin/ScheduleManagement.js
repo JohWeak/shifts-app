@@ -122,7 +122,8 @@ const ScheduleManagement = () => {
                                 }}
                                 onSavePositionChanges={operations.handleSavePositionChanges}
                                 onCellClick={operations.handleCellClick}
-                                onEmployeeRemove={operations.handleEmployeeRemove}
+                                onEmployeeClick={operations.handleEmployeeClick}
+                                onEmployeeRemove={operations.handleRemoveEmployee}
                                 onRemovePendingChange={state.removePendingChange}
                                 onStatusUpdate={handleScheduleStatusUpdate}
                             />
@@ -209,13 +210,16 @@ const ScheduleModals = ({ state, operations, onGenerateSchedule, onUseAlgorithm 
             onUseAlgorithm={onUseAlgorithm}
         />
 
+        {/* Employee Selection Modal */}
         <EmployeeSelectionModal
-            show={state.showEmployeeModal}
-            onHide={() => state.setShowEmployeeModal(false)}
-            recommendations={state.recommendations}
-            loading={state.loadingRecommendations}
-            selectedCell={state.selectedCell}
+            show={state.isModalOpen}
+            onHide={() => {
+                state.setIsModalOpen(false);
+                state.setSelectedPosition(null);
+            }}
+            selectedPosition={state.selectedPosition}
             onEmployeeSelect={operations.handleEmployeeAssign}
+            scheduleDetails={state.scheduleDetails}
         />
     </>
 );

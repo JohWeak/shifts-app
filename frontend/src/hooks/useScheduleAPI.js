@@ -137,6 +137,50 @@ export const useScheduleAPI = () => {
         });
     };
 
+    // NEW: Function to remove employee from shift
+    const removeEmployeeFromShift = async ({ date, positionId, shiftId, empId }) => {
+        return handleRequest(async () => {
+            const response = await fetch(`http://localhost:5000/api/schedule/remove-employee`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    date,
+                    positionId,
+                    shiftId,
+                    empId
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to remove employee from shift');
+            }
+
+            const result = await response.json();
+            return result.data;
+        });
+    };
+
+    // NEW: Function to fetch available employees for a shift
+    const fetchAvailableEmployees = async (date, positionId, shiftId) => {
+        return handleRequest(async () => {
+            const response = await fetch(
+                `http://localhost:5000/api/employees/available?date=${date}&positionId=${positionId}&shiftId=${shiftId}`,
+                {
+                    headers: getAuthHeaders()
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch available employees');
+            }
+
+            const result = await response.json();
+            return result.data;
+        });
+    };
+
     const fetchWorkSites = async () => {
         return handleRequest(async () => {
             const response = await fetch(`http://localhost:5000${API_ENDPOINTS.WORKSITES}`, {
@@ -233,6 +277,8 @@ export const useScheduleAPI = () => {
         compareAlgorithms,
         deleteSchedule,
         updateScheduleAssignments,
+        removeEmployeeFromShift,
+        fetchAvailableEmployees,
         fetchWorkSites,
         updateScheduleStatus,
         exportSchedule
