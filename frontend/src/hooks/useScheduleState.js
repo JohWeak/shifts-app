@@ -45,14 +45,17 @@ export const useScheduleState = () => {
     };
 
     const toggleEditPosition = (positionId) => {
+
+        console.log('toggleEditPosition called with:', positionId);
+        console.log('Current editingPositions:', editingPositions);
+
         setEditingPositions(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(positionId)) {
-                newSet.delete(positionId);
-            } else {
-                newSet.add(positionId);
-            }
-            return newSet;
+            const newState = {
+                ...prev,
+                [positionId]: !prev[positionId]
+            };
+            console.log('New editingPositions state:', newState);
+            return newState;
         });
     };
 

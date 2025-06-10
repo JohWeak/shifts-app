@@ -73,7 +73,7 @@ const ScheduleManagement = () => {
     };
 
     return (
-        <ErrorBoundary>
+        // <ErrorBoundary>
             <AdminLayout>
                 <Container fluid className="px-0">
                     {/* Page Header */}
@@ -116,7 +116,10 @@ const ScheduleManagement = () => {
                                 editingPositions={state.editingPositions}
                                 pendingChanges={state.pendingChanges}
                                 savingChanges={state.savingChanges}
-                                onToggleEditPosition={state.toggleEditPosition}
+                                onToggleEditPosition={(positionId) => {
+                                    console.log('ScheduleManagement: onToggleEditPosition called with:', positionId);
+                                    state.toggleEditPosition(positionId); // Убедитесь, что эта функция существует в state
+                                }}
                                 onSavePositionChanges={operations.handleSavePositionChanges}
                                 onCellClick={operations.handleCellClick}
                                 onEmployeeRemove={operations.handleEmployeeRemove}
@@ -135,7 +138,7 @@ const ScheduleManagement = () => {
                     />
                 </Container>
             </AdminLayout>
-        </ErrorBoundary>
+        //</ErrorBoundary>
     );
 };
 

@@ -717,14 +717,15 @@ exports.getAllSchedules = async (req, res) => {
 // Получить детали конкретного расписания
 exports.getScheduleDetails = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
+        const { scheduleId } = req.params;
+        console.log(`[ScheduleController] Getting details for schedule ${scheduleId}`);
 
         // Получить основную информацию о расписании
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [{
                 model: WorkSite,
                 as: 'workSite',
-                attributes: ['site_name']
+                attributes: ['site_id', 'site_name']
             }]
         });
 
@@ -735,9 +736,11 @@ exports.getScheduleDetails = async (req, res) => {
             });
         }
 
+        console.log(`[ScheduleController] Found schedule for site ${schedule.site_id}`);
+
         // Получить все назначения для этого расписания
         const assignments = await ScheduleAssignment.findAll({
-            where: {schedule_id: scheduleId},
+            where: { schedule_id: scheduleId },
             include: [
                 {
                     model: Employee,
@@ -758,121 +761,63 @@ exports.getScheduleDetails = async (req, res) => {
             order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
         });
 
+        console.log(`[ScheduleController] Found ${assignments.length} assignments`);
+
         // Получить все позиции для данного сайта
-        const allPositions = await Position.findAll({
-            where: {site_id: schedule.site_id},
-            include: [{
-                model: WorkSite,
-                as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }]
+        const positions = await Position.findAll({
+            where: { site_id: schedule.site_id },
+            attributes: ['pos_id', 'pos_name', 'profession', 'num_of_emp', 'num_of_shifts']
         });
 
+        console.log(`[ScheduleController] Found ${positions.length} positions for site`);
+
         // Получить все смены
-        const allShifts = await Shift.findAll({
+        const shifts = await Shift.findAll({
+            attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type'],
             order: [['start_time', 'ASC']]
         });
 
-        // Получить всех активных сотрудников для данного сайта
-        const allEmployees = await Employee.findAll({
-            where: {status: 'active'},
-            attributes: ['emp_id', 'first_name', 'last_name', 'email']
+        console.log(`[ScheduleController] Found ${shifts.length} shifts`);
+
+        // Получить всех сотрудников для данного сайта
+        const employees = await Employee.findAll({
+            where: { status: 'active' },
+            attributes: ['emp_id', 'first_name', 'last_name', 'status']
         });
 
-        // Создать матрицу расписания
-        const scheduleMatrix = {};
+        console.log(`[ScheduleController] Found ${employees.length} employees`);
 
-        allPositions.forEach(position => {
-            scheduleMatrix[position.pos_id] = {
-                position: {
-                    id: position.pos_id,
-                    name: position.pos_name,
-                    profession: position.profession,
-                    num_of_emp: position.num_of_emp,
-                    num_of_shifts: position.num_of_shifts
-                },
-                schedule: {}
-            };
-
-            // Создать структуру для каждого дня недели
-            for (let i = 0; i < 7; i++) {
-                const date = dayjs(schedule.start_date).add(i, 'day').format('YYYY-MM-DD');
-                scheduleMatrix[position.pos_id].schedule[date] = {};
-
-                // Создать ячейки для каждой смены
-                allShifts.forEach(shift => {
-                    scheduleMatrix[position.pos_id].schedule[date][shift.shift_id] = {
-                        shift_info: {
-                            id: shift.shift_id,
-                            name: shift.shift_name,
-                            start_time: shift.start_time,
-                            duration: shift.duration,
-                            shift_type: shift.shift_type
-                        },
-                        assignments: []
-                    };
-                });
-            }
-        });
-
-        // Заполнить матрицу существующими назначениями
-        assignments.forEach(assignment => {
-            const date = dayjs(assignment.work_date).format('YYYY-MM-DD');
-            const posId = assignment.position.pos_id;
-            const shiftId = assignment.shift.shift_id;
-
-            if (scheduleMatrix[posId] && scheduleMatrix[posId].schedule[date] &&
-                scheduleMatrix[posId].schedule[date][shiftId]) {
-                scheduleMatrix[posId].schedule[date][shiftId].assignments.push({
-                    id: assignment.id,
-                    employee: {
-                        emp_id: assignment.employee.emp_id,
-                        name: `${assignment.employee.first_name} ${assignment.employee.last_name}`
-                    },
-                    status: assignment.status,
-                    notes: assignment.notes
-                });
-            }
-        });
-
-        // Статистика
-        const stats = {
-            total_assignments: assignments.length,
-            employees_used: [...new Set(assignments.map(a => a.emp_id))].length,
-            coverage_by_day: {}
+        // Подготовить структуру данных для фронтенда
+        const responseData = {
+            schedule: {
+                id: schedule.id,
+                start_date: schedule.start_date,
+                end_date: schedule.end_date,
+                status: schedule.status,
+                site_id: schedule.site_id,
+                work_site: schedule.workSite,
+                createdAt: schedule.createdAt,
+                updatedAt: schedule.updatedAt
+            },
+            positions: positions,
+            assignments: assignments,
+            shifts: shifts,
+            all_shifts: shifts, // Алиас для совместимости
+            employees: employees
         };
 
-        // Подсчитать покрытие по дням
-        for (let i = 0; i < 7; i++) {
-            const date = dayjs(schedule.start_date).add(i, 'day').format('YYYY-MM-DD');
-            const dayAssignments = assignments.filter(a => dayjs(a.work_date).format('YYYY-MM-DD') === date);
-            stats.coverage_by_day[date] = dayAssignments.length;
-        }
+        console.log(`[ScheduleController] Sending response with ${positions.length} positions`);
 
         res.json({
             success: true,
-            data: {
-                schedule: {
-                    id: schedule.id,
-                    start_date: schedule.start_date,
-                    end_date: schedule.end_date,
-                    status: schedule.status,
-                    work_site: schedule.workSite,
-                    created_at: schedule.createdAt,
-                    metadata: schedule.text_file ? JSON.parse(schedule.text_file) : null
-                },
-                schedule_matrix: scheduleMatrix,
-                all_employees: allEmployees,
-                all_shifts: allShifts,
-                statistics: stats
-            }
+            data: responseData
         });
 
     } catch (error) {
         console.error('[ScheduleController] Error getting schedule details:', error);
         res.status(500).json({
             success: false,
-            message: 'Error retrieving schedule details',
+            message: 'Error getting schedule details',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }

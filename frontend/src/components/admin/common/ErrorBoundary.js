@@ -1,8 +1,7 @@
 // frontend/src/components/admin/common/ErrorBoundary.js
-import React, { Component } from 'react';
-import { Alert, Button, Card } from 'react-bootstrap';
+import React from 'react';
 
-class ErrorBoundary extends Component {
+class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -13,68 +12,81 @@ class ErrorBoundary extends Component {
     }
 
     static getDerivedStateFromError(error) {
-        return { hasError: true };
+        // Обновляем состояние, чтобы следующий рендер показал fallback UI
+        return { hasError: true, error };
     }
 
     componentDidCatch(error, errorInfo) {
-        this.setState({
-            error: error,
-            errorInfo: errorInfo
-        });
+        // Логируем ошибку
+        console.error('ErrorBoundary caught an error:', error);
+        console.error('Error info:', errorInfo);
 
-        // Log error to service
-        console.error('Schedule Management Error:', error, errorInfo);
+        // Сохраняем информацию об ошибке в состоянии
+        this.setState({
+            error,
+            errorInfo
+        });
     }
-
-    handleRetry = () => {
-        this.setState({
-            hasError: false,
-            error: null,
-            errorInfo: null
-        });
-    };
 
     render() {
         if (this.state.hasError) {
             return (
-                <Card className="m-4">
-                    <Card.Body className="text-center">
-                        <i className="bi bi-exclamation-triangle display-1 text-danger"></i>
-                        <h4 className="mt-3">Something went wrong</h4>
-                        <p className="text-muted">
-                            An error occurred in the schedule management interface.
-                        </p>
+                <div className="container mt-5">
+                    <div className="alert alert-danger">
+                        <h4>
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            Something went wrong
+                        </h4>
+                        <p>An error occurred while rendering this component. Please try refreshing the page.</p>
 
-                        {process.env.NODE_ENV === 'development' && (
-                            <Alert variant="danger" className="mt-3 text-start">
-                                <h6>Error Details:</h6>
-                                <pre className="small">
-                                    {this.state.error && this.state.error.toString()}
-                                    <br />
-                                    {this.state.errorInfo.componentStack}
-                                </pre>
-                            </Alert>
+                        {process.env.NODE_ENV === 'development' && this.state.error && (
+                            <details className="mt-3">
+                                <summary>Error details (Development mode)</summary>
+                                <div className="mt-2">
+                                    <strong>Error:</strong>
+                                    <pre className="bg-light p-2 mt-1 small">
+                                        {this.state.error.toString()}
+                                    </pre>
+
+                                    {this.state.errorInfo && this.state.errorInfo.componentStack && (
+                                        <>
+                                            <strong>Component Stack:</strong>
+                                            <pre className="bg-light p-2 mt-1 small">
+                                                {this.state.errorInfo.componentStack}
+                                            </pre>
+                                        </>
+                                    )}
+
+                                    {this.state.error.stack && (
+                                        <>
+                                            <strong>Stack Trace:</strong>
+                                            <pre className="bg-light p-2 mt-1 small">
+                                                {this.state.error.stack}
+                                            </pre>
+                                        </>
+                                    )}
+                                </div>
+                            </details>
                         )}
 
                         <div className="mt-3">
-                            <Button
-                                variant="primary"
-                                onClick={this.handleRetry}
-                                className="me-2"
-                            >
-                                <i className="bi bi-arrow-clockwise me-2"></i>
-                                Try Again
-                            </Button>
-                            <Button
-                                variant="outline-secondary"
+                            <button
+                                className="btn btn-primary me-2"
                                 onClick={() => window.location.reload()}
                             >
-                                <i className="bi bi-arrow-counterclockwise me-2"></i>
+                                <i className="bi bi-arrow-clockwise me-1"></i>
                                 Reload Page
-                            </Button>
+                            </button>
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
+                            >
+                                <i className="bi bi-arrow-left me-1"></i>
+                                Try Again
+                            </button>
                         </div>
-                    </Card.Body>
-                </Card>
+                    </div>
+                </div>
             );
         }
 

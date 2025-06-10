@@ -19,15 +19,30 @@ const ScheduleDetailsView = ({
                                  onRemovePendingChange,
                                  onStatusUpdate
                              }) => {
+    console.log('=== ScheduleDetailsView Debug ===');
+    console.log('scheduleDetails:', scheduleDetails);
+
+
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [showUnpublishModal, setShowUnpublishModal] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [exportMessage, setExportMessage] = useState(null);
 
     const api = useScheduleAPI();
+    if (scheduleDetails) {
+        console.log('scheduleDetails.positions:', scheduleDetails.positions);
+        console.log('scheduleDetails.assignments:', scheduleDetails.assignments);
+        console.log('scheduleDetails.shifts:', scheduleDetails.shifts);
+        console.log('scheduleDetails.employees:', scheduleDetails.employees);
+    }
     const messages = useMessages('en');
+    if (!scheduleDetails) {
+        console.log('scheduleDetails is null/undefined');
+        return null;
+    }
 
-    if (!scheduleDetails) return null;
+    console.log('Positions in scheduleDetails:', scheduleDetails.positions);
+    console.log('Number of positions:', scheduleDetails.positions?.length);
 
     const canPublish = () => {
         return scheduleDetails.schedule.status === SCHEDULE_STATUS.DRAFT;
@@ -224,19 +239,23 @@ const ScheduleDetailsView = ({
                                 key={position.pos_id}
                                 position={position}
                                 assignments={scheduleDetails.assignments.filter(
-                                    assignment => assignment.pos_id === position.pos_id
+                                    assignment => assignment.position_id === position.pos_id
                                 )}
                                 employees={scheduleDetails.employees}
-                                shifts={scheduleDetails.shifts}
-                                isEditing={editingPositions[position.pos_id]}
+                                shifts={scheduleDetails.all_shifts || scheduleDetails.shifts}
+                                isEditing={editingPositions[position.pos_id] || false} // Добавим fallback
                                 pendingChanges={pendingChanges[position.pos_id] || {}}
-                                savingChanges={savingChanges[position.pos_id]}
+                                savingChanges={savingChanges[position.pos_id] || false} // Добавим fallback
                                 canEdit={canEdit()}
-                                onToggleEdit={() => onToggleEditPosition(position.pos_id)}
+                                onToggleEdit={() => {
+                                    console.log('Toggle edit called for position:', position.pos_id); // Добавим логирование
+                                    onToggleEditPosition(position.pos_id);
+                                }}
                                 onSaveChanges={() => onSavePositionChanges(position.pos_id)}
                                 onCellClick={onCellClick}
                                 onEmployeeRemove={onEmployeeRemove}
                                 onRemovePendingChange={onRemovePendingChange}
+                                scheduleDetails={scheduleDetails}
                             />
                         ))
                     ) : (

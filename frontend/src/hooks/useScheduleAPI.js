@@ -42,6 +42,8 @@ export const useScheduleAPI = () => {
 
     const fetchScheduleDetails = async (scheduleId) => {
         return handleRequest(async () => {
+            console.log('Fetching schedule details for ID:', scheduleId);
+
             const response = await fetch(`http://localhost:5000${API_ENDPOINTS.SCHEDULE_DETAILS(scheduleId)}`, {
                 headers: getAuthHeaders()
             });
@@ -52,6 +54,9 @@ export const useScheduleAPI = () => {
             }
 
             const result = await response.json();
+            console.log('Raw API response:', result);
+            console.log('Returning data:', result.data);
+
             return result.data;
         });
     };
