@@ -36,6 +36,19 @@ const Employee = sequelize.define('Employee', {
     status: {
         type: DataTypes.ENUM('active', 'inactive', 'admin'),
         defaultValue: 'active'
+    },
+    role: {
+        type: DataTypes.ENUM('employee', 'admin'),
+        defaultValue: 'employee'
+    },
+    default_position_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'positions',
+            key: 'pos_id'
+        },
+        comment: 'Default position for automatic scheduling'
     }
 }, {
     tableName: 'employees',

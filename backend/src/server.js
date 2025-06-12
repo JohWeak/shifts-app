@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const testRoutes = require('./routes/test.routes');
 
 const sequelize = require('./config/db.config');
 // Import all models and their associations
@@ -14,6 +15,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/api/test', testRoutes);
+
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');

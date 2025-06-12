@@ -22,6 +22,7 @@ import Reports from './components/admin/Reports';
  * Protected Route Wrapper
  * Handles authentication and role-based access control
  */
+
 const ProtectedRoute = ({ children, allowedRole }) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isAuthenticated = !!localStorage.getItem('token');

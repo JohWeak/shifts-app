@@ -3,6 +3,7 @@
 const express = require('express');
 const scheduleController = require('../controllers/schedule.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const EmployeeRecommendationController = require('../controllers/employee-recommendation.controller');
 
 const router = express.Router();
 
@@ -16,6 +17,8 @@ router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getSche
 
 // Рекомендации сотрудников - ПЕРЕД /:scheduleId
 router.get('/recommendations/employees', [verifyToken, isAdmin], scheduleController.getRecommendedEmployees);
+router.post('/employee-recommendations', EmployeeRecommendationController.getRecommendations);
+
 
 // Генерация и сравнение - ПЕРЕД /:scheduleId
 router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
