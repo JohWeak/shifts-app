@@ -23,6 +23,37 @@ const PositionScheduleEditor = ({
                                 }) => {
     const messages = useMessages('en');
 
+    // Helper function to format shift time without seconds and duration
+    const formatShiftTime = (startTime, duration) => {
+        // Remove seconds from time format
+        const cleanStart = startTime.substring(0, 5); // 14:00:00 -> 14:00
+
+        // Calculate end time
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const startMinutes = hours * 60 + minutes;
+        const endMinutes = startMinutes + (duration * 60);
+
+        const endHours = Math.floor(endMinutes / 60) % 24;
+        const endMins = endMinutes % 60;
+
+        const cleanEnd = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+
+        return `${cleanStart}-${cleanEnd}`;
+    };
+
+    // Helper function to format date for header
+    const formatDateForHeader = (dateStr, dayName) => {
+        const date = new Date(dateStr);
+        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
+        return formattedDate;
+    };
+
+    // Helper function to get day name
+    const getDayName = (dayIndex) => {
+        const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        return dayNames[dayIndex];
+    };
+
     // Debug logging
     console.log('PositionScheduleEditor props:', {
         positionId: position?.pos_id,
@@ -31,7 +62,6 @@ const PositionScheduleEditor = ({
         canEdit,
         hasOnToggleEdit: !!onToggleEdit,
         pendingChangesCount: Object.keys(pendingChanges).length,
-        // ДОБАВИМ: показываем сами pending changes
         pendingChanges: pendingChanges
     });
 
@@ -73,7 +103,7 @@ const PositionScheduleEditor = ({
             return employee ? { ...employee, assignment_id: assignment.id } : null;
         }).filter(Boolean);
 
-        // ИСПРАВЛЕНО: Check pending changes - фильтруем для этой конкретной ячейки
+        // Check pending changes - фильтруем для этой конкретной ячейки
         const pendingAssignments = Object.values(pendingChanges).filter(change =>
             change.action === 'assign' &&
             change.positionId === position.pos_id &&
@@ -204,40 +234,51 @@ const PositionScheduleEditor = ({
                 </div>
             </div>
 
-            {/* Editing mode indicator */}
-            {isEditing && (
-                <div className="alert alert-info mb-3">
-                    <i className="bi bi-pencil me-2"></i>
-                    {messages.EDIT_MODE} for {position.pos_name}. {messages.CLICK_TO_ASSIGN || 'Click on cells to assign employees'}
-                </div>
-            )}
-
             {/* Schedule Table */}
             <Table responsive bordered size="sm" className="schedule-table">
                 <thead>
                 <tr>
                     <th className="shift-header">Shift</th>
-                    <th>{messages.SUNDAY}</th>
-                    <th>{messages.MONDAY}</th>
-                    <th>{messages.TUESDAY}</th>
-                    <th>{messages.WEDNESDAY}</th>
-                    <th>{messages.THURSDAY}</th>
-                    <th>{messages.FRIDAY}</th>
-                    <th>{messages.SATURDAY}</th>
+                    {Array.from({length: 7}, (_, dayIndex) => {
+                        const date = new Date(scheduleDetails.schedule.start_date);
+                        date.setDate(date.getDate() + dayIndex);
+                        const dateStr = date.toISOString().split('T')[0];
+                        const dayName = getDayName(dayIndex);
+                        const formattedDate = formatDateForHeader(dateStr, dayName);
+
+                        return (
+                            <th key={dayIndex} className="text-center">
+                                <div>
+                                    <strong>{dayName}</strong><br/>
+                                    <small>{formattedDate}</small>
+                                </div>
+                            </th>
+                        );
+                    })}
                 </tr>
                 </thead>
                 <tbody>
                 {shifts.map(shift => (
                     <tr key={shift.shift_id}>
                         <td className={`shift-${shift.shift_type} text-center`}>
-                            {shift.shift_name}<br/>
-                            <small>{shift.start_time} ({shift.duration}h)</small>
+                            <div>
+                                <strong>{shift.shift_name}</strong><br/>
+                                <small>{formatShiftTime(shift.start_time, shift.duration)}</small>
+                            </div>
                         </td>
                         {Array.from({length: 7}, (_, dayIndex) => renderCell(shift, dayIndex))}
                     </tr>
                 ))}
                 </tbody>
             </Table>
+
+            {/* Edit Mode Message - ПЕРЕНЕСЕНО ПОД ТАБЛИЦУ */}
+            {isEditing && (
+                <div className="alert alert-info mt-3">
+                    <i className="bi bi-pencil me-2"></i>
+                    <strong>Edit Mode for {position.pos_name}.</strong> Click to assign employee
+                </div>
+            )}
         </div>
     );
 };

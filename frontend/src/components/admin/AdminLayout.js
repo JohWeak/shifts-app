@@ -191,31 +191,29 @@ const AdminLayout = ({ children }) => {
                 </Container>
             </Navbar>
 
-            {/* Main Container */}
-            <Container fluid className="admin-main-container px-0">
-                <div className="row g-0">
-                    {/* Desktop Sidebar */}
-                    {!isMobile && (
-                        <div className="col-auto admin-sidebar-desktop">
-                            <div className="sidebar-content">
-                                <div className="sidebar-header">
-                                    <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
-                                        Navigation
-                                    </h6>
-                                </div>
-                                <SidebarContent />
+            {/* Main Container - ИСПРАВЛЕНО: Использовать flexbox вместо Bootstrap grid */}
+            <div className="admin-main-container">
+                {/* Desktop Sidebar */}
+                {!isMobile && (
+                    <div className="admin-sidebar-desktop">
+                        <div className="sidebar-content">
+                            <div className="sidebar-header">
+                                <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
+                                    Navigation
+                                </h6>
                             </div>
+                            <SidebarContent />
                         </div>
-                    )}
-
-                    {/* Main Content Area */}
-                    <div className="col admin-content-area">
-                        <main className="admin-main-content">
-                            {children}
-                        </main>
                     </div>
+                )}
+
+                {/* Main Content Area */}
+                <div className="admin-content-area">
+                    <main className="admin-main-content">
+                        {children}
+                    </main>
                 </div>
-            </Container>
+            </div>
 
             {/* Mobile Sidebar (Offcanvas) */}
             <Offcanvas
