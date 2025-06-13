@@ -1,4 +1,4 @@
-const { WorkSite, Position } = require('../models/associations');
+const { WorkSite, Position } = require('../models');
 
 // Get all work sites
 exports.findAll = async (req, res) => {

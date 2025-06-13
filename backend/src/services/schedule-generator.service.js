@@ -9,7 +9,7 @@ const {
     Schedule,
     ScheduleAssignment,
     ScheduleSettings
-} = require('../models/associations');
+} = require('../models');
 
 class ScheduleGeneratorService {
     /**

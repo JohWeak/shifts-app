@@ -1,4 +1,4 @@
-const { Shift, Employee, Constraint } = require('../models/associations');
+const { Shift, Employee } = require('../models');
 
 // Get all shifts
 exports.findAll = async (req, res) => {

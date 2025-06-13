@@ -1,4 +1,4 @@
-const { Employee, EmployeeConstraint, EmployeeQualification } = require('../models/associations');
+const { Employee, EmployeeConstraint, EmployeeQualification } = require('../models');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 

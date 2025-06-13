@@ -10,8 +10,8 @@ const router = express.Router();
 // === EMPLOYEE ROUTES ===
 router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
 
-// === ADMIN ROUTES (ВАЖНО: специфичные роуты ПЕРЕД динамическими) ===
 
+// === ADMIN ROUTES (ВАЖНО: специфичные роуты ПЕРЕД динамическими) ===
 // Статистика - ПЕРЕД /:scheduleId
 router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getScheduleStats);
 
@@ -27,10 +27,8 @@ router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.co
 // Получить все расписания - ПЕРЕД /:scheduleId
 router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
 
-// НОВЫЙ РОУТ - ПЕРЕД /:scheduleId
-router.put('/:scheduleId/update-assignments', [verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
-
 // Действия с конкретным расписанием - scheduleId роуты ПОСЛЕ всех остальных
+router.put('/:scheduleId/update-assignments', [verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
 router.get('/:scheduleId/export', [verifyToken, isAdmin], scheduleController.exportSchedule);
 router.post('/:scheduleId/duplicate', [verifyToken, isAdmin], scheduleController.duplicateSchedule);
 router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);

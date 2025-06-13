@@ -1,5 +1,5 @@
 // backend/src/controllers/schedule-settings.controller.js
-const { ScheduleSettings, WorkSite } = require('../models/associations');
+const { ScheduleSettings, WorkSite } = require('../models');
 
 // Get schedule settings for the work site
 exports.getSettings = async (req, res) => {

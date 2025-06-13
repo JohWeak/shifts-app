@@ -8,7 +8,7 @@ const {
     EmployeeConstraint,
     ScheduleAssignment,
     Schedule
-} = require('../models/associations');
+} = require('../models');
 
 class EmployeeRecommendationService {
 

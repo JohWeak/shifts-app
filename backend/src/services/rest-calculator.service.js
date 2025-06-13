@@ -1,5 +1,5 @@
 // backend/src/services/rest-calculator.service.js
-const { ScheduleSettings, Shift } = require('../models/associations');
+const { ScheduleSettings, Shift } = require('../models');
 
 class RestCalculatorService {
     /**

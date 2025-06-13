@@ -1,5 +1,5 @@
 // backend/src/controllers/constraint.controller.js (обновленная версия)
-const { EmployeeConstraint, Employee, Shift, ScheduleSettings } = require('../models/associations');
+const { EmployeeConstraint, Employee, Shift, ScheduleSettings } = require('../models');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');

@@ -3,19 +3,15 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const testRoutes = require('./routes/test.routes');
 
-const sequelize = require('./config/db.config');
-// Import all models and their associations
-require('./models/associations');
+const db = require('./models');
+const sequelize = db.sequelize;
 
 const app = express();
-
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/api/test', testRoutes);
 
 
 // Import routes
@@ -38,14 +34,6 @@ app.use('/api/constraints', constraintRoutes);
 app.use('/api/schedule-settings', scheduleSettingsRoutes);
 app.use('/api/schedules', scheduleRoutes);
 
-// Test route
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Shifts application API v2.0 - Optimized',
-        status: 'running',
-        timestamp: new Date().toISOString()
-    });
-});
 
 // Error handling middleware
 app.use((error, req, res, next) => {

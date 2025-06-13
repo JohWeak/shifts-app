@@ -1,5 +1,5 @@
 // backend/src/controllers/schedule.controller.js - Production version
-const {Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite} = require('../models/associations');
+const {Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite} = require('../models');
 const {Op} = require('sequelize');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
