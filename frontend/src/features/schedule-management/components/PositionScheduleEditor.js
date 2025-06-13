@@ -2,7 +2,7 @@
 import React from 'react';
 import { Table, Button, Badge, Spinner } from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
-import { useMessages, interpolateMessage } from '../../../i18n/messages';
+import { useMessages, interpolateMessage } from '../../../shared/lib/i18n/messages';
 
 const PositionScheduleEditor = ({
                                     position,

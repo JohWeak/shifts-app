@@ -1,4 +1,4 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/AdminLayout.js
+// frontend/src/CompareAlgorithmsModal.js/admin/adminLayout.js
 import React, { useState, useEffect } from 'react';
 import {
     Container,

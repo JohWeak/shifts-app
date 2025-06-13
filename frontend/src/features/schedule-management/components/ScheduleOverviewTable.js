@@ -1,7 +1,7 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/schedule/ScheduleOverviewTable.js
 import React, { useState } from 'react';
 import { Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
-import { useMessages } from '../../../i18n/messages';
+import { useMessages } from '../../../shared/lib/i18n/messages';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { useScheduleAPI } from '../../../hooks/useScheduleAPI';

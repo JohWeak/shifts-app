@@ -1,53 +1,40 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+// frontend/src/features/auth/LoginPage.js
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../app/store/slices/authSlice'; // Импортируем наш Thunk
 import './LoginPage.css';
+import { Spinner } from 'react-bootstrap';
 
 export const Login = () => {
-    // This state will hold either the username or the email entered by the user
-    const [identifier, setIdentifier] = useState(''); // 'identifier' can be username or email
+    // Локальное состояние для полей формы
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
+
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Получаем состояние аутентификации из Redux
+    const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
 
     const handlePasswordToggle = () => {
         setShowPassword(!showPassword);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setError(''); // Reset previous errors
-
-        try {
-            // Send the login request to the API
-            // The 'login' field sent to the backend will contain either the username or email
-            const response = await axios.post('http://localhost:5000/api/auth/login', {
-                login: identifier, // Send the 'identifier' (username or email) as 'login'
-                password
-            });
-
-            // Store token and user data in localStorage
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify({
-                id: response.data.id,
-                name: response.data.name,
-                role: response.data.role
-                // Add any other user data you receive and need
-            }));
-
-            // Redirect based on user role
-            if (response.data.role === 'admin') {
-                navigate('/admin');
-            } else {
-                navigate('/employee/dashboard');
-            }
-        } catch (err) {
-            // Display error message
-            setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-            console.error("Login error:", err.response || err.message || err); // Log more detailed error
-        }
+        // Диспатчим экшен `login`, передавая данные из формы
+        dispatch(login({ login: identifier, password }));
     };
+
+    // Эффект для редиректа после успешного входа
+    useEffect(() => {
+        if (isAuthenticated) {
+            const redirectPath = user.role === 'admin' ? '/admin' : '/employee/dashboard';
+            navigate(redirectPath);
+        }
+    }, [isAuthenticated, user, navigate]);
 
     return (
         <div className="login-page-container">
@@ -61,6 +48,7 @@ export const Login = () => {
                                     <p className="text-muted">Welcome back!</p>
                                 </div>
 
+                                {/* Показываем ошибку из Redux store */}
                                 {error && (
                                     <div className="alert alert-danger" role="alert">
                                         {error}
@@ -68,30 +56,26 @@ export const Login = () => {
                                 )}
 
                                 <form id="loginForm" onSubmit={handleSubmit}>
-                                    {/* Input field for Username or Email */}
                                     <div className="form-floating mb-3">
                                         <input
-                                            type="text" // Changed from "email" to "text" to allow non-email usernames
+                                            type="text"
                                             className="form-control"
-                                            id="identifier" // Changed id to match state variable
-                                            name="identifier" // Name attribute for form handling (and potentially accessibility)
-                                            placeholder="Username or Email" // Updated placeholder
+                                            id="identifier"
+                                            placeholder="Username or Email"
                                             value={identifier}
                                             onChange={(e) => setIdentifier(e.target.value)}
                                             required
-                                            autoComplete="username" // 'username' is a common value that browsers use for login/email fields
+                                            autoComplete="username"
                                         />
-                                        <label htmlFor="identifier">Username or Email</label> {/* Updated label */}
+                                        <label htmlFor="identifier">Username or Email</label>
                                     </div>
 
-                                    {/* Password field */}
                                     <div className="input-group mb-3">
                                         <div className="form-floating flex-grow-1">
                                             <input
                                                 type={showPassword ? 'text' : 'password'}
                                                 className="form-control"
                                                 id="password"
-                                                name="password"
                                                 placeholder="Password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
@@ -115,8 +99,19 @@ export const Login = () => {
                                         <a href="#" className="text-decoration-none small">Forgot password?</a>
                                     </div>
 
-                                    <button type="submit" className="btn btn-primary w-100 py-2 fw-semibold">
-                                        Login
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary w-100 py-2 fw-semibold"
+                                        disabled={loading === 'pending'} // Блокируем кнопку во время загрузки
+                                    >
+                                        {loading === 'pending' ? (
+                                            <>
+                                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                                <span className="ms-2">Logging in...</span>
+                                            </>
+                                        ) : (
+                                            'Login'
+                                        )}
                                     </button>
 
                                     <hr className="my-4" />
@@ -135,4 +130,5 @@ export const Login = () => {
     );
 };
 
-export default Login;
+// десь нет default export, так как мы экспортируем именованную константу `Login`
+// чтобы избежать конфликта имен с файлом страницы `LoginPage.js`

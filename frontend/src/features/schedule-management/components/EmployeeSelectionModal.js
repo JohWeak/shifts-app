@@ -1,45 +1,30 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/schedule/EmployeeSelectionModal.js
+// frontend/src/features/schedule-management/components/EmployeeSelectionModal.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, ListGroup, Badge, Spinner, Alert, Form, Tab, Tabs } from 'react-bootstrap';
-import { useMessages } from '../../../i18n/messages';
-import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { useMessages } from '../../../shared/lib/i18n/messages';
+import { fetchRecommendations } from '../../../app/store/slices/scheduleSlice'; // Импортируем thunk
 
-const EmployeeSelectionModal = ({
-                                    show,
-                                    onHide,
-                                    selectedPosition,
-                                    onEmployeeSelect,
-                                    scheduleDetails
-                                }) => {
+const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails }) => {
     const messages = useMessages('en');
-    const [recommendations, setRecommendations] = useState({
-        available: [],
-        cross_position: [],
-        unavailable_busy: [],
-        unavailable_hard: [],
-        unavailable_soft: []
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
+
+    // Получаем данные из Redux
+    const { recommendations, recommendationsLoading, error } = useSelector(state => state.schedule);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('available');
 
     useEffect(() => {
-        if (show && selectedPosition) {
-            fetchRecommendations();
-        } else {
-            setRecommendations({
-                available: [],
-                cross_position: [],
-                unavailable_busy: [],
-                unavailable_hard: [],
-                unavailable_soft: []
-            });
-            setError(null);
-            setSearchTerm('');
-            setActiveTab('available');
+        if (show && selectedPosition && scheduleDetails?.schedule?.id) {
+            dispatch(fetchRecommendations({
+                positionId: selectedPosition.positionId,
+                shiftId: selectedPosition.shiftId,
+                date: selectedPosition.date,
+                scheduleId: scheduleDetails.schedule.id,
+            }));
         }
-    }, [show, selectedPosition]);
+    }, [show, selectedPosition, scheduleDetails, dispatch]);
 
     const fetchRecommendations = async () => {
         if (!selectedPosition || !scheduleDetails?.schedule?.id) return;

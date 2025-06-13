@@ -1,12 +1,12 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/schedule/GenerateScheduleModal.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, ProgressBar } from 'react-bootstrap';
-import { useMessages } from '../../../i18n/messages';
-import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from '../../../constants/scheduleConstants';
+import { useMessages } from '../../../shared/lib/i18n/messages';
+import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from '../../../shared/config/scheduleConstants';
 import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
-import AlertMessage from '../common/AlertMessage';
-import LoadingSpinner from '../common/LoadingSpinner';
-import { isValidWeekStartDate, getNextSunday } from '../../../utils/scheduleUtils';
+import AlertMessage from '../../../shared/ui/AlertMessage';
+import LoadingSpinner from '../../../shared/ui/LoadingSpinner';
+import { isValidWeekStartDate, getNextSunday } from '../../../shared/lib/utils/scheduleUtils';
 
 const GenerateScheduleModal = ({
                                    show,

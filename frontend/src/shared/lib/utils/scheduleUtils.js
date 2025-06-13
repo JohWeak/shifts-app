@@ -1,5 +1,5 @@
 // frontend/src/utils/scheduleUtils.js
-import { SCHEDULE_STATUS, BADGE_VARIANTS } from '../constants/scheduleConstants';
+import { SCHEDULE_STATUS, BADGE_VARIANTS } from '../../config/scheduleConstants';
 
 /**
  * Format date for display

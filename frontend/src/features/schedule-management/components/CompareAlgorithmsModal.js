@@ -1,7 +1,7 @@
 // frontend/src/components/admin/schedule/CompareAlgorithmsModal.js
 import React from 'react';
 import { Modal, Button, Alert, Row, Col, Card, Badge } from 'react-bootstrap';
-import { useMessages } from '../../../i18n/messages';
+import { useMessages } from '../../../shared/lib/i18n/messages';
 
 const CompareAlgorithmsModal = ({
                                     show,

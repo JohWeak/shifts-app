@@ -1,17 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import store from './store'; // Путь изменился
+import store from './store/store'; // Путь изменился
 
 // Pages
 import LoginPage from '../pages/LoginPage';
 import EmployeeDashboardPage from '../pages/EmployeeDashboardPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
 import ScheduleManagementPage from '../pages/ScheduleManagementPage';
-// ... импорты для других страниц (EmployeeManagementPage, ReportsPage, etc.)
+import AlgorithmSettingsPage from '../pages/AlgorithmSettingsPage';
+import EmployeeManagementPage from '../pages/EmployeeManagementPage';
+import SystemSettingsPage from '../pages/SystemSettingsPage';
+import ReportsPage from '../pages/ReportsPage';
 
-// Shared UI/lib
-import { ProtectedRoute } from '../shared/lib/auth'; // Вынесем ProtectedRoute в утилиты
+import { ProtectedRoute } from '../shared/lib/auth/ProtectedRoute';
 
 /**
  * Main Application Component

@@ -1,6 +1,6 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js - ОБНОВЛЕННАЯ ВЕРСИЯ
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../widgets/AdminLayout/AdminLayout';
+import AdminLayout from '../widgets/adminLayout/AdminLayout';
 import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
