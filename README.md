@@ -102,12 +102,9 @@ frontend/
 ┃ ┃ ┗ scheduleUtils.js
 ┃ ┣ App.css
 ┃ ┣ App.js
-┃ ┣ App.test.js
 ┃ ┣ index.css
 ┃ ┣ index.js
-┃ ┣ logo.svg
-┃ ┣ reportWebVitals.js
-┃ ┗ setupTests.js
+┃ ┗ logo.svg
 ┣ .gitignore
 ┣ package-lock.json
 ┣ package.json
