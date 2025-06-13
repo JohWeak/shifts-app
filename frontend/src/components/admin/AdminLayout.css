@@ -93,7 +93,7 @@
    SIDEBAR
    ============================================== */
 .admin-sidebar-desktop {
-    width: var(--admin-sidebar-width);
+    min-width: var(--admin-sidebar-width);
     background-color: var(--admin-white);
     border-right: 1px solid var(--admin-gray-300);
     height: calc(100vh - var(--admin-navbar-height));
@@ -132,6 +132,11 @@
     background-color: var(--admin-primary);
     color: var(--admin-white);
 }
+.admin-nav-link.active:hover {
+    color: var(--admin-light);
+    transform: none;
+}
+
 
 .nav-icon {
     margin-right: var(--admin-spacing-md);
