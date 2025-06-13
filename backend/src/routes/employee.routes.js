@@ -1,8 +1,13 @@
+// backend/src/routes/employee.routes.js
 const express = require('express');
 const employeeController = require('../controllers/employee.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const EmployeeRecommendationController = require('../controllers/employee-recommendation.controller');
 
 const router = express.Router();
+
+// NEW: Employee recommendations route - ДОЛЖЕН БЫТЬ ПЕРЕД /:id маршрутами!
+router.get('/recommendations', verifyToken, EmployeeRecommendationController.getRecommendations);
 
 // Routes protected by JWT and requiring admin role
 router.post('/', [verifyToken, isAdmin], employeeController.create);
@@ -14,7 +19,7 @@ router.delete('/:id', [verifyToken, isAdmin], employeeController.delete);
 // Employee constraints
 router.get('/:id/constraints', verifyToken, employeeController.getConstraints);
 
-// NEW: Employee qualifications routes
+// Employee qualifications routes
 router.get('/:id/qualifications', verifyToken, employeeController.getQualifications);
 router.post('/:id/qualifications', [verifyToken, isAdmin], employeeController.addQualification);
 

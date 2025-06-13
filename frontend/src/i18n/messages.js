@@ -370,6 +370,27 @@ export const MESSAGES = {
         SCREEN_READER_REMOVE_BUTTON: 'Remove employee from shift',
         SCREEN_READER_ADD_BUTTON: 'Add employee to shift',
         SCREEN_READER_LOADING: 'Content is loading',
+
+        // Employee Selection Modal
+        UNAVAILABLE: 'Unavailable',
+        CROSS_POSITION_WARNING: 'These employees have a different primary position but can be assigned if needed.',
+        ALREADY_WORKING: 'Already Working',
+        CANNOT_WORK_CONSTRAINTS: 'Cannot Work (Constraints)',
+        PREFER_DIFFERENT_TIME: 'Prefer Different Time',
+
+        // Position related
+        NO_POSITION: 'No position',
+        PRIMARY_POSITION: 'Primary position',
+        CROSS_POSITION: 'Cross-position',
+
+        // Constraint messages
+        HARD_CONSTRAINT: 'Cannot work - personal constraint',
+        SOFT_CONSTRAINT: 'Prefers different time',
+        ALREADY_ASSIGNED: 'Already working this shift',
+
+        // Rest period messages
+        INSUFFICIENT_REST: 'Insufficient rest period',
+        REST_PERIOD_VIOLATION: 'Only {actual}h rest (need {required}h)',
     }
 };
 

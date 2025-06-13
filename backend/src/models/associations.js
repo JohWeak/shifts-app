@@ -16,13 +16,11 @@ const {
 Employee.belongsTo(Position, {
     foreignKey: 'default_position_id',
     as: 'defaultPosition',
-    constraints: false // Избегаем циклических зависимостей
 });
 
 Position.hasMany(Employee, {
     foreignKey: 'default_position_id',
     as: 'defaultEmployees',
-    constraints: false
 });
 
 WorkSite.hasMany(Position, {

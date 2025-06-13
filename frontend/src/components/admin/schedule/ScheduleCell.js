@@ -88,13 +88,14 @@ const ScheduleCell = ({
                 title={isEditing ? messages.CLICK_TO_ADD_EMPLOYEE : ''}
                 {...props}
             >
-                <div className="empty-cell d-flex align-items-center justify-content-center h-100">
+                <div className="empty-cell d-flex align-items-center justify-content-center">
                     {isEditing ? (
                         <div className="text-muted">
-                            <i className="bi bi-plus-circle fs-4"></i>
-                            <div style={{ fontSize: '0.7em' }}>
-                                {messages.CLICK_TO_ASSIGN || 'Click to assign'}
-                            </div>
+                            <i className="bi bi-plus-circle fs-7"></i>
+                            {/*<div style={{ fontSize: '0.7em' }}>*/}
+                            {/*    {messages.CLICK_TO_ASSIGN || 'Click to assign'}*/}
+                            {/*</div>*/}
+
                         </div>
                     ) : (
                         <span className="text-muted">-</span>
