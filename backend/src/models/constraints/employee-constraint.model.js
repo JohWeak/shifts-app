@@ -15,10 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at',
-        associate: function(models) {
-            EmployeeConstraint.belongsTo(models.Employee, { foreignKey: 'emp_id', as: 'employee' });
-            EmployeeConstraint.belongsTo(models.Shift, { foreignKey: 'shift_id', as: 'shift' });
-        }
+
     });
     return EmployeeConstraint;
 };

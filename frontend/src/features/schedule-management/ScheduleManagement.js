@@ -1,12 +1,11 @@
 // frontend/src/features/schedule-management/ScheduleManagement.js
-
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Button, Tabs, Tab, Spinner } from 'react-bootstrap';
 import { useMessages } from '../../shared/lib/i18n/messages';
 
-// Widgets & UI
-import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
+// Widgets, UI, etc.
+import AdminLayout from '../../widgets/adminLayout/AdminLayout';
 import ScheduleOverviewTable from './components/ScheduleOverviewTable';
 import ScheduleDetailsView from './components/ScheduleDetailsView';
 import GenerateScheduleModal from './components/GenerateScheduleModal';
@@ -23,16 +22,37 @@ import {
     deleteSchedule,
     setActiveTab,
     resetScheduleView,
-    addPendingChange, // Этот экшен нужен для модального окна
+    addPendingChange,
 } from '../../app/store/slices/scheduleSlice';
 
-// Utils & Constants
+// Utils
 import { getNextSunday } from '../../shared/lib/utils/scheduleUtils';
-import { ALGORITHM_TYPES } from '../../shared/config/scheduleConstants';
 import './ScheduleManagement.css';
 
-// --- Основной компонент ---
+// --- Компонент заголовка, как и был ---
+const ScheduleHeader = ({ messages, onGenerateClick, onCompareClick, loading }) => (
+    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div className="mb-3 mb-md-0">
+            <h1 className="h3 mb-2 text-dark fw-bold">
+                <i className="bi bi-calendar-week me-2 text-primary"></i>
+                {messages.SCHEDULE_MANAGEMENT}
+            </h1>
+            <p className="text-muted mb-0">{messages.CREATE_MANAGE_SCHEDULES}</p>
+        </div>
+        <div className="d-flex flex-column flex-sm-row gap-2">
+            <Button variant="outline-primary" onClick={onCompareClick} disabled={loading}>
+                {loading ? <Spinner size="sm" className="me-2" /> : <i className="bi bi-speedometer2 me-2"></i>}
+                {messages.COMPARE_ALGORITHMS}
+            </Button>
+            <Button variant="primary" onClick={onGenerateClick} disabled={loading}>
+                {loading ? <Spinner size="sm" className="me-2" /> : <i className="bi bi-plus-circle me-2"></i>}
+                {messages.GENERATE_SCHEDULE}
+            </Button>
+        </div>
+    </div>
+);
 
+// --- Основной компонент ---
 const ScheduleManagement = () => {
     const messages = useMessages('en');
     const dispatch = useDispatch();
@@ -45,21 +65,16 @@ const ScheduleManagement = () => {
         activeTab,
         selectedScheduleId,
         editingPositions,
-        pendingChanges,
+        pendingChanges
     } = useSelector((state) => state.schedule);
 
-    // --- Локальное состояние для UI, управляемое этим компонентом ---
+    // --- Локальное состояние для UI, которое было утеряно ---
     const [alert, setAlert] = useState(null);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
     const [comparisonResults, setComparisonResults] = useState(null);
-    const [selectedCell, setSelectedCell] = useState(null); // Для выбора сотрудника
-    const [generationSettings, setGenerationSettings] = useState({
-        site_id: 1,
-        algorithm: ALGORITHM_TYPES.AUTO,
-        weekStart: getNextSunday(),
-    });
+    const [selectedCell, setSelectedCell] = useState(null);
 
     // --- Эффекты ---
     useEffect(() => {
@@ -74,34 +89,23 @@ const ScheduleManagement = () => {
         }
     }, [error]);
 
-    // --- Обработчики ---
-
+    // --- Обработчики действий ---
     const handleGenerate = async (settings) => {
-        const resultAction = await dispatch(generateSchedule(settings));
-        if (generateSchedule.fulfilled.match(resultAction)) {
-            setAlert({ type: 'success', message: `Schedule generated!` });
-            setShowGenerateModal(false);
-        }
+        const result = await dispatch(generateSchedule(settings)).unwrap();
+        setAlert({ type: 'success', message: `Schedule generated with ${result.assignments_count || 0} assignments!` });
+        setShowGenerateModal(false);
     };
 
     const handleCompare = async () => {
-        const resultAction = await dispatch(compareAlgorithms({ site_id: 1, week_start: getNextSunday() }));
-        if (compareAlgorithms.fulfilled.match(resultAction)) {
-            setComparisonResults(resultAction.payload);
-            setShowComparisonModal(true);
-        }
+        const result = await dispatch(compareAlgorithms({})).unwrap();
+        setComparisonResults(result);
+        setShowComparisonModal(true);
     };
 
     const handleDelete = (id) => {
         if (window.confirm(messages.CONFIRM_DELETE)) {
             dispatch(deleteSchedule(id)).then(() => setAlert({ type: 'success', message: 'Schedule deleted.' }));
         }
-    };
-
-    const handleUseAlgorithm = (algorithm) => {
-        setGenerationSettings(prev => ({ ...prev, algorithm }));
-        setShowComparisonModal(false);
-        setShowGenerateModal(true);
     };
 
     const handleCellClick = (date, positionId, shiftId) => {
@@ -121,10 +125,12 @@ const ScheduleManagement = () => {
     return (
         <AdminLayout>
             <Container fluid className="px-0">
-                {/* Заголовок */}
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-                    {/* ... JSX заголовка ... */}
-                </div>
+                <ScheduleHeader
+                    messages={messages}
+                    onGenerateClick={() => setShowGenerateModal(true)}
+                    onCompareClick={handleCompare}
+                    loading={loading === 'pending'}
+                />
 
                 <AlertMessage alert={alert} onClose={() => setAlert(null)} />
 
@@ -134,28 +140,20 @@ const ScheduleManagement = () => {
                             schedules={schedules}
                             loading={loading === 'pending' && !schedules.length}
                             onViewDetails={(id) => dispatch(fetchScheduleDetails(id))}
-                            onScheduleDeleted={handleDelete}
+                            onDelete={handleDelete}
                         />
                     </Tab>
                     <Tab eventKey="view" title={messages.SCHEDULE_DETAILS} disabled={!selectedScheduleId}>
                         {loading === 'pending' && !scheduleDetails ? (
                             <div className="text-center p-5"><Spinner animation="border" /></div>
                         ) : (
-                            // Теперь передаем меньше пропсов
-                            <ScheduleDetailsView
-                                scheduleDetails={scheduleDetails}
-                                editingPositions={editingPositions}
-                                pendingChanges={pendingChanges}
-                                // onCellClick нужно передать, т.к. он открывает модалку в этом компоненте
-                                onCellClick={handleCellClick}
-                            />
+                            <ScheduleDetailsView onCellClick={handleCellClick} />
                         )}
                     </Tab>
                 </Tabs>
 
-                {/* Модальные окна остаются здесь, т.к. управляются этим компонентом */}
                 <GenerateScheduleModal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} onGenerate={handleGenerate} generating={loading === 'pending'} />
-                <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={handleUseAlgorithm} />
+                <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={() => {}} />
                 <EmployeeSelectionModal show={showEmployeeModal} onHide={() => setShowEmployeeModal(false)} selectedPosition={selectedCell} onEmployeeSelect={handleEmployeeSelect} scheduleDetails={scheduleDetails} />
             </Container>
         </AdminLayout>

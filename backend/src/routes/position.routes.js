@@ -1,8 +1,9 @@
 const express = require('express');
-const positionController = require('../controllers/position.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-const router = express.Router();
+module.exports = function(db) {
+    const router = express.Router();
+    const positionController = require('../controllers/position.controller')(db);
 
 // All position routes require admin privileges
 router.use([verifyToken, isAdmin]);
@@ -16,4 +17,5 @@ router.delete('/:id', positionController.delete);
 // Get positions by work site
 router.get('/worksite/:siteId', positionController.findByWorkSite);
 
-module.exports = router;
+    return router;
+};

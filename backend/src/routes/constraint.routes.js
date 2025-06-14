@@ -1,19 +1,20 @@
 // backend/src/routes/constraint.routes.js (исправленная версия)
 const express = require('express');
-const constraintController = require('../controllers/constraint.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
 
-const router = express.Router();
+module.exports = function (db) {
+    const router = express.Router();
+    const constraintController = require('../controllers/constraint.controller')(db);
 
 // Employee routes - all authenticated users can access
-router.get('/employee/:empId', verifyToken, constraintController.getEmployeeConstraints);
-router.post('/', verifyToken, constraintController.createConstraint);
-router.put('/:id', verifyToken, constraintController.updateConstraint);
-router.delete('/:id', verifyToken, constraintController.deleteConstraint);
+    router.get('/employee/:empId', verifyToken, constraintController.getEmployeeConstraints);
+    router.post('/', verifyToken, constraintController.createConstraint);
+    router.put('/:id', verifyToken, constraintController.updateConstraint);
+    router.delete('/:id', verifyToken, constraintController.deleteConstraint);
 
 // NEW ROUTES (основные для работы)
-router.get('/weekly-grid', verifyToken, constraintController.getWeeklyConstraintsGrid);
-router.post('/submit-weekly', verifyToken, constraintController.submitWeeklyConstraints);
+    router.get('/weekly-grid', verifyToken, constraintController.getWeeklyConstraintsGrid);
+    router.post('/submit-weekly', verifyToken, constraintController.submitWeeklyConstraints);
 
 // УДАЛЯЕМ СТАРЫЙ РОУТ - он больше не нужен
 // router.get('/next-week-template', verifyToken, constraintController.getNextWeekConstraintsTemplate);
@@ -24,6 +25,7 @@ router.post('/submit-weekly', verifyToken, constraintController.submitWeeklyCons
 // router.post('/permanent', [verifyToken, isAdmin], constraintController.createPermanentConstraint);
 
 // Scheduling routes - for schedule generation
-router.get('/period', verifyToken, constraintController.getConstraintsForPeriod);
+    router.get('/period', verifyToken, constraintController.getConstraintsForPeriod);
 
-module.exports = router;
+    return router;
+};

@@ -11,12 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'schedule_assignments',
         timestamps: true,
-        associate: function(models) {
-            ScheduleAssignment.belongsTo(models.Schedule, { foreignKey: 'schedule_id', as: 'schedule' });
-            ScheduleAssignment.belongsTo(models.Employee, { foreignKey: 'emp_id', as: 'employee' });
-            ScheduleAssignment.belongsTo(models.Shift, { foreignKey: 'shift_id', as: 'shift' });
-            ScheduleAssignment.belongsTo(models.Position, { foreignKey: 'position_id', as: 'position' });
-        }
+
     });
     return ScheduleAssignment;
 };

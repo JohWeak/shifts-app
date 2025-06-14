@@ -1,5 +1,4 @@
 // backend/src/services/rest-calculator.service.js
-const { ScheduleSettings, Shift } = require('../models');
 
 class RestCalculatorService {
     /**

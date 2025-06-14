@@ -5,11 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'work_sites',
         timestamps: true,
-        associate: function(models) {
-            WorkSite.hasMany(models.Position, { foreignKey: 'site_id', as: 'positions', onDelete: 'CASCADE' });
-            WorkSite.hasMany(models.Schedule, { foreignKey: 'site_id', as: 'schedules', onDelete: 'CASCADE' });
-            WorkSite.hasOne(models.ScheduleSettings, { foreignKey: 'site_id', as: 'scheduleSettings' });
-        }
+
     });
     return WorkSite;
 };

@@ -1,13 +1,13 @@
 // frontend/src/constants/scheduleConstants.js
 
 export const API_ENDPOINTS = {
-    SCHEDULES: '/api/schedules',
-    GENERATE: '/api/schedules/generate',
-    COMPARE: '/api/schedules/compare-algorithms',
-    WORKSITES: '/api/worksites',
-    UPDATE_ASSIGNMENTS: (id) => `/api/schedules/${id}/update-assignments`,
-    SCHEDULE_DETAILS: (id) => `/api/schedules/${id}`,
-    DELETE_SCHEDULE: (id) => `/api/schedules/${id}`
+    SCHEDULES: '/schedules',
+    GENERATE: '/schedules/generate',
+    COMPARE: '/schedules/compare-algorithms',
+    WORKSITES: '/worksites',
+    UPDATE_ASSIGNMENTS: (id) => `/schedules/${id}/update-assignments`,
+    SCHEDULE_DETAILS: (id) => `/schedules/${id}`,
+    DELETE_SCHEDULE: (id) => `/schedules/${id}`
 };
 
 export const SCHEDULE_STATUS = {

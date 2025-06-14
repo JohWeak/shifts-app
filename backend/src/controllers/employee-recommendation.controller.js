@@ -1,14 +1,20 @@
 // backend/src/controllers/employee-recommendation.controller.js
+
+// Сервис теперь тоже будет принимать db
 const EmployeeRecommendationService = require('../services/employee-recommendation.service');
 
-class EmployeeRecommendationController {
+// Экспортируем функцию, которая принимает db
+module.exports = (db) => {
+    // Создаем экземпляр сервиса, передавая ему db
+    const recommendationService = new EmployeeRecommendationService(db);
 
-    static async getRecommendations(req, res) {
+    const controller = {};
+
+    // Метод становится свойством объекта controller
+    controller.getRecommendations = async (req, res) => {
         try {
-            // GET параметры
             const { position_id, shift_id, date, schedule_id } = req.query;
 
-            // Validation
             if (!position_id || !shift_id || !date) {
                 return res.status(400).json({
                     success: false,
@@ -17,18 +23,15 @@ class EmployeeRecommendationController {
             }
 
             console.log(`[EmployeeRecommendation] Request received:`, {
-                position_id,
-                shift_id,
-                date,
-                schedule_id
+                position_id, shift_id, date, schedule_id
             });
 
-            // Get recommendations with schedule context
-            const recommendations = await EmployeeRecommendationService.getRecommendedEmployees(
+            // Вызываем метод сервиса
+            const recommendations = await recommendationService.getRecommendedEmployees(
                 parseInt(position_id),
                 parseInt(shift_id),
                 date,
-                [], // exclude_employees пустой массив
+                [],
                 schedule_id ? parseInt(schedule_id) : null
             );
 
@@ -50,7 +53,7 @@ class EmployeeRecommendationController {
                 error: error.message
             });
         }
-    }
-}
+    };
 
-module.exports = EmployeeRecommendationController;
+    return controller;
+};

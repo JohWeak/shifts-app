@@ -1,7 +1,8 @@
 // frontend/src/app/store/slices/scheduleSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import * as scheduleAPI from '../../../shared/api/scheduleAPI';
 import * as employeeAPI from '../../../shared/api/employeeAPI';
+import * as worksiteAPI from '../../../shared/api/worksiteAPI';
 import axios from "axios";
 
 // --- Асинхронные экшены (Thunks) ---
@@ -11,8 +12,7 @@ export const fetchSchedules = createAsyncThunk(
     'schedule/fetchSchedules',
     async (_, { rejectWithValue }) => {
         try {
-            const data = await scheduleAPI.fetchSchedules();
-            return data;
+            return await scheduleAPI.fetchSchedules();
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -24,8 +24,7 @@ export const fetchScheduleDetails = createAsyncThunk(
     'schedule/fetchScheduleDetails',
     async (scheduleId, { rejectWithValue }) => {
         try {
-            const data = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            return data;
+            return await scheduleAPI.fetchScheduleDetails(scheduleId);
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -47,13 +46,25 @@ export const generateSchedule = createAsyncThunk(
     }
 );
 
+export const updateScheduleStatus = createAsyncThunk(
+    'schedule/updateStatus',
+    async ({ scheduleId, status }, { rejectWithValue }) => {
+        try {
+            // Вызываем функцию из нашего API-слоя
+            const data = await scheduleAPI.updateScheduleStatus(scheduleId, status);
+            return data.data; // Возвращаем обновленное расписание
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 // Сравнение алгоритмов
 export const compareAlgorithms = createAsyncThunk(
     'schedule/compareAlgorithms',
     async (settings, { rejectWithValue }) => {
         try {
-            const data = await scheduleAPI.compareAlgorithms(settings);
-            return data;
+            return await scheduleAPI.compareAlgorithms(settings);
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -103,53 +114,52 @@ export const exportSchedule = createAsyncThunk(
 
 export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
-    async ({ positionId, shiftId, date, scheduleId }, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
-            // Здесь будет вызов API-функции
-            // Для примера, пока что оставим заглушку
-            const response = await axios.get('http://localhost:5000/api/employees/recommendations', {
-                params: { position_id: positionId, shift_id: shiftId, date, schedule_id: scheduleId },
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            return response.data.data;
+            return await employeeAPI.fetchRecommendations(params); // <-- ИЗМЕНИТЬ
         } catch (error) {
-            return rejectWithValue(error.response?.data?.error || error.message);
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// Загрузка рабочих мест
+export const fetchWorkSites = createAsyncThunk(
+    'schedule/fetchWorkSites',
+    async (_, { rejectWithValue }) => {
+        try {
+            return await worksiteAPI.fetchWorkSites(); // <-- ИЗМЕНИТЬ
+        } catch (error) {
+            return rejectWithValue(error.message);
         }
     }
 );
 
 // --- Слайс (Slice) ---
 
-const initialState = {
-    // Данные
-    schedules: [],
-    scheduleDetails: null,
-
-    // Состояния
-    loading: 'idle', // 'idle' | 'pending' | 'succeeded' | 'failed'
-    error: null,
-
-    // UI Состояния (можно оставить в локальном стейте компонентов, но для примера перенесем)
-    selectedScheduleId: null,
-    activeTab: 'overview',
-
-    recommendations: { available: [], cross_position: [], unavailable_busy: [], unavailable_hard: [], unavailable_soft: [] },
-    recommendationsLoading: 'idle',
-};
 
 const scheduleSlice = createSlice({
     name: 'schedule',
     initialState: {
+        // Данные
         schedules: [],
         scheduleDetails: null,
-        loading: 'idle',
+        workSites: [], // <-- ИСПРАВЛЕНО
+        recommendations: { available: [], cross_position: [], unavailable_busy: [], unavailable_hard: [], unavailable_soft: [] },
+
+        // Состояния загрузки
+        loading: 'idle', // для основных операций
+        workSitesLoading: 'idle',
+        recommendationsLoading: 'idle',
+
+        // Ошибки
         error: null,
+
+        // UI Состояния
         selectedScheduleId: null,
         activeTab: 'overview',
-
-        //  поля для управления редактированием
-        editingPositions: {}, // { [pos_id]: boolean }
-        pendingChanges: {}, // { [changeKey]: changeObject }
+        editingPositions: {},
+        pendingChanges: {},
     },
     reducers: {
         // Синхронные экшены для управления UI
@@ -206,6 +216,7 @@ const scheduleSlice = createSlice({
             // Обработка fetchSchedules
             .addCase(fetchSchedules.pending, (state) => {
                 state.loading = 'pending';
+                state.error = null;
             })
             .addCase(fetchSchedules.fulfilled, (state, action) => {
                 state.loading = 'succeeded';
@@ -220,6 +231,7 @@ const scheduleSlice = createSlice({
             .addCase(fetchScheduleDetails.pending, (state) => {
                 state.loading = 'pending';
                 state.scheduleDetails = null;
+                state.error = null;
             })
             .addCase(fetchScheduleDetails.fulfilled, (state, action) => {
                 state.loading = 'succeeded';
@@ -237,15 +249,29 @@ const scheduleSlice = createSlice({
             // Обработка generateSchedule (только pending/rejected, fulfilled handled by thunk)
             .addCase(generateSchedule.pending, (state) => {
                 state.loading = 'pending';
+                state.error = null;
+            })
+            .addCase(compareAlgorithms.pending, (state) => {
+                state.loading = 'pending';
+                state.error = null;
             })
             .addCase(generateSchedule.rejected, (state, action) => {
                 state.loading = 'failed';
                 state.error = action.payload;
 
             })
+            .addCase(deleteSchedule.pending, (state) => {
+                state.loading = 'pending';
+                state.error = null;
+            })
+            .addCase(updateScheduleAssignments.pending, (state) => {
+                state.loading = 'pending';
+                state.error = null;
+            })
 
             .addCase(fetchRecommendations.pending, (state) => {
                 state.recommendationsLoading = 'pending';
+                state.error = null;
             })
             .addCase(fetchRecommendations.fulfilled, (state, action) => {
                 state.recommendationsLoading = 'succeeded';
@@ -254,6 +280,40 @@ const scheduleSlice = createSlice({
             .addCase(fetchRecommendations.rejected, (state, action) => {
                 state.recommendationsLoading = 'failed';
                 state.error = action.payload; // Можно использовать общий error или отдельный
+            })
+            // Обработка fetchWorkSites
+            .addCase(fetchWorkSites.pending, (state) => {
+                state.workSitesLoading = 'pending';
+            })
+            .addCase(fetchWorkSites.fulfilled, (state, action) => {
+                state.workSitesLoading = 'succeeded';
+                state.workSites = action.payload;
+            })
+            .addCase(fetchWorkSites.rejected, (state, action) => {
+                state.workSitesLoading = 'failed';
+                state.error = action.payload; // Можно добавить отдельное поле workSitesError
+            })
+            // Обработка updateScheduleStatus
+            .addCase(updateScheduleStatus.pending, (state) => {
+                state.loading = 'pending';
+            })
+            .addCase(updateScheduleStatus.fulfilled, (state, action) => {
+                state.loading = 'succeeded';
+                const updatedSchedule = action.payload;
+
+                // Обновляем расписание в общем списке
+                state.schedules = state.schedules.map(schedule =>
+                    schedule.id === updatedSchedule.id ? updatedSchedule : schedule
+                );
+
+                // Если это расписание открыто в детальном просмотре, обновляем и его
+                if (state.scheduleDetails?.schedule.id === updatedSchedule.id) {
+                    state.scheduleDetails.schedule = updatedSchedule;
+                }
+            })
+            .addCase(updateScheduleStatus.rejected, (state, action) => {
+                state.loading = 'failed';
+                state.error = action.payload;
             });
 
 

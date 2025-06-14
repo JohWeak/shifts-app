@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/scheduleConstants'; // Путь к константам изменился
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const getAuthHeaders = (isFormData = false) => {
     const headers = {
@@ -84,7 +84,7 @@ export async function updateScheduleAssignments(scheduleId, changes) {
 
 export async function updateScheduleStatus(scheduleId, status) {
     try {
-        const response = await axios.put(`${API_BASE_URL}/api/schedules/${scheduleId}/status`, { status }, { headers: getAuthHeaders() });
+        const response = await axios.put(`${API_BASE_URL}/schedules/${scheduleId}/status`, { status }, { headers: getAuthHeaders() });
         return handleResponse(response);
     } catch (error) {
         handleError(error);
@@ -139,4 +139,4 @@ export async function fetchWorkSites()  {
     } catch (error) {
         handleError(error);
     }
-};
+}

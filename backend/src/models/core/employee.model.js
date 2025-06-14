@@ -12,20 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'employees',
         timestamps: true,
-        associate: function (models) {
-            Employee.belongsTo(models.Position, {foreignKey: 'default_position_id', as: 'defaultPosition'});
-            Employee.hasMany(models.EmployeeConstraint, {foreignKey: 'emp_id', as: 'constraints', onDelete: 'CASCADE'});
-            Employee.hasMany(models.ScheduleAssignment, {
-                foreignKey: 'emp_id',
-                as: 'scheduleAssignments',
-                onDelete: 'CASCADE'
-            });
-            Employee.hasMany(models.EmployeeQualification, {
-                foreignKey: 'emp_id',
-                as: 'qualifications',
-                onDelete: 'CASCADE'
-            });
-        }
+
     });
     return Employee;
 };

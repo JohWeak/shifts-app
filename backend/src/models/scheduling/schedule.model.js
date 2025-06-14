@@ -9,10 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'schedules',
         timestamps: true,
-        associate: function(models) {
-            Schedule.belongsTo(models.WorkSite, { foreignKey: 'site_id', as: 'workSite' });
-            Schedule.hasMany(models.ScheduleAssignment, { foreignKey: 'schedule_id', as: 'assignments', onDelete: 'CASCADE' });
-        }
+
     });
     return Schedule;
 };

@@ -1,60 +1,49 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/schedule/ScheduleOverviewTable.js
+// frontend/src/features/schedule-management/components/ScheduleOverviewTable.js
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
 import { useMessages } from '../../../shared/lib/i18n/messages';
-import LoadingSpinner from '../common/LoadingSpinner';
-import ConfirmationModal from '../common/ConfirmationModal';
-import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
+import LoadingSpinner from '../../../shared/ui/LoadingSpinner';
+import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
+import { deleteSchedule } from '../../../app/store/slices/scheduleSlice'; // Импортируем наш thunk
 import {
     formatScheduleDate,
     getStatusBadgeVariant,
     canDeleteSchedule,
     getSiteName
-} from '../../../utils/scheduleUtils';
+} from '../../../shared/lib/utils/scheduleUtils';
 
-const ScheduleOverviewTable = ({
-                                   schedules,
-                                   loading,
-                                   onViewDetails,
-                                   onScheduleDeleted
-                               }) => {
+const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
     const messages = useMessages('en');
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const dispatch = useDispatch();
+
+    // Получаем состояние загрузки из Redux, чтобы блокировать кнопку
+    const isDeleting = useSelector(state => state.schedule.loading === 'pending');
+
+    // Локальное состояние для модального окна
     const [scheduleToDelete, setScheduleToDelete] = useState(null);
-    const api = useScheduleAPI();
 
     const handleDeleteClick = (schedule) => {
         setScheduleToDelete(schedule);
-        setShowDeleteModal(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setScheduleToDelete(null);
     };
 
     const handleDeleteConfirm = async () => {
         if (!scheduleToDelete) return;
 
-        try {
-            await api.deleteSchedule(scheduleToDelete.id);
-            onScheduleDeleted(scheduleToDelete);
-            setShowDeleteModal(false);
-            setScheduleToDelete(null);
-        } catch (err) {
-            console.error('Error deleting schedule:', err);
-        }
-    };
-
-    const handleDeleteCancel = () => {
-        setShowDeleteModal(false);
-        setScheduleToDelete(null);
+        // Диспатчим экшен удаления
+        await dispatch(deleteSchedule(scheduleToDelete.id));
+        setScheduleToDelete(null); // Закрываем модальное окно
     };
 
     if (loading) {
-        return (
-            <LoadingSpinner
-                message={messages.LOADING_SCHEDULES}
-            />
-        );
+        return <LoadingSpinner message={messages.LOADING_SCHEDULES} />;
     }
 
-    if (schedules.length === 0) {
+    if (!schedules || schedules.length === 0) {
         return (
             <Card>
                 <Card.Body className="text-center py-5">
@@ -83,40 +72,18 @@ const ScheduleOverviewTable = ({
                         <tbody>
                         {schedules.map(schedule => (
                             <tr key={schedule.id}>
-                                <td>
-                                    {formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}
-                                </td>
-                                <td>
-                                    <Badge bg={getStatusBadgeVariant(schedule.status)}>
-                                        {schedule.status}
-                                    </Badge>
-                                </td>
+                                <td>{formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}</td>
+                                <td><Badge bg={getStatusBadgeVariant(schedule.status)}>{schedule.status}</Badge></td>
                                 <td>{getSiteName(schedule)}</td>
                                 <td>{formatScheduleDate(schedule.createdAt)}</td>
                                 <td>
                                     <div className="d-flex gap-2 align-items-center">
-                                        <Button
-                                            variant="outline-primary"
-                                            size="sm"
-                                            onClick={() => onViewDetails(schedule.id)}
-                                            title={messages.VIEW_DETAILS}
-                                        >
+                                        <Button variant="outline-primary" size="sm" onClick={() => onViewDetails(schedule.id)} title={messages.VIEW_DETAILS}>
                                             <i className="bi bi-eye"></i>
                                         </Button>
-
                                         {canDeleteSchedule(schedule) && (
-                                            <Button
-                                                variant="outline-danger"
-                                                size="sm"
-                                                onClick={() => handleDeleteClick(schedule)}
-                                                disabled={api.loading}
-                                                title={messages.DELETE_SCHEDULE}
-                                            >
-                                                {api.loading && scheduleToDelete?.id === schedule.id ? (
-                                                    <Spinner size="sm" />
-                                                ) : (
-                                                    <i className="bi bi-trash"></i>
-                                                )}
+                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteClick(schedule)} disabled={isDeleting} title={messages.DELETE_SCHEDULE}>
+                                                {isDeleting && scheduleToDelete?.id === schedule.id ? <Spinner size="sm" /> : <i className="bi bi-trash"></i>}
                                             </Button>
                                         )}
                                     </div>
@@ -129,40 +96,22 @@ const ScheduleOverviewTable = ({
             </Card>
 
             <ConfirmationModal
-                show={showDeleteModal}
+                show={!!scheduleToDelete}
                 title={messages.CONFIRM_DELETION}
                 message={messages.DELETE_CONFIRMATION_TEXT}
                 onConfirm={handleDeleteConfirm}
                 onCancel={handleDeleteCancel}
-                loading={api.loading}
+                loading={isDeleting}
                 confirmText={messages.DELETE_SCHEDULE}
                 variant="danger"
             >
                 {scheduleToDelete && (
                     <div className="schedule-info bg-light p-3 rounded">
-                        <div className="row">
-                            <div className="col-sm-4"><strong>Week:</strong></div>
-                            <div className="col-sm-8">
-                                {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-4"><strong>Site:</strong></div>
-                            <div className="col-sm-8">{getSiteName(scheduleToDelete)}</div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-4"><strong>Status:</strong></div>
-                            <div className="col-sm-8">
-                                <Badge bg={getStatusBadgeVariant(scheduleToDelete.status)}>
-                                    {scheduleToDelete.status}
-                                </Badge>
-                            </div>
-                        </div>
+                        <p><strong>{messages.WEEK}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
+                        <p><strong>{messages.SITE}:</strong> {getSiteName(scheduleToDelete)}</p>
+                        <p className="mt-3 text-muted">{messages.DELETE_ASSIGNMENTS_WARNING}</p>
                     </div>
                 )}
-                <p className="mt-3 text-muted">
-                    {messages.DELETE_ASSIGNMENTS_WARNING}
-                </p>
             </ConfirmationModal>
         </>
     );

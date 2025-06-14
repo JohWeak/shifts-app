@@ -3,16 +3,20 @@ const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const { Employee, Position, Shift, Schedule, ScheduleAssignment, EmployeeConstraint } = require('../models');
 const { Op } = require('sequelize');
 
 class CPSATBridge {
-
+    constructor(db) {
+        if (!db || !db.Employee) {
+            throw new Error("CPSATBridge requires a valid 'db' object with Sequelize models.");
+        }
+        this.db = db;
+    }
     /**
      * Основной метод генерации расписания
      */
     static async generateOptimalSchedule(siteId, weekStart) {
-        const bridge = new CPSATBridge();
+        const bridge = new CPSATBridge(db);
 
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
@@ -60,7 +64,7 @@ class CPSATBridge {
      */
     async prepareScheduleData(siteId, weekStart) {
         console.log(`[CP-SAT Bridge] Preparing data for site ${siteId}, week ${weekStart}`);
-
+        const { Employee, Position, Shift, EmployeeConstraint } = this.db;
         try {
             // Получить сотрудников с дефолтными позициями и ограничениями
             const employees = await Employee.findAll({
@@ -283,6 +287,8 @@ class CPSATBridge {
      * Получение существующих назначений для анализа
      */
     async getExistingAssignments(employeeIds, weekStart) {
+        const { ScheduleAssignment, Shift, Position } = this.db;
+        const { Op } = this.db.Sequelize;
         try {
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
@@ -400,6 +406,8 @@ class CPSATBridge {
      * Сохранение результатов в базу данных
      */
     async saveSchedule(siteId, weekStart, schedule) {
+        const { Schedule, ScheduleAssignment } = this.db;
+        const { Op } = this.db.Sequelize;
         try {
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);

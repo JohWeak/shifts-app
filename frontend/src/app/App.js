@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
+import {Provider} from 'react-redux';
 import store from './store/store'; // Путь изменился
 
 // Pages
@@ -13,7 +13,8 @@ import EmployeeManagementPage from '../pages/EmployeeManagementPage';
 import SystemSettingsPage from '../pages/SystemSettingsPage';
 import ReportsPage from '../pages/ReportsPage';
 
-import { ProtectedRoute } from '../shared/lib/auth/ProtectedRoute';
+import {ProtectedRoute} from '../shared/lib/auth/ProtectedRoute';
+import './App.css';
 
 /**
  * Main Application Component
@@ -26,26 +27,34 @@ function App() {
                 <div className="app">
                     <Routes>
                         {/* Public Route */}
-                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/login" element={<LoginPage/>}/>
 
                         {/* Employee Route */}
                         <Route
                             path="/employee/dashboard"
                             element={
                                 <ProtectedRoute allowedRole="employee">
-                                    <EmployeeDashboardPage />
+                                    <EmployeeDashboardPage/>
                                 </ProtectedRoute>
                             }
                         />
 
                         {/* Admin Routes */}
-                        <Route path="/admin" element={<ProtectedRoute allowedRole="admin"><AdminDashboardPage /></ProtectedRoute>} />
-                        <Route path="/admin/schedules" element={<ProtectedRoute allowedRole="admin"><ScheduleManagementPage /></ProtectedRoute>} />
-                        {/* Добавьте другие админские роуты по аналогии */}
-
+                        <Route path="/admin"
+                               element={<ProtectedRoute allowedRole="admin"><AdminDashboardPage/></ProtectedRoute>}/>
+                        <Route path="/admin/schedules" element={<ProtectedRoute
+                            allowedRole="admin"><ScheduleManagementPage/></ProtectedRoute>}/>
+                        <Route path="/admin/algorithms"
+                               element={<ProtectedRoute allowedRole="admin"><AlgorithmSettingsPage/></ProtectedRoute>}/>
+                        <Route path="/admin/employees" element={<ProtectedRoute
+                            allowedRole="admin"><EmployeeManagementPage/></ProtectedRoute>}/>
+                        <Route path="/admin/settings"
+                               element={<ProtectedRoute allowedRole="admin"><SystemSettingsPage/></ProtectedRoute>}/>
+                        <Route path="/admin/reports"
+                               element={<ProtectedRoute allowedRole="admin"><ReportsPage/></ProtectedRoute>}/>
                         {/* Default Redirects */}
-                        <Route path="/" element={<Navigate to="/login" replace />} />
-                        <Route path="*" element={<Navigate to="/login" replace />} />
+                        <Route path="/" element={<Navigate to="/login" replace/>}/>
+                        <Route path="*" element={<Navigate to="/login" replace/>}/>
                     </Routes>
                 </div>
             </Router>

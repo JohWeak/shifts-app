@@ -11,10 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'shifts',
         timestamps: true,
-        associate: function(models) {
-            Shift.hasMany(models.EmployeeConstraint, { foreignKey: 'shift_id', as: 'constraints', onDelete: 'CASCADE' });
-            Shift.hasMany(models.ScheduleAssignment, { foreignKey: 'shift_id', as: 'scheduleAssignments', onDelete: 'CASCADE' });
-        }
+
     });
     return Shift;
 };

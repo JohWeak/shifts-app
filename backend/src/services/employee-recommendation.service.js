@@ -11,8 +11,14 @@ const {
 } = require('../models');
 
 class EmployeeRecommendationService {
+    constructor(db) {
+        this.db = db;
+    }
+     async getRecommendedEmployees(positionId, shiftId, date, excludeEmployeeIds = [], scheduleId = null) {
 
-    static async getRecommendedEmployees(positionId, shiftId, date, excludeEmployeeIds = [], scheduleId = null) {
+         const { Employee, Position, Shift, EmployeeConstraint, ScheduleAssignment, Schedule } = this.db;
+         const { Op } = this.db.Sequelize;
+
         try {
             console.log(`[EmployeeRecommendation] Getting recommendations for:`, {
                 positionId,
@@ -226,7 +232,7 @@ class EmployeeRecommendationService {
         }
     }
 
-    static _evaluateEmployee(employee, targetPosition, targetShift, dayOfWeek, date, employeeWeekAssignments, todayAssignments, allWeekAssignments) {
+     _evaluateEmployee(employee, targetPosition, targetShift, dayOfWeek, date, employeeWeekAssignments, todayAssignments, allWeekAssignments) {
         const evaluation = {
             canWork: true,
             score: 50,
@@ -331,7 +337,7 @@ class EmployeeRecommendationService {
         return evaluation;
     }
 
-    static _constraintApplies(constraint, dayOfWeek, shiftId, date) {
+     _constraintApplies(constraint, dayOfWeek, shiftId, date) {
         if (constraint.applies_to === 'specific_date') {
             return constraint.target_date === date &&
                 (!constraint.shift_id || constraint.shift_id === shiftId);
@@ -343,7 +349,7 @@ class EmployeeRecommendationService {
         return false;
     }
 
-    static _checkRestViolations(empId, employeeAssignments, targetShift, date) {
+     _checkRestViolations(empId, employeeAssignments, targetShift, date) {
         const targetDate = dayjs(date);
 
         for (const assignment of employeeAssignments) {

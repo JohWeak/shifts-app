@@ -1,275 +1,119 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/schedule/GenerateScheduleModal.js
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Button, Row, Col, ProgressBar } from 'react-bootstrap';
+// frontend/src/features/schedule-management/components/GenerateScheduleModal.js
+import React, { useState, useEffect, useRef } from 'react';
+import { Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 import { useMessages } from '../../../shared/lib/i18n/messages';
 import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from '../../../shared/config/scheduleConstants';
-import { useScheduleAPI } from '../../../hooks/useScheduleAPI';
-import AlertMessage from '../../../shared/ui/AlertMessage';
-import LoadingSpinner from '../../../shared/ui/LoadingSpinner';
-import { isValidWeekStartDate, getNextSunday } from '../../../shared/lib/utils/scheduleUtils';
+import { getNextSunday, isValidWeekStartDate } from '../../../shared/lib/utils/scheduleUtils';
+import { fetchWorkSites } from '../../../app/store/slices/scheduleSlice';
 
-const GenerateScheduleModal = ({
-                                   show,
-                                   onHide,
-                                   onGenerate,
-                                   generating = false
-                               }) => {
+const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
     const messages = useMessages('en');
-    const [settings, setSettings] = useState(DEFAULT_GENERATION_SETTINGS);
-    const [workSites, setWorkSites] = useState([]);
-    const [modalAlert, setModalAlert] = useState(null);
-    const [isValidWeekStart, setIsValidWeekStart] = useState(true);
+    const dispatch = useDispatch();
 
-    const api = useScheduleAPI();
+    // Получаем данные из Redux
+    const { workSites, workSitesLoading } = useSelector((state) => state.schedule || {});
 
+    // Локальное состояние для настроек формы
+    const [settings, setSettings] = useState({ ...DEFAULT_GENERATION_SETTINGS, weekStart: getNextSunday() });
+    const [formError, setFormError] = useState('');
+
+    const hasFetched = useRef(false);
+
+    // Эффект №1: Загрузка данных при открытии модалки
     useEffect(() => {
-        if (show) {
-            initializeModal();
+        // Если модалка открыта и мы еще НЕ делали запрос
+        if (show && !hasFetched.current) {
+            dispatch(fetchWorkSites());
+            hasFetched.current = true; // Помечаем, что запрос был сделан
         }
-    }, [show]);
-
-    const initializeModal = async () => {
-        // Set default week start
-        setSettings(prev => ({
-            ...prev,
-            weekStart: getNextSunday()
-        }));
-        setIsValidWeekStart(true);
-
-        // Fetch work sites
-        await fetchWorkSites();
-    };
-
-    const fetchWorkSites = async () => {
-        try {
-            const sites = await api.fetchWorkSites();
-            setWorkSites(sites);
-
-            // Set first site as default if none selected
-            if (sites.length > 0 && !settings.site_id) {
-                setSettings(prev => ({
-                    ...prev,
-                    site_id: sites[0].site_id
-                }));
-            }
-        } catch (err) {
-            setModalAlert({
-                type: 'warning',
-                message: messages.COULD_NOT_LOAD_WORK_SITES
-            });
+        // Если модалка закрывается, сбрасываем флаг для следующего открытия
+        if (!show) {
+            hasFetched.current = false;
         }
-    };
+    }, [show, dispatch]); // Зависим только от `show` и `dispatch`
+
+    // Второй useEffect для установки дефолтного значения остается без изменений
+    useEffect(() => {
+        if (show && workSites.length > 0 && settings.site_id === 1) {
+            setSettings(prev => ({ ...prev, site_id: workSites[0].site_id }));
+        }
+    }, [show, workSites, settings.site_id]);
 
     const handleDateChange = (e) => {
-        const isValid = isValidWeekStartDate(e.target.value);
-
-        setIsValidWeekStart(isValid);
-        setModalAlert(null);
-
-        if (!isValid && e.target.value) {
-            setModalAlert({
-                type: 'warning',
-                message: messages.WEEK_START_SUNDAY_WARNING
-            });
+        const date = e.target.value;
+        if (date && !isValidWeekStartDate(date)) {
+            setFormError(messages.WEEK_START_SUNDAY_WARNING);
+        } else {
+            setFormError('');
         }
-
-        setSettings(prev => ({
-            ...prev,
-            weekStart: e.target.value
-        }));
+        setSettings(prev => ({ ...prev, weekStart: date }));
     };
 
     const handleSubmit = () => {
+        if (!settings.weekStart || !settings.site_id) {
+            setFormError('Please fill all fields.');
+            return;
+        }
         onGenerate(settings);
     };
 
-    const handleClose = () => {
-        setModalAlert(null);
-        setIsValidWeekStart(true);
-        onHide();
-    };
-
-    const isFormValid = () => {
-        return settings.weekStart &&
-            isValidWeekStart &&
-            !api.loading &&
-            workSites.length > 0;
-    };
+    const isFormValid = settings.weekStart && settings.site_id && !formError;
 
     return (
-        <Modal
-            show={show}
-            onHide={!generating ? handleClose : undefined}
-            size="lg"
-            className="generation-modal"
-        >
+        <Modal show={show} onHide={!generating ? onHide : undefined} size="lg">
             <Modal.Header closeButton={!generating}>
-                <Modal.Title>
-                    <i className="bi bi-plus-circle me-2"></i>
-                    {messages.GENERATE_SCHEDULE}
-                </Modal.Title>
+                <Modal.Title><i className="bi bi-plus-circle me-2"></i>{messages.GENERATE_SCHEDULE}</Modal.Title>
             </Modal.Header>
-
             <Modal.Body>
-                <Form>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label className="fw-semibold">
-                                    <i className="bi bi-calendar me-2"></i>
-                                    {messages.WEEK_START_DATE}
-                                </Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={settings.weekStart}
-                                    onChange={handleDateChange}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    className={!isValidWeekStart && settings.weekStart ? 'is-invalid' : ''}
-                                />
-                                <Form.Text className="text-muted">
-                                    {messages.FUTURE_DATES_ONLY}
-                                </Form.Text>
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label className="fw-semibold">
-                                    <i className="bi bi-building me-2"></i>
-                                    {messages.WORK_SITE}
-                                </Form.Label>
-                                {api.loading ? (
-                                    <LoadingSpinner message={messages.LOADING_WORK_SITES} className="py-2" />
-                                ) : (
-                                    <Form.Select
-                                        value={settings.site_id}
-                                        onChange={(e) => setSettings(prev => ({
-                                            ...prev,
-                                            site_id: parseInt(e.target.value)
-                                        }))}
-                                    >
-                                        {workSites.length === 0 ? (
-                                            <option value="">{messages.NO_WORK_SITES}</option>
-                                        ) : (
-                                            workSites.map(site => (
-                                                <option key={site.site_id} value={site.site_id}>
-                                                    {site.site_name}
-                                                </option>
-                                            ))
-                                        )}
-                                    </Form.Select>
-                                )}
-                                <Form.Text className="text-muted">
-                                    {messages.SELECT_WORK_SITE}
-                                </Form.Text>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">
-                            <i className="bi bi-cpu me-2"></i>
-                            {messages.ALGORITHM}
-                        </Form.Label>
-                        <Form.Select
-                            value={settings.algorithm}
-                            onChange={(e) => setSettings(prev => ({
-                                ...prev,
-                                algorithm: e.target.value
-                            }))}
-                        >
-                            <option value={ALGORITHM_TYPES.AUTO}>
-                                {messages.ALGORITHM_AUTO_DESC}
-                            </option>
-                            <option value={ALGORITHM_TYPES.CP_SAT}>
-                                {messages.ALGORITHM_CP_SAT_DESC}
-                            </option>
-                            <option value={ALGORITHM_TYPES.SIMPLE}>
-                                {messages.ALGORITHM_SIMPLE_DESC}
-                            </option>
-                        </Form.Select>
-                        <Form.Text className="text-muted">
-                            {messages.ALGORITHM_HELP}
-                        </Form.Text>
-                    </Form.Group>
-                </Form>
-
-                <AlertMessage
-                    alert={modalAlert}
-                    onClose={() => setModalAlert(null)}
-                    className="mt-3 mb-0"
-                />
-
-                {/* Generation Progress */}
-                {generating && (
-                    <div className="mt-4">
-                        <div className="d-flex align-items-center mb-2">
-                            <div className="spinner-border spinner-border-sm me-2" role="status" />
-                            <span>{messages.GENERATION_IN_PROGRESS}</span>
-                        </div>
-                        <ProgressBar
-                            animated
-                            now={100}
-                            variant="primary"
-                            className="mb-3"
-                        />
-                        <div className="alert alert-info mb-0">
-                            <small>
-                                <i className="bi bi-info-circle me-1"></i>
-                                {messages.GENERATION_INFO}
-                            </small>
-                        </div>
+                {generating ? (
+                    <div className="text-center">
+                        <p>{messages.GENERATION_IN_PROGRESS}</p>
+                        <ProgressBar animated now={100} className="mb-3" />
+                        <small className="text-muted">{messages.GENERATION_INFO}</small>
                     </div>
+                ) : (
+                    <Form>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>{messages.WEEK_START_DATE}</Form.Label>
+                                    <Form.Control type="date" value={settings.weekStart} onChange={handleDateChange} min={new Date().toISOString().split('T')[0]} />
+                                    <Form.Text className="text-muted">{messages.SELECT_SUNDAY_HELP}</Form.Text>
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>{messages.WORK_SITE}</Form.Label>
+                                    {workSitesLoading === 'pending' ? <Spinner size="sm" /> :
+                                        <Form.Select value={settings.site_id} onChange={(e) => setSettings(prev => ({ ...prev, site_id: parseInt(e.target.value) }))}>
+                                            {/* Здесь тоже используем optional chaining для 100% надежности */}
+                                            {workSites?.map(site => (
+                                                <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
+                                            ))}
+                                        </Form.Select>
+                                    }
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Label>{messages.ALGORITHM}</Form.Label>
+                            <Form.Select value={settings.algorithm} onChange={(e) => setSettings(prev => ({ ...prev, algorithm: e.target.value }))}>
+                                <option value={ALGORITHM_TYPES.AUTO}>{messages.ALGORITHM_AUTO_DESC}</option>
+                                <option value={ALGORITHM_TYPES.CP_SAT}>{messages.ALGORITHM_CP_SAT_DESC}</option>
+                                <option value={ALGORITHM_TYPES.SIMPLE}>{messages.ALGORITHM_SIMPLE_DESC}</option>
+                            </Form.Select>
+                        </Form.Group>
+                        {formError && <Alert variant="warning" className="mt-3">{formError}</Alert>}
+                    </Form>
                 )}
             </Modal.Body>
-
-            <Modal.Footer className="flex-column">
-                <div className="d-flex gap-2 w-100 justify-content-end">
-                    <Button
-                        variant="secondary"
-                        onClick={handleClose}
-                        disabled={generating}
-                    >
-                        {messages.CANCEL}
-                    </Button>
-
-                    <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={generating || !isFormValid()}
-                    >
-                        {generating ? (
-                            <>
-                                <div className="spinner-border spinner-border-sm me-2" role="status" />
-                                {messages.GENERATING}
-                            </>
-                        ) : (
-                            <>
-                                <i className="bi bi-play-fill me-2"></i>
-                                {messages.GENERATE_SCHEDULE}
-                            </>
-                        )}
-                    </Button>
-                </div>
-
-                {/* Help text */}
-                {(!isFormValid() || modalAlert) && (
-                    <div className="w-100 text-center mt-2">
-                        {!isValidWeekStart && settings.weekStart && (
-                            <small className="text-danger d-block">
-                                <i className="bi bi-exclamation-circle me-1"></i>
-                                {messages.SELECT_SUNDAY_TO_ENABLE}
-                            </small>
-                        )}
-
-                        {workSites.length === 0 && !api.loading && (
-                            <small className="text-danger d-block">
-                                <i className="bi bi-exclamation-triangle me-1"></i>
-                                {messages.NO_WORK_SITES_AVAILABLE}
-                            </small>
-                        )}
-                    </div>
-                )}
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onHide} disabled={generating}>{messages.CANCEL}</Button>
+                <Button variant="primary" onClick={handleSubmit} disabled={generating || !isFormValid}>
+                    {generating ? <Spinner as="span" size="sm" /> : <i className="bi bi-play-fill me-1"></i>}
+                    {generating ? messages.GENERATING : messages.GENERATE_SCHEDULE}
+                </Button>
             </Modal.Footer>
         </Modal>
     );

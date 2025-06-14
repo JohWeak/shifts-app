@@ -11,9 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at',
-        associate: function(models) {
-            EmployeeQualification.belongsTo(models.Employee, { foreignKey: 'emp_id', as: 'employee' });
-        }
+
     });
     return EmployeeQualification;
 };

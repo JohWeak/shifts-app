@@ -1,40 +1,35 @@
-// backend/src/routes/schedule.routes.js - УБЕДИСЬ что роут находится В ПРАВИЛЬНОМ МЕСТЕ
-
+// backend/src/routes/schedule.routes.js
 const express = require('express');
-const scheduleController = require('../controllers/schedule.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
-const EmployeeRecommendationController = require('../controllers/employee-recommendation.controller');
 
-const router = express.Router();
+module.exports = function(db) {
+    const router = express.Router();
+    const scheduleController = require('../controllers/schedule.controller')(db);
+    const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-// === EMPLOYEE ROUTES ===
-router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
+    // === EMPLOYEE ROUTES (публичные для залогиненных) ===
+    router.get('/weekly', verifyToken, scheduleController.getWeeklySchedule);
 
+    // === ADMIN ROUTES ===
 
-// === ADMIN ROUTES (ВАЖНО: специфичные роуты ПЕРЕД динамическими) ===
-// Статистика - ПЕРЕД /:scheduleId
-router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getScheduleStats);
+    // --- ОБЩИЕ АДМИНСКИЕ РОУТЫ (без :scheduleId в пути) ---
+    // Эти роуты должны быть ОБЯЗАТЕЛЬНО ПЕРЕД роутами с /:scheduleId
 
-// Рекомендации сотрудников - ПЕРЕД /:scheduleId
-router.get('/recommendations/employees', [verifyToken, isAdmin], scheduleController.getRecommendedEmployees);
-router.post('/employee-recommendations', EmployeeRecommendationController.getRecommendations);
+    router.get('/stats/overview', [verifyToken, isAdmin], scheduleController.getScheduleStats);
+    router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
+    router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
 
+    // ВАЖНО: этот роут должен быть последним из общих!
+    router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
 
-// Генерация и сравнение - ПЕРЕД /:scheduleId
-router.post('/generate', [verifyToken, isAdmin], scheduleController.generateNextWeekSchedule);
-router.post('/compare-algorithms', [verifyToken, isAdmin], scheduleController.compareAllAlgorithms);
+    // --- РОУТЫ ДЛЯ КОНКРЕТНОГО РАСПИСАНИЯ (с :scheduleId в пути) ---
+    // Теперь Express будет правильно их отличать от /stats/overview, /generate и т.д.
 
-// Получить все расписания - ПЕРЕД /:scheduleId
-router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
+    router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
+    router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
+    router.put('/:scheduleId/update-assignments', [verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
+    router.post('/:scheduleId/duplicate', [verifyToken, isAdmin], scheduleController.duplicateSchedule);
+    router.delete('/:scheduleId', [verifyToken, isAdmin], scheduleController.deleteSchedule);
+    router.get('/:scheduleId/export', [verifyToken, isAdmin], scheduleController.exportSchedule);
 
-// Действия с конкретным расписанием - scheduleId роуты ПОСЛЕ всех остальных
-router.put('/:scheduleId/update-assignments', [verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
-router.get('/:scheduleId/export', [verifyToken, isAdmin], scheduleController.exportSchedule);
-router.post('/:scheduleId/duplicate', [verifyToken, isAdmin], scheduleController.duplicateSchedule);
-router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
-router.delete('/:scheduleId', [verifyToken, isAdmin], scheduleController.deleteSchedule);
-
-// Получить детали расписания - САМЫЙ ПОСЛЕДНИЙ
-router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
-
-module.exports = router;
+    return router;
+};

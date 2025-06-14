@@ -1,21 +1,65 @@
 // backend/src/services/schedule-generator.service.js
 
 const dayjs = require('dayjs');
-const { Op } = require('sequelize');
-const {
-    Employee,
-    Shift,
-    Position,
-    Schedule,
-    ScheduleAssignment,
-    ScheduleSettings
-} = require('../models');
+
 
 class ScheduleGeneratorService {
     /**
      * Main schedule generation algorithm with strict position and rest period checks
      */
-    static async generateOptimalSchedule(data) {
+    constructor(db) {
+        this.db = db;
+    }
+    static async generateWeeklySchedule(db, siteId, weekStart) {
+        const service = new ScheduleGeneratorService(db);
+        try {
+            const data = await service.prepareData(siteId, weekStart);
+            const assignments = await service.generateOptimalSchedule(data);
+            const savedSchedule = await service.saveSchedule(siteId, weekStart, assignments);
+
+            return {
+                success: true,
+                schedule: savedSchedule,
+                algorithm: 'simple_js_generator',
+                stats: { // Добавляем базовую статистику для консистентности
+                    total_assignments: assignments.length,
+                    employees_assigned: new Set(assignments.map(a => a.emp_id)).size
+                }
+            };
+
+        } catch(error) {
+            console.error('[ScheduleGeneratorService] Error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * 2. Создаем метод для подготовки данных (как в CPSATBridge)
+     */
+    async prepareData(siteId, weekStart) {
+        const { Employee, Shift, Position, ScheduleSettings, EmployeeConstraint } = this.db;
+
+        const [employees, shifts, positions, settings] = await Promise.all([
+            Employee.findAll({ where: { status: 'active', role: 'employee' } }),
+            Shift.findAll({ order: [['start_time', 'ASC']] }),
+            Position.findAll({ where: { site_id: siteId } }),
+            ScheduleSettings.findOne({ where: { site_id: siteId } })
+        ]);
+
+        // Преобразуем ограничения в удобный формат
+        const allConstraints = await EmployeeConstraint.findAll({ where: { status: 'active' } });
+        const constraints = {};
+        allConstraints.forEach(c => {
+            if (!constraints[c.emp_id]) constraints[c.emp_id] = {};
+            // ... (здесь можно добавить более сложную логику обработки ограничений)
+        });
+
+        if (!settings) throw new Error(`Schedule settings not found for site ${siteId}`);
+
+        return { weekStart, employees, shifts, positions, settings, constraints };
+    }
+
+    async generateOptimalSchedule(data) {
         const {weekStart, employees, shifts, positions, settings, constraints} = data;
         const schedule = [];
 
@@ -86,7 +130,7 @@ class ScheduleGeneratorService {
     /**
      * Calculate shift end time based on start time and duration
      */
-    static calculateShiftEndTime(shift) {
+     calculateShiftEndTime(shift) {
         const startTime = dayjs(`2000-01-01 ${shift.start_time}`);
         let endTime = startTime.add(shift.duration, 'hour');
 
@@ -102,7 +146,7 @@ class ScheduleGeneratorService {
         };
     }
 
-    static async assignOptimalEmployees(date, shift, position, requiredCount, employees, constraints, settings, existingSchedule, shiftsMap) {
+     async assignOptimalEmployees(date, shift, position, requiredCount, employees, constraints, settings, existingSchedule, shiftsMap) {
         // Разделяем сотрудников на две группы
         const positionMatchedEmployees = employees.filter(emp =>
             emp.default_position_id === position.pos_id
@@ -165,7 +209,7 @@ class ScheduleGeneratorService {
         return sortedEmployees.slice(0, actualCount).map(emp => emp.emp_id);
     }
 
-    static async isEmployeeAvailable(empId, date, shift, constraints, settings, existingSchedule, shiftsMap) {
+     async isEmployeeAvailable(empId, date, shift, constraints, settings, existingSchedule, shiftsMap) {
         // 1. Check employee constraints
         const empConstraints = constraints[empId] || {};
         const dayConstraints = empConstraints[date] || {};
@@ -198,7 +242,7 @@ class ScheduleGeneratorService {
     /**
      * Calculate priority for employee assignment
      */
-    static calculateEmployeePriority(empId, date, shift, constraints, existingSchedule, hasMatchingPosition = false) {
+     calculateEmployeePriority(empId, date, shift, constraints, existingSchedule, hasMatchingPosition = false) {
         let priority = 100;
 
         // Большой бонус за соответствие позиции
@@ -226,7 +270,7 @@ class ScheduleGeneratorService {
     /**
      * Check rest period requirements - FULLY IMPLEMENTED
      */
-    static async checkRestPeriod(empId, date, shift, settings, existingSchedule, shiftsMap) {
+     async checkRestPeriod(empId, date, shift, settings, existingSchedule, shiftsMap) {
         const currentDate = dayjs(date);
 
         // Check previous day
@@ -295,7 +339,7 @@ class ScheduleGeneratorService {
     /**
      * Calculate actual rest hours between two shifts
      */
-    static calculateRestHours(date1, shift1, date2, shift2) {
+     calculateRestHours(date1, shift1, date2, shift2) {
         // Calculate end time of first shift
         const shift1Start = dayjs(`${date1} ${shift1.start_time}`);
         let shift1End = shift1Start.add(shift1.duration, 'hour');
@@ -318,7 +362,7 @@ class ScheduleGeneratorService {
     /**
      * Get required rest hours based on shift type and settings
      */
-    static getRequiredRestHours(previousShift, settings) {
+     getRequiredRestHours(previousShift, settings) {
         let requiredRest = settings.min_rest_base_hours || 11;
 
         // Add bonus for night shifts
@@ -338,8 +382,10 @@ class ScheduleGeneratorService {
     /**
      * Save schedule to database
      */
-    static async saveSchedule(siteId, weekStart, assignments) {
+     async saveSchedule(siteId, weekStart, assignments) {
+        const { Schedule, ScheduleAssignment } = this.db;
         const { Op } = require('sequelize');
+
         try {
             const weekEnd = dayjs(weekStart).add(6, 'day').format('YYYY-MM-DD');
 

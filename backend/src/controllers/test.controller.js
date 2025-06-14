@@ -1,20 +1,29 @@
 // backend/src/controllers/test.controller.js
+
 const CPSATBridge = require('../services/cp-sat-bridge.service');
 const EmployeeRecommendationService = require('../services/employee-recommendation.service');
-const { Employee, Position, EmployeeConstraint } = require('../models');
+// Убираем импорт моделей
 
-class TestController {
+module.exports = (db) => {
+    // Получаем модели из db
+    const {Employee, Position, EmployeeConstraint} = db;
 
-    static async testCPSAT(req, res) {
+    // Создаем экземпляры сервисов
+    const cpsatBridge = new CPSATBridge(db);
+    const recommendationService = new EmployeeRecommendationService(db);
+
+    const controller = {};
+
+    controller.testCPSAT = async (req, res) => {
         try {
             const siteId = 1;
             const weekStart = '2025-06-15'; // Следующий вск
-
+            const bridge = this; // Для удобства, если где-то используется
             console.log(`[Test] Testing CP-SAT with site ${siteId}, week ${weekStart}`);
 
             // Проверим данные сотрудников
             const employees = await Employee.findAll({
-                where: { status: 'active', role: 'employee' },
+                where: {status: 'active', role: 'employee'},
                 include: [{
                     model: Position,
                     as: 'defaultPosition',
@@ -51,9 +60,9 @@ class TestController {
         }
     }
 
-    static async testRecommendations(req, res) {
+    controller.testRecommendations = async (req, res) => {
         try {
-            const { position_id = 1, shift_id = 31, date = '2025-06-16' } = req.query;
+            const {position_id = 1, shift_id = 31, date = '2025-06-16'} = req.query;
 
             console.log(`[Test] Testing recommendations for position ${position_id}, shift ${shift_id}, date ${date}`);
 
@@ -85,10 +94,10 @@ class TestController {
         }
     }
 
-    static async checkConstraints(req, res) {
+    controller.checkConstraints = async (req, res) => {
         try {
             const constraints = await EmployeeConstraint.findAll({
-                where: { status: 'active' },
+                where: {status: 'active'},
                 include: [{
                     model: Employee,
                     as: 'employee',
@@ -117,6 +126,6 @@ class TestController {
             });
         }
     }
-}
 
-module.exports = TestController;
+    return controller;
+};

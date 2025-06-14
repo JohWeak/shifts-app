@@ -19,9 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'schedule_settings',
         timestamps: true,
-        associate: function(models) {
-            ScheduleSettings.belongsTo(models.WorkSite, { foreignKey: 'site_id', as: 'workSite' });
-        }
+
     });
     return ScheduleSettings;
 };

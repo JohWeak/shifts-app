@@ -2,24 +2,33 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { Spinner } from 'react-bootstrap'; // Импортируем спиннер
 
 export const ProtectedRoute = ({ children, allowedRole }) => {
-    // Получаем актуальные данные из Redux store
-    const { isAuthenticated, user } = useSelector((state) => state.auth);
+    // Получаем все нужные состояния из Redux store
+    const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
     const location = useLocation();
 
-    // Если не аутентифицирован, перенаправляем на логин,
-    // запоминая, откуда пользователь пришел, чтобы вернуть его обратно после входа.
+    // 1. Если идет процесс аутентификации, показываем заглушку-загрузчик
+    if (loading === 'pending') {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <Spinner animation="border" />
+            </div>
+        );
+    }
+
+    // 2. Если процесс завершен и пользователь НЕ аутентифицирован
     if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Если роль не совпадает, перенаправляем на соответствующий дашборд
+    // 3. Если роль не совпадает
     if (allowedRole && user?.role !== allowedRole) {
         const redirectPath = user?.role === 'admin' ? '/admin' : '/employee/dashboard';
         return <Navigate to={redirectPath} replace />;
     }
 
-    // Если все проверки пройдены, отображаем дочерний компонент
+    // 4. Если все проверки пройдены
     return children;
 };

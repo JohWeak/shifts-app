@@ -9,15 +9,21 @@ import {
     Button,
     Badge
 } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import './AdminLayout.css';
+import { logout } from '../../app/store/slices/authSlice';
 
 const AdminLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
-
+    const dispatch = useDispatch();
+    const handleLogout = () => {
+        dispatch(logout()); // Диспатчим экшен
+        navigate('/login'); // Перенаправляем на логин
+    };
     // Отслеживание размера экрана
     useEffect(() => {
         const handleResize = () => {
@@ -32,11 +38,6 @@ const AdminLayout = ({ children }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/login');
-    };
 
     const navigationItems = [
         {
@@ -83,41 +84,37 @@ const AdminLayout = ({ children }) => {
         }
     ];
 
-    const currentRoute = location.pathname;
-    const isActiveRoute = (itemPath) => {
-        if (itemPath === '/admin') {
-            // Для Dashboard проверяем точное совпадение
-            return currentRoute === '/admin';
-        } else {
-            // Для остальных используем startsWith
-            return currentRoute.startsWith(itemPath);
+    const currentPath = location.pathname;
+    const isActive = (path) => {
+        // Для дашборда '/admin' требуется точное совпадение
+        if (path === '/admin') {
+            return currentPath === '/admin';
         }
+        // Для всех остальных страниц - проверка на startsWith
+        return currentPath.startsWith(path);
     };
 
     const handleNavigation = (path) => {
         navigate(path);
-        setShowMobileMenu(false);
+        if (isMobile) { // Закрываем мобильное меню при навигации
+            setShowMobileMenu(false);
+        }
     };
 
     const SidebarContent = () => (
         <Nav className="flex-column admin-nav">
             {navigationItems.map(item => (
-                <Nav.Item key={item.key} className="admin-nav-item">
+                <Nav.Item key={item.key}>
+                    {/* ИЗМЕНЕНИЕ: используем Link вместо Nav.Link с onClick */}
                     <Nav.Link
-                        className={`admin-nav-link ${isActiveRoute(item.path) ? 'active' : ''}`}
-                        onClick={() => handleNavigation(item.path)}
+                        as={Link}
+                        to={item.path}
+                        className={`admin-nav-link ${isActive(item.path) ? 'active' : ''}`}
+                        onClick={() => showMobileMenu && setShowMobileMenu(false)} // Просто закрываем меню на мобилке
                     >
-                        <div className="nav-link-content">
-                            <div className="nav-icon-text">
-                                <i className={`bi bi-${item.icon} nav-icon`}></i>
-                                <span className="nav-text">{item.label}</span>
-                            </div>
-                            {item.badge && (
-                                <Badge bg="primary" className="nav-badge">
-                                    {item.badge}
-                                </Badge>
-                            )}
-                        </div>
+                        <i className={`bi bi-${item.icon} nav-icon`}></i>
+                        <span>{item.label}</span>
+                        {item.badge && <Badge bg="primary" className="ms-auto">{item.badge}</Badge>}
                     </Nav.Link>
                 </Nav.Item>
             ))}
@@ -183,7 +180,7 @@ const AdminLayout = ({ children }) => {
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={handleLogout} className="text-danger">
                                     <i className="bi bi-box-arrow-right me-2"></i>
-                                    Sign out
+                                    Log out
                                 </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
