@@ -1,28 +1,14 @@
 // backend/src/models/scheduling/workday.model.js
-
 module.exports = (sequelize, DataTypes) => {
-    const WorkDay = sequelize.define('WorkDay', {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        date: {
-            type: DataTypes.DATEONLY,
-            allowNull: false
-        },
-        pos_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'positions',
-                key: 'pos_id'
-            }
-        }
+    const Workday = sequelize.define('Workday', {
+        workday_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        date: { type: DataTypes.DATEONLY, allowNull: false, unique: true },
+        is_workday: { type: DataTypes.BOOLEAN, defaultValue: true },
+        holiday_name: { type: DataTypes.STRING(100) },
+        special_instructions: { type: DataTypes.TEXT }
     }, {
-        tableName: 'work_days',
+        tableName: 'workdays',
         timestamps: true
     });
-
-    return WorkDay;
+    return Workday;
 };

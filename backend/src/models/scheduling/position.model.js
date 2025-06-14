@@ -1,15 +1,19 @@
+// backend/src/models/scheduling/position.model.js
 module.exports = (sequelize, DataTypes) => {
     const Position = sequelize.define('Position', {
         pos_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        pos_name: { type: DataTypes.STRING, allowNull: false },
-        profession: { type: DataTypes.STRING, allowNull: false },
-        num_of_emp: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
-        num_of_shifts: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
-        site_id: { type: DataTypes.INTEGER, allowNull: false, references: { model: 'work_sites', key: 'site_id' } }
+        pos_name: { type: DataTypes.STRING(100), allowNull: false },
+        profession: { type: DataTypes.STRING(100) },
+        num_of_emp: { type: DataTypes.INTEGER, defaultValue: 1 },
+        num_of_shifts: { type: DataTypes.INTEGER, defaultValue: 1 },
+        site_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: { model: 'work_sites', key: 'site_id' }
+        }
     }, {
         tableName: 'positions',
-        timestamps: true,
-
+        timestamps: true
     });
     return Position;
 };

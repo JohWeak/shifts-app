@@ -1,22 +1,17 @@
 // backend/src/services/cp-sat-bridge.service.js
 const { spawn } = require('child_process');
-const fs = require('fs').promises;
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const { Op } = require('sequelize');
+const fs = require('fs').promises;
+const dayjs = require('dayjs');
+const db = require('../models');
 
 class CPSATBridge {
-    constructor(db) {
-        if (!db || !db.Employee) {
-            throw new Error("CPSATBridge requires a valid 'db' object with Sequelize models.");
-        }
-        this.db = db;
+    constructor(database) {
+        this.db = database || db;
     }
-    /**
-     * Основной метод генерации расписания
-     */
-    static async generateOptimalSchedule(db, siteId, weekStart) {
-        const bridge = new CPSATBridge(db);
+
+    static async generateOptimalSchedule(database, siteId, weekStart) {
+        const bridge = new CPSATBridge(database || db);
 
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);

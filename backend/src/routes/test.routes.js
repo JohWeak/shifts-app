@@ -1,14 +1,10 @@
 // backend/src/routes/test.routes.js
 const express = require('express');
+const testController = require('../controllers/test.controller');
 
-module.exports = function(db) {
-    const router = express.Router();
-    // Создаем экземпляр контроллера
-    const testController = require('../controllers/test.controller')(db);
+const router = express.Router();
 
-    router.post('/cp-sat', testController.testCPSAT);
-    router.get('/recommendations', testController.testRecommendations);
-    router.get('/constraints', testController.checkConstraints);
+router.get('/db', testController.testDatabase);
+router.get('/models', testController.getModels);
 
-    return router;
-};
+module.exports = router;

@@ -1,10 +1,9 @@
+// backend/src/routes/shift.routes.js
 const express = require('express');
+const shiftController = require('../controllers/shift.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-module.exports = function(db) {
-
 const router = express.Router();
-const shiftController = require('../controllers/shift.controller')(db);
 
 // Admin routes
 router.post('/', [verifyToken, isAdmin], shiftController.create);
@@ -16,5 +15,4 @@ router.put('/:id/assign', [verifyToken, isAdmin], shiftController.assignEmployee
 router.get('/', verifyToken, shiftController.findAll);
 router.get('/:id', verifyToken, shiftController.findOne);
 
-    return router;
-};
+module.exports = router;

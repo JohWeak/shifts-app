@@ -1,20 +1,15 @@
-// backend/src/services/schedule-generator.service.js
-
+// backend/src/services/schedule-generator.service.js (начало файла)
 const dayjs = require('dayjs');
 const { Op } = require('sequelize');
-
-
+const db = require('../models');
 
 class ScheduleGeneratorService {
-    /**
-     * Main schedule generation algorithm with strict position and rest period checks
-     */
-    constructor(db) {
-        if (!db) throw new Error("ScheduleGeneratorService requires a db object.");
-        this.db = db;
+    constructor(database) {
+        this.db = database || db; // Используем переданную БД или импортированную
     }
-    static async generateWeeklySchedule(db, siteId, weekStart) {
-        const service = new ScheduleGeneratorService(db);
+
+    static async generateWeeklySchedule(database, siteId, weekStart) {
+        const service = new ScheduleGeneratorService(database || db);
         try {
             console.log(`[ScheduleGeneratorService] Starting generation for site ${siteId}, week ${weekStart}`);
 
