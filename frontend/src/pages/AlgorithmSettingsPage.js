@@ -1,6 +1,6 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/AlgorithmSettings.js
 import React from 'react';
-import AdminLayout from '../widgets/adminLayout/AdminLayout';
+import AdminLayout from '../widgets/AdminLayout/AdminLayout';
 import { Container, Card } from 'react-bootstrap';
 
 const AlgorithmSettings = () => {

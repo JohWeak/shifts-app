@@ -251,15 +251,30 @@ const scheduleSlice = createSlice({
                 state.loading = 'pending';
                 state.error = null;
             })
-            .addCase(compareAlgorithms.pending, (state) => {
-                state.loading = 'pending';
-                state.error = null;
+            .addCase(generateSchedule.fulfilled, (state, action) => {
+                // Диспатч fetchSchedules уже сделан внутри thunk,
+                // здесь мы просто сбрасываем состояние загрузки
+                state.loading = 'succeeded';
             })
             .addCase(generateSchedule.rejected, (state, action) => {
                 state.loading = 'failed';
                 state.error = action.payload;
 
             })
+
+            .addCase(compareAlgorithms.pending, (state) => {
+                state.loading = 'pending';
+                state.error = null;
+            })
+            .addCase(compareAlgorithms.fulfilled, (state, action) => {
+                state.loading = 'succeeded'; // Сбрасываем загрузку
+                // ...
+            })
+            .addCase(compareAlgorithms.rejected, (state, action) => {
+                state.loading = 'failed'; // Сбрасываем загрузку
+                state.error = action.payload;
+            })
+
             .addCase(deleteSchedule.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;

@@ -35,10 +35,11 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
 
     // Второй useEffect для установки дефолтного значения остается без изменений
     useEffect(() => {
-        if (show && workSites.length > 0 && settings.site_id === 1) {
+        // Этот эффект отвечает ТОЛЬКО за установку дефолтного значения
+        if (show && workSites.length > 0 && (!settings.site_id || settings.site_id === 1)) {
             setSettings(prev => ({ ...prev, site_id: workSites[0].site_id }));
         }
-    }, [show, workSites, settings.site_id]);
+    }, [show, workSites]);
 
     const handleDateChange = (e) => {
         const date = e.target.value;

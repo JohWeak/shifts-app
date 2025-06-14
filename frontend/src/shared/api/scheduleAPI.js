@@ -93,7 +93,7 @@ export async function updateScheduleStatus(scheduleId, status) {
 
 export async function exportSchedule(scheduleId, format = 'pdf')  {
     try {
-        const response = await axios.get(`${API_BASE_URL}/api/schedules/${scheduleId}/export?format=${format}`, {
+        const response = await axios.get(`${API_BASE_URL}/schedules/${scheduleId}/export?format=${format}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             responseType: 'blob', // Важно для скачивания файлов
         });

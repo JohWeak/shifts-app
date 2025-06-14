@@ -15,7 +15,7 @@ class CPSATBridge {
     /**
      * Основной метод генерации расписания
      */
-    static async generateOptimalSchedule(siteId, weekStart) {
+    static async generateOptimalSchedule(db, siteId, weekStart) {
         const bridge = new CPSATBridge(db);
 
         try {

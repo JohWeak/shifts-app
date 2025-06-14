@@ -464,19 +464,19 @@ module.exports = (db) => {
                         result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart);
                         if (!result.success) {
                             console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
-                            result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart);
+                            result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
                             result.fallback = 'cp-sat-to-simple';
                         }
                     } catch (error) {
                         console.warn(`[ScheduleController] CP-SAT error, falling back to simple: ${error.message}`);
-                        result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart);
+                        result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
                         result.fallback = 'cp-sat-to-simple';
                         result.originalError = error.message;
                     }
                     break;
 
                 case 'simple':
-                    result = await ScheduleGeneratorService.generateWeeklySchedule(siteId, weekStart);
+                    result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
                     break;
 
                 default:
@@ -1323,18 +1323,18 @@ module.exports = (db) => {
 
             // Запустить все алгоритмы параллельно
             const results = await Promise.allSettled([
-                CPSATBridge.generateOptimalSchedule(siteId, nextWeekStart),
-                ScheduleGeneratorService.generateWeeklySchedule(siteId, nextWeekStart)
+                CPSATBridge.generateOptimalSchedule(db, siteId, nextWeekStart),
+                ScheduleGeneratorService.generateWeeklySchedule(db, siteId, nextWeekStart)
             ]);
 
             // Форматирование результатов
             const comparison = {
-                'cp-sat': exports.formatComparisonResult(results[0], 'CP-SAT'),
-                'simple': exports.formatComparisonResult(results[1], 'Simple')  // Ключ simple
+                'cp-sat': controller.formatComparisonResult(results[0], 'CP-SAT'),
+                'simple': controller.formatComparisonResult(results[1], 'Simple')  // Ключ simple
             };
 
             // Выбрать лучший результат
-            const bestAlgorithm = exports.selectBestResult(comparison);
+            const bestAlgorithm = controller.selectBestResult(comparison);
             comparison.recommended = bestAlgorithm;
 
             // Сохранить лучший результат, если он есть

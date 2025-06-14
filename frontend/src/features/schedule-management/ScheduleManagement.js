@@ -5,7 +5,7 @@ import { Container, Button, Tabs, Tab, Spinner } from 'react-bootstrap';
 import { useMessages } from '../../shared/lib/i18n/messages';
 
 // Widgets, UI, etc.
-import AdminLayout from '../../widgets/adminLayout/AdminLayout';
+import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
 import ScheduleOverviewTable from './components/ScheduleOverviewTable';
 import ScheduleDetailsView from './components/ScheduleDetailsView';
 import GenerateScheduleModal from './components/GenerateScheduleModal';

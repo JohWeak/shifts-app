@@ -8,6 +8,7 @@ class ScheduleGeneratorService {
      * Main schedule generation algorithm with strict position and rest period checks
      */
     constructor(db) {
+        if (!db) throw new Error("ScheduleGeneratorService requires a db object.");
         this.db = db;
     }
     static async generateWeeklySchedule(db, siteId, weekStart) {
@@ -54,8 +55,9 @@ class ScheduleGeneratorService {
             // ... (здесь можно добавить более сложную логику обработки ограничений)
         });
 
-        if (!settings) throw new Error(`Schedule settings not found for site ${siteId}`);
-
+        if (!settings) {
+            throw new Error(`Schedule settings not found for site ${siteId}`);
+        }
         return { weekStart, employees, shifts, positions, settings, constraints };
     }
 

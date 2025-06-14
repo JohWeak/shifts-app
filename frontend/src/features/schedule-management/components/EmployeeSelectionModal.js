@@ -174,7 +174,30 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
                         </Tab>
 
                         <Tab eventKey="unavailable" title={<span>Unavailable <Badge bg="secondary" pill>{(recommendations?.unavailable_busy?.length || 0) + (recommendations?.unavailable_hard?.length || 0) + (recommendations?.unavailable_soft?.length || 0)}</Badge></span>}>
-                            {/* ... */}
+                            <div className="mt-3">
+                                {/* --- ДОБАВЬТЕ ЭТОТ КОД --- */}
+                                {recommendations?.unavailable_busy?.length > 0 && (
+                                    <>
+                                        <h6 className="text-muted small text-uppercase">Already Working / Rest Violations</h6>
+                                        {renderEmployeeList(recommendations.unavailable_busy, 'unavailable_busy')}
+                                        <hr />
+                                    </>
+                                )}
+                                {recommendations?.unavailable_hard?.length > 0 && (
+                                    <>
+                                        <h6 className="text-muted small text-uppercase">Cannot Work (Constraints)</h6>
+                                        {renderEmployeeList(recommendations.unavailable_hard, 'unavailable_hard')}
+                                        <hr />
+                                    </>
+                                )}
+                                {recommendations?.unavailable_soft?.length > 0 && (
+                                    <>
+                                        <h6 className="text-muted small text-uppercase">Prefer Different Time</h6>
+                                        {renderEmployeeList(recommendations.unavailable_soft, 'unavailable_soft')}
+                                    </>
+                                )}
+                                {/* ------------------------- */}
+                            </div>
                         </Tab>
                     </Tabs>
                 )}
