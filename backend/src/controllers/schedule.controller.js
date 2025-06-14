@@ -1,42 +1,52 @@
-// backend/src/controllers/schedule.controller.js - Production version
-
+// backend/src/controllers/schedule.controller.js
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const weekOfYear = require('dayjs/plugin/weekOfYear');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
-const puppeteer = require('puppeteer');
-const PDFGenerator = require('../utils/pdfGenerator');
-const path = require('path');
-
-// Импорты всех алгоритмов
-const ScheduleGeneratorService = require('../services/schedule-generator.service'); // Простой алгоритм
-const CPSATBridge = require('../services/cp-sat-bridge.service'); // Python CP-SAT
-
-module.exports = (db) => {
-
-    const {Schedule, ScheduleAssignment, Employee, Shift, Position, WorkSite} = db;
-    const {Op} = db.Sequelize;
-    const controller = {};
 
 // Configure Day.js plugins
-    dayjs.extend(utc);
-    dayjs.extend(timezone);
-    dayjs.extend(weekOfYear);
-    dayjs.extend(customParseFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(weekOfYear);
+dayjs.extend(customParseFormat);
 
-// Set locale to start week on Sunday
-    dayjs.locale({
-        ...dayjs.Ls.en,
-        weekStart: 0 // 0 = Sunday, 1 = Monday
-    });
+// Внешние зависимости
 
-// Configuration constants
+const path = require('path');
+const {Op} = require('sequelize'); // Добавить, если используется
+let PDFGenerator = null;
+
+module.exports = (db) => {
+    // Импорт сервисов
+    const ScheduleGeneratorService = require('../services/schedule-generator.service');
+    const CPSATBridge = require('../services/cp-sat-bridge.service');
+
+    // Деструктуризация моделей из db
+    const {
+        Schedule,
+        ScheduleAssignment,
+        Employee,
+        Shift,
+        Position,
+        WorkSite,
+        ScheduleSettings,
+        EmployeeConstraint
+    } = db;
+
+    const controller = {};
+
+    // Константы
     const ISRAEL_TIMEZONE = 'Asia/Jerusalem';
     const DATE_FORMAT = 'YYYY-MM-DD';
     const WEEK_START_DAY = 0; // Sunday
 
+    // Set locale to start week on Sunday
+    dayjs.locale({
+        ...dayjs.Ls.en,
+        weekStart: WEEK_START_DAY
+    });
 
     /**
      * Calculate week boundaries in Israel timezone
@@ -433,37 +443,50 @@ module.exports = (db) => {
             const siteId = req.body.site_id || 1;
             const algorithm = req.body.algorithm || 'auto';
 
-            // ИСПРАВЛЕНИЕ: использовать переданную дату или следующую неделю по умолчанию
             let weekStart;
             if (req.body.week_start) {
-                // Используем переданную дату
-                weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
-                console.log(`[ScheduleController] Using provided week start: ${weekStart}`);
+                const requestedDate = dayjs(req.body.week_start);
+                const dayOfWeek = requestedDate.day();
+
+                if (dayOfWeek !== 0) {
+                    weekStart = requestedDate.subtract(dayOfWeek, 'day').format('YYYY-MM-DD');
+                    console.log(`[ScheduleController] Adjusted to Sunday: ${weekStart}`);
+                } else {
+                    weekStart = requestedDate.format('YYYY-MM-DD');
+                }
             } else {
-                // Fallback на следующую неделю
                 weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
-                console.log(`[ScheduleController] Using next week default: ${weekStart}`);
             }
 
             console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
 
-            // Остальной код функции остается без изменений...
+            // Проверим существование сайта
+            const workSite = await WorkSite.findByPk(siteId);
+            if (!workSite) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Work site with ID ${siteId} not found`
+                });
+            }
+
             let result;
             let selectedAlgorithm = algorithm;
 
-            // Автоматический выбор лучшего доступного алгоритма
             if (algorithm === 'auto') {
-                selectedAlgorithm = await controller.selectBestAlgorithm();
+                const pythonAvailable = await controller.checkPythonAvailability();
+                selectedAlgorithm = pythonAvailable ? 'cp-sat' : 'simple';
                 console.log(`[ScheduleController] Auto-selected algorithm: ${selectedAlgorithm}`);
             }
 
-            // Выполнение планирования - ИСПОЛЬЗОВАТЬ weekStart вместо nextWeekStart
+            // Выполнение планирования
             switch (selectedAlgorithm) {
                 case 'cp-sat':
                     try {
+                        // Передаем db в CPSATBridge если нужно
                         result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart);
                         if (!result.success) {
                             console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
+                            // Используем статический метод правильно
                             result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
                             result.fallback = 'cp-sat-to-simple';
                         }
@@ -476,26 +499,43 @@ module.exports = (db) => {
                     break;
 
                 case 'simple':
+                    // Используем статический метод
                     result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
                     break;
 
                 default:
                     return res.status(400).json({
                         success: false,
-                        message: `Unknown algorithm: ${selectedAlgorithm}. Available: cp-sat, simple, auto`
+                        message: `Unknown algorithm: ${selectedAlgorithm}`
                     });
             }
 
             // Формирование ответа
-            if (result.success) {
+            if (result && result.success) {
+                // Загружаем полную информацию о расписании
+                let fullSchedule = null;
+                if (result.schedule && (result.schedule.schedule_id || result.schedule.id)) {
+                    fullSchedule = await Schedule.findByPk(
+                        result.schedule.schedule_id || result.schedule.id,
+                        {
+                            include: [{
+                                model: WorkSite,
+                                as: 'workSite'
+                            }]
+                        }
+                    );
+                }
+
                 const responseData = {
                     success: true,
-                    message: `Schedule generated successfully using ${result.algorithm}`,
-                    data: result.schedule,
-                    stats: result.stats,
-                    algorithm: result.algorithm,
-                    requested_algorithm: algorithm,
-                    solve_time: result.solveTime || result.iterations || 'N/A'
+                    message: `Schedule generated successfully using ${result.algorithm || selectedAlgorithm}`,
+                    data: {
+                        ...(result.schedule || {}),
+                        workSite: fullSchedule?.workSite || workSite
+                    },
+                    stats: result.stats || {},
+                    algorithm: result.algorithm || selectedAlgorithm,
+                    requested_algorithm: algorithm
                 };
 
                 if (result.fallback) {
@@ -509,9 +549,9 @@ module.exports = (db) => {
             } else {
                 res.status(500).json({
                     success: false,
-                    message: 'Failed to generate schedule',
-                    error: result.error,
-                    algorithm: result.algorithm
+                    message: result?.error || 'Failed to generate schedule',
+                    error: result?.error || 'Unknown error',
+                    algorithm: selectedAlgorithm
                 });
             }
 
@@ -544,7 +584,6 @@ module.exports = (db) => {
 
             pythonCheck.on('close', (code) => {
                 if (code === 0) {
-                    // Проверить наличие ortools
                     const ortoolsCheck = spawn('python', ['-c', 'import ortools; print("OK")']);
 
                     ortoolsCheck.on('close', (ortoolsCode) => {
@@ -1145,9 +1184,11 @@ module.exports = (db) => {
                 res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.csv"`);
                 return res.send(csv);
             }
-
             if (format === 'pdf') {
-                // Generate PDF using the PDFGenerator class
+                if (!PDFGenerator) {
+                    PDFGenerator = require('../utils/pdfGenerator');
+                }
+
                 const pdfGenerator = new PDFGenerator(lang);
                 const pdfBuffer = await pdfGenerator.generateSchedulePDF(exportData);
 

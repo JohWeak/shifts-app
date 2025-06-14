@@ -51,12 +51,20 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
         setSettings(prev => ({ ...prev, weekStart: date }));
     };
 
-    const handleSubmit = () => {
-        if (!settings.weekStart || !settings.site_id) {
-            setFormError('Please fill all fields.');
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (formError) {
+            console.error('Cannot generate schedule:', formError);
             return;
         }
-        onGenerate(settings);
+
+        // Передаем week_start вместо weekStart
+        const settingsToSend = {
+            ...settings,
+            week_start: settings.weekStart  // Backend ожидает week_start
+        };
+
+        onGenerate(settingsToSend);
     };
 
     const isFormValid = settings.weekStart && settings.site_id && !formError;

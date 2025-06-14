@@ -1,6 +1,8 @@
 // backend/src/services/schedule-generator.service.js
 
 const dayjs = require('dayjs');
+const { Op } = require('sequelize');
+
 
 
 class ScheduleGeneratorService {
@@ -14,23 +16,35 @@ class ScheduleGeneratorService {
     static async generateWeeklySchedule(db, siteId, weekStart) {
         const service = new ScheduleGeneratorService(db);
         try {
+            console.log(`[ScheduleGeneratorService] Starting generation for site ${siteId}, week ${weekStart}`);
+
             const data = await service.prepareData(siteId, weekStart);
+            if (!data.employees || data.employees.length === 0) {
+                throw new Error('No employees found for scheduling');
+            }
+
             const assignments = await service.generateOptimalSchedule(data);
             const savedSchedule = await service.saveSchedule(siteId, weekStart, assignments);
 
             return {
                 success: true,
                 schedule: savedSchedule,
-                algorithm: 'simple_js_generator',
-                stats: { // Добавляем базовую статистику для консистентности
+                algorithm: 'simple',
+                stats: {
                     total_assignments: assignments.length,
-                    employees_assigned: new Set(assignments.map(a => a.emp_id)).size
+                    employees_assigned: new Set(assignments.map(a => a.emp_id)).size,
+                    positions_count: data.positions.length,
+                    shifts_count: data.shifts.length
                 }
             };
 
         } catch(error) {
             console.error('[ScheduleGeneratorService] Error:', error);
-            return { success: false, error: error.message };
+            return {
+                success: false,
+                error: error.message,
+                algorithm: 'simple'
+            };
         }
     }
 
@@ -38,27 +52,55 @@ class ScheduleGeneratorService {
      * 2. Создаем метод для подготовки данных (как в CPSATBridge)
      */
     async prepareData(siteId, weekStart) {
-        const { Employee, Shift, Position, ScheduleSettings, EmployeeConstraint } = this.db;
+        const {
+            Employee,
+            Shift,
+            Position,
+            ScheduleSettings,
+            EmployeeConstraint
+        } = this.db;
 
-        const [employees, shifts, positions, settings] = await Promise.all([
-            Employee.findAll({ where: { status: 'active', role: 'employee' } }),
-            Shift.findAll({ order: [['start_time', 'ASC']] }),
-            Position.findAll({ where: { site_id: siteId } }),
-            ScheduleSettings.findOne({ where: { site_id: siteId } })
-        ]);
+        try {
+            // Загружаем все необходимые данные
+            const [employees, shifts, positions, settings] = await Promise.all([
+                Employee.findAll({
+                    where: { role: 'employee', status: 'active' },
+                    include: [{
+                        model: Position,
+                        as: 'defaultPosition'
+                    }]
+                }),
+                Shift.findAll(),
+                Position.findAll(),
+                ScheduleSettings.findOne({ where: { site_id: siteId }})
+            ]);
 
-        // Преобразуем ограничения в удобный формат
-        const allConstraints = await EmployeeConstraint.findAll({ where: { status: 'active' } });
-        const constraints = {};
-        allConstraints.forEach(c => {
-            if (!constraints[c.emp_id]) constraints[c.emp_id] = {};
-            // ... (здесь можно добавить более сложную логику обработки ограничений)
-        });
+            // Загружаем ограничения
+            const constraints = {};
+            const constraintRecords = await EmployeeConstraint.findAll({
+                where: { status: 'active' }
+            });
 
-        if (!settings) {
-            throw new Error(`Schedule settings not found for site ${siteId}`);
+            // Преобразуем ограничения в нужный формат
+            constraintRecords.forEach(constraint => {
+                if (!constraints[constraint.emp_id]) {
+                    constraints[constraint.emp_id] = {};
+                }
+                // ... логика обработки ограничений ...
+            });
+
+            return {
+                weekStart,
+                employees,
+                shifts,
+                positions,
+                settings: settings || { min_rest_base_hours: 8, max_shifts_per_day: 1 },
+                constraints
+            };
+        } catch (error) {
+            console.error('[ScheduleGeneratorService] Error preparing data:', error);
+            throw error;
         }
-        return { weekStart, employees, shifts, positions, settings, constraints };
     }
 
     async generateOptimalSchedule(data) {
@@ -384,7 +426,7 @@ class ScheduleGeneratorService {
     /**
      * Save schedule to database
      */
-     async saveSchedule(siteId, weekStart, assignments) {
+    async saveSchedule(siteId, weekStart, assignments) {
         const { Schedule, ScheduleAssignment } = this.db;
         const { Op } = require('sequelize');
 
@@ -438,9 +480,12 @@ class ScheduleGeneratorService {
             }));
 
             // Create ScheduleAssignment records
-            await ScheduleAssignment.bulkCreate(scheduleAssignments);
+            if (scheduleAssignments.length > 0) {
+                await ScheduleAssignment.bulkCreate(scheduleAssignments);
+            }
 
             return {
+                id: schedule.id,  // Добавляем для совместимости
                 schedule_id: schedule.id,
                 assignments_count: scheduleAssignments.length,
                 success: true

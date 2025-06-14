@@ -1,0 +1,291 @@
+// backend/src/controllers/schedule/schedule-generation.controller.js
+const dayjs = require('dayjs');
+const { formatComparisonResult } = require('./helpers/date-helpers');
+
+module.exports = (db) => {
+    const {
+        Schedule,
+        WorkSite
+    } = db;
+
+    // Импортируем сервисы
+    const ScheduleGeneratorService = require('../../services/schedule-generator.service');
+    const CPSATBridge = require('../../services/cp-sat-bridge.service');
+
+    const controller = {};
+
+    /**
+     * Generate schedule for next week
+     */
+    controller.generateNextWeekSchedule = async (req, res) => {
+        try {
+            const siteId = req.body.site_id || 1;
+            const algorithm = req.body.algorithm || 'auto';
+
+            let weekStart;
+            if (req.body.week_start) {
+                const requestedDate = dayjs(req.body.week_start);
+                const dayOfWeek = requestedDate.day();
+
+                if (dayOfWeek !== 0) {
+                    weekStart = requestedDate.subtract(dayOfWeek, 'day').format('YYYY-MM-DD');
+                    console.log(`[ScheduleController] Adjusted to Sunday: ${weekStart}`);
+                } else {
+                    weekStart = requestedDate.format('YYYY-MM-DD');
+                }
+            } else {
+                weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
+            }
+
+            console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
+
+            // Проверим существование сайта
+            const workSite = await WorkSite.findByPk(siteId);
+            if (!workSite) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Work site with ID ${siteId} not found`
+                });
+            }
+
+            let result;
+            let selectedAlgorithm = algorithm;
+
+            if (algorithm === 'auto') {
+                const pythonAvailable = await controller.checkPythonAvailability();
+                selectedAlgorithm = pythonAvailable ? 'cp-sat' : 'simple';
+                console.log(`[ScheduleController] Auto-selected algorithm: ${selectedAlgorithm}`);
+            }
+
+            // Выполнение планирования
+            switch (selectedAlgorithm) {
+                case 'cp-sat':
+                    try {
+                        result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart);
+                        if (!result.success) {
+                            console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
+                            result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+                            result.fallback = 'cp-sat-to-simple';
+                        }
+                    } catch (error) {
+                        console.warn(`[ScheduleController] CP-SAT error, falling back to simple: ${error.message}`);
+                        result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+                        result.fallback = 'cp-sat-to-simple';
+                        result.originalError = error.message;
+                    }
+                    break;
+
+                case 'simple':
+                    result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+                    break;
+
+                default:
+                    return res.status(400).json({
+                        success: false,
+                        message: `Unknown algorithm: ${selectedAlgorithm}`
+                    });
+            }
+
+            // Формирование ответа
+            if (result && result.success) {
+                // Загружаем полную информацию о расписании
+                let fullSchedule = null;
+                if (result.schedule && (result.schedule.schedule_id || result.schedule.id)) {
+                    fullSchedule = await Schedule.findByPk(
+                        result.schedule.schedule_id || result.schedule.id,
+                        {
+                            include: [{
+                                model: WorkSite,
+                                as: 'workSite'
+                            }]
+                        }
+                    );
+                }
+
+                const responseData = {
+                    success: true,
+                    message: `Schedule generated successfully using ${result.algorithm || selectedAlgorithm}`,
+                    data: {
+                        ...(result.schedule || {}),
+                        workSite: fullSchedule?.workSite || workSite
+                    },
+                    stats: result.stats || {},
+                    algorithm: result.algorithm || selectedAlgorithm,
+                    requested_algorithm: algorithm
+                };
+
+                if (result.fallback) {
+                    responseData.warning = `Fallback used: ${result.fallback}`;
+                    if (result.originalError) {
+                        responseData.original_error = result.originalError;
+                    }
+                }
+
+                res.json(responseData);
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: result?.error || 'Failed to generate schedule',
+                    error: result?.error || 'Unknown error',
+                    algorithm: selectedAlgorithm
+                });
+            }
+
+        } catch (error) {
+            console.error('[ScheduleController] Error generating schedule:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error generating schedule',
+                error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            });
+        }
+    };
+
+    /**
+     * Compare all available algorithms
+     */
+    controller.compareAllAlgorithms = async (req, res) => {
+        try {
+            const siteId = req.body.site_id || 1;
+
+            let weekStart;
+            if (req.body.week_start) {
+                weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
+            } else {
+                weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
+            }
+
+            console.log(`[ScheduleController] Comparing algorithms for site ${siteId}, week ${weekStart}`);
+
+            // Запустить только доступные алгоритмы
+            const results = await Promise.allSettled([
+                CPSATBridge.generateOptimalSchedule(db, siteId, weekStart),
+                ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart)
+            ]);
+
+            console.log('Raw results:', results.map((r, i) => ({
+                index: i,
+                status: r.status,
+                success: r.status === 'fulfilled' ? r.value?.success : false
+            })));
+
+            const comparison = {
+                'cp-sat': formatComparisonResult(results[0], 'CP-SAT'),
+                'simple': formatComparisonResult(results[1], 'Simple')
+            };
+
+            console.log('Formatted comparison:', comparison);
+
+            // Выбрать лучший результат
+            const bestAlgorithm = controller.selectBestResult(comparison);
+            console.log('Best algorithm selected:', bestAlgorithm);
+
+            comparison.recommended = bestAlgorithm;
+
+            // Сохранить лучший результат
+            const algorithmNames = ['cp-sat', 'simple'];
+            const bestResult = results.find((result, index) => {
+                return algorithmNames[index] === bestAlgorithm &&
+                    result.status === 'fulfilled' &&
+                    result.value?.success;
+            });
+
+            res.json({
+                success: true,
+                message: 'Algorithm comparison completed',
+                comparison: comparison,
+                best_algorithm: bestAlgorithm,
+                recommendation: `Use ${bestAlgorithm} algorithm for best results`,
+                saved_schedule: bestResult ? bestResult.value.schedule : null,
+                week: weekStart
+            });
+
+        } catch (error) {
+            console.error('[ScheduleController] Error comparing algorithms:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error during algorithm comparison',
+                error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            });
+        }
+    };
+
+    /**
+     * Check Python availability for CP-SAT
+     */
+    controller.checkPythonAvailability = async () => {
+        return new Promise((resolve) => {
+            const { spawn } = require('child_process');
+
+            const pythonCheck = spawn('python', ['--version']);
+
+            pythonCheck.on('close', (code) => {
+                if (code === 0) {
+                    // Проверить наличие ortools
+                    const ortoolsCheck = spawn('python', ['-c', 'import ortools; print("OK")']);
+
+                    ortoolsCheck.on('close', (ortoolsCode) => {
+                        resolve(ortoolsCode === 0);
+                    });
+
+                    ortoolsCheck.on('error', () => {
+                        resolve(false);
+                    });
+                } else {
+                    resolve(false);
+                }
+            });
+
+            pythonCheck.on('error', () => {
+                resolve(false);
+            });
+        });
+    };
+
+    /**
+     * Select best algorithm based on results
+     */
+    controller.selectBestResult = (comparison) => {
+        console.log('Selecting best result from:', Object.keys(comparison));
+
+        // Только доступные алгоритмы
+        const algorithms = ['cp-sat', 'simple'];
+
+        const successful = algorithms.filter(alg => {
+            const result = comparison[alg];
+            return result && result.status === 'success';
+        });
+
+        console.log('Successful algorithms:', successful);
+
+        if (successful.length === 0) {
+            console.log('No successful algorithms, defaulting to simple');
+            return 'simple';
+        }
+
+        if (successful.length === 1) {
+            console.log('Only one successful algorithm:', successful[0]);
+            return successful[0];
+        }
+
+        // CP-SAT приоритетнее при равных результатах
+        if (successful.includes('cp-sat')) {
+            const cpSatResult = comparison['cp-sat'];
+            const simpleResult = comparison['simple'];
+
+            const cpSatScore = cpSatResult?.stats?.total_assignments || cpSatResult?.assignments_count || 0;
+            const simpleScore = simpleResult?.stats?.total_assignments || simpleResult?.assignments_count || 0;
+
+            console.log('Scores - CP-SAT:', cpSatScore, 'Simple:', simpleScore);
+
+            // Если CP-SAT работает и результат не хуже - выбираем его
+            if (cpSatScore >= simpleScore) {
+                return 'cp-sat';
+            }
+        }
+
+        return 'simple';
+    };
+
+    return controller;
+};
