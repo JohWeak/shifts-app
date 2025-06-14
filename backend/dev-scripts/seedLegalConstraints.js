@@ -58,3 +58,4 @@ async function seedLegalConstraints() {
 }
 
 seedLegalConstraints();
+sequelize.close();

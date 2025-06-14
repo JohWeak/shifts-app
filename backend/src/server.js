@@ -1,4 +1,15 @@
 // backend/src/server.js
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('!!!!!! UNHANDLED REJECTION !!!!!!');
+    console.error('Reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('!!!!!! UNCAUGHT EXCEPTION !!!!!!');
+    console.error('Error:', error);
+    process.exit(1); // Завершаем процесс после критической ошибки
+});
+
 const App = require('./app');
 const db = require('./models');
 
