@@ -1,6 +1,6 @@
 // frontend/src/CompareAlgorithmsModal.js/employee/schedule/WeeklySchedule.js
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Table, Button, ButtonGroup, Alert, Spinner } from 'react-bootstrap';
+import { Container, Card, Table, Button, Alert, Spinner } from 'react-bootstrap';
 import './WeeklySchedule.css';
 
 const WeeklySchedule = () => {

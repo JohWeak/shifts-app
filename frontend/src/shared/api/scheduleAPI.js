@@ -35,7 +35,7 @@ export async function fetchSchedules() {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function fetchScheduleDetails(scheduleId) {
     try {
@@ -44,7 +44,7 @@ export async function fetchScheduleDetails(scheduleId) {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function generateSchedule(settings) {
     try {
@@ -53,7 +53,7 @@ export async function generateSchedule(settings) {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function compareAlgorithms(settings) {
     try {
@@ -62,7 +62,7 @@ export async function compareAlgorithms(settings) {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function deleteSchedule(scheduleId)  {
     try {
@@ -71,7 +71,7 @@ export async function deleteSchedule(scheduleId)  {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function updateScheduleAssignments(scheduleId, changes) {
     try {
@@ -80,7 +80,7 @@ export async function updateScheduleAssignments(scheduleId, changes) {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function updateScheduleStatus(scheduleId, status) {
     try {
@@ -89,7 +89,7 @@ export async function updateScheduleStatus(scheduleId, status) {
     } catch (error) {
         handleError(error);
     }
-};
+}
 
 export async function exportSchedule(scheduleId, format = 'pdf')  {
     try {
@@ -130,7 +130,7 @@ export async function exportSchedule(scheduleId, format = 'pdf')  {
         }
         handleError(error);
     }
-};
+}
 
 export async function fetchWorkSites()  {
     try {

@@ -221,7 +221,7 @@ const ConstraintsSchedule = () => {
         if (!constraints[date]) return 'constraint-cell neutral';
 
         const dayConstraints = constraints[date];
-        let status = 'neutral';
+        let status;
 
         if (shiftType) {
             status = dayConstraints.shifts[shiftType] || 'neutral';
@@ -232,7 +232,7 @@ const ConstraintsSchedule = () => {
         const baseClass = 'constraint-cell';
         const statusClass = status === 'cannot_work' ? 'cannot-work' :
             status === 'prefer_work' ? 'prefer-work' : 'neutral';
-        const clickableClass = templateData?.constraints?.can_edit && !submitted ? 'clickable' : '';
+        const clickableClass = templateData?.constraints?.canEdit && !submitted ? 'clickable' : '';
 
         return `${baseClass} ${statusClass} ${clickableClass}`;
     };
