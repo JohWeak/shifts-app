@@ -1,111 +1,51 @@
-// frontend/src/utils/scheduleUtils.js
-import { SCHEDULE_STATUS, BADGE_VARIANTS } from '../../config/scheduleConstants';
+import { format, addDays, parseISO } from 'date-fns';
 
-/**
- * Format date for display
- * @param {string|Date} date - Date to format
- * @returns {string} - Formatted date string
- */
-export const formatScheduleDate = (date) => {
-    return new Date(date).toLocaleDateString();
-};
-
-/**
- * Get badge variant for schedule status
- * @param {string} status - Schedule status
- * @returns {string} - Bootstrap badge variant
- */
-export const getStatusBadgeVariant = (status) => {
-    return BADGE_VARIANTS[status] || 'secondary';
-};
-
-/**
- * Check if schedule can be deleted
- * @param {Object} schedule - Schedule object
- * @returns {boolean} - Whether schedule can be deleted
- */
-export const canDeleteSchedule = (schedule) => {
-    return schedule.status !== SCHEDULE_STATUS.PUBLISHED;
-};
-
-/**
- * Validate if date is a Sunday
- * @param {string} dateString - Date string in YYYY-MM-DD format
- * @returns {boolean} - Whether date is a Sunday
- */
-export const isValidWeekStartDate = (dateString) => {
-    if (!dateString) return false;
-    const selectedDate = new Date(dateString);
-    return selectedDate.getDay() === 0; // 0 = Sunday
-};
-
-/**
- * Get next Sunday date
- * @returns {string} - Date string in YYYY-MM-DD format
- */
 export const getNextSunday = () => {
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    const daysUntilSunday = (7 - nextWeek.getDay()) % 7;
-    nextWeek.setDate(nextWeek.getDate() + daysUntilSunday);
-
-    return nextWeek.toISOString().split('T')[0];
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
+    const nextSunday = addDays(today, daysUntilSunday);
+    return format(nextSunday, 'yyyy-MM-dd');
 };
 
-/**
- * Calculate week bounds for a given date
- * @param {string|Date} inputDate - Input date
- * @returns {Object} - Week start and end dates
- */
-export const calculateWeekBounds = (inputDate = null) => {
-    const targetDate = inputDate ? new Date(inputDate) : new Date();
-    const dayOfWeek = targetDate.getDay();
+export const isValidWeekStartDate = (dateString) => {
+    try {
+        const date = parseISO(dateString);
+        return date.getDay() === 0; // Sunday
+    } catch {
+        return false;
+    }
+};
 
-    const weekStart = new Date(targetDate);
-    weekStart.setDate(targetDate.getDate() - dayOfWeek);
+export const formatScheduleDate = (startDate, endDate = null) => {
+    if (!startDate) return '-';
 
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    try {
+        const start = parseISO(startDate);
+        if (endDate) {
+            const end = parseISO(endDate);
+            return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
+        }
+        return format(start, 'MMM d, yyyy');
+    } catch {
+        return startDate;
+    }
+};
 
-    return {
-        weekStart: weekStart.toISOString().split('T')[0],
-        weekEnd: weekEnd.toISOString().split('T')[0]
+export const getStatusBadgeVariant = (status) => {
+    const variants = {
+        published: 'success',
+        draft: 'warning',
+        archived: 'secondary'
     };
+    return variants[status] || 'secondary';
 };
 
-/**
- * Get site name from schedule object
- * @param {Object} schedule - Schedule object
- * @returns {string} - Site name or 'Unknown'
- */
-export const getSiteName = (schedule) => {
-    return schedule.workSite?.site_name || schedule.site_name || 'Unknown';
+export const canDeleteSchedule = (schedule) => {
+    return schedule.status !== 'published';
 };
 
-/**
- * Count pending changes for a position
- * @param {Object} pendingChanges - All pending changes
- * @param {string} positionId - Position ID
- * @returns {number} - Number of pending changes
- */
-export const countPendingChangesForPosition = (pendingChanges, positionId) => {
-    return Object.values(pendingChanges).filter(
-        change => change.positionId === positionId
-    ).length;
-};
-
-/**
- * Generate change key for pending changes
- * @param {string} positionId - Position ID
- * @param {string} date - Date string
- * @param {string} shiftId - Shift ID
- * @param {string} action - Action type
- * @param {string} empId - Employee or Assignment ID
- * @returns {string} - Change key
- */
-export const generateChangeKey = (positionId, date, shiftId, action, empId) => {
-    const key = `${positionId}-${date}-${shiftId}-${action}-${empId}`;
-    console.log('Generated change key:', key);
-    return key;
+export const getSiteName = (siteId, sites = []) => {
+    const site = sites.find(s => s.site_id === siteId);
+    return site?.site_name || `Site ${siteId}`;
 };

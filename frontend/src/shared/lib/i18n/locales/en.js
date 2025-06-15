@@ -24,6 +24,10 @@ export const en = {
         alert: 'Alert',
         info: 'Info',
         warning: 'Warning',
+        reload: 'Reload Page',
+        recommendation: 'Recommendation',
+        settings: 'Settings',
+
 
 
     },
@@ -42,8 +46,10 @@ export const en = {
     schedule: {
         title: 'Schedule Management',
         generateSchedule: 'Generate Schedule',
+        generationInProgress: 'Generation in progress...',
         compareAlgorithms: 'Compare Algorithms',
         scheduleDetails: 'Schedule Details',
+        scheduleOverview: 'Schedule Overview',
         weekPeriod: 'Week Period',
         status: 'Status',
         site: 'Site',
@@ -62,7 +68,11 @@ export const en = {
         unpublishSuccess: 'The schedule has been unpublished.',
         generateSuccess: 'Schedule successfully created',
         exportSuccess: 'Schedule successfully exported',
-        saveSuccess: 'Changes saved successfully'
+        saveSuccess: 'Changes saved successfully',
+        weekStartWarning: 'Invalid week start',
+        cannotDeletePublished: 'Cannot delete published schedule',
+        unpublishFirst: 'Please unpublish the schedule first',
+
     },
     employee: {
         employees: 'Employees',
@@ -84,6 +94,9 @@ export const en = {
         preferred: 'Preferred',
         cannotWork: 'Cannot Work',
         violatesConstraints: 'Violates Constraints',
+        assignments: 'Assignments',
+        used: 'Employees Used',
+        permanentRequests: 'PermanentRequests',
     },
     position: {
         positions: 'Positions',
@@ -92,5 +105,39 @@ export const en = {
         saveChanges: 'Save Changes',
         cancelChanges: 'Cancel Changes',
         unsavedChanges: 'You have unsaved changes'
+    },
+    modal: {
+        generateSchedule: {
+            title: 'Create New Schedule',
+            weekStart: 'Week Start',
+            site: 'Site',
+            algorithm: 'Algorithm',
+            generate: 'Generate',
+            generating: 'Generating...',
+            selectSite: 'Select Site',
+            selectAlgorithm: 'Select Algorithm',
+            selectSunday: 'Select Sunday',
+        },
+        compareAlgorithms: {
+            title: 'Compare Algorithms',
+            comparing: 'Comparing...',
+            results: 'Results',
+            algorithm: 'Algorithm',
+            score: 'Score',
+            useThis: 'Use This',
+            best: 'Best algorithm: ',
+            time: 'Execution time: ',
+        },
+        algorithmTypes: {
+            title: 'Algorithm',
+            autoDesc: 'Auto',
+            cpSatDesc: 'CP-SAT by Google OR-Tools',
+            simpleDesc: 'Simple test algorithm',
+
+        },
+        recommendations: {
+
+
+        }
     }
 };

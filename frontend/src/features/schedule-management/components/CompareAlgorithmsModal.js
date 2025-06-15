@@ -2,6 +2,7 @@
 import React from 'react';
 import { Modal, Button, Alert, Row, Col, Card, Badge } from 'react-bootstrap';
 import { useMessages } from '../../../shared/lib/i18n/messages';
+import {useI18n} from "../../../shared/lib/i18n/i18nProvider";
 
 const CompareAlgorithmsModal = ({
                                     show,
@@ -9,7 +10,7 @@ const CompareAlgorithmsModal = ({
                                     results,
                                     onUseAlgorithm
                                 }) => {
-    const messages = useMessages('en');
+    const { t } = useI18n();
     if (!results) return null;
 
 
@@ -30,7 +31,7 @@ const CompareAlgorithmsModal = ({
             <Modal.Header closeButton>
                 <Modal.Title>
                     <i className="bi bi-speedometer2 me-2"></i>
-                    {messages.ALGORITHM_COMPARISON_RESULTS}
+                    {t('modal.compareAlgorithms.result')}
                 </Modal.Title>
             </Modal.Header>
 
@@ -38,9 +39,9 @@ const CompareAlgorithmsModal = ({
                 <Alert variant="info" className="mb-4">
                     <h6 className="mb-2">
                         <i className="bi bi-trophy me-2"></i>
-                        {messages.BEST_ALGORITHM}: <strong>{best_algorithm}</strong>
+                        {t('modal.compareAlgorithms.useThis')}: <strong>{best_algorithm}</strong>
                     </h6>
-                    <p className="mb-0">{messages.BEST_ALGORITHM_INFO}</p>
+                    <p className="mb-0">{t('modal.compareAlgorithms.best')}</p>
                 </Alert>
 
                 <Row className="justify-content-center">
@@ -68,19 +69,14 @@ const CompareAlgorithmsModal = ({
                                         {result.status === 'success' ? (
                                             <div>
                                                 <div className="mb-2">
-                                                    <strong>{messages.ASSIGNMENTS}:</strong> {result.stats?.total_assignments || result.assignments_count || 0}
+                                                    <strong>{('t.employee.assignments')}:</strong> {result.stats?.total_assignments || result.assignments_count || 0}
                                                 </div>
                                                 <div className="mb-2">
-                                                    <strong>{messages.EXECUTION_TIME}:</strong> {result.solve_time || 'N/A'}
+                                                    <strong>{t('compareAlgorithms.executionTimeInfo')}:</strong> {result.solve_time || 'N/A'}
                                                 </div>
                                                 {result.stats?.employees_used && (
                                                     <div className="mb-2">
-                                                        <strong>{messages.EMPLOYEES_USED}:</strong> {result.stats.employees_used}
-                                                    </div>
-                                                )}
-                                                {result.stats?.coverage_percentage && (
-                                                    <div className="mb-2">
-                                                        <strong>{messages.COVERAGE}:</strong> {result.stats.coverage_percentage}%
+                                                        <strong>{t('employee.used')}:</strong> {result.stats.employees_used}
                                                     </div>
                                                 )}
                                                 {result.score && result.score !== 'N/A' && (
@@ -104,7 +100,7 @@ const CompareAlgorithmsModal = ({
                     <Alert variant="warning" className="mt-4">
                         <h6>
                             <i className="bi bi-lightbulb me-2"></i>
-                            {messages.RECOMMENDATION}
+                            {t('recommendation')}:
                         </h6>
                         <p className="mb-0">{recommendation}</p>
                     </Alert>
@@ -120,7 +116,7 @@ const CompareAlgorithmsModal = ({
                         variant="primary"
                         onClick={handleUseAlgorithm}
                     >
-                        {messages.USE_ALGORITHM?.replace('{algorithm}', best_algorithm) || `Use ${best_algorithm} Algorithm`}
+                        {t('compareAlgorithms.use')?.replace('{algorithm}', best_algorithm) || `Use ${best_algorithm} Algorithm`}
                     </Button>
                 )}
             </Modal.Footer>

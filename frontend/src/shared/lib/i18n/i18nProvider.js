@@ -1,10 +1,9 @@
-// 3. Создать файл: frontend/src/shared/lib/i18n/i18nProvider.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { en } from './locales/en';
 import { he } from './locales/he';
 import { ru } from './locales/ru';
 
-const I18nContext = createContext(undefined);
+const I18nContext = createContext();
 
 const translations = { en, he, ru };
 
@@ -21,7 +20,6 @@ export const I18nProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        // Update document direction
         document.documentElement.dir = direction;
         document.documentElement.lang = locale;
     }, [direction, locale]);

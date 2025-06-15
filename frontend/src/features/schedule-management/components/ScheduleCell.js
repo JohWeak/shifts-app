@@ -1,7 +1,7 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/schedule/ScheduleCell.js
 import React from 'react';
 import { Badge } from 'react-bootstrap';
-import { useMessages } from '../../../shared/lib/i18n/messages';
+import {useI18n} from '../../../shared/lib/i18n/i18nProvider';
 
 const ScheduleCell = ({
                           date,
@@ -19,7 +19,7 @@ const ScheduleCell = ({
                           className = '',
                           ...props
                       }) => {
-    const messages = useMessages('en');
+    const {t} = useI18n();
 
     // ПРОСТАЯ логика: удаленные работники не показываются вообще
     const visibleEmployees = employees.filter(emp =>
@@ -85,7 +85,7 @@ const ScheduleCell = ({
                     padding: '8px',
                     verticalAlign: 'middle'
                 }}
-                title={isEditing ? messages.CLICK_TO_ADD_EMPLOYEE : ''}
+                title={isEditing ? t.addEmployee : ''}
                 {...props}
             >
                 <div className="empty-cell d-flex align-items-center justify-content-center">
@@ -93,7 +93,7 @@ const ScheduleCell = ({
                         <div className="text-muted">
                             <i className="bi bi-plus-circle fs-7"></i>
                             {/*<div style={{ fontSize: '0.7em' }}>*/}
-                            {/*    {messages.CLICK_TO_ASSIGN || 'Click to assign'}*/}
+                            {/*    {messages.ass || 'Click to assign'}*/}
                             {/*</div>*/}
 
                         </div>

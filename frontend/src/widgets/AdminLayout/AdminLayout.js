@@ -94,12 +94,12 @@ const AdminLayout = ({ children }) => {
         return currentPath.startsWith(path);
     };
 
-    const handleNavigation = (path) => {
-        navigate(path);
-        if (isMobile) { // Закрываем мобильное меню при навигации
-            setShowMobileMenu(false);
-        }
-    };
+    // const handleNavigation = (path) => {
+    //     navigate(path);
+    //     if (isMobile) { // Закрываем мобильное меню при навигации
+    //         setShowMobileMenu(false);
+    //     }
+    // };
 
     const SidebarContent = () => (
         <Nav className="flex-column admin-nav">

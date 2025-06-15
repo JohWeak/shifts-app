@@ -1,10 +1,9 @@
 import React from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
-import { useI18n } from '../../lib/i18n/i18nProvider';
 import './ActionButtons.css';
 
 const ActionButtons = ({ actions, size = 'sm', variant = 'light' }) => {
-    const { t } = useI18n();
+
 
     if (!actions || actions.length === 0) return null;
 

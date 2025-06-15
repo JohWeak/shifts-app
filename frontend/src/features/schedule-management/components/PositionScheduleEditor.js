@@ -2,7 +2,8 @@
 import React from 'react';
 import { Table, Button, Badge, Spinner } from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
-import { useMessages, interpolateMessage } from '../../../shared/lib/i18n/messages';
+import {  interpolateMessage } from '../../../shared/lib/i18n/messages';
+import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
 
 const PositionScheduleEditor = ({
                                     position,
@@ -21,7 +22,7 @@ const PositionScheduleEditor = ({
                                     onRemovePendingChange,
                                     scheduleDetails
                                 }) => {
-    const messages = useMessages('en');
+    const { t } = useI18n();
 
     // Helper function to format shift time without seconds and duration
     const formatShiftTime = (startTime, duration) => {
@@ -158,12 +159,12 @@ const PositionScheduleEditor = ({
                 <div>
                     <h6 className="mb-1">{position.pos_name}</h6>
                     <small className="text-muted">
-                        {interpolateMessage(messages.REQUIRED_EMPLOYEES, {
+                        {interpolateMessage(t.requiredEmployees, {
                             count: position.num_of_emp
                         })}
                         {hasPendingChanges && (
                             <Badge bg="warning" className="ms-2">
-                                {messages.UNSAVED_CHANGES} ({Object.keys(pendingChanges).length})
+                                {t.unsavedChanges} ({Object.keys(pendingChanges).length})
                             </Badge>
                         )}
                     </small>
@@ -185,7 +186,7 @@ const PositionScheduleEditor = ({
                             }}
                         >
                             <i className="bi bi-pencil me-1"></i>
-                            {messages.EDIT}
+                            {t.edit}
                         </Button>
                     )}
 
@@ -212,7 +213,7 @@ const PositionScheduleEditor = ({
                                 ) : (
                                     <>
                                         <i className="bi bi-check me-1"></i>
-                                        {messages.SAVE}
+                                        {t.save}
                                     </>
                                 )}
                             </Button>
@@ -227,7 +228,7 @@ const PositionScheduleEditor = ({
                                 }}
                                 disabled={savingChanges}
                             >
-                                {messages.CANCEL}
+                                {t.cancel}
                             </Button>
                         </>
                     )}

@@ -63,11 +63,11 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
                     <Table responsive hover>
                         <thead>
                         <tr>
-                            <th>{t.WEEK}</th>
-                            <th>{t.STATUS}</th>
-                            <th>{t.SITE}</th>
-                            <th>{t.CREATED}</th>
-                            <th>{t.ACTIONS}</th>
+                            <th>{t('schedule.week')}</th>
+                            <th>{t('schedule.status')}</th>
+                            <th>{t('schedule.site')}</th>
+                            <th>{t('schedule.created')}</th>
+                            <th>{t('schedule.actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -79,11 +79,11 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
                                 <td>{formatScheduleDate(schedule.createdAt)}</td>
                                 <td>
                                     <div className="d-flex gap-2 align-items-center">
-                                        <ActionButtons variant="outline-primary" size="sm" onClick={() => onViewDetails(schedule.id)} title={messages.VIEW_DETAILS}>
+                                        <ActionButtons variant="outline-primary" size="sm" onClick={() => onViewDetails(schedule.id)} title={t('schedule.scheduleDetails')}>
                                             <i className="bi bi-eye"></i>
                                         </ActionButtons>
                                         {canDeleteSchedule(schedule) && (
-                                            <ActionButtons variant="outline-danger" size="sm" onClick={() => handleDeleteClick(schedule)} disabled={isDeleting} title={messages.DELETE_SCHEDULE}>
+                                            <ActionButtons variant="outline-danger" size="sm" onClick={() => handleDeleteClick(schedule)} disabled={isDeleting} title={t('schedule.deleteSchedule')}>
                                                 {isDeleting && scheduleToDelete?.id === schedule.id ? <Spinner size="sm" /> : <i className="bi bi-trash"></i>}
                                             </ActionButtons>
                                         )}
@@ -98,19 +98,19 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
 
             <ConfirmationModal
                 show={!!scheduleToDelete}
-                title={messages.CONFIRM_DELETION}
-                message={messages.DELETE_CONFIRMATION_TEXT}
+                title={t.deleteSchedule}
+                message={t.confirmDelete}
                 onConfirm={handleDeleteConfirm}
                 onCancel={handleDeleteCancel}
                 loading={isDeleting}
-                confirmText={messages.DELETE_SCHEDULE}
+                confirmText={t.deleteSuccess}
                 variant="danger"
             >
                 {scheduleToDelete && (
                     <div className="schedule-info bg-light p-3 rounded">
-                        <p><strong>{messages.WEEK}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
-                        <p><strong>{messages.SITE}:</strong> {getSiteName(scheduleToDelete)}</p>
-                        <p className="mt-3 text-muted">{messages.DELETE_ASSIGNMENTS_WARNING}</p>
+                        <p><strong>{t.week}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
+                        <p><strong>{t.site}:</strong> {getSiteName(scheduleToDelete)}</p>
+                        <p className="mt-3 text-muted">{t.warning}</p>
                     </div>
                 )}
             </ConfirmationModal>

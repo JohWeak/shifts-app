@@ -63,9 +63,9 @@ const ScheduleDetailsView = ({onCellClick}) => {
                 scheduleId: scheduleDetails.schedule.id,
                 format
             })).unwrap();
-            setExportAlert({type: 'success', text: `${t.EXPORT_SUCCESS}: ${resultAction.filename}`});
+            setExportAlert({type: 'success', text: `${t.exportSuccess}: ${resultAction.filename}`});
         } catch (error) {
-            setExportAlert({type: 'danger', text: `${t.EXPORT_ERROR}: ${error}`});
+            setExportAlert({type: 'danger', text: `${t.error}: ${error}`});
         } finally {
             setIsExporting(false);
             setTimeout(() => setExportAlert(null), 5000);
@@ -73,8 +73,8 @@ const ScheduleDetailsView = ({onCellClick}) => {
     };
 
     const {schedule, positions, employees, all_shifts: shifts} = scheduleDetails;
-    const canPublish = schedule.status === 'draft' && Object.keys(pendingChanges).length === 0;
-    const canEdit = schedule.status === 'draft';
+   // const canPublish = schedule.status === 'draft' && Object.keys(pendingChanges).length === 0;
+   // const canEdit = schedule.status === 'draft';
 
     return (
         <>
@@ -140,7 +140,7 @@ const ScheduleDetailsView = ({onCellClick}) => {
                 onHide={() => setShowPublishModal(false)}
                 onConfirm={() => handleStatusUpdate('published')}
                 title="Publish Schedule"
-                message={t.PUBLISH_CONFIRMATION}
+                message={t.publishSchedule}
                 loading={loading === 'pending'}
             />
             <ConfirmationModal
@@ -148,7 +148,7 @@ const ScheduleDetailsView = ({onCellClick}) => {
                 onHide={() => setShowUnpublishModal(false)}
                 onConfirm={() => handleStatusUpdate('draft')}
                 title="Unpublish Schedule"
-                message={t.CONFIRM_UNPUBLISH}
+                message={t.confirmPublish}
                 variant="warning"
                 loading={loading === 'pending'}
             />

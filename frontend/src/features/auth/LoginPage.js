@@ -48,8 +48,8 @@ export const Login = () => {
                         <div className="card login-card p-4">
                             <div className="card-body">
                                 <div className="text-center mb-4">
-                                    <h3 className="card-title fw-bold">{t.login}</h3>
-                                    <p className="text-muted">{t.welcome}</p>
+                                    <h3 className="card-title fw-bold">{t('auth.login')}</h3>
+                                    <p className="text-muted">{t('auth.welcome')}</p>
                                 </div>
 
                                 {/* Показываем ошибку из Redux store */}
@@ -71,7 +71,7 @@ export const Login = () => {
                                             required
                                             autoComplete="username"
                                         />
-                                        <label htmlFor="identifier">{t.username} </label>
+                                        <label htmlFor="identifier">{t('auth.username')} </label>
                                     </div>
 
                                     <div className="input-group mb-3">
@@ -86,7 +86,7 @@ export const Login = () => {
                                                 required
                                                 autoComplete="current-password"
                                             />
-                                            <label htmlFor="password">{t.password}</label>
+                                            <label htmlFor="password">{t('auth.password')}</label>
                                         </div>
                                         <button
                                             className="btn btn-outline-secondary btn-toggle-password"
@@ -107,7 +107,7 @@ export const Login = () => {
                                         {loading === 'pending' ? (
                                             <>
                                                 <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                                                <span className="ms-2">{t.loggingIn}</span>
+                                                <span className="ms-2">{t('login.loggingIn')}</span>
                                             </>
                                         ) : (
                                             'Login'

@@ -8,12 +8,12 @@ const ScheduleTabs = ({ activeTab, onTabChange, isDetailsDisabled, children }) =
 
     return (
         <Tabs activeKey={activeTab} onSelect={onTabChange} className="mb-4">
-            <Tab eventKey="overview" title={t('schedule.overview')}>
+            <Tab eventKey="overview" title={t('schedule.scheduleOverview')}>
                 {children.overview}
             </Tab>
             <Tab
                 eventKey="view"
-                title={t('schedule.details')}
+                title={t('schedule.scheduleDetails')}
                 disabled={isDetailsDisabled}
             >
                 {children.details}

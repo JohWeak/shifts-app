@@ -52,11 +52,11 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
     };
 
     const getModalTitle = () => {
-        if (!selectedPosition) return t.SELECT_EMPLOYEE;
+        if (!selectedPosition) return t.selectEmployee;
         const date = new Date(selectedPosition.date).toLocaleDateString();
         const shift = scheduleDetails?.shifts?.find(s => s.shift_id === selectedPosition.shiftId);
         const position = scheduleDetails?.positions?.find(p => p.pos_id === selectedPosition.positionId);
-        return `${t.SELECT_EMPLOYEE} - ${position?.pos_name} (${shift?.shift_name}, ${date})`;
+        return `${t.selectEmployee} - ${position?.pos_name} (${shift?.shift_name}, ${date})`;
     };
 
     // --- ЛОГИКА РЕНДЕРИНГА ОСТАЕТСЯ ПОЛНОСТЬЮ БЕЗ ИЗМЕНЕНИЙ ---

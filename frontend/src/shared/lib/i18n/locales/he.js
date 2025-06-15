@@ -14,7 +14,9 @@ export const he = {
         search: 'חיפוש',
         filter: 'סינון',
         export: 'ייצוא',
-        actions: 'פעולות'
+        actions: 'פעולות',
+        reload: 'טען מחדש',
+
     },
     auth: {
         login: 'כניסה',
@@ -39,7 +41,10 @@ export const he = {
         publishSchedule: 'פרסם סידור',
         unpublishEdit: 'בטל פרסום וערוך',
         exportSchedule: 'ייצא סידור',
-        deleteSchedule: 'מחק סידור'
+        deleteSchedule: 'מחק סידור',
+        cannotDeletePublished: 'לא ניתן למחוק סידור מפורסם',
+        unpublishFirst: 'יש לבטל את הפרסום תחילה',
+        scheduleOverview: 'סידורי עבודה',
     },
     employee: {
         employees: 'עובדים',

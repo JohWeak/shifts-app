@@ -1,6 +1,6 @@
 // frontend/src/shared/api/scheduleAPI.js
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config/scheduleConstants'; // Путь к константам изменился
+import { API_ENDPOINTS } from '../config/apiEndpoints';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -140,3 +140,9 @@ export async function fetchWorkSites()  {
         handleError(error);
     }
 }
+export const getRecommendations = async (scheduleId, positionId, shiftId, date) => {
+    const response = await api.get(`/api/employees/recommendations`, {
+        params: { scheduleId, positionId, shiftId, date }
+    });
+    return response;
+};

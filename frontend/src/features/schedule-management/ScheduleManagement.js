@@ -47,7 +47,7 @@ const ScheduleManagement = () => {
     } = useSelector((state) => state.schedule);
 
     // --- Локальное состояние для UI, которое было утеряно ---
-    const [alert, setAlert] = useState(null);
+    const [setAlert] = useState(null);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
@@ -59,13 +59,6 @@ const ScheduleManagement = () => {
         dispatch(fetchSchedules());
     }, [dispatch]);
 
-    useEffect(() => {
-        if (error) {
-            setAlert({ type: 'danger', message: error });
-            const timer = setTimeout(() => setAlert(null), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [error]);
 
     // --- Обработчики действий ---
     const handleGenerate = async (settings) => {

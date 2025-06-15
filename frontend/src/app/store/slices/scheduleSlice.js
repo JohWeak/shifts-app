@@ -1,7 +1,6 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import * as scheduleAPI from '../../../shared/api/scheduleAPI';
-import * as employeeAPI from '../../../shared/api/employeeAPI';
 import * as worksiteAPI from '../../../shared/api/worksiteAPI';
 
 // --- Асинхронные экшены (Thunks) ---

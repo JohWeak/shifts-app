@@ -36,16 +36,16 @@ export const EmployeeDashboard = () => {
 
     if (!user) {
         // Такое может быть на мгновение, пока стейт не обновился
-        return <div className="loading">{t.loading}</div>;
+        return <div className="loading">{t('common.loading')}</div>;
     }
 
     return (
         <div className="employee-dashboard">
             <header className="dashboard-header">
                 <div className="header-content">
-                    <h1>{t.appName}</h1>
+                    <h1>{t('common.appName')}</h1>
                     <div className="user-info">
-                        <span className="welcome-text">{user.name}</span>
+                        <span className="welcome-text">{t('auth.welcome')}, {user.name}</span>
                         <div className="header-actions">
                             <LanguageSwitch/>
                             <Dropdown show={showUserMenu} onToggle={setShowUserMenu} className="user-dropdown"
@@ -61,11 +61,11 @@ export const EmployeeDashboard = () => {
                                     <Dropdown.Divider/>
                                     <Dropdown.Item onClick={() => { /* Navigate to settings */
                                     }}>
-                                        <i className="bi bi-gear me-2"></i>{t.settings}
+                                        <i className="bi bi-gear me-2"></i>{t('common.settings')}
                                     </Dropdown.Item>
                                     <Dropdown.Divider/>
                                     <Dropdown.Item onClick={handleLogout} className="text-danger">
-                                        <i className="bi bi-box-arrow-right me-2"></i>י{t.logout}
+                                        <i className="bi bi-box-arrow-right me-2"></i>י{t('auth.logout')}
                                     </Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
@@ -104,21 +104,21 @@ export const EmployeeDashboard = () => {
                         onClick={() => setActiveTab('schedule')}
                     >
                         <i className="bi bi-calendar-week me-1"></i>
-                        <span className="tab-name">{t.scheduleDetails}</span>
+                        <span className="tab-name">{t('schedule.scheduleDetails')}</span>
                     </button>
                     <button
                         className={`nav-tab ${activeTab === 'constraints' ? 'active' : ''}`}
                         onClick={() => setActiveTab('constraints')}
                     >
                         <i className="bi bi-clock-history me-1"></i>
-                        <span className="tab-name">{t.setConstraints}</span>
+                        <span className="tab-name">{t('employee.setConstraints')}</span>
                     </button>
                     <button
                         className={`nav-tab ${activeTab === 'permanent-requests' ? 'active' : ''}`}
                         onClick={() => setActiveTab('permanent-requests')}
                     >
                         <i className="bi bi-file-earmark-text me-1"></i>
-                        <span className="tab-name">{t.permanentRequests}</span>
+                        <span className="tab-name">{t('employee.permanentRequests')}</span>
                     </button>
                 </div>
             </nav>

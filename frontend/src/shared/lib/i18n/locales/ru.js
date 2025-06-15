@@ -20,7 +20,9 @@ export const ru = {
         error: 'Ошибка',
         success: 'Успешно',
         warning: 'Предупреждение',
-        info: 'Информация'
+        info: 'Информация',
+        reload: 'Перезагрузить страницу',
+
     },
     auth: {
         login: 'Вход',
@@ -65,7 +67,9 @@ export const ru = {
         unpublishSuccess: 'Расписание снято с публикации',
         generateSuccess: 'Расписание успешно создано',
         exportSuccess: 'Расписание успешно экспортировано',
-        saveSuccess: 'Изменения успешно сохранены'
+        saveSuccess: 'Изменения успешно сохранены',
+        cannotDeletePublished: 'Невозможно удалить опубликованное расписание',
+        unpublishFirst: 'Сначала снимите расписание с публикации',
     },
     employee: {
         employees: 'Сотрудники',

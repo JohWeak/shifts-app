@@ -43,7 +43,10 @@ export const ErrorBoundary = ({ children, fallback }) => {
 
     const errorFallback = fallback || (
         <Alert variant="danger" className="m-4">
-            <Alert.Heading>{t('errors.unexpectedError')}</Alert.Heading>
+            <Alert.Heading>
+                <i className="bi bi-exclamation-triangle me-2"></i>
+                {t('errors.unexpectedError')}
+            </Alert.Heading>
             <p>{t('errors.networkError')}</p>
             <hr />
             <Button
