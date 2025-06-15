@@ -39,7 +39,7 @@ export async function fetchSchedules() {
 
 export async function fetchScheduleDetails(scheduleId) {
     try {
-        const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULE_DETAILS(scheduleId)}`, { headers: getAuthHeaders() });
+        const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)}`, { headers: getAuthHeaders() });
         return handleResponse(response).data; // API возвращает { success, data }
     } catch (error) {
         handleError(error);
@@ -48,7 +48,7 @@ export async function fetchScheduleDetails(scheduleId) {
 
 export async function generateSchedule(settings) {
     try {
-        const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.GENERATE}`, settings, { headers: getAuthHeaders() });
+        const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULES.GENERATE}`, settings, { headers: getAuthHeaders() });
         return handleResponse(response).data;
     } catch (error) {
         handleError(error);
