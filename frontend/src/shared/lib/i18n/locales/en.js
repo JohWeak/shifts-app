@@ -53,7 +53,16 @@ export const en = {
         publishSchedule: 'Publish Schedule',
         unpublishEdit: 'Unpublish & Edit',
         exportSchedule: 'Export Schedule',
-        deleteSchedule: 'Delete Schedule'
+        deleteSchedule: 'Delete Schedule',
+        confirmDelete: 'Are you sure you want to delete this schedule?',
+        confirmPublish: 'Are you sure you want to publish this schedule? Employees will be able to see it.',
+        confirmUnpublish: 'Are you sure you want to unpublish the schedule? Employees will no longer be able to see it.',
+        deleteSuccess: 'The schedule has been successfully deleted.',
+        publishSuccess: 'The schedule has been successfully published.',
+        unpublishSuccess: 'The schedule has been unpublished.',
+        generateSuccess: 'Schedule successfully created',
+        exportSuccess: 'Schedule successfully exported',
+        saveSuccess: 'Changes saved successfully'
     },
     employee: {
         employees: 'Employees',

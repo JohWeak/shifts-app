@@ -10,7 +10,6 @@ import ScheduleDetailsView from './components/ScheduleDetailsView';
 import GenerateScheduleModal from './components/GenerateScheduleModal';
 import CompareAlgorithmsModal from './components/CompareAlgorithmsModal';
 import EmployeeSelectionModal from './components/EmployeeSelectionModal';
-import AlertMessage from '../../shared/ui/AlertMessage';
 import ScheduleHeader from './components/ScheduleHeader';
 import ScheduleTabs from './components/ScheduleTabs';
 import { useI18n } from '../../shared/lib/i18n/i18nProvider';
@@ -82,7 +81,7 @@ const ScheduleManagement = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm(t.CONFIRM_DELETE)) {
+        if (window.confirm(t.confirmDelete)) {
             dispatch(deleteSchedule(id)).then(() => setAlert({ type: 'success', message: 'Schedule deleted.' }));
         }
     };
@@ -110,8 +109,6 @@ const ScheduleManagement = () => {
                     onCompareClick={handleCompare}
                     loading={loading === 'pending'}
                 />
-
-                <AlertMessage alert={alert} onClose={() => setAlert(null)} />
 
                 <ScheduleTabs
                     activeTab={activeTab}

@@ -115,7 +115,13 @@ export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
     async (params, { rejectWithValue }) => {
         try {
-            return await employeeAPI.fetchRecommendations(params); // <-- ИЗМЕНИТЬ
+            const response = await scheduleAPI.getRecommendations(
+                params.scheduleId,
+                params.positionId,
+                params.shiftId,
+                params.date
+            );
+            return response.data;
         } catch (error) {
             return rejectWithValue(error.message);
         }

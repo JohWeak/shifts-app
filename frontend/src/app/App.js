@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom
 import {Provider} from 'react-redux';
 import store from './store/store';
 import {I18nProvider} from '../shared/lib/i18n/i18nProvider';
+import {ErrorBoundary} from '../shared/ui/ErrorBoundary/ErrorBoundary';
 
 // Pages
 import LoginPage from '../pages/LoginPage';
@@ -26,37 +27,42 @@ function App() {
         <Provider store={store}>
             <I18nProvider>
                 <Router>
-                    <div className="app">
-                        <Routes>
-                        {/* Public Route */}
-                        <Route path="/login" element={<LoginPage/>}/>
+                    <ErrorBoundary>
+                        <div className="app">
+                            <Routes>
+                                {/* Public Route */}
+                                <Route path="/login" element={<LoginPage/>}/>
 
-                        {/* Employee Route */}
-                        <Route
-                            path="/employee/dashboard"
-                            element={<ProtectedRoute allowedRole="employee">
-                                <EmployeeDashboardPage/>
-                            </ProtectedRoute>}
-                        />
+                                {/* Employee Route */}
+                                <Route
+                                    path="/employee/dashboard"
+                                    element={<ProtectedRoute allowedRole="employee">
+                                        <EmployeeDashboardPage/>
+                                    </ProtectedRoute>}
+                                />
 
-                        {/* Admin Routes */}
-                        <Route path="/admin"
-                               element={<ProtectedRoute allowedRole="admin"><AdminDashboardPage/></ProtectedRoute>}/>
-                        <Route path="/admin/schedules" element={<ProtectedRoute
-                            allowedRole="admin"><ScheduleManagementPage/></ProtectedRoute>}/>
-                        <Route path="/admin/algorithms"
-                               element={<ProtectedRoute allowedRole="admin"><AlgorithmSettingsPage/></ProtectedRoute>}/>
-                        <Route path="/admin/employees" element={<ProtectedRoute
-                            allowedRole="admin"><EmployeeManagementPage/></ProtectedRoute>}/>
-                        <Route path="/admin/settings"
-                               element={<ProtectedRoute allowedRole="admin"><SystemSettingsPage/></ProtectedRoute>}/>
-                        <Route path="/admin/reports"
-                               element={<ProtectedRoute allowedRole="admin"><ReportsPage/></ProtectedRoute>}/>
-                        {/* Default Redirects */}
-                        <Route path="/" element={<Navigate to="/login" replace/>}/>
-                        <Route path="*" element={<Navigate to="/login" replace/>}/>
-                        </Routes>
-                    </div>
+                                {/* Admin Routes */}
+                                <Route path="/admin"
+                                       element={<ProtectedRoute
+                                           allowedRole="admin"><AdminDashboardPage/></ProtectedRoute>}/>
+                                <Route path="/admin/schedules" element={<ProtectedRoute
+                                    allowedRole="admin"><ScheduleManagementPage/></ProtectedRoute>}/>
+                                <Route path="/admin/algorithms"
+                                       element={<ProtectedRoute
+                                           allowedRole="admin"><AlgorithmSettingsPage/></ProtectedRoute>}/>
+                                <Route path="/admin/employees" element={<ProtectedRoute
+                                    allowedRole="admin"><EmployeeManagementPage/></ProtectedRoute>}/>
+                                <Route path="/admin/settings"
+                                       element={<ProtectedRoute
+                                           allowedRole="admin"><SystemSettingsPage/></ProtectedRoute>}/>
+                                <Route path="/admin/reports"
+                                       element={<ProtectedRoute allowedRole="admin"><ReportsPage/></ProtectedRoute>}/>
+                                {/* Default Redirects */}
+                                <Route path="/" element={<Navigate to="/login" replace/>}/>
+                                <Route path="*" element={<Navigate to="/login" replace/>}/>
+                            </Routes>
+                        </div>
+                    </ErrorBoundary>
                 </Router>
             </I18nProvider>
         </Provider>
