@@ -1,4 +1,4 @@
-// backend/src/services/schedule-generator.service.js (начало файла)
+// backend/src/services/schedule-generator.service.js
 const dayjs = require('dayjs');
 const { Op } = require('sequelize');
 const db = require('../models');

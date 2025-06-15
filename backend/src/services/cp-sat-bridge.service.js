@@ -1,9 +1,12 @@
 // backend/src/services/cp-sat-bridge.service.js
+
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
 const db = require('../models');
+const { v4: uuidv4 } = require('uuid');
+
 
 class CPSATBridge {
     constructor(database) {

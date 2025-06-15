@@ -105,11 +105,11 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
                                     <small key={idx} className="d-block text-success"><i className="bi bi-check-circle me-1"></i>{reason}</small>
                                 ))}
                                 {employee.recommendation?.warnings?.map((warning, idx) => (
-                                    <small key={idx} className="d-block text-danger"><i className="bi bi-exclamation-triangle me-1"></i>{warning}</small>
+                                    <small key={idx} className="d-block text-danger"><i className="bi bi-exclamation-circle me-1"></i>{warning}</small>
                                 ))}
-                                {employee.note && (
-                                    <small className="d-block text-danger mt-1 fw-bold"><i className="bi bi-exclamation-circle me-1"></i>{employee.note}</small>
-                                )}
+                                {/*{employee.note && (*/}
+                                {/*    <small className="d-block text-danger mt-1"><i className="bi bi-exclamation-circle me-1"></i>{employee.note}</small>*/}
+                                {/*)}*/}
                             </div>
                             <div className="d-flex flex-column align-items-end">
                                 {type === 'available' && <Badge bg="success">Available</Badge>}

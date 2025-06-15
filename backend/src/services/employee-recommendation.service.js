@@ -1,4 +1,4 @@
-// backend/src/services/employee-recommendation.service.js (начало файла)
+// backend/src/services/employee-recommendation.service.js
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 const db = require('../models');

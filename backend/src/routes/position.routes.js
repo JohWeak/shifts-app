@@ -6,8 +6,8 @@ const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 const router = express.Router();
 
 router.get('/', verifyToken, positionController.getAllPositions);
-router.post('/', [verifyToken, isAdmin], positionController.createPosition);
-router.put('/:id', [verifyToken, isAdmin], positionController.updatePosition);
-router.delete('/:id', [verifyToken, isAdmin], positionController.deletePosition);
+router.post('/', ...[verifyToken, isAdmin], positionController.createPosition);
+router.put('/:id', ...[verifyToken, isAdmin], positionController.updatePosition);
+router.delete('/:id', ...[verifyToken, isAdmin], positionController.deletePosition);
 
 module.exports = router;

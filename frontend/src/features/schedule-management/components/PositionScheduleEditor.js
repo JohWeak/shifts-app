@@ -262,7 +262,7 @@ const PositionScheduleEditor = ({
                     <tr key={shift.shift_id}>
                         <td className={`shift-${shift.shift_type} text-center`}>
                             <div>
-                                <strong>{shift.shift_name}</strong><br/>
+                                {shift.shift_name}<br/>
                                 <small>{formatShiftTime(shift.start_time, shift.duration)}</small>
                             </div>
                         </td>
@@ -272,7 +272,7 @@ const PositionScheduleEditor = ({
                 </tbody>
             </Table>
 
-            {/* Edit Mode Message - ПЕРЕНЕСЕНО ПОД ТАБЛИЦУ */}
+            {/* Edit Mode Message */}
             {isEditing && (
                 <div className="alert alert-info mt-3">
                     <i className="bi bi-pencil me-2"></i>

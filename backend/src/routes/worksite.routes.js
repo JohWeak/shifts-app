@@ -5,9 +5,9 @@ const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-router.get('/', verifyToken, worksiteController.getAllWorkSites);
-router.post('/', [verifyToken, isAdmin], worksiteController.createWorkSite);
-router.put('/:id', [verifyToken, isAdmin], worksiteController.updateWorkSite);
-router.delete('/:id', [verifyToken, isAdmin], worksiteController.deleteWorkSite);
+router.get('/', verifyToken, worksiteController.findAll);
+router.post('/', ...[verifyToken, isAdmin], worksiteController.create);
+router.put('/:id', ...[verifyToken, isAdmin], worksiteController.update);
+router.delete('/:id', ...[verifyToken, isAdmin], worksiteController.delete);
 
 module.exports = router;

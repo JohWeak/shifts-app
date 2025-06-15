@@ -14,16 +14,16 @@ const router = express.Router();
 router.get('/weekly', verifyToken, employeeController.getWeeklySchedule);
 
 // === ADMIN ROUTES ===
-router.get('/stats/overview', [verifyToken, isAdmin], exportController.getScheduleStats);
-router.get('/:scheduleId/export', [verifyToken, isAdmin], exportController.exportSchedule);
-router.get('/recommendations/employees', [verifyToken, isAdmin], scheduleController.getRecommendedEmployees);
-router.post('/generate', [verifyToken, isAdmin], generationController.generateNextWeekSchedule);
-router.post('/compare-algorithms', [verifyToken, isAdmin], generationController.compareAllAlgorithms);
-router.get('/', [verifyToken, isAdmin], scheduleController.getAllSchedules);
-router.get('/:scheduleId', [verifyToken, isAdmin], scheduleController.getScheduleDetails);
-router.put('/:scheduleId/status', [verifyToken, isAdmin], scheduleController.updateScheduleStatus);
-router.put('/:scheduleId/update-assignments', [verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
-router.delete('/:scheduleId', [verifyToken, isAdmin], scheduleController.deleteSchedule);
-router.get('/admin/weekly', [verifyToken, isAdmin], employeeController.getAdminWeeklySchedule);
+router.get('/stats/overview', ...[verifyToken, isAdmin], exportController.getScheduleStats);
+router.get('/:scheduleId/export', ...[verifyToken, isAdmin], exportController.exportSchedule);
+router.get('/recommendations/employees', ...[verifyToken, isAdmin], scheduleController.getRecommendedEmployees);
+router.post('/generate', ...[verifyToken, isAdmin], generationController.generateNextWeekSchedule);
+router.post('/compare-algorithms', ...[verifyToken, isAdmin], generationController.compareAllAlgorithms);
+router.get('/', ...[verifyToken, isAdmin], scheduleController.getAllSchedules);
+router.get('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.getScheduleDetails);
+router.put('/:scheduleId/status', ...[verifyToken, isAdmin], scheduleController.updateScheduleStatus);
+router.put('/:scheduleId/update-assignments', ...[verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
+router.delete('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.deleteSchedule);
+router.get('/admin/weekly', ...[verifyToken, isAdmin], employeeController.getAdminWeeklySchedule);
 
 module.exports = router;

@@ -10,17 +10,17 @@ const router = express.Router();
 router.get('/recommendations', verifyToken, EmployeeRecommendationController.getRecommendations);
 
 // Routes protected by JWT and requiring admin role
-router.post('/', [verifyToken, isAdmin], employeeController.create);
-router.get('/', [verifyToken, isAdmin], employeeController.findAll);
+router.post('/', ...[verifyToken, isAdmin], employeeController.create);
+router.get('/', ...[verifyToken, isAdmin], employeeController.findAll);
 router.get('/:id', verifyToken, employeeController.findOne);
-router.put('/:id', [verifyToken, isAdmin], employeeController.update);
-router.delete('/:id', [verifyToken, isAdmin], employeeController.delete);
+router.put('/:id', ...[verifyToken, isAdmin], employeeController.update);
+router.delete('/:id', ...[verifyToken, isAdmin], employeeController.delete);
 
 // Employee constraints
 router.get('/:id/constraints', verifyToken, employeeController.getConstraints);
 
 // Employee qualifications routes
 router.get('/:id/qualifications', verifyToken, employeeController.getQualifications);
-router.post('/:id/qualifications', [verifyToken, isAdmin], employeeController.addQualification);
+router.post('/:id/qualifications', ...[verifyToken, isAdmin], employeeController.addQualification);
 
 module.exports = router;

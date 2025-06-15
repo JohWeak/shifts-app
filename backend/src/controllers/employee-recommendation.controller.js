@@ -1,6 +1,7 @@
 // backend/src/controllers/employee-recommendation.controller.js
 const EmployeeRecommendationService = require('../services/employee-recommendation.service');
-
+const db = require('../models');
+const recommendationService = new EmployeeRecommendationService(db);
 class EmployeeRecommendationController {
     static async getRecommendations(req, res) {
         try {
@@ -13,7 +14,7 @@ class EmployeeRecommendationController {
                 });
             }
 
-            const recommendations = await EmployeeRecommendationService.getRecommendedEmployees(
+            const recommendations = await recommendationService.getRecommendedEmployees(
                 parseInt(position_id),
                 parseInt(shift_id),
                 date,

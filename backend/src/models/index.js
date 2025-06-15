@@ -1,11 +1,11 @@
 // backend/src/models/index.js
 const fs = require('fs');
 const path = require('path');
-const Sequelize = require('sequelize');
-const config = require('../config/db.config');
+const sequelize = require('../config/db.config');
+const {Sequelize} = require("sequelize");
 
 const db = {};
-const sequelize = config.sequelize;
+
 
 // Функция для загрузки моделей из папки
 function loadModelsFromFolder(folderPath, folderName) {
