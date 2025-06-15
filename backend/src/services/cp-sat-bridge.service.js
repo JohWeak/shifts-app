@@ -1,17 +1,18 @@
 // backend/src/services/cp-sat-bridge.service.js
+
 const { spawn } = require('child_process');
-const fs = require('fs').promises;
 const path = require('path');
+const fs = require('fs').promises;
+const dayjs = require('dayjs');
+const db = require('../models');
 const { v4: uuidv4 } = require('uuid');
-const { Op } = require('sequelize');
+
 
 class CPSATBridge {
     constructor(database) {
         this.db = database || db;
     }
-    /**
-     * Основной метод генерации расписания
-     */
+
     static async generateOptimalSchedule(database, siteId, weekStart) {
         const bridge = new CPSATBridge(database || db);
 

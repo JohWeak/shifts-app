@@ -1,94 +1,75 @@
 // backend/src/controllers/schedule-settings.controller.js
-module.exports = (db) => {
-    const {ScheduleSettings, WorkSite} = db;
-    const controller = {};
-// Get schedule settings for the work site
-    controller.getSettings = async (req, res) => {
-        try {
-            const siteId = req.params.siteId;
+const db = require('../models');
+const { ScheduleSettings, WorkSite } = db;
 
-            const settings = await ScheduleSettings.findOne({
-                where: {site_id: siteId},
-                include: [{
-                    association: 'workSite',
-                    attributes: ['site_id', 'site_name']
-                }]
-            });
+// Get settings for site
+const getSettings = async (req, res) => {
+    try {
+        const siteId = req.params.siteId;
 
-            if (!settings) {
-                return res.status(404).json({message: 'Schedule settings not found for this site'});
-            }
+        const settings = await ScheduleSettings.findOne({
+            where: { site_id: siteId },
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name']
+            }]
+        });
 
-            res.json(settings);
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error retrieving schedule settings',
-                error: error.message
-            });
+        if (!settings) {
+            return res.status(404).json({ message: 'Schedule settings not found for this site' });
         }
-    };
 
-// Create or update schedule settings
-    controller.updateSettings = async (req, res) => {
-        try {
-            const siteId = req.params.siteId;
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving schedule settings', error: error.message });
+    }
+};
 
-            // Verify the work site exists
-            const workSite = await WorkSite.findByPk(siteId);
-            if (!workSite) {
-                return res.status(404).json({message: 'Work site not found'});
-            }
+// Update settings
+const updateSettings = async (req, res) => {
+    try {
+        const siteId = req.params.siteId;
 
-            // Find existing settings or create new
-            let settings = await ScheduleSettings.findOne({where: {site_id: siteId}});
-
-            if (settings) {
-                // Update existing settings
-                await settings.update(req.body);
-            } else {
-                // Create new settings
-                settings = await ScheduleSettings.create({
-                    ...req.body,
-                    site_id: siteId
-                });
-            }
-
-            // Fetch updated settings with work site info
-            const updatedSettings = await ScheduleSettings.findOne({
-                where: {site_id: siteId},
-                include: [{association: 'workSite'}]
-            });
-
-            res.json({
-                message: 'Schedule settings updated successfully',
-                settings: updatedSettings
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error updating schedule settings',
-                error: error.message
-            });
+        const workSite = await WorkSite.findByPk(siteId);
+        if (!workSite) {
+            return res.status(404).json({ message: 'Work site not found' });
         }
-    };
 
-// Get all sites with their settings
-    controller.getAllSitesSettings = async (req, res) => {
-        try {
-            const sites = await WorkSite.findAll({
-                include: [{
-                    association: 'scheduleSettings',
-                    required: false // Include sites even without settings
-                }],
-                order: [['site_name', 'ASC']]
-            });
+        let settings = await ScheduleSettings.findOne({ where: { site_id: siteId } });
 
-            res.json(sites);
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error retrieving sites settings',
-                error: error.message
-            });
+        if (settings) {
+            await settings.update(req.body);
+        } else {
+            settings = await ScheduleSettings.create({ ...req.body, site_id: siteId });
         }
-    };
-    return controller;
+
+        const updatedSettings = await ScheduleSettings.findOne({
+            where: { site_id: siteId },
+            include: [{ model: WorkSite, as: 'workSite' }]
+        });
+
+        res.json(updatedSettings);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating schedule settings', error: error.message });
+    }
+};
+
+// Get all sites settings
+const getAllSitesSettings = async (req, res) => {
+    try {
+        const settings = await ScheduleSettings.findAll({
+            include: [{ model: WorkSite, as: 'workSite' }]
+        });
+
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving settings', error: error.message });
+    }
+};
+
+module.exports = {
+    getSettings,
+    updateSettings,
+    getAllSitesSettings
 };

@@ -1,6 +1,7 @@
 // backend/src/services/employee-recommendation.service.js
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
+const db = require('../models');
 const {
     Employee,
     Position,
@@ -8,7 +9,7 @@ const {
     EmployeeConstraint,
     ScheduleAssignment,
     Schedule
-} = require('../models');
+} = db;
 
 class EmployeeRecommendationService {
     constructor(db) {

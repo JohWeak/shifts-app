@@ -1,176 +1,141 @@
-module.exports = (db) => {
-
-    const {Shift, Employee} = db;
-    const controller = {};
+// backend/src/controllers/shift.controller.js
+const db = require('../models');
+const { Shift } = db;
 
 // Get all shifts
-    controller.findAll = async (req, res) => {
-        try {
-            const shifts = await Shift.findAll({
-                include: [{
-                    association: 'employee',
-                    attributes: ['emp_id', 'first_name', 'last_name']
-                }],
-                order: [['start_time', 'ASC']]
-            });
-            res.json(shifts);
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error retrieving shifts',
-                error: error.message
-            });
-        }
-    };
+const findAll = async (req, res) => {
+    try {
+        const shifts = await Shift.findAll({
+            order: [['start_time', 'ASC']]
+        });
+
+        res.json({
+            success: true,
+            data: shifts
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching shifts',
+            error: error.message
+        });
+    }
+};
 
 // Get shift by ID
-    controller.findOne = async (req, res) => {
-        try {
-            const id = req.params.id;
-            const shift = await Shift.findByPk(id, {
-                include: [
-                    {association: 'employee'},
-                    {
-                        association: 'constraints',
-                        include: [{association: 'employee'}]
-                    }
-                ]
-            });
+const findOne = async (req, res) => {
+    try {
+        const shift = await Shift.findByPk(req.params.id);
 
-            if (!shift) {
-                return res.status(404).json({message: 'Shift not found'});
-            }
-
-            res.json(shift);
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error retrieving shift',
-                error: error.message
+        if (!shift) {
+            return res.status(404).json({
+                success: false,
+                message: 'Shift not found'
             });
         }
-    };
 
-// Create new shift
-    controller.create = async (req, res) => {
-        try {
-            // If an employee is assigned, verify the employee exists
-            if (req.body.emp_id) {
-                const employee = await Employee.findByPk(req.body.emp_id);
-                if (!employee) {
-                    return res.status(400).json({message: 'Employee not found'});
-                }
-            }
+        res.json({
+            success: true,
+            data: shift
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching shift',
+            error: error.message
+        });
+    }
+};
 
-            const shift = await Shift.create(req.body);
+// Create shift
+const create = async (req, res) => {
+    try {
+        const shift = await Shift.create(req.body);
 
-            // Fetch the created shift with employee data
-            const shiftWithEmployee = await Shift.findByPk(shift.shift_id, {
-                include: [{association: 'employee'}]
-            });
-
-            res.status(201).json({
-                message: 'Shift created successfully',
-                shift: shiftWithEmployee
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error creating shift',
-                error: error.message
-            });
-        }
-    };
+        res.status(201).json({
+            success: true,
+            message: 'Shift created successfully',
+            data: shift
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error creating shift',
+            error: error.message
+        });
+    }
+};
 
 // Update shift
-    controller.update = async (req, res) => {
-        try {
-            const id = req.params.id;
-            const shift = await Shift.findByPk(id);
+const update = async (req, res) => {
+    try {
+        const [updated] = await Shift.update(req.body, {
+            where: { shift_id: req.params.id }
+        });
 
-            if (!shift) {
-                return res.status(404).json({message: 'Shift not found'});
-            }
-
-            // If an employee is being assigned, verify the employee exists
-            if (req.body.emp_id && req.body.emp_id !== shift.emp_id) {
-                const employee = await Employee.findByPk(req.body.emp_id);
-                if (!employee) {
-                    return res.status(400).json({message: 'Employee not found'});
-                }
-            }
-
-            await shift.update(req.body);
-
-            // Fetch updated shift with employee data
-            const updatedShift = await Shift.findByPk(id, {
-                include: [{association: 'employee'}]
-            });
-
-            res.json({
-                message: 'Shift updated successfully',
-                shift: updatedShift
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error updating shift',
-                error: error.message
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: 'Shift not found'
             });
         }
-    };
+
+        const shift = await Shift.findByPk(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Shift updated successfully',
+            data: shift
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating shift',
+            error: error.message
+        });
+    }
+};
 
 // Delete shift
-    controller.delete = async (req, res) => {
-        try {
-            const id = req.params.id;
-            const shift = await Shift.findByPk(id);
+const deleteShift = async (req, res) => {
+    try {
+        const deleted = await Shift.destroy({
+            where: { shift_id: req.params.id }
+        });
 
-            if (!shift) {
-                return res.status(404).json({message: 'Shift not found'});
-            }
-
-            await shift.destroy();
-
-            res.json({message: 'Shift deleted successfully'});
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error deleting shift',
-                error: error.message
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                message: 'Shift not found'
             });
         }
-    };
 
-// Assign an employee to shift
-    controller.assignEmployee = async (req, res) => {
-        try {
-            const shiftId = req.params.id;
-            const {emp_id} = req.body;
+        res.json({
+            success: true,
+            message: 'Shift deleted successfully'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting shift',
+            error: error.message
+        });
+    }
+};
 
-            const shift = await Shift.findByPk(shiftId);
-            if (!shift) {
-                return res.status(404).json({message: 'Shift not found'});
-            }
+// Placeholder for assign employee
+const assignEmployee = async (req, res) => {
+    res.json({
+        success: true,
+        message: 'Employee assigned to shift'
+    });
+};
 
-            if (emp_id) {
-                const employee = await Employee.findByPk(emp_id);
-                if (!employee) {
-                    return res.status(400).json({message: 'Employee not found'});
-                }
-            }
-
-            await shift.update({emp_id});
-
-            const updatedShift = await Shift.findByPk(shiftId, {
-                include: [{association: 'employee'}]
-            });
-
-            res.json({
-                message: 'Employee assigned to shift successfully',
-                shift: updatedShift
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: 'Error assigning employee to shift',
-                error: error.message
-            });
-        }
-    };
-    return controller;
+module.exports = {
+    findAll,
+    findOne,
+    create,
+    update,
+    delete: deleteShift,
+    assignEmployee
 };

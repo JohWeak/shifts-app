@@ -1,21 +1,13 @@
+// backend/src/routes/position.routes.js
 const express = require('express');
+const positionController = require('../controllers/position.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-module.exports = function(db) {
-    const router = express.Router();
-    const positionController = require('../controllers/position.controller')(db);
+const router = express.Router();
 
-// All position routes require admin privileges
-router.use([verifyToken, isAdmin]);
+router.get('/', verifyToken, positionController.getAllPositions);
+router.post('/', ...[verifyToken, isAdmin], positionController.createPosition);
+router.put('/:id', ...[verifyToken, isAdmin], positionController.updatePosition);
+router.delete('/:id', ...[verifyToken, isAdmin], positionController.deletePosition);
 
-router.post('/', positionController.create);
-router.get('/', positionController.findAll);
-router.get('/:id', positionController.findOne);
-router.put('/:id', positionController.update);
-router.delete('/:id', positionController.delete);
-
-// Get positions by work site
-router.get('/worksite/:siteId', positionController.findByWorkSite);
-
-    return router;
-};
+module.exports = router;

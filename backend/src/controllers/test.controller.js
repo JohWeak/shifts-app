@@ -4,37 +4,18 @@ const db = require('../models');
 const testDatabase = async (req, res) => {
     try {
         await db.sequelize.authenticate();
-
-        // Проверяем, что модели загружены
-        const modelCount = Object.keys(db).filter(key => key !== 'sequelize' && key !== 'Sequelize').length;
-
-        res.json({
-            success: true,
-            message: 'Database connection successful',
-            modelsLoaded: modelCount
-        });
+        res.json({ success: true, message: 'Database connection successful' });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Database connection failed',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Database connection failed', error: error.message });
     }
 };
 
 const getModels = async (req, res) => {
     try {
         const models = Object.keys(db).filter(key => key !== 'sequelize' && key !== 'Sequelize');
-        res.json({
-            success: true,
-            models,
-            count: models.length
-        });
+        res.json({ success: true, models });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 

@@ -110,11 +110,11 @@ const AdminLayout = ({ children }) => {
                         as={Link}
                         to={item.path}
                         className={`admin-nav-link ${isActive(item.path) ? 'active' : ''}`}
-                        onClick={() => showMobileMenu && setShowMobileMenu(false)} // Просто закрываем меню на мобилке
+                        onClick={() => showMobileMenu && setShowMobileMenu(false)}
                     >
-                        <i className={`bi bi-${item.icon} nav-icon`}></i>
-                        <span>{item.label}</span>
-                        {item.badge && <Badge bg="primary" className="ms-auto">{item.badge}</Badge>}
+                        <i className={`bi bi-${item.icon} nav-icon `}></i>
+                        <span className="me-auto">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
+                        {item.badge && <Badge bg="primary">{item.badge}</Badge>}
                     </Nav.Link>
                 </Nav.Item>
             ))}

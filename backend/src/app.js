@@ -3,51 +3,36 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-class App {
-    constructor(db) {
-        this.db = db;
-        this.app = express();
-        this.setupMiddleware();
-        this.setupRoutes();
-        this.setupErrorHandlers();
-    }
+const app = express();
 
-    setupMiddleware() {
-        this.app.use(cors());
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
-    }
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    setupRoutes() {
-        this.app.get('/', (req, res) => {
-            res.json({ message: 'Shifts API is running!' });
-        });
+// Routes
+app.get('/', (req, res) => {
+    res.json({ message: 'Shifts API is running!' });
+});
 
-        // Маршруты без необходимости в db
-        this.app.use('/api/auth', require('./routes/auth.routes'));
-        this.app.use('/api/employees', require('./routes/employee.routes'));
-        this.app.use('/api/schedules', require('./routes/schedule.routes'));
-        this.app.use('/api/worksites', require('./routes/worksite.routes'));
-        this.app.use('/api/positions', require('./routes/position.routes'));
-        this.app.use('/api/shifts', require('./routes/shift.routes'));
-        this.app.use('/api/constraints', require('./routes/constraint.routes'));
-        this.app.use('/api/schedule-settings', require('./routes/schedule-settings.routes'));
-        this.app.use('/api/test', require('./routes/test.routes'));
-    }
+// Импортируем маршруты
+app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/employees', require('./routes/employee.routes'));
+app.use('/api/schedules', require('./routes/schedule.routes'));
+app.use('/api/worksites', require('./routes/worksite.routes'));
+app.use('/api/positions', require('./routes/position.routes'));
+app.use('/api/shifts', require('./routes/shift.routes'));
+app.use('/api/constraints', require('./routes/constraint.routes'));
+app.use('/api/schedule-settings', require('./routes/schedule-settings.routes'));
+app.use('/api/test', require('./routes/test.routes'));
 
-    setupErrorHandlers() {
-        this.app.use((error, req, res, next) => {
-            console.error('SERVER ERROR:', error);
-            res.status(500).json({
-                message: 'Internal server error',
-                error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
-            });
-        });
-    }
+// Error handling middleware
+app.use((error, req, res, next) => {
+    console.error('SERVER ERROR:', error);
+    res.status(500).json({
+        message: 'Internal server error',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    });
+});
 
-    listen(port, callback) {
-        this.app.listen(port, callback);
-    }
-}
-
-module.exports = App;
+module.exports = app;
