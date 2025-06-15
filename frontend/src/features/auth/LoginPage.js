@@ -5,8 +5,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../app/store/slices/authSlice'; // Импортируем наш Thunk
 import './LoginPage.css';
 import { Spinner } from 'react-bootstrap';
+import { useI18n } from '../../shared/lib/i18n/i18nProvider';
+
 
 export const Login = () => {
+    const { t } = useI18n();
+
     // Локальное состояние для полей формы
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
@@ -44,8 +48,8 @@ export const Login = () => {
                         <div className="card login-card p-4">
                             <div className="card-body">
                                 <div className="text-center mb-4">
-                                    <h3 className="card-title fw-bold">Login to Shifts App</h3>
-                                    <p className="text-muted">Welcome back!</p>
+                                    <h3 className="card-title fw-bold">{t.login}</h3>
+                                    <p className="text-muted">{t.welcome}</p>
                                 </div>
 
                                 {/* Показываем ошибку из Redux store */}
@@ -67,7 +71,7 @@ export const Login = () => {
                                             required
                                             autoComplete="username"
                                         />
-                                        <label htmlFor="identifier">Username or Email</label>
+                                        <label htmlFor="identifier">{t.username} </label>
                                     </div>
 
                                     <div className="input-group mb-3">
@@ -82,7 +86,7 @@ export const Login = () => {
                                                 required
                                                 autoComplete="current-password"
                                             />
-                                            <label htmlFor="password">Password</label>
+                                            <label htmlFor="password">{t.password}</label>
                                         </div>
                                         <button
                                             className="btn btn-outline-secondary btn-toggle-password"
@@ -95,10 +99,6 @@ export const Login = () => {
                                         </button>
                                     </div>
 
-                                    <div className="d-flex justify-content-end align-items-center mb-3">
-                                        <a href="#" className="text-decoration-none small">Forgot password?</a>
-                                    </div>
-
                                     <button
                                         type="submit"
                                         className="btn btn-primary w-100 py-2 fw-semibold"
@@ -107,7 +107,7 @@ export const Login = () => {
                                         {loading === 'pending' ? (
                                             <>
                                                 <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                                                <span className="ms-2">Logging in...</span>
+                                                <span className="ms-2">{t.loggingIn}</span>
                                             </>
                                         ) : (
                                             'Login'

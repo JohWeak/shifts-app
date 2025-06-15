@@ -1,8 +1,7 @@
 // frontend/src/features/schedule-management/ScheduleManagement.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Button, Tabs, Tab, Spinner } from 'react-bootstrap';
-import { useMessages } from '../../shared/lib/i18n/messages';
+import { Container, Spinner } from 'react-bootstrap';
 
 // Widgets, UI, etc.
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
@@ -12,6 +11,9 @@ import GenerateScheduleModal from './components/GenerateScheduleModal';
 import CompareAlgorithmsModal from './components/CompareAlgorithmsModal';
 import EmployeeSelectionModal from './components/EmployeeSelectionModal';
 import AlertMessage from '../../shared/ui/AlertMessage';
+import ScheduleHeader from './components/ScheduleHeader';
+import ScheduleTabs from './components/ScheduleTabs';
+import { useI18n } from '../../shared/lib/i18n/i18nProvider';
 
 // Redux Actions
 import {
@@ -21,40 +23,17 @@ import {
     compareAlgorithms,
     deleteSchedule,
     setActiveTab,
-    resetScheduleView,
+    //resetScheduleView,
     addPendingChange,
 } from '../../app/store/slices/scheduleSlice';
 
 // Utils
-import { getNextSunday } from '../../shared/lib/utils/scheduleUtils';
 import './ScheduleManagement.css';
 
-// --- Компонент заголовка, как и был ---
-const ScheduleHeader = ({ messages, onGenerateClick, onCompareClick, loading }) => (
-    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <div className="mb-3 mb-md-0">
-            <h1 className="h3 mb-2 text-dark fw-bold">
-                <i className="bi bi-calendar-week me-2 text-primary"></i>
-                {messages.SCHEDULE_MANAGEMENT}
-            </h1>
-            <p className="text-muted mb-0">{messages.CREATE_MANAGE_SCHEDULES}</p>
-        </div>
-        <div className="d-flex flex-column flex-sm-row gap-2">
-            <Button variant="outline-primary" onClick={onCompareClick} disabled={loading}>
-                {loading ? <Spinner size="sm" className="me-2" /> : <i className="bi bi-speedometer2 me-2"></i>}
-                {messages.COMPARE_ALGORITHMS}
-            </Button>
-            <Button variant="primary" onClick={onGenerateClick} disabled={loading}>
-                {loading ? <Spinner size="sm" className="me-2" /> : <i className="bi bi-plus-circle me-2"></i>}
-                {messages.GENERATE_SCHEDULE}
-            </Button>
-        </div>
-    </div>
-);
 
 // --- Основной компонент ---
 const ScheduleManagement = () => {
-    const messages = useMessages('en');
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
     const {
@@ -64,8 +43,8 @@ const ScheduleManagement = () => {
         error,
         activeTab,
         selectedScheduleId,
-        editingPositions,
-        pendingChanges
+        //editingPositions,
+        //pendingChanges
     } = useSelector((state) => state.schedule);
 
     // --- Локальное состояние для UI, которое было утеряно ---
@@ -103,7 +82,7 @@ const ScheduleManagement = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm(messages.CONFIRM_DELETE)) {
+        if (window.confirm(t.CONFIRM_DELETE)) {
             dispatch(deleteSchedule(id)).then(() => setAlert({ type: 'success', message: 'Schedule deleted.' }));
         }
     };
@@ -126,7 +105,7 @@ const ScheduleManagement = () => {
         <AdminLayout>
             <Container fluid className="px-0">
                 <ScheduleHeader
-                    messages={messages}
+                    messages={t}
                     onGenerateClick={() => setShowGenerateModal(true)}
                     onCompareClick={handleCompare}
                     loading={loading === 'pending'}
@@ -134,23 +113,27 @@ const ScheduleManagement = () => {
 
                 <AlertMessage alert={alert} onClose={() => setAlert(null)} />
 
-                <Tabs activeKey={activeTab} onSelect={(k) => dispatch(setActiveTab(k))} className="mb-4">
-                    <Tab eventKey="overview" title={messages.SCHEDULES}>
-                        <ScheduleOverviewTable
-                            schedules={schedules}
-                            loading={loading === 'pending' && !schedules.length}
-                            onViewDetails={(id) => dispatch(fetchScheduleDetails(id))}
-                            onDelete={handleDelete}
-                        />
-                    </Tab>
-                    <Tab eventKey="view" title={messages.SCHEDULE_DETAILS} disabled={!selectedScheduleId}>
-                        {loading === 'pending' && !scheduleDetails ? (
+                <ScheduleTabs
+                    activeTab={activeTab}
+                    onTabChange={(k) => dispatch(setActiveTab(k))}
+                    isDetailsDisabled={!selectedScheduleId}
+                >
+                    {{
+                        overview: (
+                            <ScheduleOverviewTable
+                                schedules={schedules}
+                                loading={loading === 'pending' && !schedules.length}
+                                onViewDetails={(id) => dispatch(fetchScheduleDetails(id))}
+                                onDelete={handleDelete}
+                            />
+                        ),
+                        details: loading === 'pending' && !scheduleDetails ? (
                             <div className="text-center p-5"><Spinner animation="border" /></div>
                         ) : (
                             <ScheduleDetailsView onCellClick={handleCellClick} />
-                        )}
-                    </Tab>
-                </Tabs>
+                        )
+                    }}
+                </ScheduleTabs>
 
                 <GenerateScheduleModal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} onGenerate={handleGenerate} generating={loading === 'pending'} />
                 <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={() => {}} />

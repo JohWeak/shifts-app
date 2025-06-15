@@ -1,0 +1,21 @@
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.loading-state-sm {
+    padding: 1rem;
+}
+
+.loading-state-lg {
+    padding: 4rem;
+    min-height: 400px;
+}
+
+.loading-state-message {
+    color: #6c757d;
+    margin-bottom: 0;
+}

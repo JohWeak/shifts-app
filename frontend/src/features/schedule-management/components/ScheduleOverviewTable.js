@@ -1,20 +1,23 @@
 // frontend/src/features/schedule-management/components/ScheduleOverviewTable.js
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
-import { useMessages } from '../../../shared/lib/i18n/messages';
-import LoadingSpinner from '../../../shared/ui/LoadingSpinner';
+import { Card, Table, Spinner } from 'react-bootstrap';
+import LoadingState from '../../../shared/ui/LoadingState/LoadingState';
 import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
 import { deleteSchedule } from '../../../app/store/slices/scheduleSlice'; // Импортируем наш thunk
 import {
     formatScheduleDate,
-    getStatusBadgeVariant,
     canDeleteSchedule,
     getSiteName
 } from '../../../shared/lib/utils/scheduleUtils';
 
+import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
+import EmptyState from '../../../shared/ui/EmptyState/EmptyState';
+import StatusBadge from '../../../shared/ui/StatusBadge/StatusBadge';
+import ActionButtons from '../../../shared/ui/ActionButtons/ActionButtons';
+
 const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
-    const messages = useMessages('en');
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
     // Получаем состояние загрузки из Redux, чтобы блокировать кнопку
@@ -40,18 +43,16 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
     };
 
     if (loading) {
-        return <LoadingSpinner message={messages.LOADING_SCHEDULES} />;
+        return <LoadingState size="lg" message={t('schedule.loading')} />;
     }
 
     if (!schedules || schedules.length === 0) {
         return (
-            <Card>
-                <Card.Body className="text-center py-5">
-                    <i className="bi bi-calendar-x display-1 text-muted"></i>
-                    <h4>{messages.NO_SCHEDULES_FOUND}</h4>
-                    <p>{messages.GENERATE_FIRST_SCHEDULE}</p>
-                </Card.Body>
-            </Card>
+            <EmptyState
+                icon={<i className="bi bi-calendar-x display-1"></i>}
+                title={t('schedule.noSchedulesFound')}
+                description={t('schedule.generateFirstSchedule')}
+            />
         );
     }
 
@@ -62,29 +63,29 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
                     <Table responsive hover>
                         <thead>
                         <tr>
-                            <th>{messages.WEEK}</th>
-                            <th>{messages.STATUS}</th>
-                            <th>{messages.SITE}</th>
-                            <th>{messages.CREATED}</th>
-                            <th>{messages.ACTIONS}</th>
+                            <th>{t.WEEK}</th>
+                            <th>{t.STATUS}</th>
+                            <th>{t.SITE}</th>
+                            <th>{t.CREATED}</th>
+                            <th>{t.ACTIONS}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {schedules.map(schedule => (
                             <tr key={schedule.id}>
                                 <td>{formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}</td>
-                                <td><Badge bg={getStatusBadgeVariant(schedule.status)}>{schedule.status}</Badge></td>
+                                <td><StatusBadge status={schedule.status} /></td>
                                 <td>{getSiteName(schedule)}</td>
                                 <td>{formatScheduleDate(schedule.createdAt)}</td>
                                 <td>
                                     <div className="d-flex gap-2 align-items-center">
-                                        <Button variant="outline-primary" size="sm" onClick={() => onViewDetails(schedule.id)} title={messages.VIEW_DETAILS}>
+                                        <ActionButtons variant="outline-primary" size="sm" onClick={() => onViewDetails(schedule.id)} title={messages.VIEW_DETAILS}>
                                             <i className="bi bi-eye"></i>
-                                        </Button>
+                                        </ActionButtons>
                                         {canDeleteSchedule(schedule) && (
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDeleteClick(schedule)} disabled={isDeleting} title={messages.DELETE_SCHEDULE}>
+                                            <ActionButtons variant="outline-danger" size="sm" onClick={() => handleDeleteClick(schedule)} disabled={isDeleting} title={messages.DELETE_SCHEDULE}>
                                                 {isDeleting && scheduleToDelete?.id === schedule.id ? <Spinner size="sm" /> : <i className="bi bi-trash"></i>}
-                                            </Button>
+                                            </ActionButtons>
                                         )}
                                     </div>
                                 </td>

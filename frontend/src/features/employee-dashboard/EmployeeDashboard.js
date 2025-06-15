@@ -1,19 +1,22 @@
 // frontend/src/features/employee-dashboard/EmployeeDashboard.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Dropdown } from 'react-bootstrap';
-import { useSwipeable } from 'react-swipeable';
-
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {Dropdown} from 'react-bootstrap';
+import {useSwipeable} from 'react-swipeable';
+import {useI18n} from '../../shared/lib/i18n/i18nProvider';
+import {LanguageSwitch} from '../../shared/ui/LanguageSwitch/LanguageSwitch';
 // Импортируем фичи, которые используются на дашборде
 import WeeklySchedule from '../employee-schedule/WeeklySchedule';
 import ConstraintsSchedule from '../employee-constraints/ConstraintsSchedule';
-import { logout } from '../../app/store/slices/authSlice';
+import {logout} from '../../app/store/slices/authSlice';
 
 // Стили теперь будут в этой же папке
 import './EmployeeDashboard.css';
 
 export const EmployeeDashboard = () => {
+    const {t} = useI18n();
+
     const [activeTab, setActiveTab] = useState('schedule');
     const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -21,47 +24,52 @@ export const EmployeeDashboard = () => {
     const dispatch = useDispatch();
 
     // Получаем пользователя из Redux, а не из localStorage
-    const { user } = useSelector(state => state.auth);
+    const {user} = useSelector(state => state.auth);
 
-    const tabs = ['schedule', 'constraints', 'permanent-requests'];
-    const handlers = useSwipeable({ /* ... ваш код handlers ... */ });
+    //const tabs = ['schedule', 'constraints', 'permanent-requests'];
+    const handlers = useSwipeable({ /* ... ваш код handlers ... */});
 
     const handleLogout = () => {
         dispatch(logout());
-        navigate('/login', { replace: true });
+        navigate('/login', {replace: true});
     };
 
     if (!user) {
         // Такое может быть на мгновение, пока стейт не обновился
-        return <div className="loading">Loading user...</div>;
+        return <div className="loading">{t.loading}</div>;
     }
 
     return (
         <div className="employee-dashboard">
             <header className="dashboard-header">
                 <div className="header-content">
-                    <h1>Shifts - Employee Portal</h1>
+                    <h1>{t.appName}</h1>
                     <div className="user-info">
-                        <span className="welcome-text">Welcome, {user.name}</span>
-                        <Dropdown show={showUserMenu} onToggle={setShowUserMenu} className="user-dropdown" align="end">
-                            <Dropdown.Toggle variant="outline-light" id="user-dropdown" className="user-btn">
-                                <i className="bi bi-person-circle"></i>
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Header>
-                                    <strong>{user.name}</strong>
-                                    <small className="text-muted d-block">ID: {user.id}</small>
-                                </Dropdown.Header>
-                                <Dropdown.Divider />
-                                <Dropdown.Item onClick={() => { /* Navigate to settings */ }}>
-                                    <i className="bi bi-gear me-2"></i>הגדרות
-                                </Dropdown.Item>
-                                <Dropdown.Divider />
-                                <Dropdown.Item onClick={handleLogout} className="text-danger">
-                                    <i className="bi bi-box-arrow-right me-2"></i>יציאה
-                                </Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
+                        <span className="welcome-text">{user.name}</span>
+                        <div className="header-actions">
+                            <LanguageSwitch/>
+                            <Dropdown show={showUserMenu} onToggle={setShowUserMenu} className="user-dropdown"
+                                      align="end">
+                                <Dropdown.Toggle variant="outline-light" id="user-dropdown" className="user-btn">
+                                    <i className="bi bi-person-circle"></i>
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Header>
+                                        <strong>{user.name}</strong>
+                                        <small className="text-muted d-block">ID: {user.id}</small>
+                                    </Dropdown.Header>
+                                    <Dropdown.Divider/>
+                                    <Dropdown.Item onClick={() => { /* Navigate to settings */
+                                    }}>
+                                        <i className="bi bi-gear me-2"></i>{t.settings}
+                                    </Dropdown.Item>
+                                    <Dropdown.Divider/>
+                                    <Dropdown.Item onClick={handleLogout} className="text-danger">
+                                        <i className="bi bi-box-arrow-right me-2"></i>י{t.logout}
+                                    </Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -96,21 +104,21 @@ export const EmployeeDashboard = () => {
                         onClick={() => setActiveTab('schedule')}
                     >
                         <i className="bi bi-calendar-week me-1"></i>
-                        <span className="tab-name">My Schedule</span>
+                        <span className="tab-name">{t.scheduleDetails}</span>
                     </button>
                     <button
                         className={`nav-tab ${activeTab === 'constraints' ? 'active' : ''}`}
                         onClick={() => setActiveTab('constraints')}
                     >
                         <i className="bi bi-clock-history me-1"></i>
-                        <span className="tab-name">Set Constraints</span>
+                        <span className="tab-name">{t.setConstraints}</span>
                     </button>
                     <button
                         className={`nav-tab ${activeTab === 'permanent-requests' ? 'active' : ''}`}
                         onClick={() => setActiveTab('permanent-requests')}
                     >
                         <i className="bi bi-file-earmark-text me-1"></i>
-                        <span className="tab-name">Permanent Requests</span>
+                        <span className="tab-name">{t.permanentRequests}</span>
                     </button>
                 </div>
             </nav>
@@ -119,14 +127,14 @@ export const EmployeeDashboard = () => {
                 {/* Tab 1: Current and Next Week Schedule */}
                 {activeTab === 'schedule' && (
                     <div className="tab-content">
-                        <WeeklySchedule />
+                        <WeeklySchedule/>
                     </div>
                 )}
 
                 {/* Tab 2: Set Constraints for Next Week */}
                 {activeTab === 'constraints' && (
                     <div className="tab-content">
-                        <ConstraintsSchedule />
+                        <ConstraintsSchedule/>
                     </div>
                 )}
 
@@ -139,7 +147,7 @@ export const EmployeeDashboard = () => {
                                 <h2>Permanent Requests</h2>
                                 <p className="text-muted">
                                     This section will allow you to request permanent schedule changes.
-                                    <br />
+                                    <br/>
                                     Coming soon...
                                 </p>
                             </div>

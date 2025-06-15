@@ -1,7 +1,8 @@
 import React from 'react';
 import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import {Provider} from 'react-redux';
-import store from './store/store'; // Путь изменился
+import store from './store/store';
+import {I18nProvider} from '../shared/lib/i18n/i18nProvider';
 
 // Pages
 import LoginPage from '../pages/LoginPage';
@@ -23,20 +24,19 @@ import './App.css';
 function App() {
     return (
         <Provider store={store}>
-            <Router>
-                <div className="app">
-                    <Routes>
+            <I18nProvider>
+                <Router>
+                    <div className="app">
+                        <Routes>
                         {/* Public Route */}
                         <Route path="/login" element={<LoginPage/>}/>
 
                         {/* Employee Route */}
                         <Route
                             path="/employee/dashboard"
-                            element={
-                                <ProtectedRoute allowedRole="employee">
-                                    <EmployeeDashboardPage/>
-                                </ProtectedRoute>
-                            }
+                            element={<ProtectedRoute allowedRole="employee">
+                                <EmployeeDashboardPage/>
+                            </ProtectedRoute>}
                         />
 
                         {/* Admin Routes */}
@@ -55,9 +55,10 @@ function App() {
                         {/* Default Redirects */}
                         <Route path="/" element={<Navigate to="/login" replace/>}/>
                         <Route path="*" element={<Navigate to="/login" replace/>}/>
-                    </Routes>
-                </div>
-            </Router>
+                        </Routes>
+                    </div>
+                </Router>
+            </I18nProvider>
         </Provider>
     );
 }

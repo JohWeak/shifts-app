@@ -2,13 +2,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { useMessages } from '../../../shared/lib/i18n/messages';
 import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from '../../../shared/config/scheduleConstants';
 import { getNextSunday, isValidWeekStartDate } from '../../../shared/lib/utils/scheduleUtils';
 import { fetchWorkSites } from '../../../app/store/slices/scheduleSlice';
+import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
 
 const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
-    const messages = useMessages('en');
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
     // Получаем данные из Redux
@@ -44,7 +44,7 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
     const handleDateChange = (e) => {
         const date = e.target.value;
         if (date && !isValidWeekStartDate(date)) {
-            setFormError(messages.WEEK_START_SUNDAY_WARNING);
+            setFormError(t.WEEK_START_SUNDAY_WARNING);
         } else {
             setFormError('');
         }
@@ -72,28 +72,28 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
     return (
         <Modal show={show} onHide={!generating ? onHide : undefined} size="lg">
             <Modal.Header closeButton={!generating}>
-                <Modal.Title><i className="bi bi-plus-circle me-2"></i>{messages.GENERATE_SCHEDULE}</Modal.Title>
+                <Modal.Title><i className="bi bi-plus-circle me-2"></i>{t.GENERATE_SCHEDULE}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {generating ? (
                     <div className="text-center">
-                        <p>{messages.GENERATION_IN_PROGRESS}</p>
+                        <p>{t.GENERATION_IN_PROGRESS}</p>
                         <ProgressBar animated now={100} className="mb-3" />
-                        <small className="text-muted">{messages.GENERATION_INFO}</small>
+                        <small className="text-muted">{t.GENERATION_INFO}</small>
                     </div>
                 ) : (
                     <Form>
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>{messages.WEEK_START_DATE}</Form.Label>
+                                    <Form.Label>{t.WEEK_START_DATE}</Form.Label>
                                     <Form.Control type="date" value={settings.weekStart} onChange={handleDateChange} min={new Date().toISOString().split('T')[0]} />
-                                    <Form.Text className="text-muted">{messages.SELECT_SUNDAY_HELP}</Form.Text>
+                                    <Form.Text className="text-muted">{t.SELECT_SUNDAY_HELP}</Form.Text>
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>{messages.WORK_SITE}</Form.Label>
+                                    <Form.Label>{t.WORK_SITE}</Form.Label>
                                     {workSitesLoading === 'pending' ? <Spinner size="sm" /> :
                                         <Form.Select value={settings.site_id} onChange={(e) => setSettings(prev => ({ ...prev, site_id: parseInt(e.target.value) }))}>
                                             {/* Здесь тоже используем optional chaining для 100% надежности */}
@@ -106,11 +106,11 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                             </Col>
                         </Row>
                         <Form.Group className="mb-3">
-                            <Form.Label>{messages.ALGORITHM}</Form.Label>
+                            <Form.Label>{t.ALGORITHM}</Form.Label>
                             <Form.Select value={settings.algorithm} onChange={(e) => setSettings(prev => ({ ...prev, algorithm: e.target.value }))}>
-                                <option value={ALGORITHM_TYPES.AUTO}>{messages.ALGORITHM_AUTO_DESC}</option>
-                                <option value={ALGORITHM_TYPES.CP_SAT}>{messages.ALGORITHM_CP_SAT_DESC}</option>
-                                <option value={ALGORITHM_TYPES.SIMPLE}>{messages.ALGORITHM_SIMPLE_DESC}</option>
+                                <option value={ALGORITHM_TYPES.AUTO}>{t.ALGORITHM_AUTO_DESC}</option>
+                                <option value={ALGORITHM_TYPES.CP_SAT}>{t.ALGORITHM_CP_SAT_DESC}</option>
+                                <option value={ALGORITHM_TYPES.SIMPLE}>{t.ALGORITHM_SIMPLE_DESC}</option>
                             </Form.Select>
                         </Form.Group>
                         {formError && <Alert variant="warning" className="mt-3">{formError}</Alert>}
@@ -118,10 +118,10 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                 )}
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide} disabled={generating}>{messages.CANCEL}</Button>
+                <Button variant="secondary" onClick={onHide} disabled={generating}>{t.CANCEL}</Button>
                 <Button variant="primary" onClick={handleSubmit} disabled={generating || !isFormValid}>
                     {generating ? <Spinner as="span" size="sm" /> : <i className="bi bi-play-fill me-1"></i>}
-                    {generating ? messages.GENERATING : messages.GENERATE_SCHEDULE}
+                    {generating ? t.GENERATING : t.GENERATE_SCHEDULE}
                 </Button>
             </Modal.Footer>
         </Modal>

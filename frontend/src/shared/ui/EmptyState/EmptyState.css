@@ -1,0 +1,19 @@
+.empty-state {
+    border: 2px dashed #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    color: #6c757d;
+}
+
+.empty-state-title {
+    color: #495057;
+    font-weight: 500;
+}
+
+.empty-state-description {
+    max-width: 400px;
+    margin: 0 auto;
+}

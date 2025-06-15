@@ -1,13 +1,13 @@
 // frontend/src/features/schedule-management/components/EmployeeSelectionModal.js
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, ListGroup, Badge, Spinner, Alert, Form, Tab, Tabs } from 'react-bootstrap';
+import { Modal, Button, ListGroup, Badge, Alert, Form, Tab, Tabs } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { useMessages } from '../../../shared/lib/i18n/messages';
 import { fetchRecommendations } from '../../../app/store/slices/scheduleSlice'; // Импортируем наш thunk
+import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
+import LoadingState from '../../../shared/ui/LoadingState/LoadingState';
 
 const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails }) => {
-    const messages = useMessages('en');
-    const dispatch = useDispatch();
+    const { t } = useI18n();    const dispatch = useDispatch();
 
     // Получаем данные из Redux store
     const { recommendations, recommendationsLoading, error } = useSelector(state => state.schedule);
@@ -52,11 +52,11 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
     };
 
     const getModalTitle = () => {
-        if (!selectedPosition) return messages.SELECT_EMPLOYEE;
+        if (!selectedPosition) return t.SELECT_EMPLOYEE;
         const date = new Date(selectedPosition.date).toLocaleDateString();
         const shift = scheduleDetails?.shifts?.find(s => s.shift_id === selectedPosition.shiftId);
         const position = scheduleDetails?.positions?.find(p => p.pos_id === selectedPosition.positionId);
-        return `${messages.SELECT_EMPLOYEE} - ${position?.pos_name} (${shift?.shift_name}, ${date})`;
+        return `${t.SELECT_EMPLOYEE} - ${position?.pos_name} (${shift?.shift_name}, ${date})`;
     };
 
     // --- ЛОГИКА РЕНДЕРИНГА ОСТАЕТСЯ ПОЛНОСТЬЮ БЕЗ ИЗМЕНЕНИЙ ---
@@ -148,10 +148,7 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
                 </Form.Group>
 
                 {recommendationsLoading === 'pending' && (
-                    <div className="text-center py-4">
-                        <Spinner animation="border" />
-                        <div className="mt-2">Loading recommendations...</div>
-                    </div>
+                    <LoadingState message={t('common.loading')} />
                 )}
 
                 {error && (
@@ -203,7 +200,7 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
                 )}
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>{messages.CANCEL}</Button>
+                <Button variant="secondary" onClick={onHide}>{t.CANCEL}</Button>
             </Modal.Footer>
         </Modal>
     );

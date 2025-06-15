@@ -1,0 +1,67 @@
+//frontend/src/shared/lib/i18n/locales/he.js
+export const he = {
+    common: {
+        appName: 'סידורים',
+        loading: 'טוען...',
+        save: 'שמור',
+        cancel: 'ביטול',
+        delete: 'מחק',
+        edit: 'ערוך',
+        close: 'סגור',
+        confirm: 'אשר',
+        back: 'חזור',
+        next: 'הבא',
+        search: 'חיפוש',
+        filter: 'סינון',
+        export: 'ייצוא',
+        actions: 'פעולות'
+    },
+    auth: {
+        login: 'כניסה',
+        logout: 'יציאה',
+        username: 'שם משתמש',
+        password: 'סיסמה',
+        rememberMe: 'זכור אותי',
+        forgotPassword: 'שכחת סיסמה?',
+        invalidCredentials: 'שם משתמש או סיסמה שגויים'
+    },
+    schedule: {
+        title: 'ניהול סידור עבודה',
+        generateSchedule: 'צור סידור',
+        compareAlgorithms: 'השווה אלגוריתמים',
+        scheduleDetails: 'פרטי סידור',
+        weekPeriod: 'תקופת שבוע',
+        status: 'סטטוס',
+        site: 'אתר',
+        created: 'נוצר',
+        noSchedulesFound: 'לא נמצאו סידורים',
+        generateFirstSchedule: 'צור את הסידור הראשון שלך',
+        publishSchedule: 'פרסם סידור',
+        unpublishEdit: 'בטל פרסום וערוך',
+        exportSchedule: 'ייצא סידור',
+        deleteSchedule: 'מחק סידור'
+    },
+    employee: {
+        employees: 'עובדים',
+        addEmployee: 'הוסף עובד',
+        removeEmployee: 'הסר עובד',
+        selectEmployee: 'בחר עובד',
+        available: 'זמינים',
+        unavailable: 'לא זמינים',
+        crossPosition: 'עמדה חוצה',
+        constraints: 'אילוצים',
+        noAvailableEmployees: 'אין עובדים זמינים למשמרת זו',
+        assignedToShift: 'משמרת עבודה',
+        removeFromShift: 'הסר ממשמרת עבודה',
+        employeeDetails: 'פרטי עובד',
+
+    },
+    position: {
+        positions: 'עמדות',
+        noPositions: 'לא הוגדרו עמדות',
+        editPosition: 'ערוך עמדה',
+        saveChanges: 'שמור שינויים',
+        cancelChanges: 'בטל שינויים',
+        unsavedChanges: 'יש לך שינויים שלא נשמרו'
+    }
+};
