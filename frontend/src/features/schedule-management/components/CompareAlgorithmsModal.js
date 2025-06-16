@@ -116,7 +116,7 @@ const CompareAlgorithmsModal = ({
                         variant="primary"
                         onClick={handleUseAlgorithm}
                     >
-                        {t('modal.compareAlgorithms.use')} {best_algorithm} {t('modal.compareAlgorithms.algorithm')}
+                        {t('common.ok')}
                     </Button>
                 )}
             </Modal.Footer>

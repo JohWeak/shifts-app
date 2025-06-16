@@ -175,9 +175,15 @@ export const en = {
             executionTime: 'Execution time',
         },
 
-        recommendations: {
-
+        errors: {
+            deleteFailed: 'Failed to delete schedule',
+            generateFailed: 'Failed to generate schedule',
 
         }
+    },
+    errors: {
+        deleteFailed: 'Failed to delete schedule',
+        generateFailed: 'Failed to generate schedule',
+
     }
 };
