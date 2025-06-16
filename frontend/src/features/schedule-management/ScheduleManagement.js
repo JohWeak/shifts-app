@@ -18,13 +18,14 @@ import { useI18n } from '../../shared/lib/i18n/i18nProvider';
 import {
     fetchSchedules,
     fetchScheduleDetails,
-    generateSchedule,
+    //generateSchedule,
     compareAlgorithms,
-    deleteSchedule,
+    //deleteSchedule,
     setActiveTab,
     //resetScheduleView,
     addPendingChange,
 } from '../../app/store/slices/scheduleSlice';
+import { useScheduleActions } from './hooks/useScheduleActions';
 
 // Utils
 import './ScheduleManagement.css';
@@ -38,13 +39,21 @@ const ScheduleManagement = () => {
     const {
         schedules,
         scheduleDetails,
-        loading,
-        error,
+        loading: dataLoading,
+        error: dataError,
         activeTab,
         selectedScheduleId,
         //editingPositions,
         //pendingChanges
     } = useSelector((state) => state.schedule);
+
+    // 2. Инициализируем наш хук для выполнения действий
+    const {
+        loading: actionsLoading, // Переименуем
+        error: actionsError, // Переименуем
+        handleGenerate,
+        handleDelete: performDelete, // Можно переименовать, чтобы было понятнее
+    } = useScheduleActions();
 
     // --- Локальное состояние для UI, которое было утеряно ---
     const [alert, setAlert] = useState(null);
@@ -60,12 +69,35 @@ const ScheduleManagement = () => {
     }, [dispatch]);
 
 
+
     // --- Обработчики действий ---
-    const handleGenerate = async (settings) => {
-        const result = await dispatch(generateSchedule(settings)).unwrap();
-        setAlert({ type: 'success', message: `Schedule generated with ${result.assignments_count || 0} assignments!` });
-        setShowGenerateModal(false);
+    // 3. Создаем новую функцию-обертку для генерации расписания
+    const onGenerateSubmit = async (settings) => {
+        const result = await handleGenerate(settings); // Вызываем функцию из хука
+
+        if (result.success) {
+            setAlert({ type: 'success', message: t('schedule.generateSuccess') });
+            setShowGenerateModal(false);
+            dispatch(fetchSchedules()); // Обновляем список расписаний после успешной генерации
+        } else {
+            // Ошибку можно показать в алерте. Хук уже сохранил ее в actionsError.
+            setAlert({ type: 'danger', message: result.error || t('errors.generateFailed') });
+        }
     };
+
+    // 4. Создаем обертку для удаления
+    const onDeleteClick = async (id) => {
+        if (window.confirm(t('confirmDelete'))) {
+            const result = await performDelete(id); // Вызываем функцию из хука
+            if (result.success) {
+                setAlert({ type: 'success', message: t('alerts.scheduleDeletedSuccess') });
+                // Список обновится автоматически благодаря thunk'у, который диспатчит fetchSchedules
+            } else {
+                setAlert({ type: 'danger', message: result.error || t('errors.deleteFailed') });
+            }
+        }
+    };
+
 
     const handleCompare = async () => {
         const result = await dispatch(compareAlgorithms({})).unwrap();
@@ -73,11 +105,6 @@ const ScheduleManagement = () => {
         setShowComparisonModal(true);
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm(t.confirmDelete)) {
-            dispatch(deleteSchedule(id)).then(() => setAlert({ type: 'success', message: 'Schedule deleted.' }));
-        }
-    };
 
     const handleCellClick = (date, positionId, shiftId) => {
         setSelectedCell({ date, positionId, shiftId });
@@ -96,16 +123,22 @@ const ScheduleManagement = () => {
     return (
         <AdminLayout>
             <Container fluid className="px-0">
+                {/* Отображение алертов */}
                 {alert && (
                     <Alert variant={alert.type} onClose={() => setAlert(null)} dismissible>
                         {alert.message}
                     </Alert>
                 )}
+
+                {/* Отображение глобальной ошибки загрузки данных */}
+                {dataError && <Alert variant="danger">{dataError}</Alert>}
+
                 <ScheduleHeader
                     messages={t}
                     onGenerateClick={() => setShowGenerateModal(true)}
                     onCompareClick={handleCompare}
-                    loading={loading === 'pending'}
+                    // Кнопки блокируются, если идет загрузка данных ИЛИ выполняется какое-то действие
+                    loading={dataLoading === 'pending' || actionsLoading}
                 />
 
                 <ScheduleTabs
@@ -117,12 +150,12 @@ const ScheduleManagement = () => {
                         overview: (
                             <ScheduleOverviewTable
                                 schedules={schedules}
-                                loading={loading === 'pending' && !schedules.length}
+                                loading={dataLoading === 'pending' && !schedules.length}
                                 onViewDetails={(id) => dispatch(fetchScheduleDetails(id))}
-                                onDelete={handleDelete}
+                                onDelete={onDeleteClick}
                             />
                         ),
-                        details: loading === 'pending' && !scheduleDetails ? (
+                        details: dataLoading === 'pending' && !scheduleDetails ? (
                             <div className="text-center p-5"><Spinner animation="border" /></div>
                         ) : (
                             <ScheduleDetailsView onCellClick={handleCellClick} />
@@ -130,7 +163,7 @@ const ScheduleManagement = () => {
                     }}
                 </ScheduleTabs>
 
-                <GenerateScheduleModal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} onGenerate={handleGenerate} generating={loading === 'pending'} />
+                <GenerateScheduleModal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} onGenerate={onGenerateSubmit} generating={actionsLoading} />
                 <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={() => {}} />
                 <EmployeeSelectionModal show={showEmployeeModal} onHide={() => setShowEmployeeModal(false)} selectedPosition={selectedCell} onEmployeeSelect={handleEmployeeSelect} scheduleDetails={scheduleDetails} />
             </Container>

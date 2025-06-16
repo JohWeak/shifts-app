@@ -139,6 +139,9 @@ export const ru = {
         unexpectedError: 'Произошла непредвиденная ошибка',
         weekStartSunday: 'Неделя должна начинаться с воскресенья'
     },
+    alerts: {
+        scheduleGeneratedSuccess: 'Расписание успешно сгенерировано'
+    },
     modal: {
         generateSchedule: {
             title: 'Создать новое расписание',
