@@ -287,6 +287,13 @@ const scheduleSlice = createSlice({
                 state.loading = 'pending';
                 state.error = null;
             })
+            .addCase(deleteSchedule.fulfilled, (state, action) => {
+                state.loading = 'idle';
+                // Удаляем расписание из списка
+                state.schedules = state.schedules.filter(s => s.id !== action.payload);
+                state.error = null;
+            })
+
             .addCase(updateScheduleAssignments.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;

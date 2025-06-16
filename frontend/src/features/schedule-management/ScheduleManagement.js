@@ -18,11 +18,8 @@ import { useI18n } from '../../shared/lib/i18n/i18nProvider';
 import {
     fetchSchedules,
     fetchScheduleDetails,
-    //generateSchedule,
     compareAlgorithms,
-    //deleteSchedule,
     setActiveTab,
-    //resetScheduleView,
     addPendingChange,
 } from '../../app/store/slices/scheduleSlice';
 import { useScheduleActions } from './hooks/useScheduleActions';
@@ -43,14 +40,14 @@ const ScheduleManagement = () => {
         error: dataError,
         activeTab,
         selectedScheduleId,
-        //editingPositions,
+        editingPositions,
         //pendingChanges
     } = useSelector((state) => state.schedule);
 
     // 2. Инициализируем наш хук для выполнения действий
     const {
         loading: actionsLoading, // Переименуем
-        error: actionsError, // Переименуем
+        error: actionError, // Переименуем
         handleGenerate,
         handleDelete: performDelete, // Можно переименовать, чтобы было понятнее
     } = useScheduleActions();

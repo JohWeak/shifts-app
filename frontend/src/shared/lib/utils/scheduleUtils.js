@@ -1,20 +1,36 @@
 import { format, addDays, parseISO } from 'date-fns';
 
-export const getNextSunday = () => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
-    const nextSunday = addDays(today, daysUntilSunday);
-    return format(nextSunday, 'yyyy-MM-dd');
+export const getWeekStartDay = (locale) => {
+    // Для иврита - воскресенье (0), для остальных - понедельник (1)
+    return locale === 'he' ? 0 : 1;
 };
 
-export const isValidWeekStartDate = (dateString) => {
+export const isValidWeekStartDate = (dateString, locale = 'en') => {
     try {
         const date = parseISO(dateString);
-        return date.getDay() === 0; // Sunday
+        const expectedStartDay = getWeekStartDay(locale);
+        return date.getDay() === expectedStartDay;
     } catch {
         return false;
     }
+};
+
+export const getNextWeekStart = (locale = 'en') => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const targetDay = getWeekStartDay(locale);
+
+    let daysUntilStart;
+    if (currentDay === targetDay) {
+        daysUntilStart = 7; // Следующая неделя
+    } else if (currentDay < targetDay) {
+        daysUntilStart = targetDay - currentDay;
+    } else {
+        daysUntilStart = 7 - currentDay + targetDay;
+    }
+
+    const nextStart = addDays(today, daysUntilStart);
+    return format(nextStart, 'yyyy-MM-dd');
 };
 
 export const formatScheduleDate = (startDate, endDate = null) => {

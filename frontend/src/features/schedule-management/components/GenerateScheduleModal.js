@@ -1,22 +1,26 @@
 // frontend/src/features/schedule-management/components/GenerateScheduleModal.js
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from '../../../shared/config/scheduleConstants';
-import { getNextSunday, isValidWeekStartDate } from '../../../shared/lib/utils/scheduleUtils';
-import { fetchWorkSites } from '../../../app/store/slices/scheduleSlice';
-import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
+import React, {useState, useEffect, useRef, useMemo} from 'react';
+import {Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from '../../../shared/config/scheduleConstants';
+import {getNextWeekStart, isValidWeekStartDate} from '../../../shared/lib/utils/scheduleUtils';
+import {fetchWorkSites} from '../../../app/store/slices/scheduleSlice';
+import {useI18n} from '../../../shared/lib/i18n/i18nProvider';
 
 
-const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
-    const { t } = useI18n();
+const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
+    const {t, locale} = useI18n();
     const dispatch = useDispatch();
 
     // Получаем данные из Redux
-    const { workSites, workSitesLoading } = useSelector((state) => state.schedule || {});
+    const {workSites, workSitesLoading} = useSelector((state) => state.schedule || {});
 
     // Локальное состояние для настроек формы
-    const [settings, setSettings] = useState({ ...DEFAULT_GENERATION_SETTINGS, weekStart: getNextSunday() });
+    const [settings, setSettings] = useState({
+        ...DEFAULT_GENERATION_SETTINGS,
+        weekStart: getNextWeekStart(locale),
+        algorithm: 'auto' // Установим дефолтное значение
+    });
     const [formError, setFormError] = useState('');
 
     const hasFetched = useRef(false);
@@ -38,7 +42,7 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
             // Сброс настроек при закрытии модала
             setSettings({
                 ...DEFAULT_GENERATION_SETTINGS,
-                weekStart: getNextSunday()
+                weekStart: getNextWeekStart()
             });
         }
     }, [show, dispatch]);
@@ -54,15 +58,16 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
     }, [workSites])
 
 
-
     const handleDateChange = (e) => {
         const date = e.target.value;
-        if (date && !isValidWeekStartDate(date)) {
-            setFormError(t.weekStartWarning);
+        setSettings(prev => ({...prev, weekStart: date}));
+
+        if (date && !isValidWeekStartDate(date, locale)) {
+            const weekStartName = locale === 'he' ? t('days.sunday') : t('days.monday');
+            setFormError(t('errors.weekStartInvalid', {day: weekStartName}));
         } else {
             setFormError('');
         }
-        setSettings(prev => ({ ...prev, weekStart: date }));
     };
 
     const handleSubmit = (e) => {
@@ -92,7 +97,7 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                 {generating ? (
                     <div className="text-center">
                         <p>{t('modal.generateSchedule.generating')}</p>
-                        <ProgressBar animated now={100} className="mb-3" />
+                        <ProgressBar animated now={100} className="mb-3"/>
                         <small className="text-muted">{t('modal.generateSchedule.generating')}</small>
                     </div>
                 ) : (
@@ -101,18 +106,41 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>{t('modal.generateSchedule.weekStart')}</Form.Label>
-                                    <Form.Control type="date" value={settings.weekStart} onChange={handleDateChange} min={new Date().toISOString().split('T')[0]} />
-                                    <Form.Text className="text-muted">{t('modal.generateSchedule.selectSunday')}</Form.Text>
+                                    <Form.Control
+                                        type="date"
+                                        value={settings.weekStart}
+                                        onChange={handleDateChange}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        required
+                                        isInvalid={!!formError}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {formError}
+                                    </Form.Control.Feedback>
+                                    <Form.Text className="text-muted">
+                                        {locale === 'he'
+                                            ? t('modal.generateSchedule.weekStartHintSunday')
+                                            : t('modal.generateSchedule.weekStartHintMonday')
+                                        }
+                                    </Form.Text>
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>{t('schedule.workSite')}</Form.Label>
-                                    {workSitesLoading === 'pending' ? <Spinner size="sm" /> :
-                                        <Form.Select value={settings.site_id} onChange={(e) => setSettings(prev => ({ ...prev, site_id: parseInt(e.target.value) }))}>
+                                    {workSitesLoading === 'pending' ? <Spinner size="sm"/> :
+                                        <Form.Select
+                                            value={settings.site_id || ''}
+                                            onChange={(e) =>
+                                                setSettings(prev =>
+                                                    ({...prev, site_id: parseInt(e.target.value)}))
+                                            }
+
+                                        >
                                             {/* Здесь тоже используем optional chaining для 100% надежности */}
                                             {safeWorkSites?.map(site => (
-                                                <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
+                                                <option key={site.site_id}
+                                                        value={site.site_id}>{site.site_name}</option>
                                             ))}
                                         </Form.Select>
                                     }
@@ -123,7 +151,7 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                             <Form.Label>{t('modal.generateSchedule.selectAlgorithm')}</Form.Label>
                             <Form.Select
                                 value={settings.algorithm}
-                                onChange={(e) => setSettings(prev => ({ ...prev, algorithm: e.target.value }))}
+                                onChange={(e) => setSettings(prev => ({...prev, algorithm: e.target.value}))}
                                 required
                             >
                                 {safeAlgorithmTypes.map(algo => (
@@ -133,15 +161,34 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                                 ))}
                             </Form.Select>
                         </Form.Group>
-                        {formError && <Alert variant="warning" className="mt-3">{formError}</Alert>}
+                        {/*{formError && <Alert variant="warning" className="mt-3">{formError}</Alert>}*/}
                     </Form>
                 )}
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide} disabled={generating}>{t('common.cancel')}</Button>
-                <Button variant="primary" onClick={handleSubmit} disabled={generating || !isFormValid}>
-                    {generating ? <Spinner as="span" size="sm" /> : <i className="bi bi-play-fill me-1"></i>}
-                    {generating ? t('modal.generateSchedule.generating') : t('modal.generateSchedule.generate')}
+                <Button
+                    variant="secondary"
+                    onClick={onHide}
+                    disabled={generating}>
+                    {t('common.cancel')}
+                </Button>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    onClick={handleSubmit}
+                    disabled={generating || !isFormValid || !!formError}
+                >
+                    {generating ? (
+                        <>
+                            <Spinner size="sm" className="me-2"/>
+                            {t('modal.generateSchedule.generating')}
+                        </>
+                    ) : (
+                        <>
+                            <i className="bi bi-plus-circle me-2"></i>
+                            {t('modal.generateSchedule.generate')}
+                        </>
+                    )}
                 </Button>
             </Modal.Footer>
         </Modal>

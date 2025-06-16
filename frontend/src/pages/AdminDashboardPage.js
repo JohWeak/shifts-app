@@ -43,9 +43,9 @@ const Dashboard = () => {
                 <div className="mb-4">
                     <h1 className="h3 mb-2 text-dark fw-bold">
                         <i className="bi bi-speedometer2 me-2 text-primary"></i>
-                        {t('common.dashboardTitle')}
+                        {t('dashboard.dashboardTitle')}
                     </h1>
-                    <p className="text-muted mb-0">{t('common.dashboardDesc')}</p>
+                    <p className="text-muted mb-0">{t('dashboard.dashboardDesc')}</p>
                 </div>
 
                 <Row>

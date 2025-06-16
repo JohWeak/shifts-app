@@ -118,7 +118,7 @@ export const EmployeeDashboard = () => {
                         onClick={() => setActiveTab('permanent-requests')}
                     >
                         <i className="bi bi-file-earmark-text me-1"></i>
-                        <span className="tab-name">{t('employee.permanentRequests')}</span>
+                        <span className="tab-name">{t('employee.requests.permanent')}</span>
                     </button>
                 </div>
             </nav>

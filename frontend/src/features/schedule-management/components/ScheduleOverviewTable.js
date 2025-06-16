@@ -37,9 +37,15 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
     const handleDeleteConfirm = async () => {
         if (!scheduleToDelete) return;
 
-        // Диспатчим экшен удаления
-        await dispatch(deleteSchedule(scheduleToDelete.id));
-        setScheduleToDelete(null); // Закрываем модальное окно
+        try {
+            // Используем await для ожидания завершения
+            await dispatch(deleteSchedule(scheduleToDelete.id)).unwrap();
+            // Список обновится автоматически через extraReducers в slice
+            setScheduleToDelete(null);
+        } catch (error) {
+            console.error('Failed to delete schedule:', error);
+            // Можно добавить уведомление об ошибке
+        }
     };
 
     if (loading) {

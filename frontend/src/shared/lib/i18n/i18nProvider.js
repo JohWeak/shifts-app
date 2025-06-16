@@ -30,15 +30,25 @@ export const I18nProvider = ({ children }) => {
         localStorage.setItem('preferredLocale', newLocale);
     };
 
-    const t = (key) => {
+    const t = (key, replacements = {}) => {
         const keys = key.split('.');
         let value = translations[locale];
 
         for (const k of keys) {
             value = value?.[k];
         }
+        // Если значение не найдено, возвращаем ключ
+        let template = value || key;
 
-        return value || key;
+        // Если найденное значение - не строка, просто возвращаем его
+        if (typeof template !== 'string') {
+            return template;
+        }
+        return template.replace(/\{(\w+)\}/g, (match, placeholder) => {
+            // Если в объекте replacements есть ключ, совпадающий с плейсхолдером,
+            // используем его значение. Иначе - оставляем плейсхолдер как есть.
+            return replacements.hasOwnProperty(placeholder) ? replacements[placeholder] : match;
+        });
     };
 
     return (

@@ -174,20 +174,6 @@ const PositionScheduleEditor = ({
                 return matches;
             });
 
-            console.log(`Found ${cellAssignments.length} assignments for this cell`);
-
-
-            // Debug logging
-            console.log(`Cell [${position.pos_name}][${shift.shift_name}][${dateStr}]:`, {
-                cellAssignments,
-                allAssignments: assignments,
-                filterCriteria: {
-                    positionId: position.pos_id,
-                    shiftId: shift.shift_id,
-                    date: dateStr
-                }
-            });
-
             return assignmentPosId === position.pos_id &&
                 assignment.shift_id === shift.shift_id &&
                 assignmentDate === dateStr;
