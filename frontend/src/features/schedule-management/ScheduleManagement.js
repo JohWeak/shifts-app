@@ -1,7 +1,7 @@
 // frontend/src/features/schedule-management/ScheduleManagement.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Spinner } from 'react-bootstrap';
+import { Container, Spinner, Alert } from 'react-bootstrap';
 
 // Widgets, UI, etc.
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
@@ -47,7 +47,7 @@ const ScheduleManagement = () => {
     } = useSelector((state) => state.schedule);
 
     // --- Локальное состояние для UI, которое было утеряно ---
-    const [setAlert] = useState(null);
+    const [alert, setAlert] = useState(null);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
@@ -96,6 +96,11 @@ const ScheduleManagement = () => {
     return (
         <AdminLayout>
             <Container fluid className="px-0">
+                {alert && (
+                    <Alert variant={alert.type} onClose={() => setAlert(null)} dismissible>
+                        {alert.message}
+                    </Alert>
+                )}
                 <ScheduleHeader
                     messages={t}
                     onGenerateClick={() => setShowGenerateModal(true)}
