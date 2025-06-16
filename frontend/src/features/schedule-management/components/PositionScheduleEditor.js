@@ -1,15 +1,11 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/schedule/PositionScheduleEditor.js
-import React from 'react';
-import { Table, Button, Badge, Spinner } from 'react-bootstrap';
+// frontend/src/features/schedule-management/components/PositionScheduleEditor.js
+import React, {useMemo} from 'react';
+import {Table, Button, Badge, Spinner} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
-import {  interpolateMessage } from '../../../shared/lib/i18n/messages';
-import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
+import {useI18n} from '../../../shared/lib/i18n/i18nProvider';
 
 const PositionScheduleEditor = ({
                                     position,
-                                    assignments = [],
-                                    employees = [],
-                                    shifts = [],
                                     isEditing = false,
                                     pendingChanges = {},
                                     savingChanges = false,
@@ -22,28 +18,61 @@ const PositionScheduleEditor = ({
                                     onRemovePendingChange,
                                     scheduleDetails
                                 }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
 
-    // Helper function to format shift time without seconds and duration
+    // Extract data from scheduleDetails
+    const assignments = useMemo(() => {
+        if (!scheduleDetails?.assignments) return [];
+
+        console.log('Тип scheduleDetails.assignments:', typeof scheduleDetails.assignments);
+        console.log('Фильтрация с position.pos_id:', position.pos_id);
+        console.log('Тип position.pos_id:', typeof position.pos_id);
+        if (scheduleDetails.assignments.length > 0) {
+            console.log('Тип первого a.pos_id в массиве:', typeof scheduleDetails.assignments[0].pos_id);
+        }
+
+        // Filter assignments for this position
+        return scheduleDetails.assignments.filter(a => a.position_id === position.pos_id);
+    }, [scheduleDetails, position.pos_id]);
+
+
+    console.log('ASS - Assignments:', assignments);
+    console.log('ASS 2 - Assignments:', scheduleDetails.assignments);
+
+
+    const employees = useMemo(() => {
+        return scheduleDetails?.employees || [];
+    }, [scheduleDetails]);
+
+    // Define default shifts if not provided
+    const defaultShifts = useMemo(() => [
+        {shift_id: 1, shift_name: 'Morning', shift_type: 'morning', start_time: '06:00:00', duration: 8},
+        {shift_id: 2, shift_name: 'Day', shift_type: 'day', start_time: '14:00:00', duration: 8},
+        {shift_id: 3, shift_name: 'Night', shift_type: 'night', start_time: '22:00:00', duration: 8}
+    ], []);
+
+    const shifts = useMemo(() => {
+        return scheduleDetails?.shifts || position?.shifts || defaultShifts;
+    }, [scheduleDetails, position, defaultShifts]);
+
+    // Helper function to format shift time
     const formatShiftTime = (startTime, duration) => {
-        // Remove seconds from time format
-        const cleanStart = startTime.substring(0, 5); // 14:00:00 -> 14:00
+        if (!startTime) return '';
 
-        // Calculate end time
+        const cleanStart = startTime.substring(0, 5);
         const [hours, minutes] = startTime.split(':').map(Number);
         const startMinutes = hours * 60 + minutes;
         const endMinutes = startMinutes + (duration * 60);
 
         const endHours = Math.floor(endMinutes / 60) % 24;
         const endMins = endMinutes % 60;
-
         const cleanEnd = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 
         return `${cleanStart}-${cleanEnd}`;
     };
 
     // Helper function to format date for header
-    const formatDateForHeader = (dateStr, dayName) => {
+    const formatDateForHeader = (dateStr) => {
         const date = new Date(dateStr);
         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
         return formattedDate;
@@ -51,38 +80,44 @@ const PositionScheduleEditor = ({
 
     // Helper function to get day name
     const getDayName = (dayIndex) => {
-        const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const dayNames = [
+            t('days.sunday'),
+            t('days.monday'),
+            t('days.tuesday'),
+            t('days.wednesday'),
+            t('days.thursday'),
+            t('days.friday'),
+            t('days.saturday')
+        ];
         return dayNames[dayIndex];
     };
 
     // Debug logging
-    console.log('PositionScheduleEditor props:', {
-        positionId: position?.pos_id,
-        positionName: position?.pos_name,
-        isEditing,
-        canEdit,
-        hasOnToggleEdit: !!onToggleEdit,
-        pendingChangesCount: Object.keys(pendingChanges).length,
-        pendingChanges: pendingChanges
+    console.log('PositionScheduleEditor - Position:', position);
+    console.log('PositionScheduleEditor - Schedule Details:', scheduleDetails);
+    console.log('PositionScheduleEditor - Shifts:', shifts);
+    console.log('PositionScheduleEditor - Assignments:', assignments);
+    console.log('Full scheduleDetails structure:', {
+        schedule: scheduleDetails?.schedule,
+        positions: scheduleDetails?.positions,
+        assignments: scheduleDetails?.assignments,
+        employees: scheduleDetails?.employees,
+        shifts: scheduleDetails?.shifts
     });
-    console.log('Position:', position);
-    console.log('Schedule Details:', scheduleDetails);
-
+    console.log('PositionScheduleEditor - Employees:', employees);
 
     if (!position) {
-        console.error('PositionScheduleEditor: position prop is undefined');
         return (
             <div className="alert alert-warning">
-                Position data is missing
+                {t('errors.positionDataMissing')}
             </div>
         );
     }
 
     if (!scheduleDetails) {
-        console.error('PositionScheduleEditor: scheduleDetails prop is undefined');
         return (
             <div className="alert alert-warning">
-                Schedule details are missing
+                {t('errors.scheduleDetailsMissing')}
             </div>
         );
     }
@@ -94,23 +129,91 @@ const PositionScheduleEditor = ({
         date.setDate(date.getDate() + dayIndex);
         const dateStr = date.toISOString().split('T')[0];
 
+        // Debug
+        console.log(`=== Checking cell [${position.pos_name}][${shift.shift_name}][${dateStr}] ===`);
+
+        if (assignments.length > 0 && dayIndex === 0 && shift.shift_id === 1) {
+            console.log('Sample assignment:', assignments[0]);
+            console.log('Assignment fields:', Object.keys(assignments[0]));
+        }
+
+
         // Find assignments for this position, shift and date
-        const cellAssignments = assignments.filter(assignment =>
-            assignment.position_id === position.pos_id &&
-            assignment.shift_id === shift.shift_id &&
-            assignment.work_date === dateStr
-        );
+        const cellAssignments = assignments.filter(assignment => {
+            // Check different possible field names
+            const assignmentPosId = assignment.pos_id || assignment.position_id;
+            const assignmentDate = assignment.work_date || assignment.date;
 
-        console.log('Assignment for', dateStr, shift.shift_name, ':', cellAssignments);
+            const cellAssignments = assignments.filter(assignment => {
+                const assignmentPosId = assignment.pos_id || assignment.position_id;
+                const assignmentDate = assignment.work_date || assignment.date;
 
+
+                //Debug
+                const matches = assignmentPosId === position.pos_id &&
+                    assignment.shift_id === shift.shift_id &&
+                    assignmentDate === dateStr;
+
+                // Детальное логирование для первой ячейки
+                if (dayIndex === 0 && shift.shift_id === 1) {
+                    console.log('Assignment check:', {
+                        assignment,
+                        assignmentPosId,
+                        expectedPosId: position.pos_id,
+                        posMatch: assignmentPosId === position.pos_id,
+                        assignmentShiftId: assignment.shift_id,
+                        expectedShiftId: shift.shift_id,
+                        shiftMatch: assignment.shift_id === shift.shift_id,
+                        assignmentDate,
+                        expectedDate: dateStr,
+                        dateMatch: assignmentDate === dateStr,
+                        overallMatch: matches
+                    });
+                }
+
+                return matches;
+            });
+
+            console.log(`Found ${cellAssignments.length} assignments for this cell`);
+
+
+            // Debug logging
+            console.log(`Cell [${position.pos_name}][${shift.shift_name}][${dateStr}]:`, {
+                cellAssignments,
+                allAssignments: assignments,
+                filterCriteria: {
+                    positionId: position.pos_id,
+                    shiftId: shift.shift_id,
+                    date: dateStr
+                }
+            });
+
+            return assignmentPosId === position.pos_id &&
+                assignment.shift_id === shift.shift_id &&
+                assignmentDate === dateStr;
+        });
 
         // Get employees for assignments
         const cellEmployees = cellAssignments.map(assignment => {
             const employee = employees.find(emp => emp.emp_id === assignment.emp_id);
-            return employee ? { ...employee, assignment_id: assignment.id } : null;
+            if (employee) {
+                return {
+                    ...employee,
+                    assignment_id: assignment.id,
+                    employee_name: employee.name || `${employee.first_name} ${employee.last_name}`
+                };
+            }
+
+
+            // If employee not found, use data from assignment
+            return {
+                emp_id: assignment.emp_id,
+                employee_name: assignment.employee_name || 'Unknown Employee',
+                assignment_id: assignment.id
+            };
         }).filter(Boolean);
 
-        // Check pending changes - фильтруем для этой конкретной ячейки
+        // Check pending changes
         const pendingAssignments = Object.values(pendingChanges).filter(change =>
             change.action === 'assign' &&
             change.positionId === position.pos_id &&
@@ -125,23 +228,13 @@ const PositionScheduleEditor = ({
             change.shiftId === shift.shift_id
         );
 
-        // Логирование для отладки
-        if (pendingAssignments.length > 0 || pendingRemovals.length > 0) {
-            console.log(`Cell [${shift.shift_name}][${dateStr}] pending changes:`, {
-                assignments: pendingAssignments,
-                removals: pendingRemovals
-            });
-        }
-
         const currentEmployees = cellEmployees.length - pendingRemovals.length;
         const totalEmployees = currentEmployees + pendingAssignments.length;
         const isUnderstaffed = totalEmployees < position.num_of_emp;
 
-        console.log('Rendering cell with onRemoveEmployee:', !!onEmployeeRemove);
-
         return (
             <ScheduleCell
-                key={dayIndex}
+                key={`${shift.shift_id}-${dayIndex}`}
                 date={dateStr}
                 positionId={position.pos_id}
                 shiftId={shift.shift_id}
@@ -158,6 +251,11 @@ const PositionScheduleEditor = ({
         );
     };
 
+    // Calculate total pending changes for this position
+    const positionPendingChanges = Object.values(pendingChanges).filter(
+        change => change.positionId === position.pos_id
+    );
+
     return (
         <div className="position-schedule-editor mb-4">
             {/* Header */}
@@ -165,12 +263,10 @@ const PositionScheduleEditor = ({
                 <div>
                     <h6 className="mb-1">{position.pos_name}</h6>
                     <small className="text-muted">
-                        {interpolateMessage(t('employee.required'), {
-                            count: position.num_of_emp
-                        })}
-                        {hasPendingChanges && (
+                        {t('employee.requiredEmployees')}: {position.num_of_emp}
+                        {hasPendingChanges && positionPendingChanges.length > 0 && (
                             <Badge bg="warning" className="ms-2">
-                                {t('position.unsavedChanges')} ({Object.keys(pendingChanges).length})
+                                {t('position.unsavedChanges')} ({positionPendingChanges.length})
                             </Badge>
                         )}
                     </small>
@@ -183,11 +279,8 @@ const PositionScheduleEditor = ({
                             size="sm"
                             onClick={() => {
                                 console.log('Edit button clicked for position:', position.pos_id);
-                                console.log('onToggleEdit function:', onToggleEdit);
                                 if (onToggleEdit) {
                                     onToggleEdit(position.pos_id);
-                                } else {
-                                    console.error('onToggleEdit is not defined!');
                                 }
                             }}
                         >
@@ -204,17 +297,16 @@ const PositionScheduleEditor = ({
                                 size="sm"
                                 className="me-2"
                                 onClick={() => {
-                                    console.log('Save button clicked for position:', position.pos_id);
                                     if (onSaveChanges) {
                                         onSaveChanges(position.pos_id);
                                     }
                                 }}
-                                disabled={savingChanges || !hasPendingChanges}
+                                disabled={savingChanges || positionPendingChanges.length === 0}
                             >
                                 {savingChanges ? (
                                     <>
-                                        <Spinner size="sm" className="me-1" />
-                                        Saving...
+                                        <Spinner size="sm" className="me-1"/>
+                                        {t('common.saving')}
                                     </>
                                 ) : (
                                     <>
@@ -227,7 +319,6 @@ const PositionScheduleEditor = ({
                                 variant="outline-secondary"
                                 size="sm"
                                 onClick={() => {
-                                    console.log('Cancel button clicked for position:', position.pos_id);
                                     if (onToggleEdit) {
                                         onToggleEdit(position.pos_id);
                                     }
@@ -245,13 +336,13 @@ const PositionScheduleEditor = ({
             <Table responsive bordered size="sm" className="schedule-table">
                 <thead>
                 <tr>
-                    <th className="shift-header">Shift</th>
+                    <th className="shift-header">{t('schedule.shift')}</th>
                     {Array.from({length: 7}, (_, dayIndex) => {
                         const date = new Date(scheduleDetails.schedule.start_date);
                         date.setDate(date.getDate() + dayIndex);
                         const dateStr = date.toISOString().split('T')[0];
                         const dayName = getDayName(dayIndex);
-                        const formattedDate = formatDateForHeader(dateStr, dayName);
+                        const formattedDate = formatDateForHeader(dateStr);
 
                         return (
                             <th key={dayIndex} className="text-center">
@@ -265,17 +356,27 @@ const PositionScheduleEditor = ({
                 </tr>
                 </thead>
                 <tbody>
-                {shifts.map(shift => (
-                    <tr key={shift.shift_id}>
-                        <td className={`shift-${shift.shift_type} text-center`}>
-                            <div>
-                                {shift.shift_name}<br/>
-                                <small>{formatShiftTime(shift.start_time, shift.duration)}</small>
-                            </div>
+                {shifts.length > 0 ? (
+                    shifts.map(shift => (
+                        <tr key={shift.shift_id}>
+                            <td className={`shift-${shift.shift_type} text-center`}>
+                                <div>
+                                    {shift.shift_name}<br/>
+                                    <small className="text-muted">
+                                        {formatShiftTime(shift.start_time, shift.duration)}
+                                    </small>
+                                </div>
+                            </td>
+                            {Array.from({length: 7}, (_, dayIndex) => renderCell(shift, dayIndex))}
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="8" className="text-center text-muted py-3">
+                            {t('schedule.noShiftsDefined')}
                         </td>
-                        {Array.from({length: 7}, (_, dayIndex) => renderCell(shift, dayIndex))}
                     </tr>
-                ))}
+                )}
                 </tbody>
             </Table>
 
@@ -283,7 +384,7 @@ const PositionScheduleEditor = ({
             {isEditing && (
                 <div className="alert alert-info mt-3">
                     <i className="bi bi-pencil me-2"></i>
-                    <strong>{t('common.editModeFor')} {position.pos_name}.</strong> {t('Click to assign employee')}
+                    <strong>{t('position.editPosition')}: {position.pos_name}.</strong> {t('employee.clickToAssignEmployee')}
                 </div>
             )}
         </div>

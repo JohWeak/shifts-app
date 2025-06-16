@@ -1,7 +1,7 @@
 export const ALGORITHM_TYPES = [
     { value: 'basic', label: 'Basic Algorithm' },
     { value: 'advanced', label: 'Advanced Algorithm' },
-    { value: 'ai', label: 'AI-Powered Algorithm' }
+    { value: 'ai', label: 'CP-SAT by Google OR-Tools' }
 ];
 
 export const DEFAULT_GENERATION_SETTINGS = {

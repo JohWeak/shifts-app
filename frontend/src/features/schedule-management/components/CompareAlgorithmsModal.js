@@ -1,7 +1,6 @@
 // frontend/src/components/admin/schedule/CompareAlgorithmsModal.js
 import React from 'react';
 import { Modal, Button, Alert, Row, Col, Card, Badge } from 'react-bootstrap';
-import { useMessages } from '../../../shared/lib/i18n/messages';
 import {useI18n} from "../../../shared/lib/i18n/i18nProvider";
 
 const CompareAlgorithmsModal = ({
@@ -31,17 +30,18 @@ const CompareAlgorithmsModal = ({
             <Modal.Header closeButton>
                 <Modal.Title>
                     <i className="bi bi-speedometer2 me-2"></i>
-                    {t('modal.compareAlgorithms.result')}
+                    {t('modal.compareAlgorithms.results')}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
                 <Alert variant="info" className="mb-4">
                     <h6 className="mb-2">
+                        <div className="mb-0">
                         <i className="bi bi-trophy me-2"></i>
-                        {t('modal.compareAlgorithms.useThis')}: <strong>{best_algorithm}</strong>
+                        {t('modal.compareAlgorithms.best')}: <strong>{best_algorithm}</strong></div>
                     </h6>
-                    <p className="mb-0">{t('modal.compareAlgorithms.best')}</p>
+
                 </Alert>
 
                 <Row className="justify-content-center">
@@ -69,10 +69,10 @@ const CompareAlgorithmsModal = ({
                                         {result.status === 'success' ? (
                                             <div>
                                                 <div className="mb-2">
-                                                    <strong>{('t.employee.assignments')}:</strong> {result.stats?.total_assignments || result.assignments_count || 0}
+                                                    <strong>{t('employee.assignments')}:</strong> {result.stats?.total_assignments || result.assignments_count || 0}
                                                 </div>
                                                 <div className="mb-2">
-                                                    <strong>{t('compareAlgorithms.executionTimeInfo')}:</strong> {result.solve_time || 'N/A'}
+                                                    <strong>{t('modal.compareAlgorithms.executionTime')}:</strong> {result.solve_time || 'N/A'}
                                                 </div>
                                                 {result.stats?.employees_used && (
                                                     <div className="mb-2">
@@ -100,7 +100,7 @@ const CompareAlgorithmsModal = ({
                     <Alert variant="warning" className="mt-4">
                         <h6>
                             <i className="bi bi-lightbulb me-2"></i>
-                            {t('recommendation')}:
+                            {t('common.recommendation')}:
                         </h6>
                         <p className="mb-0">{recommendation}</p>
                     </Alert>
@@ -116,7 +116,7 @@ const CompareAlgorithmsModal = ({
                         variant="primary"
                         onClick={handleUseAlgorithm}
                     >
-                        {t('compareAlgorithms.use')?.replace('{algorithm}', best_algorithm) || `Use ${best_algorithm} Algorithm`}
+                        {t('modal.compareAlgorithms.use')} {best_algorithm} {t('modal.compareAlgorithms.algorithm')}
                     </Button>
                 )}
             </Modal.Footer>

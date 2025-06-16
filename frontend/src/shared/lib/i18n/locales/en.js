@@ -81,9 +81,11 @@ export const en = {
         actions: 'Actions',
         view: 'View',
         week: 'Week',
+        shift: 'Shift',
         draft: 'Draft',
         published: 'Published',
         total: 'Total Schedules',
+        workSite: 'Work Site',
 
 
 
@@ -111,9 +113,11 @@ export const en = {
         assignments: 'Assignments',
         used: 'Employees Used',
         permanentRequests: 'PermanentRequests',
-        required: 'Required employees',
+        requiredEmployees: 'Required employees',
         clickToAssignEmployee: 'Click to assign employee',
+        clickToAssign: 'Click to assign',
         totalAssignments: 'Total Assignments',
+
     },
     position: {
         positions: 'Positions',
@@ -122,6 +126,22 @@ export const en = {
         saveChanges: 'Save Changes',
         cancelChanges: 'Cancel Changes',
         unsavedChanges: 'You have unsaved changes'
+    },
+    days: {
+        sunday: 'Sunday',
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+        sun: 'Sun',
+        mon: 'Mon',
+        tue: 'Tue',
+        wed: 'Wed',
+        thu: 'Thu',
+        fri: 'Fri',
+        sat: 'Sat'
     },
     modal: {
         generateSchedule: {
@@ -134,24 +154,22 @@ export const en = {
             selectSite: 'Select Site',
             selectAlgorithm: 'Select Algorithm',
             selectSunday: 'Select Sunday',
+            autoDesc: 'Auto choice algorithm',
+            cpSatDesc: 'CP-SAT by Google OR-Tools',
+            simpleDesc: 'Simple test algorithm',
         },
         compareAlgorithms: {
             title: 'Compare Algorithms',
             comparing: 'Comparing...',
-            results: 'Results',
+            results: 'Compare Algorithms Results',
             algorithm: 'Algorithm',
             score: 'Score',
-            useThis: 'Use This',
+            use: 'Use',
             best: 'Best algorithm: ',
             time: 'Execution time: ',
+            executionTime: 'Execution time',
         },
-        algorithmTypes: {
-            title: 'Algorithm',
-            autoDesc: 'Auto',
-            cpSatDesc: 'CP-SAT by Google OR-Tools',
-            simpleDesc: 'Simple test algorithm',
 
-        },
         recommendations: {
 
 
