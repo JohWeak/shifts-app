@@ -10,7 +10,12 @@ export const fetchSchedules = createAsyncThunk(
     'schedule/fetchSchedules',
     async (_, { rejectWithValue }) => {
         try {
-            return await scheduleAPI.fetchSchedules();
+            const response = await scheduleAPI.fetchSchedules();
+            // Если используется структура с pagination
+            if (response.data && response.data.items) {
+                return response.data.items;
+            }
+            return response.data || [];
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -22,7 +27,10 @@ export const fetchScheduleDetails = createAsyncThunk(
     'schedule/fetchScheduleDetails',
     async (scheduleId, { rejectWithValue }) => {
         try {
-            return await scheduleAPI.fetchScheduleDetails(scheduleId);
+            const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
+            console.log('Schedule details response:', response.data); // Для отладки
+
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -32,12 +40,10 @@ export const fetchScheduleDetails = createAsyncThunk(
 // Генерация нового расписания
 export const generateSchedule = createAsyncThunk(
     'schedule/generateSchedule',
-    async (settings, { dispatch, rejectWithValue }) => {
+    async (settings, { rejectWithValue }) => {
         try {
-            const data = await scheduleAPI.generateSchedule(settings);
-            // После успешной генерации, автоматически обновляем список расписаний
-            dispatch(fetchSchedules());
-            return data;
+            const response = await scheduleAPI.generateSchedule(settings);
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -45,12 +51,11 @@ export const generateSchedule = createAsyncThunk(
 );
 
 export const updateScheduleStatus = createAsyncThunk(
-    'schedule/updateStatus',
+    'schedule/updateScheduleStatus',
     async ({ scheduleId, status }, { rejectWithValue }) => {
         try {
-            // Вызываем функцию из нашего API-слоя
-            const data = await scheduleAPI.updateScheduleStatus(scheduleId, status);
-            return data.data; // Возвращаем обновленное расписание
+            const response = await scheduleAPI.updateScheduleStatus(scheduleId, status);
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -62,7 +67,8 @@ export const compareAlgorithms = createAsyncThunk(
     'schedule/compareAlgorithms',
     async (settings, { rejectWithValue }) => {
         try {
-            return await scheduleAPI.compareAlgorithms(settings);
+            const response = await scheduleAPI.compareAlgorithms(settings);
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -72,12 +78,10 @@ export const compareAlgorithms = createAsyncThunk(
 // Удаление расписания
 export const deleteSchedule = createAsyncThunk(
     'schedule/deleteSchedule',
-    async (scheduleId, { dispatch, rejectWithValue }) => {
+    async (scheduleId, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.deleteSchedule(scheduleId);
-            // После успешного удаления обновляем список
-            dispatch(fetchSchedules());
-            return response; // Возвращаем ответ сервера
+            await scheduleAPI.deleteSchedule(scheduleId);
+            return scheduleId; // Возвращаем ID для удаления из state
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -86,24 +90,24 @@ export const deleteSchedule = createAsyncThunk(
 
 // Обновление назначений
 export const updateScheduleAssignments = createAsyncThunk(
-    'schedule/updateAssignments',
-    async ({ scheduleId, changes }, { dispatch, rejectWithValue }) => {
+    'schedule/updateScheduleAssignments',
+    async ({ scheduleId, changes }, { rejectWithValue }) => {
         try {
-            const result = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
-            // После сохранения перезагружаем детали, чтобы увидеть актуальное состояние
-            dispatch(fetchScheduleDetails(scheduleId));
-            return result;
+            const response = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
+
+// Export schedule
 export const exportSchedule = createAsyncThunk(
     'schedule/exportSchedule',
     async ({ scheduleId, format }, { rejectWithValue }) => {
         try {
-            const result = await scheduleAPI.exportSchedule(scheduleId, format);
-            return { ...result, format }; // Возвращаем имя файла и формат для уведомления
+            await scheduleAPI.exportSchedule(scheduleId, format);
+            return { success: true }; // Возвращаем простой объект
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -120,7 +124,7 @@ export const fetchRecommendations = createAsyncThunk(
                 params.shiftId,
                 params.date
             );
-            return response.data;
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -132,7 +136,8 @@ export const fetchWorkSites = createAsyncThunk(
     'schedule/fetchWorkSites',
     async (_, { rejectWithValue }) => {
         try {
-            return await worksiteAPI.fetchWorkSites(); // <-- ИЗМЕНИТЬ
+            const response = await scheduleAPI.fetchWorkSites();
+            return response.data; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -225,10 +230,11 @@ const scheduleSlice = createSlice({
             .addCase(fetchSchedules.fulfilled, (state, action) => {
                 state.loading = 'succeeded';
                 state.schedules = action.payload;
+                state.error = null;
             })
             .addCase(fetchSchedules.rejected, (state, action) => {
                 state.loading = 'failed';
-                state.error = action.payload;
+                state.error = action.payload || 'Failed to fetch schedules';
             })
 
             // Обработка fetchScheduleDetails
@@ -238,12 +244,10 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchScheduleDetails.fulfilled, (state, action) => {
-                state.loading = 'succeeded';
+                state.loading = 'idle';
                 state.scheduleDetails = action.payload;
-                state.selectedScheduleId = action.payload.schedule.id;
+                state.selectedScheduleId = action.payload?.schedule?.id;
                 state.activeTab = 'view';
-                state.editingPositions = {}; // Сброс при загрузке новых деталей
-                state.pendingChanges = {}; // Сброс при загрузке новых деталей
             })
             .addCase(fetchScheduleDetails.rejected, (state, action) => {
                 state.loading = 'failed';

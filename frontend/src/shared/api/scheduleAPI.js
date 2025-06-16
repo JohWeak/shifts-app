@@ -2,147 +2,226 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/apiEndpoints';
 
-const API_BASE_URL = 'http://localhost:5000/api';
-
-const getAuthHeaders = (isFormData = false) => {
-    const headers = {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-    };
-    if (!isFormData) {
-        headers['Content-Type'] = 'application/json';
+// Create axios instance with default config
+const api = axios.create({
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+    headers: {
+        'Content-Type': 'application/json'
     }
-    return headers;
-};
+});
 
-// Централизованная обработка ответов
-const handleResponse = (response) => {
-    // Axios выбрасывает ошибку для статусов вне 2xx диапазона,
-    // поэтому мы можем просто вернуть response.data
-    return response.data;
-};
-
-// Централизованная обработка ошибок
-const handleError = (error) => {
-    console.error("API Error:", error.response || error);
-    const message = error.response?.data?.message || error.message || 'An unexpected error occurred.';
-    throw new Error(message);
-};
-
-export async function fetchSchedules() {
-    try {
-        const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULES}`, { headers: getAuthHeaders() });
-        return handleResponse(response).data; // API возвращает { success, data }
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function fetchScheduleDetails(scheduleId) {
-    try {
-        const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)}`, { headers: getAuthHeaders() });
-        return handleResponse(response).data; // API возвращает { success, data }
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function generateSchedule(settings) {
-    try {
-        const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.SCHEDULES.GENERATE}`, settings, { headers: getAuthHeaders() });
-        return handleResponse(response).data;
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function compareAlgorithms(settings) {
-    try {
-        const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.COMPARE}`, settings, { headers: getAuthHeaders() });
-        return handleResponse(response);
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function deleteSchedule(scheduleId)  {
-    try {
-        const response = await axios.delete(`${API_BASE_URL}${API_ENDPOINTS.DELETE_SCHEDULE(scheduleId)}`, { headers: getAuthHeaders() });
-        return handleResponse(response);
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function updateScheduleAssignments(scheduleId, changes) {
-    try {
-        const response = await axios.put(`${API_BASE_URL}${API_ENDPOINTS.UPDATE_ASSIGNMENTS(scheduleId)}`, { changes }, { headers: getAuthHeaders() });
-        return handleResponse(response).data;
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function updateScheduleStatus(scheduleId, status) {
-    try {
-        const response = await axios.put(`${API_BASE_URL}/schedules/${scheduleId}/status`, { status }, { headers: getAuthHeaders() });
-        return handleResponse(response);
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-export async function exportSchedule(scheduleId, format = 'pdf')  {
-    try {
-        const response = await axios.get(`${API_BASE_URL}/schedules/${scheduleId}/export?format=${format}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-            responseType: 'blob', // Важно для скачивания файлов
-        });
-
-        const contentDisposition = response.headers['content-disposition'];
-        let filename = `schedule-${scheduleId}.${format}`;
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"])(.*?)\2|[^;\n]*)/);
-            if (filenameMatch && filenameMatch[3]) {
-                filename = filenameMatch[3];
+// Add auth token to requests
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+api.interceptors.response.use(
+    (response) => {
+        // Для ответов с пагинацией сохраняем структуру
+        if (response.data && 'success' in response.data && 'data' in response.data) {
+            // Если есть pagination, сохраняем её
+            if (response.data.pagination) {
+                response.data = {
+                    items: response.data.data,
+                    pagination: response.data.pagination,
+                    success: response.data.success
+                };
+            } else {
+                // Для простых ответов просто извлекаем data
+                response.data = response.data.data;
             }
         }
+        return response;
+    },
+    (error) => Promise.reject(error)
+);
 
+// Handle errors
+const handleError = (error) => {
+    console.error('API Error:', error.response || error);
+    if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+    throw error;
+};
+
+// Schedule API functions
+export const fetchSchedules = async () => {
+    try {
+        const response = await api.get(API_ENDPOINTS.SCHEDULES.BASE);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const fetchScheduleDetails = async (scheduleId) => {
+    try {
+        const response = await api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId));
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const generateSchedule = async (settings) => {
+    try {
+        const response = await api.post(API_ENDPOINTS.SCHEDULES.GENERATE, settings);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const updateScheduleStatus = async (scheduleId, status) => {
+    try {
+        const response = await api.patch(API_ENDPOINTS.SCHEDULES.STATUS(scheduleId), { status });
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const deleteSchedule = async (scheduleId) => {
+    try {
+        const response = await api.delete(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId));
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const compareAlgorithms = async (settings) => {
+    try {
+        const response = await api.post(API_ENDPOINTS.SCHEDULES.COMPARE, settings);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const updateScheduleAssignments = async (scheduleId, changes) => {
+    try {
+        const response = await api.put(API_ENDPOINTS.SCHEDULES.ASSIGNMENTS(scheduleId), { changes });
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const exportSchedule = async (scheduleId, format) => {
+    try {
+        const response = await api.get(API_ENDPOINTS.SCHEDULES.EXPORT(scheduleId), {
+            params: { format },
+            responseType: 'blob'
+        });
+
+        // Create download link
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', filename);
+        link.setAttribute('download', `schedule_${scheduleId}.${format}`);
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
 
-        return { success: true, filename };
-    } catch (error) {
-        // Ошибка при скачивании файла может быть в виде Blob, нужно её прочитать
-        if (error.response && error.response.data instanceof Blob) {
-            const errorText = await error.response.data.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.message || 'Failed to export schedule');
-            } catch (e) {
-                throw new Error(errorText);
-            }
-        }
-        handleError(error);
-    }
-}
-
-export async function fetchWorkSites()  {
-    try {
-        const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.WORKSITES}`, { headers: getAuthHeaders() });
-        return handleResponse(response);
+        return response;
     } catch (error) {
         handleError(error);
+        throw error;
     }
-}
-export const getRecommendations = async (scheduleId, positionId, shiftId, date) => {
-    const response = await api.get(`/api/employees/recommendations`, {
-        params: { scheduleId, positionId, shiftId, date }
-    });
-    return response;
 };
+
+// Work sites
+export const fetchWorkSites = async () => {
+    try {
+        const response = await api.get(API_ENDPOINTS.WORKSITES.BASE);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// Employee recommendations
+export const getRecommendations = async (scheduleId, positionId, shiftId, date) => {
+    try {
+        const response = await api.get(API_ENDPOINTS.EMPLOYEES.RECOMMENDATIONS, {
+            params: { scheduleId, positionId, shiftId, date }
+        });
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// Additional schedule-related functions that might be needed
+export const fetchSchedulePositions = async (scheduleId) => {
+    try {
+        const response = await api.get(`/api/schedules/${scheduleId}/positions`);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const fetchScheduleEmployees = async (scheduleId) => {
+    try {
+        const response = await api.get(`/api/schedules/${scheduleId}/employees`);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const fetchScheduleShifts = async (scheduleId) => {
+    try {
+        const response = await api.get(`/api/schedules/${scheduleId}/shifts`);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// Schedule settings
+export const fetchScheduleSettings = async (siteId) => {
+    try {
+        const response = await api.get(`/api/schedule-settings/${siteId}`);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+export const updateScheduleSettings = async (siteId, settings) => {
+    try {
+        const response = await api.put(`/api/schedule-settings/${siteId}`, settings);
+        return response;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// Export the axios instance for custom requests
+export default api;

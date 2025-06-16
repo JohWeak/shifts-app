@@ -27,6 +27,11 @@ export const en = {
         reload: 'Reload Page',
         recommendation: 'Recommendation',
         settings: 'Settings',
+        editModeFor: 'Edit Mode for',
+        dashboardDesc: 'Quick overview of your scheduling system',
+        dashboardTitle: 'Dashboard Overview',
+        quickActions: 'Quick Actions',
+        admin: 'Admin',
 
 
 
@@ -45,6 +50,7 @@ export const en = {
     },
     schedule: {
         title: 'Schedule Management',
+        subtitle: 'Create and manage schedules for employees using advanced algorithms',
         generateSchedule: 'Generate Schedule',
         generationInProgress: 'Generation in progress...',
         compareAlgorithms: 'Compare Algorithms',
@@ -72,6 +78,14 @@ export const en = {
         weekStartWarning: 'Invalid week start',
         cannotDeletePublished: 'Cannot delete published schedule',
         unpublishFirst: 'Please unpublish the schedule first',
+        actions: 'Actions',
+        view: 'View',
+        week: 'Week',
+        draft: 'Draft',
+        published: 'Published',
+        total: 'Total Schedules',
+
+
 
     },
     employee: {
@@ -97,6 +111,9 @@ export const en = {
         assignments: 'Assignments',
         used: 'Employees Used',
         permanentRequests: 'PermanentRequests',
+        required: 'Required employees',
+        clickToAssignEmployee: 'Click to assign employee',
+        totalAssignments: 'Total Assignments',
     },
     position: {
         positions: 'Positions',

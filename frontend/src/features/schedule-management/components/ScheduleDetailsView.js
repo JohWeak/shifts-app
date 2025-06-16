@@ -139,16 +139,16 @@ const ScheduleDetailsView = ({onCellClick}) => {
                 show={showPublishModal}
                 onHide={() => setShowPublishModal(false)}
                 onConfirm={() => handleStatusUpdate('published')}
-                title="Publish Schedule"
-                message={t.publishSchedule}
+                title={t('schedule.publishSchedule')}
+                message={t('schedule.confirmPublish')}
                 loading={loading === 'pending'}
             />
             <ConfirmationModal
                 show={showUnpublishModal}
                 onHide={() => setShowUnpublishModal(false)}
                 onConfirm={() => handleStatusUpdate('draft')}
-                title="Unpublish Schedule"
-                message={t.confirmPublish}
+                title={t('schedule.unpublishEdit')}
+                message={t('schedule.confirmUnpublish')}
                 variant="warning"
                 loading={loading === 'pending'}
             />

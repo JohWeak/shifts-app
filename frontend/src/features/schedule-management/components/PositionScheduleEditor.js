@@ -65,6 +65,9 @@ const PositionScheduleEditor = ({
         pendingChangesCount: Object.keys(pendingChanges).length,
         pendingChanges: pendingChanges
     });
+    console.log('Position:', position);
+    console.log('Schedule Details:', scheduleDetails);
+
 
     if (!position) {
         console.error('PositionScheduleEditor: position prop is undefined');
@@ -97,6 +100,9 @@ const PositionScheduleEditor = ({
             assignment.shift_id === shift.shift_id &&
             assignment.work_date === dateStr
         );
+
+        console.log('Assignment for', dateStr, shift.shift_name, ':', cellAssignments);
+
 
         // Get employees for assignments
         const cellEmployees = cellAssignments.map(assignment => {
@@ -159,12 +165,12 @@ const PositionScheduleEditor = ({
                 <div>
                     <h6 className="mb-1">{position.pos_name}</h6>
                     <small className="text-muted">
-                        {interpolateMessage(t.requiredEmployees, {
+                        {interpolateMessage(t('employee.required'), {
                             count: position.num_of_emp
                         })}
                         {hasPendingChanges && (
                             <Badge bg="warning" className="ms-2">
-                                {t.unsavedChanges} ({Object.keys(pendingChanges).length})
+                                {t('position.unsavedChanges')} ({Object.keys(pendingChanges).length})
                             </Badge>
                         )}
                     </small>
@@ -186,7 +192,7 @@ const PositionScheduleEditor = ({
                             }}
                         >
                             <i className="bi bi-pencil me-1"></i>
-                            {t.edit}
+                            {t('common.edit')}
                         </Button>
                     )}
 
@@ -213,7 +219,7 @@ const PositionScheduleEditor = ({
                                 ) : (
                                     <>
                                         <i className="bi bi-check me-1"></i>
-                                        {t.save}
+                                        {t('common.save')}
                                     </>
                                 )}
                             </Button>
@@ -228,7 +234,7 @@ const PositionScheduleEditor = ({
                                 }}
                                 disabled={savingChanges}
                             >
-                                {t.cancel}
+                                {t('common.cancel')}
                             </Button>
                         </>
                     )}
@@ -277,7 +283,7 @@ const PositionScheduleEditor = ({
             {isEditing && (
                 <div className="alert alert-info mt-3">
                     <i className="bi bi-pencil me-2"></i>
-                    <strong>Edit Mode for {position.pos_name}.</strong> Click to assign employee
+                    <strong>{t('common.editModeFor')} {position.pos_name}.</strong> {t('Click to assign employee')}
                 </div>
             )}
         </div>

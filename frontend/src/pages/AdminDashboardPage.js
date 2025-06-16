@@ -1,17 +1,20 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js - ОБНОВЛЕННАЯ ВЕРСИЯ
+// frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../widgets/AdminLayout/AdminLayout';
 import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import {useI18n} from "../shared/lib/i18n/i18nProvider";
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { t } = useI18n();
 
     useEffect(() => {
         fetchStats();
     }, []);
+
 
     const fetchStats = async () => {
         try {
@@ -40,9 +43,9 @@ const Dashboard = () => {
                 <div className="mb-4">
                     <h1 className="h3 mb-2 text-dark fw-bold">
                         <i className="bi bi-speedometer2 me-2 text-primary"></i>
-                        Dashboard Overview
+                        {t('common.dashboardTitle')}
                     </h1>
-                    <p className="text-muted mb-0">Quick overview of your scheduling system</p>
+                    <p className="text-muted mb-0">{t('common.dashboardDesc')}</p>
                 </div>
 
                 <Row>
@@ -54,7 +57,7 @@ const Dashboard = () => {
                                         <i className="bi bi-calendar-week text-primary fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">Total Schedules</div>
+                                        <div className="text-muted small">{t('schedule.total')}</div>
                                         <div className="h4 mb-0">{stats?.overview.total_schedules || 0}</div>
                                     </div>
                                 </div>
@@ -70,7 +73,7 @@ const Dashboard = () => {
                                         <i className="bi bi-check-circle text-success fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">Published</div>
+                                        <div className="text-muted small">{t('schedule.published')}</div>
                                         <div className="h4 mb-0">{stats?.overview.published_schedules || 0}</div>
                                     </div>
                                 </div>
@@ -86,7 +89,7 @@ const Dashboard = () => {
                                         <i className="bi bi-file-earmark text-warning fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">Draft</div>
+                                        <div className="text-muted small">{t('schedule.draft')}</div>
                                         <div className="h4 mb-0">{stats?.overview.draft_schedules || 0}</div>
                                     </div>
                                 </div>
@@ -102,7 +105,7 @@ const Dashboard = () => {
                                         <i className="bi bi-people text-info fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">Total Assignments</div>
+                                        <div className="text-muted small">{t('employee.totalAssignments')}</div>
                                         <div className="h4 mb-0">{stats?.overview.total_assignments || 0}</div>
                                     </div>
                                 </div>
@@ -115,7 +118,7 @@ const Dashboard = () => {
                     <Col lg={8} className="mb-4">
                         <Card className="border-0 shadow-sm h-100">
                             <Card.Header className="bg-light border-0">
-                                <h5 className="mb-0">Quick Actions</h5>
+                                <h5 className="mb-0">{t('common.quickActions')}</h5>
                             </Card.Header>
                             <Card.Body>
                                 <Row>
