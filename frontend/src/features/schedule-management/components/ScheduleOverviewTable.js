@@ -117,14 +117,14 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
                 onConfirm={handleDeleteConfirm}
                 onCancel={handleDeleteCancel}
                 loading={isDeleting}
-                confirmText={t('schedule.deleteSuccess')}
+                confirmText={t('schedule.deleteSchedule')}
                 variant="danger"
             >
                 {scheduleToDelete && (
                     <div className="schedule-info bg-light p-3 rounded">
                         <p><strong>{t('schedule.weekPeriod')}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
-                        <p><strong>{t('schedule.site')}:</strong> {getSiteName(scheduleToDelete)}</p>
-                        <p className="mt-3 text-muted">{t('common.warning')}</p>
+                        <p><strong>{t('schedule.site')}:</strong> {scheduleToDelete.workSite?.site_name || 'N/A'}</p>
+
                     </div>
                 )}
             </ConfirmationModal>

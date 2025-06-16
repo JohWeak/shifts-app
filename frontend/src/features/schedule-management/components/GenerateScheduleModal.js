@@ -27,23 +27,31 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
 
     // Эффект №1: Загрузка данных при открытии модалки
     useEffect(() => {
-        // Если модалка открыта, и мы еще НЕ делали запрос
         if (show && !hasFetched.current) {
             dispatch(fetchWorkSites());
-            hasFetched.current = true; // Помечаем, что запрос был сделан
+            hasFetched.current = true;
         }
-        // Если модалка закрывается, сбрасываем флаг для следующего открытия
+
+        // Сброс при закрытии
         if (!show) {
             hasFetched.current = false;
+            // Сброс настроек при закрытии модала
+            setSettings({
+                ...DEFAULT_GENERATION_SETTINGS,
+                weekStart: getNextSunday()
+            });
         }
-    }, [show, dispatch]); // Зависим только от `show` и `dispatch`
+    }, [show, dispatch]);
 
-    // Второй useEffect для установки дефолтного значения остается без изменений
+// Отдельный эффект для установки дефолтного site_id
     useEffect(() => {
-        if (show && safeWorkSites.length > 0 && (!settings.site_id || settings.site_id === 1)) {
-            setSettings(prev => ({ ...prev, site_id: safeWorkSites[0].site_id }));
+        if (workSites.length > 0 && !settings.site_id) {
+            setSettings(prev => ({
+                ...prev,
+                site_id: workSites[0].site_id
+            }));
         }
-    }, [show, safeWorkSites, settings.site_id]);
+    }, [workSites])
 
 
 
@@ -118,10 +126,9 @@ const GenerateScheduleModal = ({ show, onHide, onGenerate, generating }) => {
                                 onChange={(e) => setSettings(prev => ({ ...prev, algorithm: e.target.value }))}
                                 required
                             >
-                                <option value="">{t('modal.generateSchedule.selectAlgorithm')}</option>
                                 {safeAlgorithmTypes.map(algo => (
                                     <option key={algo.value} value={algo.value}>
-                                        {algo.label}
+                                        {t(`modal.generateSchedule.algorithms.${algo.value}`)}
                                     </option>
                                 ))}
                             </Form.Select>

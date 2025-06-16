@@ -157,6 +157,11 @@ export const en = {
             autoDesc: 'Auto choice algorithm',
             cpSatDesc: 'CP-SAT by Google OR-Tools',
             simpleDesc: 'Simple test algorithm',
+            algorithms: {
+                auto: 'Auto',
+                'cp-sat': 'CP-SAT by Google OR-Tools',
+                simple: 'Simple'
+            }
         },
         compareAlgorithms: {
             title: 'Compare Algorithms',

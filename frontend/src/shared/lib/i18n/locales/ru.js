@@ -148,7 +148,12 @@ export const ru = {
             generate: 'Создать',
             generating: 'Создание...',
             selectSite: 'Выберите объект',
-            selectAlgorithm: 'Выберите алгоритм'
+            selectAlgorithm: 'Выберите алгоритм',
+            algorithms: {
+                auto: 'Автоматический',
+                'cp-sat': 'CP-SAT от Google OR-Tools',
+                simple: 'Простой'
+            }
         },
         compareAlgorithms: {
             title: 'Сравнение алгоритмов',
