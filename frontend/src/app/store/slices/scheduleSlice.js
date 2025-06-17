@@ -327,18 +327,20 @@ const scheduleSlice = createSlice({
                 state.loading = 'pending';
             })
             .addCase(updateScheduleStatus.fulfilled, (state, action) => {
-                state.loading = 'succeeded';
-                const updatedSchedule = action.payload;
-
-                // Обновляем расписание в общем списке
-                state.schedules = state.schedules.map(schedule =>
-                    schedule.id === updatedSchedule.id ? updatedSchedule : schedule
-                );
-
-                // Если это расписание открыто в детальном просмотре, обновляем и его
-                if (state.scheduleDetails?.schedule.id === updatedSchedule.id) {
-                    state.scheduleDetails.schedule = updatedSchedule;
+                state.loading = 'idle';
+                // Обновляем статус в списке расписаний
+                const scheduleIndex = state.schedules.findIndex(s => s.id === action.meta.arg.scheduleId);
+                if (scheduleIndex !== -1) {
+                    state.schedules[scheduleIndex] = {
+                        ...state.schedules[scheduleIndex],
+                        status: action.meta.arg.status
+                    };
                 }
+                // Обновляем в деталях, если это текущее расписание
+                if (state.scheduleDetails?.schedule?.id === action.meta.arg.scheduleId) {
+                    state.scheduleDetails.schedule.status = action.meta.arg.status;
+                }
+                state.error = null;
             })
             .addCase(updateScheduleStatus.rejected, (state, action) => {
                 state.loading = 'failed';

@@ -189,7 +189,20 @@ const updateScheduleStatus = async (req, res) => {
             });
         }
 
-        await schedule.update({status});
+        await Schedule.update(
+            { status },
+            { where: { id: scheduleId } }
+        );
+        // Возвращаем обновленное расписание с связями
+        const updatedSchedule = await Schedule.findByPk(scheduleId, {
+            include: [
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                }
+            ]
+        });
 
         res.json({
             success: true,

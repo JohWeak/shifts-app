@@ -66,7 +66,6 @@ const ScheduleManagement = () => {
     }, [dispatch]);
 
 
-
     // --- Обработчики действий ---
     // 3. Создаем новую функцию-обертку для генерации расписания
     const onGenerateSubmit = async (settings) => {
