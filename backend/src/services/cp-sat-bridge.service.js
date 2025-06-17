@@ -176,9 +176,9 @@ class CPSATBridge {
                 soft_constraints: CONSTRAINTS.SOFT_CONSTRAINTS,
                 optimization_weights: CONSTRAINTS.OPTIMIZATION_WEIGHTS,
 
-                // Дополнительные настройки из БД (если есть)
-                max_cannot_work_days_per_week: systemSettings?.maxCannotWorkDays || 2,
-                max_prefer_work_days_per_week: systemSettings?.maxPreferWorkDays || 3,
+                // Дополнительные настройки из БД (будут добавлены через админа)
+                // max_cannot_work_days_per_week: systemSettings?.maxCannotWorkDays || 2,
+                // max_prefer_work_days_per_week: systemSettings?.maxPreferWorkDays || 3,
                 max_solve_time: CONSTRAINTS.SOLVER_SETTINGS.max_time_seconds || 120,
 
                 // Флаги
