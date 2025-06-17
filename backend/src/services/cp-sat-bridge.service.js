@@ -6,6 +6,7 @@ const fs = require('fs').promises;
 const dayjs = require('dayjs');
 const db = require('../models');
 const { v4: uuidv4 } = require('uuid');
+const CONSTRAINTS = require('../config/scheduling-constraints');
 
 
 class CPSATBridge {
@@ -169,12 +170,21 @@ class CPSATBridge {
             const settings = {
                 week_start: weekStart,
                 site_id: siteId,
-                max_shifts_per_day: 1,
-                max_weekly_hours: 42,
-                min_rest_hours: 11,
-                prefer_default_positions: true, // Новая настройка
-                flexible_coverage: true, // Разрешить гибкое покрытие позиций
-                balance_workload: true // Балансировка нагрузки
+
+                // Жесткие ограничения из конфигурации
+                hard_constraints: CONSTRAINTS.HARD_CONSTRAINTS,
+                soft_constraints: CONSTRAINTS.SOFT_CONSTRAINTS,
+                optimization_weights: CONSTRAINTS.OPTIMIZATION_WEIGHTS,
+
+                // Дополнительные настройки из БД (если есть)
+                max_cannot_work_days_per_week: systemSettings?.maxCannotWorkDays || 2,
+                max_prefer_work_days_per_week: systemSettings?.maxPreferWorkDays || 3,
+                max_solve_time: CONSTRAINTS.SOLVER_SETTINGS.max_time_seconds || 120,
+
+                // Флаги
+                enable_overtime: CONSTRAINTS.SOLVER_SETTINGS.enable_overtime,
+                enable_weekend_work: CONSTRAINTS.SOLVER_SETTINGS.enable_weekend_work,
+                strict_rest_requirements: CONSTRAINTS.SOLVER_SETTINGS.strict_rest_requirements
             };
 
             const preparedData = {

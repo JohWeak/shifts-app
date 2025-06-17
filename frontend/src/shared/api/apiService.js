@@ -57,6 +57,13 @@ export const employeeAPI = {
     }
 };
 
+export const positionAPI = {
+    // Принимает siteId и делает GET запрос
+    fetchPositions: (siteId) => api.get(API_ENDPOINTS.POSITIONS.BY_SITE(siteId)),
+    // Принимает объект должности, извлекает ID для URL, и отправляет весь объект в теле запроса
+    updatePosition: (positionData) => api.put(API_ENDPOINTS.POSITIONS.DETAILS(positionData.pos_id), positionData)
+};
+
 export const settingsAPI = {
     fetchSystemSettings: () => api.get(API_ENDPOINTS.SETTINGS.SYSTEM),
     updateSystemSettings: (settings) => api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings)

@@ -223,10 +223,13 @@ export const ru = {
         cancelChanges: 'Отменить изменения',
         description: 'Описание',
         editPosition: 'Редактировать должность',
+        employeesPerShift: 'Работников на смену',
         noPositions: 'Нет настроенных должностей',
         positionCode: 'Код должности',
         positionName: 'Название должности',
         positions: 'Должности',
+        profession: 'Профессия',
+        requirements: 'Требования',
         saveChanges: 'Сохранить изменения',
         unsavedChanges: 'У вас есть несохраненные изменения',
     },
@@ -296,6 +299,8 @@ export const ru = {
         scheduleSettings: 'Расписание',
         notificationSettings: 'Уведомления',
         securitySettings: 'Безопасность',
+        positionSettings: 'Позиции',
+        constraintSettings: 'Ограничения',
 
         // General
         dateFormat: 'Формат даты',
@@ -312,6 +317,9 @@ export const ru = {
         autoPublishHint: 'Автоматически публиковать расписания после генерации',
         autoAssignShifts: 'Авто-назначение смен',
         autoAssignHint: 'Автоматически назначать сотрудников на основе их доступности',
+
+        selectSite: 'Выбери рабочий объект',
+        selectSitePrompt: 'Выбери рабочий объект для настройки',
 
         // Notifications
         enableNotifications: 'Включить уведомления',
@@ -332,6 +340,24 @@ export const ru = {
         minutes: 'минут',
 
         // Messages
-        saveSuccess: 'Настройки успешно сохранены'
+        saveSuccess: 'Настройки успешно сохранены',
+
+        maxCannotWorkDays: 'Максимум дней "Не могу работать"',
+        maxCannotWorkDaysHint: 'Максимальное количество дней в неделю, которые сотрудник может отметить как недоступные',
+        maxPreferWorkDays: 'Максимум дней "Предпочитаю работать"',
+        maxPreferWorkDaysHint: 'Максимальное количество дней в неделю, которые сотрудник может отметить как предпочтительные',
+        daysPerWeek: 'дней/неделю',
+        defaultEmployeesPerShift: 'Сотрудников на смену по умолчанию',
+        defaultEmployeesPerShiftHint: 'Количество сотрудников на смену по умолчанию (можно переопределить для каждой позиции)',
+        algorithmMaxTime: 'Время работы алгоритма',
+        algorithmMaxTimeHint: 'Максимальное время для оптимизации расписания',
+        seconds: 'секунд',
+
+        legalCompliance: 'Соответствие законодательству',
+        legalComplianceInfo: 'Эти настройки требуются израильским трудовым законодательством и не могут быть изменены',
+        maxHoursPerDay: 'Максимум часов в день',
+        fixedByLaw: 'Установлено законом',
+        strictLegalCompliance: 'Строгое соблюдение законодательства',
+        strictLegalComplianceHint: 'Строго соблюдать все требования законодательства. Отключайте только для тестирования.',
     }
 };

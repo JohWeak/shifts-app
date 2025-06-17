@@ -1,20 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Card, Form, Button, Row, Col, Alert, Spinner, Nav, Tab } from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Container, Card, Form, Button, Row, Col, Alert, Spinner, Nav, Tab} from 'react-bootstrap';
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
-import { useI18n } from '../../shared/lib/i18n/i18nProvider';
-import { fetchSystemSettings, updateSystemSettings } from '../../app/store/slices/settingsSlice';
+import {useI18n} from '../../shared/lib/i18n/i18nProvider';
+import {fetchSystemSettings, updateSystemSettings} from '../../app/store/slices/settingsSlice';
+import { fetchWorkSites } from '../../app/store/slices/scheduleSlice';
+import PositionSettings from '../position-settings/PositionSettings';
 
 const SystemSettings = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { systemSettings, loading, error } = useSelector(state => state.settings);
+
+    const {systemSettings, loading, error} = useSelector(state => state.settings);
+    const { workSites, workSitesLoading } = useSelector(state => state.schedule);
+
     const [localSettings, setLocalSettings] = useState(systemSettings);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [activeTab, setActiveTab] = useState('general');
+    const [selectedSiteId, setSelectedSiteId] = useState('');
+
+
 
     useEffect(() => {
         dispatch(fetchSystemSettings());
+        dispatch(fetchWorkSites());
     }, [dispatch]);
 
     useEffect(() => {
@@ -22,7 +31,7 @@ const SystemSettings = () => {
     }, [systemSettings]);
 
     const handleChange = (field, value) => {
-        setLocalSettings(prev => ({ ...prev, [field]: value }));
+        setLocalSettings(prev => ({...prev, [field]: value}));
     };
 
     const handleSave = async () => {
@@ -39,8 +48,8 @@ const SystemSettings = () => {
     if (loading === 'pending' && !localSettings.weekStartDay !== undefined) {
         return (
             <AdminLayout>
-                <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-                    <Spinner animation="border" />
+                <Container className="d-flex justify-content-center align-items-center" style={{minHeight: '60vh'}}>
+                    <Spinner animation="border"/>
                 </Container>
             </AdminLayout>
         );
@@ -70,7 +79,7 @@ const SystemSettings = () => {
                         >
                             {loading === 'pending' ? (
                                 <>
-                                    <Spinner size="sm" className="me-2" />
+                                    <Spinner size="sm" className="me-2"/>
                                     {t('common.saving')}
                                 </>
                             ) : (
@@ -84,7 +93,8 @@ const SystemSettings = () => {
                 </div>
 
                 {error && (
-                    <Alert variant="danger" dismissible onClose={() => {}}>
+                    <Alert variant="danger" dismissible onClose={() => {
+                    }}>
                         {error}
                     </Alert>
                 )}
@@ -114,6 +124,18 @@ const SystemSettings = () => {
                                             </Nav.Link>
                                         </Nav.Item>
                                         <Nav.Item>
+                                            <Nav.Link eventKey="positions">
+                                                <i className="bi bi-diagram-3 me-2"></i>
+                                                {t('settings.positionSettings')}
+                                            </Nav.Link>
+                                        </Nav.Item>
+                                        <Nav.Item>
+                                            <Nav.Link eventKey="constraints">
+                                                <i className="bi bi-people me-2"></i>
+                                                {t('settings.constraintSettings')}
+                                            </Nav.Link>
+                                        </Nav.Item>
+                                        <Nav.Item>
                                             <Nav.Link eventKey="notifications">
                                                 <i className="bi bi-bell me-2"></i>
                                                 {t('settings.notificationSettings')}
@@ -125,6 +147,7 @@ const SystemSettings = () => {
                                                 {t('settings.securitySettings')}
                                             </Nav.Link>
                                         </Nav.Item>
+
                                     </Nav>
                                 </Card.Body>
                             </Card>
@@ -132,6 +155,7 @@ const SystemSettings = () => {
 
                         <Col md={9}>
                             <Tab.Content>
+
                                 {/* General Settings */}
                                 <Tab.Pane eventKey="general">
                                     <Card>
@@ -227,7 +251,8 @@ const SystemSettings = () => {
                                                                 value={localSettings.minRestBetweenShifts}
                                                                 onChange={(e) => handleChange('minRestBetweenShifts', parseInt(e.target.value))}
                                                             />
-                                                            <span className="input-group-text">{t('settings.hours')}</span>
+                                                            <span
+                                                                className="input-group-text">{t('settings.hours')}</span>
                                                         </div>
                                                     </Form.Group>
                                                 </Col>
@@ -243,13 +268,14 @@ const SystemSettings = () => {
                                                                 value={localSettings.maxConsecutiveDays || 6}
                                                                 onChange={(e) => handleChange('maxConsecutiveDays', parseInt(e.target.value))}
                                                             />
-                                                            <span className="input-group-text">{t('settings.days')}</span>
+                                                            <span
+                                                                className="input-group-text">{t('settings.days')}</span>
                                                         </div>
                                                     </Form.Group>
                                                 </Col>
                                             </Row>
 
-                                            <hr />
+                                            <hr/>
 
                                             <h6 className="mb-3">{t('settings.automationSettings')}</h6>
 
@@ -281,6 +307,190 @@ const SystemSettings = () => {
                                         </Card.Body>
                                     </Card>
                                 </Tab.Pane>
+                                {/* Positions Settings */}
+                                <Tab.Pane eventKey="positions">
+                                    <Card>
+                                        <Card.Header>
+                                            <h5 className="mb-0">{t('settings.positionSettings')}</h5>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            <Form.Group className="mb-4">
+                                                <Form.Label>{t('settings.selectSite')}</Form.Label>
+                                                <Form.Select
+                                                    value={selectedSiteId}
+                                                    onChange={(e) => setSelectedSiteId(e.target.value)}
+                                                    disabled={workSitesLoading === 'pending'} // Блокируем, пока идет загрузка
+                                                >
+                                                    <option value="">{t('settings.selectSitePrompt')}</option>
+                                                    {/* Используем workSites из Redux */}
+                                                    {(workSites || []).map(site => (
+                                                        <option key={site.site_id} value={site.site_id}>
+                                                            {site.site_name}
+                                                        </option>
+                                                    ))}
+                                                </Form.Select>
+                                            </Form.Group>
+
+                                            {selectedSiteId && (
+                                                <PositionSettings siteId={selectedSiteId} />
+                                            )}
+                                        </Card.Body>
+                                    </Card>
+                                </Tab.Pane>
+
+                                {/* Constraint Settings */}
+                                <Tab.Pane eventKey="constraints">
+                                    <Card>
+                                        <Card.Header>
+                                            <h6 className="mb-3">{t('settings.constraintSettings')}</h6>
+                                        </Card.Header>
+                                        <Card.Body>
+
+                                            <Row>
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-4">
+                                                        <Form.Label>{t('settings.maxCannotWorkDays')}</Form.Label>
+                                                        <div className="input-group">
+                                                            <Form.Control
+                                                                type="number"
+                                                                min="0"
+                                                                max="7"
+                                                                value={localSettings.maxCannotWorkDays || 2}
+                                                                onChange={(e) => handleChange('maxCannotWorkDays', parseInt(e.target.value))}
+                                                            />
+                                                            <span
+                                                                className="input-group-text">{t('settings.daysPerWeek')}</span>
+                                                        </div>
+                                                        <Form.Text className="text-muted">
+                                                            {t('settings.maxCannotWorkDaysHint')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-4">
+                                                        <Form.Label>{t('settings.maxPreferWorkDays')}</Form.Label>
+                                                        <div className="input-group">
+                                                            <Form.Control
+                                                                type="number"
+                                                                min="0"
+                                                                max="7"
+                                                                value={localSettings.maxPreferWorkDays || 3}
+                                                                onChange={(e) => handleChange('maxPreferWorkDays', parseInt(e.target.value))}
+                                                            />
+                                                            <span
+                                                                className="input-group-text">{t('settings.daysPerWeek')}</span>
+                                                        </div>
+                                                        <Form.Text className="text-muted">
+                                                            {t('settings.maxPreferWorkDaysHint')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+
+                                            <Row>
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-4">
+                                                        <Form.Label>{t('settings.defaultEmployeesPerShift')}</Form.Label>
+                                                        <Form.Control
+                                                            type="number"
+                                                            min="1"
+                                                            max="10"
+                                                            value={localSettings.defaultEmployeesPerShift || 1}
+                                                            onChange={(e) => handleChange('defaultEmployeesPerShift', parseInt(e.target.value))}
+                                                        />
+                                                        <Form.Text className="text-muted">
+                                                            {t('settings.defaultEmployeesPerShiftHint')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-4">
+                                                        <Form.Label>{t('settings.algorithmMaxTime')}</Form.Label>
+                                                        <div className="input-group">
+                                                            <Form.Control
+                                                                type="number"
+                                                                min="30"
+                                                                max="300"
+                                                                step="30"
+                                                                value={localSettings.algorithmMaxTime || 120}
+                                                                onChange={(e) => handleChange('algorithmMaxTime', parseInt(e.target.value))}
+                                                            />
+                                                            <span
+                                                                className="input-group-text">{t('settings.seconds')}</span>
+                                                        </div>
+                                                        <Form.Text className="text-muted">
+                                                            {t('settings.algorithmMaxTimeHint')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+
+                                            {/* Legal Compliance Settings */}
+                                            <hr className="my-4"/>
+                                            <h6 className="mb-3">{t('settings.legalCompliance')}</h6>
+
+                                            <Alert variant="info">
+                                                <i className="bi bi-info-circle me-2"></i>
+                                                {t('settings.legalComplianceInfo')}
+                                            </Alert>
+
+                                            <Row>
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>{t('settings.maxHoursPerDay')}</Form.Label>
+                                                        <div className="input-group">
+                                                            <Form.Control
+                                                                type="number"
+                                                                value={12}
+                                                                disabled
+                                                                className="bg-light"
+                                                            />
+                                                            <span
+                                                                className="input-group-text">{t('settings.hours')}</span>
+                                                        </div>
+                                                        <Form.Text className="text-muted">
+                                                            {t('settings.fixedByLaw')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>{t('settings.minRestBetweenShifts')}</Form.Label>
+                                                        <div className="input-group">
+                                                            <Form.Control
+                                                                type="number"
+                                                                value={11}
+                                                                disabled
+                                                                className="bg-light"
+                                                            />
+                                                            <span
+                                                                className="input-group-text">{t('settings.hours')}</span>
+                                                        </div>
+                                                        <Form.Text className="text-muted">
+                                                            {t('settings.fixedByLaw')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+
+                                            <Form.Group className="mb-3">
+                                                <Form.Check
+                                                    type="switch"
+                                                    id="strictLegalCompliance"
+                                                    label={t('settings.strictLegalCompliance')}
+                                                    checked={localSettings.strictLegalCompliance ?? true}
+                                                    onChange={(e) => handleChange('strictLegalCompliance', e.target.checked)}
+                                                />
+                                                <Form.Text className="text-muted d-block ms-4">
+                                                    {t('settings.strictLegalComplianceHint')}
+                                                </Form.Text>
+                                            </Form.Group>
+                                        </Card.Body>
+                                    </Card>
+                                </Tab.Pane>
 
                                 {/* Notification Settings */}
                                 <Tab.Pane eventKey="notifications">
@@ -299,7 +509,7 @@ const SystemSettings = () => {
                                                 />
                                             </Form.Group>
 
-                                            <hr />
+                                            <hr/>
 
                                             <h6 className="mb-3">{t('settings.notificationTypes')}</h6>
 
@@ -359,7 +569,8 @@ const SystemSettings = () => {
                                                                 value={localSettings.sessionTimeout || 60}
                                                                 onChange={(e) => handleChange('sessionTimeout', parseInt(e.target.value))}
                                                             />
-                                                            <span className="input-group-text">{t('settings.minutes')}</span>
+                                                            <span
+                                                                className="input-group-text">{t('settings.minutes')}</span>
                                                         </div>
                                                     </Form.Group>
                                                 </Col>

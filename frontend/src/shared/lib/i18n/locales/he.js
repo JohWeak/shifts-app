@@ -225,11 +225,14 @@ export const he = {
         cancelChanges: 'בטל שינויים',
         description: 'תיאור',
         editPosition: 'ערוך תפקיד',
+        employeesPerShift: 'אנשים במשמרת',
         noPositions: 'לא הוגדרו תפקידים',
         positionCode: 'קוד תפקיד',
         positionName: 'שם התפקיד',
         positions: 'תפקידים',
+        profession: 'מקצוע',
         saveChanges: 'שמור שינויים',
+        requirements: 'דרישות',
         unsavedChanges: 'יש לך שינויים שלא נשמרו',
     },
     reports: {
@@ -298,6 +301,8 @@ export const he = {
         scheduleSettings: 'סידור עבודה',
         notificationSettings: 'התראות',
         securitySettings: 'אבטחה',
+        positionSettings: 'עמדות',
+        constraintSettings: 'אילוצים',
 
         // General
         dateFormat: 'פורמט תאריך',
@@ -314,6 +319,9 @@ export const he = {
         autoPublishHint: 'פרסם סידורים באופן אוטומטי לאחר יצירתם',
         autoAssignShifts: 'שיבוץ אוטומטי למשמרות',
         autoAssignHint: 'שבץ עובדים באופן אוטומטי על בסיס זמינותם',
+
+        selectSite: 'בחר אתר עבודה',
+        selectSitePrompt: 'בחר אתר עבודה להגדרות',
 
         // Notifications
         enableNotifications: 'הפעל התראות',
@@ -334,6 +342,24 @@ export const he = {
         minutes: 'דקות',
 
         // Messages
-        saveSuccess: 'ההגדרות נשמרו בהצלחה'
+        saveSuccess: 'ההגדרות נשמרו בהצלחה',
+
+        maxCannotWorkDays: 'מקסימום ימי "לא יכול לעבוד"',
+        maxCannotWorkDaysHint: 'מספר מקסימלי של ימים בשבוע שעובד יכול לסמן כלא זמין',
+        maxPreferWorkDays: 'מקסימום ימי "מעדיף לעבוד"',
+        maxPreferWorkDaysHint: 'מספר מקסימלי של ימים בשבוע שעובד יכול לסמן כמועדפים',
+        daysPerWeek: 'ימים/שבוע',
+        defaultEmployeesPerShift: 'עובדים למשמרת כברירת מחדל',
+        defaultEmployeesPerShiftHint: 'מספר העובדים הנדרש למשמרת כברירת מחדל (ניתן לשנות לכל תפקיד)',
+        algorithmMaxTime: 'זמן מקסימלי לאלגוריתם',
+        algorithmMaxTimeHint: 'זמן מקסימלי המותר לאופטימיזציית סידור',
+        seconds: 'שניות',
+
+        legalCompliance: 'עמידה בחוק',
+        legalComplianceInfo: 'הגדרות אלו נדרשות על פי חוק העבודה הישראלי ואינן ניתנות לשינוי',
+        maxHoursPerDay: 'מקסימום שעות ביום',
+        fixedByLaw: 'קבוע בחוק',
+        strictLegalCompliance: 'אכיפה קפדנית של החוק',
+        strictLegalComplianceHint: 'אכוף בקפדנות את כל דרישות החוק. כבה רק למטרות בדיקה.'
     },
 };

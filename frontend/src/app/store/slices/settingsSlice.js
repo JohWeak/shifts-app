@@ -37,7 +37,16 @@ const settingsSlice = createSlice({
             enableNotifications: true,
             autoPublishSchedule: false,
             defaultScheduleDuration: 7, // days
-            minRestBetweenShifts: 8, // hours
+            minRestBetweenShifts: 8,
+            // Constraint settings
+            maxCannotWorkDays: 2,
+            maxPreferWorkDays: 3,
+            defaultEmployeesPerShift: 1,
+            algorithmMaxTime: 120,
+            strictLegalCompliance: true,
+
+            // Position-specific settings (можно переопределить для каждой позиции)
+            positionSettings: {},// hours
         },
         loading: 'idle',
         error: null,

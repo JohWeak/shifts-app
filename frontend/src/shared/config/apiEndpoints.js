@@ -35,6 +35,12 @@ export const API_ENDPOINTS = {
         EMPLOYEE: (empId) => `/api/constraints/employee/${empId}`
     },
     SETTINGS: {
-        SYSTEM: '/api/settings/system'
-    }
+        SYSTEM: '/api/settings/system',
+        POSITIONS: '/api/positions',
+        POSITION_UPDATE: (id) => `/api/positions/${id}`,
+    },
+    POSITIONS: {
+        BY_SITE: (siteId) => `/api/sites/${siteId}/positions`,
+        DETAILS: (positionId) => `/api/positions/${positionId}`
+    },
 };

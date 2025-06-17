@@ -223,14 +223,17 @@ export const en = {
     position: {
         addPosition: 'Add Position', 
         cancelChanges: 'Cancel Changes',
-        description: 'Description', 
+        description: 'Description',
+        employeesPerShift: 'Employees per Shift',
         editPosition: 'Edit Position',
         noPositions: 'No positions configured',
         positionCode: 'Position Code', 
         positionName: 'Position Name', 
         positions: 'Positions',
+        profession: 'Profession',
+        requirements: 'Requirements',
         saveChanges: 'Save Changes',
-        unsavedChanges: 'You have unsaved changes'
+        unsavedChanges: 'You have unsaved changes',
     },
     reports: {
         dateRange: 'Date Range',
@@ -298,6 +301,8 @@ export const en = {
         scheduleSettings: 'Schedule',
         notificationSettings: 'Notifications',
         securitySettings: 'Security',
+        positionSettings: 'Positions',
+        constraintSettings: 'Constraints',
 
         // General
         dateFormat: 'Date Format',
@@ -314,6 +319,9 @@ export const en = {
         autoPublishHint: 'Automatically publish schedules after generation',
         autoAssignShifts: 'Auto-assign Shifts',
         autoAssignHint: 'Automatically assign employees based on availability',
+
+        selectSite: 'Select Site',
+        selectSitePrompt: 'Select a site to configurate',
 
         // Notifications
         enableNotifications: 'Enable Notifications',
@@ -334,6 +342,24 @@ export const en = {
         minutes: 'minutes',
 
         // Messages
-        saveSuccess: 'Settings saved successfully'
+        saveSuccess: 'Settings saved successfully',
+
+        maxCannotWorkDays: 'Maximum "Cannot Work" Days',
+        maxCannotWorkDaysHint: 'Maximum days per week an employee can mark as unavailable',
+        maxPreferWorkDays: 'Maximum "Prefer to Work" Days',
+        maxPreferWorkDaysHint: 'Maximum days per week an employee can mark as preferred',
+        daysPerWeek: 'days/week',
+        defaultEmployeesPerShift: 'Default Employees per Shift',
+        defaultEmployeesPerShiftHint: 'Default number of employees required per shift (can be overridden per position)',
+        algorithmMaxTime: 'Algorithm Time Limit',
+        algorithmMaxTimeHint: 'Maximum time allowed for schedule optimization',
+        seconds: 'seconds',
+
+        legalCompliance: 'Legal Compliance',
+        legalComplianceInfo: 'These settings are required by Israeli labor law and cannot be changed',
+        maxHoursPerDay: 'Maximum Hours per Day',
+        fixedByLaw: 'Fixed by law',
+        strictLegalCompliance: 'Enforce Strict Legal Compliance',
+        strictLegalComplianceHint: 'Strictly enforce all legal requirements. Disable only for testing purposes.',
     }
 };
