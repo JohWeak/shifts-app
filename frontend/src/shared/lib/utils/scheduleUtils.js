@@ -1,36 +1,54 @@
-import { format, addDays, parseISO } from 'date-fns';
+import { format, addDays, startOfWeek, parseISO } from 'date-fns';
 
-export const getWeekStartDay = (locale) => {
-    // Для иврита - воскресенье (0), для остальных - понедельник (1)
-    return locale === 'he' ? 0 : 1;
+export const getWeekStartDay = (systemSettings) => {
+    // Из настроек системы, а не из локали
+    return systemSettings?.weekStartDay ?? 0; // По умолчанию воскресенье
 };
 
-export const isValidWeekStartDate = (dateString, locale = 'en') => {
+export const isValidWeekStartDate = (dateString, weekStartDay = 0) => {
     try {
         const date = parseISO(dateString);
-        const expectedStartDay = getWeekStartDay(locale);
-        return date.getDay() === expectedStartDay;
+        return date.getDay() === weekStartDay;
     } catch {
         return false;
     }
 };
 
-export const getNextWeekStart = (locale = 'en') => {
+export const getNextWeekStart = (weekStartDay = 0) => {
     const today = new Date();
     const currentDay = today.getDay();
-    const targetDay = getWeekStartDay(locale);
 
     let daysUntilStart;
-    if (currentDay === targetDay) {
+    if (currentDay === weekStartDay) {
         daysUntilStart = 7; // Следующая неделя
-    } else if (currentDay < targetDay) {
-        daysUntilStart = targetDay - currentDay;
+    } else if (currentDay < weekStartDay) {
+        daysUntilStart = weekStartDay - currentDay;
     } else {
-        daysUntilStart = 7 - currentDay + targetDay;
+        daysUntilStart = 7 - currentDay + weekStartDay;
     }
 
     const nextStart = addDays(today, daysUntilStart);
     return format(nextStart, 'yyyy-MM-dd');
+};
+
+export const getWeekDates = (startDate, weekStartDay = 0) => {
+    const start = parseISO(startDate);
+    const dates = [];
+
+    // Убедимся, что начинаем с правильного дня недели
+    let currentDate = start;
+    if (currentDate.getDay() !== weekStartDay) {
+        // Найти ближайший день начала недели
+        const diff = (weekStartDay - currentDate.getDay() + 7) % 7;
+        currentDate = addDays(currentDate, diff);
+    }
+
+    // Генерируем 7 дней
+    for (let i = 0; i < 7; i++) {
+        dates.push(addDays(currentDate, i));
+    }
+
+    return dates;
 };
 
 export const formatScheduleDate = (startDate, endDate = null) => {

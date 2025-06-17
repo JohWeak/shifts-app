@@ -1,6 +1,6 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/EmployeeManagement.js
 import React from 'react';
-import AdminLayout from '../widgets/AdminLayout/AdminLayout';
+import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
 import { Container, Card } from 'react-bootstrap';
 
 const EmployeeManagement = () => {

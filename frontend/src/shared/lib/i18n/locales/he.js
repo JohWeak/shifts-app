@@ -33,6 +33,7 @@ export const he = {
         reload: 'טען עמוד מחדש',
         reset: 'אפס',
         save: 'שמור',
+        saving: 'Saving...',
         search: 'חיפוש',
         settings: 'הגדרות',
         status: 'סטטוס',
@@ -40,7 +41,10 @@ export const he = {
         time: 'שעה',
         to: 'עד-',
         warning: 'אזהרה',
+        week: 'שבוע',
+        weeks: 'שבועות',
         yes: 'כן',
+
     },
     auth: {
         createAccount: 'צור חשבון',
@@ -287,5 +291,49 @@ export const he = {
         weekPeriod: 'תקופת השבוע',
         weekStartWarning: 'תחילת שבוע לא חוקית',
         workSite: 'אתר עבודה',
+    },
+    settings: {
+        systemSettings: 'הגדרות מערכת',
+        generalSettings: 'כללי',
+        scheduleSettings: 'סידור עבודה',
+        notificationSettings: 'התראות',
+        securitySettings: 'אבטחה',
+
+        // General
+        dateFormat: 'פורמט תאריך',
+        timeFormat: 'פורמט שעה',
+
+        // Schedule
+        weekStartDay: 'יום תחילת השבוע',
+        weekStartDayHint: 'בחר איזה יום ייחשב ליום הראשון של השבוע',
+        defaultScheduleDuration: 'משך סידור ברירת מחדל',
+        minRestBetweenShifts: 'מנוחה מינימלית בין משמרות',
+        maxConsecutiveDays: 'מקסימום ימי עבודה רצופים',
+        automationSettings: 'אוטומציה',
+        autoPublishSchedule: 'פרסום אוטומטי של סידורים',
+        autoPublishHint: 'פרסם סידורים באופן אוטומטי לאחר יצירתם',
+        autoAssignShifts: 'שיבוץ אוטומטי למשמרות',
+        autoAssignHint: 'שבץ עובדים באופן אוטומטי על בסיס זמינותם',
+
+        // Notifications
+        enableNotifications: 'הפעל התראות',
+        notificationTypes: 'סוגי התראות',
+        notifySchedulePublished: 'פורסם סידור חדש',
+        notifyShiftReminder: 'תזכורות למשמרת',
+        notifyScheduleChange: 'שינויים בסידור העבודה',
+
+        // Security
+        sessionTimeout: 'זמן קצוב לסשן (Session)',
+        passwordMinLength: 'אורך סיסמה מינימלי',
+        requirePasswordChange: 'דרוש שינוי סיסמה בכניסה ראשונה',
+        requirePasswordChangeHint: 'עובדים חדשים חייבים לשנות את סיסמתם בכניסה הראשונה למערכת',
+
+        // Units
+        hours: 'שעות',
+        days: 'ימים',
+        minutes: 'דקות',
+
+        // Messages
+        saveSuccess: 'ההגדרות נשמרו בהצלחה'
     },
 };

@@ -1,9 +1,9 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../widgets/AdminLayout/AdminLayout';
+import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
 import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import {useI18n} from "../shared/lib/i18n/i18nProvider";
+import {useI18n} from "../../shared/lib/i18n/i18nProvider";
 
 const Dashboard = () => {
     const navigate = useNavigate();

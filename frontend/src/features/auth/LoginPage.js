@@ -34,9 +34,9 @@ export const Login = () => {
 
     // Эффект для редиректа после успешного входа
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && user) {
             const redirectPath = user.role === 'admin' ? '/admin' : '/employee/dashboard';
-            navigate(redirectPath);
+            navigate(redirectPath, { replace: true });
         }
     }, [isAuthenticated, user, navigate]);
 

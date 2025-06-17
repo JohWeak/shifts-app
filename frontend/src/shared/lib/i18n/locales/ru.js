@@ -40,6 +40,8 @@ export const ru = {
         time: 'Время',
         to: 'По',
         warning: 'Предупреждение',
+        week: 'Неделя',
+        weeks: 'Недели',
         yes: 'Да',
     },
     auth: {
@@ -288,4 +290,48 @@ export const ru = {
         weekStartWarning: 'Неверное начало недели',
         workSite: 'Рабочий объект',
     },
+    settings: {
+        systemSettings: 'Системные настройки',
+        generalSettings: 'Общие',
+        scheduleSettings: 'Расписание',
+        notificationSettings: 'Уведомления',
+        securitySettings: 'Безопасность',
+
+        // General
+        dateFormat: 'Формат даты',
+        timeFormat: 'Формат времени',
+
+        // Schedule
+        weekStartDay: 'День начала недели',
+        weekStartDayHint: 'Выберите день, который будет считаться первым днем недели',
+        defaultScheduleDuration: 'Длительность расписания по умолчанию',
+        minRestBetweenShifts: 'Минимальный отдых между сменами',
+        maxConsecutiveDays: 'Максимум рабочих дней подряд',
+        automationSettings: 'Автоматизация',
+        autoPublishSchedule: 'Авто-публикация расписаний',
+        autoPublishHint: 'Автоматически публиковать расписания после генерации',
+        autoAssignShifts: 'Авто-назначение смен',
+        autoAssignHint: 'Автоматически назначать сотрудников на основе их доступности',
+
+        // Notifications
+        enableNotifications: 'Включить уведомления',
+        notificationTypes: 'Типы уведомлений',
+        notifySchedulePublished: 'Опубликовано новое расписание',
+        notifyShiftReminder: 'Напоминания о сменах',
+        notifyScheduleChange: 'Изменения в расписании',
+
+        // Security
+        sessionTimeout: 'Тайм-аут сессии',
+        passwordMinLength: 'Минимальная длина пароля',
+        requirePasswordChange: 'Требовать смену пароля при первом входе',
+        requirePasswordChangeHint: 'Новые сотрудники должны сменить пароль при первом входе в систему',
+
+        // Units
+        hours: 'часов',
+        days: 'дней',
+        minutes: 'минут',
+
+        // Messages
+        saveSuccess: 'Настройки успешно сохранены'
+    }
 };

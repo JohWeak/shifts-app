@@ -13,8 +13,12 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import './AdminLayout.css';
 import { logout } from '../../app/store/slices/authSlice';
+import { LanguageSwitch } from '../../shared/ui/LanguageSwitch/LanguageSwitch';
+import {useI18n} from "../../shared/lib/i18n/i18nProvider";
+
 
 const AdminLayout = ({ children }) => {
+    const { t } = useI18n();
     const navigate = useNavigate();
     const location = useLocation();
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -142,13 +146,15 @@ const AdminLayout = ({ children }) => {
                         {/* Brand */}
                         <Navbar.Brand className="brand-logo mb-0">
                             <i className="bi bi-calendar-check-fill text-primary me-2"></i>
-                            <span className="brand-text">Shifts</span>
-                            <Badge bg="secondary" className="ms-2 brand-badge">Admin</Badge>
+                            <span className="brand-text">{t('common.appName')}</span>
+                            <Badge bg="secondary" className="ms-2 brand-badge">{t('common.admin')}</Badge>
                         </Navbar.Brand>
                     </div>
 
                     {/* Right side - User menu */}
-                    <div className="d-flex align-items-center">
+
+                    <div className="d-flex align-items-center gap-3">
+                        <LanguageSwitch />
                         <Dropdown align="end">
                             <Dropdown.Toggle
                                 variant="light"
@@ -159,14 +165,14 @@ const AdminLayout = ({ children }) => {
                                     <div className="user-avatar me-2">
                                         <i className="bi bi-person-circle"></i>
                                     </div>
-                                    <span className="d-none d-md-inline">Admin</span>
+                                    <span className="d-none d-md-inline">{t('common.admin')}</span>
                                 </div>
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu className="user-dropdown-menu shadow">
                                 <Dropdown.Header>
-                                    <div className="text-muted small">Signed in as</div>
-                                    <div className="fw-semibold">Administrator</div>
+                                    <div className="text-muted small">{t('auth.signedInAs')}</div>
+                                    <div className="fw-semibold">{t('common.admin')}</div>
                                 </Dropdown.Header>
                                 <Dropdown.Divider />
                                 <Dropdown.Item>

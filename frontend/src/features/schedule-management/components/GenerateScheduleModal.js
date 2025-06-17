@@ -14,13 +14,15 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
 
     // Получаем данные из Redux
     const {workSites, workSitesLoading} = useSelector((state) => state.schedule || {});
+    const { systemSettings } = useSelector(state => state.settings);
 
     // Локальное состояние для настроек формы
     const [settings, setSettings] = useState({
         ...DEFAULT_GENERATION_SETTINGS,
-        weekStart: getNextWeekStart(locale),
-        algorithm: 'auto' // Установим дефолтное значение
+        weekStart: getNextWeekStart(systemSettings?.weekStartDay || 0),
+        algorithm: 'auto'
     });
+
     const [formError, setFormError] = useState('');
 
     const hasFetched = useRef(false);
@@ -49,22 +51,24 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
 
 // Отдельный эффект для установки дефолтного site_id
     useEffect(() => {
-        if (workSites.length > 0 && !settings.site_id) {
+        // Условие: если список сайтов ЗАГРУЖЕН, но в настройках еще НЕТ site_id
+        if (safeWorkSites.length > 0 && !settings.site_id) {
             setSettings(prev => ({
                 ...prev,
-                site_id: workSites[0].site_id
+                site_id: safeWorkSites[0].site_id // Устанавливаем ПЕРВЫЙ сайт из списка
             }));
         }
-    }, [workSites])
+// Зависимость от safeWorkSites, чтобы эффект сработал, когда они придут
+    }, [safeWorkSites, settings.site_id]);
 
 
     const handleDateChange = (e) => {
         const date = e.target.value;
-        setSettings(prev => ({...prev, weekStart: date}));
+        setSettings(prev => ({ ...prev, weekStart: date }));
 
-        if (date && !isValidWeekStartDate(date, locale)) {
-            const weekStartName = locale === 'he' ? t('days.sunday') : t('days.monday');
-            setFormError(t('errors.weekStartInvalid', {day: weekStartName}));
+        if (date && !isValidWeekStartDate(date, systemSettings?.weekStartDay || 0)) {
+            const weekStartName = systemSettings?.weekStartDay === 1 ? t('days.monday') : t('days.sunday');
+            setFormError(t('errors.weekStartInvalid', { day: weekStartName }));
         } else {
             setFormError('');
         }
@@ -118,10 +122,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                                         {formError}
                                     </Form.Control.Feedback>
                                     <Form.Text className="text-muted">
-                                        {locale === 'he'
-                                            ? t('modal.generateSchedule.weekStartHintSunday')
-                                            : t('modal.generateSchedule.weekStartHintMonday')
-                                        }
+
                                     </Form.Text>
                                 </Form.Group>
                             </Col>

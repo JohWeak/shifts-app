@@ -40,6 +40,8 @@ export const en = {
         time: 'Time', 
         to: 'To', 
         warning: 'Warning',
+        week: 'Week',
+        weeks: 'Weeks',
         yes: 'Yes',
     },
     auth: {
@@ -54,7 +56,8 @@ export const en = {
         rememberMe: 'Remember me',
         resetPassword: 'Reset Password', 
         sendResetLink: 'Send Reset Link', 
-        signUp: 'Sign Up', 
+        signUp: 'Sign Up',
+        signedInAs: 'Signed in as',
         username: 'Username',
         welcome: 'Welcome back!',
     },
@@ -288,5 +291,49 @@ export const en = {
         weekPeriod: 'Week Period',
         weekStartWarning: 'Invalid week start',
         workSite: 'Work Site',
+    },
+    settings: {
+        systemSettings: 'System Settings',
+        generalSettings: 'General',
+        scheduleSettings: 'Schedule',
+        notificationSettings: 'Notifications',
+        securitySettings: 'Security',
+
+        // General
+        dateFormat: 'Date Format',
+        timeFormat: 'Time Format',
+
+        // Schedule
+        weekStartDay: 'Week Start Day',
+        weekStartDayHint: 'Choose which day should be considered the first day of the week',
+        defaultScheduleDuration: 'Default Schedule Duration',
+        minRestBetweenShifts: 'Minimum Rest Between Shifts',
+        maxConsecutiveDays: 'Maximum Consecutive Work Days',
+        automationSettings: 'Automation',
+        autoPublishSchedule: 'Auto-publish Schedules',
+        autoPublishHint: 'Automatically publish schedules after generation',
+        autoAssignShifts: 'Auto-assign Shifts',
+        autoAssignHint: 'Automatically assign employees based on availability',
+
+        // Notifications
+        enableNotifications: 'Enable Notifications',
+        notificationTypes: 'Notification Types',
+        notifySchedulePublished: 'New Schedule Published',
+        notifyShiftReminder: 'Shift Reminders',
+        notifyScheduleChange: 'Schedule Changes',
+
+        // Security
+        sessionTimeout: 'Session Timeout',
+        passwordMinLength: 'Minimum Password Length',
+        requirePasswordChange: 'Require Password Change on First Login',
+        requirePasswordChangeHint: 'New employees must change their password on first login',
+
+        // Units
+        hours: 'hours',
+        days: 'days',
+        minutes: 'minutes',
+
+        // Messages
+        saveSuccess: 'Settings saved successfully'
     }
 };

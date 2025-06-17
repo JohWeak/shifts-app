@@ -3,6 +3,9 @@ import React, {useMemo} from 'react';
 import {Table, Button, Badge, Spinner} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
 import {useI18n} from '../../../shared/lib/i18n/i18nProvider';
+import { getWeekDates } from '../../../shared/lib/utils/scheduleUtils';
+import {useSelector} from "react-redux";
+import {format} from "date-fns";
 
 const PositionScheduleEditor = ({
                                     position,
@@ -19,6 +22,8 @@ const PositionScheduleEditor = ({
                                     scheduleDetails
                                 }) => {
     const {t} = useI18n();
+    const { systemSettings } = useSelector(state => state.settings);
+
 
     // Extract data from scheduleDetails
     const assignments = useMemo(() => {
@@ -35,9 +40,6 @@ const PositionScheduleEditor = ({
         return scheduleDetails.assignments.filter(a => a.position_id === position.pos_id);
     }, [scheduleDetails, position.pos_id]);
 
-
-    console.log('ASS - Assignments:', assignments);
-    console.log('ASS 2 - Assignments:', scheduleDetails.assignments);
 
 
     const employees = useMemo(() => {
@@ -72,11 +74,10 @@ const PositionScheduleEditor = ({
     };
 
     // Helper function to format date for header
-    const formatDateForHeader = (dateStr) => {
-        const date = new Date(dateStr);
-        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
-        return formattedDate;
-    };
+    const weekDates = useMemo(() => {
+        if (!scheduleDetails?.schedule?.start_date) return [];
+        return getWeekDates(scheduleDetails.schedule.start_date, systemSettings?.weekStartDay || 0);
+    }, [scheduleDetails, systemSettings]);
 
     // Helper function to get day name
     const getDayName = (dayIndex) => {
@@ -125,17 +126,8 @@ const PositionScheduleEditor = ({
     const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
     const renderCell = (shift, dayIndex) => {
-        const date = new Date(scheduleDetails.schedule.start_date);
-        date.setDate(date.getDate() + dayIndex);
-        const dateStr = date.toISOString().split('T')[0];
-
-        // Debug
-        console.log(`=== Checking cell [${position.pos_name}][${shift.shift_name}][${dateStr}] ===`);
-
-        if (assignments.length > 0 && dayIndex === 0 && shift.shift_id === 1) {
-            console.log('Sample assignment:', assignments[0]);
-            console.log('Assignment fields:', Object.keys(assignments[0]));
-        }
+        const date = weekDates[dayIndex];
+        const dateStr = format(date, 'yyyy-MM-dd');
 
 
         // Find assignments for this position, shift and date
@@ -143,36 +135,6 @@ const PositionScheduleEditor = ({
             // Check different possible field names
             const assignmentPosId = assignment.pos_id || assignment.position_id;
             const assignmentDate = assignment.work_date || assignment.date;
-
-            const cellAssignments = assignments.filter(assignment => {
-                const assignmentPosId = assignment.pos_id || assignment.position_id;
-                const assignmentDate = assignment.work_date || assignment.date;
-
-
-                //Debug
-                const matches = assignmentPosId === position.pos_id &&
-                    assignment.shift_id === shift.shift_id &&
-                    assignmentDate === dateStr;
-
-                // Детальное логирование для первой ячейки
-                if (dayIndex === 0 && shift.shift_id === 1) {
-                    console.log('Assignment check:', {
-                        assignment,
-                        assignmentPosId,
-                        expectedPosId: position.pos_id,
-                        posMatch: assignmentPosId === position.pos_id,
-                        assignmentShiftId: assignment.shift_id,
-                        expectedShiftId: shift.shift_id,
-                        shiftMatch: assignment.shift_id === shift.shift_id,
-                        assignmentDate,
-                        expectedDate: dateStr,
-                        dateMatch: assignmentDate === dateStr,
-                        overallMatch: matches
-                    });
-                }
-
-                return matches;
-            });
 
             return assignmentPosId === position.pos_id &&
                 assignment.shift_id === shift.shift_id &&
@@ -189,7 +151,6 @@ const PositionScheduleEditor = ({
                     employee_name: employee.name || `${employee.first_name} ${employee.last_name}`
                 };
             }
-
 
             // If employee not found, use data from assignment
             return {
@@ -323,17 +284,15 @@ const PositionScheduleEditor = ({
                 <thead>
                 <tr>
                     <th className="shift-header">{t('schedule.shift')}</th>
-                    {Array.from({length: 7}, (_, dayIndex) => {
-                        const date = new Date(scheduleDetails.schedule.start_date);
-                        date.setDate(date.getDate() + dayIndex);
-                        const dateStr = date.toISOString().split('T')[0];
+                    {weekDates.map((date, index) => {
+                        const dayIndex = date.getDay();
                         const dayName = getDayName(dayIndex);
-                        const formattedDate = formatDateForHeader(dateStr);
+                        const formattedDate = format(date, 'dd/MM');
 
                         return (
-                            <th key={dayIndex} className="text-center">
+                            <th key={index} className="text-center">
                                 <div>
-                                    <strong>{dayName}</strong><br/>
+                                    <strong>{dayName}</strong><br />
                                     <small>{formattedDate}</small>
                                 </div>
                             </th>

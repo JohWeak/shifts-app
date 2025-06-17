@@ -1,25 +1,32 @@
 // frontend/src/app/store/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { authAPI } from '../../../shared/api/apiService';
 
 // --- Асинхронные экшены (Thunks) ---
 export const login = createAsyncThunk(
     'auth/login',
     async ({ login: identifier, password }, { rejectWithValue }) => {
+
         try {
-            const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+            // Вызываем метод из нашего нового, чистого API
+            const userData = await authAPI.loginUser({
                 login: identifier,
                 password,
             });
-            const { token, id, name, role } = response.data;
+
+            // userData - это уже ответ от сервера (например, { token, user: { id, name, role } })
             // Сохраняем в localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify({ id, name, role }));
-            // Устанавливаем заголовок для будущих запросов axios
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            return { id, name, role, token };
+            localStorage.setItem('token', userData.token);
+            const user = {
+                id: userData.id,
+                name: userData.name,
+                email: userData.email,
+                role: userData.role,
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+
+
+            return { token: userData.token, user: user };
         } catch (error) {
             const message = error.response?.data?.message || 'Login failed';
             return rejectWithValue(message);
@@ -28,12 +35,27 @@ export const login = createAsyncThunk(
 );
 
 // --- Слайс (Slice) ---
+// Безопасно получаем и парсим данные пользователя
+const storedUserJSON = localStorage.getItem('user');
+let initialUser = null;
+try {
+    // Парсим, только если что-то есть
+    if (storedUserJSON) {
+        initialUser = JSON.parse(storedUserJSON);
+    }
+} catch (error) {
+    console.error("Failed to parse user from localStorage:", error);
+    // Если в localStorage поврежденный JSON, считаем, что пользователя нет
+    initialUser = null;
+}
 
-// Начальное состояние, которое пытается восстановить сессию из localStorage
+const initialToken = localStorage.getItem('token');
+
+// Начальное состояние, которое 100% безопасное
 const initialState = {
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    token: localStorage.getItem('token') || null,
-    isAuthenticated: !!localStorage.getItem('token'),
+    user: initialUser,
+    token: initialToken,
+    isAuthenticated: !!initialToken,
     loading: 'idle',
     error: null,
 };
@@ -46,7 +68,7 @@ const authSlice = createSlice({
         logout(state) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            delete axios.defaults.headers.common['Authorization'];
+
             // Сбрасываем состояние
             state.user = null;
             state.token = null;
@@ -64,11 +86,8 @@ const authSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = 'succeeded';
                 state.isAuthenticated = true;
-                state.user = {
-                    id: action.payload.id,
-                    name: action.payload.name,
-                    role: action.payload.role,
-                };
+                // action.payload теперь содержит весь объект, который вернул thunk
+                state.user = action.payload.user;
                 state.token = action.payload.token;
             })
             .addCase(login.rejected, (state, action) => {

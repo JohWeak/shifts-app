@@ -33,5 +33,8 @@ export const API_ENDPOINTS = {
     CONSTRAINTS: {
         BASE: '/api/constraints',
         EMPLOYEE: (empId) => `/api/constraints/employee/${empId}`
+    },
+    SETTINGS: {
+        SYSTEM: '/api/settings/system'
     }
 };

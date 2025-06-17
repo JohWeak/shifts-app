@@ -1,7 +1,6 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import * as scheduleAPI from '../../../shared/api/scheduleAPI';
-import * as worksiteAPI from '../../../shared/api/worksiteAPI';
+import { scheduleAPI, worksiteAPI, employeeAPI } from '../../../shared/api/apiService';
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -12,10 +11,10 @@ export const fetchSchedules = createAsyncThunk(
         try {
             const response = await scheduleAPI.fetchSchedules();
             // Если используется структура с pagination
-            if (response.data && response.data.items) {
-                return response.data.items;
+            if (response && response.items) {
+                return response.items;
             }
-            return response.data || [];
+            return response || [];
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -28,9 +27,9 @@ export const fetchScheduleDetails = createAsyncThunk(
     async (scheduleId, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            console.log('Schedule details response:', response.data); // Для отладки
+            console.log('Schedule details response:', response); // Для отладки
 
-            return response.data; // Возвращаем только data
+            return response; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -43,7 +42,7 @@ export const generateSchedule = createAsyncThunk(
     async (settings, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.generateSchedule(settings);
-            return response.data; // Возвращаем только data
+            return response; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -55,7 +54,7 @@ export const updateScheduleStatus = createAsyncThunk(
     async ({ scheduleId, status }, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.updateScheduleStatus(scheduleId, status);
-            return response.data; // Возвращаем только data
+            return response; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -68,7 +67,7 @@ export const compareAlgorithms = createAsyncThunk(
     async (settings, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.compareAlgorithms(settings);
-            return response.data; // Возвращаем только data
+            return response; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -94,7 +93,7 @@ export const updateScheduleAssignments = createAsyncThunk(
     async ({ scheduleId, changes }, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
-            return response.data; // Возвращаем только data
+            return response;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -118,13 +117,13 @@ export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
     async (params, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.getRecommendations(
+            const response = await employeeAPI.fetchRecommendations(
                 params.scheduleId,
                 params.positionId,
                 params.shiftId,
                 params.date
             );
-            return response.data; // Возвращаем только data
+            return response; // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -136,8 +135,8 @@ export const fetchWorkSites = createAsyncThunk(
     'schedule/fetchWorkSites',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.fetchWorkSites();
-            return response.data; // Возвращаем только data
+            const response = await worksiteAPI.fetchWorkSites();
+            return response;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -153,7 +152,7 @@ const scheduleSlice = createSlice({
         // Данные
         schedules: [],
         scheduleDetails: null,
-        workSites: [], // <-- ИСПРАВЛЕНО
+        workSites: [],
         recommendations: { available: [], cross_position: [], unavailable_busy: [], unavailable_hard: [], unavailable_soft: [] },
 
         // Состояния загрузки
@@ -321,7 +320,7 @@ const scheduleSlice = createSlice({
             })
             .addCase(fetchWorkSites.rejected, (state, action) => {
                 state.workSitesLoading = 'failed';
-                state.error = action.payload; // Можно добавить отдельное поле workSitesError
+                state.error = action.payload;
             })
             // Обработка updateScheduleStatus
             .addCase(updateScheduleStatus.pending, (state) => {
