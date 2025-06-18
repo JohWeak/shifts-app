@@ -1,7 +1,7 @@
 // frontend/src/shared/ui/LanguageSwitch/LanguageSwitch.js
 import React from 'react';
 import { Dropdown } from 'react-bootstrap';
-import { useI18n } from '../../lib/i18n/i18nProvider';
+import { useI18n } from '../../../lib/i18n/i18nProvider';
 import './LanguageSwitch.css';
 
 export const LanguageSwitch = () => {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import LoadingState from '../../ui/LoadingState/LoadingState';
+import LoadingState from '../../ui/components/LoadingState/LoadingState';
 
 export const ProtectedRoute = ({ children, allowedRole }) => {
     // Получаем все нужные состояния из Redux store

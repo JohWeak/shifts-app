@@ -5,9 +5,9 @@ import { useDispatch } from 'react-redux';
 import { format } from 'date-fns';
 import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
 import { deleteSchedule, updateScheduleStatus } from '../../../../app/store/slices/scheduleSlice';
-import ActionButtons from '../../../../shared/ui/ActionButtons/ActionButtons';
-import StatusBadge from '../../../../shared/ui/StatusBadge/StatusBadge';
-import ConfirmationModal from '../../../../shared/ui/ConfirmationModal';
+import ActionButtons from '../../../../shared/ui/components/ActionButtons/ActionButtons';
+import StatusBadge from '../../../../shared/ui/components/StatusBadge/StatusBadge';
+import ConfirmationModal from '../../../../shared/ui/components/ConfirmationModal';
 import './ScheduleList.css';
 
 const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {

@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {Container, Spinner, Alert, Button} from 'react-bootstrap';
 
 // Widgets, UI, etc.
-import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
-import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import AdminLayout from '../../shared/ui/layouts/AdminLayout/AdminLayout';
+import PageHeader from '../../shared/ui/components/PageHeader/PageHeader';
 import ScheduleList from './ui/schedule-list/ScheduleList';
 import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
 import GenerateScheduleModal from './ui/modals/GenerateScheduleModal';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Button } from 'react-bootstrap';
-import { useI18n } from '../../lib/i18n/i18nProvider';
+import { useI18n } from '../../../lib/i18n/i18nProvider';
 
 class ErrorBoundaryClass extends React.Component {
     constructor(props) {

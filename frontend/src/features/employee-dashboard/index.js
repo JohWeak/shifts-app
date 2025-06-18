@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Dropdown} from 'react-bootstrap';
 import {useSwipeable} from 'react-swipeable';
 import {useI18n} from '../../shared/lib/i18n/i18nProvider';
-import {LanguageSwitch} from '../../shared/ui/LanguageSwitch/LanguageSwitch';
+import {LanguageSwitch} from '../../shared/ui/components/LanguageSwitch/LanguageSwitch';
 // Импортируем фичи, которые используются на дашборде
 import WeeklySchedule from '../employee-schedule';
 import ConstraintsSchedule from '../employee-constraints';

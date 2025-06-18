@@ -3,7 +3,7 @@ import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom
 import {Provider, useDispatch} from 'react-redux';
 import store from './store/store';
 import {I18nProvider} from '../shared/lib/i18n/i18nProvider';
-import {ErrorBoundary} from '../shared/ui/ErrorBoundary/ErrorBoundary';
+import {ErrorBoundary} from '../shared/ui/components/ErrorBoundary/ErrorBoundary';
 import {fetchSystemSettings} from './store/slices/settingsSlice';
 
 // Pages

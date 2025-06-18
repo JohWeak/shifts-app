@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col } from 'react-bootstrap';
-import StatusBadge from '../../../../shared/ui/StatusBadge/StatusBadge';
+import StatusBadge from '../../../../shared/ui/components/StatusBadge/StatusBadge';
 import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
 import { formatScheduleDate } from '../../../../shared/lib/utils/scheduleUtils';
 

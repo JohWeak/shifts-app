@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Card, Form, Button, Row, Col, Alert, Spinner, Nav, Tab} from 'react-bootstrap';
-import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
-import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import AdminLayout from '../../shared/ui/layouts/AdminLayout/AdminLayout';
+import PageHeader from '../../shared/ui/components/PageHeader/PageHeader';
 import {useI18n} from '../../shared/lib/i18n/i18nProvider';
 import {fetchSystemSettings, updateSystemSettings} from '../../app/store/slices/settingsSlice';
 import { fetchWorkSites } from '../../app/store/slices/scheduleSlice';

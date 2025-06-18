@@ -1,6 +1,6 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/schedule/NoPositionsMessage.js
 import React from 'react';
-import { useMessages } from '../lib/i18n/messages';
+import { useMessages } from '../../lib/i18n/messages';
 
 const NoPositionsMessage = () => {
     const messages = useMessages('en');

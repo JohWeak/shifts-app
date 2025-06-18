@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from 'react-bootstrap';
-import { useI18n } from '../../lib/i18n/i18nProvider';
+import { useI18n } from '../../../lib/i18n/i18nProvider';
 
 const StatusBadge = ({ status, size = 'md' }) => {
     const { t } = useI18n();

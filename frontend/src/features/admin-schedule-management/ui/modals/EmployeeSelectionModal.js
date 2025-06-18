@@ -4,7 +4,7 @@ import { Modal, Button, ListGroup, Badge, Alert, Form, Tab, Tabs } from 'react-b
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRecommendations } from '../../../../app/store/slices/scheduleSlice'; // Импортируем наш thunk
 import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
-import LoadingState from '../../../../shared/ui/LoadingState/LoadingState';
+import LoadingState from '../../../../shared/ui/components/LoadingState/LoadingState';
 
 const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails }) => {
     const { t } = useI18n();    const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
-import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import AdminLayout from '../../shared/ui/layouts/AdminLayout/AdminLayout';
+import PageHeader from '../../shared/ui/components/PageHeader/PageHeader';
 
 import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';

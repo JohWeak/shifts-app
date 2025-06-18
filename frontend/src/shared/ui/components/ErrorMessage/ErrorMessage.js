@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
-import { useI18n } from '../../lib/i18n/i18nProvider';
+import { useI18n } from '../../../lib/i18n/i18nProvider';
 
 const ErrorMessage = ({ error, onClose, variant = 'danger' }) => {
     const { t } = useI18n();
