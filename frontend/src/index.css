@@ -1,2 +1,7 @@
 /* frontend/src/index.css */
 @import './app/design-system.css';
+
+[data-theme="dark"] .form-control:disabled {
+    background-color: var(--bs-gray-800);
+    opacity: 1;
+}

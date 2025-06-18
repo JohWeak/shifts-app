@@ -449,7 +449,6 @@ const SystemSettings = () => {
                                                                 type="number"
                                                                 value={12}
                                                                 disabled
-                                                                className="bg-light"
                                                             />
                                                             <span
                                                                 className="input-group-text">{t('settings.hours')}</span>
@@ -468,7 +467,6 @@ const SystemSettings = () => {
                                                                 type="number"
                                                                 value={11}
                                                                 disabled
-                                                                className="bg-light"
                                                             />
                                                             <span
                                                                 className="input-group-text">{t('settings.hours')}</span>
