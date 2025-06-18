@@ -1,8 +1,8 @@
 import React from 'react';
-import ScheduleManagement from '../../features/schedule-management/ScheduleManagement';
+import Index from '../../features/schedule-management';
 
 const ScheduleManagementPage = () => {
-    return <ScheduleManagement />;
+    return <Index />;
 };
 
 export default ScheduleManagementPage;

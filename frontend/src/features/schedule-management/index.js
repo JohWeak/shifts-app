@@ -1,4 +1,4 @@
-// frontend/src/features/schedule-management/ScheduleManagement.js
+// frontend/src/features/schedule-management/index.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Spinner, Alert } from 'react-bootstrap';
@@ -26,10 +26,10 @@ import {
 import { useScheduleActions } from './hooks/useScheduleActions';
 
 // Utils
-import './ScheduleManagement.css';
+import './index.css';
 
 // --- Основной компонент ---
-const ScheduleManagement = () => {
+const Index = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
@@ -180,4 +180,4 @@ const ScheduleManagement = () => {
     );
 };
 
-export default ScheduleManagement;
+export default Index;
