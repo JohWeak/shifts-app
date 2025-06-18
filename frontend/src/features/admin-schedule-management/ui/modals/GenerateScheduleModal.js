@@ -2,10 +2,10 @@
 import React, {useState, useEffect, useRef, useMemo} from 'react';
 import {Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
-import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from '../../../../shared/config/scheduleConstants';
-import {getNextWeekStart, isValidWeekStartDate} from '../../../../shared/lib/utils/scheduleUtils';
+import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from 'shared/config/scheduleConstants';
+import {getNextWeekStart, isValidWeekStartDate} from 'shared/lib/utils/scheduleUtils';
 import {fetchWorkSites, compareAlgorithms} from '../../model/scheduleSlice';
-import {useI18n} from '../../../../shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import CompareAlgorithmsModal from './CompareAlgorithmsModal';
 
 const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {

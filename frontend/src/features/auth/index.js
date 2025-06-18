@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login } from './model/authSlice'; // Импортируем наш Thunk
 import './index.css';
 import { Spinner } from 'react-bootstrap';
-import { useI18n } from '../../shared/lib/i18n/i18nProvider';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 
 const Login = () => {

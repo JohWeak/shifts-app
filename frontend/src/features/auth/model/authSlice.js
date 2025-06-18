@@ -1,6 +1,6 @@
 // frontend/src/app/store/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authAPI } from '../../../shared/api/apiService';
+import { authAPI } from 'shared/api/apiService';
 
 // --- Асинхронные экшены (Thunks) ---
 export const login = createAsyncThunk(

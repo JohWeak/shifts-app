@@ -1,16 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../../features/auth/model/authSlice';
-import scheduleReducer from '../../features/admin-schedule-management/model/scheduleSlice';
-import settingsReducer from '../../features/admin-system-settings/model/settingsSlice';
-import positionReducer from '../../features/admin-position-settings/model/positionSlice';
+import { rootReducer } from './rootReducer';
 
 const store = configureStore({
-    reducer: {
-        auth: authReducer,
-        schedule: scheduleReducer,
-        settings: settingsReducer,
-        positions: positionReducer,
-    },
+    reducer: rootReducer,
 });
 
 export default store;

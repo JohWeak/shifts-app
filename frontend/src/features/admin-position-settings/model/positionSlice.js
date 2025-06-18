@@ -1,6 +1,6 @@
 // frontend/src/app/store/slices/positionSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { positionAPI } from '../../../shared/api/apiService';
+import { positionAPI } from 'shared/api/apiService';
 
 // --- Асинхронные Thunks ---
 

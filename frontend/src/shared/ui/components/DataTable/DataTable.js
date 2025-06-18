@@ -1,4 +1,4 @@
-// frontend/src/shared/ui/DataTable/DataTable.js
+// frontend/src/shared/ui/components/DataTable/DataTable.js
 import React from 'react';
 import { Table, Spinner } from 'react-bootstrap';
 import EmptyState  from '../EmptyState/EmptyState';

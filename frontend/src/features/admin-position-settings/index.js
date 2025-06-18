@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Form, Modal, Badge } from 'react-bootstrap';
-import { useI18n } from '../../shared/lib/i18n/i18nProvider';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchPositions, updatePosition } from './model/positionSlice';
 
 const PositionSettings = ({ siteId }) => {

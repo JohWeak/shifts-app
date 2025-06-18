@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { settingsAPI } from '../../../shared/api/apiService';
+import { settingsAPI } from 'shared/api/apiService';
 
 // Async thunks
 export const fetchSystemSettings = createAsyncThunk(

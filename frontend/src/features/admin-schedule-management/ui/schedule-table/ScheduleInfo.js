@@ -1,8 +1,8 @@
 import React from 'react';
 import { Row, Col } from 'react-bootstrap';
-import StatusBadge from '../../../../shared/ui/components/StatusBadge/StatusBadge';
-import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
-import { formatScheduleDate } from '../../../../shared/lib/utils/scheduleUtils';
+import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { formatScheduleDate } from 'shared/lib/utils/scheduleUtils';
 
 const ScheduleInfo = ({ schedule, positions = [] }) => {
     const { t } = useI18n();

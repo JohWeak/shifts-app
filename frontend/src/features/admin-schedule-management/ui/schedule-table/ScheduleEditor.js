@@ -2,8 +2,8 @@
 import React, {useMemo} from 'react';
 import {Table, Button, Badge, Spinner} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
-import {useI18n} from '../../../../shared/lib/i18n/i18nProvider';
-import { getWeekDates } from '../../../../shared/lib/utils/scheduleUtils';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import { getWeekDates } from 'shared/lib/utils/scheduleUtils';
 import {useSelector} from "react-redux";
 import {format} from "date-fns";
 

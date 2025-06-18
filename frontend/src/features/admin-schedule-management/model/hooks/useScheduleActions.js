@@ -7,7 +7,7 @@ import {
     updateScheduleStatus,
     exportSchedule
 } from '../scheduleSlice';
-import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 export const useScheduleActions = () => {
     const dispatch = useDispatch();

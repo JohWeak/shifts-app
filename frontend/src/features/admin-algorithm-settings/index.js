@@ -1,7 +1,7 @@
 import React from 'react';
-import AdminLayout from '../../shared/ui/layouts/AdminLayout/AdminLayout';
-import PageHeader from '../../shared/ui/components/PageHeader/PageHeader';
-import {useI18n} from "../../shared/lib/i18n/i18nProvider";
+import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
+import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
+import {useI18n} from "shared/lib/i18n/i18nProvider";
 
 import { Container, Card } from 'react-bootstrap';
 
