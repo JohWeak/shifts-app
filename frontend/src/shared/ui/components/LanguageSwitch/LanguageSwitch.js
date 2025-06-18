@@ -23,7 +23,6 @@ export const LanguageSwitch = () => {
                     <Dropdown.Item
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
-                        active={locale === lang.code}
                     >
                         {lang.flag} {lang.name}
                     </Dropdown.Item>

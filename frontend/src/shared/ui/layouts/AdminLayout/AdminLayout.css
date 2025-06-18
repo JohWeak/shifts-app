@@ -1,53 +1,17 @@
-/* frontend/src/CompareAlgorithmsModal.js/admin/AdminLayout.css */
+/* AdminLayout.css - совмещаем Bootstrap переменные с кастомными стилями */
 
-/* ==============================================
-   CSS VARIABLES
-   ============================================== */
-:root {
-    /* Core Colors */
-    --admin-primary: #0066cc;
-    --admin-primary-hover: #0052a3;
-    --admin-white: #ffffff;
-    --admin-light: #f8f9fa;
-    --admin-gray-300: #dee2e6;
-    --admin-gray-500: #6c757d;
-    --admin-gray-700: #343a40;
-
-    /* Layout */
-    --admin-sidebar-width: 290px;
-    --admin-navbar-height: 64px;
-
-    /* Spacing */
-    --admin-spacing-sm: 0.5rem;
-    --admin-spacing-md: 0.75rem;
-    --admin-spacing-lg: 1rem;
-    --admin-spacing-xl: 1.5rem;
-    --admin-spacing-2xl: 2rem;
-
-    /* Borders & Effects */
-    --admin-border-radius: 0.5rem;
-    --admin-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
-    --admin-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
-    --admin-transition: 0.2s ease-in-out;
-}
-
-/* ==============================================
-   BASE LAYOUT
-   ============================================== */
 .admin-layout {
     min-height: 100vh;
-    background-color: var(--admin-light);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bs-body-bg);
+    font-family: var(--bs-body-font-family);
 }
 
-/* ==============================================
-   TOP NAVBAR
-   ============================================== */
+/* TOP NAVBAR */
 .admin-navbar {
-    background-color: var(--admin-white);
-    border-bottom: 1px solid var(--admin-gray-300);
-    height: var(--admin-navbar-height);
-    box-shadow: var(--admin-shadow-sm);
+    background-color: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    height: var(--app-navbar-height);
+    box-shadow: var(--bs-box-shadow-sm);
     position: sticky;
     top: 0;
     z-index: 1030;
@@ -56,119 +20,179 @@
 .brand-logo {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--admin-gray-700);
+    color: var(--bs-emphasis-color);
     text-decoration: none;
-    transition: color var(--admin-transition);
+    transition: color 0.2s ease-in-out;
 }
 
 .brand-logo:hover {
-    color: var(--admin-primary);
+    color: var(--bs-primary);
 }
 
 .mobile-menu-btn,
 .user-dropdown-btn {
-    background: var(--admin-white);
-    border: 1px solid var(--admin-gray-300);
-    border-radius: var(--admin-border-radius);
-    padding: var(--admin-spacing-sm) var(--admin-spacing-lg);
-    transition: all var(--admin-transition);
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
 }
 
 .mobile-menu-btn:hover,
 .user-dropdown-btn:hover {
-    background-color: var(--admin-light);
-    border-color: var(--admin-primary);
-    color: var(--admin-primary);
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
 }
 
-/* ==============================================
-   MAIN CONTAINER
-   ============================================== */
+/* Dark mode adjustment */
+[data-theme="dark"] .mobile-menu-btn:hover,
+[data-theme="dark"] .user-dropdown-btn:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* MAIN CONTAINER */
 .admin-main-container {
     display: flex;
-    min-height: calc(100vh - var(--admin-navbar-height));
+    min-height: calc(100vh - var(--app-navbar-height));
 }
 
-/* ==============================================
-   SIDEBAR
-   ============================================== */
+/* SIDEBAR */
 .admin-sidebar-desktop {
-    min-width: var(--admin-sidebar-width);
-    background-color: var(--admin-white);
-    border-right: 1px solid var(--admin-gray-300);
-    height: calc(100vh - var(--admin-navbar-height));
+    min-width: var(--app-sidebar-width);
+    background-color: var(--bs-body-bg);
+    border-right: 1px solid var(--bs-border-color);
+    height: calc(100vh - var(--app-navbar-height));
     position: sticky;
-    top: var(--admin-navbar-height);
+    top: var(--app-navbar-height);
     overflow-y: auto;
 }
 
 .sidebar-content {
-    padding: var(--admin-spacing-xl) 0;
+    padding: 1.5rem 0;
+}
+
+.sidebar-header {
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+}
+
+.sidebar-title {
+    color: var(--bs-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .admin-nav {
-    padding: 0 var(--admin-spacing-lg);
+    padding: 0 1rem;
 }
 
 .admin-nav-link {
     display: flex;
     align-items: center;
-    padding: var(--admin-spacing-md) var(--admin-spacing-lg);
-    color: var(--admin-gray-500);
+    padding: 0.75rem 1rem;
+    color: var(--bs-body-color);
     text-decoration: none;
-    border-radius: var(--admin-border-radius);
+    border-radius: 0.375rem;
     font-weight: 500;
-    margin-bottom: var(--admin-spacing-sm);
-    transition: all var(--admin-transition);
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease-in-out;
 }
 
 .admin-nav-link:hover {
-    background-color: var(--admin-light);
-    color: var(--admin-primary);
+    background-color: var(--bs-gray-100);
+    color: var(--bs-primary);
     transform: translateX(4px);
 }
 
-.admin-nav-link.active {
-    background-color: var(--admin-primary);
-    color: var(--admin-white);
+[data-theme="dark"] .admin-nav-link:hover {
+    background-color: var(--bs-gray-800);
 }
+
+.admin-nav-link.active {
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
 .admin-nav-link.active:hover {
-    color: var(--admin-light);
+    color: var(--bs-white);
     transform: none;
 }
 
-
 .nav-icon {
-    margin-right: var(--admin-spacing-md);
+    margin-right: 0.75rem;
     width: 20px;
     text-align: center;
 }
 
-/* ==============================================
-   CONTENT AREA
-   ============================================== */
+/* CONTENT AREA */
 .admin-content-area {
     flex: 1;
-    background-color: var(--admin-light);
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .admin-content-area {
+    background-color: var(--bs-black);
 }
 
 .admin-main-content {
-    padding: var(--admin-spacing-2xl);
+    padding: 2rem;
 }
 
+/* MOBILE SIDEBAR (Offcanvas) */
+.admin-mobile-sidebar {
+    /* Bootstrap Offcanvas уже имеет свои стили */
+}
 
-/* ==============================================
-   RESPONSIVE
-   ============================================== */
+.admin-mobile-sidebar .offcanvas-header {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.mobile-sidebar-content {
+    /* Наследует стили от sidebar-content */
+}
+
+/* USER DROPDOWN - Bootstrap уже стилизует, добавляем только кастомное */
+.user-dropdown .dropdown-menu {
+    box-shadow: var(--bs-box-shadow);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* RESPONSIVE */
 @media (max-width: 991.98px) {
     .admin-main-content {
-        padding: var(--admin-spacing-lg);
-
+        padding: 1rem;
     }
 }
 
 @media (max-width: 767.98px) {
     .admin-main-content {
-        padding: var(--admin-spacing-md);
+        padding: 0.75rem;
+    }
+}
+
+/* BADGES - дополнения к Bootstrap */
+.admin-nav-link .badge {
+    margin-left: auto;
+    font-size: 0.7rem;
+}
+
+/* Убираем лишние hover эффекты на мобильных устройствах */
+@media (hover: none) {
+    .admin-nav-link:hover {
+        transform: none;
     }
 }

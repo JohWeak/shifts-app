@@ -11,10 +11,13 @@ import {
 } from 'react-bootstrap';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import './AdminLayout.css';
+
 import { logout } from '../../../../features/auth/model/authSlice';
 import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "../../../lib/i18n/i18nProvider";
+
+import './AdminLayout.css';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 
 import { setActiveTab, setSelectedScheduleId } from '../../../../features/admin-schedule-management/model/scheduleSlice';
 
@@ -139,7 +142,7 @@ const AdminLayout = ({ children }) => {
     return (
         <div className="admin-layout">
             {/* Top Navigation Bar */}
-            <Navbar bg="white" className="admin-navbar shadow-sm sticky-top">
+            <Navbar className="admin-navbar shadow-sm sticky-top">
                 <Container fluid className="px-3">
                     <div className="d-flex align-items-center">
                         {/* Mobile Menu Toggle */}
@@ -155,19 +158,19 @@ const AdminLayout = ({ children }) => {
                         )}
 
                         {/* Brand */}
-                        <Navbar.Brand className="brand-logo mb-0">
+                        <Navbar className="brand-logo mb-0">
                             <i className="bi bi-calendar-check-fill text-primary me-2"></i>
                             <span className="brand-text">{t('common.appName')}</span>
                             <Badge bg="secondary" className="ms-2 brand-badge">{t('common.admin')}</Badge>
-                        </Navbar.Brand>
+                        </Navbar>
                     </div>
 
                     {/* Right side - User menu */}
                     <div className="d-flex align-items-center gap-3">
                         <LanguageSwitch />
+                        <ThemeToggle />
                         <Dropdown align="end">
                             <Dropdown.Toggle
-                                variant="light"
                                 className="user-dropdown-btn border-0 shadow-sm"
                                 id="user-dropdown"
                             >

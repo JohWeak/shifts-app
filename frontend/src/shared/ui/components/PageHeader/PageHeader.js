@@ -17,7 +17,7 @@ const PageHeader = ({
                 <div className={`page-header ${className}`}>
                     <div className="page-header-content">
                         <div className="page-header-text">
-                            <h1 className="h3 mb-2 text-dark fw-bold">
+                            <h1 className="h3 mb-2  fw-bold">
                                 {icon && <i className={`bi bi-${icon} me-2 ${iconColor} fs-3`}></i>}
                                 {title}
                             </h1>

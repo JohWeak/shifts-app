@@ -1,41 +1,25 @@
-/* frontend/src/CompareAlgorithmsModal.js/admin/AdminDashboard.css */
+/* Admin Dashboard - гибридный подход */
 
-/* ==============================================
-   DASHBOARD VARIABLES
-   ============================================== */
-:root {
-    --dashboard-bg: #f8f9fa;
-    --dashboard-card-bg: #ffffff;
-    --dashboard-primary: #3498db;
-    --dashboard-success: #2ecc71;
-    --dashboard-warning: #f39c12;
-    --dashboard-danger: #e74c3c;
-    --dashboard-text: #2c3e50;
-    --dashboard-text-muted: #6c757d;
-    --dashboard-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    --dashboard-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
-    --dashboard-radius: 12px;
-    --dashboard-spacing: 1rem;
-    --dashboard-spacing-lg: 1.5rem;
-    --dashboard-spacing-xl: 2rem;
-}
-
-/* ==============================================
-   DASHBOARD BASE
-   ============================================== */
 .admin-dashboard {
-    background-color: var(--dashboard-bg);
+    /* Используем Bootstrap переменные где возможно */
+    background-color: var(--bs-gray-100);
     min-height: 100vh;
-    padding: var(--dashboard-spacing-lg);
+    padding: 1.5rem;
 }
 
+[data-theme="dark"] .admin-dashboard {
+    background-color: var(--bs-black);
+}
+[data-theme="dark"] .text-muted {
+    color: var(--bs-gray-500) !important;
+}
 .admin-dashboard h1 {
-    color: var(--dashboard-text);
+    color: var(--bs-emphasis-color);
     font-weight: 600;
     font-size: 1.875rem;
-    margin-bottom: var(--dashboard-spacing-xl);
+    margin-bottom: 2rem;
     position: relative;
-    padding-bottom: var(--dashboard-spacing);
+    padding-bottom: 1rem;
 }
 
 .admin-dashboard h1::after {
@@ -45,43 +29,28 @@
     left: 0;
     width: 60px;
     height: 4px;
-    background: linear-gradient(90deg, var(--dashboard-primary), var(--dashboard-success));
+    background: linear-gradient(90deg, var(--bs-primary), var(--bs-success));
     border-radius: 2px;
 }
 
-/* ==============================================
-   DASHBOARD CARDS
-   ============================================== */
+/* CARDS - минимальные дополнения к Bootstrap */
 .admin-dashboard .card {
     border: none;
-    border-radius: var(--dashboard-radius);
-    box-shadow: var(--dashboard-shadow);
-    margin-bottom: var(--dashboard-spacing-lg);
+    border-radius: 0.75rem;
+    box-shadow: var(--bs-box-shadow-sm);
+    margin-bottom: 1.5rem;
     transition: all 0.2s ease;
     overflow: hidden;
 }
 
 .admin-dashboard .card:hover {
-    box-shadow: var(--dashboard-shadow-hover);
+    box-shadow: var(--bs-box-shadow);
     transform: translateY(-2px);
 }
 
-.admin-dashboard .card-header {
-    background-color: var(--dashboard-card-bg);
-    border-bottom: 1px solid #eee;
-    padding: var(--dashboard-spacing-lg);
-}
-
-.admin-dashboard .card-body {
-    padding: var(--dashboard-spacing-lg);
-}
-
-/* ==============================================
-   METRIC CARDS
-   ============================================== */
+/* METRIC CARDS */
 .dashboard-metric-card {
-    background: var(--dashboard-card-bg);
-    border-left: 4px solid var(--dashboard-primary);
+    border-left: 4px solid var(--bs-primary);
     transition: all 0.2s ease;
 }
 
@@ -90,81 +59,73 @@
 }
 
 .dashboard-metric-card.metric-success {
-    border-left-color: var(--dashboard-success);
+    border-left-color: var(--bs-success);
 }
 
 .dashboard-metric-card.metric-warning {
-    border-left-color: var(--dashboard-warning);
+    border-left-color: var(--bs-warning);
 }
 
 .dashboard-metric-card.metric-danger {
-    border-left-color: var(--dashboard-danger);
+    border-left-color: var(--bs-danger);
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    font-size: 1.25rem;
+}
+
+/* Используем Bootstrap utility классы для цветов фона */
+.metric-icon.bg-primary-subtle {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-primary);
 }
 
 .metric-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--dashboard-text);
+    color: var(--bs-emphasis-color);
     margin-bottom: 0.25rem;
 }
 
 .metric-label {
     font-size: 0.875rem;
-    color: var(--dashboard-text-muted);
+    color: var(--bs-secondary);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-/* ==============================================
-   BUTTONS & TABLES
-   ============================================== */
+/* BUTTONS - используем Bootstrap классы, добавляем только анимацию */
 .admin-dashboard .btn {
-    border-radius: 8px;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
     transition: all 0.15s ease;
 }
 
 .admin-dashboard .btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.admin-dashboard .table {
-    background-color: var(--dashboard-card-bg);
-    border-radius: var(--dashboard-radius);
-    overflow: hidden;
-    box-shadow: var(--dashboard-shadow);
+/* STATUS в System Status карточке */
+.admin-dashboard .badge {
+    font-weight: 500;
 }
 
-.admin-dashboard .table th {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    color: var(--dashboard-text-muted);
-}
-
-.admin-dashboard .table tbody tr:hover {
-    background-color: rgba(52, 152, 219, 0.04);
-}
-
-/* ==============================================
-   RESPONSIVE
-   ============================================== */
+/* RESPONSIVE */
 @media (max-width: 767.98px) {
     .admin-dashboard {
-        padding: var(--dashboard-spacing);
+        padding: 1rem;
     }
 
     .admin-dashboard h1 {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
     }
 
     .metric-value {
-        font-size: 1.125rem;
+        font-size: 1.25rem;
     }
 }
