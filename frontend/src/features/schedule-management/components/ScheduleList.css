@@ -1,4 +1,4 @@
-/* frontend/src/features/schedule-management/components/ScheduleOverviewTable.css */
+/* frontend/src/features/schedule-management/components/ScheduleList.css */
 
 /* Table container styles */
 .schedule-overview-table {
@@ -122,6 +122,31 @@
 /* Override Bootstrap table hover if needed */
 .table-hover .schedule-overview-table tbody tr:hover {
     background-color: transparent;
+}
+
+/*!* Highlight animation for new schedules *!*/
+/*.schedule-overview-table tbody tr.highlight-new {*/
+/*    animation: highlightPulse 2s ease-out;*/
+/*}*/
+
+/*@keyframes highlightPulse {*/
+/*    0% {*/
+/*        background-color: rgba(25, 135, 84, 0.3);*/
+/*        transform: scale(1.02);*/
+/*    }*/
+/*    50% {*/
+/*        background-color: rgba(25, 135, 84, 0.15);*/
+/*        transform: scale(1.01);*/
+/*    }*/
+/*    100% {*/
+/*        background-color: transparent;*/
+/*        transform: scale(1);*/
+/*    }*/
+/*}*/
+
+/* Ensure smooth transition */
+.schedule-overview-table tbody tr.schedule-row {
+    transition: all 0.2s ease;
 }
 
 /* Mobile responsive adjustments */

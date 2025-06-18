@@ -1,9 +1,9 @@
-// frontend/src/features/schedule-management/components/ScheduleDetailsView.js
+// frontend/src/features/schedule-management/components/ScheduleDetails.js
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Card, Alert} from 'react-bootstrap';
 
-import PositionScheduleEditor from './PositionScheduleEditor';
+import ScheduleEditor from './ScheduleEditor';
 import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
 import ScheduleInfo from './ScheduleInfo';
 import ScheduleActions from './ScheduleActions';
@@ -18,7 +18,7 @@ import {
     toggleEditPosition,
 } from '../../../app/store/slices/scheduleSlice';
 
-const ScheduleDetailsView = ({onCellClick}) => {
+const ScheduleDetails = ({onCellClick}) => {
     const dispatch = useDispatch();
     const {t} = useI18n();
 
@@ -112,7 +112,7 @@ const ScheduleDetailsView = ({onCellClick}) => {
                 <Card.Body>
                     {scheduleDetails.positions?.length > 0 ? (
                         scheduleDetails.positions.map(position => (
-                            <PositionScheduleEditor
+                            <ScheduleEditor
                                 key={position.pos_id}
                                 position={position}
                                 isEditing={!!editingPositions[position.pos_id]}
@@ -156,4 +156,4 @@ const ScheduleDetailsView = ({onCellClick}) => {
     );
 };
 
-export default ScheduleDetailsView;
+export default ScheduleDetails;

@@ -16,6 +16,7 @@ export const useScheduleActions = () => {
     const [error, setError] = useState(null);
 
     const handleGenerate = async (settings) => {
+
         setLoading(true);
         setError(null);
         try {

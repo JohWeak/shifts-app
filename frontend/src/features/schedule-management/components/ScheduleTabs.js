@@ -20,7 +20,6 @@ const ScheduleTabs = ({ activeTab, onTabChange, isDetailsDisabled, children, onB
                         <i className="bi bi-arrow-left me-2"></i>
                         {t('common.back')}
                     </Button>
-                    <h4 className="mb-0">{t('schedule.scheduleDetails')}</h4>
                 </div>
                 {children.details}
             </div>

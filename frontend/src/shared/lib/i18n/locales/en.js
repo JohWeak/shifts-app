@@ -192,6 +192,7 @@ export const en = {
             weekStart: 'Week Start',
             weekStartHintMonday: 'Week must start on Monday',
             weekStartHintSunday: 'Week must start on Sunday',
+            workSite: 'Work Site',
         },
         requestTimeOff: { 
             allDay: 'All Day',

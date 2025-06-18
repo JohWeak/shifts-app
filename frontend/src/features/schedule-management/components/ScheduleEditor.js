@@ -1,4 +1,4 @@
-// frontend/src/features/schedule-management/components/PositionScheduleEditor.js
+// frontend/src/features/schedule-management/components/ScheduleEditor.js
 import React, {useMemo} from 'react';
 import {Table, Button, Badge, Spinner} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
@@ -7,7 +7,7 @@ import { getWeekDates } from '../../../shared/lib/utils/scheduleUtils';
 import {useSelector} from "react-redux";
 import {format} from "date-fns";
 
-const PositionScheduleEditor = ({
+const ScheduleEditor = ({
                                     position,
                                     isEditing = false,
                                     pendingChanges = {},
@@ -94,10 +94,10 @@ const PositionScheduleEditor = ({
     };
 
     // Debug logging
-    console.log('PositionScheduleEditor - Position:', position);
-    console.log('PositionScheduleEditor - Schedule Details:', scheduleDetails);
-    console.log('PositionScheduleEditor - Shifts:', shifts);
-    console.log('PositionScheduleEditor - Assignments:', assignments);
+    console.log('ScheduleEditor - Position:', position);
+    console.log('ScheduleEditor - Schedule Details:', scheduleDetails);
+    console.log('ScheduleEditor - Shifts:', shifts);
+    console.log('ScheduleEditor - Assignments:', assignments);
     console.log('Full scheduleDetails structure:', {
         schedule: scheduleDetails?.schedule,
         positions: scheduleDetails?.positions,
@@ -105,7 +105,7 @@ const PositionScheduleEditor = ({
         employees: scheduleDetails?.employees,
         shifts: scheduleDetails?.shifts
     });
-    console.log('PositionScheduleEditor - Employees:', employees);
+    console.log('ScheduleEditor - Employees:', employees);
 
     if (!position) {
         return (
@@ -336,4 +336,4 @@ const PositionScheduleEditor = ({
     );
 };
 
-export default PositionScheduleEditor;
+export default ScheduleEditor;

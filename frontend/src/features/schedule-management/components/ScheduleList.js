@@ -1,4 +1,4 @@
-// frontend/src/features/schedule-management/components/ScheduleOverviewTable.js
+// frontend/src/features/schedule-management/components/ScheduleList.js
 import React, { useState } from 'react';
 import { Table, Card, Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
@@ -8,9 +8,9 @@ import { deleteSchedule, updateScheduleStatus } from '../../../app/store/slices/
 import ActionButtons from '../../../shared/ui/ActionButtons/ActionButtons';
 import StatusBadge from '../../../shared/ui/StatusBadge/StatusBadge';
 import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
-import './ScheduleOverviewTable.css';
+import './ScheduleList.css';
 
-const ScheduleOverviewTable = ({ schedules, onViewDetails, onScheduleDeleted }) => {
+const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
     const dispatch = useDispatch();
     const { t } = useI18n();
     const [scheduleToDelete, setScheduleToDelete] = useState(null);
@@ -19,6 +19,7 @@ const ScheduleOverviewTable = ({ schedules, onViewDetails, onScheduleDeleted }) 
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [showError, setShowError] = useState(null);
+
 
     const formatScheduleDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -257,4 +258,4 @@ const ScheduleOverviewTable = ({ schedules, onViewDetails, onScheduleDeleted }) 
     );
 };
 
-export default ScheduleOverviewTable;
+export default ScheduleList;

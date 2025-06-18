@@ -163,6 +163,7 @@
 @media (max-width: 991.98px) {
     .admin-main-content {
         padding: var(--admin-spacing-lg);
+
     }
 }
 

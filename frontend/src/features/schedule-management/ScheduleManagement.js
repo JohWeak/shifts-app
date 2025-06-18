@@ -5,8 +5,8 @@ import { Container, Spinner, Alert } from 'react-bootstrap';
 
 // Widgets, UI, etc.
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
-import ScheduleOverviewTable from './components/ScheduleOverviewTable';
-import ScheduleDetailsView from './components/ScheduleDetailsView';
+import ScheduleList from './components/ScheduleList';
+import ScheduleDetails from './components/ScheduleDetails';
 import GenerateScheduleModal from './components/GenerateScheduleModal';
 import CompareAlgorithmsModal from './components/CompareAlgorithmsModal';
 import EmployeeSelectionModal from './components/EmployeeSelectionModal';
@@ -72,6 +72,8 @@ const ScheduleManagement = () => {
         if (result.success) {
             setAlert({ type: 'success', message: t('schedule.generateSuccess') });
             setShowGenerateModal(false);
+
+
             dispatch(fetchSchedules());
         } else {
             setAlert({ type: 'danger', message: actionError || t('schedule.generateError') });
@@ -132,10 +134,9 @@ const ScheduleManagement = () => {
 
     return (
         <AdminLayout>
-            <Container fluid className="p-4">
+            <Container fluid className="px-0">
                 <ScheduleHeader
                     onGenerateClick={() => setShowGenerateModal(true)}
-                    onCompareClick={handleCompareAlgorithms}
                     loading={isLoading}
                 />
 
@@ -157,7 +158,7 @@ const ScheduleManagement = () => {
                         overview: dataLoading === 'pending' ? (
                             <div className="text-center p-5"><Spinner animation="border" /></div>
                         ) : (
-                            <ScheduleOverviewTable
+                            <ScheduleList
                                 schedules={schedules}
                                 onViewDetails={handleViewDetails}
                                 onScheduleDeleted={onScheduleDeleted}
@@ -166,7 +167,7 @@ const ScheduleManagement = () => {
                         details: dataLoading === 'pending' ? (
                             <div className="text-center p-5"><Spinner animation="border" /></div>
                         ) : (
-                            <ScheduleDetailsView onCellClick={handleCellClick} />
+                            <ScheduleDetails onCellClick={handleCellClick} />
                         )
                     }}
                 </ScheduleTabs>
