@@ -1,75 +1,166 @@
 // frontend/src/features/schedule-management/components/ScheduleOverviewTable.js
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card, Table, Spinner } from 'react-bootstrap';
-import LoadingState from '../../../shared/ui/LoadingState/LoadingState';
-import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
-import { deleteSchedule } from '../../../app/store/slices/scheduleSlice'; // Импортируем наш thunk
-import {
-    formatScheduleDate,
-    canDeleteSchedule,
-    getSiteName
-} from '../../../shared/lib/utils/scheduleUtils';
-
+import { Table, Card, Alert } from 'react-bootstrap';
+import { useDispatch } from 'react-redux';
+import { format } from 'date-fns';
 import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
-import EmptyState from '../../../shared/ui/EmptyState/EmptyState';
-import StatusBadge from '../../../shared/ui/StatusBadge/StatusBadge';
+import { deleteSchedule, updateScheduleStatus } from '../../../app/store/slices/scheduleSlice';
 import ActionButtons from '../../../shared/ui/ActionButtons/ActionButtons';
+import StatusBadge from '../../../shared/ui/StatusBadge/StatusBadge';
+import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
+import './ScheduleOverviewTable.css';
 
-const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
-    const { t } = useI18n();
+const ScheduleOverviewTable = ({ schedules, onViewDetails, onScheduleDeleted }) => {
     const dispatch = useDispatch();
-
-    // Получаем состояние загрузки из Redux, чтобы блокировать кнопку
-    const isDeleting = useSelector(state => state.schedule.loading === 'pending');
-
-    // Локальное состояние для модального окна
+    const { t } = useI18n();
     const [scheduleToDelete, setScheduleToDelete] = useState(null);
+    const [scheduleToPublish, setScheduleToPublish] = useState(null);
+    const [scheduleToUnpublish, setScheduleToUnpublish] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+    const [showError, setShowError] = useState(null);
+
+    const formatScheduleDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return format(new Date(dateString), 'MMM dd, yyyy');
+        } catch (error) {
+            return 'Invalid Date';
+        }
+    };
+
+    const canDeleteSchedule = (schedule) => {
+        return ['draft', 'unpublished'].includes(schedule.status?.toLowerCase());
+    };
 
     const handleDeleteClick = (schedule) => {
         setScheduleToDelete(schedule);
     };
 
-    const handleDeleteCancel = () => {
-        setScheduleToDelete(null);
-    };
-
     const handleDeleteConfirm = async () => {
         if (!scheduleToDelete) return;
 
+        setIsDeleting(true);
+        setShowError(null);
+
         try {
-            // Используем await для ожидания завершения
             await dispatch(deleteSchedule(scheduleToDelete.id)).unwrap();
-            // Список обновится автоматически через extraReducers в slice
             setScheduleToDelete(null);
+            if (onScheduleDeleted) {
+                onScheduleDeleted(scheduleToDelete.id);
+            }
         } catch (error) {
-            console.error('Failed to delete schedule:', error);
-            // Можно добавить уведомление об ошибке
+            setShowError(error.message || t('errors.deleteFailed'));
+        } finally {
+            setIsDeleting(false);
         }
     };
 
-    if (loading) {
-        return <LoadingState size="lg" message={t('schedule.loading')} />;
-    }
+    const handleDeleteCancel = () => {
+        setScheduleToDelete(null);
+        setShowError(null);
+    };
+
+    const handlePublishClick = (schedule) => {
+        setScheduleToPublish(schedule);
+    };
+
+    const handleUnpublishClick = (schedule) => {
+        setScheduleToUnpublish(schedule);
+    };
+
+    const handlePublishConfirm = async () => {
+        if (!scheduleToPublish) return;
+
+        setIsUpdatingStatus(true);
+        setShowError(null);
+
+        try {
+            await dispatch(updateScheduleStatus({
+                scheduleId: scheduleToPublish.id,
+                status: 'published'
+            })).unwrap();
+            setScheduleToPublish(null);
+        } catch (error) {
+            setShowError(error.message || t('errors.updateFailed'));
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
+
+    const handleUnpublishConfirm = async () => {
+        if (!scheduleToUnpublish) return;
+
+        setIsUpdatingStatus(true);
+        setShowError(null);
+
+        try {
+            await dispatch(updateScheduleStatus({
+                scheduleId: scheduleToUnpublish.id,
+                status: 'draft'
+            })).unwrap();
+            setScheduleToUnpublish(null);
+        } catch (error) {
+            setShowError(error.message || t('errors.updateFailed'));
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
+
+    const handleRowClick = (scheduleId) => {
+        onViewDetails(scheduleId);
+    };
+
+    const getScheduleActions = (schedule) => {
+        const actions = [];
+
+        // Add delete action
+        actions.push({
+            label: t('common.delete'),
+            icon: 'bi bi-trash',
+            onClick: () => handleDeleteClick(schedule),
+            disabled: !canDeleteSchedule(schedule),
+            variant: 'danger'
+        });
+        // Add publish/unpublish action based on current status
+        if (schedule.status === 'draft') {
+            actions.push({
+                label: t('schedule.publish'),
+                icon: 'bi bi-upload',
+                onClick: () => handlePublishClick(schedule),
+                variant: 'success'
+            });
+        } else if (schedule.status === 'published') {
+            actions.push({
+                label: t('schedule.unpublish'),
+                icon: 'bi bi-pencil-square',
+                onClick: () => handleUnpublishClick(schedule),
+                variant: 'warning'
+            });
+        }
+
+
+
+        return actions;
+    };
+
 
     if (!schedules || schedules.length === 0) {
         return (
-            <EmptyState
-                icon={<i className="bi bi-calendar-x display-1"></i>}
-                title={t('schedule.noSchedulesFound')}
-                description={t('schedule.generateFirstSchedule')}
-            />
+            <Alert variant="info">
+                <i className="bi bi-info-circle me-2"></i>
+                {t('schedule.noSchedules')}
+            </Alert>
         );
     }
-    console.log('schedules prop:', schedules);
-    console.log('schedules type:', typeof schedules);
-    console.log('Is array:', Array.isArray(schedules));
+
     const schedulesList = Array.isArray(schedules) ? schedules : [];
+
     return (
         <>
             <Card>
                 <Card.Body>
-                    <Table responsive hover>
+                    <Table responsive hover className="schedule-overview-table">
                         <thead>
                         <tr>
                             <th>{t('schedule.weekPeriod')}</th>
@@ -80,37 +171,30 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {schedulesList.map(schedule => {
-                            console.log('Schedule object:', schedule); // Временно для отладки
-                            return (
-                                <tr key={schedule.id}>
+                        {schedulesList.map(schedule => (
+                            <tr
+                                key={schedule.id}
+                                className="schedule-row"
+                                onClick={(e) => {
+                                    // Prevent click when clicking on actions column
+                                    if (!e.target.closest('.action-buttons')) {
+                                        handleRowClick(schedule.id);
+                                    }
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <td>{formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}</td>
                                 <td><StatusBadge status={schedule.status} /></td>
-                                    <td>{schedule.workSite?.site_name || 'N/A'}</td>
+                                <td>{schedule.workSite?.site_name || 'N/A'}</td>
                                 <td>{formatScheduleDate(schedule.createdAt)}</td>
-                                <td>
+                                <td className="action-buttons">
                                     <ActionButtons
-                                        actions={[
-                                            {
-                                                label: t('schedule.view'),
-                                                icon: 'bi bi-eye',
-                                                onClick: () => onViewDetails(schedule.id),
-                                                variant: 'primary'
-                                            },
-                                            {
-                                                label: t('common.delete'),
-                                                icon: 'bi bi-trash',
-                                                onClick: () => handleDeleteClick(schedule),
-                                                disabled: !canDeleteSchedule(schedule),
-                                                variant: 'danger'
-                                            }
-                                        ]}
+                                        actions={getScheduleActions(schedule)}
                                         size="sm"
                                     />
                                 </td>
                             </tr>
-                            );
-                        })}
+                        ))}
                         </tbody>
                     </Table>
                 </Card.Body>
@@ -130,10 +214,45 @@ const ScheduleOverviewTable = ({ schedules, loading, onViewDetails }) => {
                     <div className="schedule-info bg-light p-3 rounded">
                         <p><strong>{t('schedule.weekPeriod')}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
                         <p><strong>{t('schedule.site')}:</strong> {scheduleToDelete.workSite?.site_name || 'N/A'}</p>
-
                     </div>
                 )}
             </ConfirmationModal>
+
+            {/* Publish Confirmation Modal */}
+            <ConfirmationModal
+                show={!!scheduleToPublish}
+                title={t('schedule.publishSchedule')}
+                message={t('schedule.confirmPublish')}
+                onConfirm={handlePublishConfirm}
+                onCancel={() => setScheduleToPublish(null)}
+                loading={isUpdatingStatus}
+                confirmText={t('schedule.publishSchedule')}
+                variant="success"
+            />
+
+            {/* Unpublish Confirmation Modal */}
+            <ConfirmationModal
+                show={!!scheduleToUnpublish}
+                title={t('schedule.unpublishEdit')}
+                message={t('schedule.confirmUnpublish')}
+                onConfirm={handleUnpublishConfirm}
+                onCancel={() => setScheduleToUnpublish(null)}
+                loading={isUpdatingStatus}
+                confirmText={t('schedule.unpublishEdit')}
+                variant="warning"
+            />
+
+            {/* Error Alert */}
+            {showError && (
+                <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => setShowError(null)}
+                    className="mt-3"
+                >
+                    {showError}
+                </Alert>
+            )}
         </>
     );
 };

@@ -21,12 +21,12 @@ import {
     compareAlgorithms,
     setActiveTab,
     addPendingChange,
+    setSelectedScheduleId,
 } from '../../app/store/slices/scheduleSlice';
 import { useScheduleActions } from './hooks/useScheduleActions';
 
 // Utils
 import './ScheduleManagement.css';
-
 
 // --- Основной компонент ---
 const ScheduleManagement = () => {
@@ -46,10 +46,10 @@ const ScheduleManagement = () => {
 
     // 2. Инициализируем наш хук для выполнения действий
     const {
-        loading: actionsLoading, // Переименуем
-        error: actionError, // Переименуем
+        loading: actionsLoading,
+        error: actionError,
         handleGenerate,
-        handleDelete: performDelete, // Можно переименовать, чтобы было понятнее
+        handleDelete: performDelete,
     } = useScheduleActions();
 
     // --- Локальное состояние для UI, которое было утеряно ---
@@ -65,93 +65,105 @@ const ScheduleManagement = () => {
         dispatch(fetchSchedules());
     }, [dispatch]);
 
-
     // --- Обработчики действий ---
-    // 3. Создаем новую функцию-обертку для генерации расписания
     const onGenerateSubmit = async (settings) => {
-        const result = await handleGenerate(settings); // Вызываем функцию из хука
+        const result = await handleGenerate(settings);
 
         if (result.success) {
             setAlert({ type: 'success', message: t('schedule.generateSuccess') });
             setShowGenerateModal(false);
-            dispatch(fetchSchedules()); // Обновляем список расписаний после успешной генерации
+            dispatch(fetchSchedules());
         } else {
-            // Ошибку можно показать в алерте. Хук уже сохранил ее в actionsError.
-            setAlert({ type: 'danger', message: result.error || t('errors.generateFailed') });
+            setAlert({ type: 'danger', message: actionError || t('schedule.generateError') });
         }
     };
 
-    // 4. Создаем обертку для удаления
-    const onDeleteClick = async (id) => {
-        if (window.confirm(t('confirmDelete'))) {
-            const result = await performDelete(id); // Вызываем функцию из хука
-            if (result.success) {
-                setAlert({ type: 'success', message: t('alerts.scheduleDeletedSuccess') });
-                // Список обновится автоматически благодаря thunk'у, который диспатчит fetchSchedules
-            } else {
-                setAlert({ type: 'danger', message: result.error || t('errors.deleteFailed') });
-            }
+    const handleViewDetails = async (scheduleId) => {
+        dispatch(setSelectedScheduleId(scheduleId));
+        if (scheduleId) {
+            dispatch(fetchScheduleDetails(scheduleId));
         }
     };
 
+    const handleBackToList = () => {
+        dispatch(setActiveTab('overview'));
+        dispatch(setSelectedScheduleId(null));
+    };
 
-    const handleCompare = async () => {
-        const result = await dispatch(compareAlgorithms({})).unwrap();
+    const handleTabChange = (newTab) => {
+        dispatch(setActiveTab(newTab));
+    };
+
+    const handleCompareAlgorithms = async () => {
+        const result = await dispatch(compareAlgorithms()).unwrap();
         setComparisonResults(result);
         setShowComparisonModal(true);
     };
 
-
-    const handleCellClick = (date, positionId, shiftId) => {
-        setSelectedCell({ date, positionId, shiftId });
+    const handleCellClick = (cell) => {
+        setSelectedCell(cell);
         setShowEmployeeModal(true);
     };
 
-    const handleEmployeeSelect = (empId, empName) => {
+    const handleEmployeeSelect = async (employeeId) => {
         if (!selectedCell) return;
-        const { date, shiftId, positionId } = selectedCell;
-        const key = `${positionId}-${date}-${shiftId}-assign-${empId}`;
-        dispatch(addPendingChange({ key, change: { action: 'assign', empId, empName, date, shiftId, positionId } }));
+
+        dispatch(addPendingChange({
+            positionId: selectedCell.positionId,
+            dayIndex: selectedCell.dayIndex,
+            shiftId: selectedCell.shiftId,
+            employeeId: employeeId,
+        }));
+
         setShowEmployeeModal(false);
         setSelectedCell(null);
     };
 
+    const onScheduleDeleted = (deletedId) => {
+        setAlert({ type: 'success', message: t('schedule.deleteSuccess') });
+        if (selectedScheduleId === deletedId) {
+            dispatch(setSelectedScheduleId(null));
+        }
+    };
+
+    // --- Рендеринг ---
+    const isLoading = dataLoading === 'pending' || actionsLoading;
+    const scheduleExists = !!selectedScheduleId;
+
     return (
         <AdminLayout>
-            <Container fluid className="px-0">
-                {/* Отображение алертов */}
+            <Container fluid className="p-4">
+                <ScheduleHeader
+                    onGenerateClick={() => setShowGenerateModal(true)}
+                    onCompareClick={handleCompareAlgorithms}
+                    loading={isLoading}
+                />
+
+                {/* Alert messages */}
                 {alert && (
-                    <Alert variant={alert.type} onClose={() => setAlert(null)} dismissible>
+                    <Alert variant={alert.type} dismissible onClose={() => setAlert(null)} className="mb-3">
                         {alert.message}
                     </Alert>
                 )}
 
-                {/* Отображение глобальной ошибки загрузки данных */}
-                {dataError && <Alert variant="danger">{dataError}</Alert>}
-
-                <ScheduleHeader
-                    messages={t}
-                    onGenerateClick={() => setShowGenerateModal(true)}
-                    onCompareClick={handleCompare}
-                    // Кнопки блокируются, если идет загрузка данных ИЛИ выполняется какое-то действие
-                    loading={dataLoading === 'pending' || actionsLoading}
-                />
-
+                {/* Main content */}
                 <ScheduleTabs
                     activeTab={activeTab}
-                    onTabChange={(k) => dispatch(setActiveTab(k))}
-                    isDetailsDisabled={!selectedScheduleId}
+                    onTabChange={handleTabChange}
+                    isDetailsDisabled={!scheduleExists}
+                    onBackClick={handleBackToList}
                 >
                     {{
-                        overview: (
+                        overview: dataLoading === 'pending' ? (
+                            <div className="text-center p-5"><Spinner animation="border" /></div>
+                        ) : (
                             <ScheduleOverviewTable
                                 schedules={schedules}
-                                loading={dataLoading === 'pending' && !schedules.length}
-                                onViewDetails={(id) => dispatch(fetchScheduleDetails(id))}
-                                onDelete={onDeleteClick}
+                                onViewDetails={handleViewDetails}
+                                onScheduleDeleted={onScheduleDeleted}
                             />
                         ),
-                        details: dataLoading === 'pending' && !scheduleDetails ? (
+                        details: dataLoading === 'pending' ? (
                             <div className="text-center p-5"><Spinner animation="border" /></div>
                         ) : (
                             <ScheduleDetailsView onCellClick={handleCellClick} />

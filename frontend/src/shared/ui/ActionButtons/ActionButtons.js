@@ -27,7 +27,8 @@ const ActionButtons = ({ actions, size = 'sm', variant = 'light' }) => {
     return (
         <Dropdown as={ButtonGroup} size={size}>
             <Button
-                variant={variant}
+                type="button"
+                variant={actions[0].variant || variant}
                 size={size}
                 onClick={actions[0].onClick}
                 disabled={actions[0].disabled}
@@ -42,6 +43,7 @@ const ActionButtons = ({ actions, size = 'sm', variant = 'light' }) => {
                         key={index}
                         onClick={action.onClick}
                         disabled={action.disabled}
+                        className={action.variant ? `text-${action.variant}` : ''}
                     >
                         {action.icon && <i className={`${action.icon} me-2`}></i>}
                         {action.label}

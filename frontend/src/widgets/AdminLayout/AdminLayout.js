@@ -16,6 +16,7 @@ import { logout } from '../../app/store/slices/authSlice';
 import { LanguageSwitch } from '../../shared/ui/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "../../shared/lib/i18n/i18nProvider";
 
+import { setActiveTab, setSelectedScheduleId } from '../../app/store/slices/scheduleSlice';
 
 const AdminLayout = ({ children }) => {
     const { t } = useI18n();
@@ -24,6 +25,7 @@ const AdminLayout = ({ children }) => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
     const dispatch = useDispatch();
+
     const handleLogout = () => {
         dispatch(logout()); // Диспатчим экшен
         navigate('/login'); // Перенаправляем на логин
@@ -46,42 +48,42 @@ const AdminLayout = ({ children }) => {
     const navigationItems = [
         {
             key: 'dashboard',
-            label: 'Dashboard',
+            label: t('navigation.dashboard'),
             icon: 'speedometer2',
             path: '/admin',
             badge: null
         },
         {
             key: 'schedules',
-            label: 'Schedules',
+            label: t('navigation.schedules'),
             icon: 'calendar-week',
             path: '/admin/schedules',
             badge: 'New'
         },
         {
             key: 'algorithms',
-            label: 'Algorithms',
+            label: t('navigation.algorithms'),
             icon: 'cpu-fill',
             path: '/admin/algorithms',
             badge: null
         },
         {
             key: 'employees',
-            label: 'Employees',
+            label: t('navigation.employees'),
             icon: 'people-fill',
             path: '/admin/employees',
             badge: null
         },
         {
             key: 'settings',
-            label: 'Settings',
+            label: t('navigation.settings'),
             icon: 'gear-fill',
             path: '/admin/settings',
             badge: null
         },
         {
             key: 'reports',
-            label: 'Analytics',
+            label: t('navigation.reports'),
             icon: 'graph-up-arrow',
             path: '/admin/reports',
             badge: null
@@ -98,12 +100,18 @@ const AdminLayout = ({ children }) => {
         return currentPath.startsWith(path);
     };
 
-    // const handleNavigation = (path) => {
-    //     navigate(path);
-    //     if (isMobile) { // Закрываем мобильное меню при навигации
-    //         setShowMobileMenu(false);
-    //     }
-    // };
+    // Handle navigation with schedule reset
+    const handleNavigation = (path) => {
+        // If navigating to schedules page, reset to overview
+        if (path === '/admin/schedules') {
+            dispatch(setActiveTab('overview'));
+            dispatch(setSelectedScheduleId(null));
+        }
+        navigate(path);
+        if (isMobile) {
+            setShowMobileMenu(false);
+        }
+    };
 
     const SidebarContent = () => (
         <Nav className="flex-column admin-nav">
@@ -114,7 +122,10 @@ const AdminLayout = ({ children }) => {
                         as={Link}
                         to={item.path}
                         className={`admin-nav-link ${isActive(item.path) ? 'active' : ''}`}
-                        onClick={() => showMobileMenu && setShowMobileMenu(false)}
+                        onClick={(e) => {
+                            e.preventDefault(); // Prevent default Link behavior
+                            handleNavigation(item.path);
+                        }}
                     >
                         <i className={`bi bi-${item.icon} nav-icon `}></i>
                         <span className="me-auto">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
@@ -152,7 +163,6 @@ const AdminLayout = ({ children }) => {
                     </div>
 
                     {/* Right side - User menu */}
-
                     <div className="d-flex align-items-center gap-3">
                         <LanguageSwitch />
                         <Dropdown align="end">
@@ -177,16 +187,16 @@ const AdminLayout = ({ children }) => {
                                 <Dropdown.Divider />
                                 <Dropdown.Item>
                                     <i className="bi bi-person me-2"></i>
-                                    Profile
+                                    {t('common.profile')}
                                 </Dropdown.Item>
                                 <Dropdown.Item>
                                     <i className="bi bi-gear me-2"></i>
-                                    Preferences
+                                    {t('common.settings')}
                                 </Dropdown.Item>
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={handleLogout} className="text-danger">
                                     <i className="bi bi-box-arrow-right me-2"></i>
-                                    Log out
+                                    {t('auth.logout')}
                                 </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
@@ -194,7 +204,7 @@ const AdminLayout = ({ children }) => {
                 </Container>
             </Navbar>
 
-            {/* Main Container - ИСПРАВЛЕНО: Использовать flexbox вместо Bootstrap grid */}
+            {/* Main Container  */}
             <div className="admin-main-container">
                 {/* Desktop Sidebar */}
                 {!isMobile && (
@@ -202,7 +212,7 @@ const AdminLayout = ({ children }) => {
                         <div className="sidebar-content">
                             <div className="sidebar-header">
                                 <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
-                                    Navigation
+                                    {t('navigation.title')}
                                 </h6>
                             </div>
                             <SidebarContent />
@@ -228,14 +238,14 @@ const AdminLayout = ({ children }) => {
                 <Offcanvas.Header closeButton className="border-bottom">
                     <Offcanvas.Title>
                         <i className="bi bi-calendar-check-fill text-primary me-2"></i>
-                        Shifts Admin
+                        {t('common.appName')}
                     </Offcanvas.Title>
                 </Offcanvas.Header>
                 <Offcanvas.Body className="p-0">
                     <div className="mobile-sidebar-content">
                         <div className="sidebar-header">
                             <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3 mt-3">
-                                Navigation
+                                {t('navigation.title')}
                             </h6>
                         </div>
                         <SidebarContent />
