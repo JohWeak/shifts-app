@@ -256,6 +256,9 @@ export const en = {
         payrollReport: 'Payroll Report',
         reportType: 'Report Type',
         reportsTitle: 'Reports',
+        analyticsAndReports: 'Analytics & Reports',
+        analyticsDesc: 'View detailed analytics and generate reports',
+
     },
     schedule: {
         actions: 'Actions',
@@ -311,12 +314,17 @@ export const en = {
     },
     settings: {
         systemSettings: 'System Settings',
+        settingsSubtitle: 'Configure the system settings',
         generalSettings: 'General',
         scheduleSettings: 'Schedule',
         notificationSettings: 'Notifications',
         securitySettings: 'Security',
         positionSettings: 'Positions',
         constraintSettings: 'Constraints',
+        algorithmsSettings: 'Algorithms Settings',
+        algorithmsSettingsSubtitle: 'Configure the algorithms settings',
+        employeeSettings: 'Employees Management',
+        employeeSettingsSubtitle: 'Manage employee accounts and permissions',
 
         // General
         dateFormat: 'Date Format',
@@ -375,5 +383,6 @@ export const en = {
         fixedByLaw: 'Fixed by law',
         strictLegalCompliance: 'Enforce Strict Legal Compliance',
         strictLegalComplianceHint: 'Strictly enforce all legal requirements. Disable only for testing purposes.',
-    }
+    },
+
 };

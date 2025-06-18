@@ -1,18 +1,19 @@
 // frontend/src/features/admin-schedule-management/weeklySchedule.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Spinner, Alert } from 'react-bootstrap';
+import {Container, Spinner, Alert, Button} from 'react-bootstrap';
 
 // Widgets, UI, etc.
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
-import ScheduleList from './components/ScheduleList';
-import ScheduleDetails from './components/ScheduleDetails';
-import GenerateScheduleModal from './components/GenerateScheduleModal';
-import CompareAlgorithmsModal from './components/CompareAlgorithmsModal';
-import EmployeeSelectionModal from './components/EmployeeSelectionModal';
-import ScheduleHeader from './components/ScheduleHeader';
-import ScheduleTabs from './components/ScheduleTabs';
+import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import ScheduleList from './ui/schedule-list/ScheduleList';
+import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
+import GenerateScheduleModal from './ui/modals/GenerateScheduleModal';
+import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
+import EmployeeSelectionModal from './ui/modals/EmployeeSelectionModal';
 import { useI18n } from '../../shared/lib/i18n/i18nProvider';
+import { useScheduleActions } from './model/hooks/useScheduleActions';
+import './index.css';
 
 // Redux Actions
 import {
@@ -23,10 +24,8 @@ import {
     addPendingChange,
     setSelectedScheduleId,
 } from '../../app/store/slices/scheduleSlice';
-import { useScheduleActions } from './hooks/useScheduleActions';
 
-// Utils
-import './index.css';
+
 
 // --- Основной компонент ---
 const ScheduleManagement = () => {
@@ -135,10 +134,25 @@ const ScheduleManagement = () => {
     return (
         <AdminLayout>
             <Container fluid className="px-0">
-                <ScheduleHeader
-                    onGenerateClick={() => setShowGenerateModal(true)}
-                    loading={isLoading}
-                />
+                <PageHeader
+                    icon="calendar-week"
+                    title={t('schedule.title')}
+                    subtitle={t('schedule.subtitle')}
+                >
+                    <Button
+                        variant="primary"
+                        onClick={() => setShowGenerateModal(true)}
+                        disabled={isLoading}
+                        className="d-flex align-items-center"
+                    >
+                        {isLoading ? (
+                            <Spinner size="sm" className="me-2" />
+                        ) : (
+                            <i className="bi bi-plus-circle me-2"></i>
+                        )}
+                        <span>{t('schedule.generateSchedule')}</span>
+                    </Button>
+                </PageHeader>
 
                 {/* Alert messages */}
                 {alert && (
@@ -148,29 +162,44 @@ const ScheduleManagement = () => {
                 )}
 
                 {/* Main content */}
-                <ScheduleTabs
-                    activeTab={activeTab}
-                    onTabChange={handleTabChange}
-                    isDetailsDisabled={!scheduleExists}
-                    onBackClick={handleBackToList}
-                >
-                    {{
-                        overview: dataLoading === 'pending' ? (
-                            <div className="text-center p-5"><Spinner animation="border" /></div>
-                        ) : (
-                            <ScheduleList
-                                schedules={schedules}
-                                onViewDetails={handleViewDetails}
-                                onScheduleDeleted={onScheduleDeleted}
-                            />
-                        ),
-                        details: dataLoading === 'pending' ? (
-                            <div className="text-center p-5"><Spinner animation="border" /></div>
+                {activeTab === 'view' && selectedScheduleId ? (
+                    <>
+                        {/* Кнопка "Назад" */}
+                        <div className="d-flex align-items-center mb-3">
+                            <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                onClick={handleBackToList}
+                                className="me-3"
+                            >
+                                <i className="bi bi-arrow-left me-2"></i>
+                                {t('common.back')}
+                            </Button>
+                        </div>
+
+                        {/* Детали расписания */}
+                        {dataLoading === 'pending' ? (
+                            <div className="text-center p-5">
+                                <Spinner animation="border" />
+                            </div>
                         ) : (
                             <ScheduleDetails onCellClick={handleCellClick} />
-                        )
-                    }}
-                </ScheduleTabs>
+                        )}
+                    </>
+                ) : (
+                    /* Список расписаний */
+                    dataLoading === 'pending' ? (
+                        <div className="text-center p-5">
+                            <Spinner animation="border" />
+                        </div>
+                    ) : (
+                        <ScheduleList
+                            schedules={schedules}
+                            onViewDetails={handleViewDetails}
+                            onScheduleDeleted={onScheduleDeleted}
+                        />
+                    )
+                )}
 
                 <GenerateScheduleModal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} onGenerate={onGenerateSubmit} generating={actionsLoading} />
                 <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={() => {}} />

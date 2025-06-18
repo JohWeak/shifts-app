@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { Table, Card, Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { format } from 'date-fns';
-import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
-import { deleteSchedule, updateScheduleStatus } from '../../../app/store/slices/scheduleSlice';
-import ActionButtons from '../../../shared/ui/ActionButtons/ActionButtons';
-import StatusBadge from '../../../shared/ui/StatusBadge/StatusBadge';
-import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
+import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
+import { deleteSchedule, updateScheduleStatus } from '../../../../app/store/slices/scheduleSlice';
+import ActionButtons from '../../../../shared/ui/ActionButtons/ActionButtons';
+import StatusBadge from '../../../../shared/ui/StatusBadge/StatusBadge';
+import ConfirmationModal from '../../../../shared/ui/ConfirmationModal';
 import './ScheduleList.css';
 
 const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {

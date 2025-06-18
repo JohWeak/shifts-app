@@ -1,18 +1,20 @@
 import React from 'react';
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
 import { Container, Card } from 'react-bootstrap';
+import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import {useI18n} from "../../shared/lib/i18n/i18nProvider";
 
 const Reports = () => {
+    const { t } = useI18n();
+
     return (
         <AdminLayout>
             <Container fluid className="px-0">
-                <div className="mb-4">
-                    <h1 className="h3 mb-2 text-dark fw-bold">
-                        <i className="bi bi-graph-up-arrow me-2 text-primary"></i>
-                        Analytics & Reports
-                    </h1>
-                    <p className="text-muted mb-0">View detailed analytics and generate reports</p>
-                </div>
+                <PageHeader
+                    icon="graph-up-arrow"
+                    title={t('reports.analyticsAndReports')}
+                    subtitle={t('reports.analyticsDesc')}
+                />
 
                 <Card className="border-0 shadow-sm">
                     <Card.Body className="text-center py-5">

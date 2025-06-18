@@ -1,7 +1,7 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/schedule/ScheduleCell.js
 import React from 'react';
 import { Badge } from 'react-bootstrap';
-import {useI18n} from '../../../shared/lib/i18n/i18nProvider';
+import {useI18n} from '../../../../shared/lib/i18n/i18nProvider';
 
 const ScheduleCell = ({
                           date,

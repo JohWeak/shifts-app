@@ -1,18 +1,19 @@
 import React from 'react';
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
 import { Container, Card } from 'react-bootstrap';
-
+import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import {useI18n} from "../../shared/lib/i18n/i18nProvider";
 const EmployeeManagement = () => {
+    const { t } = useI18n();
+
     return (
         <AdminLayout>
             <Container fluid className="px-0">
-                <div className="mb-4">
-                    <h1 className="h3 mb-2 text-dark fw-bold">
-                        <i className="bi bi-people-fill me-2 text-primary"></i>
-                        Employee Management
-                    </h1>
-                    <p className="text-muted mb-0">Manage employee accounts and permissions</p>
-                </div>
+                <PageHeader
+                    icon="people-fill"
+                    title={t('settings.employeeSettings')}
+                    subtitle={t('settings.employeeSettingsSubtitle')}
+                />
 
                 <Card className="border-0 shadow-sm">
                     <Card.Body className="text-center py-5">

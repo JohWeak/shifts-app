@@ -1,6 +1,8 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
+import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+
 import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import {useI18n} from "../../shared/lib/i18n/i18nProvider";
@@ -44,13 +46,11 @@ const AdminDashboard = () => {
     return (
         <AdminLayout>
             <Container fluid className="px-0">
-                <div className="mb-4">
-                    <h1 className="h3 mb-2 text-dark fw-bold">
-                        <i className="bi bi-speedometer2 me-2 text-primary"></i>
-                        {t('dashboard.dashboardTitle')}
-                    </h1>
-                    <p className="text-muted mb-0">{t('dashboard.dashboardDesc')}</p>
-                </div>
+                <PageHeader
+                    icon="speedometer2"
+                    title={t('dashboard.dashboardTitle')}
+                    subtitle={t('dashboard.dashboardDesc')}
+                />
 
                 <Row>
                     <Col lg={3} md={6} className="mb-4">

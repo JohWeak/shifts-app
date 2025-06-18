@@ -4,19 +4,19 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Card, Alert} from 'react-bootstrap';
 
 import ScheduleEditor from './ScheduleEditor';
-import ConfirmationModal from '../../../shared/ui/ConfirmationModal';
+import ConfirmationModal from '../../../../shared/ui/ConfirmationModal';
 import ScheduleInfo from './ScheduleInfo';
-import ScheduleActions from './ScheduleActions';
-import LoadingState from '../../../shared/ui/LoadingState/LoadingState';
-import EmptyState from '../../../shared/ui/EmptyState/EmptyState';
-import {useI18n} from '../../../shared/lib/i18n/i18nProvider';
+import ScheduleActions from '../schedule-list/ScheduleActions';
+import LoadingState from '../../../../shared/ui/LoadingState/LoadingState';
+import EmptyState from '../../../../shared/ui/EmptyState/EmptyState';
+import {useI18n} from '../../../../shared/lib/i18n/i18nProvider';
 // Импортируем все необходимые экшены из Redux Slice
 import {
     updateScheduleStatus,
     updateScheduleAssignments,
     exportSchedule, // <--- Новый экшен для экспорта
     toggleEditPosition,
-} from '../../../app/store/slices/scheduleSlice';
+} from '../../../../app/store/slices/scheduleSlice';
 
 const ScheduleDetails = ({onCellClick}) => {
     const dispatch = useDispatch();

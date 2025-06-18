@@ -2,10 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Card, Form, Button, Row, Col, Alert, Spinner, Nav, Tab} from 'react-bootstrap';
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
+import PageHeader from '../../shared/ui/PageHeader/PageHeader';
 import {useI18n} from '../../shared/lib/i18n/i18nProvider';
 import {fetchSystemSettings, updateSystemSettings} from '../../app/store/slices/settingsSlice';
 import { fetchWorkSites } from '../../app/store/slices/scheduleSlice';
-import Index from '../admin-position-settings';
+import PositionSettings from '../admin-position-settings';
+
+import './index.css';
 
 const SystemSettings = () => {
     const {t} = useI18n();
@@ -57,12 +60,13 @@ const SystemSettings = () => {
 
     return (
         <AdminLayout>
-            <Container fluid>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h1 className="h3 mb-0">
-                        <i className="bi bi-gear me-2"></i>
-                        {t('settings.systemSettings')}
-                    </h1>
+            <Container fluid className="px-0">
+                <PageHeader
+                    icon="gear"
+                    title={t('settings.systemSettings')}
+                    subtitle={t('settings.settingsSubtitle')}
+
+                >
                     <div className="d-flex gap-2">
                         <Button
                             variant="secondary"
@@ -79,18 +83,18 @@ const SystemSettings = () => {
                         >
                             {loading === 'pending' ? (
                                 <>
-                                    <Spinner size="sm" className="me-2"/>
+                                    <Spinner size="sm" className="me-2" />
                                     {t('common.saving')}
                                 </>
                             ) : (
                                 <>
-                                    <i className="bi bi-save me-2"></i>
+                                    <i className="bi bi-check-circle me-2"></i>
                                     {t('common.save')}
                                 </>
                             )}
                         </Button>
                     </div>
-                </div>
+                </PageHeader>
 
                 {error && (
                     <Alert variant="danger" dismissible onClose={() => {
@@ -332,7 +336,7 @@ const SystemSettings = () => {
                                             </Form.Group>
 
                                             {selectedSiteId && (
-                                                <Index siteId={selectedSiteId} />
+                                                <PositionSettings siteId={selectedSiteId} />
                                             )}
                                         </Card.Body>
                                     </Card>

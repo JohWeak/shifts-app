@@ -4,7 +4,7 @@ import { Table, Button, Form, Modal, Badge } from 'react-bootstrap';
 import { useI18n } from '../../shared/lib/i18n/i18nProvider';
 import { fetchPositions, updatePosition } from '../../app/store/slices/positionSlice';
 
-const Index = ({ siteId }) => {
+const PositionSettings = ({ siteId }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
     const { positions, loading } = useSelector(state => state.positions);
@@ -148,4 +148,4 @@ const Index = ({ siteId }) => {
     );
 };
 
-export default Index;
+export default PositionSettings;

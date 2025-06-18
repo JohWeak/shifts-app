@@ -6,8 +6,8 @@ import {
     deleteSchedule,
     updateScheduleStatus,
     exportSchedule
-} from '../../../app/store/slices/scheduleSlice';
-import { useI18n } from '../../../shared/lib/i18n/i18nProvider';
+} from '../../../../app/store/slices/scheduleSlice';
+import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
 
 export const useScheduleActions = () => {
     const dispatch = useDispatch();

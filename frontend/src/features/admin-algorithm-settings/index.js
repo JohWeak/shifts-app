@@ -1,18 +1,21 @@
 import React from 'react';
 import AdminLayout from '../../widgets/AdminLayout/AdminLayout';
+import PageHeader from '../../shared/ui/PageHeader/PageHeader';
+import {useI18n} from "../../shared/lib/i18n/i18nProvider";
+
 import { Container, Card } from 'react-bootstrap';
 
 const AlgorithmSettings = () => {
+    const { t } = useI18n();
+
     return (
         <AdminLayout>
             <Container fluid className="px-0">
-                <div className="mb-4">
-                    <h1 className="h3 mb-2 text-dark fw-bold">
-                        <i className="bi bi-cpu-fill me-2 text-primary"></i>
-                        Algorithm Settings
-                    </h1>
-                    <p className="text-muted mb-0">Configure scheduling algorithms</p>
-                </div>
+                <PageHeader
+                    icon="cpu-fill"
+                    title={t('settings.algorithmsSettings')}
+                    subtitle={t('settings.algorithmsSettingsSubtitle')}
+                />
 
                 <Card className="border-0 shadow-sm">
                     <Card.Body className="text-center py-5">
