@@ -4,7 +4,7 @@ import {Provider, useDispatch} from 'react-redux';
 import store from './store/store';
 import {I18nProvider} from '../shared/lib/i18n/i18nProvider';
 import {ErrorBoundary} from '../shared/ui/components/ErrorBoundary/ErrorBoundary';
-import {fetchSystemSettings} from './store/slices/settingsSlice';
+import {fetchSystemSettings} from '../features/admin-system-settings/model/settingsSlice';
 
 // Pages
 import Login from '../features/auth';

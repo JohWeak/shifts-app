@@ -23,7 +23,7 @@ import {
     setActiveTab,
     addPendingChange,
     setSelectedScheduleId,
-} from '../../app/store/slices/scheduleSlice';
+} from './model/scheduleSlice';
 
 
 

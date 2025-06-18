@@ -9,7 +9,7 @@ import {LanguageSwitch} from '../../shared/ui/components/LanguageSwitch/Language
 // Импортируем фичи, которые используются на дашборде
 import WeeklySchedule from '../employee-schedule';
 import ConstraintsSchedule from '../employee-constraints';
-import {logout} from '../../app/store/slices/authSlice';
+import {logout} from '../auth/model/authSlice';
 
 // Стили теперь будут в этой же папке
 import './index.css';

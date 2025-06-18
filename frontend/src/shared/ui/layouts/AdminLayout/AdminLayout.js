@@ -12,11 +12,11 @@ import {
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import './AdminLayout.css';
-import { logout } from '../../../../app/store/slices/authSlice';
+import { logout } from '../../../../features/auth/model/authSlice';
 import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "../../../lib/i18n/i18nProvider";
 
-import { setActiveTab, setSelectedScheduleId } from '../../../../app/store/slices/scheduleSlice';
+import { setActiveTab, setSelectedScheduleId } from '../../../../features/admin-schedule-management/model/scheduleSlice';
 
 const AdminLayout = ({ children }) => {
     const { t } = useI18n();

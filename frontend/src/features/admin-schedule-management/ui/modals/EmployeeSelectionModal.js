@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, ListGroup, Badge, Alert, Form, Tab, Tabs } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecommendations } from '../../../../app/store/slices/scheduleSlice'; // Импортируем наш thunk
+import { fetchRecommendations } from '../../model/scheduleSlice'; // Импортируем наш thunk
 import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
 import LoadingState from '../../../../shared/ui/components/LoadingState/LoadingState';
 

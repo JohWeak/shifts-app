@@ -16,7 +16,7 @@ import {
     updateScheduleAssignments,
     exportSchedule, // <--- Новый экшен для экспорта
     toggleEditPosition,
-} from '../../../../app/store/slices/scheduleSlice';
+} from '../../model/scheduleSlice';
 
 const ScheduleDetails = ({onCellClick}) => {
     const dispatch = useDispatch();

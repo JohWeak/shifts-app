@@ -4,8 +4,8 @@ import {Container, Card, Form, Button, Row, Col, Alert, Spinner, Nav, Tab} from 
 import AdminLayout from '../../shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from '../../shared/ui/components/PageHeader/PageHeader';
 import {useI18n} from '../../shared/lib/i18n/i18nProvider';
-import {fetchSystemSettings, updateSystemSettings} from '../../app/store/slices/settingsSlice';
-import { fetchWorkSites } from '../../app/store/slices/scheduleSlice';
+import {fetchSystemSettings, updateSystemSettings} from './model/settingsSlice';
+import { fetchWorkSites } from '../admin-schedule-management/model/scheduleSlice';
 import PositionSettings from '../admin-position-settings';
 
 import './index.css';

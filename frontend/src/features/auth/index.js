@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../app/store/slices/authSlice'; // Импортируем наш Thunk
+import { login } from './model/authSlice'; // Импортируем наш Thunk
 import './index.css';
 import { Spinner } from 'react-bootstrap';
 import { useI18n } from '../../shared/lib/i18n/i18nProvider';
