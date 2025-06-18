@@ -1,3 +1,5 @@
+/* Loading State - гибридный подход */
+
 .loading-state {
     display: flex;
     flex-direction: column;
@@ -8,14 +10,21 @@
 
 .loading-state-sm {
     padding: 1rem;
+    min-height: 100px;
+}
+
+.loading-state-md {
+    padding: 2rem;
+    min-height: 200px;
 }
 
 .loading-state-lg {
-    padding: 4rem;
-    min-height: 400px;
+    padding: 3rem;
+    min-height: 300px;
 }
 
 .loading-state-message {
-    color: #6c757d;
-    margin-bottom: 0;
+    color: var(--bs-secondary);
+    font-size: 0.875rem;
+    margin-top: 1rem;
 }

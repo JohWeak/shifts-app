@@ -121,7 +121,7 @@ const AdminDashboard = () => {
                 <Row>
                     <Col lg={8} className="mb-4">
                         <Card className="border-0 shadow-sm h-100">
-                            <Card.Header className="bg-light border-0">
+                            <Card.Header >
                                 <h5 className="mb-0">{t('common.quickActions')}</h5>
                             </Card.Header>
                             <Card.Body>
@@ -133,7 +133,7 @@ const AdminDashboard = () => {
                                             onClick={() => navigate('/admin/schedules')}
                                         >
                                             <i className="bi bi-calendar-week me-2"></i>
-                                            Manage Schedules
+                                            {t('schedule.manageSchedules')}
                                         </Button>
                                     </Col>
                                     <Col md={6} className="mb-3">
@@ -143,8 +143,7 @@ const AdminDashboard = () => {
                                             onClick={() => navigate('/admin/employees')}
                                         >
                                             <i className="bi bi-people me-2"></i>
-                                            Manage Employees
-                                        </Button>
+                                            {t('employee.manageEmployees')}                                        </Button>
                                     </Col>
                                     <Col md={6} className="mb-3">
                                         <Button
@@ -153,8 +152,7 @@ const AdminDashboard = () => {
                                             onClick={() => navigate('/admin/algorithms')}
                                         >
                                             <i className="bi bi-cpu me-2"></i>
-                                            Algorithm Settings
-                                        </Button>
+                                            {t('settings.algorithmsSettings')}                                        </Button>
                                     </Col>
                                     <Col md={6} className="mb-3">
                                         <Button
@@ -163,7 +161,7 @@ const AdminDashboard = () => {
                                             onClick={() => navigate('/admin/reports')}
                                         >
                                             <i className="bi bi-graph-up me-2"></i>
-                                            View Reports
+                                            {t('reports.viewReports')}
                                         </Button>
                                     </Col>
                                 </Row>
@@ -173,7 +171,7 @@ const AdminDashboard = () => {
 
                     <Col lg={4} className="mb-4">
                         <Card className="border-0 shadow-sm h-100">
-                            <Card.Header className="bg-light border-0">
+                            <Card.Header >
                                 <h5 className="mb-0">System Status</h5>
                             </Card.Header>
                             <Card.Body>

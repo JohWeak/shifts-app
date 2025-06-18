@@ -36,7 +36,7 @@ const ActionButtons = ({ actions, size = 'sm', variant = 'light' }) => {
                 {actions[0].icon && <i className={`${actions[0].icon} me-1`}></i>}
                 {actions[0].label}
             </Button>
-            <Dropdown.Toggle split variant={variant} />
+            <Dropdown.Toggle split variant='' />
             <Dropdown.Menu>
                 {actions.slice(1).map((action, index) => (
                     <Dropdown.Item

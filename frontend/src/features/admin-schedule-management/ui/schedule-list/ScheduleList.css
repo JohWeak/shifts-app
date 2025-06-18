@@ -1,24 +1,21 @@
-/* frontend/src/features/admin-schedule-management/components/ScheduleList.css */
+/* Schedule List - гибридный подход */
 
-/* Table container styles */
 .schedule-overview-table {
     position: relative;
 }
 
-/* Row hover effect with Bootstrap-friendly approach */
+/* Row hover effect */
 .schedule-overview-table tbody tr.schedule-row {
     transition: all 0.2s ease;
     position: relative;
 }
 
 .schedule-overview-table tbody tr.schedule-row:hover {
-    background-color: rgba(13, 110, 253, 0.04);
-    /* Removed translateY to fix z-index issue */
-    /* transform: translateY(-1px); */
+    background-color: rgba(var(--bs-primary-rgb), 0.04);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 -1px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Alternative visual feedback without transform */
+/* Visual feedback without transform */
 .schedule-overview-table tbody tr.schedule-row::after {
     content: '';
     position: absolute;
@@ -75,91 +72,29 @@
 }
 
 /* Visual feedback for clickable area */
-.schedule-overview-table tbody tr.schedule-row td:not(.action-buttons) {
-    cursor: pointer;
-    position: relative;
-}
-
-/* Add subtle animation on hover */
-.schedule-overview-table tbody tr.schedule-row td:first-child {
-    position: relative;
-    overflow: hidden;
-}
-
-.schedule-overview-table tbody tr.schedule-row:hover td:first-child::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--bs-primary);
-    animation: slideIn 0.2s ease;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(-100%);
-    }
-    to {
-        transform: translateX(0);
-    }
-}
-
-/* Ensure proper spacing and alignment */
-.schedule-overview-table th,
-.schedule-overview-table td {
-    vertical-align: middle;
-}
-
-/* Style for action buttons column */
-.schedule-overview-table td.action-buttons {
-    width: 1%;
-    white-space: nowrap;
-    text-align: right;
-}
-
-/* Override Bootstrap table hover if needed */
-.table-hover .schedule-overview-table tbody tr:hover {
-    background-color: transparent;
-}
-
-/*!* Highlight animation for new schedules *!*/
-/*.schedule-overview-table tbody tr.highlight-new {*/
-/*    animation: highlightPulse 2s ease-out;*/
-/*}*/
-
-/*@keyframes highlightPulse {*/
-/*    0% {*/
-/*        background-color: rgba(25, 135, 84, 0.3);*/
-/*        transform: scale(1.02);*/
-/*    }*/
-/*    50% {*/
-/*        background-color: rgba(25, 135, 84, 0.15);*/
-/*        transform: scale(1.01);*/
-/*    }*/
-/*    100% {*/
-/*        background-color: transparent;*/
-/*        transform: scale(1);*/
-/*    }*/
-/*}*/
-
-/* Ensure smooth transition */
 .schedule-overview-table tbody tr.schedule-row {
-    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-    .schedule-overview-table tbody tr.schedule-row:hover {
-        box-shadow: none;
+/* Status badges custom styling */
+.schedule-overview-table .badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Date columns */
+.schedule-overview-table .text-nowrap {
+    font-weight: 500;
+    color: var(--bs-emphasis-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .schedule-overview-table {
+        font-size: 0.875rem;
     }
 
-    .schedule-overview-table tbody tr.schedule-row:hover td:first-child::before {
-        display: none;
-    }
-
-    .schedule-overview-table tbody tr.schedule-row::after {
-        display: none;
+    .schedule-overview-table .badge {
+        font-size: 0.75rem;
     }
 }

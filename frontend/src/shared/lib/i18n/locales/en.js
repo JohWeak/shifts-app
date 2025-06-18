@@ -118,6 +118,7 @@ export const en = {
         employeeDetails: 'Employee Details',
         employees: 'Employees',
         hireDate: 'Hire Date',
+        manageEmployees: 'Manage Employees',
         myRequests: 'My Requests', 
         noAvailableEmployees: 'No available employees for this shift',
         position: 'Position',
@@ -256,6 +257,7 @@ export const en = {
         payrollReport: 'Payroll Report',
         reportType: 'Report Type',
         reportsTitle: 'Reports',
+        viewReports: 'View Reports',
         analyticsAndReports: 'Analytics & Reports',
         analyticsDesc: 'View detailed analytics and generate reports',
 
@@ -281,6 +283,7 @@ export const en = {
         generateSchedule: 'Generate Schedule',
         generateSuccess: 'Schedule successfully created',
         generationInProgress: 'Generation in progress...',
+        manageSchedules: 'Manage Schedules',
         mySchedule: 'My Schedule', 
         noSchedulesFound: 'No schedules found',
         openShift: 'Open Shift',

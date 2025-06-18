@@ -6,6 +6,7 @@
     /* Bootstrap CSS Variables Override */
     --bs-primary: #0066cc;
     --bs-primary-rgb: 0, 102, 204;
+    --bs-primary-hover: #66b3ff;
     --bs-secondary: #6c757d;
     --bs-secondary-rgb: 108, 117, 125;
     --bs-success: #198754;

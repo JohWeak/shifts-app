@@ -16,9 +16,9 @@ import { logout } from '../../../../features/auth/model/authSlice';
 import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "../../../lib/i18n/i18nProvider";
 
-import './AdminLayout.css';
-import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import './AdminLayout.css';
 import { setActiveTab, setSelectedScheduleId } from '../../../../features/admin-schedule-management/model/scheduleSlice';
 
 const AdminLayout = ({ children }) => {

@@ -57,8 +57,12 @@
     min-height: calc(100vh - var(--app-navbar-height));
 }
 
-/* SIDEBAR */
- .admin-sidebar-desktop {
+/* ======================================================== */
+/*                  SIDEBAR (ИСПРАВЛЕННЫЙ БЛОК v2)          */
+/* ======================================================== */
+
+/* 1. Общие стили для самого сайдбара. */
+.admin-sidebar-desktop {
     min-width: var(--app-sidebar-width);
     background-color: var(--bs-body-bg);
     border-right: 1px solid var(--bs-border-color);
@@ -88,7 +92,9 @@
 .admin-nav {
     padding: 0 1rem;
 }
- .admin-nav-link {
+
+/* 2. Общий стиль для ссылок с ПОВЫШЕННОЙ СПЕЦИФИЧНОСТЬЮ. */
+.admin-nav .admin-nav-link { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -100,48 +106,31 @@
     transition: all 0.2s ease-in-out;
 }
 
-[data-theme="dark"] .admin-nav-link {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    color: var(--bs-body-color);
-    text-decoration: none;
-    border-radius: 0.375rem;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-    transition: all 0.2s ease-in-out;
-}
- .admin-nav-link:hover {
-    color: var(--bs-primary);
+/* 3. Стили при наведении (HOVER) - также с повышенной специфичностью */
+
+/* Общий эффект сдвига */
+.admin-nav .admin-nav-link:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
     transform: translateX(4px);
-}
-[data-theme="dark"] .admin-nav-link.active:hover {
-    background-color: var(--bs-primary);
-}
-[data-theme="dark"] .admin-nav-link:hover {
-    background-color: var(--bs-gray-800);
-}
-[data-theme="dark"] .admin-nav-link:hover {
     color: var(--bs-primary);
-    transform: translateX(4px);
 }
-[data-theme="dark"] .admin-nav-link.active:hover {
-    background-color: var(--bs-primary);
+
+/* Фон при наведении в СВЕТЛОЙ теме */
+[data-theme="light"] .admin-nav .admin-nav-link:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
+    background-color: var(--bs-gray-200);
 }
-[data-theme="dark"] .admin-nav-link:hover {
+
+/* Фон при наведении в ТЕМНОЙ теме */
+[data-theme="dark"] .admin-nav .admin-nav-link:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
     background-color: var(--bs-gray-800);
 }
 
-.admin-nav-link.active {
+/* 4. Стили для активной ссылки. */
+.admin-nav .admin-nav-link.active,
+.admin-nav .admin-nav-link.active:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
     background-color: var(--bs-primary);
-    color: var(--bs-white);
-}
-
-.admin-nav-link.active:hover {
     color: var(--bs-white);
     transform: none;
 }
-
 
 .nav-icon {
     margin-right: 0.75rem;

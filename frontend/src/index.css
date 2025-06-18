@@ -1,7 +1,80 @@
 /* frontend/src/index.css */
+
+/* 1. Импортируем нашу дизайн-систему. Это должно быть в самом верху. */
 @import './app/design-system.css';
 
-[data-theme="dark"] .form-control:disabled {
+
+/* 2. Глобальные стили для body, использующие переменные из design-system.css */
+body {
+    font-family: var(--bs-body-font-family), serif;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    /* Плавный переход уже задан глобально в design-system.css, здесь он не нужен */
+}
+
+
+/* 3. Кастомные утилитарные классы, теперь на правильных переменных */
+
+/* Класс для "поверхностей" (карточки, блоки и т.д.) */
+.surface {
+    border-radius: var(--bs-border-radius); /* Стандартный радиус скругления Bootstrap */
+    box-shadow: var(--bs-box-shadow-sm);   /* Легкая тень для выделения */
+}
+
+/* Тематические цвета для поверхностей */
+[data-theme="light"] .surface {
+    background-color: var(--bs-white); /* Белый фон на светлой теме */
+}
+[data-theme="dark"] .surface {
+    background-color: var(--bs-card-bg); /* Специальный цвет для карточек на темной теме */
+}
+
+
+/* Интерактивная карточка с увеличенной тенью при наведении */
+.card-interactive {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--bs-box-shadow-lg); /* Большая тень при наведении */
+}
+
+
+/* 4. Переопределения Bootstrap (если они всё еще нужны) */
+
+/*
+   ПЕРЕОПРЕДЕЛЕНИЕ .btn-primary БОЛЬШЕ НЕ НУЖНО!
+   Ваш design-system.css уже меняет --bs-primary, и Bootstrap автоматически
+   рассчитывает цвета для :hover, :active и т.д. на основе этой переменной.
+   Удаление старых правил сделает кнопки более консистентными.
+*/
+/* Override Bootstrap with CSS variables */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--bs-primary-hover);
+    border-color: var(--bs-primary-hover);
+}
+
+/*
+   Переопределение для .text-muted.
+   Используем --bs-secondary, как основной приглушенный цвет.
+   !important здесь может быть нужен для перебивания специфичности Bootstrap.
+*/
+.text-muted {
+    color: var(--bs-secondary) !important;
+}
+
+
+/* 5. Специфичные для темы исправления */
+
+/* Улучшаем вид неактивного поля ввода в темной теме */
+[data-theme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-control[readonly] {
     background-color: var(--bs-gray-800);
-    opacity: 1;
+    /* opacity: 1; не всегда нужен, Bootstrap сам справляется, но можно оставить если есть проблемы */
 }

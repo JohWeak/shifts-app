@@ -1,74 +1,33 @@
-/* frontend/src/shared/ui/ActionButtons/ActionButtons.css */
+/* Action Buttons - гибридный подход */
 
-/* Base button group styles */
 .btn-group {
     position: relative;
 }
 
-/* Dropdown toggle arrow spacing */
-.dropdown-toggle::after {
-    margin-left: 0.255em;
-}
-
-/* Small button padding */
+/* Small button padding adjustment */
 .btn-group-sm > .btn {
     padding: 0.25rem 0.5rem;
 }
 
-/* Ensure dropdown is properly positioned */
+/* Dropdown positioning */
 .btn-group .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    left: auto;
-    margin-top: 0.125rem;
     min-width: 160px;
-    z-index: 1050;
-}
-
-/* Fix for RTL languages */
-[dir="rtl"] .btn-group .dropdown-menu {
-    right: auto;
-    left: 0;
 }
 
 /* Dropdown item styling */
 .btn-group .dropdown-item {
-    padding: 0.1rem 0.75rem;
-    clear: both;
-    white-space: nowrap;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.15s ease;
 }
 
-/* Icon spacing in dropdown */
 .btn-group .dropdown-item i {
     width: 1.25rem;
     text-align: center;
 }
 
-/* Hover and focus states */
-.btn-group .dropdown-item:hover,
-.btn-group .dropdown-item:focus {
-    background-color: var(--bs-gray-100);
-    color: var(--bs-gray-900);
-}
-
-/* Disabled state */
-.btn-group .dropdown-item.disabled,
-.btn-group .dropdown-item:disabled {
-    color: var(--bs-gray-500);
-    pointer-events: none;
-    background-color: transparent;
-}
-
 /* Active dropdown state */
 .btn-group.show {
     z-index: 1051;
-}
-
-/* Ensure proper stacking context */
-.btn-group-vertical > .btn-group:not(:first-child),
-.btn-group > .btn-group:not(:first-child) {
-    margin-left: -1px;
 }
 
 /* Mobile responsiveness */
@@ -78,7 +37,7 @@
     }
 
     .btn-group .dropdown-item {
-        padding: 0.25rem 0.75rem;
+        padding: 0.375rem 0.75rem;
         font-size: 0.875rem;
     }
 }
