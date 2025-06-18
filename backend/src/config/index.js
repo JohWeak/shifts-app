@@ -1,4 +1,4 @@
-// backend/src/config/index.js
+// backend/src/config/weeklySchedule.js
 module.exports = {
     env: process.env.NODE_ENV || 'development',
     port: process.env.PORT || 5000,

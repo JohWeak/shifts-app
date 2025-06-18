@@ -1,4 +1,4 @@
-// frontend/src/shared/api/index.js
+// frontend/src/shared/api/weeklySchedule.js
 import axios from 'axios';
 
 // 1. Создаем один экземпляр axios для всего приложения

@@ -1,0 +1,165 @@
+/* frontend/src/features/admin-schedule-management/components/ScheduleList.css */
+
+/* Table container styles */
+.schedule-overview-table {
+    position: relative;
+}
+
+/* Row hover effect with Bootstrap-friendly approach */
+.schedule-overview-table tbody tr.schedule-row {
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.schedule-overview-table tbody tr.schedule-row:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+    /* Removed translateY to fix z-index issue */
+    /* transform: translateY(-1px); */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 -1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Alternative visual feedback without transform */
+.schedule-overview-table tbody tr.schedule-row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--bs-primary), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.schedule-overview-table tbody tr.schedule-row:hover::after {
+    opacity: 0.3;
+}
+
+/* Prevent text selection when clicking on rows */
+.schedule-overview-table tbody tr.schedule-row {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Fix z-index issue for action buttons dropdown */
+.schedule-overview-table tbody tr {
+    position: relative;
+}
+
+.schedule-overview-table tbody tr td.action-buttons {
+    position: relative;
+    z-index: auto;
+}
+
+/* Ensure dropdown menus appear above other rows */
+.schedule-overview-table .action-buttons .dropdown {
+    position: static;
+}
+
+.schedule-overview-table .action-buttons .dropdown-menu {
+    position: absolute;
+    z-index: 1050;
+    transform: translate3d(0, 0, 0);
+}
+
+/* Make sure the active dropdown is on top */
+.schedule-overview-table .action-buttons .dropdown.show {
+    z-index: 1051;
+}
+
+/* Ensure the row with open dropdown stays on top */
+.schedule-overview-table tbody tr:has(.dropdown.show) {
+    z-index: 10;
+}
+
+/* Visual feedback for clickable area */
+.schedule-overview-table tbody tr.schedule-row td:not(.action-buttons) {
+    cursor: pointer;
+    position: relative;
+}
+
+/* Add subtle animation on hover */
+.schedule-overview-table tbody tr.schedule-row td:first-child {
+    position: relative;
+    overflow: hidden;
+}
+
+.schedule-overview-table tbody tr.schedule-row:hover td:first-child::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--bs-primary);
+    animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Ensure proper spacing and alignment */
+.schedule-overview-table th,
+.schedule-overview-table td {
+    vertical-align: middle;
+}
+
+/* Style for action buttons column */
+.schedule-overview-table td.action-buttons {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* Override Bootstrap table hover if needed */
+.table-hover .schedule-overview-table tbody tr:hover {
+    background-color: transparent;
+}
+
+/*!* Highlight animation for new schedules *!*/
+/*.schedule-overview-table tbody tr.highlight-new {*/
+/*    animation: highlightPulse 2s ease-out;*/
+/*}*/
+
+/*@keyframes highlightPulse {*/
+/*    0% {*/
+/*        background-color: rgba(25, 135, 84, 0.3);*/
+/*        transform: scale(1.02);*/
+/*    }*/
+/*    50% {*/
+/*        background-color: rgba(25, 135, 84, 0.15);*/
+/*        transform: scale(1.01);*/
+/*    }*/
+/*    100% {*/
+/*        background-color: transparent;*/
+/*        transform: scale(1);*/
+/*    }*/
+/*}*/
+
+/* Ensure smooth transition */
+.schedule-overview-table tbody tr.schedule-row {
+    transition: all 0.2s ease;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .schedule-overview-table tbody tr.schedule-row:hover {
+        box-shadow: none;
+    }
+
+    .schedule-overview-table tbody tr.schedule-row:hover td:first-child::before {
+        display: none;
+    }
+
+    .schedule-overview-table tbody tr.schedule-row::after {
+        display: none;
+    }
+}

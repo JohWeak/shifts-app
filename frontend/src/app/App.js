@@ -7,14 +7,14 @@ import {ErrorBoundary} from '../shared/ui/ErrorBoundary/ErrorBoundary';
 import {fetchSystemSettings} from './store/slices/settingsSlice';
 
 // Pages
-import LoginPage from '../pages/LoginPage';
-import EmployeeDashboardPage from '../pages/EmployeePages/EmployeeDashboardPage';
-import AdminDashboardPage from '../pages/AdminPages/AdminDashboardPage';
-import ScheduleManagementPage from '../pages/AdminPages/ScheduleManagementPage';
-import AlgorithmSettingsPage from '../pages/AdminPages/AlgorithmSettingsPage';
-import EmployeeManagementPage from '../pages/AdminPages/EmployeeManagementPage';
-import SystemSettingsPage from '../pages/AdminPages/SystemSettingsPage';
-import ReportsPage from '../pages/AdminPages/ReportsPage';
+import Login from '../features/auth';
+import EmployeeDashboard from '../features/employee-dashboard';
+import AdminDashboard from '../features/admin-dashboard';
+import ScheduleManagement from '../features/admin-schedule-management';
+import AlgorithmSettings from '../features/admin-algorithm-settings';
+import EmployeeManagement from '../features/admin-employee-management';
+import SystemSettings from '../features/admin-system-settings';
+import Reports from '../features/admin-reports';
 
 import {ProtectedRoute} from '../shared/lib/auth/ProtectedRoute';
 import './App.css';
@@ -40,7 +40,7 @@ const AppContent = () => {
                         {/* Public Route */}
                         <Route
                             path="/login"
-                            element={<LoginPage/>}
+                            element={<Login/>}
                         />
                         {/* Employee Route */}
                         <Route
@@ -48,7 +48,7 @@ const AppContent = () => {
                             element=
                                 {<ProtectedRoute
                                     allowedRole="employee">
-                                    <EmployeeDashboardPage/>
+                                    <EmployeeDashboard/>
                                 </ProtectedRoute>}
                         />
                         {/* Admin Routes */}
@@ -57,14 +57,14 @@ const AppContent = () => {
                             element=
                                 {<ProtectedRoute
                                     allowedRole="admin">
-                                    <AdminDashboardPage/>
+                                    <AdminDashboard/>
                                 </ProtectedRoute>}
                         />
                         <Route
                             path="/admin/schedules"
                             element={<ProtectedRoute
                                 allowedRole="admin">
-                                <ScheduleManagementPage/>
+                                <ScheduleManagement/>
                             </ProtectedRoute>}
                         />
                         <Route
@@ -72,7 +72,7 @@ const AppContent = () => {
                             element=
                                 {<ProtectedRoute
                                     allowedRole="admin">
-                                    <AlgorithmSettingsPage/>
+                                    <AlgorithmSettings/>
                                 </ProtectedRoute>}
                         />
                         <Route
@@ -80,7 +80,7 @@ const AppContent = () => {
                             element=
                                 {<ProtectedRoute
                                     allowedRole="admin">
-                                    <EmployeeManagementPage/>
+                                    <EmployeeManagement/>
                                 </ProtectedRoute>}
                         />
                         <Route
@@ -88,7 +88,7 @@ const AppContent = () => {
                             element=
                                 {<ProtectedRoute
                                     allowedRole="admin">
-                                    <SystemSettingsPage/>
+                                    <SystemSettings/>
                                 </ProtectedRoute>}
                         />
                         <Route
@@ -96,7 +96,7 @@ const AppContent = () => {
                             element=
                                 {<ProtectedRoute
                                     allowedRole="admin">
-                                    <ReportsPage/>
+                                    <Reports/>
                                 </ProtectedRoute>}
                         />
                         {/* Default Redirects */}

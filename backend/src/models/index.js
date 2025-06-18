@@ -1,4 +1,4 @@
-// backend/src/models/index.js
+// backend/src/models/weeklySchedule.js
 const fs = require('fs');
 const path = require('path');
 const sequelize = require('../config/db.config');
