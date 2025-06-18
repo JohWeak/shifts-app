@@ -82,7 +82,19 @@
     --bs-dropdown-border-color: #495057;
     --bs-dropdown-link-color: #e0e0e0;
     --bs-dropdown-link-hover-bg: #343a40;
+
+    --bs-btn-color: #5da6ff;
+    --bs-btn-border-color: #5da6ff;
+    --bs-btn-hover-bg: #5da6ff;
+    --bs-btn-hover-border-color: #5da6ff;
+    --bs-btn-hover-color: #000;
+
+    --bs-primary-muted: #5da6ff; /* Можно оставить как есть или сделать чуть тусклее */
+    --bs-success-muted: #48c9a0; /* Приглушенный мятный */
+    --bs-info-muted: #49c0e0;    /* Приглушенный бирюзовый */
+
 }
+
 
 /* Smooth transitions */
 * {
@@ -90,3 +102,4 @@
     transition-duration: 200ms;
     transition-timing-function: ease-in-out;
 }
+

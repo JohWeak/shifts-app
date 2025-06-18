@@ -45,7 +45,7 @@ const AdminDashboard = () => {
 
     return (
         <AdminLayout>
-            <Container fluid className="px-0">
+            <Container fluid className="admin-dashboard px-0">
                 <PageHeader
                     icon="speedometer2"
                     title={t('dashboard.dashboardTitle')}
@@ -53,64 +53,74 @@ const AdminDashboard = () => {
                 />
 
                 <Row>
+                    {/* 1. Карточка "Total Schedules" */}
                     <Col lg={3} md={6} className="mb-4">
-                        <Card className="border-0 shadow-sm h-100">
+                        {/* Добавляем класс dashboard-metric-card */}
+                        <Card className="dashboard-metric-card h-100">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
-                                    <div className="bg-primary bg-opacity-10 rounded p-3 me-3">
+                                    {/* Добавляем класс metric-icon */}
+                                    <div className="metric-icon bg-primary bg-opacity-10 me-3">
                                         <i className="bi bi-calendar-week text-primary fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">{t('schedule.total')}</div>
-                                        <div className="h4 mb-0">{stats?.overview.total_schedules || 0}</div>
+                                        {/* Добавляем классы metric-label и metric-value */}
+                                        <div className="metric-label">{t('schedule.total')}</div>
+                                        <div className="metric-value">{stats?.overview.total_schedules || 0}</div>
                                     </div>
                                 </div>
                             </Card.Body>
                         </Card>
                     </Col>
 
+                    {/* 2. Карточка "Published" */}
                     <Col lg={3} md={6} className="mb-4">
-                        <Card className="border-0 shadow-sm h-100">
+                        {/* Добавляем классы dashboard-metric-card и metric-success */}
+                        <Card className="dashboard-metric-card metric-success h-100">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
-                                    <div className="bg-success bg-opacity-10 rounded p-3 me-3">
+                                    <div className="metric-icon bg-success bg-opacity-10 me-3">
                                         <i className="bi bi-check-circle text-success fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">{t('schedule.published')}</div>
-                                        <div className="h4 mb-0">{stats?.overview.published_schedules || 0}</div>
+                                        <div className="metric-label">{t('schedule.published')}</div>
+                                        <div className="metric-value">{stats?.overview.published_schedules || 0}</div>
                                     </div>
                                 </div>
                             </Card.Body>
                         </Card>
                     </Col>
 
+                    {/* 3. Карточка "Draft" */}
                     <Col lg={3} md={6} className="mb-4">
-                        <Card className="border-0 shadow-sm h-100">
+                        {/* Добавляем классы dashboard-metric-card и metric-warning */}
+                        <Card className="dashboard-metric-card metric-warning h-100">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
-                                    <div className="bg-warning bg-opacity-10 rounded p-3 me-3">
+                                    <div className="metric-icon bg-warning bg-opacity-10 me-3">
                                         <i className="bi bi-file-earmark text-warning fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">{t('schedule.draft')}</div>
-                                        <div className="h4 mb-0">{stats?.overview.draft_schedules || 0}</div>
+                                        <div className="metric-label">{t('schedule.draft')}</div>
+                                        <div className="metric-value">{stats?.overview.draft_schedules || 0}</div>
                                     </div>
                                 </div>
                             </Card.Body>
                         </Card>
                     </Col>
 
+                    {/* 4. Карточка "Total Assignments" */}
                     <Col lg={3} md={6} className="mb-4">
-                        <Card className="border-0 shadow-sm h-100">
+                        {/* Добавляем классы dashboard-metric-card и metric-info */}
+                        <Card className="dashboard-metric-card metric-info h-100">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
-                                    <div className="bg-info bg-opacity-10 rounded p-3 me-3">
+                                    <div className="metric-icon bg-info bg-opacity-10 me-3">
                                         <i className="bi bi-people text-info fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="text-muted small">{t('employee.totalAssignments')}</div>
-                                        <div className="h4 mb-0">{stats?.overview.total_assignments || 0}</div>
+                                        <div className="metric-label">{t('employee.totalAssignments')}</div>
+                                        <div className="metric-value">{stats?.overview.total_assignments || 0}</div>
                                     </div>
                                 </div>
                             </Card.Body>

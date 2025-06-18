@@ -1,7 +1,6 @@
 /* Admin Dashboard - гибридный подход */
 
 .admin-dashboard {
-    /* Используем Bootstrap переменные где возможно */
     background-color: var(--bs-gray-100);
     min-height: 100vh;
     padding: 1.5rem;
@@ -10,9 +9,11 @@
 [data-theme="dark"] .admin-dashboard {
     background-color: var(--bs-black);
 }
-[data-theme="dark"] .text-muted {
+
+[data-theme="dark"] .admin-dashboard .text-muted {
     color: var(--bs-gray-500) !important;
 }
+
 .admin-dashboard h1 {
     color: var(--bs-emphasis-color);
     font-weight: 600;
@@ -27,13 +28,13 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 60px;
+    width: 5rem;
     height: 4px;
     background: linear-gradient(90deg, var(--bs-primary), var(--bs-success));
     border-radius: 2px;
 }
 
-/* CARDS - минимальные дополнения к Bootstrap */
+/* CARDS - общие стили для всех карточек на дашборде */
 .admin-dashboard .card {
     border: none;
     border-radius: 0.75rem;
@@ -43,19 +44,17 @@
     overflow: hidden;
 }
 
-.admin-dashboard .card:hover {
-    box-shadow: var(--bs-box-shadow);
-    transform: translateY(-2px);
-}
 
-/* METRIC CARDS */
+
+/* METRIC CARDS - стили для карточек с показателями */
 .dashboard-metric-card {
     border-left: 4px solid var(--bs-primary);
     transition: all 0.2s ease;
 }
 
 .dashboard-metric-card:hover {
-    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--bs-box-shadow);
+    transform: translateY(-3px) ;
 }
 
 .dashboard-metric-card.metric-success {
@@ -70,6 +69,11 @@
     border-left-color: var(--bs-danger);
 }
 
+/* ДОБАВЛЕНО: Стиль для карточки с информацией (Total Assignments) */
+.dashboard-metric-card.metric-info {
+    border-left-color: var(--bs-info);
+}
+
 .metric-icon {
     width: 48px;
     height: 48px;
@@ -78,12 +82,6 @@
     justify-content: center;
     border-radius: 0.75rem;
     font-size: 1.25rem;
-}
-
-/* Используем Bootstrap utility классы для цветов фона */
-.metric-icon.bg-primary-subtle {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-    color: var(--bs-primary);
 }
 
 .metric-value {
@@ -101,13 +99,42 @@
     letter-spacing: 0.05em;
 }
 
-/* BUTTONS - используем Bootstrap классы, добавляем только анимацию */
+/* BUTTONS - анимация и стили для темной темы */
 .admin-dashboard .btn {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease-out;
+    box-shadow: var(--bs-box-shadow);
+
 }
 
 .admin-dashboard .btn:hover {
     transform: translateY(-1px);
+    box-shadow: var(--bs-box-shadow-lg);
+
+
+}
+
+[data-theme="dark"] .btn-outline-primary {
+    --bs-btn-color: var(--bs-primary-muted);
+    --bs-btn-border-color: var(--bs-primary-muted);
+    --bs-btn-hover-bg: var(--bs-primary-muted);
+    --bs-btn-hover-border-color: var(--bs-primary-muted);
+    --bs-btn-hover-color: #000;
+}
+
+[data-theme="dark"] .btn-outline-success {
+    --bs-btn-color: var(--bs-success-muted);
+    --bs-btn-border-color: var(--bs-success-muted);
+    --bs-btn-hover-bg: var(--bs-success-muted);
+    --bs-btn-hover-border-color: var(--bs-success-muted);
+    --bs-btn-hover-color: #000;
+}
+
+[data-theme="dark"] .btn-outline-info {
+    --bs-btn-color: var(--bs-info-muted);
+    --bs-btn-border-color: var(--bs-info-muted);
+    --bs-btn-hover-bg: var(--bs-info-muted);
+    --bs-btn-hover-border-color: var(--bs-info-muted);
+    --bs-btn-hover-color: #000;
 }
 
 /* STATUS в System Status карточке */
@@ -120,11 +147,9 @@
     .admin-dashboard {
         padding: 1rem;
     }
-
     .admin-dashboard h1 {
         font-size: 1.5rem;
     }
-
     .metric-value {
         font-size: 1.25rem;
     }

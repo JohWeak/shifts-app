@@ -44,11 +44,6 @@ body {
 /* 4. Переопределения Bootstrap (если они всё еще нужны) */
 
 /*
-   ПЕРЕОПРЕДЕЛЕНИЕ .btn-primary БОЛЬШЕ НЕ НУЖНО!
-   Ваш design-system.css уже меняет --bs-primary, и Bootstrap автоматически
-   рассчитывает цвета для :hover, :active и т.д. на основе этой переменной.
-   Удаление старых правил сделает кнопки более консистентными.
-*/
 /* Override Bootstrap with CSS variables */
 .btn-primary {
     background-color: var(--bs-primary);
