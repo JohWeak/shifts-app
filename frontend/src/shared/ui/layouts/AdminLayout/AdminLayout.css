@@ -167,19 +167,19 @@
 
 /* USER DROPDOWN - Bootstrap уже стилизует, добавляем только кастомное */
 .user-dropdown .dropdown-menu {
+    color: var(--bs-primary);
+
     box-shadow: var(--bs-box-shadow);
 }
 
+
 .user-avatar {
-    width: 32px;
+    width: 52px;
     height: 32px;
-    border-radius: 50%;
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-size: 1.7rem;
 }
 
 /* RESPONSIVE */

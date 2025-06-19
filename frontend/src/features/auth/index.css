@@ -1,52 +1,183 @@
-/* index.css */
-.login-page-container {
+/* Auth - стили для страницы авторизации */
+
+.auth-container {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    background-color: #f8f9fa; /* Light background for contrast */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem;
 }
 
-.login-card {
+[data-theme="dark"] .auth-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.auth-card {
     width: 100%;
-    /* max-width: 420px; /* Already handled by Bootstrap col-* classes */
-    border-radius: 0.75rem; /* More rounded corners */
-    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1); /* Soft shadow */
+    max-width: 400px;
+    background: var(--bs-body-bg);
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: relative;
 }
 
-/* Ensure floating labels are styled correctly if needed, Bootstrap usually handles this */
-.form-floating > .form-control:focus ~ label,
-.form-floating > .form-control:not(:placeholder-shown) ~ label {
-    font-size: 0.8rem; /* Slightly smaller font for the floating label on focus/fill */
+.auth-header {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+    padding: 2rem;
+    text-align: center;
 }
 
-.btn-toggle-password {
+.auth-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.auth-header p {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+    font-size: 0.875rem;
+}
+
+.auth-body {
+    padding: 2rem;
+    position: relative;
+}
+
+.auth-form .form-label {
+    font-weight: 500;
+    color: var(--bs-emphasis-color);
+    margin-bottom: 0.5rem;
+}
+
+.auth-form .form-control {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+.auth-form .form-control:focus {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.auth-form .input-group {
+    position: relative;
+}
+
+.password-toggle {
     cursor: pointer;
-    /* border-left: none; /* Bootstrap's input-group handles this */
+    color: var(--bs-secondary);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    transition: all 0.2s ease;
 }
 
-/* Adjustments for input-group with floating label */
-.input-group .form-floating {
-    /* This ensures the floating label input takes up available space */
-    flex: 1 1 auto;
-    width: 1%; /* Fix for some Bootstrap versions where input might not fill space */
+.password-toggle:hover {
+    color: var(--bs-primary);
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-primary);
 }
 
-.input-group .form-control {
-    border-right: none; /* Remove right border of input for seamless button attachment */
+[data-theme="dark"] .password-toggle:hover {
+    background-color: var(--bs-gray-800);
 }
-.input-group .btn-toggle-password {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+
+.auth-submit {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    transition: all 0.2s ease;
 }
-.input-group .form-control:focus {
-    box-shadow: none; /* Remove focus shadow to avoid gap with button */
-    border-color: #ced4da; /* Standard Bootstrap border color */
-    /* If using a primary color focus ring from Bootstrap 5.3+, you might need to adjust this
-       or ensure the button also gets a matching focus style. */
+
+.auth-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.auth-footer {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    background-color: var(--bs-gray-100);
+    border-top: 1px solid var(--bs-border-color);
+}
+
+[data-theme="dark"] .auth-footer {
+    background-color: var(--bs-gray-800);
 }
 
 .biometric-placeholder {
-    font-size: 0.9rem;
-    color: #6c757d; /* secondary text color */
+    color: var(--bs-secondary);
+}
+
+.biometric-placeholder i {
+    color: var(--bs-primary);
+}
+
+/* Alert improvements */
+.auth-body .alert {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Loading spinner overlay */
+.auth-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 0.375rem;
+}
+
+[data-theme="dark"] .auth-loading {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .auth-card {
+        margin: 0 0.5rem;
+    }
+
+    .auth-header {
+        padding: 1.5rem;
+    }
+
+    .auth-body {
+        padding: 1.5rem;
+    }
+
+    .auth-header h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animation for form elements */
+.auth-form .form-control,
+.auth-form .btn {
+    transition: all 0.2s ease;
+}
+
+.auth-form .form-control:focus {
+    transform: translateY(-1px);
+}
+
+.auth-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--bs-primary-rgb), 0.3);
 }

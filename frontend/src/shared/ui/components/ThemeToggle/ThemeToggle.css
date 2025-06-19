@@ -1,0 +1,42 @@
+/* Theme Toggle - стили для переключателя темы */
+.theme-toggle{
+    /*min-width: 100px;*/
+    /*padding: 0.5rem;*/
+
+}
+
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.theme-toggle-btn i {
+    font-size: 1.2rem;
+    padding: 0.15rem;
+
+}
+
+.theme-toggle-btn:hover i {
+    transform: rotateX(180deg);
+}
+
+/* Анимация для иконки луны */
+.theme-toggle-btn .bi-moon-stars {
+    color: var(--bs-primary);
+}
+
+/* Анимация для иконки солнца */
+.theme-toggle-btn .bi-sun {
+    color: var(--bs-warning);
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+
+    .theme-toggle {
+        min-width: auto;
+    }
+}

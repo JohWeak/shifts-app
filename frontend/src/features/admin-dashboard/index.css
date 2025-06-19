@@ -28,7 +28,7 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 5rem;
+    width: 60px;
     height: 4px;
     background: linear-gradient(90deg, var(--bs-primary), var(--bs-success));
     border-radius: 2px;
@@ -36,7 +36,6 @@
 
 /* CARDS - общие стили для всех карточек на дашборде */
 .admin-dashboard .card {
-    border: none;
     border-radius: 0.75rem;
     box-shadow: var(--bs-box-shadow-sm);
     margin-bottom: 1.5rem;
@@ -44,7 +43,10 @@
     overflow: hidden;
 }
 
-
+/*.admin-dashboard .card:hover {*/
+/*    */
+/*    transform: translateY(-2px);*/
+/*}*/
 
 /* METRIC CARDS - стили для карточек с показателями */
 .dashboard-metric-card {
@@ -53,8 +55,8 @@
 }
 
 .dashboard-metric-card:hover {
+    transform: translateY(-3px);
     box-shadow: var(--bs-box-shadow);
-    transform: translateY(-3px) ;
 }
 
 .dashboard-metric-card.metric-success {
@@ -101,39 +103,35 @@
 
 /* BUTTONS - анимация и стили для темной темы */
 .admin-dashboard .btn {
-    transition: all 0.2s ease-out;
-    box-shadow: var(--bs-box-shadow);
-
+    transition: all 0.2s ease-in;
 }
 
 .admin-dashboard .btn:hover {
     transform: translateY(-1px);
     box-shadow: var(--bs-box-shadow-lg);
-
-
 }
 
 [data-theme="dark"] .btn-outline-primary {
-    --bs-btn-color: var(--bs-primary-muted);
-    --bs-btn-border-color: var(--bs-primary-muted);
-    --bs-btn-hover-bg: var(--bs-primary-muted);
-    --bs-btn-hover-border-color: var(--bs-primary-muted);
+    --bs-btn-color: #5da6ff;
+    --bs-btn-border-color: #5da6ff;
+    --bs-btn-hover-bg: #5da6ff;
+    --bs-btn-hover-border-color: #5da6ff;
     --bs-btn-hover-color: #000;
 }
 
 [data-theme="dark"] .btn-outline-success {
-    --bs-btn-color: var(--bs-success-muted);
-    --bs-btn-border-color: var(--bs-success-muted);
-    --bs-btn-hover-bg: var(--bs-success-muted);
-    --bs-btn-hover-border-color: var(--bs-success-muted);
+    --bs-btn-color: #48c9a0;
+    --bs-btn-border-color: #48c9a0;
+    --bs-btn-hover-bg: #48c9a0;
+    --bs-btn-hover-border-color: #48c9a0;
     --bs-btn-hover-color: #000;
 }
 
 [data-theme="dark"] .btn-outline-info {
-    --bs-btn-color: var(--bs-info-muted);
-    --bs-btn-border-color: var(--bs-info-muted);
-    --bs-btn-hover-bg: var(--bs-info-muted);
-    --bs-btn-hover-border-color: var(--bs-info-muted);
+    --bs-btn-color: #49c0e0;
+    --bs-btn-border-color: #49c0e0;
+    --bs-btn-hover-bg: #49c0e0;
+    --bs-btn-hover-border-color: #49c0e0;
     --bs-btn-hover-color: #000;
 }
 

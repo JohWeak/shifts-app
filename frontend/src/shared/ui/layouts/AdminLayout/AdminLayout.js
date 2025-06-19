@@ -175,10 +175,9 @@ const AdminLayout = ({ children }) => {
                                 id="user-dropdown"
                             >
                                 <div className="d-flex align-items-center">
-                                    <div className="user-avatar me-2">
+                                    <div className="user-avatar mt-3">
                                         <i className="bi bi-person-circle"></i>
                                     </div>
-                                    <span className="d-none d-md-inline">{t('common.admin')}</span>
                                 </div>
                             </Dropdown.Toggle>
 

@@ -8,14 +8,14 @@ export const LanguageSwitch = () => {
     const { locale, changeLanguage } = useI18n();
 
     const languages = [
-        { code: 'en', name: 'English', flag: '🇺🇸' },
-        { code: 'he', name: 'עברית', flag: '🇮🇱' },
-        { code: 'ru', name: 'Русский', flag: '🇷🇺' }
+        { code: 'en', name: 'English', flag: '' },
+        { code: 'he', name: 'עברית', flag: '' },
+        { code: 'ru', name: 'Русский', flag: '' }
     ];
 
     return (
         <Dropdown className="language-switch" align="end">
-            <Dropdown.Toggle variant="outline-secondary" size="sm">
+            <Dropdown.Toggle variant="outline-secondary">
                 {languages.find(lang => lang.code === locale)?.flag} {locale.toUpperCase()}
             </Dropdown.Toggle>
             <Dropdown.Menu>

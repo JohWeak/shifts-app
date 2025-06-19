@@ -1,0 +1,57 @@
+/* Error Boundary - стили для обработки ошибок */
+
+.error-boundary {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.error-boundary-content {
+    text-align: center;
+    max-width: 500px;
+}
+
+.error-boundary-icon {
+    font-size: 4rem;
+    color: var(--bs-danger);
+    margin-bottom: 1rem;
+}
+
+.error-boundary-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+    margin-bottom: 0.5rem;
+}
+
+.error-boundary-message {
+    color: var(--bs-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.error-boundary-details {
+    background-color: var(--bs-gray-100);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    text-align: left;
+    font-family: var(--bs-font-monospace), serif;
+    font-size: 0.875rem;
+    color: var(--bs-danger);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+[data-theme="dark"] .error-boundary-details {
+    background-color: var(--bs-gray-800);
+}
+
+.error-boundary-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}

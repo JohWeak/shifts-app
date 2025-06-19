@@ -1,0 +1,51 @@
+/* Status Badge - кастомные стили для статусов */
+
+.status-badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    font-size: 0.875rem;
+    text-transform: capitalize;
+    letter-spacing: 0.025em;
+}
+
+.status-badge.status-draft {
+    background-color: var(--bs-secondary);
+    color: var(--bs-white);
+}
+
+.status-badge.status-published {
+    background-color: var(--bs-success);
+    color: var(--bs-white);
+}
+
+.status-badge.status-archived {
+    background-color: var(--bs-info);
+    color: var(--bs-white);
+}
+
+.status-badge.status-pending {
+    background-color: var(--bs-warning);
+    color: var(--bs-dark);
+}
+
+.status-badge.status-error {
+    background-color: var(--bs-danger);
+    color: var(--bs-white);
+}
+
+/* Subtle versions for less emphasis */
+.status-badge.subtle {
+    opacity: 0.8;
+}
+
+/* Large size variant */
+.status-badge.status-badge-lg {
+    font-size: 1rem;
+    padding: 0.5em 0.75em;
+}
+
+/* Small size variant */
+.status-badge.status-badge-sm {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+}

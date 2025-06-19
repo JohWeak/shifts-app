@@ -6,6 +6,7 @@
 
 .language-switch .dropdown-menu {
     min-width: 120px;
+    font-size: 0.875rem;
 }
 
 .language-switch .dropdown-item {
@@ -22,7 +23,7 @@
 }
 
 .language-switch .dropdown-item:hover {
-    background-color: var(--bs-gray-100);
+    background-color: var(--bs-gray-200);
 }
 
 [data-theme="dark"] .language-switch .dropdown-item:hover {

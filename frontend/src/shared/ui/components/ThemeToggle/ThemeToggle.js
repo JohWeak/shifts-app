@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
+import './ThemeToggle.css';
 
 const ThemeToggle = () => {
     const [theme, setTheme] = useState(() => {
@@ -17,17 +18,16 @@ const ThemeToggle = () => {
     };
 
     return (
-        <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={toggleTheme}
-            className="d-flex align-items-center"
-        >
-            <i className={`bi bi-${theme === 'light' ? 'moon-stars' : 'sun'} me-2`}></i>
-            <span className="d-none d-md-inline">
-                {theme === 'light' ? 'Dark' : 'Light'}
-            </span>
-        </Button>
+        <div className="theme-toggle">
+            <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={toggleTheme}
+                className="theme-toggle-btn"
+            >
+                <i className={`bi bi-${theme === 'light' ? 'moon-stars' : 'sun'}`}></i>
+            </Button>
+        </div>
     );
 };
 
