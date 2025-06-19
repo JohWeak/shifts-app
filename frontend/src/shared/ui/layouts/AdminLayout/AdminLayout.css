@@ -94,7 +94,7 @@
 }
 
 /* 2. Общий стиль для ссылок с ПОВЫШЕННОЙ СПЕЦИФИЧНОСТЬЮ. */
-.admin-nav .admin-nav-link { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
+.admin-nav .admin-nav-link {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -109,7 +109,7 @@
 /* 3. Стили при наведении (HOVER) - также с повышенной специфичностью */
 
 /* Общий эффект сдвига */
-.admin-nav .admin-nav-link:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
+.admin-nav .admin-nav-link:hover {
     transform: translateX(4px);
     color: var(--bs-primary);
 }
@@ -136,6 +136,7 @@
     margin-right: 0.75rem;
     width: 20px;
     text-align: center;
+
 }
 
 /* CONTENT AREA */
@@ -152,24 +153,115 @@
     padding: 2rem;
 }
 
-/* MOBILE SIDEBAR (Offcanvas) */
-.admin-mobile-sidebar {
-    /* Bootstrap Offcanvas уже имеет свои стили */
+/* Mobile Sidebar - Кастомная реализация */
+.mobile-sidebar-overlay {
+    position: fixed;
+    top: var(--app-navbar-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out forwards;
 }
 
-.admin-mobile-sidebar .offcanvas-header {
-    border-bottom: 1px solid var(--bs-border-color);
+.admin-layout .mobile-sidebar-overlay.closing {
+    animation: fadeOut 0.3s ease-out forwards;
 }
 
-.mobile-sidebar-content {
-    /* Наследует стили от sidebar-content */
+.admin-layout .mobile-sidebar {
+    position: fixed;
+    top: var(--app-navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--app-sidebar-width);
+    max-width: 80vw;
+    background-color: var(--bs-body-bg);
+    box-shadow: var(--bs-box-shadow-lg);
+    z-index: 1045;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+[dir="rtl"] .mobile-sidebar {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+}
+
+.admin-layout .mobile-sidebar.closing {
+    animation: slideOut 0.3s ease-out forwards;
+}
+
+[dir="rtl"] .mobile-sidebar.closing {
+    animation: slideOutRTL 0.3s ease-out forwards;
+}
+
+.admin-layout .mobile-sidebar-content {
+    padding: 1rem 0;
+}
+
+/* Обновленная кнопка меню */
+.admin-layout .mobile-menu-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-layout .mobile-menu-btn.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.admin-layout .mobile-menu-btn.active:hover {
+    background-color: var(--bs-primary-hover);
+    border-color: var(--bs-primary-hover);
+    color: var(--bs-white);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+
+@keyframes slideInRTL {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideOutRTL {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
 }
 
 /* USER DROPDOWN - Bootstrap уже стилизует, добавляем только кастомное */
 .user-dropdown .dropdown-menu {
     color: var(--bs-primary);
-
     box-shadow: var(--bs-box-shadow);
+}
+.admin-layout .admin-navbar .dropdown-toggle::after {
+
+    margin-left: 0;
+
+
 }
 
 
@@ -179,7 +271,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.7rem;
+    font-size: 1.2rem;
 }
 
 /* RESPONSIVE */
@@ -199,6 +291,9 @@
 .admin-nav-link .badge {
     margin-left: auto;
     font-size: 0.7rem;
+}
+.admin-layout .admin-navbar .badge{
+   display: flex;
 }
 
 /* Убираем лишние hover эффекты на мобильных устройствах */

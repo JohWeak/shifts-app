@@ -286,6 +286,7 @@ export const en = {
         manageSchedules: 'Manage Schedules',
         mySchedule: 'My Schedule', 
         noSchedulesFound: 'No schedules found',
+        noSchedules: 'No Schedules',
         openShift: 'Open Shift',
         publish: 'Publish',
         publishSchedule: 'Publish Schedule',

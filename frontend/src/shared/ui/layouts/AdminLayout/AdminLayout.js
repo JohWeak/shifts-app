@@ -26,6 +26,7 @@ const AdminLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
     const dispatch = useDispatch();
 
@@ -46,6 +47,19 @@ const AdminLayout = ({ children }) => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        if (showMobileMenu) {
+            document.body.classList.add('mobile-sidebar-open');
+        } else {
+            document.body.classList.remove('mobile-sidebar-open');
+        }
+
+        // Cleanup
+        return () => {
+            document.body.classList.remove('mobile-sidebar-open');
+        };
+    }, [showMobileMenu]);
 
 
     const navigationItems = [
@@ -103,18 +117,27 @@ const AdminLayout = ({ children }) => {
         return currentPath.startsWith(path);
     };
 
-    // Handle navigation with schedule reset
+    // Обновленная функция закрытия
+    const handleCloseMobileMenu = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowMobileMenu(false);
+            setIsClosing(false);
+        }, 300); // Время анимации
+    };
+
+// Обновленная функция навигации
     const handleNavigation = (path) => {
-        // If navigating to schedules page, reset to overview
         if (path === '/admin/schedules') {
             dispatch(setActiveTab('overview'));
             dispatch(setSelectedScheduleId(null));
         }
         navigate(path);
         if (isMobile) {
-            setShowMobileMenu(false);
+            handleCloseMobileMenu(); // Используем новую функцию
         }
     };
+
 
     const SidebarContent = () => (
         <Nav className="flex-column admin-nav">
@@ -150,8 +173,8 @@ const AdminLayout = ({ children }) => {
                             <Button
                                 variant="outline-secondary"
                                 size="sm"
-                                className="me-3 mobile-menu-btn"
-                                onClick={() => setShowMobileMenu(true)}
+                                className={`me-3 mobile-menu-btn ${showMobileMenu ? 'active' : ''}`}
+                                onClick={() => showMobileMenu ? handleCloseMobileMenu() : setShowMobileMenu(true)}
                             >
                                 <i className="bi bi-list"></i>
                             </Button>
@@ -166,9 +189,10 @@ const AdminLayout = ({ children }) => {
                     </div>
 
                     {/* Right side - User menu */}
-                    <div className="d-flex align-items-center gap-3">
-                        <LanguageSwitch />
-                        <ThemeToggle />
+                    <div className="d-flex align-items-center">
+                            <ThemeToggle variant="icon" />
+                            <LanguageSwitch />
+
                         <Dropdown align="end">
                             <Dropdown.Toggle
                                 className="user-dropdown-btn border-0 shadow-sm"
@@ -176,7 +200,7 @@ const AdminLayout = ({ children }) => {
                             >
                                 <div className="d-flex align-items-center">
                                     <div className="user-avatar mt-3">
-                                        <i className="bi bi-person-circle"></i>
+                                        <i className="bi bi-person-square"></i>
                                     </div>
                                 </div>
                             </Dropdown.Toggle>
@@ -231,29 +255,27 @@ const AdminLayout = ({ children }) => {
             </div>
 
             {/* Mobile Sidebar (Offcanvas) */}
-            <Offcanvas
-                show={showMobileMenu}
-                onHide={() => setShowMobileMenu(false)}
-                placement="start"
-                className="admin-mobile-sidebar"
-            >
-                <Offcanvas.Header closeButton className="border-bottom">
-                    <Offcanvas.Title>
-                        <i className="bi bi-calendar-check-fill text-primary me-2"></i>
-                        {t('common.appName')}
-                    </Offcanvas.Title>
-                </Offcanvas.Header>
-                <Offcanvas.Body className="p-0">
-                    <div className="mobile-sidebar-content">
-                        <div className="sidebar-header">
-                            <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3 mt-3">
-                                {t('navigation.title')}
-                            </h6>
+            {showMobileMenu && (
+                <>
+                    {/* Overlay */}
+                    <div
+                        className={`mobile-sidebar-overlay ${isClosing ? 'closing' : ''}`}
+                        onClick={handleCloseMobileMenu}
+                    />
+
+                    {/* Sidebar */}
+                    <div className={`mobile-sidebar ${isClosing ? 'closing' : ''}`}>
+                        <div className="mobile-sidebar-content">
+                            <div className="sidebar-header">
+                                <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3 mt-3">
+                                    {t('navigation.title')}
+                                </h6>
+                            </div>
+                            <SidebarContent />
                         </div>
-                        <SidebarContent />
                     </div>
-                </Offcanvas.Body>
-            </Offcanvas>
+                </>
+            )}
         </div>
     );
 };

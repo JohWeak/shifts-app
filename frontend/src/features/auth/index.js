@@ -1,11 +1,13 @@
 // frontend/src/features/auth/weeklySchedule.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { login } from './model/authSlice'; // Импортируем наш Thunk
-import { Spinner } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {login} from './model/authSlice'; // Импортируем наш Thunk
+import {Spinner} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './index.css';
+import {LanguageSwitch} from "../../shared/ui/components/LanguageSwitch/LanguageSwitch";
+import ThemeToggle from "../../shared/ui/components/ThemeToggle/ThemeToggle";
 
 const Login = () => {
     const {t} = useI18n();
@@ -41,10 +43,17 @@ const Login = () => {
 
     return (
         <div className="auth-container">
+            {/* Контролы в углу */}
+            <div className="auth-controls">
+                <ThemeToggle variant="icon" />
+                <LanguageSwitch />
+            </div>
             <div className="auth-card">
+
                 <div className="auth-header">
                     <h2>{t('auth.login')}</h2>
                     <p>{t('auth.welcome')}</p>
+
                 </div>
 
                 <div className="auth-body">

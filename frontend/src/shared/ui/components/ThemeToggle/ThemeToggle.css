@@ -1,42 +1,84 @@
-/* Theme Toggle - стили для переключателя темы */
-.theme-toggle{
-    /*min-width: 100px;*/
-    /*padding: 0.5rem;*/
+/* Theme Toggle - обновленные стили */
 
-}
-
+/* Вариант 1: Кнопка с рамкой (как у языка) */
 .theme-toggle-btn {
+    min-width: 100px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    font-weight: 500;
+    border-color: var(--bs-gray-400);
+    background-color: transparent;
+    color: var(--bs-body-color);
     transition: all 0.2s ease;
-    border-radius: 6px;
-}
-
-.theme-toggle-btn i {
-    font-size: 1.2rem;
-    padding: 0.15rem;
 
 }
 
-.theme-toggle-btn:hover i {
-    transform: rotateX(180deg);
-}
-
-/* Анимация для иконки луны */
-.theme-toggle-btn .bi-moon-stars {
+.theme-toggle-btn:hover {
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-primary);
     color: var(--bs-primary);
 }
 
-/* Анимация для иконки солнца */
-.theme-toggle-btn .bi-sun {
-    color: var(--bs-warning);
+[data-theme="dark"] .theme-toggle-btn {
+    border-color: var(--bs-gray-600);
 }
 
-/* Mobile view */
-@media (max-width: 768px) {
+[data-theme="dark"] .theme-toggle-btn:hover {
+    background-color: var(--bs-gray-800);
+}
 
-    .theme-toggle {
-        min-width: auto;
-    }
+.theme-toggle-btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Вариант 2: Только иконка без рамки */
+.theme-toggle-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--bs-body-color);
+    transition: all 0.2s ease;
+    border: none;
+    padding: 0;
+    margin-left: 0.5rem;
+}
+
+.theme-toggle-icon:hover {
+    background-color: var(--bs-gray-100);
+    color: var(--bs-primary);
+}
+
+[data-theme="dark"] .theme-toggle-icon:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.theme-toggle-icon:active {
+    transform: scale(0.95);
+}
+
+/* Анимация иконок */
+.theme-toggle-btn i,
+.theme-toggle-icon i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover i,
+.theme-toggle-icon:hover i {
+    transform: rotate(180deg);
+}
+
+/* Цвета иконок */
+.bi-moon-stars {
+    color: var(--bs-indigo);
+}
+
+.bi-sun {
+    color: var(--bs-warning);
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import './ThemeToggle.css';
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ variant = 'button' }) => {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
@@ -17,17 +17,28 @@ const ThemeToggle = () => {
         localStorage.setItem('theme', newTheme);
     };
 
-    return (
-        <div className="theme-toggle">
-            <Button
-                variant="outline-secondary"
-                size="sm"
+    if (variant === 'icon') {
+        return (
+            <button
                 onClick={toggleTheme}
-                className="theme-toggle-btn"
+                className="theme-toggle-icon"
+                title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             >
                 <i className={`bi bi-${theme === 'light' ? 'moon-stars' : 'sun'}`}></i>
-            </Button>
-        </div>
+            </button>
+        );
+    }
+
+    return (
+        <Button
+            variant="outline-secondary"
+            size="sm"
+            onClick={toggleTheme}
+            className="theme-toggle-btn"
+        >
+            <i className={`bi bi-${theme === 'light' ? 'moon-stars' : 'sun'}`}></i>
+            <span>{theme === 'light' ? 'Dark' : 'Light'}</span>
+        </Button>
     );
 };
 
