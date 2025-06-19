@@ -56,7 +56,7 @@ const AdminDashboard = () => {
                     {/* 1. Карточка "Total Schedules" */}
                     <Col lg={3} md={6} className="mb-4">
                         {/* Добавляем класс dashboard-metric-card */}
-                        <Card className="dashboard-metric-card h-100">
+                        <Card className="dashboard-metric-card">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
                                     {/* Добавляем класс metric-icon */}
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
                                     </div>
                                     <div>
                                         {/* Добавляем классы metric-label и metric-value */}
-                                        <div className="metric-label">{t('schedule.total')}</div>
+                                        <div className="metric-label">{t('navigation.schedules')}</div>
                                         <div className="metric-value">{stats?.overview.total_schedules || 0}</div>
                                     </div>
                                 </div>
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
                     {/* 2. Карточка "Published" */}
                     <Col lg={3} md={6} className="mb-4">
                         {/* Добавляем классы dashboard-metric-card и metric-success */}
-                        <Card className="dashboard-metric-card metric-success h-100">
+                        <Card className="dashboard-metric-card metric-success">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
                                     <div className="metric-icon bg-success bg-opacity-10 me-3">
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
                     {/* 3. Карточка "Draft" */}
                     <Col lg={3} md={6} className="mb-4">
                         {/* Добавляем классы dashboard-metric-card и metric-warning */}
-                        <Card className="dashboard-metric-card metric-warning h-100">
+                        <Card className="dashboard-metric-card metric-warning">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
                                     <div className="metric-icon bg-warning bg-opacity-10 me-3">
@@ -112,14 +112,14 @@ const AdminDashboard = () => {
                     {/* 4. Карточка "Total Assignments" */}
                     <Col lg={3} md={6} className="mb-4">
                         {/* Добавляем классы dashboard-metric-card и metric-info */}
-                        <Card className="dashboard-metric-card metric-info h-100">
+                        <Card className="dashboard-metric-card metric-info">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
                                     <div className="metric-icon bg-info bg-opacity-10 me-3">
                                         <i className="bi bi-people text-info fs-4"></i>
                                     </div>
                                     <div>
-                                        <div className="metric-label">{t('employee.totalAssignments')}</div>
+                                        <div className="metric-label">{t('employee.assignments')}</div>
                                         <div className="metric-value">{stats?.overview.total_assignments || 0}</div>
                                     </div>
                                 </div>
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
                                             onClick={() => navigate('/admin/algorithms')}
                                         >
                                             <i className="bi bi-cpu me-2"></i>
-                                            {t('settings.algorithmsSettings')}                                        </Button>
+                                            {t('navigation.algorithms')}                                        </Button>
                                     </Col>
                                     <Col md={6} className="mb-3">
                                         <Button

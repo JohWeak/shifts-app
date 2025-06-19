@@ -49,12 +49,13 @@
 /*}*/
 
 /* METRIC CARDS - стили для карточек с показателями */
-.dashboard-metric-card {
+.admin-dashboard .dashboard-metric-card {
     border-left: 4px solid var(--bs-primary);
     transition: all 0.2s ease;
+    height: 100%;
 }
 
-.dashboard-metric-card:hover {
+.admin-dashboard .dashboard-metric-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--bs-box-shadow);
 }
@@ -151,4 +152,6 @@
     .metric-value {
         font-size: 1.25rem;
     }
+
+
 }

@@ -200,7 +200,7 @@ const AdminLayout = ({ children }) => {
                             >
                                 <div className="d-flex align-items-center">
                                     <div className="user-avatar mt-3">
-                                        <i className="bi bi-person-square"></i>
+                                        <i className="bi bi-person-circle"></i>
                                     </div>
                                 </div>
                             </Dropdown.Toggle>
