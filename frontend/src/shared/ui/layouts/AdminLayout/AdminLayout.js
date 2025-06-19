@@ -167,6 +167,7 @@ const AdminLayout = ({ children }) => {
             {/* Top Navigation Bar */}
             <Navbar className="admin-navbar shadow-sm sticky-top">
                 <Container fluid className="px-3">
+
                     <div className="d-flex align-items-center">
                         {/* Mobile Menu Toggle */}
                         {isMobile && (
@@ -181,12 +182,24 @@ const AdminLayout = ({ children }) => {
                         )}
 
                         {/* Brand */}
-                        <Navbar className="brand-logo mb-0">
+                        <Navbar
+                            as={Link}
+                            to="/admin"
+                            className="brand-logo mb-0"
+                            onClick={(e) => {
+                                // Предотвращаем стандартное действие Link, чтобы полностью контролировать навигацию
+                                e.preventDefault();
+                                // Используем вашу готовую функцию навигации для '/admin'
+                                handleNavigation('/admin');
+                            }}
+                        >
                             <i className="bi bi-calendar-check-fill text-primary me-2"></i>
                             <span className="brand-text">{t('common.appName')}</span>
                             <Badge bg="secondary" className="ms-2 brand-badge">{t('common.admin')}</Badge>
                         </Navbar>
+
                     </div>
+
 
                     {/* Right side - User menu */}
                     <div className="d-flex align-items-center">

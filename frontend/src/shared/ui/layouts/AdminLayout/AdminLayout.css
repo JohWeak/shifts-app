@@ -261,7 +261,14 @@
 
     margin-left: 0;
 
-
+}
+/* BADGES - дополнения к Bootstrap */
+.admin-nav-link .badge {
+    margin-left: auto;
+    font-size: 0.8rem;
+}
+.admin-layout .admin-navbar .badge{
+    font-size: 0.8rem;
 }
 
 
@@ -279,26 +286,29 @@
     .admin-main-content {
         padding: 1rem;
     }
+
 }
 
 @media (max-width: 767.98px) {
     .admin-main-content {
         padding: 0.75rem;
     }
+
+}
+@media (max-width: 400px) {
+    .admin-layout .admin-navbar .badge{
+        visibility: hidden;
+        font-size: 0;
+    }
 }
 
-/* BADGES - дополнения к Bootstrap */
-.admin-nav-link .badge {
-    margin-left: auto;
-    font-size: 0.7rem;
-}
-.admin-layout .admin-navbar .badge{
-   display: flex;
-}
+
 
 /* Убираем лишние hover эффекты на мобильных устройствах */
 @media (hover: none) {
     .admin-nav-link:hover {
         transform: none;
     }
+
+
 }

@@ -45,16 +45,16 @@ const AdminDashboard = () => {
 
     return (
         <AdminLayout>
-            <Container fluid className="admin-dashboard px-0">
+            <Container fluid className="admin-dashboard p-2">
                 <PageHeader
                     icon="speedometer2"
                     title={t('dashboard.dashboardTitle')}
                     subtitle={t('dashboard.dashboardDesc')}
                 />
 
-                <Row>
+                <Row >
                     {/* 1. Карточка "Total Schedules" */}
-                    <Col lg={3} md={6} className="mb-4">
+                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
                         {/* Добавляем класс dashboard-metric-card */}
                         <Card className="dashboard-metric-card">
                             <Card.Body>
@@ -74,7 +74,7 @@ const AdminDashboard = () => {
                     </Col>
 
                     {/* 2. Карточка "Published" */}
-                    <Col lg={3} md={6} className="mb-4">
+                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
                         {/* Добавляем классы dashboard-metric-card и metric-success */}
                         <Card className="dashboard-metric-card metric-success">
                             <Card.Body>
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
                     </Col>
 
                     {/* 3. Карточка "Draft" */}
-                    <Col lg={3} md={6} className="mb-4">
+                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4 ">
                         {/* Добавляем классы dashboard-metric-card и metric-warning */}
                         <Card className="dashboard-metric-card metric-warning">
                             <Card.Body>
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
                     </Col>
 
                     {/* 4. Карточка "Total Assignments" */}
-                    <Col lg={3} md={6} className="mb-4">
+                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
                         {/* Добавляем классы dashboard-metric-card и metric-info */}
                         <Card className="dashboard-metric-card metric-info">
                             <Card.Body>
