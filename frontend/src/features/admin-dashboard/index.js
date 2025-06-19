@@ -130,7 +130,7 @@ const AdminDashboard = () => {
 
                 <Row>
                     <Col lg={8} className="mb-4">
-                        <Card className="border-0 shadow-sm h-100">
+                        <Card className="border-0 shadow-sm ">
                             <Card.Header >
                                 <h5 className="mb-0">{t('common.quickActions')}</h5>
                             </Card.Header>
