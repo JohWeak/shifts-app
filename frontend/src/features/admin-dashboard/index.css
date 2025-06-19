@@ -50,7 +50,7 @@
 
 /* METRIC CARDS - стили для карточек с показателями */
 .admin-dashboard .dashboard-metric-card {
-    border-left: 4px solid var(--bs-primary);
+    border-left: 5px solid var(--bs-primary);
     transition: all 0.2s ease;
     height: 100%;
 }
