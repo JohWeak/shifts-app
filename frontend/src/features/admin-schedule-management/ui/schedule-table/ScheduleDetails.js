@@ -14,8 +14,10 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     updateScheduleStatus,
     updateScheduleAssignments,
-    exportSchedule, // <--- Новый экшен для экспорта
+    exportSchedule,
     toggleEditPosition,
+    addPendingChange,
+    removePendingChange
 } from '../../model/scheduleSlice';
 
 const ScheduleDetails = ({onCellClick}) => {
@@ -72,9 +74,28 @@ const ScheduleDetails = ({onCellClick}) => {
         }
     };
 
-    const {schedule, positions, employees, all_shifts: shifts} = scheduleDetails;
-   // const canPublish = schedule.status === 'draft' && Object.keys(pendingChanges).length === 0;
-   // const canEdit = schedule.status === 'draft';
+    const handleEmployeeRemove = (date, positionId, shiftId, empId) => {
+        const key = `remove-${positionId}-${date}-${shiftId}-${empId}`;
+        dispatch(addPendingChange({
+            key,
+            change: {
+                action: 'remove',
+                positionId,
+                date,
+                shiftId,
+                empId
+            }
+        }));
+    };
+
+    const handleEmployeeClick = (date, positionId, shiftId, empId) => {
+        // При клике на сотрудника открываем модальное окно для его замены
+        onCellClick(date, positionId, shiftId, empId);
+    };
+
+    const handleRemovePendingChange = (key) => {
+        dispatch(removePendingChange(key));
+    };
 
     return (
         <>
@@ -123,6 +144,9 @@ const ScheduleDetails = ({onCellClick}) => {
                                 scheduleDetails={scheduleDetails}
                                 pendingChanges={pendingChanges}
                                 isSaving={isSaving}
+                                onEmployeeClick={handleEmployeeClick}
+                                onEmployeeRemove={handleEmployeeRemove}
+                                onRemovePendingChange={handleRemovePendingChange}
                             />
                         ))
                     ) : (

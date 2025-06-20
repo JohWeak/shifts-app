@@ -29,15 +29,12 @@ const ScheduleEditor = ({
     const assignments = useMemo(() => {
         if (!scheduleDetails?.assignments) return [];
 
-        console.log('Тип scheduleDetails.assignments:', typeof scheduleDetails.assignments);
-        console.log('Фильтрация с position.pos_id:', position.pos_id);
-        console.log('Тип position.pos_id:', typeof position.pos_id);
-        if (scheduleDetails.assignments.length > 0) {
-            console.log('Тип первого a.pos_id в массиве:', typeof scheduleDetails.assignments[0].pos_id);
-        }
-
         // Filter assignments for this position
-        return scheduleDetails.assignments.filter(a => a.position_id === position.pos_id);
+        // Handle both pos_id and position_id field names
+        return scheduleDetails.assignments.filter(a => {
+            const assignmentPosId = a.pos_id || a.position_id;
+            return assignmentPosId === position.pos_id;
+        });
     }, [position.pos_id, scheduleDetails?.assignments]);
 
 

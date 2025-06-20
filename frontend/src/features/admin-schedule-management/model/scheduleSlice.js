@@ -90,9 +90,13 @@ export const deleteSchedule = createAsyncThunk(
 // Обновление назначений
 export const updateScheduleAssignments = createAsyncThunk(
     'schedule/updateScheduleAssignments',
-    async ({ scheduleId, changes }, { rejectWithValue }) => {
+    async ({ scheduleId, changes }, { dispatch, rejectWithValue }) => {
         try {
             const response = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
+
+            // После успешного обновления перезагружаем детали расписания
+            await dispatch(fetchScheduleDetails(scheduleId));
+
             return response;
         } catch (error) {
             return rejectWithValue(error.message);
@@ -295,6 +299,28 @@ const scheduleSlice = createSlice({
             .addCase(updateScheduleAssignments.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;
+            })
+            .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
+                state.loading = 'succeeded';
+
+                // После успешного обновления данные будут перезагружены через fetchScheduleDetails
+                // который вызывается в самом thunk
+
+                // Очищаем pendingChanges для позиции, которая была сохранена
+                if (action.meta?.arg?.changes) {
+                    const positionId = action.meta.arg.changes[0]?.positionId;
+                    if (positionId) {
+                        // Удаляем все изменения для этой позиции
+                        Object.keys(state.pendingChanges).forEach(key => {
+                            if (state.pendingChanges[key].positionId === positionId) {
+                                delete state.pendingChanges[key];
+                            }
+                        });
+
+                        // Выключаем режим редактирования для этой позиции
+                        state.editingPositions[positionId] = false;
+                    }
+                }
             })
 
             .addCase(fetchRecommendations.pending, (state) => {

@@ -100,11 +100,12 @@ const ScheduleManagement = () => {
         setShowComparisonModal(true);
     };
 
-    const handleCellClick = (date, positionId, shiftId) => {
+    const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null) => {
         setSelectedCell({
             date: date,
             positionId: positionId,
-            shiftId: shiftId
+            shiftId: shiftId,
+            employeeIdToReplace: employeeIdToReplace  // Для замены существующего сотрудника
         });
         setShowEmployeeModal(true);
     };
@@ -112,11 +113,35 @@ const ScheduleManagement = () => {
     const handleEmployeeSelect = async (employeeId) => {
         if (!selectedCell) return;
 
+        const key = selectedCell.employeeIdToReplace
+            ? `replace-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`
+            : `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employeeId}`;
+
+        // Если это замена, сначала удаляем старого сотрудника
+        if (selectedCell.employeeIdToReplace) {
+            dispatch(addPendingChange({
+                key: `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`,
+                change: {
+                    action: 'remove',
+                    positionId: selectedCell.positionId,
+                    date: selectedCell.date,
+                    shiftId: selectedCell.shiftId,
+                    empId: selectedCell.employeeIdToReplace
+                }
+            }));
+        }
+
+        // Затем добавляем нового
         dispatch(addPendingChange({
-            positionId: selectedCell.positionId,
-            dayIndex: selectedCell.dayIndex,
-            shiftId: selectedCell.shiftId,
-            employeeId: employeeId,
+            key,
+            change: {
+                action: 'assign',
+                positionId: selectedCell.positionId,
+                date: selectedCell.date,
+                shiftId: selectedCell.shiftId,
+                empId: employeeId,
+                employeeName: null  // Будет заполнено из данных сотрудника
+            }
         }));
 
         setShowEmployeeModal(false);
