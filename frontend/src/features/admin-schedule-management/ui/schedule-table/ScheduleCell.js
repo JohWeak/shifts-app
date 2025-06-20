@@ -1,6 +1,6 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/schedule/ScheduleCell.js
+// frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleCell.js
 import React from 'react';
-import { Badge } from 'react-bootstrap';
+import {Badge} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 
 const ScheduleCell = ({
@@ -14,8 +14,10 @@ const ScheduleCell = ({
                           isUnderstaffed = false,
                           requiredEmployees = 1,
                           onCellClick,
-                          onEmployeeClick, // НОВЫЙ проп для клика на работника
+                          onEmployeeClick,
                           onRemoveEmployee,
+                          onRemovePendingChange,  // Добавить в пропсы
+                          pendingChanges = {},
                           className = '',
                           ...props
                       }) => {
@@ -85,7 +87,7 @@ const ScheduleCell = ({
                     padding: '8px',
                     verticalAlign: 'middle'
                 }}
-                title={isEditing ? t.addEmployee : ''}
+                title={isEditing ? t('employee.assignEmployee') : ''}
                 {...props}
             >
                 <div className="empty-cell d-flex align-items-center justify-content-center">
@@ -125,7 +127,7 @@ const ScheduleCell = ({
                     <div
                         key={`visible-${employee.emp_id}`}
                         className="employee-item mb-1 d-flex align-items-center justify-content-between"
-                        style={{ fontSize: '0.8em' }}
+                        style={{fontSize: '0.8em'}}
                     >
                         <span
                             className={`employee-name employee-clickable ${isEditing ? 'text-primary' : ''}`}
@@ -146,10 +148,10 @@ const ScheduleCell = ({
                                 onClick={(e) => handleRemoveClick(e, employee.emp_id)}
                                 title="Remove employee"
                                 style={{
-                                    width: '20px',
-                                    height: '20px',
+                                    width: '10px',
+                                    height: '10px',
                                     borderRadius: '50%',
-                                    fontSize: '12px',
+                                    fontSize: '8px',
                                     lineHeight: '1',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -158,7 +160,7 @@ const ScheduleCell = ({
                                     position: 'relative'
                                 }}
                             >
-                                ×
+                                X
                             </button>
                         )}
                     </div>
@@ -169,29 +171,41 @@ const ScheduleCell = ({
                     <div
                         key={`pending-${assignment.empId}-${index}`}
                         className="employee-item mb-1 d-flex align-items-center justify-content-between pending-assignment"
-                        style={{ fontSize: '0.8em' }}
+                        style={{fontSize: '0.8em'}}
                     >
                         <span
                             className="employee-name text-success"
-                            style={{ fontStyle: 'italic' }}
+                            style={{fontStyle: 'italic'}}
                         >
-                            {assignment.empName}
+                            {assignment.empName || 'New Employee'} {/* Защита от undefined */}
                         </span>
                         <div className="d-flex align-items-center">
-                            <Badge bg="success" style={{ fontSize: '0.6em' }} className="me-1">
-                                New
-                            </Badge>
-                            {isEditing && (
+                            {isEditing && onRemovePendingChange && (
                                 <button
                                     type="button"
                                     className="remove-btn btn btn-sm btn-outline-secondary p-0"
-                                    onClick={(e) => handleRemoveClick(e, assignment.empId)}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        // Найти и удалить правильный pending change
+                                        const changeKey = Object.keys(pendingChanges).find(key => {
+                                            const change = pendingChanges[key];
+                                            return change.action === 'assign' &&
+                                                change.empId === assignment.empId &&
+                                                change.positionId === positionId &&
+                                                change.date === date &&
+                                                change.shiftId === shiftId;
+                                        });
+                                        if (changeKey) {
+                                            onRemovePendingChange(changeKey);
+                                        }
+                                    }}
                                     title="Cancel assignment"
                                     style={{
-                                        width: '18px',
-                                        height: '18px',
+                                        width: '10px',
+                                        height: '10px',
                                         borderRadius: '50%',
-                                        fontSize: '10px',
+                                        fontSize: '8px',
                                         lineHeight: '1',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -200,7 +214,7 @@ const ScheduleCell = ({
                                         position: 'relative'
                                     }}
                                 >
-                                    ×
+                                    x
                                 </button>
                             )}
                         </div>

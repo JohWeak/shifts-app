@@ -138,7 +138,7 @@ const ScheduleDetails = ({onCellClick}) => {
                                 position={position}
                                 isEditing={!!editingPositions[position.pos_id]}
                                 onToggleEdit={() => dispatch(toggleEditPosition(position.pos_id))}
-                                onSave={() => handleSaveChanges(position.pos_id)}
+                                onSaveChanges={() => handleSaveChanges(position.pos_id)}
                                 onCancel={() => dispatch(toggleEditPosition(position.pos_id))}
                                 onCellClick={onCellClick}
                                 scheduleDetails={scheduleDetails}

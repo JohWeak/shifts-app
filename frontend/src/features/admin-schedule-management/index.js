@@ -110,7 +110,7 @@ const ScheduleManagement = () => {
         setShowEmployeeModal(true);
     };
 
-    const handleEmployeeSelect = async (employeeId) => {
+    const handleEmployeeSelect = async (employeeId, employeeName) => {  // Добавить employeeName параметр
         if (!selectedCell) return;
 
         const key = selectedCell.employeeIdToReplace
@@ -131,7 +131,7 @@ const ScheduleManagement = () => {
             }));
         }
 
-        // Затем добавляем нового
+        // Затем добавляем нового с именем
         dispatch(addPendingChange({
             key,
             change: {
@@ -140,7 +140,7 @@ const ScheduleManagement = () => {
                 date: selectedCell.date,
                 shiftId: selectedCell.shiftId,
                 empId: employeeId,
-                employeeName: null  // Будет заполнено из данных сотрудника
+                empName: employeeName  // Используем переданное имя
             }
         }));
 

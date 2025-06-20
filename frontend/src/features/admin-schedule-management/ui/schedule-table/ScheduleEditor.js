@@ -191,6 +191,8 @@ const ScheduleEditor = ({
                 onCellClick={onCellClick}
                 onEmployeeClick={onEmployeeClick}
                 onRemoveEmployee={onEmployeeRemove}
+                onRemovePendingChange={onRemovePendingChange}
+                pendingChanges={pendingChanges}
             />
         );
     };
