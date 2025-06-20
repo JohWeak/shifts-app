@@ -6,6 +6,7 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import { getWeekDates } from 'shared/lib/utils/scheduleUtils';
 import {useSelector} from "react-redux";
 import {format} from "date-fns";
+import './ScheduleEditor.css';
 
 const ScheduleEditor = ({
                                     position,
@@ -144,7 +145,7 @@ const ScheduleEditor = ({
             if (employee) {
                 return {
                     ...employee,
-                    assignment_id: assignment.id,
+                    assignment_id: assignment.id, // Это уже есть
                     employee_name: employee.name || `${employee.first_name} ${employee.last_name}`
                 };
             }
@@ -153,7 +154,7 @@ const ScheduleEditor = ({
             return {
                 emp_id: assignment.emp_id,
                 employee_name: assignment.employee_name || 'Unknown Employee',
-                assignment_id: assignment.id
+                assignment_id: assignment.id // Убедитесь что это тоже есть
             };
         }).filter(Boolean);
 
@@ -190,7 +191,8 @@ const ScheduleEditor = ({
                 requiredEmployees={position.num_of_emp}
                 onCellClick={onCellClick}
                 onEmployeeClick={onEmployeeClick}
-                onRemoveEmployee={onEmployeeRemove}
+                onRemoveEmployee={(date, posId, shiftId, empId, assignmentId) =>
+                    onEmployeeRemove(date, posId, shiftId, empId, assignmentId)}
                 onRemovePendingChange={onRemovePendingChange}
                 pendingChanges={pendingChanges}
             />

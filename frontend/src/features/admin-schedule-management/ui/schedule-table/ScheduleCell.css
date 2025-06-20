@@ -1,0 +1,182 @@
+/* frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleCell.css */
+
+/* Schedule Cell Base Styles */
+.schedule-cell {
+    min-height: 60px;
+    padding: var(--space-2);
+    vertical-align: middle;
+    position: relative;
+    transition: all var(--transition-base);
+}
+
+.schedule-cell.editing-mode {
+    cursor: pointer;
+}
+
+.schedule-cell.editing-mode:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .schedule-cell.editing-mode:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Cell with employees - different vertical alignment */
+.schedule-cell.has-employees {
+    vertical-align: top;
+}
+
+/* Empty Cell Styles */
+.schedule-cell .empty-cell {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.schedule-cell.editing-mode .empty-cell:hover .bi-plus-circle {
+    color: var(--bs-primary);
+    transform: scale(1.1);
+    transition: all var(--transition-fast);
+}
+
+/* Employees Container */
+.schedule-cell .employees-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+/* Employee Item */
+.schedule-cell .employee-item {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.schedule-cell .employee-item:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .schedule-cell .employee-item:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Employee Name */
+.schedule-cell .employee-name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.schedule-cell .employee-name.employee-clickable {
+    transition: color var(--transition-fast);
+}
+
+.schedule-cell.editing-mode .employee-name.employee-clickable:hover {
+    color: var(--bs-primary-hover) !important;
+}
+
+/* Pending Assignment */
+.schedule-cell .pending-assignment .employee-name {
+    font-style: italic;
+    opacity: 0.9;
+}
+
+/* Remove Button - переносим стили из JS */
+.schedule-cell .remove-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    opacity: 0.7;
+    transition: all var(--transition-fast);
+}
+
+.schedule-cell .remove-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Маленькая кнопка для pending assignments */
+.schedule-cell .pending-assignment .remove-btn {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+}
+
+/* Add More Indicator */
+.schedule-cell .add-more-indicator {
+    padding-top: var(--space-1);
+    font-size: var(--text-xs);
+    opacity: 0.7;
+}
+
+.schedule-cell .add-more-indicator i {
+    font-size: var(--text-xs);
+}
+
+/* Cell State Colors */
+.schedule-cell.table-warning {
+    background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
+}
+
+.schedule-cell.table-info {
+    background-color: rgba(var(--bs-info-rgb), 0.1) !important;
+}
+
+.schedule-cell.table-success {
+    background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+}
+
+[data-theme="dark"] .schedule-cell.table-warning {
+    background-color: rgba(var(--bs-warning-rgb), 0.15) !important;
+}
+
+[data-theme="dark"] .schedule-cell.table-info {
+    background-color: rgba(var(--bs-info-rgb), 0.15) !important;
+}
+
+[data-theme="dark"] .schedule-cell.table-success {
+    background-color: rgba(var(--bs-success-rgb), 0.15) !important;
+}
+[data-theme="dark"] .schedule-cell {
+    border-color: var(--bs-gray-700);
+}
+
+/* Dark theme state colors with better contrast */
+[data-theme="dark"] .schedule-cell.table-warning {
+    background-color: rgba(var(--bs-warning-rgb), 0.2) !important;
+    color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .schedule-cell.table-info {
+    background-color: rgba(var(--bs-info-rgb), 0.2) !important;
+    color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .schedule-cell.table-success {
+    background-color: rgba(var(--bs-success-rgb), 0.2) !important;
+    color: var(--bs-gray-100);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .schedule-cell {
+        padding: var(--space-1);
+        min-height: 50px;
+    }
+
+    .schedule-cell .employee-item {
+        padding: 2px var(--space-1);
+    }
+
+    .schedule-cell .employee-name {
+        font-size: var(--text-xs);
+    }
+}

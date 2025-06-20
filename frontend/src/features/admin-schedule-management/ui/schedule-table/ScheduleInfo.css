@@ -1,0 +1,75 @@
+/* frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.css */
+
+/* Schedule Info Container */
+.schedule-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+.schedule-info-container {
+    position: relative;
+}
+/* Back Button */
+.schedule-info-container .back-button {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+.schedule-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.schedule-info-grid .info-value{
+    gap: var(--space-2);
+}
+.schedule-info-container .back-button:hover {
+    transform: translateX(-4px);
+}
+
+/* Info Item */
+.schedule-info .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.schedule-info .info-label {
+    font-size: var(--text-sm);
+    color: var(--bs-secondary);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.schedule-info .info-value {
+    font-size: var(--text-base);
+    color: var(--bs-emphasis-color);
+    font-weight: var(--font-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.schedule-info .info-value i {
+    color: var(--bs-primary);
+    font-size: var(--text-lg);
+}
+
+/* Status Badge in Info */
+.schedule-info .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .schedule-info {
+        grid-template-columns: 1fr;
+    }
+}

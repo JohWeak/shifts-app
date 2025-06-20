@@ -7,7 +7,7 @@ import {getNextWeekStart, isValidWeekStartDate} from 'shared/lib/utils/scheduleU
 import {fetchWorkSites, compareAlgorithms} from '../../model/scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import CompareAlgorithmsModal from './CompareAlgorithmsModal';
-
+import './GenerateScheduleModal.css';
 const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
     const {t, locale} = useI18n();
     const dispatch = useDispatch();
@@ -108,6 +108,8 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                 onHide={onHide}
                 backdrop={generating ? 'static' : true}
                 keyboard={!generating}
+                size="lg"
+                className="generate-schedule-modal"
             >
                 <Modal.Header closeButton>
                     <Modal.Title>

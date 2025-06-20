@@ -10,6 +10,9 @@ import ScheduleActions from '../schedule-list/ScheduleActions';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
+
+import './ScheduleDetails.css';
+
 // Импортируем все необходимые экшены из Redux Slice
 import {
     updateScheduleStatus,
@@ -74,7 +77,7 @@ const ScheduleDetails = ({onCellClick}) => {
         }
     };
 
-    const handleEmployeeRemove = (date, positionId, shiftId, empId) => {
+    const handleEmployeeRemove = (date, positionId, shiftId, empId, assignmentId = null) => {
         const key = `remove-${positionId}-${date}-${shiftId}-${empId}`;
         dispatch(addPendingChange({
             key,
@@ -83,14 +86,24 @@ const ScheduleDetails = ({onCellClick}) => {
                 positionId,
                 date,
                 shiftId,
-                empId
+                empId,
+                assignmentId
             }
         }));
     };
 
     const handleEmployeeClick = (date, positionId, shiftId, empId) => {
+        // Найдем assignment_id для этого сотрудника
+        const assignment = scheduleDetails?.assignments?.find(a =>
+            (a.pos_id === positionId || a.position_id === positionId) &&
+            a.emp_id === empId &&
+            a.shift_id === shiftId &&
+            (a.work_date === date || a.date === date)
+        );
+
         // При клике на сотрудника открываем модальное окно для его замены
-        onCellClick(date, positionId, shiftId, empId);
+        // Передаем assignment_id если он есть
+        onCellClick(date, positionId, shiftId, empId, assignment?.id);
     };
 
     const handleRemovePendingChange = (key) => {

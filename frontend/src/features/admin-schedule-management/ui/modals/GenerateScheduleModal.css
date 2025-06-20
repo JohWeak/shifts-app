@@ -1,0 +1,223 @@
+/* frontend/src/features/admin-schedule-management/ui/modals/GenerateScheduleModal.css */
+
+/* Generate Schedule Modal Base */
+.generate-schedule-modal .modal-content {
+    border: none;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.generate-schedule-modal .modal-header {
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: none;
+}
+
+.generate-schedule-modal .modal-header .modal-title {
+    font-weight: var(--font-semibold);
+    font-size: var(--text-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.generate-schedule-modal .modal-header .btn-close {
+    color: var(--bs-white);
+    opacity: 0.8;
+    transition: opacity var(--transition-base);
+}
+
+.generate-schedule-modal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.generate-schedule-modal .modal-body {
+    padding: var(--space-5);
+}
+
+/* Form Sections */
+.generate-schedule-modal .form-section {
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.generate-schedule-modal .form-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.generate-schedule-modal .section-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--bs-emphasis-color);
+    margin-bottom: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.generate-schedule-modal .section-title i {
+    color: var(--bs-primary);
+}
+
+/* Form Controls */
+.generate-schedule-modal .form-label {
+    font-weight: var(--font-medium);
+    color: var(--bs-emphasis-color);
+    margin-bottom: var(--space-2);
+}
+
+.generate-schedule-modal .form-text {
+    color: var(--bs-secondary);
+    font-size: var(--text-sm);
+    margin-top: var(--space-1);
+}
+
+/* Date Range Inputs */
+.generate-schedule-modal .date-range-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+
+/* Work Site Selection */
+.generate-schedule-modal .worksite-card {
+    border: 2px solid var(--bs-border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.generate-schedule-modal .worksite-card:hover {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .generate-schedule-modal .worksite-card:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.generate-schedule-modal .worksite-card.selected {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Algorithm Selection */
+.generate-schedule-modal .algorithm-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.generate-schedule-modal .algorithm-option {
+    padding: var(--space-3);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.generate-schedule-modal .algorithm-option:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .generate-schedule-modal .algorithm-option:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.generate-schedule-modal .algorithm-option input[type="radio"] {
+    margin-right: var(--space-2);
+}
+
+.generate-schedule-modal .algorithm-name {
+    font-weight: var(--font-medium);
+}
+
+.generate-schedule-modal .algorithm-description {
+    font-size: var(--text-sm);
+    color: var(--bs-secondary);
+    margin-left: var(--space-5);
+}
+
+/* Settings Summary */
+.generate-schedule-modal .settings-summary {
+    background-color: var(--bs-gray-100);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+[data-theme="dark"] .generate-schedule-modal .settings-summary {
+    background-color: var(--bs-gray-800);
+}
+
+.generate-schedule-modal .summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+}
+
+.generate-schedule-modal .summary-label {
+    font-size: var(--text-sm);
+    color: var(--bs-secondary);
+}
+
+.generate-schedule-modal .summary-value {
+    font-weight: var(--font-medium);
+    color: var(--bs-emphasis-color);
+}
+
+/* Modal Footer */
+.generate-schedule-modal .modal-footer {
+    background-color: var(--bs-gray-100);
+    border-top: 1px solid var(--bs-border-color);
+    padding: var(--space-3) var(--space-5);
+}
+
+[data-theme="dark"] .generate-schedule-modal .modal-footer {
+    background-color: var(--bs-gray-900);
+}
+
+/* Loading State */
+.generate-schedule-modal.generating .modal-body {
+    position: relative;
+    min-height: 200px;
+}
+
+.generate-schedule-modal .generation-progress {
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+}
+
+.generate-schedule-modal .generation-progress .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-3);
+}
+
+.generate-schedule-modal .generation-progress .progress-text {
+    font-size: var(--text-lg);
+    color: var(--bs-emphasis-color);
+    margin-bottom: var(--space-2);
+}
+
+.generate-schedule-modal .generation-progress .progress-subtext {
+    font-size: var(--text-sm);
+    color: var(--bs-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .generate-schedule-modal .date-range-inputs {
+        grid-template-columns: 1fr;
+    }
+
+    .generate-schedule-modal .modal-body {
+        padding: var(--space-4);
+    }
+}

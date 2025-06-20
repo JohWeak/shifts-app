@@ -100,17 +100,18 @@ const ScheduleManagement = () => {
         setShowComparisonModal(true);
     };
 
-    const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null) => {
+    const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
         setSelectedCell({
             date: date,
             positionId: positionId,
             shiftId: shiftId,
-            employeeIdToReplace: employeeIdToReplace  // Для замены существующего сотрудника
+            employeeIdToReplace: employeeIdToReplace,
+            assignmentIdToReplace: assignmentIdToReplace  // Добавляем assignment ID
         });
         setShowEmployeeModal(true);
     };
 
-    const handleEmployeeSelect = async (employeeId, employeeName) => {  // Добавить employeeName параметр
+    const handleEmployeeSelect = async (employeeId, employeeName) => {
         if (!selectedCell) return;
 
         const key = selectedCell.employeeIdToReplace
@@ -126,12 +127,13 @@ const ScheduleManagement = () => {
                     positionId: selectedCell.positionId,
                     date: selectedCell.date,
                     shiftId: selectedCell.shiftId,
-                    empId: selectedCell.employeeIdToReplace
+                    empId: selectedCell.employeeIdToReplace,
+                    assignmentId: selectedCell.assignmentIdToReplace  // Используем сохраненный assignment ID
                 }
             }));
         }
 
-        // Затем добавляем нового с именем
+        // Затем добавляем нового
         dispatch(addPendingChange({
             key,
             change: {
@@ -140,7 +142,7 @@ const ScheduleManagement = () => {
                 date: selectedCell.date,
                 shiftId: selectedCell.shiftId,
                 empId: employeeId,
-                empName: employeeName  // Используем переданное имя
+                empName: employeeName
             }
         }));
 

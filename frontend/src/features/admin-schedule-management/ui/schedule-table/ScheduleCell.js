@@ -2,6 +2,7 @@
 import React from 'react';
 import {Badge} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import './ScheduleCell.css';
 
 const ScheduleCell = ({
                           date,
@@ -42,12 +43,12 @@ const ScheduleCell = ({
         }
     };
 
-    const handleRemoveClick = (e, empId) => {
+    const handleRemoveClick = (e, empId, assignmentId = null) => {
         e.preventDefault();
         e.stopPropagation();
 
         if (onRemoveEmployee) {
-            onRemoveEmployee(date, positionId, shiftId, empId);
+            onRemoveEmployee(date, positionId, shiftId, empId, assignmentId);
         }
     };
 
@@ -61,11 +62,13 @@ const ScheduleCell = ({
         }
     };
 
+    // Для ячейки с сотрудниками, добавляем класс has-employees:
     const getCellClasses = () => {
         const baseClasses = ['schedule-cell', 'text-center', 'position-relative'];
 
         if (className) baseClasses.push(className);
         if (isEditing) baseClasses.push('editing-mode');
+        if (!isEmpty) baseClasses.push('has-employees'); // Добавляем этот класс
         if (isEmpty && isEditing) baseClasses.push('table-warning');
         if (isUnderstaffed && !isEmpty) baseClasses.push('table-info');
         if (isFull) baseClasses.push('table-success');
@@ -81,23 +84,13 @@ const ScheduleCell = ({
             <td
                 className={getCellClasses()}
                 onClick={handleCellClick}
-                style={{
-                    cursor: getCursor(),
-                    minHeight: '60px',
-                    padding: '8px',
-                    verticalAlign: 'middle'
-                }}
-                title={isEditing ? t('employee.assignEmployee') : ''}
+                title={isEditing ? t('employee.clickToAssign') : ''}
                 {...props}
             >
-                <div className="empty-cell d-flex align-items-center justify-content-center">
+                <div className="empty-cell">
                     {isEditing ? (
                         <div className="text-muted">
                             <i className="bi bi-plus-circle fs-7"></i>
-                            {/*<div style={{ fontSize: '0.7em' }}>*/}
-                            {/*    {messages.ass || 'Click to assign'}*/}
-                            {/*</div>*/}
-
                         </div>
                     ) : (
                         <span className="text-muted">-</span>
@@ -107,17 +100,12 @@ const ScheduleCell = ({
         );
     }
 
+
     // Render cell with employees
     return (
         <td
             className={getCellClasses()}
             onClick={handleCellClick}
-            style={{
-                cursor: getCursor(),
-                minHeight: '60px',
-                padding: '8px',
-                verticalAlign: 'top'
-            }}
             title={isEditing ? 'Click on employee name to replace, or click empty space to add' : ''}
             {...props}
         >
@@ -129,38 +117,26 @@ const ScheduleCell = ({
                         className="employee-item mb-1 d-flex align-items-center justify-content-between"
                         style={{fontSize: '0.8em'}}
                     >
-                        <span
-                            className={`employee-name employee-clickable ${isEditing ? 'text-primary' : ''}`}
-                            onClick={(e) => handleEmployeeNameClick(e, employee.emp_id)}
-                            style={{
-                                cursor: isEditing ? 'pointer' : 'default',
-                                textDecoration: isEditing ? 'underline' : 'none'
-                            }}
-                            title={isEditing ? 'Click to replace this employee' : ''}
-                        >
-                            {employee.first_name} {employee.last_name}
-                        </span>
+        <span
+            className={`employee-name employee-clickable ${isEditing ? 'text-primary' : ''}`}
+            onClick={(e) => handleEmployeeNameClick(e, employee.emp_id)}
+            style={{
+                cursor: isEditing ? 'pointer' : 'default',
+                textDecoration: isEditing ? 'underline' : 'none'
+            }}
+            title={isEditing ? 'Click to replace this employee' : ''}
+        >
+            {employee.first_name} {employee.last_name}
+        </span>
 
                         {isEditing && (
                             <button
                                 type="button"
                                 className="remove-btn btn btn-sm btn-outline-danger p-0 ms-1"
-                                onClick={(e) => handleRemoveClick(e, employee.emp_id)}
+                                onClick={(e) => handleRemoveClick(e, employee.emp_id, employee.assignment_id)} // Передаём assignment_id
                                 title="Remove employee"
-                                style={{
-                                    width: '10px',
-                                    height: '10px',
-                                    borderRadius: '50%',
-                                    fontSize: '8px',
-                                    lineHeight: '1',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    zIndex: 1000,
-                                    position: 'relative'
-                                }}
                             >
-                                X
+                                ×
                             </button>
                         )}
                     </div>
@@ -201,18 +177,7 @@ const ScheduleCell = ({
                                         }
                                     }}
                                     title="Cancel assignment"
-                                    style={{
-                                        width: '10px',
-                                        height: '10px',
-                                        borderRadius: '50%',
-                                        fontSize: '8px',
-                                        lineHeight: '1',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        zIndex: 1000,
-                                        position: 'relative'
-                                    }}
+
                                 >
                                     x
                                 </button>
