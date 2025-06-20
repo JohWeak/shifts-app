@@ -2,6 +2,7 @@
 import React from 'react';
 import { Modal, Button, Alert, Row, Col, Card, Badge } from 'react-bootstrap';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
+import './CompareAlgorithmsModal.css';
 
 const CompareAlgorithmsModal = ({
                                     show,
@@ -21,12 +22,8 @@ const CompareAlgorithmsModal = ({
     };
 
     return (
-        <Modal
-            show={show}
-            onHide={onHide}
-            size="lg"
-            className="comparison-modal"
-        >
+        <Modal show={show} onHide={onHide} size="lg"
+               className="compare-algorithms-modal">
             <Modal.Header closeButton>
                 <Modal.Title>
                     <i className="bi bi-speedometer2 me-2"></i>

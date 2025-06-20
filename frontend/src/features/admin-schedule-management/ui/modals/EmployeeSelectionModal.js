@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRecommendations } from '../../model/scheduleSlice'; // Импортируем наш thunk
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import './EmployeeSelectionModal.css';
+
 
 const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails }) => {
     const { t } = useI18n();    const dispatch = useDispatch();
@@ -132,8 +134,7 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg" centered className="employee-selection-modal">
-            <Modal.Header closeButton>
+        <Modal show={show} onHide={onHide} size="lg" className="employee-selection-modal">            <Modal.Header closeButton>
                 <Modal.Title>{getModalTitle()}</Modal.Title>
             </Modal.Header>
             <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>

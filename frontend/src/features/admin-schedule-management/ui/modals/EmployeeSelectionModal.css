@@ -1,0 +1,286 @@
+/* Employee Selection Modal - стили с использованием дизайн-системы */
+
+/* Modal customization */
+.employee-selection-modal .modal-content {
+    border: none;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.employee-selection-modal .modal-content .modal-body {
+    padding: 1rem;
+}
+
+.employee-selection-modal .modal-header {
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: none;
+}
+
+.employee-selection-modal .modal-header .modal-title {
+    font-weight: var(--font-semibold);
+    font-size: var(--text-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.employee-selection-modal .modal-header .btn-close {
+    color: var(--bs-white);
+    opacity: 0.8;
+    transition: opacity var(--transition-base);
+}
+
+.employee-selection-modal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.employee-selection-modal .modal-body {
+    padding: 0;
+    background-color: var(--bs-body-bg);
+}
+
+/* Position info bar */
+.employee-selection-modal .position-info {
+    background-color: var(--bs-gray-100);
+    padding: var(--space-3) var(--space-5);
+    border-bottom: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+[data-theme="dark"] .employee-selection-modal .position-info {
+    background-color: var(--bs-gray-800);
+}
+
+.employee-selection-modal .position-info-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+}
+
+.employee-selection-modal .position-info-item i {
+    color: var(--bs-primary);
+    font-size: var(--text-base);
+}
+
+.employee-selection-modal .position-info-label {
+    color: var(--bs-secondary);
+    font-weight: var(--font-medium);
+}
+
+.employee-selection-modal .position-info-value {
+    color: var(--bs-emphasis-color);
+    font-weight: var(--font-semibold);
+}
+
+/* Tabs customization */
+.employee-selection-modal .nav-tabs {
+    border-bottom: 2px solid var(--bs-border-color);
+    padding: 0 var(--space-5);
+    padding-top: var(--space-3);
+}
+
+.employee-selection-modal .nav-tabs .nav-link {
+    color: var(--bs-secondary);
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: var(--space-2) var(--space-4);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-base);
+    margin-bottom: -2px;
+}
+
+.employee-selection-modal .nav-tabs .nav-link:hover {
+    color: var(--bs-primary);
+    border-bottom-color: var(--bs-gray-300);
+}
+
+.employee-selection-modal .nav-tabs .nav-link.active {
+    color: var(--bs-primary);
+    background-color: transparent;
+    border-bottom-color: var(--bs-primary);
+}
+
+.employee-selection-modal .nav-tabs .badge {
+    margin-left: var(--space-2);
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+}
+
+/* Tab content */
+.employee-selection-modal .tab-content {
+    padding: var(--space-4) var(--space-5);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Employee list */
+.employee-selection-modal .employee-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.employee-selection-modal .employee-list-item {
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--bs-gray-200);
+    border-radius: var(--radius-base);
+    margin-bottom: var(--space-2);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+[data-theme="dark"] .employee-selection-modal .employee-list-item {
+    border-color: var(--bs-gray-700);
+}
+
+.employee-selection-modal .employee-list-item:hover {
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-primary);
+    transform: translateX(4px);
+}
+
+[data-theme="dark"] .employee-selection-modal .employee-list-item:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.employee-selection-modal .employee-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.employee-selection-modal .employee-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+}
+
+.employee-selection-modal .employee-details {
+    flex: 1;
+}
+
+.employee-selection-modal .employee-name {
+    font-weight: var(--font-semibold);
+    color: var(--bs-emphasis-color);
+    margin-bottom: var(--space-1);
+}
+
+.employee-selection-modal .employee-meta {
+    font-size: var(--text-xs);
+    color: var(--bs-secondary);
+    display: flex;
+    gap: var(--space-3);
+}
+
+.employee-selection-modal .employee-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--bs-gray-100);
+    color: var(--bs-gray-700);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+}
+
+[data-theme="dark"] .employee-selection-modal .employee-badge {
+    background-color: var(--bs-gray-800);
+    color: var(--bs-gray-300);
+}
+
+/* Availability indicators */
+.employee-selection-modal .availability-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    display: inline-block;
+    margin-right: var(--space-1);
+}
+
+.employee-selection-modal .availability-available {
+    background-color: var(--bs-success);
+}
+
+.employee-selection-modal .availability-busy {
+    background-color: var(--bs-warning);
+}
+
+.employee-selection-modal .availability-unavailable {
+    background-color: var(--bs-danger);
+}
+
+/* Empty state */
+.employee-selection-modal .empty-state {
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+    color: var(--bs-secondary);
+}
+
+.employee-selection-modal .empty-state i {
+    font-size: 3rem;
+    opacity: 0.3;
+    margin-bottom: var(--space-3);
+}
+
+/* Loading state */
+.employee-selection-modal .loading-container {
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+}
+
+/* Footer */
+.employee-selection-modal .modal-footer {
+    background-color: var(--bs-gray-100);
+    border-top: 1px solid var(--bs-border-color);
+    padding: var(--space-3) var(--space-5);
+}
+
+[data-theme="dark"] .employee-selection-modal .modal-footer {
+    background-color: var(--bs-gray-900);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .employee-selection-modal .modal-header {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .employee-selection-modal .position-info {
+        padding: var(--space-2) var(--space-3);
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    .employee-selection-modal .nav-tabs {
+        padding: 0 var(--space-3);
+    }
+
+    .employee-selection-modal .tab-content {
+        padding: var(--space-3);
+        max-height: 300px;
+    }
+
+    .employee-selection-modal .employee-list-item {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .employee-selection-modal .employee-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: var(--text-xs);
+    }
+}
