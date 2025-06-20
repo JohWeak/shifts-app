@@ -4,6 +4,8 @@ const db = require('../models');
 const recommendationService = new EmployeeRecommendationService(db);
 class EmployeeRecommendationController {
     static async getRecommendations(req, res) {
+        console.log('[EmployeeRecommendationController] Received query params:', req.query);
+
         try {
             const { position_id, shift_id, date, schedule_id } = req.query;
 

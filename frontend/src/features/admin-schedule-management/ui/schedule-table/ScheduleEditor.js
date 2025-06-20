@@ -38,13 +38,13 @@ const ScheduleEditor = ({
 
         // Filter assignments for this position
         return scheduleDetails.assignments.filter(a => a.position_id === position.pos_id);
-    }, [scheduleDetails, position.pos_id]);
+    }, [position.pos_id, scheduleDetails?.assignments]);
 
 
 
     const employees = useMemo(() => {
         return scheduleDetails?.employees || [];
-    }, [scheduleDetails]);
+    }, [scheduleDetails?.employees]);
 
     // Define default shifts if not provided
     const defaultShifts = useMemo(() => [
@@ -55,7 +55,7 @@ const ScheduleEditor = ({
 
     const shifts = useMemo(() => {
         return scheduleDetails?.shifts || position?.shifts || defaultShifts;
-    }, [scheduleDetails, position, defaultShifts]);
+    }, [defaultShifts, scheduleDetails?.shifts, position?.shifts]);
 
     // Helper function to format shift time
     const formatShiftTime = (startTime, duration) => {
@@ -77,7 +77,7 @@ const ScheduleEditor = ({
     const weekDates = useMemo(() => {
         if (!scheduleDetails?.schedule?.start_date) return [];
         return getWeekDates(scheduleDetails.schedule.start_date, systemSettings?.weekStartDay || 0);
-    }, [scheduleDetails, systemSettings]);
+    }, [scheduleDetails?.schedule?.start_date, systemSettings?.weekStartDay]);
 
     // Helper function to get day name
     const getDayName = (dayIndex) => {

@@ -1,6 +1,6 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import { scheduleAPI, worksiteAPI, employeeAPI } from 'shared/api/apiService';
+import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -117,13 +117,12 @@ export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
     async (params, { rejectWithValue }) => {
         try {
-            const response = await employeeAPI.fetchRecommendations(
+            return await employeeAPI.fetchRecommendations(
                 params.scheduleId,
                 params.positionId,
                 params.shiftId,
                 params.date
-            );
-            return response; // Возвращаем только data
+            ); // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
