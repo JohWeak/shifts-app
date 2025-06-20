@@ -45,7 +45,15 @@ export const worksiteAPI = {
 };
 
 export const employeeAPI = {
+
     fetchRecommendations: (scheduleId, positionId, shiftId, date) => {
+        console.log('fetchRecommendations called with:', {
+            scheduleId,
+            positionId,
+            shiftId,
+            date
+        });
+
         return api.get(API_ENDPOINTS.EMPLOYEES.RECOMMENDATIONS, {
             params: {
                 position_id: positionId,

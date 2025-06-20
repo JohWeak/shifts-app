@@ -122,7 +122,7 @@ export const fetchRecommendations = createAsyncThunk(
                 params.positionId,
                 params.shiftId,
                 params.date
-            ); // Возвращаем только data
+            );
         } catch (error) {
             return rejectWithValue(error.message);
         }

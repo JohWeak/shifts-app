@@ -1,4 +1,3 @@
-// frontend/src/features/admin-schedule-management/weeklySchedule.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {Container, Spinner, Alert, Button} from 'react-bootstrap';
@@ -101,8 +100,12 @@ const ScheduleManagement = () => {
         setShowComparisonModal(true);
     };
 
-    const handleCellClick = (cell) => {
-        setSelectedCell(cell);
+    const handleCellClick = (date, positionId, shiftId) => {
+        setSelectedCell({
+            date: date,
+            positionId: positionId,
+            shiftId: shiftId
+        });
         setShowEmployeeModal(true);
     };
 
