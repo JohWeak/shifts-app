@@ -45,6 +45,18 @@ export const en = {
         weeks: 'Weeks',
         yes: 'Yes',
         profile: 'Profile',
+        print: 'Print',
+        download: 'Download',
+        upload: 'Upload',
+        refresh: 'Refresh',
+        view: 'View',
+        logout: 'Logout',
+        login: 'Login',
+        register: 'Register',
+        submit: 'Submit',
+        select: 'Select',
+        choose: 'Choose',
+        pick: 'Pick',
     },
     auth: {
         createAccount: 'Create Account', 
@@ -142,6 +154,7 @@ export const en = {
         unavailable: 'Unavailable',
         used: 'Employees Used',
         violatesConstraints: 'Violates Constraints',
+
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.', 
@@ -191,10 +204,8 @@ export const en = {
             simpleDesc: 'Simple test algorithm',
             site: 'Site',
             title: 'Create New Schedule',
-            weekStart: 'Week Start',
-            weekStartHintMonday: 'Week must start on Monday',
-            weekStartHintSunday: 'Week must start on Sunday',
-            workSite: 'Work Site',
+            pleaseWait: 'This may take a few moments...',
+            autoSelecting: 'Auto-selecting best algorithm...'
         },
         requestTimeOff: { 
             allDay: 'All Day',
@@ -298,7 +309,6 @@ export const en = {
         rejectRequests: 'Reject Requests', 
         saveSuccess: 'Changes saved successfully',
         selectNextStartDay: 'Next start day',
-        weekStartWarning: 'The selected date must be a {{day}}.',
         selectStartDate: 'Select Start Date',
         scheduleDetails: 'Schedule Details',
         scheduleOverview: 'Schedule Overview',
@@ -322,6 +332,7 @@ export const en = {
         workSite: 'Work Site',
         backToSchedules: 'Back to Schedules',
         scheduleInformation: 'Schedule Information',
+        weekStartWarning: 'Please select {day} as the start of the week'
     },
     settings: {
         systemSettings: 'System Settings',
