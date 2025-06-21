@@ -151,8 +151,22 @@
     color: var(--bs-white);
     transform: scale(1.1);
 }
+.page-header{
+    padding: var(--space-2) var(--space-2);
+}
+.page-header .page-header-actions .btn-primary{
+    border-radius: var(--radius-md);
+}
 
 /* RESPONSIVE */
+@media (max-width: 768px) {
+    .page-header .text-muted {
+        display: none;
+    }
+    .page-header{
+        margin-bottom: 0;
+    }
+}
 @media (max-width: 576px) {
     .schedule-table {
         font-size: 0.75rem;
