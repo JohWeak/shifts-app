@@ -9,7 +9,6 @@
 }
 
 
-
 /* Title */
 .schedule-details-title {
     font-size: var(--text-xl);
@@ -24,11 +23,14 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: 0 var(--space-2);
-    font-size: var(--text-lg);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
     font-weight: var(--font-medium);
-    color: var(--bs-emphasis-color);
-    border-radius: var(--radius-lg);
+    color: var(--bs-body-color);
+    border-radius: var(--radius-base);
+    flex-wrap: wrap;
+    border-top: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
 }
 
 .schedule-date-range i {
@@ -58,13 +60,13 @@
 .schedule-info-bar .info-item {
     display: flex;
     align-items: baseline; /* KEY CHANGE: Aligns text of different sizes */
-    gap: var(--space-2);       /* Gap between [Icon+Label] and [Value] */
+    gap: var(--space-2); /* Gap between [Icon+Label] and [Value] */
 }
 
 .info-item-header {
     display: flex;
     align-items: baseline; /* Aligns icon and label text */
-    gap: var(--space-2);       /* KEY CHANGE: Smaller gap between icon and label */
+    gap: var(--space-2); /* KEY CHANGE: Smaller gap between icon and label */
 }
 
 .schedule-info-bar .info-item i {
@@ -103,12 +105,17 @@
     padding: 0 var(--space-1);
 }
 
+
 /* ... (rest of the file is the same as before) ... */
 [dir="rtl"] .schedule-actions-bar {
     flex-direction: row-reverse;
 }
 
 .schedule-info-wrapper .back-button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--bs-body-color);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     padding: var(--space-2) var(--space-3);
@@ -141,7 +148,7 @@
     }
 
     .schedule-date-range {
-        font-size: var(--text-base);
+        font-size: var(--text-sm);
     }
 
     .schedule-info-bar {
@@ -172,10 +179,10 @@
         width: 100%;
     }
 
-    .action-buttons-group .schedule-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
+    /*.action-buttons-group .schedule-actions {*/
+    /*    width: 100%;*/
+    /*    justify-content: space-between;*/
+    /*}*/
 }
 
 /* Mobile view - Now inherits some goodness from desktop */
@@ -194,7 +201,7 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline; /* Consistent baseline alignment */
-        padding: var(--space-3) var(--space-2);
+        padding: var(--space-2) var(--space-1);
         border-bottom: 1px solid var(--bs-border-color);
         transition: background-color 0.2s ease-in-out;
     }
@@ -211,10 +218,9 @@
         background-color: var(--bs-gray-800);
     }
 
-    .info-item-header {
-        gap: var(--space-2); /* Slightly larger gap for mobile touch */
-    }
-
+    /*.info-item-header {*/
+    /*    gap: var(--space-2); !* Slightly larger gap for mobile touch *!*/
+    /*}*/
     .schedule-info-bar .info-label {
         font-size: var(--text-sm);
         text-transform: none;

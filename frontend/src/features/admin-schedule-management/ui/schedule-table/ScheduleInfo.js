@@ -1,15 +1,15 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.js
 import React from 'react';
 import {Button, Col, Row} from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
+import {useDispatch} from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { setActiveTab, setSelectedScheduleId } from '../../model/scheduleSlice';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {setActiveTab, setSelectedScheduleId} from '../../model/scheduleSlice';
 import ScheduleActions from '../schedule-list/ScheduleActions';
 import './ScheduleInfo.css';
 
-const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExport, isExporting }) => {
-    const { t } = useI18n();
+const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExport, isExporting}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     const formatDate = (dateString) => {
@@ -41,15 +41,38 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
 
     return (
         <div className="schedule-info-wrapper">
-            <h5 className="mb-0 ps-2">{t('schedule.scheduleDetails')}</h5>
 
-            <div className="schedule-date-range">
+            {/* --- Actions bar (NEW STRUCTURE) --- */}
+            <div className="schedule-actions-bar">
+                <div className="back-action">
+                    <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={handleBackClick}
+                        className="back-button"
+                    >
+                        <i className="bi bi-arrow-left me-2"></i>
+                        {t('schedule.backToSchedules') || 'Back to Schedules'}
+                    </Button>
+                </div>
+                <div className="schedule-date-range">
+                    {t('schedule.week')}
+                    <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
+                </div>
+                <div className="main-actions">
+                    <ScheduleActions
+                        status={schedule.status}
+                        onPublish={onPublish}
+                        onUnpublish={onUnpublish}
+                        onExport={onExport}
+                        isExporting={isExporting}
+                    />
+                </div>
 
-                <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
             </div>
-
             {/* Info bar */}
             <div className="schedule-info-bar">
+                {/* ... ваши info-item ... */}
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-geo-alt"></i>
@@ -59,15 +82,13 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
                         {schedule.work_site?.site_name || '-'}
                     </span>
                 </div>
-
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-flag"></i>
                         <span className="info-label">{t('schedule.status')}</span>
                     </div>
-                    <StatusBadge status={schedule.status} size="sm" />
+                    <StatusBadge status={schedule.status} size="sm"/>
                 </div>
-
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-people"></i>
@@ -75,7 +96,6 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
                     </div>
                     <span className="info-value">{positions.length}</span>
                 </div>
-
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-gear"></i>
@@ -83,7 +103,6 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
                     </div>
                     <span className="info-value">{getAlgorithmName()}</span>
                 </div>
-
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-calendar-check"></i>
@@ -92,34 +111,6 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
                     <span className="info-value">{formatDate(schedule.createdAt)}</span>
                 </div>
             </div>
-
-            {/* Actions bar */}
-            {/* Header Row with Back Button and Title */}
-            <Row className="align-items-center mb-3">
-                <Col xs="auto">
-                    <Button
-                        variant="outline-secondary"
-                        size="sm"
-                        onClick={handleBackClick}
-                        className="back-button"
-                    >
-                        <i className="bi bi-arrow-left me-2"></i>
-                        {t('schedule.backToSchedules')}
-                    </Button>
-                </Col>
-                <Col>
-
-                </Col>
-                <Col xs="auto">
-                    <ScheduleActions
-                        status={schedule.status}
-                        onPublish={onPublish}
-                        onUnpublish={onUnpublish}
-                        onExport={onExport}
-                        isExporting={isExporting}
-                    />
-                </Col>
-            </Row>
         </div>
     );
 };

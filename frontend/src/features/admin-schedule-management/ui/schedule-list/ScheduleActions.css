@@ -5,22 +5,29 @@
     gap: var(--space-3);
     align-items: center;
     flex-wrap: wrap;
+    width: 100%; /* Добавлено */
+
 }
 
 /* Status Action */
-.status-action {
+.status-action, .export-action {
     display: flex;
+    flex-grow: 1; /* Добавлено, чтобы кнопки растягивались */
 }
 
-.schedule-actions-container .publish-btn {
+.schedule-actions-container .publish-btn,
+.schedule-actions-container .unpublish-btn,
+.schedule-actions-container .export-btn {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    justify-content: center; /* Добавлено для центрирования контента */
     font-weight: var(--font-medium);
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-3); /* Немного уменьшил паддинг для мобильных */
     border-radius: var(--radius-md);
     transition: all var(--transition-base);
     white-space: nowrap;
+    width: 100%; /* Добавлено, чтобы кнопка занимала всю ширину родителя */
+    min-width: 100px;
 }
 
 .schedule-actions-container .publish-btn:hover {
@@ -28,16 +35,6 @@
     box-shadow: var(--shadow-sm);
 }
 
-.schedule-actions-container .unpublish-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-weight: var(--font-medium);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-    white-space: nowrap;
-}
 
 .schedule-actions-container .unpublish-btn:hover {
     transform: translateY(-1px);
@@ -49,18 +46,6 @@
     display: flex;
 }
 
-.schedule-actions-container .export-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-weight: var(--font-medium);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-    white-space: nowrap;
-    min-width: 100px;
-    justify-content: center;
-}
 
 .schedule-actions-container .export-btn:hover:not(:disabled) {
     transform: translateY(-1px);
@@ -71,11 +56,14 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+@media (max-width: 768px) { /* Изменено на 768px для более раннего срабатывания */
+    .schedule-actions-container {
+        flex-wrap: nowrap; /* Предотвращаем перенос кнопок на десктопе */
+    }
+}
 
-/* Responsive */
 @media (max-width: 576px) {
     .schedule-actions-container {
-        flex-direction: column;
         gap: var(--space-2);
         align-items: stretch;
     }
