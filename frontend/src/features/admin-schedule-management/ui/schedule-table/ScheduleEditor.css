@@ -9,6 +9,21 @@
     transition: all var(--transition-base);
 }
 
+.position-schedule-editor .btn-success,
+.position-schedule-editor .btn-outline-secondary,
+.position-schedule-editor .btn-outline-primary {
+    border-radius: var(--radius-md);
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-medium);
+    padding: var(--space-2) var(--space-1);
+    transition: all var(--transition-base);
+    white-space: nowrap;
+    /*width: 100%;*/
+    min-width: 100px;
+
+}
+
 [data-theme="dark"] .position-schedule-editor {
     background-color: var(--bs-gray-900);
 }
@@ -49,6 +64,10 @@
     display: flex;
     gap: var(--space-2);
     align-items: center;
+}
+
+[data-theme="dark"] .position-schedule-editor .btn-outline-secondary {
+    color: var(--bs-gray-500);
 }
 
 /* Schedule Table Wrapper */
@@ -97,15 +116,15 @@
 /* Fixed column widths */
 .position-schedule-editor .schedule-table th:first-child,
 .position-schedule-editor .schedule-table td:first-child {
-    width: 180px; /* Фиксированная ширина для колонки смен */
-    min-width: 180px;
-    max-width: 180px;
+    /*width: 140px; !* Фиксированная ширина для колонки смен *!*/
+    /*min-width: 50px;*/
+    max-width: 140px;
 }
 
 /* Equal width for day columns */
 .position-schedule-editor .schedule-table th:not(:first-child),
 .position-schedule-editor .schedule-table td:not(:first-child) {
-    width: calc((100% - 180px) / 7); /* Равная ширина для дней недели */
+    width: calc((100% - 140px) / 7); /* Равная ширина для дней недели */
 }
 
 /* Table headers */
@@ -140,17 +159,17 @@
 
 /* Dark theme shift cells */
 [data-theme="dark"] .position-schedule-editor td.shift-morning {
-    background-color: rgba(var(--bs-warning-rgb), 0.2);
+    background-color: rgba(var(--bs-secondary-rgb), 0.1);
     color: var(--bs-gray-100);
 }
 
 [data-theme="dark"] .position-schedule-editor td.shift-day {
-    background-color: rgba(var(--bs-info-rgb), 0.2);
+    background-color: rgba(var(--bs-info-rgb), 0.1);
     color: var(--bs-gray-100);
 }
 
 [data-theme="dark"] .position-schedule-editor td.shift-night {
-    background-color: rgba(var(--bs-primary-rgb), 0.2);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
     color: var(--bs-gray-100);
 }
 
@@ -193,14 +212,14 @@
 @media (max-width: 1200px) {
     .position-schedule-editor .schedule-table th:first-child,
     .position-schedule-editor .schedule-table td:first-child {
-        width: 150px;
-        min-width: 150px;
-        max-width: 150px;
+        width: 140px;
+        min-width: 100px;
+        max-width: 140px;
     }
 
     .position-schedule-editor .schedule-table th:not(:first-child),
     .position-schedule-editor .schedule-table td:not(:first-child) {
-        width: calc((100% - 150px) / 7);
+        width: calc((100% - 140px) / 7);
     }
 }
 

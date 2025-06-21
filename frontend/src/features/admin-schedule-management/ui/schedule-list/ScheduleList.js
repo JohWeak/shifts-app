@@ -196,7 +196,10 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
                                 style={{ cursor: 'pointer' }}
                             >
                                 <td>{formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}</td>
-                                <td><StatusBadge status={schedule.status} /></td>
+                                <td><StatusBadge
+                                    status={schedule.status}
+                                />
+                                </td>
                                 <td>{schedule.workSite?.site_name || 'N/A'}</td>
                                 <td>{formatScheduleDate(schedule.createdAt)}</td>
                                 <td className="action-buttons">
