@@ -1,27 +1,102 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.js
 import React from 'react';
-import {Row, Col, Button} from 'react-bootstrap';
-import {useNavigate} from 'react-router-dom';
+import { Button } from 'react-bootstrap';
+import { useDispatch } from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatScheduleDate} from 'shared/lib/utils/scheduleUtils';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { setActiveTab, setSelectedScheduleId } from '../../model/scheduleSlice';
+import ScheduleActions from '../schedule-list/ScheduleActions';
 import './ScheduleInfo.css';
-import {setActiveTab, setSelectedScheduleId} from "../../model/scheduleSlice";
-import {useDispatch} from "react-redux";
 
-const ScheduleInfo = ({schedule, positions = []}) => {
-    const {t} = useI18n();
-    const navigate = useNavigate();
+const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExport, isExporting }) => {
+    const { t } = useI18n();
     const dispatch = useDispatch();
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).replace(/\//g, '.');
+    };
 
     const handleBackClick = () => {
         dispatch(setActiveTab('overview'));
         dispatch(setSelectedScheduleId(null));
     };
 
+    // Extract algorithm from text_file JSON
+    const getAlgorithmName = () => {
+        try {
+            if (schedule.text_file) {
+                const data = JSON.parse(schedule.text_file);
+                return data.algorithm || '-';
+            }
+        } catch (e) {
+            console.error('Error parsing text_file:', e);
+        }
+        return '-';
+    };
+
     return (
-        <Row className="schedule-info-row align-items-center">
-            <Col xs="auto">
+        <div className="schedule-info-wrapper">
+            {/* Title */}
+            <h5 className="schedule-details-title">{t('schedule.scheduleDetails')}</h5>
+
+            {/* Date range with icon */}
+            <div className="schedule-date-range">
+                <i className="bi bi-calendar-range"></i>
+                <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
+            </div>
+
+            {/* Info bar */}
+            <div className="schedule-info-bar">
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-geo-alt"></i>
+                        <span className="info-label">{t('site.workSite')}</span>
+                    </div>
+                    <span className="info-value">
+                        {schedule.work_site?.site_name || '-'}
+                    </span>
+                </div>
+
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-flag"></i>
+                        <span className="info-label">{t('schedule.status')}</span>
+                    </div>
+                    <StatusBadge status={schedule.status} size="sm" />
+                </div>
+
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-people"></i>
+                        <span className="info-label">{t('position.positions')}</span>
+                    </div>
+                    <span className="info-value">{positions.length}</span>
+                </div>
+
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-gear"></i>
+                        <span className="info-label">{t('modal.compareAlgorithms.algorithm')}</span>
+                    </div>
+                    <span className="info-value">{getAlgorithmName()}</span>
+                </div>
+
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-calendar-check"></i>
+                        <span className="info-label">{t('schedule.created')}</span>
+                    </div>
+                    <span className="info-value">{formatDate(schedule.createdAt)}</span>
+                </div>
+            </div>
+
+            {/* Actions bar */}
+            <div className="schedule-actions-bar">
                 <Button
                     variant="outline-secondary"
                     size="sm"
@@ -31,47 +106,18 @@ const ScheduleInfo = ({schedule, positions = []}) => {
                     <i className="bi bi-arrow-left me-2"></i>
                     {t('common.back')}
                 </Button>
-            </Col>
-            <Col>
-                <Row className="schedule-info-grid">
-                    <Col md={3}>
-                        <div className="info-item">
-                            <div className="info-label">{t('schedule.week')}</div>
-                            <div className="info-value">
-                                <i className="bi bi-calendar-week me-2"></i>
-                                {formatScheduleDate(schedule.start_date)}
-                            </div>
-                        </div>
-                    </Col>
-                    <Col md={3}>
-                        <div className="info-item">
-                            <div className="info-label">{t('schedule.site')}</div>
-                            <div className="info-value">
-                                <i className="bi bi-building me-2"></i>
-                                {schedule.workSite?.site_name || schedule.site?.site_name || '-'}
-                            </div>
-                        </div>
-                    </Col>
-                    <Col md={3}>
-                        <div className="info-item">
-                            <div className="info-label">{t('schedule.status')}</div>
-                            <div className="info-value">
-                                <StatusBadge status={schedule.status}/>
-                            </div>
-                        </div>
-                    </Col>
-                    <Col md={3}>
-                        <div className="info-item">
-                            <div className="info-label">{t('position.positions')}</div>
-                            <div className="info-value">
-                                <i className="bi bi-people me-2"></i>
-                                {positions.length}
-                            </div>
-                        </div>
-                    </Col>
-                </Row>
-            </Col>
-        </Row>
+
+                <div className="action-buttons-group">
+                    <ScheduleActions
+                        status={schedule.status}
+                        onPublish={onPublish}
+                        onUnpublish={onUnpublish}
+                        onExport={onExport}
+                        isExporting={isExporting}
+                    />
+                </div>
+            </div>
+        </div>
     );
 };
 
