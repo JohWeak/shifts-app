@@ -382,7 +382,7 @@ export const {
     toggleEditPosition,
     addPendingChange,
     removePendingChange,
-    clearPositionChanges
+    clearPositionChanges,
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

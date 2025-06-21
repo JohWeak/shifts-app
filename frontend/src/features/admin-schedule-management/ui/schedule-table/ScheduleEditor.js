@@ -3,27 +3,27 @@ import React, {useMemo} from 'react';
 import {Table, Button, Badge, Spinner} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import { getWeekDates } from 'shared/lib/utils/scheduleUtils';
+import {getWeekDates} from 'shared/lib/utils/scheduleUtils';
 import {useSelector} from "react-redux";
 import {format} from "date-fns";
 import './ScheduleEditor.css';
 
 const ScheduleEditor = ({
-                                    position,
-                                    isEditing = false,
-                                    pendingChanges = {},
-                                    savingChanges = false,
-                                    canEdit = true,
-                                    onToggleEdit,
-                                    onSaveChanges,
-                                    onCellClick,
-                                    onEmployeeClick,
-                                    onEmployeeRemove,
-                                    onRemovePendingChange,
-                                    scheduleDetails
-                                }) => {
+                            position,
+                            isEditing = false,
+                            pendingChanges = {},
+                            savingChanges = false,
+                            canEdit = true,
+                            onToggleEdit,
+                            onSaveChanges,
+                            onCellClick,
+                            onEmployeeClick,
+                            onEmployeeRemove,
+                            onRemovePendingChange,
+                            scheduleDetails
+                        }) => {
     const {t} = useI18n();
-    const { systemSettings } = useSelector(state => state.settings);
+    const {systemSettings} = useSelector(state => state.settings);
 
 
     // Extract data from scheduleDetails
@@ -37,7 +37,6 @@ const ScheduleEditor = ({
             return assignmentPosId === position.pos_id;
         });
     }, [position.pos_id, scheduleDetails?.assignments]);
-
 
 
     const employees = useMemo(() => {
@@ -281,7 +280,7 @@ const ScheduleEditor = ({
             </div>
 
             {/* Schedule Table */}
-            <Table responsive bordered size="sm" className="schedule-table">
+            <Table responsive bordered className="schedule-table mb-0">
                 <thead>
                 <tr>
                     <th className="shift-header">{t('schedule.shift')}</th>
@@ -293,7 +292,7 @@ const ScheduleEditor = ({
                         return (
                             <th key={index} className="text-center">
                                 <div>
-                                    <strong>{dayName}</strong><br />
+                                    <strong>{dayName}</strong><br/>
                                     <small>{formattedDate}</small>
                                 </div>
                             </th>

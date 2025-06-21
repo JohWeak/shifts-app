@@ -74,7 +74,7 @@
     --space-7: 3rem;     /* 48px */
     --space-8: 4rem;     /* 64px */
 
-    /* ========== Borders & Radius (добавь недостающие) ========== */
+    /* ========== Borders & Radius  ========== */
     --radius-none: 0;
     --radius-sm: 0.25rem;   /* 4px */
     --radius-base: 0.375rem; /* 6px */
@@ -83,15 +83,35 @@
     --radius-xl: 1rem;      /* 16px */
     --radius-full: 9999px;
 
-    /* ========== Transitions (добавь если их нет) ========== */
+    /* ========== Transitions  ========== */
     --transition-fast: 150ms ease-in-out;
     --transition-base: 200ms ease-in-out;
     --transition-slow: 300ms ease-in-out;
 
-    /* Shadows */
-    --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    /* ========== Shadows  ========== */    --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     --bs-box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     --bs-box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Renamed from --bs-box-shadow-sm for consistency */
+    --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);     /* Renamed from --bs-box-shadow */
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+
+    /* ========== Form Select variables (ДОБАВЛЕНО для DatePicker) ========== */
+    /* Эти переменные используются для стилизации выпадающих списков месяца/года */
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    --bs-form-select-padding-y: 0.375rem;
+    --bs-form-select-padding-x: 2.25rem 0.75rem; /* padding-right | padding-left */
+    --bs-form-select-font-size: 1rem;
+    --bs-form-select-font-weight: 400;
+    --bs-form-select-line-height: 1.5;
+    --bs-form-select-color: var(--bs-body-color);
+    --bs-form-select-bg: var(--bs-white);
+    --bs-border-width: 1px;
+    --bs-border-radius: var(--radius-base);
+    /* Bootstrap Popover Width (ДЛЯ КАЛЕНДАРЯ) */
+    --bs-popover-max-width: 350px;
+
+
+
 }
 
 /* Dark Theme */
@@ -132,6 +152,15 @@
     --bs-success-muted: #48c9a0; /* Приглушенный мятный */
     --bs-info-muted: #49c0e0;    /* Приглушенный бирюзовый */
 
+    /* ========== Dark Theme Form Select variables (ДОБАВЛЕНО для DatePicker) ========== */
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    --bs-form-select-color: var(--bs-body-color);
+    --bs-form-select-bg: var(--bs-gray-900); /* Slightly darker than body for contrast */
+
+    /* ========== Dark Theme Shadows ========== */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15); /* Darker shadow */
+    --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.35);
 }
 
 

@@ -60,8 +60,8 @@ body {
    Используем --bs-secondary, как основной приглушенный цвет.
    !important здесь может быть нужен для перебивания специфичности Bootstrap.
 */
-.text-muted {
-    color: var(--bs-secondary) !important;
+[data-theme="dark"] .text-muted {
+    color: var(--bs-gray-300) !important;
 }
 
 

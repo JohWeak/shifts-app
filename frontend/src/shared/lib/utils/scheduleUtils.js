@@ -1,17 +1,19 @@
-import { format, addDays, startOfWeek, parseISO } from 'date-fns';
+//frontend/src/shared/lib/utils/scheduleUtils.js
+import { format, addDays, startOfWeek, parseISO, parse, isValid } from 'date-fns';
 
 export const getWeekStartDay = (systemSettings) => {
     // Из настроек системы, а не из локали
     return systemSettings?.weekStartDay ?? 0; // По умолчанию воскресенье
 };
 
-export const isValidWeekStartDate = (dateString, weekStartDay = 0) => {
-    try {
-        const date = parseISO(dateString);
-        return date.getDay() === weekStartDay;
-    } catch {
-        return false;
-    }
+export const isValidWeekStartDate = (date, weekStartDay = 0) => {
+    if (!date) return false;
+    // Если это не объект Date, пытаемся его распарсить
+    const dateObj = date instanceof Date ? date : new Date(date);
+
+    if (!isValid(dateObj)) return false;
+
+    return dateObj.getDay() === weekStartDay;
 };
 
 export const getNextWeekStart = (weekStartDay = 0) => {
@@ -21,14 +23,17 @@ export const getNextWeekStart = (weekStartDay = 0) => {
     let daysUntilStart;
     if (currentDay === weekStartDay) {
         daysUntilStart = 7; // Следующая неделя
-    } else if (currentDay < weekStartDay) {
-        daysUntilStart = weekStartDay - currentDay;
     } else {
-        daysUntilStart = 7 - currentDay + weekStartDay;
+        // Упрощенная логика для поиска следующего дня
+        daysUntilStart = (weekStartDay - currentDay + 7) % 7;
     }
 
-    const nextStart = addDays(today, daysUntilStart);
-    return format(nextStart, 'yyyy-MM-dd');
+    // Если день сегодня, но нам нужен следующий, добавляем 7 дней
+    if (daysUntilStart === 0) {
+        daysUntilStart = 7;
+    }
+
+    return addDays(today, daysUntilStart);
 };
 
 export const getWeekDates = (startDate, weekStartDay = 0) => {

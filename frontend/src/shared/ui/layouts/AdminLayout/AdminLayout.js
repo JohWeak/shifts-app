@@ -5,7 +5,6 @@ import {
     Navbar,
     Nav,
     Dropdown,
-    Offcanvas,
     Button,
     Badge
 } from 'react-bootstrap';
@@ -27,7 +26,7 @@ const AdminLayout = ({ children }) => {
     const location = useLocation();
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1592);
     const dispatch = useDispatch();
 
     const handleLogout = () => {
@@ -37,7 +36,7 @@ const AdminLayout = ({ children }) => {
     // Отслеживание размера экрана
     useEffect(() => {
         const handleResize = () => {
-            const mobile = window.innerWidth < 992;
+            const mobile = window.innerWidth < 1592;
             setIsMobile(mobile);
             if (!mobile) {
                 setShowMobileMenu(false);

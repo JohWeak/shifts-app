@@ -2,7 +2,8 @@
 
 /* Schedule Cell Base Styles */
 .schedule-cell {
-    min-height: 60px;
+    min-height: 80px;
+    height: 100%;
     padding: var(--space-2);
     vertical-align: middle;
     position: relative;
@@ -28,7 +29,8 @@
 
 /* Empty Cell Styles */
 .schedule-cell .empty-cell {
-    min-height: 40px;
+    min-height: 60px;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -134,6 +136,10 @@
     background-color: rgba(var(--bs-success-rgb), 0.1) !important;
 }
 
+[data-theme="dark"] td.schedule-cell {
+    border-color: var(--bs-gray-700) !important;
+}
+
 [data-theme="dark"] .schedule-cell.table-warning {
     background-color: rgba(var(--bs-warning-rgb), 0.15) !important;
 }
@@ -169,7 +175,7 @@
 @media (max-width: 768px) {
     .schedule-cell {
         padding: var(--space-1);
-        min-height: 50px;
+        min-height: 60px;
     }
 
     .schedule-cell .employee-item {
@@ -178,5 +184,8 @@
 
     .schedule-cell .employee-name {
         font-size: var(--text-xs);
+    }
+    .schedule-cell .empty-cell {
+        min-height: 40px;
     }
 }

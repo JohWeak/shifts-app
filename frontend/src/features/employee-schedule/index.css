@@ -8,65 +8,65 @@
 }
 
 /* Table Borders */
-.table-bordered th,
+.schedule-container .table-bordered th,
 .table-bordered td {
     border: 3px solid #f8f9fb !important;
     vertical-align: middle;
 }
 
 /* Shift Color Classes */
-td.shift-morning,
+.schedule-container td.shift-morning,
 th.shift-morning {
     background-color: #fff3cd !important;
 }
 
-td.shift-afternoon,
+.schedule-container td.shift-afternoon,
 th.shift-afternoon {
     background-color: #d1ecf1 !important;
 }
 
-td.shift-night,
+.schedule-container td.shift-night,
 th.shift-night {
     background-color: #cce5ff !important;
 }
 
 /* Shift Header Styling */
-.shift-header {
+.schedule-container .shift-header {
     background-color: #e8ecef !important;
     font-weight: bold;
 }
 
-.table-header {
+.schedule-container .table-header {
     background-color: #6c757d !important;
     color: white !important;
     font-weight: bold;
 }
 
 /* Desktop Schedule */
-.desktop-schedule {
+.schedule-container .desktop-schedule {
     display: block;
     width: 100%;
 }
 
 /* Mobile General Schedule */
-.mobile-schedule-general {
+.schedule-container .mobile-schedule-general {
     display: none;
     width: 100%;
 }
 
-.mobile-schedule-general th,
+.schedule-container .mobile-schedule-general th,
 .mobile-schedule-general td {
     text-align: center;
     padding: 0.5rem;
 }
 
-.mobile-schedule-general .day-date-col {
+.schedule-container .mobile-schedule-general .day-date-col {
     font-weight: bold;
     background-color: #e9ecef;
     min-width: 90px;
 }
 
-.mobile-schedule-general .shift-name-header {
+.schedule-container .mobile-schedule-general .shift-name-header {
     font-weight: bold;
 }
 

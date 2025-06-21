@@ -33,8 +33,8 @@ const ScheduleActions = ({
                     disabled={isExporting}
                     title={t('schedule.exportSchedule')}
                 >
-                    <i className="bi bi-download me-2"></i>
-
+                    <i className="bi bi-upload me-2"></i>
+                    {t('schedule.export')}
                 </Button>
             </ButtonGroup>
         </div>

@@ -85,10 +85,7 @@ const ScheduleManagement = () => {
         }
     };
 
-    const handleBackToList = () => {
-        dispatch(setActiveTab('overview'));
-        dispatch(setSelectedScheduleId(null));
-    };
+
 
     const handleTabChange = (newTab) => {
         dispatch(setActiveTab(newTab));
@@ -163,7 +160,7 @@ const ScheduleManagement = () => {
 
     return (
         <AdminLayout>
-            <Container fluid className="px-0">
+            <Container fluid className="p-2">
                 <PageHeader
                     icon="calendar-week"
                     title={t('schedule.title')}
@@ -194,19 +191,6 @@ const ScheduleManagement = () => {
                 {/* Main content */}
                 {activeTab === 'view' && selectedScheduleId ? (
                     <>
-                        {/* Кнопка "Назад" */}
-                        <div className="d-flex align-items-center mb-3">
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={handleBackToList}
-                                className="me-3"
-                            >
-                                <i className="bi bi-arrow-left me-2"></i>
-                                {t('common.back')}
-                            </Button>
-                        </div>
-
                         {/* Детали расписания */}
                         {dataLoading === 'pending' ? (
                             <div className="text-center p-5">

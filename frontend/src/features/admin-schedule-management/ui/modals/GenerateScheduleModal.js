@@ -6,20 +6,24 @@ import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from 'shared/config/schedu
 import {getNextWeekStart, isValidWeekStartDate} from 'shared/lib/utils/scheduleUtils';
 import {fetchWorkSites, compareAlgorithms} from '../../model/scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import DatePicker from 'shared/ui/components/DatePicker/DatePicker';
 import CompareAlgorithmsModal from './CompareAlgorithmsModal';
 import './GenerateScheduleModal.css';
+
+
 const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
-    const {t, locale} = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     // Получаем данные из Redux
     const {workSites, workSitesLoading} = useSelector((state) => state.schedule || {});
     const { systemSettings } = useSelector(state => state.settings);
+    const weekStartDay = systemSettings?.weekStartDay || 0;
 
     // Локальное состояние для настроек формы
     const [settings, setSettings] = useState({
         ...DEFAULT_GENERATION_SETTINGS,
-        weekStart: getNextWeekStart(systemSettings?.weekStartDay || 0),
+        weekStart: getNextWeekStart(weekStartDay),
         algorithm: 'auto'
     });
 
@@ -46,11 +50,13 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
             // Сброс настроек при закрытии модала
             setSettings({
                 ...DEFAULT_GENERATION_SETTINGS,
-                weekStart: getNextWeekStart()
+                weekStart: getNextWeekStart(weekStartDay),
+                site_id: settings.site_id
             });
+            setFormError('');
             setComparisonResults(null);
         }
-    }, [show, dispatch]);
+    }, [show, dispatch, weekStartDay, settings.site_id]);
 
     // Отдельный эффект для установки дефолтного site_id
     useEffect(() => {
@@ -62,18 +68,16 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
         }
     }, [safeWorkSites, settings.site_id]);
 
-    const handleDateChange = (e) => {
-        const date = e.target.value;
-        setSettings(prev => ({ ...prev, weekStart: date }));
-
-        if (date && !isValidWeekStartDate(date, systemSettings?.weekStartDay || 0)) {
-            const weekStartName = systemSettings?.weekStartDay === 1 ?
-                t('weekDays.monday') : t('weekDays.sunday');
+    // Отдельный эффект для валидации даты
+    useEffect(() => {
+        if (!isValidWeekStartDate(settings.weekStart, weekStartDay)) {
+            const weekStartName = weekStartDay === 1 ? t('weekDays.monday') : t('weekDays.sunday');
             setFormError(t('schedule.weekStartWarning', { day: weekStartName }));
         } else {
             setFormError('');
         }
-    };
+    }, [settings.weekStart, weekStartDay, t]);
+
 
     const handleCompareAlgorithms = async () => {
         setIsComparing(true);
@@ -99,7 +103,8 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
         onGenerate(settings);
     };
 
-    const isFormValid = settings.site_id && settings.weekStart && settings.algorithm;
+    const isFormValid = settings.site_id && settings.weekStart && settings.algorithm && !formError;
+
 
     return (
         <>
@@ -127,40 +132,37 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                         </div>
                     ) : (
                         <Form onSubmit={handleSubmit}>
+                            {/* ИЗМЕНЕНА СТРУКТУРА ДЛЯ КОРРЕКТНОЙ ШИРИНЫ */}
                             <Row className="mb-3">
                                 <Col md={6}>
-                                    <Form.Group>
+                                    <Form.Group controlId="weekStart">
                                         <Form.Label>{t('modal.generateSchedule.weekStart')}</Form.Label>
-                                        <Form.Control
-                                            type="date"
+                                        <DatePicker
                                             value={settings.weekStart}
-                                            onChange={handleDateChange}
+                                            onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
+                                            minDate={new Date()}
+                                            placeholder={t('schedule.selectStartDate')}
+                                            dateFormat="dd.MM.yyyy"
                                             isInvalid={!!formError}
-                                            required
                                         />
-                                        <Form.Control.Feedback type="invalid">
-                                            {formError}
-                                        </Form.Control.Feedback>
+                                        <Form.Control.Feedback type="invalid">{formError}</Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group>
                                         <Form.Label>{t('modal.generateSchedule.workSite')}</Form.Label>
-                                        {workSitesLoading === 'pending' ?
-                                            <Spinner size="sm"/> :
+                                        {workSitesLoading === 'pending' ? (
+                                            <Spinner size="sm" />
+                                        ) : (
                                             <Form.Select
                                                 value={settings.site_id || ''}
-                                                onChange={(e) =>
-                                                    setSettings(prev =>
-                                                        ({...prev, site_id: parseInt(e.target.value)}))
-                                                }
+                                                onChange={(e) => setSettings(prev => ({ ...prev, site_id: parseInt(e.target.value) }))}
                                             >
                                                 {safeWorkSites?.map(site => (
-                                                    <option key={site.site_id}
-                                                            value={site.site_id}>{site.site_name}</option>
+                                                    <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
                                                 ))}
                                             </Form.Select>
-                                        }
+                                        )}
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -168,7 +170,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                                 <div className="d-flex justify-content-between align-items-center mb-2">
                                     <Form.Label className="mb-0">{t('modal.generateSchedule.selectAlgorithm')}</Form.Label>
                                     <Button
-                                        variant="outline-primary"
+                                        variant="outline"
                                         size="sm"
                                         onClick={handleCompareAlgorithms}
                                         disabled={isComparing}
@@ -197,6 +199,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
+
                     <Button
                         variant="secondary"
                         onClick={onHide}
