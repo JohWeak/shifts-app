@@ -1,8 +1,19 @@
 /* frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.css */
 
-/* Schedule Info Row */
-.schedule-info-row {
-    margin-bottom: var(--space-4);
+/* Schedule Info Container */
+.schedule-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* Header Section */
+.schedule-info-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--bs-border-color);
 }
 
 /* Back Button */
@@ -13,18 +24,27 @@
     border-radius: var(--radius-md);
     transition: all var(--transition-base);
     white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .back-button:hover {
-    transform: translateX(-4px);
+    transform: translateX(-2px);
 }
 
-/* Schedule Info Grid */
+/* Schedule Title */
+.schedule-info-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--bs-emphasis-color);
+    flex: 1;
+}
+
+/* Info Grid */
 .schedule-info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--space-3);
-    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
 }
 
 /* Info Item */
@@ -35,7 +55,7 @@
 }
 
 .info-label {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--bs-secondary);
     font-weight: var(--font-medium);
     text-transform: uppercase;
@@ -45,30 +65,30 @@
 .info-value {
     font-size: var(--text-base);
     color: var(--bs-emphasis-color);
-    font-weight: var(--font-semibold);
+    font-weight: var(--font-medium);
     display: flex;
     align-items: center;
 }
 
 .info-value i {
     color: var(--bs-primary);
-    font-size: var(--text-lg);
+    font-size: var(--text-sm);
 }
 
-/* Responsive */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .schedule-info-row {
-        flex-direction: column;
-        align-items: flex-start !important;
+    .schedule-info-header {
+        flex-wrap: wrap;
     }
 
-    .schedule-info-row > .col-auto {
-        margin-bottom: var(--space-3);
+    .schedule-info-title {
+        width: 100%;
+        margin-top: var(--space-2);
     }
 
     .schedule-info-grid {
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-2);
+        gap: var(--space-3);
     }
 }
 

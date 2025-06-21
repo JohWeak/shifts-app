@@ -260,6 +260,7 @@ export const ru = {
         draft: 'Черновик',
         exportSchedule: 'Экспорт расписания',
         exportSuccess: 'Расписание успешно экспортировано',
+        exportExcel: 'Экспорт Excel',
         generateFirstSchedule: 'Сгенерируйте ваше первое расписание',
         generateSchedule: 'Сгенерировать расписание',
         generateSuccess: 'Расписание успешно создано',

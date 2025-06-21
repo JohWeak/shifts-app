@@ -262,6 +262,7 @@ export const he = {
         draft: 'טיוטה',
         exportSchedule: 'ייצא סידור',
         exportSuccess: 'הסידור יוצא בהצלחה',
+        exportExcel: 'ייצוא אקסל',
         generateFirstSchedule: 'צור את הסידור הראשון שלך',
         generateSchedule: 'צור סידור',
         generateSuccess: 'הסידור נוצר בהצלחה',

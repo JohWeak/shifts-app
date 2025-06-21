@@ -280,6 +280,7 @@ export const en = {
         export: 'Export',
         exportSchedule: 'Export Schedule',
         exportSuccess: 'Schedule successfully exported',
+        exportExcel: 'Export Excel',
         generateFirstSchedule: 'Generate your first schedule',
         generateSchedule: 'Generate Schedule',
         generateSuccess: 'Schedule successfully created',
