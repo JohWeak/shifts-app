@@ -4,6 +4,7 @@ import { Table, Card, Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { format } from 'date-fns';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import { deleteSchedule, updateScheduleStatus } from '../../model/scheduleSlice';
 import ActionButtons from 'shared/ui/components/ActionButtons/ActionButtons';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
@@ -13,6 +14,10 @@ import './ScheduleList.css';
 const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
     const dispatch = useDispatch();
     const { t } = useI18n();
+
+    const isMobile = useMediaQuery('(max-width: 768px)');
+
+
     const [scheduleToDelete, setScheduleToDelete] = useState(null);
     const [scheduleToPublish, setScheduleToPublish] = useState(null);
     const [scheduleToUnpublish, setScheduleToUnpublish] = useState(null);
@@ -117,11 +122,13 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
 
         // Add delete action
         actions.push({
-            label: t('common.delete'),
+            label: isMobile ? '' : t('common.delete'),
             icon: 'bi bi-trash',
             onClick: () => handleDeleteClick(schedule),
             disabled: !canDeleteSchedule(schedule),
-            variant: 'danger'
+            variant: 'danger',
+            title: t('common.delete')
+
         });
         // Add publish/unpublish action based on current status
         if (schedule.status === 'draft') {
@@ -129,14 +136,18 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
                 label: t('schedule.publish'),
                 icon: 'bi bi-upload',
                 onClick: () => handlePublishClick(schedule),
-                variant: 'success'
+                variant: 'success',
+                title: t('schedule.publish')
+
             });
         } else if (schedule.status === 'published') {
             actions.push({
                 label: t('schedule.unpublish'),
                 icon: 'bi bi-pencil-square',
                 onClick: () => handleUnpublishClick(schedule),
-                variant: 'warning'
+                variant: 'warning',
+                title: t('schedule.unpublish')
+
             });
         }
 

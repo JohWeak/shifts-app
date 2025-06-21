@@ -10,15 +10,15 @@ import {
 } from 'react-bootstrap';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-
-import { logout } from '../../../../features/auth/model/authSlice';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
+import { logout } from 'features/auth/model/authSlice';
 import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
-import {useI18n} from "../../../lib/i18n/i18nProvider";
+import {useI18n} from "shared/lib/i18n/i18nProvider";
 
 
-import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import './AdminLayout.css';
-import { setActiveTab, setSelectedScheduleId } from '../../../../features/admin-schedule-management/model/scheduleSlice';
+import { setActiveTab, setSelectedScheduleId } from 'features/admin-schedule-management/model/scheduleSlice';
 
 const AdminLayout = ({ children }) => {
     const { t } = useI18n();

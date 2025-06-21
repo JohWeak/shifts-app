@@ -170,22 +170,82 @@
     --bs-btn-outline-warning-color: var(--bs-warning);
     --bs-btn-outline-danger-color: var(--bs-danger);
     --bs-btn-outline-info-color: var(--bs-info);
+    --bs-btn-outline-light-color: var(--bs-gray-300); /* Цвет для "светлой" кнопки */
+    --bs-btn-outline-dark-color: var(--bs-gray-500);  /* Цвет для "темной" кнопки */
 
-    /* Теперь применяем их. Bootstrap 5.3+ делает это автоматически, но для
-       более старых версий или для надежности можно определить явно */
+
+    /* --- Стили для каждого типа кнопки --- */
+
+    /* Primary Button */
     .btn-outline-primary {
         --bs-btn-color: var(--bs-btn-outline-primary-color);
         --bs-btn-border-color: var(--bs-btn-outline-primary-color);
-        --bs-btn-hover-color: #000; /* Цвет текста при наведении */
+        --bs-btn-hover-color: #000; /* Черный текст на светлом синем фоне */
         --bs-btn-hover-bg: var(--bs-btn-outline-primary-color);
         --bs-btn-hover-border-color: var(--bs-btn-outline-primary-color);
     }
+
+    /* Secondary Button */
     .btn-outline-secondary {
         --bs-btn-color: var(--bs-btn-outline-secondary-color);
         --bs-btn-border-color: var(--bs-btn-outline-secondary-color);
-        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-color: #fff; /* Белый текст на сером фоне */
         --bs-btn-hover-bg: var(--bs-btn-outline-secondary-color);
         --bs-btn-hover-border-color: var(--bs-btn-outline-secondary-color);
+    }
+
+    /* Success Button */
+    .btn-outline-success {
+        --bs-btn-color: var(--bs-btn-outline-success-color);
+        --bs-btn-border-color: var(--bs-btn-outline-success-color);
+        --bs-btn-hover-color: #fff; /* Белый текст на зеленом фоне */
+        --bs-btn-hover-bg: var(--bs-btn-outline-success-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-success-color);
+    }
+
+    /* Danger Button */
+    .btn-outline-danger {
+        --bs-btn-color: var(--bs-btn-outline-danger-color);
+        --bs-btn-border-color: var(--bs-btn-outline-danger-color);
+        --bs-btn-hover-color: #fff; /* Белый текст на красном фоне */
+        --bs-btn-hover-bg: var(--bs-btn-outline-danger-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-danger-color);
+    }
+
+    /* Warning Button */
+    .btn-outline-warning {
+        --bs-btn-color: var(--bs-btn-outline-warning-color);
+        --bs-btn-border-color: var(--bs-btn-outline-warning-color);
+        --bs-btn-hover-color: #000; /* Темный текст для контраста на желтом фоне */
+        --bs-btn-hover-bg: var(--bs-btn-outline-warning-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-warning-color);
+    }
+
+    /* Info Button */
+    .btn-outline-info {
+        --bs-btn-color: var(--bs-btn-outline-info-color);
+        --bs-btn-border-color: var(--bs-btn-outline-info-color);
+        --bs-btn-hover-color: #000; /* Темный текст для контраста на бирюзовом фоне */
+        --bs-btn-hover-bg: var(--bs-btn-outline-info-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-info-color);
+    }
+
+    /* Light Button */
+    .btn-outline-light {
+        --bs-btn-color: var(--bs-btn-outline-light-color);
+        --bs-btn-border-color: var(--bs-btn-outline-light-color);
+        --bs-btn-hover-color: #000; /* Темный текст на светлом фоне */
+        --bs-btn-hover-bg: var(--bs-btn-outline-light-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-light-color);
+    }
+
+    /* Dark Button */
+    .btn-outline-dark {
+        --bs-btn-color: var(--bs-btn-outline-dark-color);
+        --bs-btn-border-color: var(--bs-btn-outline-dark-color);
+        --bs-btn-hover-color: #fff; /* Белый текст на темном фоне */
+        --bs-btn-hover-bg: var(--bs-btn-outline-dark-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-dark-color);
     }
 }
 
