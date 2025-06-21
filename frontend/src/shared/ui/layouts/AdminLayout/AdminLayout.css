@@ -6,6 +6,10 @@
     font-family: var(--bs-body-font-family), serif;
 }
 
+.admin-main-content{
+    max-width: 1650px;
+}
+
 /* TOP NAVBAR */
 .admin-navbar {
     background-color: var(--bs-body-bg);
