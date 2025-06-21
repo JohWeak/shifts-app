@@ -292,6 +292,8 @@ export const ru = {
         weekPeriod: 'Период недели',
         weekStartWarning: 'Неверное начало недели',
         workSite: 'Рабочий объект',
+        backToSchedules: 'Назад к расписаниям',
+        scheduleInformation: 'Информация о расписании',
     },
     settings: {
         systemSettings: 'Системные настройки',
