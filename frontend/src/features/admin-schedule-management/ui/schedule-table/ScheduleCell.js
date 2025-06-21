@@ -134,7 +134,8 @@ const ScheduleCell = ({
                                 type="button"
                                 className="remove-btn btn btn-sm btn-outline-danger p-0 ms-1"
                                 onClick={(e) => handleRemoveClick(e, employee.emp_id, employee.assignment_id)} // Передаём assignment_id
-                                title="Remove employee"
+                                title={t('common.remove')}
+
                             >
                                 ×
                             </button>

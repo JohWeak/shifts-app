@@ -38,6 +38,7 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
         }
         return '-';
     };
+    console.log('Full schedule object:', JSON.stringify(schedule, null, 2));
 
     return (
         <div className="schedule-info-wrapper">
@@ -58,7 +59,7 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
                         <span className="info-label">{t('site.workSite')}</span>
                     </div>
                     <span className="info-value">
-                        {schedule.workSite?.site_name || '-'}
+                        {schedule.work_site?.site_name || '-'}
                     </span>
                 </div>
 
