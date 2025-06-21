@@ -15,8 +15,6 @@
     color: var(--bs-emphasis-color);
     margin: 0;
     padding: 0 var(--space-4);
-
-
 }
 
 /* Date Range */
@@ -25,7 +23,6 @@
     align-items: center;
     gap: var(--space-2);
     padding: 0 var(--space-4);
-
     font-size: var(--text-lg);
     font-weight: var(--font-medium);
     color: var(--bs-emphasis-color);
@@ -67,6 +64,7 @@
     flex-shrink: 0;
 }
 
+/* This is the container for label + value on desktop */
 .schedule-info-bar .info-content {
     display: flex;
     flex-direction: column;
@@ -75,7 +73,7 @@
 
 .schedule-info-bar .info-label {
     font-size: var(--text-xs);
-    color: var(--bs-secondary);
+    color: var(--bs-body-color);
     font-weight: var(--font-medium);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -125,7 +123,10 @@
     gap: var(--space-3);
 }
 
-/* Mobile Responsive */
+
+/* --- Responsive --- */
+
+/* Tablet view */
 @media (max-width: 768px) {
     .schedule-info-wrapper {
         gap: var(--space-3);
@@ -145,7 +146,6 @@
         min-width: 140px;
     }
 
-    /* Mobile: Actions bar becomes column */
     .schedule-actions-bar {
         flex-direction: column-reverse;
         align-items: stretch;
@@ -170,25 +170,64 @@
     }
 }
 
+/* Mobile view - completely revamped */
 @media (max-width: 576px) {
-    .schedule-info-bar .info-item  {
-        flex: 1 1 100%;
-    }
-    .info-items {
+    .schedule-info-bar {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: 0;
+        padding: 0 var(--space-2);
+        background-color: transparent; /* Remove background from the container */
+        border: none; /* Remove border from container */
     }
 
-    .info-item {
-        width: 100%;
-        flex-direction: row;
+    /* Each item now becomes a flex row with space between its children */
+    .schedule-info-bar .info-item {
+        flex: 1 1 100%;
+        display: flex;
         justify-content: space-between;
-        padding: var(--space-2) 0;
-        border-bottom: 1px solid var(--bs-gray-200);
+        align-items: center;
+        padding: var(--space-3) var(--space-2);
+        border-bottom: 1px solid var(--bs-border-color);
+        transition: background-color 0.2s ease-in-out;
     }
 
-    .info-item:last-child {
-        border-bottom: none;
+    .schedule-info-bar .info-item:first-child {
+        border-top: 1px solid var(--bs-border-color);
     }
 
+    .schedule-info-bar .info-item:hover {
+        background-color: var(--bs-gray-100);
+    }
+
+
+    [data-theme="dark"] .schedule-info-bar .info-item:hover {
+        background-color: var(--bs-gray-800);
+    }
+
+    /* This is the new container for icon + label on mobile */
+    .info-item-header {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Remove the old container for label + value */
+    .schedule-info-bar .info-content {
+        display: none;
+    }
+
+    /* Adjust label style for mobile */
+    .schedule-info-bar .info-label {
+        font-size: var(--text-sm);
+        text-transform: none;
+        letter-spacing: normal;
+        /*font-weight: var(--font-normal);*/
+        color: var(--bs-body-color);
+    }
+
+    .schedule-info-bar .info-value,
+    .schedule-info-bar .badge {
+        /* This is now automatically aligned to the right by justify-content */
+        text-align: right;
+    }
 }

@@ -395,5 +395,16 @@ export const en = {
         strictLegalCompliance: 'Enforce Strict Legal Compliance',
         strictLegalComplianceHint: 'Strictly enforce all legal requirements. Disable only for testing purposes.',
     },
+    site: {
+        addSite: 'Add Site',
+        cancelChanges: 'Cancel Changes',
+        description: 'Description',
+        editSite: 'Edit Site',
+        noSites: 'No sites configured',
+        siteCode: 'Site Code',
+        siteName: 'Site Name',
+        sites: 'Sites',
+        workSite: 'Work Site',
+    }
 
 };

@@ -26,9 +26,18 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
         dispatch(setSelectedScheduleId(null));
     };
 
-    // Debug log to see what we're getting
-    console.log('Schedule object:', schedule);
-    console.log('WorkSite:', schedule.workSite);
+    // Extract algorithm from text_file JSON
+    const getAlgorithmName = () => {
+        try {
+            if (schedule.text_file) {
+                const data = JSON.parse(schedule.text_file);
+                return data.algorithm || '-';
+            }
+        } catch (e) {
+            console.error('Error parsing text_file:', e);
+        }
+        return '-';
+    };
 
     return (
         <div className="schedule-info-wrapper">
@@ -44,37 +53,45 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
             {/* Info bar */}
             <div className="schedule-info-bar">
                 <div className="info-item">
-                    <i className="bi bi-geo-alt"></i>
-                    <div className="info-content">
+                    <div className="info-item-header">
+                        <i className="bi bi-geo-alt pe-2"></i>
                         <span className="info-label">{t('site.workSite')}</span>
-                        <span className="info-value">
-                            {schedule.workSite?.site_name || '-'}
-                        </span>
                     </div>
+                    <span className="info-value">
+                        {schedule.workSite?.site_name || '-'}
+                    </span>
                 </div>
 
                 <div className="info-item">
-                    <i className="bi bi-flag"></i>
-                    <div className="info-content">
+                    <div className="info-item-header">
+                        <i className="bi bi-flag pe-2"></i>
                         <span className="info-label">{t('schedule.status')}</span>
-                        <StatusBadge status={schedule.status} size="sm" />
                     </div>
+                    <StatusBadge status={schedule.status} size="sm" />
                 </div>
 
                 <div className="info-item">
-                    <i className="bi bi-people"></i>
-                    <div className="info-content">
+                    <div className="info-item-header">
+                        <i className="bi bi-people pe-2"></i>
                         <span className="info-label">{t('position.positions')}</span>
-                        <span className="info-value">{positions.length}</span>
                     </div>
+                    <span className="info-value">{positions.length}</span>
                 </div>
 
                 <div className="info-item">
-                    <i className="bi bi-calendar-check"></i>
-                    <div className="info-content">
-                        <span className="info-label">{t('schedule.created')}</span>
-                        <span className="info-value">{formatDate(schedule.createdAt)}</span>
+                    <div className="info-item-header">
+                        <i className="bi bi-gear pe-2"></i>
+                        <span className="info-label">{t('modal.compareAlgorithms.algorithm')}</span>
                     </div>
+                    <span className="info-value">{getAlgorithmName()}</span>
+                </div>
+
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-calendar-check pe-2"></i>
+                        <span className="info-label">{t('schedule.created')}</span>
+                    </div>
+                    <span className="info-value">{formatDate(schedule.createdAt)}</span>
                 </div>
             </div>
 
