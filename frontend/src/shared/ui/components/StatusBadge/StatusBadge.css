@@ -1,5 +1,36 @@
 /* Status Badge - кастомные стили для статусов */
+/* frontend/src/shared/ui/components/StatusBadge/StatusBadge.css */
 
+/* Status Badge Base Styles */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-medium);
+    padding: 0.25em 0.75em;
+    font-size: 0.875rem;
+    text-transform: capitalize;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+    width: auto;
+    min-width: fit-content;
+}
+
+/* Size variants */
+.badge-sm {
+    font-size: 0.75rem;
+    padding: 0.2em 0.6em;
+}
+
+.badge-lg {
+    font-size: 1rem;
+    padding: 0.35em 0.85em;
+}
+
+/* Fix for stretched badges */
+.badge:not(.w-100) {
+    max-width: fit-content;
+}
 .status-badge {
     font-weight: 500;
     padding: 0.35em 0.65em;

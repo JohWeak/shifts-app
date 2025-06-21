@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import ExportDropdown from './ExportDropdown';
 import './ScheduleActions.css';
 
 const ScheduleActions = ({
@@ -37,17 +38,11 @@ const ScheduleActions = ({
                 </Button>
             )}
 
-            <Button
-                variant="outline-primary"
+            <ExportDropdown
+                onExport={onExport}
+                isExporting={isExporting}
                 size="sm"
-                onClick={() => onExport('pdf')}
-                disabled={isExporting}
-                className="action-button"
-                title={t('schedule.exportSchedule')}
-            >
-                <i className="bi bi-file-earmark-pdf me-2"></i>
-                {t('schedule.export')}
-            </Button>
+            />
         </div>
     );
 };

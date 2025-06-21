@@ -19,6 +19,7 @@ export const ru = {
         editModeFor: 'Режим редактирования для',
         error: 'Ошибка',
         export: 'Экспорт',
+        exporting: 'Экспорт...',
         filter: 'Фильтр',
         from: 'С',
         info: 'Информация',

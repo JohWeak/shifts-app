@@ -19,6 +19,7 @@ export const en = {
         editModeFor: 'Edit Mode for',
         error: 'Error',
         export: 'Export',
+        exporting: 'Exporting...',
         filter: 'Filter',
         from: 'From', 
         info: 'Info',
