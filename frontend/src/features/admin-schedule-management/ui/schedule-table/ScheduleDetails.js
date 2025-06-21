@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Card, Alert} from 'react-bootstrap';
 
 import ScheduleEditor from './ScheduleEditor';
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import ScheduleInfo from './ScheduleInfo';
 import ScheduleActions from '../schedule-list/ScheduleActions';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -168,7 +168,7 @@ const ScheduleDetails = ({onCellClick}) => {
 
             <ConfirmationModal
                 show={showPublishModal}
-                onHide={() => setShowPublishModal(false)}
+                onCancel={() => setShowPublishModal(false)}
                 onConfirm={() => handleStatusUpdate('published')}
                 title={t('schedule.publishSchedule')}
                 message={t('schedule.confirmPublish')}
@@ -178,7 +178,7 @@ const ScheduleDetails = ({onCellClick}) => {
             />
             <ConfirmationModal
                 show={showUnpublishModal}
-                onHide={() => setShowUnpublishModal(false)}
+                onCancel={() => setShowUnpublishModal(false)}
                 onConfirm={() => handleStatusUpdate('draft')}
                 title={t('schedule.unpublishEdit')}
                 message={t('schedule.confirmUnpublish')}

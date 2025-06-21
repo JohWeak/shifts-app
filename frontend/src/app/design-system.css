@@ -161,6 +161,32 @@
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15); /* Darker shadow */
     --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+
+    /* ========== Dark Theme Outline Button Colors (НОВЫЙ БЛОК) ========== */
+    /* Сначала определяем переменные, которые будут использоваться в стилях ниже */
+    --bs-btn-outline-primary-color: var(--bs-primary);
+    --bs-btn-outline-secondary-color: var(--bs-secondary);
+    --bs-btn-outline-success-color: var(--bs-success);
+    --bs-btn-outline-warning-color: var(--bs-warning);
+    --bs-btn-outline-danger-color: var(--bs-danger);
+    --bs-btn-outline-info-color: var(--bs-info);
+
+    /* Теперь применяем их. Bootstrap 5.3+ делает это автоматически, но для
+       более старых версий или для надежности можно определить явно */
+    .btn-outline-primary {
+        --bs-btn-color: var(--bs-btn-outline-primary-color);
+        --bs-btn-border-color: var(--bs-btn-outline-primary-color);
+        --bs-btn-hover-color: #000; /* Цвет текста при наведении */
+        --bs-btn-hover-bg: var(--bs-btn-outline-primary-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-primary-color);
+    }
+    .btn-outline-secondary {
+        --bs-btn-color: var(--bs-btn-outline-secondary-color);
+        --bs-btn-border-color: var(--bs-btn-outline-secondary-color);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: var(--bs-btn-outline-secondary-color);
+        --bs-btn-hover-border-color: var(--bs-btn-outline-secondary-color);
+    }
 }
 
 

@@ -1,6 +1,8 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/common/ConfirmationModal.js
+// frontend/src/shared/ui/components/ConfirmationModal.js
 import React from 'react';
-import { Modal, Button, Alert, Spinner } from 'react-bootstrap';
+import { Modal, Button, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import './ConfirmationModal.css';
 
 export const ConfirmationModal = ({
                                       show,
@@ -9,61 +11,61 @@ export const ConfirmationModal = ({
                                       onConfirm,
                                       onCancel,
                                       loading = false,
-                                      confirmText = "Confirm",
-                                      cancelText = "Cancel",
+                                      confirmText,
+                                      cancelText,
                                       variant = "danger",
                                       size = "md",
-                                      showWarning = true,
-                                      warningMessage = "This action cannot be undone.",
-                                      children
+                                      children,
+                                      confirmVariant,
                                   }) => {
+    const { t } = useI18n();
+
+    const finalConfirmText = confirmText || t('common.confirm');
+    const finalCancelText = cancelText || t('common.cancel');
+    const finalConfirmVariant = confirmVariant || variant;
+
     return (
         <Modal
             show={show}
             onHide={!loading ? onCancel : undefined}
             centered
             size={size}
+            backdrop={loading ? 'static' : true}
+            className="confirmation-modal" // <-- Шаг 2: Добавляем класс для стилизации
         >
             <Modal.Header closeButton={!loading}>
                 <Modal.Title className={`text-${variant}`}>
-                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    <i className={`bi bi-exclamation-triangle me-2`}></i> {/* Убрали дублирование text-variant */}
                     {title}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
-                {showWarning && (
-                    <Alert variant="warning" className="mb-3">
-                        <i className="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Warning:</strong> {warningMessage}
-                    </Alert>
-                )}
-
                 {message && <p className="mb-3">{message}</p>}
-
                 {children}
             </Modal.Body>
 
             <Modal.Footer>
                 <Button
-                    variant="secondary"
+                    variant="outline-secondary"
                     onClick={onCancel}
                     disabled={loading}
                 >
-                    {cancelText}
+                    {finalCancelText}
                 </Button>
                 <Button
-                    variant={variant}
+                    variant={finalConfirmVariant}
                     onClick={onConfirm}
                     disabled={loading}
+                    style={{ minWidth: '120px' }}
                 >
                     {loading ? (
                         <>
-                            <Spinner size="sm" className="me-2" />
-                            Processing...
+                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            {t('common.loading')}
                         </>
                     ) : (
-                        confirmText
+                        finalConfirmText
                     )}
                 </Button>
             </Modal.Footer>
