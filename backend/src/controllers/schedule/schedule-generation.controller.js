@@ -9,7 +9,7 @@ const ScheduleGeneratorService = require('../../services/schedule-generator.serv
 const CPSATBridge = require('../../services/cp-sat-bridge.service');
 
 /**
- * Generate schedule for next week
+ * Generate schedule for specified week
  */
 const generateNextWeekSchedule = async (req, res) => {
     try {
@@ -18,22 +18,17 @@ const generateNextWeekSchedule = async (req, res) => {
 
         let weekStart;
         if (req.body.week_start) {
-            const requestedDate = dayjs(req.body.week_start);
-            const dayOfWeek = requestedDate.day();
-
-            if (dayOfWeek !== 0) {
-                weekStart = requestedDate.subtract(dayOfWeek, 'day').format('YYYY-MM-DD');
-                console.log(`[ScheduleController] Adjusted to Sunday: ${weekStart}`);
-            } else {
-                weekStart = requestedDate.format('YYYY-MM-DD');
-            }
+            // Use the exact date provided by frontend
+            // Frontend should ensure it's a valid week start day
+            weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
         } else {
+            // Fallback to next week if no date provided
             weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
         }
 
         console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
 
-        // Проверим существование сайта
+        // Check if worksite exists
         const workSite = await WorkSite.findByPk(siteId);
         if (!workSite) {
             return res.status(400).json({
@@ -51,7 +46,7 @@ const generateNextWeekSchedule = async (req, res) => {
             console.log(`[ScheduleController] Auto-selected algorithm: ${selectedAlgorithm}`);
         }
 
-        // Выполнение планирования
+        // Execute scheduling
         switch (selectedAlgorithm) {
             case 'cp-sat':
                 try {
@@ -76,51 +71,27 @@ const generateNextWeekSchedule = async (req, res) => {
             default:
                 return res.status(400).json({
                     success: false,
-                    message: `Unknown algorithm: ${selectedAlgorithm}`
+                    message: `Unknown algorithm: ${algorithm}`
                 });
         }
 
-        // Формирование ответа
-        if (result && result.success) {
-            let fullSchedule = null;
-            if (result.schedule && (result.schedule.schedule_id || result.schedule.id)) {
-                fullSchedule = await Schedule.findByPk(
-                    result.schedule.schedule_id || result.schedule.id,
-                    {
-                        include: [{
-                            model: WorkSite,
-                            as: 'workSite'
-                        }]
-                    }
-                );
-            }
-
-            const responseData = {
+        // Handle result
+        if (result.success) {
+            res.json({
                 success: true,
-                message: `Schedule generated successfully using ${result.algorithm || selectedAlgorithm}`,
-                data: {
-                    ...(result.schedule || {}),
-                    workSite: fullSchedule?.workSite || workSite
-                },
+                message: `Schedule generated successfully using ${selectedAlgorithm} algorithm`,
+                algorithm_used: selectedAlgorithm,
+                schedule: result.schedule,
                 stats: result.stats || {},
-                algorithm: result.algorithm || selectedAlgorithm,
-                requested_algorithm: algorithm
-            };
-
-            if (result.fallback) {
-                responseData.warning = `Fallback used: ${result.fallback}`;
-                if (result.originalError) {
-                    responseData.original_error = result.originalError;
-                }
-            }
-
-            res.json(responseData);
+                week: weekStart,
+                fallback: result.fallback || null,
+                originalError: result.originalError || null
+            });
         } else {
             res.status(500).json({
                 success: false,
-                message: result?.error || 'Failed to generate schedule',
-                error: result?.error || 'Unknown error',
-                algorithm: selectedAlgorithm
+                message: result.error || 'Failed to generate schedule',
+                error: process.env.NODE_ENV === 'development' ? result.error : 'Internal server error'
             });
         }
 
@@ -128,7 +99,7 @@ const generateNextWeekSchedule = async (req, res) => {
         console.error('[ScheduleController] Error generating schedule:', error);
         res.status(500).json({
             success: false,
-            message: 'Error generating schedule',
+            message: 'Error during schedule generation',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
@@ -143,8 +114,10 @@ const compareAllAlgorithms = async (req, res) => {
 
         let weekStart;
         if (req.body.week_start) {
+            // Use the exact date provided by frontend
             weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
         } else {
+            // Fallback to next week
             weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
         }
 

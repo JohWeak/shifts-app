@@ -1,3 +1,4 @@
+// frontend/src/shared/config/scheduleConstants.js
 export const ALGORITHM_TYPES = [
     { value: 'auto', label: 'Auto' },
     { value: 'cp-sat', label: 'CP-SAT by Google OR-Tools' },
@@ -7,7 +8,7 @@ export const ALGORITHM_TYPES = [
 export const DEFAULT_GENERATION_SETTINGS = {
     site_id: null,
     weekStart: '',
-    algorithm: 'basic'
+    algorithm: 'auto'  // Changed from 'basic' to 'auto'
 };
 
 export const SCHEDULE_STATUS = {
