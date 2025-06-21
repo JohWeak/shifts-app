@@ -161,6 +161,106 @@
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15); /* Darker shadow */
     --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+    /* ========== Dark Theme Button Outline Variables ========== */
+    /* Primary outline button */
+    --bs-btn-outline-primary-color: #6ea8fe;
+    --bs-btn-outline-primary-border-color: #6ea8fe;
+    --bs-btn-outline-primary-hover-bg: #6ea8fe;
+    --bs-btn-outline-primary-hover-color: #000;
+
+    /* Secondary outline button */
+    --bs-btn-outline-secondary-color: #a7acb1;
+    --bs-btn-outline-secondary-border-color: #a7acb1;
+    --bs-btn-outline-secondary-hover-bg: #a7acb1;
+    --bs-btn-outline-secondary-hover-color: #000;
+
+    /* Success outline button */
+    --bs-btn-outline-success-color: #75b798;
+    --bs-btn-outline-success-border-color: #75b798;
+    --bs-btn-outline-success-hover-bg: #75b798;
+    --bs-btn-outline-success-hover-color: #000;
+
+    /* Danger outline button */
+    --bs-btn-outline-danger-color: #ea868f;
+    --bs-btn-outline-danger-border-color: #ea868f;
+    --bs-btn-outline-danger-hover-bg: #ea868f;
+    --bs-btn-outline-danger-hover-color: #000;
+
+    /* Warning outline button */
+    --bs-btn-outline-warning-color: #ffda6a;
+    --bs-btn-outline-warning-border-color: #ffda6a;
+    --bs-btn-outline-warning-hover-bg: #ffda6a;
+    --bs-btn-outline-warning-hover-color: #000;
+
+    /* Info outline button */
+    --bs-btn-outline-info-color: #6edff6;
+    --bs-btn-outline-info-border-color: #6edff6;
+    --bs-btn-outline-info-hover-bg: #6edff6;
+    --bs-btn-outline-info-hover-color: #000;
+
+    /* Light outline button */
+    --bs-btn-outline-light-color: #f8f9fa;
+    --bs-btn-outline-light-border-color: #f8f9fa;
+    --bs-btn-outline-light-hover-bg: #f8f9fa;
+    --bs-btn-outline-light-hover-color: #000;
+
+    /* Dark outline button */
+    --bs-btn-outline-dark-color: #dee2e6;
+    --bs-btn-outline-dark-border-color: #dee2e6;
+    --bs-btn-outline-dark-hover-bg: #dee2e6;
+    --bs-btn-outline-dark-hover-color: #000;
+
+    /* ... rest of existing dark theme variables ... */
+}
+
+/* ========== Apply outline button variables ========== */
+[data-theme="dark"] .btn-outline-primary {
+    --bs-btn-color: var(--bs-btn-outline-primary-color);
+    --bs-btn-border-color: var(--bs-btn-outline-primary-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-primary-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-primary-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-primary-hover-bg);
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+    --bs-btn-color: var(--bs-btn-outline-secondary-color);
+    --bs-btn-border-color: var(--bs-btn-outline-secondary-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-secondary-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-secondary-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-secondary-hover-bg);
+}
+
+[data-theme="dark"] .btn-outline-success {
+    --bs-btn-color: var(--bs-btn-outline-success-color);
+    --bs-btn-border-color: var(--bs-btn-outline-success-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-success-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-success-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-success-hover-bg);
+}
+
+[data-theme="dark"] .btn-outline-danger {
+    --bs-btn-color: var(--bs-btn-outline-danger-color);
+    --bs-btn-border-color: var(--bs-btn-outline-danger-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-danger-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-danger-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-danger-hover-bg);
+}
+
+[data-theme="dark"] .btn-outline-warning {
+    --bs-btn-color: var(--bs-btn-outline-warning-color);
+    --bs-btn-border-color: var(--bs-btn-outline-warning-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-warning-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-warning-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-warning-hover-bg);
+}
+
+[data-theme="dark"] .btn-outline-info {
+    --bs-btn-color: var(--bs-btn-outline-info-color);
+    --bs-btn-border-color: var(--bs-btn-outline-info-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-info-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-info-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-info-hover-bg);
+
 }
 
 
