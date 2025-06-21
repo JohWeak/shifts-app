@@ -318,6 +318,8 @@ export const en = {
         week: 'Week',
         weekPeriod: 'Week Period',
         workSite: 'Work Site',
+        backToSchedules: 'Back to Schedules',
+        scheduleInformation: 'Schedule Information',
     },
     settings: {
         systemSettings: 'System Settings',

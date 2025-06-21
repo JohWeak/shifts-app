@@ -1,6 +1,6 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.js
 import React from 'react';
-import { Button } from 'react-bootstrap';
+import {Button, Col, Row} from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -41,12 +41,10 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
 
     return (
         <div className="schedule-info-wrapper">
-            {/* Title */}
-            <h5 className="schedule-details-title">{t('schedule.scheduleDetails')}</h5>
+            <h5 className="mb-0 ps-2">{t('schedule.scheduleDetails')}</h5>
 
-            {/* Date range with icon */}
             <div className="schedule-date-range">
-                <i className="bi bi-calendar-range"></i>
+
                 <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
             </div>
 
@@ -96,18 +94,23 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
             </div>
 
             {/* Actions bar */}
-            <div className="schedule-actions-bar">
-                <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={handleBackClick}
-                    className="back-button"
-                >
-                    <i className="bi bi-arrow-left me-2"></i>
-                    {t('common.back')}
-                </Button>
+            {/* Header Row with Back Button and Title */}
+            <Row className="align-items-center mb-3">
+                <Col xs="auto">
+                    <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={handleBackClick}
+                        className="back-button"
+                    >
+                        <i className="bi bi-arrow-left me-2"></i>
+                        {t('schedule.backToSchedules')}
+                    </Button>
+                </Col>
+                <Col>
 
-                <div className="action-buttons-group">
+                </Col>
+                <Col xs="auto">
                     <ScheduleActions
                         status={schedule.status}
                         onPublish={onPublish}
@@ -115,8 +118,8 @@ const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExpo
                         onExport={onExport}
                         isExporting={isExporting}
                     />
-                </div>
-            </div>
+                </Col>
+            </Row>
         </div>
     );
 };

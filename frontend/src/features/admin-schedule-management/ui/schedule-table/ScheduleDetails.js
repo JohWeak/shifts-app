@@ -112,34 +112,28 @@ const ScheduleDetails = ({onCellClick}) => {
 
     return (
         <>
-            <Card className="mb-4">
+            <Card className="mb-4 ">
                 <Card.Body>
-                    <div className="d-flex justify-content-between align-items-start mb-4">
-                        <h5 className="mb-0">{t('schedule.scheduleDetails')}</h5>
-                        <ScheduleActions
-                            status={scheduleDetails.schedule.status}
-                            onPublish={() => setShowPublishModal(true)}
-                            onUnpublish={() => setShowUnpublishModal(true)}
-                            onExport={handleExport}
-                            isExporting={isExporting}
-                        />
-                    </div>
-
                     <ScheduleInfo
                         schedule={scheduleDetails.schedule}
                         positions={scheduleDetails.positions}
+                        onPublish={() => setShowPublishModal(true)}
+                        onUnpublish={() => setShowUnpublishModal(true)}
+                        onExport={handleExport}
+                        isExporting={isExporting}
                     />
 
-                    {exportAlert && (
-                        <Alert
-                            variant={exportAlert.type}
-                            dismissible
-                            onClose={() => setExportAlert(null)}
-                        >
-                            {exportAlert.message}
-                        </Alert>
-                    )}
+
                 </Card.Body>
+                {exportAlert && (
+                    <Alert
+                        variant={exportAlert.type}
+                        dismissible
+                        onClose={() => setExportAlert(null)}
+                    >
+                        {exportAlert.message}
+                    </Alert>
+                )}
             </Card>
 
             <Card>
@@ -179,6 +173,8 @@ const ScheduleDetails = ({onCellClick}) => {
                 title={t('schedule.publishSchedule')}
                 message={t('schedule.confirmPublish')}
                 loading={loading === 'pending'}
+                confirmText={t('schedule.publish')}
+                confirmVariant="success"
             />
             <ConfirmationModal
                 show={showUnpublishModal}
@@ -188,6 +184,8 @@ const ScheduleDetails = ({onCellClick}) => {
                 message={t('schedule.confirmUnpublish')}
                 variant="warning"
                 loading={loading === 'pending'}
+                confirmText={t('schedule.unpublishEdit')}
+                confirmVariant="warning"
             />
         </>
     );
