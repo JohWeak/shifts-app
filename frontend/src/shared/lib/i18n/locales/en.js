@@ -57,6 +57,10 @@ export const en = {
         select: 'Select',
         choose: 'Choose',
         pick: 'Pick',
+        confirmAction: 'Confirm Action',
+        actionCannotBeUndone: 'This action cannot be undone.',
+        processing: 'Processing...',
+        areYouSure: 'Are you sure?',
     },
     auth: {
         createAccount: 'Create Account', 
@@ -320,7 +324,6 @@ export const en = {
         teamSchedule: 'Team Schedule', 
         timeOff: 'Time Off', 
         title: 'Schedule Management',
-        total: 'Total Schedules',
         unassignedShifts: 'Unassigned Shifts',
         unpublish: 'Unpublish',
         unpublishEdit: 'Unpublish & Edit',
@@ -332,7 +335,11 @@ export const en = {
         workSite: 'Work Site',
         backToSchedules: 'Back to Schedules',
         scheduleInformation: 'Schedule Information',
-        weekStartWarning: 'Please select {day} as the start of the week'
+        weekStartWarning: 'Please select {day} as the start of the week',
+        generateError: 'Failed to generate schedule',
+        newScheduleCreated: 'New schedule created successfully! It is highlighted below.',
+        confirmDeleteMessage: 'Are you sure you want to delete the schedule for {scheduleName}? This action cannot be undone.',
+        total: 'Total',
     },
     settings: {
         systemSettings: 'System Settings',

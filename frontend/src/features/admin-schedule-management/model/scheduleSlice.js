@@ -1,6 +1,8 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
+import {scheduleAPI} from "shared/api/apiService"
+import {employeeAPI}  from 'shared/api/apiService';
+import {worksiteAPI}  from 'shared/api/apiService';
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -9,12 +11,7 @@ export const fetchSchedules = createAsyncThunk(
     'schedule/fetchSchedules',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.fetchSchedules();
-            // Если используется структура с pagination
-            if (response && response.items) {
-                return response.items;
-            }
-            return response || [];
+            return await scheduleAPI.fetchSchedules();
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -26,10 +23,7 @@ export const fetchScheduleDetails = createAsyncThunk(
     'schedule/fetchScheduleDetails',
     async (scheduleId, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            console.log('Schedule details response:', response); // Для отладки
-
-            return response; // Возвращаем только data
+            return await scheduleAPI.fetchScheduleDetails(scheduleId);
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -39,10 +33,23 @@ export const fetchScheduleDetails = createAsyncThunk(
 // Генерация нового расписания
 export const generateSchedule = createAsyncThunk(
     'schedule/generateSchedule',
-    async (settings, { rejectWithValue }) => {
+    async (settings, { dispatch, rejectWithValue, getState }) => {
         try {
-            const response = await scheduleAPI.generateSchedule(settings);
-            return response; // Возвращаем только data
+            const data = await scheduleAPI.generateSchedule(settings);
+
+            // Get current state to determine navigation logic
+            const state = getState();
+            const currentTab = state.schedule.activeTab;
+            const currentScheduleId = state.schedule.selectedScheduleId;
+
+            // After successful generation, update schedules list
+            await dispatch(fetchSchedules());
+
+            return {
+                ...data,
+                shouldNavigate: currentTab === 'view' && currentScheduleId,
+                wasOnOverview: currentTab === 'overview'
+            };
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -50,11 +57,11 @@ export const generateSchedule = createAsyncThunk(
 );
 
 export const updateScheduleStatus = createAsyncThunk(
-    'schedule/updateScheduleStatus',
+    'schedule/updateStatus',
     async ({ scheduleId, status }, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.updateScheduleStatus(scheduleId, status);
-            return response; // Возвращаем только data
+            const data = await scheduleAPI.updateScheduleStatus(scheduleId, status);
+            return data.data;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -66,8 +73,7 @@ export const compareAlgorithms = createAsyncThunk(
     'schedule/compareAlgorithms',
     async (settings, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.compareAlgorithms(settings);
-            return response; // Возвращаем только data
+            return await scheduleAPI.compareAlgorithms(settings);
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -77,10 +83,12 @@ export const compareAlgorithms = createAsyncThunk(
 // Удаление расписания
 export const deleteSchedule = createAsyncThunk(
     'schedule/deleteSchedule',
-    async (scheduleId, { rejectWithValue }) => {
+    async (scheduleId, { dispatch, rejectWithValue }) => {
         try {
-            await scheduleAPI.deleteSchedule(scheduleId);
-            return scheduleId; // Возвращаем ID для удаления из state
+            const response = await scheduleAPI.deleteSchedule(scheduleId);
+            // После успешного удаления обновляем список
+            dispatch(fetchSchedules());
+            return response;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -89,28 +97,25 @@ export const deleteSchedule = createAsyncThunk(
 
 // Обновление назначений
 export const updateScheduleAssignments = createAsyncThunk(
-    'schedule/updateScheduleAssignments',
+    'schedule/updateAssignments',
     async ({ scheduleId, changes }, { dispatch, rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
-
-            // После успешного обновления перезагружаем детали расписания
-            await dispatch(fetchScheduleDetails(scheduleId));
-
-            return response;
+            const result = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
+            // После сохранения перезагружаем детали, чтобы увидеть актуальное состояние
+            dispatch(fetchScheduleDetails(scheduleId));
+            return result;
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
 
-// Export schedule
 export const exportSchedule = createAsyncThunk(
     'schedule/exportSchedule',
     async ({ scheduleId, format }, { rejectWithValue }) => {
         try {
-            await scheduleAPI.exportSchedule(scheduleId, format);
-            return { success: true }; // Возвращаем простой объект
+            const result = await scheduleAPI.exportSchedule(scheduleId, format);
+            return { ...result, format };
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -148,7 +153,6 @@ export const fetchWorkSites = createAsyncThunk(
 
 // --- Слайс (Slice) ---
 
-
 const scheduleSlice = createSlice({
     name: 'schedule',
     initialState: {
@@ -156,10 +160,16 @@ const scheduleSlice = createSlice({
         schedules: [],
         scheduleDetails: null,
         workSites: [],
-        recommendations: { available: [], cross_position: [], unavailable_busy: [], unavailable_hard: [], unavailable_soft: [] },
+        recommendations: {
+            available: [],
+            cross_position: [],
+            unavailable_busy: [],
+            unavailable_hard: [],
+            unavailable_soft: []
+        },
 
         // Состояния загрузки
-        loading: 'idle', // для основных операций
+        loading: 'idle',
         workSitesLoading: 'idle',
         recommendationsLoading: 'idle',
 
@@ -171,6 +181,11 @@ const scheduleSlice = createSlice({
         activeTab: 'overview',
         editingPositions: {},
         pendingChanges: {},
+
+        // Новые поля для отслеживания созданного расписания
+        newlyCreatedScheduleId: null,
+        shouldNavigateToNew: false,
+        showNewScheduleHighlight: false,
     },
     reducers: {
         // Синхронные экшены для управления UI
@@ -179,9 +194,21 @@ const scheduleSlice = createSlice({
         },
         setSelectedScheduleId(state, action) {
             state.selectedScheduleId = action.payload;
-            state.scheduleDetails = null; // Сбрасываем детали при выборе нового расписания
+            state.scheduleDetails = null;
             state.activeTab = action.payload ? 'view' : 'overview';
         },
+
+        // Новые экшены для управления навигацией после генерации
+        clearNewScheduleFlags(state) {
+            state.newlyCreatedScheduleId = null;
+            state.shouldNavigateToNew = false;
+            state.showNewScheduleHighlight = false;
+        },
+
+        setNewScheduleHighlight(state, action) {
+            state.showNewScheduleHighlight = action.payload;
+        },
+
         // Синхронные экшены для управления редактированием
         toggleEditPosition(state, action) {
             const positionId = action.payload;
@@ -220,6 +247,7 @@ const scheduleSlice = createSlice({
             state.activeTab = 'overview';
             state.editingPositions = {};
             state.pendingChanges = {};
+            // Не сбрасываем флаги нового расписания здесь
         }
     },
     extraReducers: (builder) => {
@@ -232,11 +260,10 @@ const scheduleSlice = createSlice({
             .addCase(fetchSchedules.fulfilled, (state, action) => {
                 state.loading = 'succeeded';
                 state.schedules = action.payload;
-                state.error = null;
             })
             .addCase(fetchSchedules.rejected, (state, action) => {
                 state.loading = 'failed';
-                state.error = action.payload || 'Failed to fetch schedules';
+                state.error = action.payload;
             })
 
             // Обработка fetchScheduleDetails
@@ -246,83 +273,66 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchScheduleDetails.fulfilled, (state, action) => {
-                state.loading = 'idle';
+                state.loading = 'succeeded';
                 state.scheduleDetails = action.payload;
-                state.selectedScheduleId = action.payload?.schedule?.id;
+                state.selectedScheduleId = action.payload.schedule.id;
                 state.activeTab = 'view';
+                state.editingPositions = {};
+                state.pendingChanges = {};
             })
             .addCase(fetchScheduleDetails.rejected, (state, action) => {
                 state.loading = 'failed';
                 state.error = action.payload;
             })
 
-            // Обработка generateSchedule (только pending/rejected, fulfilled handled by thunk)
+            // Обработка generateSchedule
             .addCase(generateSchedule.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;
             })
             .addCase(generateSchedule.fulfilled, (state, action) => {
-                // Диспатч fetchSchedules уже сделан внутри thunk,
-                // здесь мы просто сбрасываем состояние загрузки
                 state.loading = 'succeeded';
+
+                // Extract schedule ID from response
+                const newScheduleId = action.payload.data?.schedule_id || action.payload.data?.id;
+
+                if (newScheduleId) {
+                    state.newlyCreatedScheduleId = newScheduleId;
+                    state.shouldNavigateToNew = action.payload.shouldNavigate;
+                    state.showNewScheduleHighlight = action.payload.wasOnOverview;
+                }
             })
             .addCase(generateSchedule.rejected, (state, action) => {
                 state.loading = 'failed';
                 state.error = action.payload;
-
             })
 
+            // Обработка сравнения алгоритмов
             .addCase(compareAlgorithms.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;
             })
             .addCase(compareAlgorithms.fulfilled, (state, action) => {
-                state.loading = 'succeeded'; // Сбрасываем загрузку
-                // ...
+                state.loading = 'succeeded';
             })
             .addCase(compareAlgorithms.rejected, (state, action) => {
-                state.loading = 'failed'; // Сбрасываем загрузку
+                state.loading = 'failed';
                 state.error = action.payload;
             })
 
+            // Обработка удаления расписания
             .addCase(deleteSchedule.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;
             })
-            .addCase(deleteSchedule.fulfilled, (state, action) => {
-                state.loading = 'idle';
-                // Удаляем расписание из списка
-                state.schedules = state.schedules.filter(s => s.id !== action.payload);
-                state.error = null;
-            })
 
+            // Обработка обновления назначений
             .addCase(updateScheduleAssignments.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;
             })
-            .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
-                state.loading = 'succeeded';
 
-                // После успешного обновления данные будут перезагружены через fetchScheduleDetails
-                // который вызывается в самом thunk
-
-                // Очищаем pendingChanges для позиции, которая была сохранена
-                if (action.meta?.arg?.changes) {
-                    const positionId = action.meta.arg.changes[0]?.positionId;
-                    if (positionId) {
-                        // Удаляем все изменения для этой позиции
-                        Object.keys(state.pendingChanges).forEach(key => {
-                            if (state.pendingChanges[key].positionId === positionId) {
-                                delete state.pendingChanges[key];
-                            }
-                        });
-
-                        // Выключаем режим редактирования для этой позиции
-                        state.editingPositions[positionId] = false;
-                    }
-                }
-            })
-
+            // Обработка рекомендаций
             .addCase(fetchRecommendations.pending, (state) => {
                 state.recommendationsLoading = 'pending';
                 state.error = null;
@@ -333,11 +343,13 @@ const scheduleSlice = createSlice({
             })
             .addCase(fetchRecommendations.rejected, (state, action) => {
                 state.recommendationsLoading = 'failed';
-                state.error = action.payload; // Можно использовать общий error или отдельный
+                state.error = action.payload;
             })
-            // Обработка fetchWorkSites
+
+            // Обработка worksites
             .addCase(fetchWorkSites.pending, (state) => {
                 state.workSitesLoading = 'pending';
+                state.error = null;
             })
             .addCase(fetchWorkSites.fulfilled, (state, action) => {
                 state.workSitesLoading = 'succeeded';
@@ -346,43 +358,20 @@ const scheduleSlice = createSlice({
             .addCase(fetchWorkSites.rejected, (state, action) => {
                 state.workSitesLoading = 'failed';
                 state.error = action.payload;
-            })
-            // Обработка updateScheduleStatus
-            .addCase(updateScheduleStatus.pending, (state) => {
-                state.loading = 'pending';
-            })
-            .addCase(updateScheduleStatus.fulfilled, (state, action) => {
-                state.loading = 'idle';
-                const scheduleIndex = state.schedules.findIndex(s => s.id === action.meta.arg.scheduleId);
-                if (scheduleIndex !== -1) {
-                    state.schedules[scheduleIndex] = {
-                        ...state.schedules[scheduleIndex],
-                        status: action.meta.arg.status
-                    };
-                }
-                // Обновляем в деталях, если это текущее расписание
-                if (state.scheduleDetails?.schedule?.id === action.meta.arg.scheduleId) {
-                    state.scheduleDetails.schedule.status = action.meta.arg.status;
-                }
-                state.error = null;
-            })
-            .addCase(updateScheduleStatus.rejected, (state, action) => {
-                state.loading = 'failed';
-                state.error = action.payload;
             });
-
-
     },
 });
 
 export const {
     setActiveTab,
     setSelectedScheduleId,
-    resetScheduleView,
     toggleEditPosition,
     addPendingChange,
     removePendingChange,
     clearPositionChanges,
+    resetScheduleView,
+    clearNewScheduleFlags,
+    setNewScheduleHighlight
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;
