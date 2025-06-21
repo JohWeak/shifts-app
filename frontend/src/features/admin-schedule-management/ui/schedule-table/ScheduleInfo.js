@@ -5,9 +5,10 @@ import { useDispatch } from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { setActiveTab, setSelectedScheduleId } from '../../model/scheduleSlice';
+import ScheduleActions from '../schedule-list/ScheduleActions';
 import './ScheduleInfo.css';
 
-const ScheduleInfo = ({ schedule, positions = [] }) => {
+const ScheduleInfo = ({ schedule, positions = [], onPublish, onUnpublish, onExport, isExporting }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
@@ -25,13 +26,60 @@ const ScheduleInfo = ({ schedule, positions = [] }) => {
         dispatch(setSelectedScheduleId(null));
     };
 
+    // Debug log to see what we're getting
+    console.log('Schedule object:', schedule);
+    console.log('WorkSite:', schedule.workSite);
+
     return (
-        <div className="schedule-info-container">
-            {/* Header row with all elements */}
-            <h4 className="schedule-title mb-0">
-            {t('schedule.scheduleDetails')}
-            </h4>
-            <div className="schedule-info-header">
+        <div className="schedule-info-wrapper">
+            {/* Title */}
+            <h5 className="schedule-details-title">{t('schedule.scheduleDetails')}</h5>
+
+            {/* Date range with icon */}
+            <div className="schedule-date-range">
+                <i className="bi bi-calendar-range"></i>
+                <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
+            </div>
+
+            {/* Info bar */}
+            <div className="schedule-info-bar">
+                <div className="info-item">
+                    <i className="bi bi-geo-alt"></i>
+                    <div className="info-content">
+                        <span className="info-label">{t('site.workSite')}</span>
+                        <span className="info-value">
+                            {schedule.workSite?.site_name || '-'}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="info-item">
+                    <i className="bi bi-flag"></i>
+                    <div className="info-content">
+                        <span className="info-label">{t('schedule.status')}</span>
+                        <StatusBadge status={schedule.status} size="sm" />
+                    </div>
+                </div>
+
+                <div className="info-item">
+                    <i className="bi bi-people"></i>
+                    <div className="info-content">
+                        <span className="info-label">{t('position.positions')}</span>
+                        <span className="info-value">{positions.length}</span>
+                    </div>
+                </div>
+
+                <div className="info-item">
+                    <i className="bi bi-calendar-check"></i>
+                    <div className="info-content">
+                        <span className="info-label">{t('schedule.created')}</span>
+                        <span className="info-value">{formatDate(schedule.createdAt)}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Actions bar */}
+            <div className="schedule-actions-bar">
                 <Button
                     variant="outline-secondary"
                     size="sm"
@@ -42,40 +90,16 @@ const ScheduleInfo = ({ schedule, positions = [] }) => {
                     {t('common.back')}
                 </Button>
 
-                <h5 className="schedule-title mb-0">
-                    {formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}
-                </h5>
-            </div>
-                <div className="info-items">
-                    <div className="info-item">
-                        <span className="info-label">{t('schedule.workSite')}</span>
-                        <span className="info-value">
-                            {schedule.workSite?.site_name || schedule.site?.site_name || '-'}
-                        </span>
-                    </div>
-
-                    <div className="info-item">
-                        <span className="info-label">{t('schedule.status')}</span>
-                        <StatusBadge status={schedule.status} size="sm" />
-                    </div>
-
-                    <div className="info-item">
-                        <span className="info-label">{t('position.positions')}</span>
-                        <span className="info-value">
-                            <i className="bi bi-people me-1"></i>
-                            {positions.length}
-                        </span>
-                    </div>
-
-                    <div className="info-item">
-                        <span className="info-label">{t('schedule.created')}</span>
-                        <span className="info-value">
-                            <i className="bi bi-calendar-check me-1"></i>
-                            {formatDate(schedule.createdAt)}
-                        </span>
-                    </div>
+                <div className="action-buttons-group">
+                    <ScheduleActions
+                        status={schedule.status}
+                        onPublish={onPublish}
+                        onUnpublish={onUnpublish}
+                        onExport={onExport}
+                        isExporting={isExporting}
+                    />
                 </div>
-
+            </div>
         </div>
     );
 };

@@ -6,7 +6,6 @@ import { Card, Alert } from 'react-bootstrap';
 import ScheduleEditor from './ScheduleEditor';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 import ScheduleInfo from './ScheduleInfo';
-import ScheduleActions from '../schedule-list/ScheduleActions';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -136,19 +135,14 @@ const ScheduleDetails = ({ onCellClick }) => {
         <>
             <Card className="schedule-details-card">
                 <Card.Body>
-                    <div className="schedule-header-section">
-                        <ScheduleInfo
-                            schedule={scheduleDetails.schedule}
-                            positions={scheduleDetails.positions}
-                        />
-                        <ScheduleActions
-                            status={scheduleDetails.schedule.status}
-                            onPublish={() => setShowPublishModal(true)}
-                            onUnpublish={() => setShowUnpublishModal(true)}
-                            onExport={handleExport}
-                            isExporting={isExporting}
-                        />
-                    </div>
+                    <ScheduleInfo
+                        schedule={scheduleDetails.schedule}
+                        positions={scheduleDetails.positions}
+                        onPublish={() => setShowPublishModal(true)}
+                        onUnpublish={() => setShowUnpublishModal(true)}
+                        onExport={handleExport}
+                        isExporting={isExporting}
+                    />
 
                     {exportAlert && (
                         <Alert
