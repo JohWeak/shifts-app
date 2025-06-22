@@ -12,9 +12,9 @@ import EmployeeDashboard from '../features/employee-dashboard';
 import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
 import AlgorithmSettings from '../features/admin-algorithm-settings';
-import EmployeeManagement from '../features/admin-employee-management';
 import SystemSettings from '../features/admin-system-settings';
 import Reports from '../features/admin-reports';
+import EmployeeManagement from 'features/admin-employee-management'
 
 import {ProtectedRoute} from '../shared/lib/auth/ProtectedRoute';
 import './App.css';

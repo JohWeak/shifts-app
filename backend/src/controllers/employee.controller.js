@@ -2,6 +2,7 @@
 const db = require('../models');
 const { Employee, Position, EmployeeConstraint } = db;
 const bcrypt = require('bcryptjs');
+const {Op} = require("sequelize");
 
 // Create new employee
 const create = async (req, res) => {
@@ -32,20 +33,59 @@ const create = async (req, res) => {
 // Get all employees
 const findAll = async (req, res) => {
     try {
-        const employees = await Employee.findAll({
+        const { page = 1, pageSize = 10, status, position, search } = req.query;
+
+        // Build where clause
+        const where = {};
+        if (status && status !== 'all') {
+            where.status = status;
+        }
+        if (position && position !== 'all') {
+            where.default_position_id = position;
+        }
+        if (search) {
+            where[Op.or] = [
+                { first_name: { [Op.like]: `%${search}%` } },
+                { last_name: { [Op.like]: `%${search}%` } },
+                { email: { [Op.like]: `%${search}%` } }
+            ];
+        }
+
+        // Calculate offset
+        const offset = (page - 1) * pageSize;
+
+        // Fetch employees with pagination
+        const { count, rows } = await Employee.findAndCountAll({
+            where,
             attributes: { exclude: ['password'] },
             include: [{
-                model: Position,
+                model: db.Position,
                 as: 'defaultPosition',
                 attributes: ['pos_id', 'pos_name']
-            }]
+            }],
+            limit: parseInt(pageSize),
+            offset: offset,
+            order: [['createdAt', 'DESC']]
         });
+
+        // Format response
+        const employees = rows.map(emp => ({
+            ...emp.toJSON(),
+            default_position_name: emp.defaultPosition?.pos_name || null
+        }));
 
         res.json({
             success: true,
-            data: employees
+            data: employees,
+            pagination: {
+                page: parseInt(page),
+                pageSize: parseInt(pageSize),
+                total: count,
+                totalPages: Math.ceil(count / pageSize)
+            }
         });
     } catch (error) {
+        console.error('Error fetching employees:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching employees',

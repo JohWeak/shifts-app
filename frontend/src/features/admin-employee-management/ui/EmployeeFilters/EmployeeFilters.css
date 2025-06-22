@@ -1,0 +1,74 @@
+/* frontend/src/features/admin-employee-management/ui/EmployeeFilters/EmployeeFilters.css */
+
+.employee-filters-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--bs-border-color);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: calc(var(--app-navbar-height) + var(--space-4));
+    max-height: calc(100vh - var(--app-navbar-height) - var(--space-8));
+    overflow-y: auto;
+}
+
+.employee-filters-card .card-header {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.employee-filters-card .card-header h6 {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+}
+
+.employee-filters-card .card-body {
+    padding: var(--space-4);
+}
+
+.employee-filters-card .form-label {
+    font-weight: var(--font-medium);
+    color: var(--bs-emphasis-color);
+    margin-bottom: var(--space-2);
+}
+
+.employee-filters-card .form-control,
+.employee-filters-card .form-select {
+    border-radius: var(--radius-base);
+    border: 1px solid var(--bs-border-color);
+    transition: all var(--transition-fast);
+}
+
+.employee-filters-card .form-control:focus,
+.employee-filters-card .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+[data-theme="dark"] .employee-filters-card .form-control,
+[data-theme="dark"] .employee-filters-card .form-select {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-700);
+    color: var(--bs-body-color);
+}
+
+.employee-filters-card .btn-outline-secondary {
+    border-color: var(--bs-border-color);
+}
+
+.employee-filters-card .btn-outline-secondary:hover {
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-gray-400);
+}
+
+[data-theme="dark"] .employee-filters-card .btn-outline-secondary:hover {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-600);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .employee-filters-card {
+        position: static;
+        margin-bottom: var(--space-4);
+    }
+}

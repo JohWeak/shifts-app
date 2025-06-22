@@ -44,6 +44,8 @@ const settingsSlice = createSlice({
             defaultEmployeesPerShift: 1,
             algorithmMaxTime: 120,
             strictLegalCompliance: true,
+            positions: [], // Добавляем массив позиций
+            workSites: [],
 
             // Position-specific settings (можно переопределить для каждой позиции)
             positionSettings: {},// hours
@@ -64,11 +66,15 @@ const settingsSlice = createSlice({
             })
             .addCase(fetchSystemSettings.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                state.systemSettings = action.payload;
+                // Объединяем существующие настройки с полученными
+                state.systemSettings = {
+                    ...state.systemSettings,
+                    ...action.payload
+                };
             })
             .addCase(fetchSystemSettings.rejected, (state, action) => {
                 state.loading = 'idle';
-                state.error = action.payload;
+                state.error = action.payload || 'Failed to fetch settings';
             })
             // Update settings
             .addCase(updateSystemSettings.pending, (state) => {
@@ -76,11 +82,14 @@ const settingsSlice = createSlice({
             })
             .addCase(updateSystemSettings.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                state.systemSettings = action.payload;
+                state.systemSettings = {
+                    ...state.systemSettings,
+                    ...action.payload
+                };
             })
             .addCase(updateSystemSettings.rejected, (state, action) => {
                 state.loading = 'idle';
-                state.error = action.payload;
+                state.error = action.payload || 'Failed to update settings';
             });
     },
 });

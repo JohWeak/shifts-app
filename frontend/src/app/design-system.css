@@ -1,3 +1,5 @@
+/* frontend/src/app/design-system.css */
+
 /* ============================================
    DESIGN SYSTEM - Bootstrap Integration
    ============================================ */
@@ -17,6 +19,10 @@
     --bs-danger-rgb: 220, 53, 69;
     --bs-info: #0dcaf0;
     --bs-info-rgb: 13, 202, 240;
+    --bs-light: #f8f9fa;
+    --bs-light-rgb: 248, 249, 250;
+    --bs-dark: #212529;
+    --bs-dark-rgb: 33, 37, 41;
 
     /* Bootstrap Grays */
     --bs-white: #ffffff;
@@ -39,11 +45,52 @@
     --bs-border-color: #dee2e6;
     --bs-border-color-translucent: rgba(0, 0, 0, .175);
 
-    /* Наши дополнительные переменные */
+    /* Light theme outline button variables */
+    --bs-btn-outline-primary-color: var(--bs-primary);
+    --bs-btn-outline-primary-border-color: var(--bs-primary);
+    --bs-btn-outline-primary-hover-bg: var(--bs-primary);
+    --bs-btn-outline-primary-hover-color: #fff;
+
+    --bs-btn-outline-secondary-color: var(--bs-secondary);
+    --bs-btn-outline-secondary-border-color: var(--bs-secondary);
+    --bs-btn-outline-secondary-hover-bg: var(--bs-secondary);
+    --bs-btn-outline-secondary-hover-color: #fff;
+
+    --bs-btn-outline-success-color: var(--bs-success);
+    --bs-btn-outline-success-border-color: var(--bs-success);
+    --bs-btn-outline-success-hover-bg: var(--bs-success);
+    --bs-btn-outline-success-hover-color: #fff;
+
+    --bs-btn-outline-warning-color: var(--bs-warning);
+    --bs-btn-outline-warning-border-color: var(--bs-warning);
+    --bs-btn-outline-warning-hover-bg: var(--bs-warning);
+    --bs-btn-outline-warning-hover-color: #000;
+
+    --bs-btn-outline-danger-color: var(--bs-danger);
+    --bs-btn-outline-danger-border-color: var(--bs-danger);
+    --bs-btn-outline-danger-hover-bg: var(--bs-danger);
+    --bs-btn-outline-danger-hover-color: #fff;
+
+    --bs-btn-outline-info-color: var(--bs-info);
+    --bs-btn-outline-info-border-color: var(--bs-info);
+    --bs-btn-outline-info-hover-bg: var(--bs-info);
+    --bs-btn-outline-info-hover-color: #000;
+
+    --bs-btn-outline-light-color: var(--bs-light);
+    --bs-btn-outline-light-border-color: var(--bs-light);
+    --bs-btn-outline-light-hover-bg: var(--bs-light);
+    --bs-btn-outline-light-hover-color: #000;
+
+    --bs-btn-outline-dark-color: var(--bs-dark);
+    --bs-btn-outline-dark-border-color: var(--bs-dark);
+    --bs-btn-outline-dark-hover-bg: var(--bs-dark);
+    --bs-btn-outline-dark-hover-color: #fff;
+
+    /* Дополнительные переменные */
     --app-sidebar-width: 280px;
     --app-navbar-height: 64px;
 
-    /* ========== Typography (добавь недостающие) ========== */
+    /* Typography */
     --text-xs: 0.75rem;     /* 12px */
     --text-sm: 0.875rem;    /* 14px */
     --text-base: 1rem;      /* 16px */
@@ -63,7 +110,7 @@
     --bs-body-font-weight: 400;
     --bs-body-line-height: 1.5;
 
-    /* ========== Spacing System (добавь недостающие) ========== */
+    /* Spacing System */
     --space-0: 0;
     --space-1: 0.25rem;  /* 4px */
     --space-2: 0.5rem;   /* 8px */
@@ -74,7 +121,7 @@
     --space-7: 3rem;     /* 48px */
     --space-8: 4rem;     /* 64px */
 
-    /* ========== Borders & Radius  ========== */
+    /* Borders & Radius */
     --radius-none: 0;
     --radius-sm: 0.25rem;   /* 4px */
     --radius-base: 0.375rem; /* 6px */
@@ -83,24 +130,23 @@
     --radius-xl: 1rem;      /* 16px */
     --radius-full: 9999px;
 
-    /* ========== Transitions  ========== */
+    /* Transitions */
     --transition-fast: 150ms ease-in-out;
     --transition-base: 200ms ease-in-out;
     --transition-slow: 300ms ease-in-out;
 
-    /* ========== Shadows  ========== */    --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    /* Shadows */
+    --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     --bs-box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     --bs-box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Renamed from --bs-box-shadow-sm for consistency */
-    --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);     /* Renamed from --bs-box-shadow */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-    --shadow-inset: 6px 6px 6px -6px rgba(0,0,0,0.68) inset;
 
-    /* ========== Form Select variables (ДОБАВЛЕНО для DatePicker) ========== */
-    /* Эти переменные используются для стилизации выпадающих списков месяца/года */
+    /* Form Select variables */
     --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     --bs-form-select-padding-y: 0.375rem;
-    --bs-form-select-padding-x: 2.25rem 0.75rem; /* padding-right | padding-left */
+    --bs-form-select-padding-x: 2.25rem 0.75rem;
     --bs-form-select-font-size: 1rem;
     --bs-form-select-font-weight: 400;
     --bs-form-select-line-height: 1.5;
@@ -108,11 +154,7 @@
     --bs-form-select-bg: var(--bs-white);
     --bs-border-width: 1px;
     --bs-border-radius: var(--radius-base);
-    /* Bootstrap Popover Width (ДЛЯ КАЛЕНДАРЯ) */
     --bs-popover-max-width: 350px;
-
-
-
 }
 
 /* Dark Theme */
@@ -149,107 +191,126 @@
     --bs-btn-hover-border-color: #5da6ff;
     --bs-btn-hover-color: #000;
 
-    --bs-primary-muted: #5da6ff; /* Можно оставить как есть или сделать чуть тусклее */
-    --bs-success-muted: #48c9a0; /* Приглушенный мятный */
-    --bs-info-muted: #49c0e0;    /* Приглушенный бирюзовый */
+    /* Dark theme outline button variables */
+    --bs-btn-outline-primary-color: #4da3ff;
+    --bs-btn-outline-primary-border-color: #4da3ff;
+    --bs-btn-outline-primary-hover-bg: #4da3ff;
+    --bs-btn-outline-primary-hover-color: #000;
 
-    /* ========== Dark Theme Form Select variables (ДОБАВЛЕНО для DatePicker) ========== */
+    --bs-btn-outline-secondary-color: #adb5bd;
+    --bs-btn-outline-secondary-border-color: #adb5bd;
+    --bs-btn-outline-secondary-hover-bg: #adb5bd;
+    --bs-btn-outline-secondary-hover-color: #000;
+
+    --bs-btn-outline-success-color: #75b798;
+    --bs-btn-outline-success-border-color: #75b798;
+    --bs-btn-outline-success-hover-bg: #75b798;
+    --bs-btn-outline-success-hover-color: #000;
+
+    --bs-btn-outline-warning-color: #ffda6a;
+    --bs-btn-outline-warning-border-color: #ffda6a;
+    --bs-btn-outline-warning-hover-bg: #ffda6a;
+    --bs-btn-outline-warning-hover-color: #000;
+
+    --bs-btn-outline-danger-color: #ea868f;
+    --bs-btn-outline-danger-border-color: #ea868f;
+    --bs-btn-outline-danger-hover-bg: #ea868f;
+    --bs-btn-outline-danger-hover-color: #000;
+
+    --bs-btn-outline-info-color: #6edff6;
+    --bs-btn-outline-info-border-color: #6edff6;
+    --bs-btn-outline-info-hover-bg: #6edff6;
+    --bs-btn-outline-info-hover-color: #000;
+
+    --bs-btn-outline-light-color: #f8f9fa;
+    --bs-btn-outline-light-border-color: #f8f9fa;
+    --bs-btn-outline-light-hover-bg: #f8f9fa;
+    --bs-btn-outline-light-hover-color: #000;
+
+    --bs-btn-outline-dark-color: #dee2e6;
+    --bs-btn-outline-dark-border-color: #dee2e6;
+    --bs-btn-outline-dark-hover-bg: #dee2e6;
+    --bs-btn-outline-dark-hover-color: #000;
+
+    --bs-primary-muted: #5da6ff;
+    --bs-success-muted: #48c9a0;
+    --bs-info-muted: #49c0e0;
+
+    /* Dark Theme Form Select variables */
     --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     --bs-form-select-color: var(--bs-body-color);
-    --bs-form-select-bg: var(--bs-gray-900); /* Slightly darker than body for contrast */
+    --bs-form-select-bg: var(--bs-gray-900);
 
-    /* ========== Dark Theme Shadows ========== */
-    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15); /* Darker shadow */
+    /* Dark Theme Shadows */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
     --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.35);
-
-    /* ========== Dark Theme Outline Button Colors (НОВЫЙ БЛОК) ========== */
-    /* Сначала определяем переменные, которые будут использоваться в стилях ниже */
-    --bs-btn-outline-primary-color: var(--bs-primary);
-    --bs-btn-outline-secondary-color: var(--bs-secondary);
-    --bs-btn-outline-success-color: var(--bs-success);
-    --bs-btn-outline-warning-color: var(--bs-warning);
-    --bs-btn-outline-danger-color: var(--bs-danger);
-    --bs-btn-outline-info-color: var(--bs-info);
-    --bs-btn-outline-light-color: var(--bs-gray-300); /* Цвет для "светлой" кнопки */
-    --bs-btn-outline-dark-color: var(--bs-gray-500);  /* Цвет для "темной" кнопки */
-
-
-    /* --- Стили для каждого типа кнопки --- */
-
-    /* Primary Button */
-    .btn-outline-primary {
-        --bs-btn-color: var(--bs-btn-outline-primary-color);
-        --bs-btn-border-color: var(--bs-btn-outline-primary-color);
-        --bs-btn-hover-color: #000; /* Черный текст на светлом синем фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-primary-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-primary-color);
-    }
-
-    /* Secondary Button */
-    .btn-outline-secondary {
-        --bs-btn-color: var(--bs-btn-outline-secondary-color);
-        --bs-btn-border-color: var(--bs-btn-outline-secondary-color);
-        --bs-btn-hover-color: #fff; /* Белый текст на сером фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-secondary-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-secondary-color);
-    }
-
-    /* Success Button */
-    .btn-outline-success {
-        --bs-btn-color: var(--bs-btn-outline-success-color);
-        --bs-btn-border-color: var(--bs-btn-outline-success-color);
-        --bs-btn-hover-color: #fff; /* Белый текст на зеленом фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-success-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-success-color);
-    }
-
-    /* Danger Button */
-    .btn-outline-danger {
-        --bs-btn-color: var(--bs-btn-outline-danger-color);
-        --bs-btn-border-color: var(--bs-btn-outline-danger-color);
-        --bs-btn-hover-color: #fff; /* Белый текст на красном фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-danger-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-danger-color);
-    }
-
-    /* Warning Button */
-    .btn-outline-warning {
-        --bs-btn-color: var(--bs-btn-outline-warning-color);
-        --bs-btn-border-color: var(--bs-btn-outline-warning-color);
-        --bs-btn-hover-color: #000; /* Темный текст для контраста на желтом фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-warning-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-warning-color);
-    }
-
-    /* Info Button */
-    .btn-outline-info {
-        --bs-btn-color: var(--bs-btn-outline-info-color);
-        --bs-btn-border-color: var(--bs-btn-outline-info-color);
-        --bs-btn-hover-color: #000; /* Темный текст для контраста на бирюзовом фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-info-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-info-color);
-    }
-
-    /* Light Button */
-    .btn-outline-light {
-        --bs-btn-color: var(--bs-btn-outline-light-color);
-        --bs-btn-border-color: var(--bs-btn-outline-light-color);
-        --bs-btn-hover-color: #000; /* Темный текст на светлом фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-light-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-light-color);
-    }
-
-    /* Dark Button */
-    .btn-outline-dark {
-        --bs-btn-color: var(--bs-btn-outline-dark-color);
-        --bs-btn-border-color: var(--bs-btn-outline-dark-color);
-        --bs-btn-hover-color: #fff; /* Белый текст на темном фоне */
-        --bs-btn-hover-bg: var(--bs-btn-outline-dark-color);
-        --bs-btn-hover-border-color: var(--bs-btn-outline-dark-color);
-    }
 }
 
+/* Apply outline button variables for all themes */
+.btn-outline-primary {
+    --bs-btn-color: var(--bs-btn-outline-primary-color);
+    --bs-btn-border-color: var(--bs-btn-outline-primary-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-primary-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-primary-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-primary-hover-bg);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--bs-btn-outline-secondary-color);
+    --bs-btn-border-color: var(--bs-btn-outline-secondary-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-secondary-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-secondary-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-secondary-hover-bg);
+}
+
+.btn-outline-success {
+    --bs-btn-color: var(--bs-btn-outline-success-color);
+    --bs-btn-border-color: var(--bs-btn-outline-success-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-success-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-success-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-success-hover-bg);
+}
+
+.btn-outline-warning {
+    --bs-btn-color: var(--bs-btn-outline-warning-color);
+    --bs-btn-border-color: var(--bs-btn-outline-warning-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-warning-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-warning-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-warning-hover-bg);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--bs-btn-outline-danger-color);
+    --bs-btn-border-color: var(--bs-btn-outline-danger-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-danger-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-danger-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-danger-hover-bg);
+}
+
+.btn-outline-info {
+    --bs-btn-color: var(--bs-btn-outline-info-color);
+    --bs-btn-border-color: var(--bs-btn-outline-info-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-info-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-info-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-info-hover-bg);
+}
+
+.btn-outline-light {
+    --bs-btn-color: var(--bs-btn-outline-light-color);
+    --bs-btn-border-color: var(--bs-btn-outline-light-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-light-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-light-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-light-hover-bg);
+}
+
+.btn-outline-dark {
+    --bs-btn-color: var(--bs-btn-outline-dark-color);
+    --bs-btn-border-color: var(--bs-btn-outline-dark-border-color);
+    --bs-btn-hover-bg: var(--bs-btn-outline-dark-hover-bg);
+    --bs-btn-hover-color: var(--bs-btn-outline-dark-hover-color);
+    --bs-btn-hover-border-color: var(--bs-btn-outline-dark-hover-bg);
+}
 
 /* Smooth transitions */
 * {
@@ -257,4 +318,3 @@
     transition-duration: 200ms;
     transition-timing-function: ease-in-out;
 }
-

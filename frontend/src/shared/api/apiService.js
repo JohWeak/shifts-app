@@ -73,6 +73,12 @@ export const positionAPI = {
 };
 
 export const settingsAPI = {
-    fetchSystemSettings: () => api.get(API_ENDPOINTS.SETTINGS.SYSTEM),
-    updateSystemSettings: (settings) => api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings)
+    fetchSystemSettings: async () => {
+        const response = await api.get(API_ENDPOINTS.SETTINGS.SYSTEM);
+        return response; // Axios уже возвращает response.data
+    },
+    updateSystemSettings: async (settings) => {
+        const response = await api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings);
+        return response;
+    }
 };

@@ -24,6 +24,9 @@ app.use('/api/positions', require('./routes/position.routes'));
 app.use('/api/shifts', require('./routes/shift.routes'));
 app.use('/api/constraints', require('./routes/constraint.routes'));
 app.use('/api/schedule-settings', require('./routes/schedule-settings.routes'));
+app.use('/api/settings', require('./routes/settings.routes'));
+
+
 app.use('/api/test', require('./routes/test.routes'));
 
 // Error handling middleware

@@ -1,0 +1,74 @@
+/* frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.css */
+
+.employee-list-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--bs-border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.employee-table {
+    margin-bottom: 0;
+}
+
+.employee-table thead th {
+    background-color: var(--bs-gray-100);
+    border-bottom: 2px solid var(--bs-border-color);
+    font-weight: var(--font-semibold);
+    color: var(--bs-emphasis-color);
+    padding: var(--space-3) var(--space-4);
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .employee-table thead th {
+    background-color: var(--bs-gray-800);
+}
+
+.employee-table tbody td {
+    padding: var(--space-3) var(--space-4);
+    vertical-align: middle;
+}
+
+.employee-table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.employee-table tbody tr:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .employee-table tbody tr:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.employee-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .employee-table {
+        font-size: var(--text-sm);
+    }
+
+    .employee-table thead th,
+    .employee-table tbody td {
+        padding: var(--space-2);
+    }
+
+    .employee-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: var(--text-xs);
+    }
+}
