@@ -2,8 +2,8 @@ const {
     WorkSite,
     Position,
     Shift
-} = require('../models/associations');
-const sequelize = require('../config/db.config');
+} = require('../src/models');
+const sequelize = require('../src/config/db.config');
 require('dotenv').config();
 
 async function seedData() {

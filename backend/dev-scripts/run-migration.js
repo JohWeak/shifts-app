@@ -1,6 +1,6 @@
 // backend/src/scripts/run-migration.js
-const sequelize = require('../config/db.config');
-const migration = require('../migrations/001-simplify-constraints');
+const sequelize = require('../src/config/db.config');
+const migration = require('../src/migrations/001-simplify-constraints');
 
 async function runMigration() {
     try {
