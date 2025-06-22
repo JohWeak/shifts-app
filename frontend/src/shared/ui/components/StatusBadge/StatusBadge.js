@@ -19,7 +19,7 @@ const StatusBadge = ({ status, size = 'md', mode = 'text' }) => {
 
     // НОВОЕ: Определяем, какая иконка соответствует какому статусу
     const icons = {
-        published: 'bi bi-check-circle-fill',
+        published: 'bi bi-check-lg',
         draft: 'bi bi-pencil-fill',
         archived: 'bi bi-archive-fill',
         active: 'bi bi-play-circle-fill',

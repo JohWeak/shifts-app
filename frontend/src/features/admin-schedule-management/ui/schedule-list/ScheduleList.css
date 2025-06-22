@@ -97,4 +97,11 @@
     .schedule-overview-table .badge {
         font-size: 0.75rem;
     }
+    .schedule-overview-table .action-buttons .btn{
+        padding: var(--space-0);
+        padding-left: var(--space-1);
+    }
+    .schedule-row .status-badge {
+        border-radius: var(--radius-sm);
+    }
 }
