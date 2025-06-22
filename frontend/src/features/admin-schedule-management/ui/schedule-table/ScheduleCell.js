@@ -118,11 +118,11 @@ const ScheduleCell = ({
                         style={{fontSize: '0.8em'}}
                     >
         <span
-            className={`employee-name employee-clickable ${isEditing ? 'text-primary' : ''}`}
+            className={`employee-name employee-clickable ${isEditing ? 'employee-editable' : ''}`}
             onClick={(e) => handleEmployeeNameClick(e, employee.emp_id)}
             style={{
                 cursor: isEditing ? 'pointer' : 'default',
-                textDecoration: isEditing ? 'underline' : 'none'
+                textDecoration: isEditing ? 'underline' : 'none',
             }}
             title={isEditing ? 'Click to replace this employee' : ''}
         >

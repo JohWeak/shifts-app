@@ -75,15 +75,18 @@
 
 .schedule-cell .employee-name.employee-clickable {
     transition: color var(--transition-fast);
+
+}
+.employee-editable {
+    font-style: italic;
 }
 
 .schedule-cell.editing-mode .employee-name.employee-clickable:hover {
-    color: var(--bs-primary-hover) !important;
+    color: var(--bs-primary-hover);
 }
 
 /* Pending Assignment */
 .schedule-cell .pending-assignment .employee-name {
-    font-style: italic;
     opacity: 0.9;
 }
 
