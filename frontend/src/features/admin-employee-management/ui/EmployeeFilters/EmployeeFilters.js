@@ -15,11 +15,11 @@ const EmployeeFilters = () => {
     const { systemSettings } = useSelector((state) => state.settings || {});
     const { workSites } = useSelector((state) => state.schedule || {});
 
-    const [selectedWorkSite, setSelectedWorkSite] = useState('all');
+    const [selectedWorkSite, setSelectedWorkSite] = useState(filters.work_site || 'all');
 
     // Get all positions or filter by work site
     const allPositions = systemSettings?.positions || [];
-    const filteredPositions = selectedWorkSite === 'all'
+    const filteredPositions = selectedWorkSite === 'all' || selectedWorkSite === 'any'
         ? allPositions
         : allPositions.filter(pos => pos.site_id === parseInt(selectedWorkSite));
 
@@ -40,15 +40,18 @@ const EmployeeFilters = () => {
 
     const handleWorkSiteChange = (value) => {
         setSelectedWorkSite(value);
+        // Update work_site filter
+        handleFilterChange('work_site', value);
         // Reset position filter when work site changes
         handleFilterChange('position', 'all');
     };
 
     const handleReset = () => {
         dispatch(setFilters({
-            status: 'active', // Default to active
+            status: 'active',
             position: 'all',
-            search: ''
+            search: '',
+            work_site: 'all'
         }));
         setSelectedWorkSite('all');
     };
@@ -93,6 +96,7 @@ const EmployeeFilters = () => {
                             onChange={(e) => handleWorkSiteChange(e.target.value)}
                         >
                             <option value="all">{t('common.all')}</option>
+                            <option value="any">{t('employee.anyWorkSite')}</option>
                             {workSites?.map((site) => (
                                 <option key={site.site_id} value={site.site_id}>
                                     {site.site_name}
@@ -115,7 +119,7 @@ const EmployeeFilters = () => {
                                 </option>
                             ))}
                         </Form.Select>
-                        {selectedWorkSite !== 'all' && filteredPositions.length === 0 && (
+                        {selectedWorkSite !== 'all' && selectedWorkSite !== 'any' && filteredPositions.length === 0 && (
                             <Form.Text className="text-muted">
                                 {t('employee.noPositionsForSite')}
                             </Form.Text>

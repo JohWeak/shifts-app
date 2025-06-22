@@ -36,6 +36,15 @@
 .employee-table tbody tr:hover {
     background-color: var(--bs-gray-100);
 }
+.employee-table .badge {
+    font-weight: var(--font-medium);
+    font-size: var(--text-xs);
+    padding: 0.25rem 0.5rem;
+}
+
+.employee-table .badge i {
+    font-size: 0.875rem;
+}
 
 [data-theme="dark"] .employee-table tbody tr:hover {
     background-color: var(--bs-gray-800);

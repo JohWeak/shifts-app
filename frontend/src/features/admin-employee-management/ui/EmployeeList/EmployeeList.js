@@ -72,7 +72,19 @@ const EmployeeList = ({
                                         </div>
                                     </div>
                                 </td>
-                                <td>{employee.site_name}</td>
+                                <td>
+                                    {employee.work_site_name ? (
+                                        <Badge bg="info" className="bg-opacity-10 text-info">
+                                            <i className="bi bi-building me-1"></i>
+                                            {employee.work_site_name}
+                                        </Badge>
+                                    ) : (
+                                        <Badge bg="secondary" className="bg-opacity-10 text-secondary">
+                                            <i className="bi bi-globe me-1"></i>
+                                            {t('employee.anyWorkSite')}
+                                        </Badge>
+                                    )}
+                                </td>
                                 <td>
                                     {employee.default_position_name ||
                                         <span className="text-muted">{t('employee.noPosition')}</span>}
