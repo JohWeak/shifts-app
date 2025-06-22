@@ -35,6 +35,7 @@ export const en = {
         reset: 'Reset', 
         save: 'Save',
         search: 'Search',
+        select: 'Select',
         settings: 'Settings',
         status: 'Status', 
         success: 'Success',
@@ -219,6 +220,8 @@ export const en = {
         dateRange: 'Date Range',
         customFields: 'Custom Fields',
         noPositionsForSite: 'No positions available for selected work site',
+        anyWorkSite: 'Any work site',
+        workSiteHelp: 'Select work site or "Any" for flexible assignment',
 
     },
     errors: {

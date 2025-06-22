@@ -1,13 +1,13 @@
 // backend/src/controllers/employee.controller.js
 const db = require('../models');
-const { Employee, Position, EmployeeConstraint } = db;
+const {Employee, Position, EmployeeConstraint, WorkSite} = db;
 const bcrypt = require('bcryptjs');
 const {Op} = require("sequelize");
 
 // Create new employee
 const create = async (req, res) => {
     try {
-        const { password, ...employeeData } = req.body;
+        const {password, ...employeeData} = req.body;
 
         // Hash password if provided
         if (password) {
@@ -33,7 +33,7 @@ const create = async (req, res) => {
 // Get all employees
 const findAll = async (req, res) => {
     try {
-        const { page = 1, pageSize = 10, status, position, search } = req.query;
+        const {page = 1, pageSize = 10, status, position, search, work_site} = req.query;
 
         // Build where clause
         const where = {};
@@ -43,11 +43,19 @@ const findAll = async (req, res) => {
         if (position && position !== 'all') {
             where.default_position_id = position;
         }
+        if (work_site && work_site !== 'all') {
+            // 'any' означает работников без привязки к work site
+            if (work_site === 'any') {
+                where.work_site_id = null;
+            } else {
+                where.work_site_id = work_site;
+            }
+        }
         if (search) {
             where[Op.or] = [
-                { first_name: { [Op.like]: `%${search}%` } },
-                { last_name: { [Op.like]: `%${search}%` } },
-                { email: { [Op.like]: `%${search}%` } }
+                {first_name: {[Op.like]: `%${search}%`}},
+                {last_name: {[Op.like]: `%${search}%`}},
+                {email: {[Op.like]: `%${search}%`}}
             ];
         }
 
@@ -55,14 +63,21 @@ const findAll = async (req, res) => {
         const offset = (page - 1) * pageSize;
 
         // Fetch employees with pagination
-        const { count, rows } = await Employee.findAndCountAll({
+        const {count, rows} = await Employee.findAndCountAll({
             where,
             attributes: { exclude: ['password'] },
-            include: [{
-                model: db.Position,
-                as: 'defaultPosition',
-                attributes: ['pos_id', 'pos_name']
-            }],
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition',
+                    attributes: ['pos_id', 'pos_name']
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                }
+            ],
             limit: parseInt(pageSize),
             offset: offset,
             order: [['createdAt', 'DESC']]
@@ -71,7 +86,8 @@ const findAll = async (req, res) => {
         // Format response
         const employees = rows.map(emp => ({
             ...emp.toJSON(),
-            default_position_name: emp.defaultPosition?.pos_name || null
+            default_position_name: emp.defaultPosition?.pos_name || null,
+            work_site_name: emp.workSite?.site_name || null
         }));
 
         res.json({
@@ -98,11 +114,17 @@ const findAll = async (req, res) => {
 const findOne = async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] },
-            include: [{
-                model: Position,
-                as: 'defaultPosition'
-            }]
+            attributes: {exclude: ['password']},
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition'
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite'
+                }
+            ]
         });
 
         if (!employee) {
@@ -128,7 +150,7 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const { password, ...updateData } = req.body;
+        const {password, ...updateData} = req.body;
 
         // Hash password if provided
         if (password) {
@@ -136,7 +158,7 @@ const update = async (req, res) => {
         }
 
         const [updated] = await Employee.update(updateData, {
-            where: { emp_id: req.params.id }
+            where: {emp_id: req.params.id}
         });
 
         if (!updated) {
@@ -147,7 +169,7 @@ const update = async (req, res) => {
         }
 
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] }
+            attributes: {exclude: ['password']}
         });
 
         res.json({
@@ -168,7 +190,7 @@ const update = async (req, res) => {
 const deleteEmployee = async (req, res) => {
     try {
         const deleted = await Employee.destroy({
-            where: { emp_id: req.params.id }
+            where: {emp_id: req.params.id}
         });
 
         if (!deleted) {
@@ -195,7 +217,7 @@ const deleteEmployee = async (req, res) => {
 const getConstraints = async (req, res) => {
     try {
         const constraints = await EmployeeConstraint.findAll({
-            where: { emp_id: req.params.id },
+            where: {emp_id: req.params.id},
             include: [{
                 model: db.Shift,
                 as: 'shift',

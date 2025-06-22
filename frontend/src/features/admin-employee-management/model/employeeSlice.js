@@ -74,7 +74,8 @@ const initialState = {
     filters: {
         status: 'active',
         position: 'all',
-        search: ''
+        search: '',
+        work_site: 'all'
     },
     pagination: {
         page: 1,

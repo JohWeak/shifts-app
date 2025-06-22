@@ -1,14 +1,17 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeModal/EmployeeModal.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
 import './EmployeeModal.css';
 
 const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const { t } = useI18n();
-    // FIX: Get positions from the correct path in Redux store
+    const dispatch = useDispatch();
+
     const { systemSettings } = useSelector((state) => state.settings || {});
+    const { workSites } = useSelector((state) => state.schedule || {});
     const positions = systemSettings?.positions || [];
 
     const [formData, setFormData] = useState({
@@ -19,10 +22,18 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         password: '',
         status: 'active',
         role: 'employee',
-        default_position_id: ''
+        default_position_id: '',
+        work_site_id: ''
     });
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
+    const [selectedWorkSite, setSelectedWorkSite] = useState('');
+
+    useEffect(() => {
+        if (show && (!workSites || workSites.length === 0)) {
+            dispatch(fetchWorkSites());
+        }
+    }, [show, dispatch, workSites]);
 
     useEffect(() => {
         if (employee) {
@@ -31,13 +42,14 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 last_name: employee.last_name || '',
                 email: employee.email || '',
                 login: employee.login || '',
-                password: '', // Don't populate password for editing
+                password: '',
                 status: employee.status || 'active',
                 role: employee.role || 'employee',
-                default_position_id: employee.default_position_id || ''
+                default_position_id: employee.default_position_id || '',
+                work_site_id: employee.work_site_id || ''
             });
+            setSelectedWorkSite(employee.work_site_id || '');
         } else {
-            // Reset form for new employee
             setFormData({
                 first_name: '',
                 last_name: '',
@@ -46,15 +58,33 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 password: '',
                 status: 'active',
                 role: 'employee',
-                default_position_id: ''
+                default_position_id: '',
+                work_site_id: ''
             });
+            setSelectedWorkSite('');
         }
         setErrors({});
     }, [employee]);
 
+    // Filter positions based on selected work site
+    const filteredPositions = selectedWorkSite && selectedWorkSite !== 'any'
+        ? positions.filter(pos => pos.site_id === parseInt(selectedWorkSite))
+        : positions;
+
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        // Clear error for this field
+
+        // If work site changes, reset position if it's not compatible
+        if (field === 'work_site_id') {
+            setSelectedWorkSite(value);
+            if (value && value !== 'any' && formData.default_position_id) {
+                const position = positions.find(p => p.pos_id === parseInt(formData.default_position_id));
+                if (position && position.site_id !== parseInt(value)) {
+                    setFormData(prev => ({ ...prev, default_position_id: '' }));
+                }
+            }
+        }
+
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
@@ -88,7 +118,12 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            onSave(formData);
+            // Convert empty string to null for work_site_id
+            const dataToSave = {
+                ...formData,
+                work_site_id: formData.work_site_id === 'any' ? null : formData.work_site_id
+            };
+            onSave(dataToSave);
         }
     };
 
@@ -194,23 +229,50 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.defaultPosition')}</Form.Label>
+                                <Form.Label>{t('workSite.workSite')}</Form.Label>
                                 <Form.Select
-                                    value={formData.default_position_id}
-                                    onChange={(e) => handleChange('default_position_id', e.target.value)}
+                                    value={formData.work_site_id}
+                                    onChange={(e) => handleChange('work_site_id', e.target.value)}
                                 >
-                                    <option value="">{t('employee.noPosition')}</option>
-                                    {positions.map((position) => (
-                                        <option key={position.pos_id} value={position.pos_id}>
-                                            {position.pos_name}
+                                    <option value="">{t('common.select')}</option>
+                                    <option value="any">{t('employee.anyWorkSite')}</option>
+                                    {workSites?.map((site) => (
+                                        <option key={site.site_id} value={site.site_id}>
+                                            {site.site_name}
                                         </option>
                                     ))}
                                 </Form.Select>
+                                <Form.Text className="text-muted">
+                                    {t('employee.workSiteHelp')}
+                                </Form.Text>
                             </Form.Group>
                         </Col>
                     </Row>
 
                     <Row>
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>{t('employee.defaultPosition')}</Form.Label>
+                                <Form.Select
+                                    value={formData.default_position_id}
+                                    onChange={(e) => handleChange('default_position_id', e.target.value)}
+                                    disabled={!selectedWorkSite || filteredPositions.length === 0}
+                                >
+                                    <option value="">{t('employee.noPosition')}</option>
+                                    {filteredPositions.map((position) => (
+                                        <option key={position.pos_id} value={position.pos_id}>
+                                            {position.pos_name}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                {selectedWorkSite && selectedWorkSite !== 'any' && filteredPositions.length === 0 && (
+                                    <Form.Text className="text-muted">
+                                        {t('employee.noPositionsForSite')}
+                                    </Form.Text>
+                                )}
+                            </Form.Group>
+                        </Col>
+
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>{t('employee.status')}</Form.Label>
@@ -226,7 +288,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                 </Form.Select>
                             </Form.Group>
                         </Col>
+                    </Row>
 
+                    <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>{t('employee.role')}</Form.Label>

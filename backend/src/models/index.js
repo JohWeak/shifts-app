@@ -69,6 +69,12 @@ const defineAssociations = () => {
             as: 'assignments'
         });
     }
+    if (Employee && WorkSite) {
+        Employee.belongsTo(WorkSite, {
+            foreignKey: 'work_site_id',
+            as: 'workSite'
+        });
+    }
 
     // Position associations
     if (Position && WorkSite) {
@@ -84,6 +90,7 @@ const defineAssociations = () => {
             as: 'employees'
         });
     }
+
 
     // Schedule associations
     if (Schedule && WorkSite) {
@@ -179,6 +186,12 @@ const defineAssociations = () => {
                 as: 'settings'
             });
         }
+        if (Employee) {
+            WorkSite.hasMany(Employee, {
+                foreignKey: 'work_site_id',
+                as: 'employees'
+            });
+        }
     }
 
     if (EmployeeQualification && Employee) {
@@ -192,6 +205,7 @@ const defineAssociations = () => {
             as: 'qualifications'
         });
     }
+
 };
 
 // Вызываем функцию определения ассоциаций
