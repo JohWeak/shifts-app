@@ -1,6 +1,7 @@
 // frontend/src/shared/api/weeklySchedule.js
 import axios from 'axios';
 
+
 // 1. Создаем один экземпляр axios для всего приложения
 const api = axios.create({
     baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
@@ -19,6 +20,8 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        console.log('API Request:', config.method?.toUpperCase(), config.url, config.params);
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -28,21 +31,34 @@ api.interceptors.request.use(
 // Обрабатывает успешные ответы и глобальные ошибки
 api.interceptors.response.use(
     (response) => {
+        console.log('API Response:', response.config.url, response.data);
+
         // Если это запрос на файл (blob), возвращаем весь ответ как есть
         if (response.config.responseType === 'blob') {
             return response;
         }
 
-        // Проверяем, является ли `response.data` объектом и содержит ли он
-        // стандартные поля нашего API (например, `success` или `data`).
+        // Список endpoints, которые должны возвращать полный ответ
+        const fullResponseEndpoints = [
+            '/api/employees',
+
+            // Добавьте другие endpoints, которым нужен полный ответ
+        ];
+
+        // Проверяем, нужен ли полный ответ для этого endpoint
+        const needsFullResponse = fullResponseEndpoints.some(endpoint =>
+            response.config.url.includes(endpoint) && !response.config.url.includes('/recommendations')
+        );
+
+        if (needsFullResponse) {
+            return response.data;
+        }
+
+        // Для остальных используем старую логику
         if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-            // Если это наш стандартный "обернутый" ответ,
-            // мы извлекаем из него полезные данные.
             return response.data.data;
         }
 
-        // Если это любой другой ответ (например, прямой массив `[]` или объект `{}`),
-        // мы возвращаем `response.data` как есть.
         return response.data;
     },
     (error) => {

@@ -9,7 +9,8 @@ export const fetchEmployees = createAsyncThunk(
     async (filters = {}, { rejectWithValue }) => {
         try {
             const response = await api.get(API_ENDPOINTS.EMPLOYEES.BASE, { params: filters });
-            return response.data;
+            console.log('fetchEmployees response:', response); // Для отладки
+            return response; // response уже содержит { success, data, pagination }
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -21,7 +22,7 @@ export const fetchEmployeeDetails = createAsyncThunk(
     async (employeeId, { rejectWithValue }) => {
         try {
             const response = await api.get(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId));
-            return response.data;
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -33,7 +34,7 @@ export const createEmployee = createAsyncThunk(
     async (employeeData, { rejectWithValue }) => {
         try {
             const response = await api.post(API_ENDPOINTS.EMPLOYEES.BASE, employeeData);
-            return response.data;
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -45,7 +46,7 @@ export const updateEmployee = createAsyncThunk(
     async ({ employeeId, data }, { rejectWithValue }) => {
         try {
             const response = await api.put(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId), data);
-            return response.data;
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -57,7 +58,7 @@ export const deleteEmployee = createAsyncThunk(
     async (employeeId, { rejectWithValue }) => {
         try {
             const response = await api.delete(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId));
-            return { employeeId, ...response.data };
+            return { employeeId, ...response };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -71,7 +72,7 @@ const initialState = {
     loading: false,
     error: null,
     filters: {
-        status: 'all',
+        status: 'active',
         position: 'all',
         search: ''
     },
@@ -107,13 +108,15 @@ const employeeSlice = createSlice({
             })
             .addCase(fetchEmployees.fulfilled, (state, action) => {
                 state.loading = false;
-                // Безопасная проверка данных
-                if (action.payload) {
+                console.log('fetchEmployees.fulfilled payload:', action.payload); // Для отладки
+
+                // action.payload уже содержит { success, data, pagination }
+                if (action.payload && action.payload.success) {
                     state.employees = action.payload.data || [];
                     if (action.payload.pagination) {
                         state.pagination = {
                             ...state.pagination,
-                            total: action.payload.pagination.total || 0
+                            ...action.payload.pagination
                         };
                     }
                 } else {
@@ -132,7 +135,7 @@ const employeeSlice = createSlice({
             })
             .addCase(createEmployee.fulfilled, (state, action) => {
                 state.loading = false;
-                if (action.payload?.data) {
+                if (action.payload && action.payload.success && action.payload.data) {
                     state.employees.unshift(action.payload.data);
                     state.pagination.total += 1;
                 }
@@ -148,7 +151,7 @@ const employeeSlice = createSlice({
             })
             .addCase(updateEmployee.fulfilled, (state, action) => {
                 state.loading = false;
-                if (action.payload?.data) {
+                if (action.payload && action.payload.success && action.payload.data) {
                     const index = state.employees.findIndex(
                         emp => emp.emp_id === action.payload.data.emp_id
                     );

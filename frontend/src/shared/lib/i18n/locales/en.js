@@ -12,6 +12,7 @@ export const en = {
         clear: 'Clear', 
         close: 'Close',
         confirm: 'Confirm',
+        create: 'Create',
         date: 'Date', 
         delete: 'Delete',
         details: 'Details', 
@@ -216,7 +217,9 @@ export const en = {
         exportFormat: 'Export Format',
         includeInactive: 'Include Inactive',
         dateRange: 'Date Range',
-        customFields: 'Custom Fields'
+        customFields: 'Custom Fields',
+        noPositionsForSite: 'No positions available for selected work site',
+
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.', 
@@ -340,6 +343,8 @@ export const en = {
     },
     schedule: {
         actions: 'Actions',
+        active: 'Active',
+        admin: 'Administrator',
         approveRequests: 'Approve Requests', 
         archived: 'Archived', 
         cannotDeletePublished: 'Cannot delete published schedule',
@@ -504,6 +509,17 @@ export const en = {
         alphanumeric: 'Must contain only letters and numbers',
         unique: 'This value already exists',
         strongPassword: 'Password must contain uppercase, lowercase, number and special character'
+    },
+    workSite: {
+        addWorkSite: 'Add Work Site',
+        editWorkSite: 'Edit Work Site',
+        workSite: 'Work Site',
+        workSiteName: 'Work Site Name',
+        workSiteNameHint: 'Work site name',
+        workSiteAddress: 'Work Site Address',
+        workSiteAddressHint: 'Work site address',
+        workSitePhone: 'Work Site Phone',
+        workSitePhoneHint: 'Work site phone number',
     }
 
 };

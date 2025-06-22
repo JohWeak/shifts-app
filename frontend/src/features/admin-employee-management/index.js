@@ -19,7 +19,6 @@ import {
 } from './model/employeeSlice';
 import './index.css';
 
-
 const EmployeeManagement = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
@@ -28,21 +27,25 @@ const EmployeeManagement = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
+    // Get the entire employees state for debugging
+    const employeesState = useSelector((state) => state.employees);
+
+    // Log the state to see what's happening
+    console.log('Employees State:', employeesState);
+
     const {
-        employees,
-        loading,
-        error,
-        filters,
-        pagination
-    } = useSelector((state) => state.employees || {
-        employees: [],
-        loading: false,
-        error: null,
-        filters: { status: 'all', position: 'all', search: '' },
-        pagination: { page: 1, pageSize: 10, total: 0 }
-    });
+        employees = [],
+        loading = false,
+        error = null,
+        filters = { status: 'active', position: 'all', search: '' },
+        pagination = { page: 1, pageSize: 10, total: 0 }
+    } = employeesState || {};
+
+    console.log('Employees array:', employees);
+    console.log('Loading:', loading);
 
     useEffect(() => {
+        console.log('Dispatching fetchEmployees with filters:', filters);
         dispatch(fetchEmployees(filters));
     }, [dispatch, filters]);
 
@@ -56,43 +59,33 @@ const EmployeeManagement = () => {
         setShowModal(true);
     };
 
-    const handleSaveEmployee = async (employeeData) => {
-        try {
-            if (selectedEmployee) {
-                await dispatch(updateEmployee({
-                    employeeId: selectedEmployee.emp_id,
-                    data: employeeData
-                })).unwrap();
-            } else {
-                await dispatch(createEmployee(employeeData)).unwrap();
-            }
-            setShowModal(false);
-            dispatch(fetchEmployees(filters));
-        } catch (error) {
-            console.error('Failed to save employee:', error);
-        }
-    };
-
-    const handleDeleteEmployee = async () => {
-        if (!employeeToDelete) return;
-
-        try {
-            await dispatch(deleteEmployee(employeeToDelete.emp_id)).unwrap();
-            setShowDeleteConfirm(false);
-            setEmployeeToDelete(null);
-        } catch (error) {
-            console.error('Failed to delete employee:', error);
-        }
-    };
-
     const handleDeleteClick = (employee) => {
         setEmployeeToDelete(employee);
         setShowDeleteConfirm(true);
     };
 
+    const handleDeleteEmployee = async () => {
+        if (employeeToDelete) {
+            await dispatch(deleteEmployee(employeeToDelete.emp_id));
+            setShowDeleteConfirm(false);
+            setEmployeeToDelete(null);
+        }
+    };
+
+    const handleSaveEmployee = async (employeeData) => {
+        if (selectedEmployee) {
+            await dispatch(updateEmployee({
+                employeeId: selectedEmployee.emp_id,
+                data: employeeData
+            }));
+        } else {
+            await dispatch(createEmployee(employeeData));
+        }
+        setShowModal(false);
+    };
+
     const handlePageChange = (page) => {
         dispatch(setPagination({ page }));
-        dispatch(fetchEmployees({ ...filters, page }));
     };
 
     return (
@@ -100,14 +93,17 @@ const EmployeeManagement = () => {
             <div className="employee-management">
                 <PageHeader
                     title={t('employee.management')}
-                    description={t('employee.managementDesc')}
+                    description={t('employee.managementDescription')}
+                    breadcrumbs={[
+                        { text: t('admin.dashboard'), to: '/admin' },
+                        { text: t('employee.management') }
+                    ]}
                     actions={
                         <Button
                             variant="primary"
                             onClick={handleCreateEmployee}
-                            className="d-flex align-items-center gap-2"
                         >
-                            <i className="bi bi-plus-circle"></i>
+                            <i className="bi bi-plus-circle me-2"></i>
                             {t('employee.addNew')}
                         </Button>
                     }
@@ -150,7 +146,6 @@ const EmployeeManagement = () => {
                     employee={selectedEmployee}
                 />
 
-                {/* Delete Confirmation Modal */}
                 <ConfirmationModal
                     show={showDeleteConfirm}
                     onHide={() => setShowDeleteConfirm(false)}

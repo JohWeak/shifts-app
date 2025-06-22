@@ -48,7 +48,7 @@ const EmployeeList = ({
                         <thead>
                         <tr>
                             <th>{t('employee.fullName')}</th>
-                            <th>{t('employee.email')}</th>
+                            <th>{t('workSite.workSite')}</th>
                             <th>{t('employee.position')}</th>
                             <th>{t('employee.status')}</th>
                             <th className="text-center">{t('common.actions')}</th>
@@ -72,7 +72,7 @@ const EmployeeList = ({
                                         </div>
                                     </div>
                                 </td>
-                                <td>{employee.email}</td>
+                                <td>{employee.site_name}</td>
                                 <td>
                                     {employee.default_position_name ||
                                         <span className="text-muted">{t('employee.noPosition')}</span>}

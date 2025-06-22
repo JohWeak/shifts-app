@@ -7,7 +7,10 @@ import './EmployeeModal.css';
 
 const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const { t } = useI18n();
-    const { positions } = useSelector((state) => state.settings);
+    // FIX: Get positions from the correct path in Redux store
+    const { systemSettings } = useSelector((state) => state.settings || {});
+    const positions = systemSettings?.positions || [];
+
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
@@ -84,40 +87,26 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
+        if (validateForm()) {
+            onSave(formData);
         }
-
-        // Don't send empty password when editing
-        const dataToSend = { ...formData };
-        if (employee && !dataToSend.password) {
-            delete dataToSend.password;
-        }
-
-        onSave(dataToSend);
     };
 
     return (
-        <Modal
-            show={show}
-            onHide={onHide}
-            size="lg"
-            className="employee-modal"
-        >
-            <Modal.Header closeButton className="bg-primary text-white">
-                <Modal.Title>
-                    <i className={`bi bi-${employee ? 'pencil' : 'person-plus'} me-2`}></i>
-                    {employee ? t('employee.edit') : t('employee.addNew')}
-                </Modal.Title>
-            </Modal.Header>
-
+        <Modal show={show} onHide={onHide} size="lg" className="employee-modal">
             <Form onSubmit={handleSubmit}>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        <i className={`bi bi-person-${employee ? 'gear' : 'plus'} me-2`}></i>
+                        {employee ? t('employee.editEmployee') : t('employee.addEmployee')}
+                    </Modal.Title>
+                </Modal.Header>
+
                 <Modal.Body>
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.firstName')} *</Form.Label>
+                                <Form.Label>{t('employee.firstName')}</Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={formData.first_name}
@@ -132,7 +121,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.lastName')} *</Form.Label>
+                                <Form.Label>{t('employee.lastName')}</Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={formData.last_name}
@@ -149,7 +138,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.email')} *</Form.Label>
+                                <Form.Label>{t('employee.email')}</Form.Label>
                                 <Form.Control
                                     type="email"
                                     value={formData.email}
@@ -164,7 +153,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.login')} *</Form.Label>
+                                <Form.Label>{t('employee.login')}</Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={formData.login}
@@ -181,10 +170,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>
-                                    {t('employee.password')}
-                                    {!employee && ' *'}
-                                </Form.Label>
+                                <Form.Label>{t('employee.password')}</Form.Label>
                                 <div className="input-group">
                                     <Form.Control
                                         type={showPassword ? 'text' : 'password'}
@@ -214,7 +200,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                     onChange={(e) => handleChange('default_position_id', e.target.value)}
                                 >
                                     <option value="">{t('employee.noPosition')}</option>
-                                    {positions?.map((position) => (
+                                    {positions.map((position) => (
                                         <option key={position.pos_id} value={position.pos_id}>
                                             {position.pos_name}
                                         </option>
