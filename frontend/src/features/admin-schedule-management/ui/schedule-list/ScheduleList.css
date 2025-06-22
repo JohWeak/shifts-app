@@ -25,7 +25,7 @@
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--bs-primary), transparent);
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease;
 }
 
 .schedule-overview-table tbody tr.schedule-row:hover::after {
