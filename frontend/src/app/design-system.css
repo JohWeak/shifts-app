@@ -94,6 +94,7 @@
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Renamed from --bs-box-shadow-sm for consistency */
     --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);     /* Renamed from --bs-box-shadow */
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --shadow-inset: 6px 6px 6px -6px rgba(0,0,0,0.68) inset;
 
     /* ========== Form Select variables (ДОБАВЛЕНО для DatePicker) ========== */
     /* Эти переменные используются для стилизации выпадающих списков месяца/года */

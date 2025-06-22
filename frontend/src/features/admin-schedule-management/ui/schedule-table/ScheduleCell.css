@@ -8,10 +8,12 @@
     vertical-align: middle;
     position: relative;
     transition: all var(--transition-base);
+
 }
 
 .schedule-cell.editing-mode {
     cursor: pointer;
+
 }
 
 .schedule-cell.editing-mode:hover {
@@ -34,6 +36,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
 }
 
 .schedule-cell.editing-mode .empty-cell:hover .bi-plus-circle {
@@ -84,7 +87,7 @@
     opacity: 0.9;
 }
 
-/* Remove Button - переносим стили из JS */
+/* Remove Button  */
 .schedule-cell .remove-btn {
     width: 20px;
     height: 20px;
@@ -126,6 +129,8 @@
 /* Cell State Colors */
 .schedule-cell.table-warning {
     background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
+    box-shadow: 3px 3px 6px -7px rgba(0,0,0,0.68) inset;
+
 }
 
 .schedule-cell.table-info {
@@ -136,29 +141,19 @@
     background-color: rgba(var(--bs-success-rgb), 0.1) !important;
 }
 
-[data-theme="dark"] td.schedule-cell {
-    border-color: var(--bs-gray-700) !important;
-}
 
-[data-theme="dark"] .schedule-cell.table-warning {
-    background-color: rgba(var(--bs-warning-rgb), 0.15) !important;
-}
 
-[data-theme="dark"] .schedule-cell.table-info {
-    background-color: rgba(var(--bs-info-rgb), 0.15) !important;
-}
-
-[data-theme="dark"] .schedule-cell.table-success {
-    background-color: rgba(var(--bs-success-rgb), 0.15) !important;
-}
 [data-theme="dark"] .schedule-cell {
     border-color: var(--bs-gray-700);
 }
 
 /* Dark theme state colors with better contrast */
 [data-theme="dark"] .schedule-cell.table-warning {
-    background-color: rgba(var(--bs-warning-rgb), 0.2) !important;
+    background-color: var(--bs-secondary)!important;
+    padding-top: var(--space-1);
     color: var(--bs-gray-100);
+    box-shadow: 6px 6px 6px -6px rgba(0,0,0,0.68) inset;
+
 }
 
 [data-theme="dark"] .schedule-cell.table-info {

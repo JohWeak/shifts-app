@@ -159,7 +159,7 @@ const ScheduleCell = ({
                             {isEditing && onRemovePendingChange && (
                                 <button
                                     type="button"
-                                    className="remove-btn btn btn-sm btn-outline-secondary p-0"
+                                    className="remove-btn btn btn-sm btn-outline-danger p-0"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
