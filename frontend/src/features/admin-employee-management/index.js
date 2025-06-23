@@ -141,7 +141,7 @@ const EmployeeManagement = () => {
                     </Container>
                 )}
 
-                <Container fluid className="px-4">
+                <Container fluid className="px-2">
                     <Row className="g-4 mt-2">
                         <Col lg={3} className="mt-2" >
                             <EmployeeFilters />

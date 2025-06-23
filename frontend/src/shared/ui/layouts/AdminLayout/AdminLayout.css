@@ -261,11 +261,11 @@
     color: var(--bs-primary);
     box-shadow: var(--bs-box-shadow);
 }
-.admin-layout .admin-navbar .dropdown-toggle::after {
+/*.admin-layout .admin-navbar .dropdown-toggle::after {*/
 
-    margin-left: 0;
+/*    margin-left: 0;*/
 
-}
+/*}*/
 /* BADGES - дополнения к Bootstrap */
 .admin-nav-link .badge {
     margin-left: auto;

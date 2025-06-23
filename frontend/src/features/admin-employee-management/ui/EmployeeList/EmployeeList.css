@@ -79,6 +79,8 @@
     border-radius: 2rem;
 }
 
+
+
 .site-badge.common {
     background: var(--bs-gray-200) !important;
     color: var(--bs-gray-700) !important;
@@ -210,14 +212,23 @@
         height: 2rem;
         font-size: 0.75rem;
     }
-
-    .pagination-container {
-        justify-content: center;
+    .list-card .d-flex .text-muted{
+        display: none !important;
     }
-
-    .pagination-info {
-        width: 100%;
-        text-align: center;
-        order: -1;
+    .data-table .action-btn .btn .btn-link{
+        margin-right: 0 !important;
     }
+    /*.data-table .status-badge {*/
+    /*    margin-left: var(--space-3);*/
+    /*}*/
+
+    /*.pagination-container {*/
+    /*    justify-content: center;*/
+    /*}*/
+
+    /*.pagination-info {*/
+    /*    width: 100%;*/
+    /*    text-align: center;*/
+    /*    order: -1;*/
+    /*}*/
 }

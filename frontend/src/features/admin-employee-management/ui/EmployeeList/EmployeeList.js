@@ -227,7 +227,7 @@ const EmployeeList = ({
                                     <Button
                                         variant="link"
                                         size="sm"
-                                        className="action-btn me-2"
+                                        className="action-btn"
                                         onClick={() => onEdit(employee)}
                                         title={t('common.edit')}
                                     >

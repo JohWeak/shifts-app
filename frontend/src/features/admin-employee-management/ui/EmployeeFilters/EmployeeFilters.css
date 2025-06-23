@@ -12,12 +12,14 @@
     background: var(--bs-gray-800);
 }
 
-.filters-header {
-    background: transparent;
+.filters-card .filters-header {
+    /*background: transparent;*/
     border-bottom: 1px solid var(--bs-border-color);
-    padding: 1rem 1.25rem;
+    padding: 0.84rem 1.35rem;
 }
-
+[data-theme="dark"] .filters-card .filters-header {
+    background: var(--bs-gray-900);
+}
 .filters-header h6 {
     color: var(--bs-emphasis-color);
     font-weight: 600;
