@@ -230,6 +230,8 @@ export const en = {
         restore: 'Restore',
         emailOptional: 'Optional',
         deactivateConfirmMessage: 'Are you sure you want to deactivate {name}? This action cannot be undone.',
+        phonePlaceholder: '+972-52-555-5555',
+        editEmployee: 'Edit Employee',
 
     },
     errors: {

@@ -33,7 +33,16 @@ const create = async (req, res) => {
 // Get all employees
 const findAll = async (req, res) => {
     try {
-        const { page = 1, pageSize = 10, status, position, search, work_site } = req.query;
+        const {
+            page = 1,
+            pageSize = 10,
+            status,
+            position,
+            search,
+            work_site,
+            sortBy = 'createdAt',
+            sortOrder = 'DESC'
+        } = req.query;
 
         // Build where clause
         const where = {};
@@ -55,21 +64,37 @@ const findAll = async (req, res) => {
             where[Op.or] = [
                 { first_name: { [Op.like]: `%${search}%` } },
                 { last_name: { [Op.like]: `%${search}%` } },
-                { email: { [Op.like]: `%${search}%` } }
+                { email: { [Op.like]: `%${search}%` } },
+                { phone: { [Op.like]: `%${search}%` } }
             ];
         }
 
         // Handle position filter
         if (position && position !== 'all') {
-            // If work_site is 'all', position will be a position name
-            // Otherwise, it will be a position ID
             if (work_site === 'all') {
-                // Filter by position name
                 includeWhere.pos_name = position;
             } else {
-                // Filter by position ID
                 where.default_position_id = position;
             }
+        }
+
+        // Build order clause
+        let order = [];
+        switch (sortBy) {
+            case 'name':
+                order = [['first_name', sortOrder], ['last_name', sortOrder]];
+                break;
+            case 'workSite':
+                order = [[WorkSite, 'site_name', sortOrder]];
+                break;
+            case 'position':
+                order = [[Position, 'pos_name', sortOrder]];
+                break;
+            case 'status':
+                order = [['status', sortOrder]];
+                break;
+            default:
+                order = [[sortBy, sortOrder]];
         }
 
         // Calculate offset
@@ -85,7 +110,7 @@ const findAll = async (req, res) => {
                     as: 'defaultPosition',
                     attributes: ['pos_id', 'pos_name'],
                     where: Object.keys(includeWhere).length > 0 ? includeWhere : undefined,
-                    required: position && position !== 'all' && work_site === 'all' // Make it required only when filtering by position name
+                    required: position && position !== 'all' && work_site === 'all'
                 },
                 {
                     model: WorkSite,
@@ -95,7 +120,7 @@ const findAll = async (req, res) => {
             ],
             limit: parseInt(pageSize),
             offset: offset,
-            order: [['createdAt', 'DESC']]
+            order: order
         });
 
         // Format response

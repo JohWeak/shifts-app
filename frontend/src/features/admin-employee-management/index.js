@@ -28,6 +28,7 @@ const EmployeeManagement = () => {
     const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
     const employeesState = useSelector((state) => state.employees);
+    const [sortConfig, setSortConfig] = useState({ field: 'createdAt', order: 'DESC' });
 
     const {
         employees = [],
@@ -38,8 +39,19 @@ const EmployeeManagement = () => {
     } = employeesState || {};
 
     useEffect(() => {
-        dispatch(fetchEmployees({ ...filters, page: pagination.page, pageSize: pagination.pageSize }));
-    }, [dispatch, filters, pagination.page, pagination.pageSize]);
+        dispatch(fetchEmployees({
+            ...filters,
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+            sortBy: sortConfig.field,
+            sortOrder: sortConfig.order
+        }));
+    }, [dispatch, filters, pagination.page, pagination.pageSize, sortConfig]);
+
+// Добавить функцию handleSort:
+    const handleSort = (field, order) => {
+        setSortConfig({ field, order });
+    };
 
     const handleCreateEmployee = () => {
         setSelectedEmployee(null);
@@ -144,6 +156,8 @@ const EmployeeManagement = () => {
                                 pagination={pagination}
                                 onPageChange={handlePageChange}
                                 onPageSizeChange={handlePageSizeChange}
+                                onSort={handleSort}
+                                currentSort={sortConfig}
                             />
                         </Col>
                     </Row>

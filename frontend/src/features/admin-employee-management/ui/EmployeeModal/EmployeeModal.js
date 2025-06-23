@@ -18,6 +18,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         first_name: '',
         last_name: '',
         email: '',
+        phone: '',
         login: '',
         password: '',
         status: 'active',
@@ -41,6 +42,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 first_name: employee.first_name || '',
                 last_name: employee.last_name || '',
                 email: employee.email || '',
+                phone: employee.phone || '',
                 login: employee.login || '',
                 password: '',
                 status: employee.status || 'active',
@@ -191,6 +193,18 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
+                                <Form.Label>{t('employee.phone')}</Form.Label>
+                                <Form.Control
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => handleChange('phone', e.target.value)}
+                                    placeholder={t('employee.phonePlaceholder')}
+                                />
+                            </Form.Group>
+                        </Col>
+
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
                                 <Form.Label>
                                     {t('employee.login')} <span className="text-danger">*</span>
                                 </Form.Label>
@@ -205,9 +219,6 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                 </Form.Control.Feedback>
                             </Form.Group>
                         </Col>
-                    </Row>
-
-                    <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>
@@ -235,7 +246,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                 </div>
                             </Form.Group>
                         </Col>
+                    </Row>
 
+                    <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>{t('workSite.workSite')}</Form.Label>
@@ -256,9 +269,6 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                 </Form.Text>
                             </Form.Group>
                         </Col>
-                    </Row>
-
-                    <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>{t('employee.defaultPosition')}</Form.Label>
@@ -281,6 +291,10 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                 )}
                             </Form.Group>
                         </Col>
+                    </Row>
+
+                    <Row>
+
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
@@ -297,9 +311,6 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                 </Form.Select>
                             </Form.Group>
                         </Col>
-                    </Row>
-
-                    <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>{t('employee.role')}</Form.Label>

@@ -1,5 +1,5 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.js
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, Table, Button, Badge, Spinner, Pagination, Form } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
@@ -13,12 +13,33 @@ const EmployeeList = ({
                           onRestore,
                           pagination,
                           onPageChange,
-                          onPageSizeChange
+                          onPageSizeChange,
+                          onSort,
+                          currentSort
                       }) => {
     const { t } = useI18n();
+    const [sortConfig, setSortConfig] = useState(currentSort || { field: null, order: null });
 
     const totalPages = Math.ceil(pagination.total / pagination.pageSize);
     const showPagination = totalPages > 1;
+
+    const handleSort = (field) => {
+        let newOrder = 'ASC';
+        if (sortConfig.field === field && sortConfig.order === 'ASC') {
+            newOrder = 'DESC';
+        }
+        setSortConfig({ field, order: newOrder });
+        onSort(field, newOrder);
+    };
+
+    const getSortIcon = (field) => {
+        if (sortConfig.field !== field) {
+            return <i className="bi bi-arrow-down-up text-muted ms-1"></i>;
+        }
+        return sortConfig.order === 'ASC'
+            ? <i className="bi bi-arrow-up ms-1"></i>
+            : <i className="bi bi-arrow-down ms-1"></i>;
+    };
 
     const renderPaginationControls = () => {
         return (
@@ -38,55 +59,53 @@ const EmployeeList = ({
                 </div>
 
                 {showPagination && (
-                    <>
-                        <Pagination size="sm" className="mb-0">
-                            <Pagination.First
-                                onClick={() => onPageChange(1)}
-                                disabled={pagination.page === 1}
-                            />
-                            <Pagination.Prev
-                                onClick={() => onPageChange(pagination.page - 1)}
-                                disabled={pagination.page === 1}
-                            />
+                    <Pagination size="sm" className="mb-0">
+                        <Pagination.First
+                            onClick={() => onPageChange(1)}
+                            disabled={pagination.page === 1}
+                        />
+                        <Pagination.Prev
+                            onClick={() => onPageChange(pagination.page - 1)}
+                            disabled={pagination.page === 1}
+                        />
 
-                            {[...Array(totalPages)].map((_, index) => {
-                                const page = index + 1;
-                                if (
-                                    page === 1 ||
-                                    page === totalPages ||
-                                    (page >= pagination.page - 1 && page <= pagination.page + 1)
-                                ) {
-                                    return (
-                                        <Pagination.Item
-                                            key={page}
-                                            active={page === pagination.page}
-                                            onClick={() => onPageChange(page)}
-                                        >
-                                            {page}
-                                        </Pagination.Item>
-                                    );
-                                }
-                                if (page === pagination.page - 2 || page === pagination.page + 2) {
-                                    return <Pagination.Ellipsis key={page} disabled />;
-                                }
-                                return null;
-                            })}
+                        {[...Array(totalPages)].map((_, index) => {
+                            const page = index + 1;
+                            if (
+                                page === 1 ||
+                                page === totalPages ||
+                                (page >= pagination.page - 1 && page <= pagination.page + 1)
+                            ) {
+                                return (
+                                    <Pagination.Item
+                                        key={page}
+                                        active={page === pagination.page}
+                                        onClick={() => onPageChange(page)}
+                                    >
+                                        {page}
+                                    </Pagination.Item>
+                                );
+                            }
+                            if (page === pagination.page - 2 || page === pagination.page + 2) {
+                                return <Pagination.Ellipsis key={page} disabled />;
+                            }
+                            return null;
+                        })}
 
-                            <Pagination.Next
-                                onClick={() => onPageChange(pagination.page + 1)}
-                                disabled={pagination.page === totalPages}
-                            />
-                            <Pagination.Last
-                                onClick={() => onPageChange(totalPages)}
-                                disabled={pagination.page === totalPages}
-                            />
-                        </Pagination>
-
-                        <div className="pagination-info">
-                            {t('common.showing')} {((pagination.page - 1) * pagination.pageSize) + 1} - {Math.min(pagination.page * pagination.pageSize, pagination.total)} {t('common.of')} {pagination.total}
-                        </div>
-                    </>
+                        <Pagination.Next
+                            onClick={() => onPageChange(pagination.page + 1)}
+                            disabled={pagination.page === totalPages}
+                        />
+                        <Pagination.Last
+                            onClick={() => onPageChange(totalPages)}
+                            disabled={pagination.page === totalPages}
+                        />
+                    </Pagination>
                 )}
+
+                <div className="pagination-info">
+                    {t('common.showing')} {Math.min(((pagination.page - 1) * pagination.pageSize) + 1, pagination.total)} - {Math.min(pagination.page * pagination.pageSize, pagination.total)} {t('common.of')} {pagination.total}
+                </div>
             </div>
         );
     };
@@ -125,10 +144,34 @@ const EmployeeList = ({
                     <Table hover className="data-table mb-0">
                         <thead>
                         <tr>
-                            <th>{t('employee.fullName')}</th>
-                            <th>{t('workSite.workSite')}</th>
-                            <th>{t('employee.position')}</th>
-                            <th>{t('employee.status')}</th>
+                            <th
+                                className="sortable-header"
+                                onClick={() => handleSort('name')}
+                            >
+                                {t('employee.fullName')}
+                                {getSortIcon('name')}
+                            </th>
+                            <th
+                                className="sortable-header"
+                                onClick={() => handleSort('workSite')}
+                            >
+                                {t('workSite.workSite')}
+                                {getSortIcon('workSite')}
+                            </th>
+                            <th
+                                className="sortable-header"
+                                onClick={() => handleSort('position')}
+                            >
+                                {t('employee.position')}
+                                {getSortIcon('position')}
+                            </th>
+                            <th
+                                className="sortable-header"
+                                onClick={() => handleSort('status')}
+                            >
+                                {t('employee.status')}
+                                {getSortIcon('status')}
+                            </th>
                             <th className="text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
@@ -140,8 +183,16 @@ const EmployeeList = ({
                                         <div className="employee-avatar me-3">
                                             {employee.first_name[0]}{employee.last_name[0]}
                                         </div>
-                                        <div className="fw-semibold">
-                                            {employee.first_name} {employee.last_name}
+                                        <div>
+                                            <div className="fw-semibold">
+                                                {employee.first_name} {employee.last_name}
+                                            </div>
+                                            {employee.phone && (
+                                                <small className="text-muted d-flex align-items-center ">
+                                                    <i className="bi bi-telephone me-1 "></i>
+                                                    {employee.phone}
+                                                </small>
+                                            )}
                                         </div>
                                     </div>
                                 </td>
