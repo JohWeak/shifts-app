@@ -1,68 +1,116 @@
-# Shifts App — Система автоматического планирования смен
+# Shifts App - An Intelligent Shift Scheduling System
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=for-the-badge&logo=sequelize&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
 
-Это полнофункциональное веб-приложение, разработанное для автоматизации и упрощения процесса создания рабочих графиков. Проект решает проблему ручного и трудоемкого планирования смен, предлагая умный алгоритм для автоматического распределения сотрудников и удобный интерфейс для ручной корректировки.
+This is a full-stack web application designed to automate and simplify the complex process of creating and managing work schedules. The project tackles the challenges of manual scheduling by offering a powerful algorithm for automatic staff assignment and an intuitive interface for manual adjustments.
 
-## ✨ Ключевые возможности
+## ✨ Key Features
 
--   **Автоматическое создание расписания:** Ядро системы — сложный алгоритм, который анализирует доступность сотрудников, их пожелания (ограничения), требования к должностям на сменах и генерирует оптимальный график в один клик.
--   **Ручное Drag-and-Drop редактирование:** Менеджеры могут легко изменять и корректировать сгенерированное расписание с помощью интуитивного интерфейса перетаскивания.
--   **Разделение ролей:** Четкое разделение прав доступа для **Администратора** (полное управление системой) и **Сотрудника** (просмотр своего графика, отправка пожеланий).
--   **Управление ограничениями:** Сотрудники могут указать свои предпочтения и недоступные для работы дни, которые будут учтены при составлении графика. Поддерживаются постоянные ограничения.
--   **Управление объектами и должностями:** Гибкая настройка рабочих мест (сайтов), должностей и типов смен, что позволяет адаптировать систему под нужды любой организации.
--   **Аутентификация и профиль:** Безопасная регистрация и вход в систему, а также возможность для пользователей управлять данными своего профиля.
--   **Адаптивный дизайн:** Интерфейс корректно отображается как на десктопных, так и на мобильных устройствах.
+-   **Automatic Schedule Generation:** The core of the application is a sophisticated algorithm that analyzes employee availability, constraints, position requirements, and legal rules to generate an optimized weekly schedule with a single click.
+-   **Drag & Drop Manual Editor:** For fine-tuning and handling exceptions, managers have access to an intuitive drag-and-drop interface to manually assign or re-assign employees to different shifts.
+-   **Role-Based Access Control (RBAC):** Clear separation of permissions for **Admins** (full system control) and **Employees** (viewing their schedule, submitting constraints).
+-   **Employee Constraints Management:** Employees can submit their work preferences and unavailability, which are automatically factored into the schedule generation process.
+-   **Core System Configuration:** Flexible setup of multiple **Work Sites**, **Positions**, and **Shifts**, allowing the system to be tailored to the specific needs of any organization.
+-   **JWT Authentication:** Secure user registration and login functionality using JSON Web Tokens, ensuring protected routes and data.
+-   **Responsive Design:** The user interface is fully responsive, providing a seamless experience on both desktop and mobile devices.
 
-## 🛠️ Стек технологий
+## 🛠️ Tech Stack
 
 <table width="100%">
-  <tr>
-    <td width="50%" valign="top">
+  <tr valign="top">
+    <td width="50%">
       <h3>Frontend</h3>
       <ul>
-        <li><b>Фреймворк:</b> React</li>
-        <li><b>Сборщик:</b> Vite</li>
-        <li><b>Стейт-менеджер:</b> Redux Toolkit</li>
-        <li><b>Роутинг:</b> React Router DOM</li>
-        <li><b>UI-библиотека:</b> React-Bootstrap</li>
-        <li><b>Стилизация:</b> CSS Modules, PostCSS</li>
+        <li><b>Framework:</b> React</li>
+        <li><b>Build Tool:</b> Vite</li>
+        <li><b>State Management:</b> Redux Toolkit</li>
+        <li><b>Routing:</b> React Router DOM</li>
+        <li><b>UI Library:</b> React-Bootstrap</li>
+        <li><b>Styling:</b> CSS Modules, PostCSS</li>
       </ul>
     </td>
-    <td width="50%" valign="top">
+    <td width="50%">
       <h3>Backend</h3>
       <ul>
-        <li><b>Среда выполнения:</b> Node.js</li>
-        <li><b>Фреймворк:</b> Express</li>
-        <li><b>ORM:</b> Prisma</li>
-        <li><b>База данных:</b> PostgreSQL</li>
-        <li><b>Аутентификация:</b> JWT (JSON Web Tokens)</li>
+        <li><b>Runtime:</b> Node.js</li>
+        <li><b>Framework:</b> Express</li>
+        <li><b>ORM:</b> Sequelize</li>
+        <li><b>Database:</b> PostgreSQL</li>
+        <li><b>Authentication:</b> JWT (Passport.js)</li>
       </ul>
     </td>
   </tr>
 </table>
 
-## 🏛️ Архитектура
+## 🏛️ Architecture
 
 ### Frontend
-Фронтенд построен на основе архитектурной методологии **Feature-Sliced Design (FSD)**. Это обеспечивает:
--   **Масштабируемость:** Легко добавлять новые функции, не затрагивая существующие.
--   **Модульность:** Четкое разделение кода на слои (`shared`, `entities`, `features`, `widgets`).
--   **Поддерживаемость:** Код легко найти, понять и модифицировать.
+The frontend is architected using the **Feature-Sliced Design (FSD)** methodology. This modern approach provides:
+-   **High Scalability:** New features can be added in isolation without affecting existing code.
+-   **Strong Modularity:** A clear and logical separation of code into layers (`shared`, `entities`, `features`, `widgets`).
+-   **Excellent Maintainability:** The codebase is easy to navigate, understand, and debug.
 
 ### Backend
-Бэкенд следует классической трехуровневой архитектуре:
--   **Routes:** Отвечают за маршрутизацию и прием HTTP-запросов.
--   **Controllers:** Обрабатывают входящие данные и вызывают соответствующую бизнес-логику.
--   **Services:** Содержат всю основную бизнес-логику приложения, включая сложный алгоритм генерации расписания. Взаимодействуют с базой данных через Prisma.
+The backend follows a classic **Layered Architecture** pattern, separating concerns into distinct modules:
+-   **Routes:** Define the API endpoints and direct incoming HTTP requests to the appropriate controllers.
+-   **Controllers:** Handle request validation and data extraction, then call the relevant service logic. They are responsible for formatting and sending the HTTP response.
+-   **Services:** Contain all the core business logic, including the complex schedule generation algorithm. They interact with the database via the Sequelize ORM.
+-   **Models:** Define the database schema and relationships using Sequelize.
 
+## 🚀 Getting Started
 
-
-### Требования
--   Node.js (v18.x или выше)
--   npm или yarn
--   PostgreSQL
+### Prerequisites
+-   Node.js (v18.x or later)
+-   npm or yarn
+-   PostgreSQL instance running
 -   Git
+
+## 1. Clone the Repository
+    ```bash
+       git clone https://github.com/JohWeak/shifts-app.git
+       cd shifts-app
+
+## 2. Backend Setup
+#### Navigate to the backend directory
+    ```bash
+       cd backend
+
+#### Install dependencies
+    ```bash
+       npm install
+
+#### Create a .env file from the example
+#### Make sure to fill in your actual database credentials
+cp .env.example .env
+
+#### Run database migrations using Sequelize CLI
+#### This will create all necessary tables
+    ```bash
+       npx sequelize-cli db:migrate
+
+#### (Optional) Run seeders to populate the database with initial data
+    ```bash
+       npx sequelize-cli db:seed:all
+
+#### Start the development server
+    ```bash
+       npm run dev
+
+## 3. Frontend Setup
+#### From the root directory, navigate to the frontend directory
+    ```bash
+       cd frontend
+
+#### Install dependencies
+    ```bash
+       npm install
+#### Create a .env file from the example
+#### The default API URL should already be correct
+cp .env.example .env
+
+#### Start the development server
+    ```bash
+       npm run dev
