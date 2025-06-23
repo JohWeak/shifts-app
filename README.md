@@ -68,16 +68,3 @@ The backend follows a classic **Layered Architecture** pattern, separating conce
 -   PostgreSQL instance running
 -   Git
 
-## Installation
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   cd backend && npm install
-   cd ../frontend && npm install
-3. Set up environment variables in backend/.env
-4.   Run the application:
-### Backend
-cd backend && npm start
-### Frontend
-cd frontend && npm start
