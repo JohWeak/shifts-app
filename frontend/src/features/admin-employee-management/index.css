@@ -46,11 +46,19 @@
     font-size: 0.875rem;
     padding: 0.5rem 1rem;
 }
-.employee-management .col-lg-3, .employee-management .col-lg-9 {
-    padding-left: var(--space-1);
-    padding-right: var(--space-1);
-}
+/*.employee-management .col-lg-3, .employee-management .col-lg-9 {*/
+/*    padding-left: var(--space-1);*/
+/*    padding-right: var(--space-1);*/
+/*}*/
+.employee-management .col-lg-3{
 
+}
+[data-theme="dark"] .admin-dashboard .text-muted {
+    color: var(--bs-gray-500) !important;
+}
+/*[data-theme="dark"] .employee-management .form-control .placeholder {*/
+/*    color: var(--bs-gray-300) !important;*/
+/*}*/
 /* Ensure smooth transitions */
 * {
     transition: background-color 0.2s ease,

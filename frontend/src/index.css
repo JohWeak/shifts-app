@@ -60,16 +60,22 @@ body {
    Используем --bs-secondary, как основной приглушенный цвет.
    !important здесь может быть нужен для перебивания специфичности Bootstrap.
 */
-[data-theme="dark"] .text-muted {
+[data-theme="dark"] .text-muted{
     color: var(--bs-gray-300) !important;
 }
 
+[data-theme="dark"] ::placeholder{
+    color: var(--bs-gray-600);
+}
 
-/* 5. Специфичные для темы исправления */
+
+    /* 5. Специфичные для темы исправления */
 
 /* Улучшаем вид неактивного поля ввода в темной теме */
 [data-theme="dark"] .form-control:disabled,
-[data-theme="dark"] .form-control[readonly] {
+[data-theme="dark"] .form-control[readonly]
+ {
     background-color: var(--bs-gray-800);
+    color: var(--bs-gray-300);
     /* opacity: 1; не всегда нужен, Bootstrap сам справляется, но можно оставить если есть проблемы */
 }

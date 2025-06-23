@@ -215,20 +215,16 @@
     .list-card .d-flex .text-muted{
         display: none !important;
     }
-    .data-table .action-btn .btn .btn-link{
-        margin-right: 0 !important;
+
+
+
+    .pagination-container {
+        justify-content: center;
     }
-    /*.data-table .status-badge {*/
-    /*    margin-left: var(--space-3);*/
-    /*}*/
 
-    /*.pagination-container {*/
-    /*    justify-content: center;*/
-    /*}*/
-
-    /*.pagination-info {*/
-    /*    width: 100%;*/
-    /*    text-align: center;*/
-    /*    order: -1;*/
-    /*}*/
+    .pagination-info {
+        width: 100%;
+        text-align: center;
+        order: -1;
+    }
 }
