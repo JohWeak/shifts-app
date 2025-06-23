@@ -68,49 +68,16 @@ The backend follows a classic **Layered Architecture** pattern, separating conce
 -   PostgreSQL instance running
 -   Git
 
-## 1. Clone the Repository
-    ```bash
-       git clone https://github.com/JohWeak/shifts-app.git
-       cd shifts-app
+## Installation
 
-## 2. Backend Setup
-#### Navigate to the backend directory
-    ```bash
-       cd backend
-
-#### Install dependencies
-    ```bash
-       npm install
-
-#### Create a .env file from the example
-#### Make sure to fill in your actual database credentials
-cp .env.example .env
-
-#### Run database migrations using Sequelize CLI
-#### This will create all necessary tables
-    ```bash
-       npx sequelize-cli db:migrate
-
-#### (Optional) Run seeders to populate the database with initial data
-    ```bash
-       npx sequelize-cli db:seed:all
-
-#### Start the development server
-    ```bash
-       npm run dev
-
-## 3. Frontend Setup
-#### From the root directory, navigate to the frontend directory
-    ```bash
-       cd frontend
-
-#### Install dependencies
-    ```bash
-       npm install
-#### Create a .env file from the example
-#### The default API URL should already be correct
-cp .env.example .env
-
-#### Start the development server
-    ```bash
-       npm run dev
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   cd backend && npm install
+   cd ../frontend && npm install
+3. Set up environment variables in backend/.env
+4.   Run the application:
+### Backend
+cd backend && npm start
+### Frontend
+cd frontend && npm start
