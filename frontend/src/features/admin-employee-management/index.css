@@ -1,37 +1,59 @@
+/*!* frontend/src/features/admin-employee-management/index.css *!*/
+
+/*.employee-management {*/
+/*    min-height: 100vh;*/
+/*    background-color: var(--bs-body-bg);*/
+/*}*/
+
+/*!* Filters card styles *!*/
+/*.employee-filters-card {*/
+/*    border-radius: var(--radius-lg);*/
+/*    border: 1px solid var(--bs-border-color);*/
+/*    box-shadow: var(--shadow-sm);*/
+/*    position: sticky;*/
+/*    top: var(--space-4);*/
+/*}*/
+
+/*.employee-filters-card .card-header {*/
+/*    border-radius: var(--radius-lg) var(--radius-lg) 0 0;*/
+/*    padding: var(--space-3) var(--space-4);*/
+/*}*/
+
+/*!* Modal styles *!*/
+/*.employee-modal .modal-header {*/
+/*    border-radius: var(--radius-lg) var(--radius-lg) 0 0;*/
+/*}*/
+
+/*.employee-modal .input-group .btn {*/
+/*    border-color: var(--bs-border-color-translucent);*/
+/*}*/
+
+/*!* Responsive design *!*/
+/*@media (max-width: 991px) {*/
+/*    .employee-filters-card {*/
+/*        position: static;*/
+/*        margin-bottom: var(--space-4);*/
+/*    }*/
+/*}*/
+
 /* frontend/src/features/admin-employee-management/index.css */
-
 .employee-management {
+    background: var(--bs-gray-100);
     min-height: 100vh;
-    background-color: var(--bs-body-bg);
 }
 
-/* Filters card styles */
-.employee-filters-card {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--bs-border-color);
-    box-shadow: var(--shadow-sm);
-    position: sticky;
-    top: var(--space-4);
+[data-theme="dark"] .employee-management {
+    background: var(--bs-gray-900);
 }
 
-.employee-filters-card .card-header {
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: var(--space-3) var(--space-4);
+.create-button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
 }
 
-/* Modal styles */
-.employee-modal .modal-header {
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-
-.employee-modal .input-group .btn {
-    border-color: var(--bs-border-color-translucent);
-}
-
-/* Responsive design */
-@media (max-width: 991px) {
-    .employee-filters-card {
-        position: static;
-        margin-bottom: var(--space-4);
-    }
+/* Ensure smooth transitions */
+* {
+    transition: background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }

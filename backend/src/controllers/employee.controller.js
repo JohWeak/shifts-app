@@ -33,44 +33,59 @@ const create = async (req, res) => {
 // Get all employees
 const findAll = async (req, res) => {
     try {
-        const {page = 1, pageSize = 10, status, position, search, work_site} = req.query;
+        const { page = 1, pageSize = 10, status, position, search, work_site } = req.query;
 
         // Build where clause
         const where = {};
+        const includeWhere = {};
+
         if (status && status !== 'all') {
             where.status = status;
         }
-        if (position && position !== 'all') {
-            where.default_position_id = position;
-        }
+
         if (work_site && work_site !== 'all') {
-            // 'any' означает работников без привязки к work site
             if (work_site === 'any') {
                 where.work_site_id = null;
             } else {
                 where.work_site_id = work_site;
             }
         }
+
         if (search) {
             where[Op.or] = [
-                {first_name: {[Op.like]: `%${search}%`}},
-                {last_name: {[Op.like]: `%${search}%`}},
-                {email: {[Op.like]: `%${search}%`}}
+                { first_name: { [Op.like]: `%${search}%` } },
+                { last_name: { [Op.like]: `%${search}%` } },
+                { email: { [Op.like]: `%${search}%` } }
             ];
+        }
+
+        // Handle position filter
+        if (position && position !== 'all') {
+            // If work_site is 'all', position will be a position name
+            // Otherwise, it will be a position ID
+            if (work_site === 'all') {
+                // Filter by position name
+                includeWhere.pos_name = position;
+            } else {
+                // Filter by position ID
+                where.default_position_id = position;
+            }
         }
 
         // Calculate offset
         const offset = (page - 1) * pageSize;
 
         // Fetch employees with pagination
-        const {count, rows} = await Employee.findAndCountAll({
+        const { count, rows } = await Employee.findAndCountAll({
             where,
             attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
                     as: 'defaultPosition',
-                    attributes: ['pos_id', 'pos_name']
+                    attributes: ['pos_id', 'pos_name'],
+                    where: Object.keys(includeWhere).length > 0 ? includeWhere : undefined,
+                    required: position && position !== 'all' && work_site === 'all' // Make it required only when filtering by position name
                 },
                 {
                     model: WorkSite,

@@ -1,83 +1,199 @@
 /* frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.css */
-
-.employee-list-card {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--bs-border-color);
-    box-shadow: var(--shadow-sm);
+.list-card {
+    border: none;
+    border-radius: 0.5rem;
+    background: var(--bs-white);
     overflow: hidden;
 }
 
-.employee-table {
-    margin-bottom: 0;
+[data-theme="dark"] .list-card {
+    background: var(--bs-gray-800);
 }
 
-.employee-table thead th {
-    background-color: var(--bs-gray-100);
-    border-bottom: 2px solid var(--bs-border-color);
-    font-weight: var(--font-semibold);
-    color: var(--bs-emphasis-color);
-    padding: var(--space-3) var(--space-4);
-    white-space: nowrap;
+.list-header,
+.list-footer {
+    background: var(--bs-gray-100);
+    border: none;
+    padding: 0.75rem 1.25rem;
 }
 
-[data-theme="dark"] .employee-table thead th {
-    background-color: var(--bs-gray-800);
+[data-theme="dark"] .list-header,
+[data-theme="dark"] .list-footer {
+    background: var(--bs-gray-900);
 }
 
-.employee-table tbody td {
-    padding: var(--space-3) var(--space-4);
-    vertical-align: middle;
-}
-
-.employee-table tbody tr {
-    transition: background-color var(--transition-fast);
-}
-
-.employee-table tbody tr:hover {
-    background-color: var(--bs-gray-100);
-}
-.employee-table .badge {
-    font-weight: var(--font-medium);
-    font-size: var(--text-xs);
-    padding: 0.25rem 0.5rem;
-}
-
-.employee-table .badge i {
+.data-table {
+    margin: 0;
     font-size: 0.875rem;
 }
 
-[data-theme="dark"] .employee-table tbody tr:hover {
-    background-color: var(--bs-gray-800);
+.data-table thead th {
+    background: var(--bs-gray-100);
+    border-bottom: 2px solid var(--bs-border-color);
+    color: var(--bs-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.25rem;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .data-table thead th {
+    background: var(--bs-gray-900);
+    color: var(--bs-gray-400);
+}
+
+.data-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.data-table tbody tr:hover {
+    background: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .data-table tbody tr:hover {
+    background: var(--bs-gray-900);
 }
 
 .employee-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-full);
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: var(--font-semibold);
-    font-size: var(--text-sm);
-    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
 }
 
-/* Responsive adjustments */
+.site-badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 2rem;
+}
+
+.site-badge.common {
+    background: var(--bs-gray-200) !important;
+    color: var(--bs-gray-700) !important;
+}
+
+[data-theme="dark"] .site-badge.common {
+    background: var(--bs-gray-700) !important;
+    color: var(--bs-gray-300) !important;
+}
+
+.action-btn {
+    padding: 0.25rem 0.5rem;
+    color: var(--bs-gray-600);
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--bs-gray-100);
+    color: var(--bs-primary);
+}
+
+[data-theme="dark"] .action-btn:hover {
+    background: var(--bs-gray-700);
+}
+
+.action-btn.text-danger:hover {
+    background: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger) !important;
+}
+
+/* Pagination styles */
+.pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-size-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-size-select {
+    width: auto;
+    border: 1px solid var(--bs-border-color);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+.pagination-container .page-item .page-link{
+    color: var(--bs-body-color);
+    margin: 0 0.25rem;
+    border-radius: var(--radius-sm);
+}
+
+.pagination-container .page-item.active .page-link {
+    transform: translateY(-2px);
+    background: var(--bs-primary);
+    color: white;
+}
+[data-theme="dark"] .pagination-container .pagination .page-item.disabled .page-link{
+    background: var(--bs-gray-800) !important;
+}
+
+.inactive-row {
+    opacity: 0.6;
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .inactive-row {
+    background-color: var(--bs-gray-900);
+}
+
+.inactive-row:hover {
+    opacity: 0.8;
+}
+
+.action-btn.text-success:hover {
+    background: var(--bs-success-bg-subtle);
+    color: var(--bs-success) !important;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .employee-table {
-        font-size: var(--text-sm);
+    .data-table {
+        font-size: 0.8125rem;
     }
 
-    .employee-table thead th,
-    .employee-table tbody td {
-        padding: var(--space-2);
+    .data-table thead th,
+    .data-table tbody td {
+        padding: 0.75rem 1rem;
     }
 
     .employee-avatar {
-        width: 32px;
-        height: 32px;
-        font-size: var(--text-xs);
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.75rem;
+    }
+
+    .pagination-container {
+        justify-content: center;
+    }
+
+    .pagination-info {
+        width: 100%;
+        text-align: center;
+        order: -1;
     }
 }

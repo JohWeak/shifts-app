@@ -74,7 +74,6 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
 
-        // If work site changes, reset position if it's not compatible
         if (field === 'work_site_id') {
             setSelectedWorkSite(value);
             if (value && value !== 'any' && formData.default_position_id) {
@@ -99,11 +98,11 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         if (!formData.last_name.trim()) {
             newErrors.last_name = t('validation.required');
         }
-        if (!formData.email.trim()) {
-            newErrors.email = t('validation.required');
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        // Email is optional now
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = t('validation.invalidEmail');
         }
+        // Login is required
         if (!formData.login.trim()) {
             newErrors.login = t('validation.required');
         }
@@ -118,7 +117,6 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            // Convert empty string to null for work_site_id
             const dataToSave = {
                 ...formData,
                 work_site_id: formData.work_site_id === 'any' ? null : formData.work_site_id
@@ -141,7 +139,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.firstName')}</Form.Label>
+                                <Form.Label>
+                                    {t('employee.firstName')} <span className="text-danger">*</span>
+                                </Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={formData.first_name}
@@ -156,7 +156,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.lastName')}</Form.Label>
+                                <Form.Label>
+                                    {t('employee.lastName')} <span className="text-danger">*</span>
+                                </Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={formData.last_name}
@@ -179,6 +181,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                     value={formData.email}
                                     onChange={(e) => handleChange('email', e.target.value)}
                                     isInvalid={!!errors.email}
+                                    placeholder={t('employee.emailOptional')}
                                 />
                                 <Form.Control.Feedback type="invalid">
                                     {errors.email}
@@ -188,7 +191,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.login')}</Form.Label>
+                                <Form.Label>
+                                    {t('employee.login')} <span className="text-danger">*</span>
+                                </Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={formData.login}
@@ -205,7 +210,10 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
-                                <Form.Label>{t('employee.password')}</Form.Label>
+                                <Form.Label>
+                                    {t('employee.password')}
+                                    {!employee && <span className="text-danger">*</span>}
+                                </Form.Label>
                                 <div className="input-group">
                                     <Form.Control
                                         type={showPassword ? 'text' : 'password'}
@@ -217,6 +225,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                     <Button
                                         variant="outline-secondary"
                                         onClick={() => setShowPassword(!showPassword)}
+                                        type="button"
                                     >
                                         <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
                                     </Button>
@@ -235,7 +244,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                     onChange={(e) => handleChange('work_site_id', e.target.value)}
                                 >
                                     <option value="">{t('common.select')}</option>
-                                    <option value="any">{t('employee.anyWorkSite')}</option>
+                                    <option value="any">{t('employee.commonWorkSite')}</option>
                                     {workSites?.map((site) => (
                                         <option key={site.site_id} value={site.site_id}>
                                             {site.site_name}

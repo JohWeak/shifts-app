@@ -27,27 +27,19 @@ const EmployeeManagement = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
-    // Get the entire employees state for debugging
     const employeesState = useSelector((state) => state.employees);
-
-    // Log the state to see what's happening
-    console.log('Employees State:', employeesState);
 
     const {
         employees = [],
         loading = false,
         error = null,
-        filters = { status: 'active', position: 'all', search: '' },
+        filters = { status: 'active', position: 'all', search: '', work_site: 'all' },
         pagination = { page: 1, pageSize: 10, total: 0 }
     } = employeesState || {};
 
-    console.log('Employees array:', employees);
-    console.log('Loading:', loading);
-
     useEffect(() => {
-        console.log('Dispatching fetchEmployees with filters:', filters);
-        dispatch(fetchEmployees(filters));
-    }, [dispatch, filters]);
+        dispatch(fetchEmployees({ ...filters, page: pagination.page, pageSize: pagination.pageSize }));
+    }, [dispatch, filters, pagination.page, pagination.pageSize]);
 
     const handleCreateEmployee = () => {
         setSelectedEmployee(null);
@@ -66,10 +58,21 @@ const EmployeeManagement = () => {
 
     const handleDeleteEmployee = async () => {
         if (employeeToDelete) {
-            await dispatch(deleteEmployee(employeeToDelete.emp_id));
+            // Instead of deleting, we set status to inactive
+            await dispatch(updateEmployee({
+                employeeId: employeeToDelete.emp_id,
+                data: { status: 'inactive' }
+            }));
             setShowDeleteConfirm(false);
             setEmployeeToDelete(null);
         }
+    };
+
+    const handleRestoreEmployee = async (employee) => {
+        await dispatch(updateEmployee({
+            employeeId: employee.emp_id,
+            data: { status: 'active' }
+        }));
     };
 
     const handleSaveEmployee = async (employeeData) => {
@@ -88,6 +91,10 @@ const EmployeeManagement = () => {
         dispatch(setPagination({ page }));
     };
 
+    const handlePageSizeChange = (pageSize) => {
+        dispatch(setPagination({ pageSize, page: 1 }));
+    };
+
     return (
         <AdminLayout>
             <div className="employee-management">
@@ -102,6 +109,7 @@ const EmployeeManagement = () => {
                         <Button
                             variant="primary"
                             onClick={handleCreateEmployee}
+                            className="create-button"
                         >
                             <i className="bi bi-plus-circle me-2"></i>
                             {t('employee.addNew')}
@@ -121,9 +129,9 @@ const EmployeeManagement = () => {
                     </Container>
                 )}
 
-                <Container className="mt-4">
-                    <Row>
-                        <Col lg={3}>
+                <Container fluid className="px-4">
+                    <Row className="g-4 mt-2">
+                        <Col lg={3} className="mt-2" >
                             <EmployeeFilters />
                         </Col>
                         <Col lg={9}>
@@ -132,8 +140,10 @@ const EmployeeManagement = () => {
                                 loading={loading}
                                 onEdit={handleEditEmployee}
                                 onDelete={handleDeleteClick}
+                                onRestore={handleRestoreEmployee}
                                 pagination={pagination}
                                 onPageChange={handlePageChange}
+                                onPageSizeChange={handlePageSizeChange}
                             />
                         </Col>
                     </Row>
@@ -151,12 +161,12 @@ const EmployeeManagement = () => {
                     onHide={() => setShowDeleteConfirm(false)}
                     onConfirm={handleDeleteEmployee}
                     title={t('employee.deleteConfirmTitle')}
-                    message={t('employee.deleteConfirmMessage', {
+                    message={t('employee.deactivateConfirmMessage', {
                         name: employeeToDelete ?
                             `${employeeToDelete.first_name} ${employeeToDelete.last_name}` : ''
                     })}
-                    confirmVariant="danger"
-                    confirmText={t('common.delete')}
+                    confirmVariant="warning"
+                    confirmText={t('employee.deactivate')}
                 />
             </div>
         </AdminLayout>

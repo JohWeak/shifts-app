@@ -46,6 +46,9 @@ export const en = {
         weeks: 'Weeks',
         yes: 'Yes',
         profile: 'Profile',
+        show: 'Show',
+        showing: 'Showing',
+        of: 'of',
     },
     auth: {
         createAccount: 'Create Account', 
@@ -63,6 +66,7 @@ export const en = {
         signedInAs: 'Signed in as',
         username: 'Username',
         welcome: 'Welcome back!',
+
     },
     dashboard: { 
         dashboardDesc: 'Quick overview of your scheduling system',
@@ -222,6 +226,10 @@ export const en = {
         noPositionsForSite: 'No positions available for selected work site',
         anyWorkSite: 'Any work site',
         workSiteHelp: 'Select work site or "Any" for flexible assignment',
+        commonWorkSite: 'Common',
+        restore: 'Restore',
+        emailOptional: 'Optional',
+        deactivateConfirmMessage: 'Are you sure you want to deactivate {name}? This action cannot be undone.',
 
     },
     errors: {
@@ -404,6 +412,7 @@ export const en = {
         workSite: 'Work Site',
         backToSchedules: 'Back to Schedules',
         scheduleInformation: 'Schedule Information',
+        inactive: 'Inactive',
     },
     settings: {
         systemSettings: 'System Settings',

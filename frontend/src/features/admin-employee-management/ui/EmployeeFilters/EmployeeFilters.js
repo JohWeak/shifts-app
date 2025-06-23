@@ -11,17 +11,52 @@ import './EmployeeFilters.css';
 const EmployeeFilters = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
-    const { filters } = useSelector((state) => state.employees);
+    const { filters, employees } = useSelector((state) => state.employees);
     const { systemSettings } = useSelector((state) => state.settings || {});
     const { workSites } = useSelector((state) => state.schedule || {});
 
     const [selectedWorkSite, setSelectedWorkSite] = useState(filters.work_site || 'all');
 
-    // Get all positions or filter by work site
+    // Get all positions
     const allPositions = systemSettings?.positions || [];
-    const filteredPositions = selectedWorkSite === 'all' || selectedWorkSite === 'any'
-        ? allPositions
-        : allPositions.filter(pos => pos.site_id === parseInt(selectedWorkSite));
+
+    // Filter positions based on selected work site
+    const getFilteredPositions = () => {
+        if (selectedWorkSite === 'all') {
+            // Show unique position names across all work sites
+            const uniquePositions = [];
+            const positionMap = new Map();
+
+            allPositions.forEach(pos => {
+                if (!positionMap.has(pos.pos_name)) {
+                    positionMap.set(pos.pos_name, {
+                        pos_id: pos.pos_name, // Use position name as ID for display
+                        pos_name: pos.pos_name,
+                        actual_ids: [pos.pos_id] // Store actual IDs
+                    });
+                } else {
+                    // Add this position's ID to the list
+                    positionMap.get(pos.pos_name).actual_ids.push(pos.pos_id);
+                }
+            });
+
+            positionMap.forEach(value => uniquePositions.push(value));
+            return uniquePositions;
+        } else if (selectedWorkSite === 'any') {
+            // Show only positions that exist among employees without work site
+            const positionIdsFromFlexibleEmployees = [...new Set(
+                employees
+                    .filter(emp => !emp.work_site_id && emp.default_position_id)
+                    .map(emp => emp.default_position_id)
+            )];
+            return allPositions.filter(pos => positionIdsFromFlexibleEmployees.includes(pos.pos_id));
+        } else {
+            // Show positions for specific work site
+            return allPositions.filter(pos => pos.site_id === parseInt(selectedWorkSite));
+        }
+    };
+
+    const filteredPositions = getFilteredPositions();
 
     useEffect(() => {
         // Load system settings if not already loaded
@@ -35,7 +70,20 @@ const EmployeeFilters = () => {
     }, [dispatch]);
 
     const handleFilterChange = (field, value) => {
-        dispatch(setFilters({ [field]: value }));
+        // Special handling for position filter when work_site is 'all'
+        if (field === 'position' && selectedWorkSite === 'all' && value !== 'all') {
+            // Find the position object to get all IDs
+            const position = filteredPositions.find(p => p.pos_id === value);
+            if (position && position.actual_ids) {
+                // For now, just use the position name as the filter value
+                // The backend will handle filtering by position name
+                dispatch(setFilters({ [field]: value }));
+            } else {
+                dispatch(setFilters({ [field]: value }));
+            }
+        } else {
+            dispatch(setFilters({ [field]: value }));
+        }
     };
 
     const handleWorkSiteChange = (value) => {
@@ -57,30 +105,32 @@ const EmployeeFilters = () => {
     };
 
     return (
-        <Card className="employee-filters-card">
-            <Card.Header className="bg-primary text-white">
+        <Card className="filters-card shadow-sm">
+            <Card.Header className="filters-header">
                 <h6 className="mb-0 d-flex align-items-center">
                     <i className="bi bi-funnel me-2"></i>
                     {t('common.filter')}
                 </h6>
             </Card.Header>
-            <Card.Body>
+            <Card.Body className="filters-body">
                 <Form>
                     <Form.Group className="mb-3">
-                        <Form.Label>{t('common.search')}</Form.Label>
+                        <Form.Label className="filter-label">{t('common.search')}</Form.Label>
                         <Form.Control
                             type="text"
                             placeholder={t('employee.searchPlaceholder')}
                             value={filters.search}
                             onChange={(e) => handleFilterChange('search', e.target.value)}
+                            className="filter-input"
                         />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>{t('employee.status')}</Form.Label>
+                        <Form.Label className="filter-label">{t('employee.status')}</Form.Label>
                         <Form.Select
                             value={filters.status}
                             onChange={(e) => handleFilterChange('status', e.target.value)}
+                            className="filter-select"
                         >
                             <option value="all">{t('common.all')}</option>
                             <option value="active">{t('status.active')}</option>
@@ -90,13 +140,14 @@ const EmployeeFilters = () => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>{t('workSite.workSite')}</Form.Label>
+                        <Form.Label className="filter-label">{t('workSite.workSite')}</Form.Label>
                         <Form.Select
                             value={selectedWorkSite}
                             onChange={(e) => handleWorkSiteChange(e.target.value)}
+                            className="filter-select"
                         >
                             <option value="all">{t('common.all')}</option>
-                            <option value="any">{t('employee.anyWorkSite')}</option>
+                            <option value="any">{t('employee.commonWorkSite')}</option>
                             {workSites?.map((site) => (
                                 <option key={site.site_id} value={site.site_id}>
                                     {site.site_name}
@@ -106,10 +157,11 @@ const EmployeeFilters = () => {
                     </Form.Group>
 
                     <Form.Group className="mb-4">
-                        <Form.Label>{t('employee.position')}</Form.Label>
+                        <Form.Label className="filter-label">{t('employee.position')}</Form.Label>
                         <Form.Select
                             value={filters.position}
                             onChange={(e) => handleFilterChange('position', e.target.value)}
+                            className="filter-select"
                             disabled={filteredPositions.length === 0}
                         >
                             <option value="all">{t('common.all')}</option>
@@ -119,17 +171,17 @@ const EmployeeFilters = () => {
                                 </option>
                             ))}
                         </Form.Select>
-                        {selectedWorkSite !== 'all' && selectedWorkSite !== 'any' && filteredPositions.length === 0 && (
-                            <Form.Text className="text-muted">
+                        {selectedWorkSite !== 'all' && filteredPositions.length === 0 && (
+                            <Form.Text className="text-muted mt-1">
                                 {t('employee.noPositionsForSite')}
                             </Form.Text>
                         )}
                     </Form.Group>
 
                     <Button
-                        variant="outline-secondary"
+                        variant="secondary"
                         size="sm"
-                        className="w-100"
+                        className="w-100 reset-button"
                         onClick={handleReset}
                     >
                         <i className="bi bi-arrow-clockwise me-2"></i>
