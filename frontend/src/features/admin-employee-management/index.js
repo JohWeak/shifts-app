@@ -73,16 +73,27 @@ const EmployeeManagement = () => {
 
     const handleDeleteEmployee = async () => {
         if (employeeToDelete) {
-            // Сохраняем все данные работника и меняем только статус
             const updatedData = {
                 ...employeeToDelete,
                 status: 'inactive'
             };
 
-            await dispatch(updateEmployee({
+            const result = await dispatch(updateEmployee({
                 employeeId: employeeToDelete.emp_id,
                 data: updatedData
             }));
+
+            // Если обновление успешно, перезагружаем список
+            if (updateEmployee.fulfilled.match(result)) {
+                dispatch(fetchEmployees({
+                    ...filters,
+                    page: pagination.page,
+                    pageSize: pagination.pageSize,
+                    sortBy: sortConfig.field,
+                    sortOrder: sortConfig.order
+                }));
+            }
+
             setShowDeleteConfirm(false);
             setEmployeeToDelete(null);
         }
@@ -100,10 +111,22 @@ const EmployeeManagement = () => {
                 status: 'active'
             };
 
-            await dispatch(updateEmployee({
+            const result = await dispatch(updateEmployee({
                 employeeId: employeeToRestore.emp_id,
                 data: updatedData
             }));
+
+            // Если обновление успешно, перезагружаем список
+            if (updateEmployee.fulfilled.match(result)) {
+                dispatch(fetchEmployees({
+                    ...filters,
+                    page: pagination.page,
+                    pageSize: pagination.pageSize,
+                    sortBy: sortConfig.field,
+                    sortOrder: sortConfig.order
+                }));
+            }
+
             setShowRestoreConfirm(false);
             setEmployeeToRestore(null);
         }
