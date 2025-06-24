@@ -12,7 +12,7 @@
 }
 
 [data-theme="dark"] .admin-dashboard .text-muted {
-    color: var(--bs-gray-500) !important;
+    color: var(--bs-gray-500) ;
 }
 
 .admin-dashboard h1 {
@@ -113,7 +113,7 @@
 
 /* Quick Actions Buttons */
 .admin-dashboard .card-body .btn {
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     padding: 0.75rem 1rem;
     font-weight: 500;
     border-radius: var(--radius-lg);

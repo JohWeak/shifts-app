@@ -2,7 +2,6 @@
 .filters-accordion {
     --bs-accordion-btn-bg: #f1f2f4;
     --bs-accordion-active-bg: #f1f2f4;
-    box-shadow: var(--shadow-sm);
 }
 
 /* Стили для заголовка внутри кнопки аккордеона */
@@ -15,10 +14,13 @@
 
 /* Стили для кнопки-заголовка аккордеона */
 .filters-accordion .accordion-button {
+    border-color: var(--bs-border-color);
+    max-height: 3rem;
 
 }
 [data-theme="dark"] .filters-accordion .accordion-button {
     background-color: var(--bs-gray-900);
+
 }
 
 .filters-accordion .accordion-button:not(.collapsed) {

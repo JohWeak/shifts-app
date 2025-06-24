@@ -109,7 +109,7 @@ const EmployeeFilters = () => {
             <Accordion.Item eventKey="0">
                 <Accordion.Header>
                     <h6 className="mb-0 d-flex align-items-center">
-                        <i className="bi bi-funnel me-2"></i>
+                        <i className="bi bi-funnel me-1"></i>
                         {t('common.filter')}
                     </h6>
                 </Accordion.Header>
