@@ -54,6 +54,54 @@ export const deleteWorkSite = createAsyncThunk(
     }
 );
 
+export const fetchPositions = createAsyncThunk(
+    'workplace/fetchPositions',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get(API_ENDPOINTS.SETTINGS.POSITIONS);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch positions');
+        }
+    }
+);
+
+export const createPosition = createAsyncThunk(
+    'workplace/createPosition',
+    async (positionData, { rejectWithValue }) => {
+        try {
+            const response = await api.post(API_ENDPOINTS.SETTINGS.POSITIONS, positionData);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to create position');
+        }
+    }
+);
+
+export const updatePosition = createAsyncThunk(
+    'workplace/updatePosition',
+    async ({ id, ...data }, { rejectWithValue }) => {
+        try {
+            const response = await api.put(API_ENDPOINTS.SETTINGS.POSITION_UPDATE(id), data);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to update position');
+        }
+    }
+);
+
+export const deletePosition = createAsyncThunk(
+    'workplace/deletePosition',
+    async (id, { rejectWithValue }) => {
+        try {
+            await api.delete(API_ENDPOINTS.SETTINGS.POSITION_UPDATE(id));
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to delete position');
+        }
+    }
+);
+
 // Slice
 const workplaceSlice = createSlice({
     name: 'workplace',
@@ -62,11 +110,16 @@ const workplaceSlice = createSlice({
         positions: [],
         loading: false,
         error: null,
-        operationStatus: null // 'success' | 'error' | null
+        operationStatus: null, // 'success' | 'error' | null
+        positionOperationStatus: null
     },
     reducers: {
         clearOperationStatus: (state) => {
             state.operationStatus = null;
+            state.error = null;
+        },
+        clearPositionOperationStatus: (state) => {
+            state.positionOperationStatus = null;
             state.error = null;
         }
     },
@@ -116,9 +169,51 @@ const workplaceSlice = createSlice({
             .addCase(deleteWorkSite.rejected, (state, action) => {
                 state.error = action.payload;
                 state.operationStatus = 'error';
+            })
+
+            // Positions
+            .addCase(fetchPositions.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchPositions.fulfilled, (state, action) => {
+                state.loading = false;
+                state.positions = action.payload;
+            })
+            .addCase(fetchPositions.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Create position
+            .addCase(createPosition.fulfilled, (state, action) => {
+                state.positions.push(action.payload);
+                state.positionOperationStatus = 'success';
+            })
+            .addCase(createPosition.rejected, (state, action) => {
+                state.error = action.payload;
+                state.positionOperationStatus = 'error';
+            })
+            // Update position
+            .addCase(updatePosition.fulfilled, (state, action) => {
+                const index = state.positions.findIndex(pos => pos.pos_id === action.payload.pos_id);
+                if (index !== -1) {
+                    state.positions[index] = action.payload;
+                }
+                state.positionOperationStatus = 'success';
+            })
+            // Delete position
+            .addCase(deletePosition.fulfilled, (state, action) => {
+                state.positions = state.positions.filter(pos => pos.pos_id !== action.payload);
+                state.positionOperationStatus = 'success';
+            })
+            .addCase(deletePosition.rejected, (state, action) => {
+                state.error = action.payload;
+                state.positionOperationStatus = 'error';
             });
+
+
     }
 });
 
-export const { clearOperationStatus } = workplaceSlice.actions;
+export const { clearOperationStatus, clearPositionOperationStatus } = workplaceSlice.actions;
 export default workplaceSlice.reducer;
