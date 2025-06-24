@@ -26,6 +26,9 @@ const EmployeeManagement = () => {
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [employeeToDelete, setEmployeeToDelete] = useState(null);
+    const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+    const [employeeToRestore, setEmployeeToRestore] = useState(null);
+
 
     const employeesState = useSelector((state) => state.employees);
     const [sortConfig, setSortConfig] = useState({ field: 'createdAt', order: 'DESC' });
@@ -70,21 +73,40 @@ const EmployeeManagement = () => {
 
     const handleDeleteEmployee = async () => {
         if (employeeToDelete) {
-            // Instead of deleting, we set status to inactive
+            // Сохраняем все данные работника и меняем только статус
+            const updatedData = {
+                ...employeeToDelete,
+                status: 'inactive'
+            };
+
             await dispatch(updateEmployee({
                 employeeId: employeeToDelete.emp_id,
-                data: { status: 'inactive' }
+                data: updatedData
             }));
             setShowDeleteConfirm(false);
             setEmployeeToDelete(null);
         }
     };
 
-    const handleRestoreEmployee = async (employee) => {
-        await dispatch(updateEmployee({
-            employeeId: employee.emp_id,
-            data: { status: 'active' }
-        }));
+    const handleRestoreClick = (employee) => {
+        setEmployeeToRestore(employee);
+        setShowRestoreConfirm(true);
+    };
+
+    const handleRestoreEmployee = async () => {
+        if (employeeToRestore) {
+            const updatedData = {
+                ...employeeToRestore,
+                status: 'active'
+            };
+
+            await dispatch(updateEmployee({
+                employeeId: employeeToRestore.emp_id,
+                data: updatedData
+            }));
+            setShowRestoreConfirm(false);
+            setEmployeeToRestore(null);
+        }
     };
 
     const handleSaveEmployee = async (employeeData) => {
@@ -152,7 +174,7 @@ const EmployeeManagement = () => {
                                 loading={loading}
                                 onEdit={handleEditEmployee}
                                 onDelete={handleDeleteClick}
-                                onRestore={handleRestoreEmployee}
+                                onRestore={handleRestoreClick}
                                 pagination={pagination}
                                 onPageChange={handlePageChange}
                                 onPageSizeChange={handlePageSizeChange}
@@ -181,6 +203,18 @@ const EmployeeManagement = () => {
                     })}
                     confirmVariant="warning"
                     confirmText={t('employee.deactivate')}
+                />
+                <ConfirmationModal
+                    show={showRestoreConfirm}
+                    onHide={() => setShowRestoreConfirm(false)}
+                    onConfirm={handleRestoreEmployee}
+                    title={t('employee.restoreConfirmTitle')}
+                    message={t('employee.restoreConfirmMessage', {
+                        name: employeeToRestore ?
+                            `${employeeToRestore.first_name} ${employeeToRestore.last_name}` : ''
+                    })}
+                    confirmVariant="success"
+                    confirmText={t('employee.restore')}
                 />
             </div>
         </AdminLayout>

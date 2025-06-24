@@ -194,15 +194,16 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const {password, ...updateData} = req.body;
+        const { password, ...updateData } = req.body;
 
         // Hash password if provided
         if (password) {
             updateData.password = await bcrypt.hash(password, 10);
         }
 
+        // Обновляем только переданные поля
         const [updated] = await Employee.update(updateData, {
-            where: {emp_id: req.params.id}
+            where: { emp_id: req.params.id }
         });
 
         if (!updated) {
@@ -212,8 +213,21 @@ const update = async (req, res) => {
             });
         }
 
+        // Возвращаем полные данные сотрудника с включенными ассоциациями
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: {exclude: ['password']}
+            attributes: { exclude: ['password'] },
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition',
+                    attributes: ['pos_id', 'pos_name']
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                }
+            ]
         });
 
         res.json({

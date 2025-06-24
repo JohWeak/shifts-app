@@ -9,7 +9,7 @@ export const ConfirmationModal = ({
                                       title,
                                       message,
                                       onConfirm,
-                                      onCancel,
+                                      onHide: onCancel,
                                       loading = false,
                                       confirmText,
                                       cancelText,
@@ -23,7 +23,6 @@ export const ConfirmationModal = ({
     const finalConfirmText = confirmText || t('common.confirm');
     const finalCancelText = cancelText || t('common.cancel');
     const finalConfirmVariant = confirmVariant || variant;
-
     return (
         <Modal
             show={show}

@@ -196,9 +196,36 @@
     justify-content: center;
     z-index: 1000;
 }
+.employee-modal .card {
+    border: 1px solid var(--bs-border-color);
+    box-shadow: none;
+}
+
+.employee-modal .card-header {
+    background-color: var(--bs-gray-100);
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 0.75rem 1rem;
+}
+
+[data-theme="dark"] .employee-modal .card-header {
+    background-color: var(--bs-gray-800);
+}
+
+.employee-modal .card-header h6 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+}
+
+.employee-modal .card-body {
+    padding: 1rem;
+}
 
 [data-theme="dark"] .employee-modal.loading .modal-body::after {
     background: rgba(0, 0, 0, 0.8);
+}
+[data-theme="dark"] .modal .modal-content .form-select {
+
 }
 
 /* Responsive adjustments */

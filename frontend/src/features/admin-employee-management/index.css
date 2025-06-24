@@ -53,7 +53,7 @@
 .employee-management .col-lg-3{
 
 }
-[data-theme="dark"] .admin-dashboard .text-muted {
+[data-theme="dark"] .employee-management .text-muted {
     color: var(--bs-gray-500) !important;
 }
 /*[data-theme="dark"] .employee-management .form-control .placeholder {*/

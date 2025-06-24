@@ -146,12 +146,12 @@
 }
 
 .pagination-container .page-item.active .page-link {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     background: var(--bs-primary);
     color: white;
 }
 [data-theme="dark"] .pagination-container .pagination .page-item.disabled .page-link{
-    background: var(--bs-gray-800) !important;
+    background: var(--bs-gray-800);
 }
 
 .inactive-row {
