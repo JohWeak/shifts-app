@@ -85,10 +85,12 @@ const findAll = async (req, res) => {
                 order = [['first_name', sortOrder], ['last_name', sortOrder]];
                 break;
             case 'workSite':
-                order = [[WorkSite, 'site_name', sortOrder]];
+                // Use the association alias 'workSite'
+                order = [[{ model: WorkSite, as: 'workSite' }, 'site_name', sortOrder]];
                 break;
             case 'position':
-                order = [[Position, 'pos_name', sortOrder]];
+                // Use the association alias 'defaultPosition'
+                order = [[{ model: Position, as: 'defaultPosition' }, 'pos_name', sortOrder]];
                 break;
             case 'status':
                 order = [['status', sortOrder]];
@@ -115,12 +117,14 @@ const findAll = async (req, res) => {
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
+                    attributes: ['site_id', 'site_name'],
+                    required: false // Make it optional to include employees without work site
                 }
             ],
             limit: parseInt(pageSize),
             offset: offset,
-            order: order
+            order: order,
+            distinct: true // Add this to get correct count with includes
         });
 
         // Format response
