@@ -1,13 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { settingsAPI } from 'shared/api/apiService';
+import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
 
 // Async thunks
 export const fetchSystemSettings = createAsyncThunk(
     'settings/fetchSystemSettings',
-    async (_, { rejectWithValue }) => {
+    async (forceRefresh = false, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { lastFetched, systemSettings } = state.settings;
+
+        // Проверяем кэш
+        if (!forceRefresh && isCacheValid(lastFetched, CACHE_DURATION.LONG) && systemSettings?.positions?.length > 0) {
+            return { cached: true, data: systemSettings };
+        }
+
         try {
             const response = await settingsAPI.fetchSystemSettings();
-            return response;
+            return { cached: false, data: response };
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -52,11 +61,15 @@ const settingsSlice = createSlice({
         },
         loading: 'idle',
         error: null,
+        lastFetched: null,
     },
     reducers: {
         updateLocalSettings(state, action) {
             state.systemSettings = { ...state.systemSettings, ...action.payload };
         },
+        invalidateCache(state) {
+            state.lastFetched = null;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -66,11 +79,13 @@ const settingsSlice = createSlice({
             })
             .addCase(fetchSystemSettings.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                // Объединяем существующие настройки с полученными
-                state.systemSettings = {
-                    ...state.systemSettings,
-                    ...action.payload
-                };
+                if (!action.payload.cached) {
+                    state.systemSettings = {
+                        ...state.systemSettings,
+                        ...action.payload.data
+                    };
+                    state.lastFetched = Date.now();
+                }
             })
             .addCase(fetchSystemSettings.rejected, (state, action) => {
                 state.loading = 'idle';
@@ -94,5 +109,5 @@ const settingsSlice = createSlice({
     },
 });
 
-export const { updateLocalSettings } = settingsSlice.actions;
+export const { updateLocalSettings, invalidateCache   } = settingsSlice.actions;
 export default settingsSlice.reducer;

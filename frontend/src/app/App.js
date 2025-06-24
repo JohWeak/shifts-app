@@ -1,10 +1,11 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import {Provider, useDispatch} from 'react-redux';
-import store from './store/store';
-import {I18nProvider} from '../shared/lib/i18n/i18nProvider';
-import {ErrorBoundary} from '../shared/ui/components/ErrorBoundary/ErrorBoundary';
-import {fetchSystemSettings} from '../features/admin-system-settings/model/settingsSlice';
+import store from 'app/store/store';
+import {I18nProvider} from 'shared/lib/i18n/i18nProvider';
+import {ErrorBoundary} from 'shared/ui/components/ErrorBoundary/ErrorBoundary';
+import {fetchSystemSettings} from 'features/admin-system-settings/model/settingsSlice';
+import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleSlice';
 
 // Pages
 import Login from '../features/auth';
@@ -23,6 +24,21 @@ import './App.css';
  * Main Application Component
  * Defines routing structure and authentication flow
  */
+const AppInitializer = ({children}) => {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        // Загружаем данные параллельно при старте приложения
+        Promise.all([
+            dispatch(fetchSystemSettings()),
+            dispatch(fetchWorkSites())
+        ]);
+    }, [dispatch]);
+
+    return children;
+};
+
+
 const AppContent = () => {
     // Теперь useDispatch() вызывается ВНУТРИ Provider, и все работает!
     const dispatch = useDispatch();
@@ -114,14 +130,13 @@ const AppContent = () => {
 };
 
 
-
-
-
 function App() {
     return (
         <Provider store={store}>
             <I18nProvider>
-                <AppContent />
+                <AppInitializer>
+                    <AppContent/>
+                </AppInitializer>
             </I18nProvider>
         </Provider>
     );

@@ -1,6 +1,7 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
+import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -136,10 +137,18 @@ export const fetchRecommendations = createAsyncThunk(
 // Загрузка рабочих мест
 export const fetchWorkSites = createAsyncThunk(
     'schedule/fetchWorkSites',
-    async (_, { rejectWithValue }) => {
+    async (forceRefresh = false, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { workSitesLastFetched, workSites } = state.schedule;
+
+        // Проверяем кэш
+        if (!forceRefresh && isCacheValid(workSitesLastFetched, CACHE_DURATION.LONG) && workSites?.length > 0) {
+            return { cached: true, data: workSites };
+        }
+
         try {
             const response = await worksiteAPI.fetchWorkSites();
-            return response;
+            return { cached: false, data: response };
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -171,6 +180,8 @@ const scheduleSlice = createSlice({
         activeTab: 'overview',
         editingPositions: {},
         pendingChanges: {},
+        workSitesLastFetched: null,
+
     },
     reducers: {
         // Синхронные экшены для управления UI
@@ -340,8 +351,11 @@ const scheduleSlice = createSlice({
                 state.workSitesLoading = 'pending';
             })
             .addCase(fetchWorkSites.fulfilled, (state, action) => {
-                state.workSitesLoading = 'succeeded';
-                state.workSites = action.payload;
+                state.workSitesLoading = 'idle';
+                if (!action.payload.cached) {
+                    state.workSites = action.payload.data;
+                    state.workSitesLastFetched = Date.now();
+                }
             })
             .addCase(fetchWorkSites.rejected, (state, action) => {
                 state.workSitesLoading = 'failed';

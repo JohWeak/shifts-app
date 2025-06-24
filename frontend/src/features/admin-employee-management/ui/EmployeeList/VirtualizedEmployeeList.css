@@ -1,0 +1,28 @@
+/* frontend/src/features/admin-employee-management/ui/EmployeeList/VirtualizedEmployeeList.css */
+.virtualized-list-container {
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.employee-row {
+    border-bottom: 1px solid var(--bs-border-color);
+    transition: background-color 0.2s ease;
+}
+
+.employee-row:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.employee-cell {
+    padding: 0.5rem;
+}
+
+.list-header {
+    z-index: 10;
+}
+
+/* Убираем стандартные стили react-window */
+.List {
+    outline: none;
+}

@@ -41,7 +41,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         if (show && (!workSites || workSites.length === 0)) {
             dispatch(fetchWorkSites());
         }
-    }, [show, dispatch, workSites]);
+    }, [show]);
 
     useEffect(() => {
         if (employee) {

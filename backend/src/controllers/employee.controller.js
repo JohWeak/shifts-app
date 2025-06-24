@@ -4,6 +4,9 @@ const {Employee, Position, EmployeeConstraint, WorkSite} = db;
 const bcrypt = require('bcryptjs');
 const {Op} = require("sequelize");
 
+// redis для кэша? мбмб
+
+
 // Create new employee
 const create = async (req, res) => {
     try {
@@ -35,14 +38,25 @@ const findAll = async (req, res) => {
     try {
         const {
             page = 1,
-            pageSize = 10,
+            pageSize = 20, // Увеличиваем дефолтный размер
             status,
             position,
             search,
             work_site,
             sortBy = 'createdAt',
-            sortOrder = 'DESC'
+            sortOrder = 'DESC',
+            fields // Новый параметр для выборочной загрузки полей
         } = req.query;
+
+        // Определяем какие поля загружать
+        const attributes = fields
+            ? fields.split(',').filter(f => f !== 'password')
+            : [
+                'emp_id', 'first_name', 'last_name', 'email', 'phone',
+                'status', 'role', 'default_position_id', 'work_site_id',
+                'createdAt', 'updatedAt'
+                // Не загружаем password, country, city, address по умолчанию
+            ];
 
         // Build where clause
         const where = {};
@@ -60,11 +74,22 @@ const findAll = async (req, res) => {
             }
         }
 
+        // Оптимизированный поиск с использованием индексов
         if (search) {
+            const searchLower = search.toLowerCase();
             where[Op.or] = [
-                { first_name: { [Op.like]: `%${search}%` } },
-                { last_name: { [Op.like]: `%${search}%` } },
-                { email: { [Op.like]: `%${search}%` } },
+                sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('first_name')),
+                    { [Op.like]: `%${searchLower}%` }
+                ),
+                sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('last_name')),
+                    { [Op.like]: `%${searchLower}%` }
+                ),
+                sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('email')),
+                    { [Op.like]: `%${searchLower}%` }
+                ),
                 { phone: { [Op.like]: `%${search}%` } }
             ];
         }
@@ -85,11 +110,9 @@ const findAll = async (req, res) => {
                 order = [['first_name', sortOrder], ['last_name', sortOrder]];
                 break;
             case 'workSite':
-                // Use the association alias 'workSite'
                 order = [[{ model: WorkSite, as: 'workSite' }, 'site_name', sortOrder]];
                 break;
             case 'position':
-                // Use the association alias 'defaultPosition'
                 order = [[{ model: Position, as: 'defaultPosition' }, 'pos_name', sortOrder]];
                 break;
             case 'status':
@@ -102,29 +125,33 @@ const findAll = async (req, res) => {
         // Calculate offset
         const offset = (page - 1) * pageSize;
 
-        // Fetch employees with pagination
+        // Оптимизированный запрос с ограниченным набором полей
         const { count, rows } = await Employee.findAndCountAll({
             where,
-            attributes: { exclude: ['password'] },
+            attributes,
             include: [
                 {
                     model: Position,
                     as: 'defaultPosition',
-                    attributes: ['pos_id', 'pos_name'],
+                    attributes: ['pos_id', 'pos_name'], // Только необходимые поля
                     where: Object.keys(includeWhere).length > 0 ? includeWhere : undefined,
                     required: position && position !== 'all' && work_site === 'all'
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name'],
-                    required: false // Make it optional to include employees without work site
+                    attributes: ['site_id', 'site_name'], // Только необходимые поля
+                    required: false
                 }
             ],
             limit: parseInt(pageSize),
             offset: offset,
             order: order,
-            distinct: true // Add this to get correct count with includes
+            distinct: true,
+            // Добавляем подсказку для использования индексов
+            ...((status || work_site) && {
+                index: status && work_site ? 'idx_work_site_status' : 'idx_status_created'
+            })
         });
 
         // Format response
@@ -141,11 +168,33 @@ const findAll = async (req, res) => {
                 page: parseInt(page),
                 pageSize: parseInt(pageSize),
                 total: count,
-                totalPages: Math.ceil(count / pageSize)
+                totalPages: Math.ceil(count / pageSize),
+                hasNextPage: page < Math.ceil(count / pageSize)
             }
         });
     } catch (error) {
         console.error('Error fetching employees:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching employees',
+            error: error.message
+        });
+    }
+};
+
+const findAllBasic = async (req, res) => {
+    try {
+        const employees = await Employee.findAll({
+            attributes: ['emp_id', 'first_name', 'last_name', 'default_position_id', 'work_site_id'],
+            where: { status: 'active' },
+            order: [['first_name', 'ASC'], ['last_name', 'ASC']]
+        });
+
+        res.json({
+            success: true,
+            data: employees
+        });
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error fetching employees',

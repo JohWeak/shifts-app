@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import {Card, Form, Button, Col, Row, Accordion} from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
+import { useMemo } from 'react';
+import { debounce } from 'lodash';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { setFilters } from '../../model/employeeSlice';
 import { fetchSystemSettings } from 'features/admin-system-settings/model/settingsSlice';
@@ -19,6 +21,14 @@ const EmployeeFilters = () => {
 
     // Get all positions
     const allPositions = systemSettings?.positions || [];
+
+    // Дебаунс для поиска
+    const debouncedSearch = useMemo(
+        () => debounce((value) => {
+            handleFilterChange('search', value);
+        }, 500),
+        []
+    );
 
     // Filter positions based on selected work site
     const getFilteredPositions = () => {
@@ -123,7 +133,7 @@ const EmployeeFilters = () => {
                                     type="text"
                                     placeholder={t('employee.searchPlaceholder')}
                                     value={filters.search}
-                                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                                    onChange={(e) => debouncedSearch(e.target.value)}
                                     className="filter-input"
                                 />
                             </Col>

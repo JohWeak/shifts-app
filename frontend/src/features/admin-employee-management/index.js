@@ -1,6 +1,9 @@
 // frontend/src/features/admin-employee-management/index.js
-import React, { useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import store from "app/store/store";
+import {fetchSystemSettings} from "../admin-system-settings/model/settingsSlice";
+import {fetchWorkSites} from "../admin-schedule-management/model/scheduleSlice";
 import { Container, Card, Button, Row, Col, Alert } from 'react-bootstrap';
 import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -8,6 +11,7 @@ import EmployeeList from './ui/EmployeeList/EmployeeList';
 import EmployeeModal from './ui/EmployeeModal/EmployeeModal';
 import EmployeeFilters from './ui/EmployeeFilters/EmployeeFilters';
 import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
+
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {
     fetchEmployees,
@@ -18,6 +22,7 @@ import {
     setPagination
 } from './model/employeeSlice';
 import './index.css';
+
 
 const EmployeeManagement = () => {
     const { t } = useI18n();
@@ -33,6 +38,11 @@ const EmployeeManagement = () => {
     const employeesState = useSelector((state) => state.employees);
     const [sortConfig, setSortConfig] = useState({ field: 'createdAt', order: 'DESC' });
 
+    // Для infinite scroll
+    const [allEmployees, setAllEmployees] = useState([]);
+    const [hasNextPage, setHasNextPage] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
     const {
         employees = [],
         loading = false,
@@ -40,6 +50,18 @@ const EmployeeManagement = () => {
         filters = { status: 'active', position: 'all', search: '', work_site: 'all' },
         pagination = { page: 1, pageSize: 10, total: 0 }
     } = employeesState || {};
+
+    useEffect(() => {
+        const { systemSettings } = store.getState().settings;
+        const { workSites } = store.getState().schedule;
+
+        if (!systemSettings?.positions?.length) {
+            dispatch(fetchSystemSettings());
+        }
+        if (!workSites?.length) {
+            dispatch(fetchWorkSites());
+        }
+    }, [dispatch]);
 
     useEffect(() => {
         dispatch(fetchEmployees({
@@ -51,7 +73,36 @@ const EmployeeManagement = () => {
         }));
     }, [dispatch, filters, pagination.page, pagination.pageSize, sortConfig]);
 
-// Добавить функцию handleSort:
+    // Функция для загрузки дополнительных данных
+    const loadMoreEmployees = useCallback(async () => {
+        if (isLoadingMore || !hasNextPage) return;
+
+        setIsLoadingMore(true);
+        const nextPage = Math.floor(allEmployees.length / pagination.pageSize) + 1;
+
+        try {
+            const response = await dispatch(fetchEmployees({
+                ...filters,
+                page: nextPage,
+                pageSize: pagination.pageSize,
+                sortBy: sortConfig.field,
+                sortOrder: sortConfig.order
+            })).unwrap();
+
+            if (response.data.length > 0) {
+                setAllEmployees(prev => [...prev, ...response.data]);
+                setHasNextPage(response.data.length === pagination.pageSize);
+            } else {
+                setHasNextPage(false);
+            }
+        } catch (error) {
+            console.error('Error loading more employees:', error);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    }, [dispatch, filters, pagination.pageSize, sortConfig, allEmployees.length, isLoadingMore, hasNextPage]);
+
+
     const handleSort = (field, order) => {
         setSortConfig({ field, order });
     };
