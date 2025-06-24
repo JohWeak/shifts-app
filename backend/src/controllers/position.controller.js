@@ -1,49 +1,75 @@
 // backend/src/controllers/position.controller.js
 const db = require('../models');
-const { Position, WorkSite } = db;
+const { Position, WorkSite, Employee } = db;
 
-// Get all positions
+// Get all positions with statistics
 const getAllPositions = async (req, res) => {
     try {
-        const { site_id } = req.query;
+        const { site_id, includeStats } = req.query;
         const where = site_id ? { site_id } : {};
 
         const positions = await Position.findAll({
             where,
-            include: [{
-                model: WorkSite,
-                as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }],
+            include: [
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                },
+                includeStats === 'true' ? {
+                    model: Employee,
+                    as: 'employees',
+                    attributes: ['emp_id'],
+                    through: { attributes: [] }
+                } : null
+            ].filter(Boolean),
             order: [['pos_name', 'ASC']]
         });
 
-        res.json({
-            success: true,
-            data: positions
+        // Add statistics if requested
+        const positionsWithStats = positions.map(position => {
+            const posData = position.toJSON();
+            if (includeStats === 'true') {
+                posData.totalEmployees = posData.employees?.length || 0;
+                delete posData.employees; // Remove raw employee data
+            }
+            return posData;
         });
+
+        res.json(positionsWithStats);
     } catch (error) {
         res.status(500).json({
-            success: false,
             message: 'Error fetching positions',
             error: error.message
         });
     }
 };
 
-// Create position
+// Create position with support for required_roles
 const createPosition = async (req, res) => {
     try {
-        const position = await Position.create(req.body);
+        const { pos_name, site_id, profession, num_of_emp, required_roles } = req.body;
 
-        res.status(201).json({
-            success: true,
-            message: 'Position created successfully',
-            data: position
+        const position = await Position.create({
+            pos_name,
+            site_id,
+            profession,
+            num_of_emp,
+            required_roles: required_roles || []
         });
+
+        // Fetch created position with workSite info
+        const createdPosition = await Position.findByPk(position.pos_id, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name']
+            }]
+        });
+
+        res.status(201).json(createdPosition);
     } catch (error) {
         res.status(500).json({
-            success: false,
             message: 'Error creating position',
             error: error.message
         });
@@ -54,28 +80,35 @@ const createPosition = async (req, res) => {
 const updatePosition = async (req, res) => {
     try {
         const { id } = req.params;
+        const { pos_name, site_id, profession, num_of_emp, required_roles } = req.body;
 
-        const [updated] = await Position.update(req.body, {
-            where: { pos_id: id }
-        });
-
-        if (!updated) {
+        const position = await Position.findByPk(id);
+        if (!position) {
             return res.status(404).json({
-                success: false,
                 message: 'Position not found'
             });
         }
 
-        const position = await Position.findByPk(id);
-
-        res.json({
-            success: true,
-            message: 'Position updated successfully',
-            data: position
+        await position.update({
+            pos_name,
+            site_id,
+            profession,
+            num_of_emp,
+            required_roles: required_roles || []
         });
+
+        // Fetch updated position with workSite info
+        const updatedPosition = await Position.findByPk(id, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name']
+            }]
+        });
+
+        res.json(updatedPosition);
     } catch (error) {
         res.status(500).json({
-            success: false,
             message: 'Error updating position',
             error: error.message
         });
@@ -87,24 +120,34 @@ const deletePosition = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const deleted = await Position.destroy({
-            where: { pos_id: id }
+        // Check if position has employees
+        const position = await Position.findByPk(id, {
+            include: [{
+                model: Employee,
+                as: 'employees',
+                attributes: ['emp_id']
+            }]
         });
 
-        if (!deleted) {
+        if (!position) {
             return res.status(404).json({
-                success: false,
                 message: 'Position not found'
             });
         }
 
+        if (position.employees && position.employees.length > 0) {
+            return res.status(400).json({
+                message: 'Cannot delete position with assigned employees'
+            });
+        }
+
+        await position.destroy();
+
         res.json({
-            success: true,
             message: 'Position deleted successfully'
         });
     } catch (error) {
         res.status(500).json({
-            success: false,
             message: 'Error deleting position',
             error: error.message
         });

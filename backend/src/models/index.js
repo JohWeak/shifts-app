@@ -54,6 +54,14 @@ const defineAssociations = () => {
             foreignKey: 'default_position_id',
             as: 'defaultPosition'
         });
+
+        // Добавляем many-to-many связь
+        Employee.belongsToMany(Position, {
+            through: 'employee_positions',
+            foreignKey: 'emp_id',
+            otherKey: 'position_id',
+            as: 'positions'
+        });
     }
 
     if (Employee && EmployeeConstraint) {
@@ -85,8 +93,10 @@ const defineAssociations = () => {
     }
 
     if (Position && Employee) {
-        Position.hasMany(Employee, {
-            foreignKey: 'default_position_id',
+        Position.belongsToMany(Employee, {
+            through: 'employee_positions',
+            foreignKey: 'position_id',
+            otherKey: 'emp_id',
             as: 'employees'
         });
     }

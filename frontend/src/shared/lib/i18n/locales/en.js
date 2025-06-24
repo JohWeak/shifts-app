@@ -591,6 +591,11 @@ export const en = {
             title: 'Display Settings',
             dateFormat: 'Date Format',
             timeFormat: 'Time Format',
+            dateFormatHint: 'Choose how dates are displayed throughout the system',
+            timeFormatHint: 'Choose between 24-hour or 12-hour time format',
+            preview: 'Preview',
+            dateExample: 'Date Example',
+            timeExample: 'Time Example',
             formats: {
                 date: {
                     'DD/MM/YYYY': 'DD/MM/YYYY',
