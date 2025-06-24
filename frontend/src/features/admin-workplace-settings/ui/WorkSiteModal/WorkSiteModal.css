@@ -1,0 +1,15 @@
+/* frontend/src/features/admin-workplace-settings/ui/WorkSiteModal/WorkSiteModal.css */
+.form-label {
+    font-weight: 500;
+    color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--bs-gray-300);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}

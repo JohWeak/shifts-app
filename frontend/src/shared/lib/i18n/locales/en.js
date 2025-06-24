@@ -34,6 +34,7 @@ export const en = {
         reload: 'Reload Page',
         reset: 'Reset',
         save: 'Save',
+        saving: 'Saving...',
         search: 'Search',
         select: 'Select',
         settings: 'Settings',
@@ -529,7 +530,8 @@ export const en = {
         numeric: 'Must be a number',
         alphanumeric: 'Must contain only letters and numbers',
         unique: 'This value already exists',
-        strongPassword: 'Password must contain uppercase, lowercase, number and special character'
+        strongPassword: 'Password must contain uppercase, lowercase, number and special character',
+
     },
     workplace: {
         title: 'Workplace Settings',
@@ -551,7 +553,10 @@ export const en = {
             deleteError: 'Cannot delete work site with existing positions',
             created: 'Work site created successfully',
             updated: 'Work site updated successfully',
-            deleted: 'Work site deleted successfully'
+            deleted: 'Work site deleted successfully',
+            noSites: 'No work sites found. Add your first site to get started.',
+            namePlaceholder: 'e.g., Main Office',
+            addressPlaceholder: 'e.g., 123 Main Street, Tel Aviv',
         },
         positions: {
             title: 'Positions',

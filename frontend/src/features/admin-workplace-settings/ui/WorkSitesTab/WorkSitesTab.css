@@ -1,0 +1,13 @@
+/* frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/WorkSitesTab.css */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.workplace-table tbody tr:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .workplace-table tbody tr:hover {
+    background-color: var(--bs-gray-800);
+}
