@@ -181,7 +181,7 @@ const defineAssociations = () => {
         }
 
         if (ScheduleSettings) {
-            WorkSite.hasOne(ScheduleSettings, {
+            WorkSite.hasMany(ScheduleSettings, {
                 foreignKey: 'site_id',
                 as: 'settings'
             });
@@ -194,21 +194,20 @@ const defineAssociations = () => {
         }
     }
 
-    if (EmployeeQualification && Employee) {
-        EmployeeQualification.belongsTo(Employee, {
-            foreignKey: 'emp_id',
-            as: 'employee'
-        });
+        if (EmployeeQualification && Employee) {
+            EmployeeQualification.belongsTo(Employee, {
+                foreignKey: 'emp_id',
+                as: 'employee'
+            });
 
-        Employee.hasMany(EmployeeQualification, {
-            foreignKey: 'emp_id',
-            as: 'qualifications'
-        });
-    }
+            Employee.hasMany(EmployeeQualification, {
+                foreignKey: 'emp_id',
+                as: 'qualifications'
+            });
+        }
 
-};
+    };
 
 // Вызываем функцию определения ассоциаций
-defineAssociations();
-
-module.exports = db;
+    defineAssociations();
+    module.exports = db;

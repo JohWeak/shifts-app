@@ -14,6 +14,7 @@ import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
 import AlgorithmSettings from '../features/admin-algorithm-settings';
 import SystemSettings from '../features/admin-system-settings';
+import WorkplaceSettings from '../features/admin-workplace-settings';
 import Reports from '../features/admin-reports';
 import EmployeeManagement from 'features/admin-employee-management'
 
