@@ -1,51 +1,61 @@
 /* frontend/src/features/admin-employee-management/ui/EmployeeFilters/EmployeeFilters.css */
-.filters-card {
-    border: none;
-    border-radius: var(--radius-lg);
-    background: var(--bs-white);
-    height: fit-content;
-    position: sticky;
-    top: 1rem;
+.filters-accordion {
+    --bs-accordion-btn-bg: #f1f2f4;
+    --bs-accordion-active-bg: #f1f2f4;
+    box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .filters-card {
-    background: var(--bs-gray-800);
-}
-
-.filters-card .filters-header {
-    /*background: transparent;*/
-    border-bottom: 1px solid var(--bs-border-color);
-    padding: 0.84rem 1.35rem;
-}
-[data-theme="dark"] .filters-card .filters-header {
-    background: var(--bs-gray-900);
-}
-.filters-header h6 {
-    color: var(--bs-emphasis-color);
-    font-weight: 600;
-    font-size: 0.875rem;
+/* Стили для заголовка внутри кнопки аккордеона */
+.filters-accordion .accordion-header h6 {
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    color: var(--bs-body-color);
 }
 
-.filters-body {
-    padding: 1.25rem;
+/* Стили для кнопки-заголовка аккордеона */
+.filters-accordion .accordion-button {
+
+}
+[data-theme="dark"] .filters-accordion .accordion-button {
+    background-color: var(--bs-gray-900);
 }
 
-.filter-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--bs-secondary);
-    margin-bottom: 0.5rem;
+.filters-accordion .accordion-button:not(.collapsed) {
+    box-shadow: none; /* Убираем тень при открытии */
 }
 
+.filters-accordion .accordion-button:focus {
+    box-shadow: none; /* Убираем обводку при фокусе */
+}
+
+/* Кастомизация стрелочки */
+.filters-accordion .accordion-button::after {
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236c757d'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230d6efd'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+/* Темная тема */
+[data-theme="dark"] .filters-accordion {
+    --bs-accordion-bg: var(--bs-gray-800);
+    --bs-accordion-btn-bg: var(--bs-gray-800);
+    --bs-accordion-active-bg: var(--bs-gray-800);
+    --bs-accordion-btn-color: var(--bs-gray-300);
+}
+[data-theme="dark"] .filters-accordion .accordion-header h6{
+    color: var(--bs-gray-300);
+
+}
+
+/* Стили для инпутов и селектов остаются актуальными */
 .filter-input,
 .filter-select {
     border: 1px solid var(--bs-border-color);
-    border-radius: 0.375rem;
+    border-radius: var(--radius-sm);
     font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.6rem 0.75rem;
     transition: all 0.2s ease;
+    height: 100%;
 }
 
 .filter-input:focus,
@@ -53,30 +63,36 @@
     border-color: var(--bs-primary);
     box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.15);
 }
+.filter-select:hover {
+    border-color: var(--bs-gray-400);
+}
+[data-theme="dark"] .filter-select:hover {
+    border-color: var(--bs-tertiary-color);
+}
 
 .reset-button {
     border: 1px solid var(--bs-border-color);
     background: transparent;
     color: var(--bs-body-color);
     font-size: 0.875rem;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     transition: all 0.2s ease;
+    height: 100%;
+    border-radius: var(--radius-sm);
 }
 
 .reset-button:hover {
-    background: var(--bs-gray-100);
+    background: var(--bs-gray-200);
     border-color: var(--bs-gray-400);
+    color: var(--bs-gray-600);
+}
+
+[data-theme="dark"] .reset-button {
+    border-color: var(--bs-gray-600);
 }
 
 [data-theme="dark"] .reset-button:hover {
     background: var(--bs-gray-700);
     border-color: var(--bs-gray-600);
-}
-
-/* Responsive */
-@media (max-width: 991px) {
-    .filters-card {
-        position: static;
-        margin-bottom: 1.5rem;
-    }
+    color: var(--bs-gray-300);
 }

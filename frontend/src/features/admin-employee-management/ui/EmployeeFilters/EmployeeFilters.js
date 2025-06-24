@@ -1,6 +1,6 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/EmployeeFilters.js
 import React, { useEffect, useState } from 'react';
-import { Card, Form, Button } from 'react-bootstrap';
+import {Card, Form, Button, Col, Row, Accordion} from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { setFilters } from '../../model/employeeSlice';
@@ -105,91 +105,98 @@ const EmployeeFilters = () => {
     };
 
     return (
-        <Card className="filters-card shadow-sm">
-            <Card.Header className="filters-header">
-                <h6 className="mb-0 d-flex align-items-center">
-                    <i className="bi bi-funnel me-2"></i>
-                    {t('common.filter')}
-                </h6>
-            </Card.Header>
-            <Card.Body className="filters-body">
-                <Form>
-                    <Form.Group className="mb-3">
-                        <Form.Label className="filter-label">{t('common.search')}</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder={t('employee.searchPlaceholder')}
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
-                            className="filter-input"
-                        />
-                    </Form.Group>
+        <Accordion defaultActiveKey="1" className="filters-accordion">
+            <Accordion.Item eventKey="0">
+                <Accordion.Header>
+                    <h6 className="mb-0 d-flex align-items-center">
+                        <i className="bi bi-funnel me-2"></i>
+                        {t('common.filter')}
+                    </h6>
+                </Accordion.Header>
+                <Accordion.Body>
+                    <Form>
+                        {/* ИЗМЕНЕНИЕ: Новая структура с использованием Row и Col для адаптивности */}
+                        <Row className="g-3">
+                            {/* Поиск на всю ширину */}
+                            <Col xs={12}>
+                                <Form.Control
+                                    type="text"
+                                    placeholder={t('employee.searchPlaceholder')}
+                                    value={filters.search}
+                                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                                    className="filter-input"
+                                />
+                            </Col>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label className="filter-label">{t('employee.status')}</Form.Label>
-                        <Form.Select
-                            value={filters.status}
-                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('common.all')}</option>
-                            <option value="active">{t('status.active')}</option>
-                            <option value="inactive">{t('status.inactive')}</option>
-                            <option value="admin">{t('common.admin')}</option>
-                        </Form.Select>
-                    </Form.Group>
+                            {/* Статус */}
+                            <Col lg={3} md={6} xs={12}>
+                                <Form.Select
+                                    value={filters.status}
+                                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                                    className="filter-select"
+                                >
+                                    <option value="all">{t('common.all')} {t('employee.status')}</option>
+                                    <option value="active">{t('status.active')}</option>
+                                    <option value="inactive">{t('status.inactive')}</option>
+                                    <option value="admin">{t('common.admin')}</option>
+                                </Form.Select>
+                            </Col>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label className="filter-label">{t('workSite.workSite')}</Form.Label>
-                        <Form.Select
-                            value={selectedWorkSite}
-                            onChange={(e) => handleWorkSiteChange(e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="all">{t('common.all')}</option>
-                            <option value="any">{t('employee.commonWorkSite')}</option>
-                            {workSites?.map((site) => (
-                                <option key={site.site_id} value={site.site_id}>
-                                    {site.site_name}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
+                            {/* Место работы */}
+                            <Col lg={3} md={6} xs={12}>
+                                <Form.Select
+                                    value={selectedWorkSite}
+                                    onChange={(e) => handleWorkSiteChange(e.target.value)}
+                                    className="filter-select"
+                                >
+                                    <option value="all">{t('common.all')} {t('workSite.workSite')}</option>
+                                    <option value="any">{t('employee.commonWorkSite')}</option>
+                                    {workSites?.map((site) => (
+                                        <option key={site.site_id} value={site.site_id}>
+                                            {site.site_name}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </Col>
 
-                    <Form.Group className="mb-4">
-                        <Form.Label className="filter-label">{t('employee.position')}</Form.Label>
-                        <Form.Select
-                            value={filters.position}
-                            onChange={(e) => handleFilterChange('position', e.target.value)}
-                            className="filter-select"
-                            disabled={filteredPositions.length === 0}
-                        >
-                            <option value="all">{t('common.all')}</option>
-                            {filteredPositions.map((position) => (
-                                <option key={position.pos_id} value={position.pos_id}>
-                                    {position.pos_name}
-                                </option>
-                            ))}
-                        </Form.Select>
-                        {selectedWorkSite !== 'all' && filteredPositions.length === 0 && (
-                            <Form.Text className="text-muted mt-1">
-                                {t('employee.noPositionsForSite')}
-                            </Form.Text>
-                        )}
-                    </Form.Group>
+                            {/* Должность */}
+                            <Col lg={3} md={6} xs={12}>
+                                <Form.Select
+                                    value={filters.position}
+                                    onChange={(e) => handleFilterChange('position', e.target.value)}
+                                    className="filter-select"
+                                    disabled={filteredPositions.length === 0}
+                                >
+                                    <option value="all">{t('common.all')} {t('employee.position')}</option>
+                                    {filteredPositions.map((position) => (
+                                        <option key={position.pos_id} value={position.pos_id}>
+                                            {position.pos_name}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                {selectedWorkSite !== 'all' && filteredPositions.length === 0 && (
+                                    <Form.Text className="text-muted mt-1 d-block">
+                                        {t('employee.noPositionsForSite')}
+                                    </Form.Text>
+                                )}
+                            </Col>
 
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        className="w-100 reset-button"
-                        onClick={handleReset}
-                    >
-                        <i className="bi bi-arrow-clockwise me-2"></i>
-                        {t('common.reset')}
-                    </Button>
-                </Form>
-            </Card.Body>
-        </Card>
+                            {/* Кнопка сброса */}
+                            <Col lg={3} md={6} xs={12}>
+                                <Button
+                                    variant="secondary"
+                                    className="w-100 reset-button"
+                                    onClick={handleReset}
+                                >
+                                    <i className="bi bi-arrow-clockwise me-2"></i>
+                                    {t('common.reset')}
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Accordion.Body>
+            </Accordion.Item>
+        </Accordion>
     );
 };
 

@@ -136,7 +136,7 @@ const EmployeeManagement = () => {
                     title={t('employee.management')}
                     description={t('employee.managementDescription')}
                     breadcrumbs={[
-                        { text: t('admin.dashboard'), to: '/admin' },
+                        { text: t('navigation.dashboard'), to: '/admin' },
                         { text: t('employee.management') }
                     ]}
                     actions={
@@ -163,12 +163,12 @@ const EmployeeManagement = () => {
                     </Container>
                 )}
 
-                <Container fluid className="px-2">
-                    <Row className="g-4 mt-2">
-                        <Col lg={3} className="mt-2" >
+                <Container fluid className="px-2 mt-3">
+                    <Row className="g-3">
+                        <Col xs={12}>
                             <EmployeeFilters />
                         </Col>
-                        <Col lg={9}>
+                        <Col xs={12}>
                             <EmployeeList
                                 employees={employees}
                                 loading={loading}

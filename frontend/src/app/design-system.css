@@ -40,6 +40,7 @@
     /* Bootstrap Theme Colors */
     --bs-body-bg: #f8f9fa;
     --bs-body-color: #212529;
+    --bs-body-tertiary: #6c757d;
     --bs-emphasis-color: #000;
 
     --bs-border-color: #dee2e6;
@@ -162,6 +163,7 @@
     /* Bootstrap Dark Mode Variables */
     --bs-body-bg: #1a1d1e;
     --bs-body-color: #e0e0e0;
+    --bs-body-tertiary: #adb5bd;
     --bs-emphasis-color: #fff;
     --bs-placeholder-color: #adb5bd;
     --bs-primary: #4da3ff;

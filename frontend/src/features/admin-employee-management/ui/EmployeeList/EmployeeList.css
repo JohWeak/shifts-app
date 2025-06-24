@@ -153,6 +153,12 @@
 [data-theme="dark"] .pagination-container .pagination .page-item.disabled .page-link{
     background: var(--bs-gray-800);
 }
+[data-theme="dark"] .pagination-container .page-item:hover .page-link {
+    background: var(--bs-gray-700);
+}
+[data-theme="dark"] .pagination-container .page-item.active:hover .page-link {
+    background: var(--bs-primary);
+}
 
 .inactive-row {
     opacity: 0.6;

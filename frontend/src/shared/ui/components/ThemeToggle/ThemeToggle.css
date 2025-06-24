@@ -71,7 +71,7 @@
 
 .theme-toggle-btn:hover i,
 .theme-toggle-icon:hover i {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
 }
 
 /* Цвета иконок */
