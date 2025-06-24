@@ -1,6 +1,7 @@
 // backend/src/app.js
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -37,5 +38,18 @@ app.use((error, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
     });
 });
+
+// --- НАСТРОЙКА ДЛЯ ДЕПЛОЯ НА RAILWAY (добавь этот блок) ---
+
+// 1. Подавать статические файлы из собранной папки React
+// process.env.NODE_ENV === 'production' гарантирует, что это будет работать только на сервере, а не при локальной разработке
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../../frontend/build')));
+
+    // 2. "Catch-all" роут: для всех остальных запросов отдавать главный HTML-файл React
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../frontend/build/index.html'));
+    });
+}
 
 module.exports = app;

@@ -14,7 +14,7 @@ backend/.env
 # Database
 *.db
 *.sqlite
-
+*.sql
 # Logs
 logs/
 *.log
