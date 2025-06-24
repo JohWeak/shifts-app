@@ -65,7 +65,7 @@ export const en = {
         signUp: 'Sign Up',
         signedInAs: 'Signed in as',
         username: 'Username',
-        welcome: 'Welcome back!',
+        welcome: 'Welcome',
 
     },
     dashboard: { 
