@@ -100,14 +100,12 @@ const AppContent = () => {
                                     <EmployeeManagement/>
                                 </ProtectedRoute>}
                         />
-                        <Route
-                            path="/admin/settings"
-                            element=
-                                {<ProtectedRoute
-                                    allowedRole="admin">
-                                    <SystemSettings/>
-                                </ProtectedRoute>}
-                        />
+                        <Route path="/admin/workplace"
+
+                               element={<ProtectedRoute
+                                   allowedRole="admin">
+                                   <WorkplaceSettings/>
+                        </ProtectedRoute>}/>
                         <Route
                             path="/admin/reports"
                             element=
