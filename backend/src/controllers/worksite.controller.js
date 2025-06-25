@@ -135,20 +135,41 @@ const deleteWorkSite = async (req, res) => {
             return res.status(404).json({ message: 'Work site not found' });
         }
 
-        // Check if there are positions associated
-        const positionsCount = await Position.count({ where: { site_id: id } });
-        if (positionsCount > 0) {
-            return res.status(400).json({
-                message: 'Cannot delete work site with existing positions. Please remove all positions first.'
-            });
+        // Soft delete - просто деактивируем
+        await site.update({ is_active: false });
+
+        res.json({
+            message: 'Work site deactivated successfully',
+            site_id: id
+        });
+    } catch (error) {
+        console.error('Error deactivating work site:', error);
+        res.status(500).json({
+            message: 'Error deactivating work site',
+            error: error.message
+        });
+    }
+};
+
+const restoreWorkSite = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const site = await WorkSite.findByPk(id);
+        if (!site) {
+            return res.status(404).json({ message: 'Work site not found' });
         }
 
-        await site.destroy();
-        res.json({ message: 'Work site deleted successfully' });
+        await site.update({ is_active: true });
+
+        res.json({
+            message: 'Work site restored successfully',
+            site
+        });
     } catch (error) {
-        console.error('Error deleting work site:', error);
+        console.error('Error restoring work site:', error);
         res.status(500).json({
-            message: 'Error deleting work site',
+            message: 'Error restoring work site',
             error: error.message
         });
     }
@@ -160,5 +181,6 @@ module.exports = {
     findOne,
     create,
     update,
-    delete: deleteWorkSite // Экспортируем как "delete", но ссылаемся на безопасное имя функции
+    delete: deleteWorkSite,
+    restore: restoreWorkSite
 };
