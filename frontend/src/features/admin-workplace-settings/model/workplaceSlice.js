@@ -109,6 +109,7 @@ const workplaceSlice = createSlice({
         workSites: [],
         positions: [],
         loading: false,
+        positionsLoading: false,
         error: null,
         operationStatus: null, // 'success' | 'error' | null
         positionOperationStatus: null

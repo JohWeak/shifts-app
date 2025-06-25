@@ -8,7 +8,7 @@ import {
     Alert,
     Form,
     InputGroup,
-    Dropdown
+    Dropdown, Row, Col
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -26,8 +26,13 @@ const PositionsTab = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const { positions, workSites, loading, positionOperationStatus, error } = useSelector(state => state.workplace);
-
+    const {
+        positions = [],
+        workSites = [],
+        loading,
+        positionOperationStatus,
+        error
+    } = useSelector(state => state.workplace);
     const [showModal, setShowModal] = useState(false);
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -40,6 +45,7 @@ const PositionsTab = () => {
     useEffect(() => {
         dispatch(fetchPositions());
     }, [dispatch]);
+
 
     useEffect(() => {
         if (positionOperationStatus === 'success') {
@@ -57,6 +63,20 @@ const PositionsTab = () => {
             }, 3000);
         }
     }, [positionOperationStatus, dispatch, t, selectedPosition, positionToDelete]);
+
+    if (loading && positions.length === 0) {
+        return (
+            <Card className="workplace-tab-content">
+                <Card.Body className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-3 text-muted">{t('common.loading')}</p>
+                </Card.Body>
+            </Card>
+        );
+    }
+
 
     const handleEdit = (position) => {
         setSelectedPosition(position);
@@ -103,12 +123,15 @@ const PositionsTab = () => {
         console.log('View employees for position:', position);
     };
 
-    const filteredPositions = positions.filter(position => {
-        const matchesSearch = position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            position.profession?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesSite = !filterSite || position.site_id === parseInt(filterSite);
-        return matchesSearch && matchesSite;
-    });
+    const filteredPositions = positions && Array.isArray(positions)
+        ? positions.filter(position => {
+            const matchesSearch = position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                position.profession?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSite = !filterSite || position.site_id === parseInt(filterSite);
+            return matchesSearch && matchesSite;
+        })
+        : [];
+
 
     const getSiteName = (siteId) => {
         const site = workSites.find(s => s.site_id === siteId);
