@@ -1,5 +1,5 @@
 // backend/src/controllers/test.controller.js
-const db = require('../models');
+const db = require('../../models');
 
 const testDatabase = async (req, res) => {
     try {

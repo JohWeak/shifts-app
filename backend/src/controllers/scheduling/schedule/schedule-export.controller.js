@@ -1,7 +1,7 @@
 // backend/src/controllers/schedule/schedule-export.controller.js
 const dayjs = require('dayjs');
 const { Op } = require('sequelize');
-const db = require('../../models');
+const db = require('../../../models');
 const {
     Schedule,
     ScheduleAssignment,
@@ -90,7 +90,7 @@ const exportSchedule = async (req, res) => {
 
         if (format === 'pdf') {
             if (!PDFGenerator) {
-                PDFGenerator = require('../../utils/pdfGenerator');
+                PDFGenerator = require('../../../utils/pdfGenerator');
             }
 
             const pdfGenerator = new PDFGenerator(lang);

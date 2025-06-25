@@ -1,5 +1,5 @@
 // backend/src/controllers/employee.controller.js
-const db = require('../models');
+const db = require('../../models');
 const {Employee, Position, EmployeeConstraint, WorkSite} = db;
 const bcrypt = require('bcryptjs');
 const {Op} = require("sequelize");

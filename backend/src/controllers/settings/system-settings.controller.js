@@ -1,5 +1,5 @@
-// backend/src/controllers/settings.controller.js
-const db = require('../models');
+// backend/src/controllers/system-settings.controller.js
+const db = require('../../models');
 const { Position, WorkSite } = db;
 
 const getSystemSettings = async (req, res) => {

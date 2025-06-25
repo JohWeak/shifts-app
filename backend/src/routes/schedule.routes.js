@@ -3,10 +3,10 @@ const express = require('express');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 // Импортируем контроллеры напрямую
-const scheduleController = require('../controllers/schedule/schedule.controller');
-const generationController = require('../controllers/schedule/schedule-generation.controller');
-const employeeController = require('../controllers/schedule/schedule-employee.controller');
-const exportController = require('../controllers/schedule/schedule-export.controller');
+const scheduleController = require('../controllers/scheduling/schedule/schedule.controller');
+const generationController = require('../controllers/scheduling/schedule/schedule-generation.controller');
+const employeeController = require('../controllers/scheduling/schedule/schedule-employee.controller');
+const exportController = require('../controllers/scheduling/schedule/schedule-export.controller');
 
 const router = express.Router();
 

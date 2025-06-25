@@ -1,6 +1,6 @@
 // backend/src/controllers/employee-recommendation.controller.js
-const EmployeeRecommendationService = require('../services/employee-recommendation.service');
-const db = require('../models');
+const EmployeeRecommendationService = require('../../services/employee-recommendation.service');
+const db = require('../../models');
 const recommendationService = new EmployeeRecommendationService(db);
 class EmployeeRecommendationController {
     static async getRecommendations(req, res) {

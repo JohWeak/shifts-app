@@ -1,8 +1,8 @@
 // backend/src/routes/position.routes.js
 const express = require('express');
-const positionController = require('../controllers/position.controller');
-const positionShiftController = require('../controllers/position-shift.controller');
-const shiftRequirementController = require('../controllers/shift-requirement.controller');
+const positionController = require('../controllers/workplace/position.controller');
+const positionShiftController = require('../controllers/workplace/position-shift.controller');
+const shiftRequirementController = require('../controllers/workplace/shift-requirement.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();

@@ -1,5 +1,5 @@
 // backend/src/controllers/position.controller.js
-const db = require('../models');
+const db = require('../../models');
 const { Position, WorkSite, Employee } = db;
 
 // Get all positions with statistics
@@ -120,7 +120,6 @@ const deletePosition = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Check if position has employees
         const position = await Position.findByPk(id, {
             include: [{
                 model: Employee,
@@ -137,18 +136,56 @@ const deletePosition = async (req, res) => {
 
         if (position.employees && position.employees.length > 0) {
             return res.status(400).json({
-                message: 'Cannot delete position with assigned employees'
+                message: 'Cannot deactivate position with assigned employees'
             });
         }
 
-        await position.destroy();
+        // Soft delete - просто деактивируем
+        await position.update({ is_active: false });
 
         res.json({
-            message: 'Position deleted successfully'
+            message: 'Position deactivated successfully'
         });
     } catch (error) {
+        console.error('Error deactivating position:', error);
         res.status(500).json({
-            message: 'Error deleting position',
+            message: 'Error deactivating position',
+            error: error.message
+        });
+    }
+};
+
+// Добавить новый метод restore:
+const restorePosition = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const position = await Position.findByPk(id);
+        if (!position) {
+            return res.status(404).json({
+                message: 'Position not found'
+            });
+        }
+
+        await position.update({ is_active: true });
+
+        // Возвращаем с информацией о workSite
+        const restoredPosition = await Position.findByPk(id, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name']
+            }]
+        });
+
+        res.json({
+            message: 'Position restored successfully',
+            position: restoredPosition
+        });
+    } catch (error) {
+        console.error('Error restoring position:', error);
+        res.status(500).json({
+            message: 'Error restoring position',
             error: error.message
         });
     }
@@ -158,5 +195,6 @@ module.exports = {
     getAllPositions,
     createPosition,
     updatePosition,
-    deletePosition
+    deletePosition,
+    restorePosition
 };

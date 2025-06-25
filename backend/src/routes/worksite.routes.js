@@ -1,6 +1,6 @@
 // backend/src/routes/worksite.routes.js
 const express = require('express');
-const worksiteController = require('../controllers/worksite.controller');
+const worksiteController = require('../controllers/workplace/worksite.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();

@@ -1,6 +1,6 @@
 // backend/src/routes/constraint.routes.js
 const express = require('express');
-const constraintController = require('../controllers/constraint.controller');
+const constraintController = require('../controllers/scheduling/constraint.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();

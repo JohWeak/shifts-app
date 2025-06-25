@@ -1,8 +1,8 @@
 // backend/src/routes/employee.routes.js
 const express = require('express');
-const employeeController = require('../controllers/employee.controller');
+const employeeController = require('../controllers/core/employee.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
-const EmployeeRecommendationController = require('../controllers/employee-recommendation.controller');
+const EmployeeRecommendationController = require('../controllers/scheduling/employee-recommendation.controller');
 
 const router = express.Router();
 

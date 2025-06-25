@@ -1,5 +1,5 @@
 // backend/src/controllers/worksite.controller.js
-const db = require('../models'); // Импортируем db напрямую, как в shift.controller
+const db = require('../../models'); // Импортируем db напрямую, как в shift.controller
 const { WorkSite, Employee, Position } = db; // Деструктурируем нужную модель
 
 // Get all work sites

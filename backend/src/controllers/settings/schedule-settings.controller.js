@@ -1,5 +1,5 @@
-// backend/src/controllers/schedule-settings.controller.js
-const db = require('../models');
+// backend/src/controllers/schedule-system-settings.controller.js
+const db = require('../../models');
 const { ScheduleSettings, WorkSite } = db;
 
 // Get settings for site

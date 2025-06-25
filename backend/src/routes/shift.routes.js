@@ -1,6 +1,6 @@
 // backend/src/routes/shift.routes.js
 const express = require('express');
-const shiftController = require('../controllers/shift.controller');
+const shiftController = require('../controllers/legacy/shift.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
 const router = express.Router();

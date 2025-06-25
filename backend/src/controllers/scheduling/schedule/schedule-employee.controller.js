@@ -8,7 +8,7 @@ const {
     ISRAEL_TIMEZONE,
     DATE_FORMAT
 } = require('./helpers/date-helpers');
-const db = require('../../models');
+const db = require('../../../models');
 const {
     Schedule,
     ScheduleAssignment,

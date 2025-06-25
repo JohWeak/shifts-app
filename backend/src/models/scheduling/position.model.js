@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
                 const value = this.getDataValue('required_roles');
                 return value || [];
             }
+        },
+        is_active: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
         }
     }, {
         tableName: 'positions',

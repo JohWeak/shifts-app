@@ -1,5 +1,5 @@
 // backend/src/controllers/position-shift.controller.js
-const db = require('../models');
+const db = require('../../models');
 const { Position, PositionShift, ShiftRequirement } = db;
 const { Op } = require('sequelize');
 

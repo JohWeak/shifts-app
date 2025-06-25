@@ -1,7 +1,7 @@
 // backend/src/routes/settings.routes.js
 const express = require('express');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
-const settingsController = require('../controllers/settings.controller');
+const settingsController = require('../controllers/settings/system-settings.controller');
 
 const router = express.Router();
 

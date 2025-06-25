@@ -1,5 +1,5 @@
 // backend/src/controllers/constraint.controller.js
-const db = require('../models');
+const db = require('../../models');
 const { EmployeeConstraint, Employee, Shift } = db;
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');

@@ -1,7 +1,7 @@
 // backend/src/controllers/auth.controller.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../models');
+const db = require('../../models');
 const { Employee } = db;
 
 // Register a new employee

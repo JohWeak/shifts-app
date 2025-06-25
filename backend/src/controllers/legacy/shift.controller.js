@@ -1,5 +1,16 @@
-// backend/src/controllers/shift.controller.js
-const db = require('../models');
+// backend/src/controllers/legacy/shift.controller.js
+/**
+ * LEGACY CONTROLLER
+ * This controller manages global shifts from the 'shifts' table.
+ * It's being replaced by position-shift.controller.js which provides
+ * more flexible shift management per position.
+ *
+ * TODO: Migrate existing functionality to position-based shifts
+ * TODO: Update schedule generation to use position shifts
+ *
+ * @deprecated Use position-shift.controller.js for new features
+ */
+const db = require('../../models');
 const { Shift } = db;
 
 // Get all shifts

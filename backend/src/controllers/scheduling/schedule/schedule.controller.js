@@ -1,6 +1,6 @@
 // backend/src/controllers/schedule/schedule.controller.js
 const {Op} = require('sequelize');
-const db = require('../../models');
+const db = require('../../../models');
 const {
     Schedule,
     ScheduleAssignment,
