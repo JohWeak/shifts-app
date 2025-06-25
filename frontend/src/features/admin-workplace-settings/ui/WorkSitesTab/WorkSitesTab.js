@@ -25,8 +25,12 @@ const WorkSitesTab = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const { workSites, loading, error, operationStatus } = useSelector(state => state.workplace);
-
+    const {
+        workSites = [], // Значение по умолчанию
+        loading,
+        error,
+        operationStatus
+    } = useSelector(state => state.workplace || {}); // Защита от undefined state
     const [showModal, setShowModal] = useState(false);
     const [selectedSite, setSelectedSite] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -34,6 +38,7 @@ const WorkSitesTab = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
         if (operationStatus === 'success') {
@@ -87,10 +92,20 @@ const WorkSitesTab = () => {
         dispatch(fetchWorkSites());
     };
 
-    const filteredSites = workSites.filter(site =>
-        site.site_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        site.address?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Защищенная фильтрация
+    const filteredSites = (workSites && Array.isArray(workSites))
+        ? workSites.filter(site =>
+            site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            site.address?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : [];
+    // Добавим загрузку данных при монтировании
+    useEffect(() => {
+        if (!isInitialized) {
+            dispatch(fetchWorkSites());
+            setIsInitialized(true);
+        }
+    }, [dispatch, isInitialized]);
 
     return (
         <Card className="workplace-tab-content">

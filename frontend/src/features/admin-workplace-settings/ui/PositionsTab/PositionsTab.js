@@ -17,7 +17,7 @@ import PositionModal from '../PositionModal/PositionModal';
 import {
     fetchPositions,
     deletePosition,
-    clearPositionOperationStatus
+    clearPositionOperationStatus, fetchWorkSites
 } from '../../model/workplaceSlice';
 
 import './PositionsTab.css';
@@ -30,9 +30,12 @@ const PositionsTab = () => {
         positions = [],
         workSites = [],
         loading,
+        positionsLoading,
         positionOperationStatus,
         error
-    } = useSelector(state => state.workplace);
+    } = useSelector(state => state.workplace || {});
+
+
     const [showModal, setShowModal] = useState(false);
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -41,11 +44,22 @@ const PositionsTab = () => {
     const [filterSite, setFilterSite] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
         dispatch(fetchPositions());
     }, [dispatch]);
 
+
+    useEffect(() => {
+        if (!isInitialized) {
+            dispatch(fetchPositions());
+            if (workSites.length === 0) {
+                dispatch(fetchWorkSites());
+            }
+            setIsInitialized(true);
+        }
+    }, [dispatch, isInitialized, workSites.length]);
 
     useEffect(() => {
         if (positionOperationStatus === 'success') {
@@ -123,9 +137,10 @@ const PositionsTab = () => {
         console.log('View employees for position:', position);
     };
 
-    const filteredPositions = positions && Array.isArray(positions)
+    // Защищенная фильтрация
+    const filteredPositions = (positions && Array.isArray(positions))
         ? positions.filter(position => {
-            const matchesSearch = position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            const matchesSearch = position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 position.profession?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSite = !filterSite || position.site_id === parseInt(filterSite);
             return matchesSearch && matchesSite;

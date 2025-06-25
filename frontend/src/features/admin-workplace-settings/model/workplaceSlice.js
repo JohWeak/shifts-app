@@ -11,7 +11,7 @@ export const fetchWorkSites = createAsyncThunk(
             const response = await api.get(API_ENDPOINTS.WORKSITES.BASE, {
                 params: { includeStats }
             });
-            return response.data;
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch work sites');
         }
@@ -23,7 +23,7 @@ export const createWorkSite = createAsyncThunk(
     async (siteData, { rejectWithValue }) => {
         try {
             const response = await api.post(API_ENDPOINTS.WORKSITES.BASE, siteData);
-            return response.data;
+            return response; // Без .data
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create work site');
         }
@@ -35,7 +35,7 @@ export const updateWorkSite = createAsyncThunk(
     async ({ id, ...data }, { rejectWithValue }) => {
         try {
             const response = await api.put(`${API_ENDPOINTS.WORKSITES.BASE}/${id}`, data);
-            return response.data;
+            return response; // Без .data
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to update work site');
         }
@@ -59,7 +59,7 @@ export const fetchPositions = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await api.get(API_ENDPOINTS.SETTINGS.POSITIONS);
-            return response.data;
+            return response;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch positions');
         }
@@ -133,11 +133,13 @@ const workplaceSlice = createSlice({
             })
             .addCase(fetchWorkSites.fulfilled, (state, action) => {
                 state.loading = false;
-                state.workSites = action.payload;
+                state.workSites = action.payload || []; // Защита от undefined
+                console.log('WorkSites saved to store:', state.workSites);
             })
             .addCase(fetchWorkSites.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                state.workSites = []; // Устанавливаем пустой массив при ошибке
             })
             // Create work site
             .addCase(createWorkSite.pending, (state) => {
@@ -178,12 +180,14 @@ const workplaceSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchPositions.fulfilled, (state, action) => {
-                state.loading = false;
-                state.positions = action.payload;
+                state.positionsLoading = false;
+                state.positions = action.payload || []; // Защита от undefined
+                console.log('Positions saved to store:', state.positions);
             })
             .addCase(fetchPositions.rejected, (state, action) => {
-                state.loading = false;
+                state.positionsLoading = false;
                 state.error = action.payload;
+                state.positions = []; // Устанавливаем пустой массив при ошибке
             })
             // Create position
             .addCase(createPosition.fulfilled, (state, action) => {

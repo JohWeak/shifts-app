@@ -11,7 +11,7 @@ import WorkSitesTab from './ui/WorkSitesTab/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab/DisplaySettingsTab';
 
-import { fetchWorkSites } from './model/workplaceSlice';
+import {fetchPositions, fetchWorkSites} from './model/workplaceSlice';
 
 import './index.css';
 
@@ -20,10 +20,17 @@ const WorkplaceSettings = () => {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('worksites');
 
-    const { loading } = useSelector(state => state.workplace);
+    const { loading } = useSelector(state => state.workplace || {});
 
     useEffect(() => {
-        dispatch(fetchWorkSites());
+        // Загружаем данные только один раз при монтировании
+        const loadData = async () => {
+            await Promise.all([
+                dispatch(fetchWorkSites()),
+                dispatch(fetchPositions())
+            ]);
+        };
+        loadData();
     }, [dispatch]);
 
     if (loading && !activeTab) {
