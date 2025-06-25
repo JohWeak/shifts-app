@@ -91,10 +91,10 @@ const AdminLayout = ({ children }) => {
             badge: null
         },
         {
-            key: 'settings',
-            label: t('navigation.settings'),
-            icon: 'gear-fill',
-            path: '/admin/settings',
+            key: 'workplace',
+            label: t('navigation.workplace'),
+            icon: 'building',
+            path: '/admin/workplace',
             badge: null
         },
         {

@@ -1,0 +1,30 @@
+/* frontend/src/features/admin-workplace-settings/ui/DisplaySettingsTab/DisplaySettingsTab.css */
+.settings-preview {
+    background-color: var(--bs-gray-100);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+}
+
+[data-theme="dark"] .settings-preview {
+    background-color: var(--bs-gray-900);
+}
+
+.preview-item {
+    padding: 1rem;
+    background-color: var(--bs-body-bg);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+    text-align: center;
+}
+
+.preview-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bs-primary);
+    margin-top: 0.5rem;
+}
+
+.form-text {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}

@@ -54,6 +54,14 @@ const defineAssociations = () => {
             foreignKey: 'default_position_id',
             as: 'defaultPosition'
         });
+
+        // Добавляем many-to-many связь
+        Employee.belongsToMany(Position, {
+            through: 'employee_positions',
+            foreignKey: 'emp_id',
+            otherKey: 'position_id',
+            as: 'positions'
+        });
     }
 
     if (Employee && EmployeeConstraint) {
@@ -85,8 +93,10 @@ const defineAssociations = () => {
     }
 
     if (Position && Employee) {
-        Position.hasMany(Employee, {
-            foreignKey: 'default_position_id',
+        Position.belongsToMany(Employee, {
+            through: 'employee_positions',
+            foreignKey: 'position_id',
+            otherKey: 'emp_id',
             as: 'employees'
         });
     }
@@ -181,7 +191,7 @@ const defineAssociations = () => {
         }
 
         if (ScheduleSettings) {
-            WorkSite.hasOne(ScheduleSettings, {
+            WorkSite.hasMany(ScheduleSettings, {
                 foreignKey: 'site_id',
                 as: 'settings'
             });
@@ -194,21 +204,20 @@ const defineAssociations = () => {
         }
     }
 
-    if (EmployeeQualification && Employee) {
-        EmployeeQualification.belongsTo(Employee, {
-            foreignKey: 'emp_id',
-            as: 'employee'
-        });
+        if (EmployeeQualification && Employee) {
+            EmployeeQualification.belongsTo(Employee, {
+                foreignKey: 'emp_id',
+                as: 'employee'
+            });
 
-        Employee.hasMany(EmployeeQualification, {
-            foreignKey: 'emp_id',
-            as: 'qualifications'
-        });
-    }
+            Employee.hasMany(EmployeeQualification, {
+                foreignKey: 'emp_id',
+                as: 'qualifications'
+            });
+        }
 
-};
+    };
 
 // Вызываем функцию определения ассоциаций
-defineAssociations();
-
-module.exports = db;
+    defineAssociations();
+    module.exports = db;
