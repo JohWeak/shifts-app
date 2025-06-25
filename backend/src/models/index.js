@@ -43,6 +43,8 @@ const defineAssociations = () => {
         ScheduleSettings,
         EmployeeConstraint,
         EmployeeQualification,
+        PositionShift,
+        ShiftRequirement,
         LegalConstraint,
         SchedulePeriod,
         Workday
@@ -98,6 +100,32 @@ const defineAssociations = () => {
             foreignKey: 'position_id',
             otherKey: 'emp_id',
             as: 'employees'
+        });
+    }
+
+    // Position и PositionShift associations
+    if (Position && PositionShift) {
+        Position.hasMany(PositionShift, {
+            foreignKey: 'position_id',
+            as: 'shifts'
+        });
+
+        PositionShift.belongsTo(Position, {
+            foreignKey: 'position_id',
+            as: 'position'
+        });
+    }
+
+    // PositionShift и ShiftRequirement associations
+    if (PositionShift && ShiftRequirement) {
+        PositionShift.hasMany(ShiftRequirement, {
+            foreignKey: 'position_shift_id',
+            as: 'requirements'
+        });
+
+        ShiftRequirement.belongsTo(PositionShift, {
+            foreignKey: 'position_shift_id',
+            as: 'shift'
         });
     }
 
