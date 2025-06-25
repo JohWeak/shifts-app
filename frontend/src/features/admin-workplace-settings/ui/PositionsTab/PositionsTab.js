@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import ManageShiftsModal from '../ManageShiftsModal/ManageShiftsModal';
 import PositionModal from '../PositionModal/PositionModal';
 import {
     fetchPositions,
@@ -45,6 +46,8 @@ const PositionsTab = () => {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
+    const [showShiftsModal, setShowShiftsModal] = useState(false);
+    const [positionForShifts, setPositionForShifts] = useState(null);
 
     useEffect(() => {
         dispatch(fetchPositions());
@@ -128,8 +131,13 @@ const PositionsTab = () => {
     };
 
     const handleManageShifts = (position) => {
-        // TODO: Implement shift management modal
-        console.log('Manage shifts for position:', position);
+        setPositionForShifts(position);
+        setShowShiftsModal(true);
+    };
+
+    const handleCloseShiftsModal = () => {
+        setShowShiftsModal(false);
+        setPositionForShifts(null);
     };
 
     const handleViewEmployees = (position) => {
@@ -310,6 +318,12 @@ const PositionsTab = () => {
                 onSuccess={handleModalSuccess}
                 position={selectedPosition}
                 workSites={workSites}
+            />
+
+            <ManageShiftsModal
+                show={showShiftsModal}
+                onHide={handleCloseShiftsModal}
+                position={positionForShifts}
             />
 
             <ConfirmationModal

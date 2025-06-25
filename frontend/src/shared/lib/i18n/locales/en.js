@@ -50,6 +50,9 @@ export const en = {
         show: 'Show',
         showing: 'Showing',
         of: 'of',
+        hours: 'hours',
+        minutes: 'minutes',
+        retry: 'Retry',
     },
     auth: {
         createAccount: 'Create Account',
@@ -609,7 +612,52 @@ export const en = {
                     '12h': '12-hour'
                 }
             }
-        }
+        },
+        shifts: {
+            manageTitle: 'Manage Shifts',
+            shiftsTab: 'Shifts',
+            requirementsTab: 'Staff Requirements',
+            addShift: 'Add Shift',
+            editShift: 'Edit Shift',
+            deleteConfirm: 'Are you sure you want to delete this shift?',
+            noShifts: 'No shifts configured for this position',
+            createFirst: 'Create First Shift',
+
+            // Form fields
+            name: 'Shift Name',
+            namePlaceholder: 'e.g., Morning Shift',
+            time: 'Time',
+            startTime: 'Start Time',
+            endTime: 'End Time',
+            duration: 'Duration',
+            type: 'Type',
+            staffing: 'Staffing',
+            color: 'Color',
+            colorHint: 'Used for visual identification in schedules',
+            sortOrder: 'Sort Order',
+            sortOrderHint: 'Lower numbers appear first',
+
+            // Shift types
+            night: 'Night',
+            morningShift: 'Morning Shift',
+            afternoonShift: 'Afternoon Shift',
+            eveningShift: 'Evening Shift',
+            nightShift: 'Night Shift',
+
+            // Messages
+            invalidTimeRange: 'End time must be different from start time',
+            overnightShiftNotice: 'This is an overnight shift (crosses midnight)',
+            regularShiftNotice: 'This is a regular day shift',
+            suggestName: 'Suggest name based on time',
+            defaultStaffing: 'Default staff requirement',
+
+            // Matrix
+            staffRequirements: 'Staff Requirements by Day',
+            staffRequirementsHint: 'Set the number of employees needed for each shift on each day',
+            noShiftsForMatrix: 'Please create shifts first to configure requirements',
+            matrixLegend: 'Enter 0 to mark a shift as non-working on specific days',
+            shift: 'Shift'
+        },
     },
     workSite: {
         addWorkSite: 'Add Work Site',
