@@ -1,4 +1,4 @@
-// backend/src/models/weeklySchedule.js
+// backend/src/models/index.js
 const fs = require('fs');
 const path = require('path');
 const sequelize = require('../config/db.config');
@@ -7,25 +7,38 @@ const {Sequelize} = require("sequelize");
 const db = {};
 
 
-// Функция для загрузки моделей из папки
-function loadModelsFromFolder(folderPath, folderName) {
-    fs.readdirSync(folderPath)
-        .filter(file => file.endsWith('.model.js'))
-        .forEach(file => {
-            const modelPath = path.join(folderPath, file);
-            const model = require(modelPath)(sequelize, Sequelize.DataTypes);
+function loadModelsRecursive(directory) {
+    const entries = fs.readdirSync(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(directory, entry.name);
+
+        if (entry.isDirectory()) {
+            // Если это папка, вызываем эту же функцию для неё
+            loadModelsRecursive(fullPath);
+        } else if (entry.isFile() && entry.name.endsWith('.model.js')) {
+            // Если это файл модели, импортируем его
+            const model = require(fullPath)(sequelize, Sequelize.DataTypes);
             db[model.name] = model;
-            console.log(`Loaded model: ${model.name} from ${folderName}/${file}`);
-        });
+
+            // Логирование для наглядности (путь от папки 'models')
+            const relativePath = path.relative(__dirname, fullPath);
+            console.log(`✅ Loaded model: ${model.name} from /${relativePath}`);
+        }
+    }
 }
 
-// Загружаем модели из каждой папки
-['core', 'scheduling', 'constraints'].forEach(folder => {
-    const folderPath = path.join(__dirname, folder);
-    if (fs.existsSync(folderPath)) {
-        loadModelsFromFolder(folderPath, folder);
-    }
-});
+// Запускаем рекурсивный обход, начиная с текущей директории (__dirname)
+loadModelsRecursive(__dirname);
+
+// Для будущего рефакторинга со связями внутри моделей
+// После загрузки всех моделей, настраиваем ассоциации (связи)
+// Object.keys(db).forEach(modelName => {
+//     if (db[modelName].associate) {
+//         db[modelName].associate(db);
+//         console.log(`🔗 Associated model: ${modelName}`);
+//     }
+// });
 
 // Добавляем Sequelize в db объект
 db.sequelize = sequelize;
