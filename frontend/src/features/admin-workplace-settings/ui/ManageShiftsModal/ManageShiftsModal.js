@@ -11,7 +11,7 @@ import {
     Col,
     Card,
     OverlayTrigger,
-    Tooltip
+    Tooltip, Nav
 } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
