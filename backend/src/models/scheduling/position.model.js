@@ -1,4 +1,4 @@
-// backend/src/models/scheduling/position.model.js
+// backend/src/models/workplace/position.model.js
 module.exports = (sequelize, DataTypes) => {
     const Position = sequelize.define('Position', {
         pos_id: {
@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
         pos_name: {
             type: DataTypes.STRING(100),
             allowNull: false
+        },
+        position_code: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+            comment: 'Code for grouping similar positions across sites'
         },
         profession: {
             type: DataTypes.STRING(100)
