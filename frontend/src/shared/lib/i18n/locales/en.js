@@ -238,6 +238,7 @@ export const en = {
         addressPlaceholder: 'Street, House, Apartment',
         restoreConfirmTitle: 'Restore Employee',
         restoreConfirmMessage: 'Are you sure you want to restore {name} to active status?',
+        useVirtualScroll: 'Virtual scroll',
 
     },
     errors: {
