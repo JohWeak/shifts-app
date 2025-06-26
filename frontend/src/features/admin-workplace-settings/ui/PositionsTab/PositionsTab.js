@@ -308,25 +308,14 @@ const PositionsTab = ({ selectedSite }) => {
                                                 >
                                                     <i className="bi bi-people"></i>
                                                 </Button>
-                                                <Dropdown align="end">
-                                                    <Dropdown.Toggle
-                                                        variant="outline-secondary"
-                                                        size="sm"
-                                                        id={`dropdown-position-${position.pos_id}`}
-                                                    >
-                                                        <i className="bi bi-three-dots"></i>
-                                                    </Dropdown.Toggle>
-                                                    <Dropdown.Menu>
-                                                        <Dropdown.Item
-                                                            onClick={() => handleDelete(position)}
-                                                            className="text-danger"
-                                                            disabled={position.totalEmployees > 0}
-                                                        >
-                                                            <i className="bi bi-trash me-2"></i>
-                                                            {t('common.delete')}
-                                                        </Dropdown.Item>
-                                                    </Dropdown.Menu>
-                                                </Dropdown>
+                                                <Button
+                                                    variant="danger"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(position)}
+                                                    title={t('common.delete')}
+                                                >
+                                                    <i className="bi bi-trash"></i>
+                                                </Button>
                                             </div>
                                         </td>
                                     </tr>

@@ -6,10 +6,11 @@ const { Position, WorkSite, Employee, PositionShift } = db;
 const getAllPositions = async (req, res) => {
     try {
         const { site_id, includeStats } = req.query;
-        const where = site_id ? { site_id } : {};
+        const where = { is_active: true };
+        if (site_id) where.site_id = site_id;
 
         const positions = await Position.findAll({
-            where: { is_active: true },
+            where,
             include: [
                 {
                     model: WorkSite,
@@ -17,31 +18,39 @@ const getAllPositions = async (req, res) => {
                     attributes: ['site_id', 'site_name']
                 },
                 {
-                    model: Employee,
-                    as: 'employees',
-                    attributes: ['emp_id']
-                },
-                {
                     model: PositionShift,
                     as: 'shifts',
                     where: { is_active: true },
                     required: false,
                     attributes: ['id']
+                },
+                {
+                    model: Employee,
+                    as: 'employees',
+                    where: { status: 'active' },
+                    required: false,
+                    attributes: ['emp_id'],
+                    through: { attributes: [] }
                 }
-            ]
+            ],
+            order: [['pos_name', 'ASC']]
         });
 
-        // Add statistics if requested
-        const positionsWithCounts = positions.map(position => {
-            const positionData = position.toJSON();
+        // Подсчитываем статистику
+        const positionsWithStats = positions.map(position => {
+            const posData = position.toJSON();
+
+            // Подсчитываем количество сотрудников с этой позицией по умолчанию
             return {
-                ...positionData,
-                totalEmployees: positionData.employees?.length || 0,
-                totalShifts: positionData.shifts?.length || 0
+                ...posData,
+                totalShifts: posData.shifts?.length || 0,
+                totalEmployees: posData.employees?.length || 0,
+                shifts: undefined, // Убираем массив смен
+                employees: undefined // Убираем массив сотрудников
             };
         });
 
-        res.json(positionsWithCounts);
+        res.json(positionsWithStats);
     } catch (error) {
         res.status(500).json({
             message: 'Error fetching positions',

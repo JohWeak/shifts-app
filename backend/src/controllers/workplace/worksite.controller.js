@@ -3,44 +3,69 @@ const db = require('../../models'); // Импортируем db напряму�
 const { WorkSite, Employee, Position } = db; // Деструктурируем нужную модель
 
 // Get all work sites
-const findAll = async (req, res) => {
+const getWorkSites = async (req, res) => {
     try {
-        const { includeStats = false, active } = req.query;
-
-        const whereCondition = {};
-        if (active !== undefined) {
-            whereCondition.is_active = active === 'true';
-        }
+        const { includeStats } = req.query;
 
         const workSites = await WorkSite.findAll({
-            where: whereCondition,
-            include: includeStats ? [{
-                model: Position,
-                as: 'positions',
-                attributes: ['pos_id', 'pos_name', 'num_of_emp'],
-                include: [{
+            where: { is_active: true },
+            include: [
+                {
+                    model: Position,
+                    as: 'positions',
+                    where: { is_active: true },
+                    required: false,
+                    attributes: ['pos_id'],
+                    include: includeStats === 'true' ? [{
+                        model: Employee,
+                        as: 'employees',
+                        where: { status: 'active' },
+                        required: false,
+                        attributes: ['emp_id'],
+                        through: { attributes: [] }
+                    }] : []
+                },
+                {
                     model: Employee,
                     as: 'employees',
-                    attributes: ['emp_id'],
-                    through: { attributes: [] }
-                }]
-            }] : [],
+                    where: {
+                        status: 'active',
+                        work_site_id: db.Sequelize.col('WorkSite.site_id')
+                    },
+                    required: false,
+                    attributes: ['emp_id']
+                }
+            ],
             order: [['site_name', 'ASC']]
         });
 
-        // Calculate stats if requested
-        if (includeStats) {
-            const sitesWithStats = workSites.map(site => {
-                const siteData = site.toJSON();
-                siteData.totalPositions = siteData.positions?.length || 0;
-                siteData.totalEmployees = siteData.positions?.reduce((sum, pos) =>
-                    sum + (pos.employees?.length || 0), 0) || 0;
-                return siteData;
-            });
-            return res.json(sitesWithStats);
-        }
+        const sitesWithStats = workSites.map(site => {
+            const siteData = site.toJSON();
 
-        res.json(workSites);
+            // Подсчет позиций
+            const positionCount = siteData.positions?.length || 0;
+
+            // Подсчет сотрудников (из всех позиций + напрямую назначенные на site)
+            const employeeIds = new Set();
+
+            // Сотрудники через позиции
+            siteData.positions?.forEach(pos => {
+                pos.employees?.forEach(emp => employeeIds.add(emp.emp_id));
+            });
+
+            // Сотрудники назначенные напрямую на site
+            siteData.employees?.forEach(emp => employeeIds.add(emp.emp_id));
+
+            return {
+                ...siteData,
+                positionCount,
+                employeeCount: employeeIds.size,
+                positions: undefined,
+                employees: undefined
+            };
+        });
+
+        res.json(sitesWithStats);
     } catch (error) {
         console.error('Error fetching work sites:', error);
         res.status(500).json({
@@ -177,7 +202,7 @@ const restoreWorkSite = async (req, res) => {
 
 // Экспортируем объект со всеми методами, как в shift.controller
 module.exports = {
-    findAll,
+    findAll: getWorkSites,
     findOne,
     create,
     update,

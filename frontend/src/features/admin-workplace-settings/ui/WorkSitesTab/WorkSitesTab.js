@@ -1,5 +1,5 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/WorkSitesTab.js
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Card,
     Table,
@@ -10,9 +10,9 @@ import {
     InputGroup,
     Dropdown
 } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useDispatch, useSelector} from 'react-redux';
+import {useNavigate} from 'react-router-dom';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import WorkSiteModal from '../WorkSiteModal/WorkSiteModal';
 import {
@@ -23,8 +23,8 @@ import {
 
 import './WorkSitesTab.css';
 
-const WorkSitesTab = ({ onSelectSite }) => {
-    const { t } = useI18n();
+const WorkSitesTab = ({onSelectSite}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -45,7 +45,6 @@ const WorkSitesTab = ({ onSelectSite }) => {
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
     const [selectedSiteId, setSelectedSiteId] = useState(null);
-
 
 
     useEffect(() => {
@@ -203,7 +202,7 @@ const WorkSitesTab = ({ onSelectSite }) => {
                                 key={site.site_id}
                                 className="clickable-row"
                                 onClick={() => handleRowClick(site)}
-                                style={{ cursor: 'pointer' }}
+                                style={{cursor: 'pointer'}}
                             >
                                 <td className="fw-semibold">{site.site_name}</td>
                                 <td>{site.address || '-'}</td>
@@ -219,8 +218,21 @@ const WorkSitesTab = ({ onSelectSite }) => {
                                         }
                                     </Badge>
                                 </td>
-                                <td className="text-center">{site.totalPositions || 0}</td>
-                                <td className="text-center">{site.totalEmployees || 0}</td>
+                                <td className="text-center">
+                                    <Badge
+                                        bg="warning"
+                                        text="dark"
+                                    >
+                                        {site.positionCount || 0}
+                                    </Badge>
+                                </td>
+                                <td className="text-center">
+                                    <Badge
+                                        bg="primary"
+                                    >
+                                        {site.employeeCount || 0}
+                                    </Badge>
+                                </td>
                                 <td onClick={(e) => e.stopPropagation()}>
                                     <div className="workplace-actions">
                                         <Button
@@ -239,25 +251,14 @@ const WorkSitesTab = ({ onSelectSite }) => {
                                         >
                                             <i className="bi bi-people"></i>
                                         </Button>
-                                        <Dropdown align="end">
-                                            <Dropdown.Toggle
-                                                variant="outline-secondary"
-                                                size="sm"
-                                                id={`dropdown-site-${site.site_id}`}
-                                            >
-                                                <i className="bi bi-three-dots"></i>
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={() => handleDelete(site)}
-                                                    className="text-danger"
-                                                    disabled={site.totalPositions > 0}
-                                                >
-                                                    <i className="bi bi-trash me-2"></i>
-                                                    {t('common.delete')}
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
+                                            onClick={() => handleDelete(site)}
+                                            title={t('common.delete')}
+                                        >
+                                            <i className="bi bi-trash"></i>
+                                        </Button>
                                     </div>
                                 </td>
                             </tr>
@@ -285,7 +286,6 @@ const WorkSitesTab = ({ onSelectSite }) => {
         </Card>
     );
 };
-
 
 
 export default WorkSitesTab;
