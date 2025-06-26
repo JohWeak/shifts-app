@@ -16,7 +16,9 @@ const create = async (req, res) => {
         if (password) {
             employeeData.password = await bcrypt.hash(password, 10);
         }
-
+        if (req.body.email === '') {
+            req.body.email = null;
+        }
         const employee = await Employee.create(employeeData);
 
         res.status(201).json({
@@ -249,7 +251,9 @@ const update = async (req, res) => {
         if (password) {
             updateData.password = await bcrypt.hash(password, 10);
         }
-
+        if (req.body.email === '') {
+            req.body.email = null;
+        }
         // Обновляем только переданные поля
         const [updated] = await Employee.update(updateData, {
             where: { emp_id: req.params.id }

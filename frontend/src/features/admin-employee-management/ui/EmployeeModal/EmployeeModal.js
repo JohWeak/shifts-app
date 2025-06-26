@@ -145,7 +145,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
             newErrors.last_name = t('validation.required');
         }
         // Email is optional now
-        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+        if (formData.email && formData.email.trim() && !/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = t('validation.invalidEmail');
         }
         // Login is required

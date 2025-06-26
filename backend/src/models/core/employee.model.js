@@ -4,7 +4,28 @@ module.exports = (sequelize, DataTypes) => {
         emp_id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
         first_name: {type: DataTypes.STRING, allowNull: false},
         last_name: {type: DataTypes.STRING, allowNull: false},
-        email: {type: DataTypes.STRING, allowNull: true, unique: true, validate: {isEmail: true}},
+        email: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+            validate: {
+                isEmail: {
+                    msg: 'Please enter a valid email address',
+                    args: true
+                },
+                // Добавляем условную валидацию - проверяем email только если он указан
+                customValidator(value) {
+                    if (value === null || value === '') {
+                        return true; // Пустое значение разрешено
+                    }
+                    // Если значение есть, оно должно быть валидным email
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        throw new Error('Invalid email format');
+                    }
+                }
+            }
+        },
         phone: {type: DataTypes.STRING(20), allowNull: true},
         country: {type: DataTypes.STRING(100), allowNull: true},
         city: {type: DataTypes.STRING(100), allowNull: true},
@@ -22,7 +43,14 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'employees',
-        timestamps: true
+        timestamps: true,
+        hooks: {
+            beforeValidate: (employee) => {
+                if (employee.email === '') {
+                    employee.email = null;
+                }
+            }
+        }
     });
     return Employee;
 };
