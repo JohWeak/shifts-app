@@ -65,10 +65,8 @@ const EmployeeManagement = () => {
         }
     }, [location.state, dispatch]);
 
-    useEffect(() => {
-        dispatch(fetchEmployees({ ...filters, ...pagination }));
-    }, [dispatch, filters, pagination]);
 
+    // Загрузка настроек
     useEffect(() => {
         const { systemSettings } = store.getState().settings;
         const { workSites } = store.getState().schedule;
@@ -81,6 +79,7 @@ const EmployeeManagement = () => {
         }
     }, [dispatch]);
 
+    // Основная загрузка сотрудников
     useEffect(() => {
         dispatch(fetchEmployees({
             ...filters,
@@ -90,6 +89,20 @@ const EmployeeManagement = () => {
             sortOrder: sortConfig.order
         }));
     }, [dispatch, filters, pagination.page, pagination.pageSize, sortConfig]);
+
+
+    // Обновление allEmployees при загрузке первой страницы
+    useEffect(() => {
+        if (employees.length > 0 && pagination.page === 1) {
+            setAllEmployees(employees);
+        }
+    }, [employees, pagination.page]);
+
+    // Сброс infinite scroll при изменении фильтров
+    useEffect(() => {
+        setAllEmployees([]);
+        setHasNextPage(true);
+    }, [filters]);
 
     // Функция для загрузки дополнительных данных
     const loadMoreEmployees = useCallback(async () => {
