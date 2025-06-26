@@ -282,7 +282,7 @@ const PositionsTab = ({ selectedSite }) => {
                                         </td>
                                         <td className="text-center">
                                             <Badge bg="warning" text="dark">
-                                                {position.num_of_shifts || 0}
+                                                {position.totalShifts || 0}
                                             </Badge>
                                         </td>
                                         <td className="text-center">

@@ -94,7 +94,7 @@ const createPositionShift = async (req, res) => {
         await ShiftRequirement.create({
             position_shift_id: newShift.id,
             day_of_week: null, // All days
-            required_staff_count: 1,
+            required_staff_count: position.num_of_emp || 1,
             is_recurring: true,
             is_working_day: true
         });

@@ -1,6 +1,6 @@
 // backend/src/controllers/position.controller.js
 const db = require('../../models');
-const { Position, WorkSite, Employee } = db;
+const { Position, WorkSite, Employee, PositionShift } = db;
 
 // Get all positions with statistics
 const getAllPositions = async (req, res) => {
@@ -9,34 +9,39 @@ const getAllPositions = async (req, res) => {
         const where = site_id ? { site_id } : {};
 
         const positions = await Position.findAll({
-            where,
+            where: { is_active: true },
             include: [
                 {
                     model: WorkSite,
                     as: 'workSite',
                     attributes: ['site_id', 'site_name']
                 },
-                includeStats === 'true' ? {
+                {
                     model: Employee,
                     as: 'employees',
-                    attributes: ['emp_id'],
-                    through: { attributes: [] }
-                } : null
-            ].filter(Boolean),
-            order: [['pos_name', 'ASC']]
+                    attributes: ['emp_id']
+                },
+                {
+                    model: PositionShift,
+                    as: 'shifts',
+                    where: { is_active: true },
+                    required: false,
+                    attributes: ['id']
+                }
+            ]
         });
 
         // Add statistics if requested
-        const positionsWithStats = positions.map(position => {
-            const posData = position.toJSON();
-            if (includeStats === 'true') {
-                posData.totalEmployees = posData.employees?.length || 0;
-                delete posData.employees; // Remove raw employee data
-            }
-            return posData;
+        const positionsWithCounts = positions.map(position => {
+            const positionData = position.toJSON();
+            return {
+                ...positionData,
+                totalEmployees: positionData.employees?.length || 0,
+                totalShifts: positionData.shifts?.length || 0
+            };
         });
 
-        res.json(positionsWithStats);
+        res.json(positionsWithCounts);
     } catch (error) {
         res.status(500).json({
             message: 'Error fetching positions',
