@@ -23,7 +23,7 @@ import {
 
 import './WorkSitesTab.css';
 
-const WorkSitesTab = () => {
+const WorkSitesTab = ({ onSelectSite }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -35,6 +35,7 @@ const WorkSitesTab = () => {
         error,
         operationStatus
     } = useSelector(state => state.workplace || {}); // Защита от undefined state
+
     const [showModal, setShowModal] = useState(false);
     const [selectedSite, setSelectedSite] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -112,9 +113,10 @@ const WorkSitesTab = () => {
     };
     const handleRowClick = (site) => {
         setSelectedSiteId(site.site_id);
-        // Переключаемся на вкладку позиций с фильтром
-        // Нужно будет передать это состояние родительскому компоненту
-        onSelectSite?.(site);
+        // Проверяем, что функция передана
+        if (onSelectSite) {
+            onSelectSite(site);
+        }
     };
 
     // Защищенная фильтрация
