@@ -58,26 +58,7 @@
     background: var(--bs-gray-900);
 }
 
-.employee-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    background: var(--bs-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.875rem;
-    flex-shrink: 0;
-}
 
-.site-badge {
-    font-weight: 500;
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: 2rem;
-}
 
 
 
@@ -222,7 +203,26 @@
 .btn-link.text-muted:hover i {
     animation: ring 0.3s ease-in-out;
 }
+.employee-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
 
+.employee-avatar:hover {
+    background: var(--bs-primary-hover);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(var(--bs-primary-rgb), 0.3);
+}
 @keyframes ring {
     0% { transform: rotate(0deg); }
     25% { transform: rotate(-10deg); }

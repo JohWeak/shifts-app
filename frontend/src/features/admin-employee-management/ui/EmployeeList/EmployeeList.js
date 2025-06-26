@@ -185,9 +185,24 @@ const EmployeeList = ({
                                 onClick={() => onEdit(employee)}
                                 style={{ cursor: 'pointer' }}
                             >
-                                <td onClick={(e) => e.stopPropagation()}>
+                                <td>
                                     <div className="d-flex align-items-center">
-                                        <div className="employee-avatar me-3">
+                                        <div
+                                            className="employee-avatar me-3"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (employee.phone && window.confirm(t('employee.confirmCall', {
+                                                    name: `${employee.first_name} ${employee.last_name}`,
+                                                    phone: employee.phone
+                                                }))) {
+                                                    window.location.href = `tel:${employee.phone}`;
+                                                } else if (!employee.phone) {
+                                                    alert(t('employee.noPhoneNumber'));
+                                                }
+                                            }}
+                                            title={employee.phone ? t('employee.clickToCall') : t('employee.noPhoneNumber')}
+                                        >
                                             {employee.first_name[0]}{employee.last_name[0]}
                                         </div>
                                         <div>
@@ -195,64 +210,35 @@ const EmployeeList = ({
                                                 {employee.first_name} {employee.last_name}
                                             </div>
                                             {employee.phone && (
-                                                <button
-                                                    className="btn btn-link p-0 text-start text-muted"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (window.confirm(t('employee.confirmCall', {
-                                                            name: `${employee.first_name} ${employee.last_name}`,
-                                                            phone: employee.phone
-                                                        }))) {
-                                                            window.location.href = `tel:${employee.phone}`;
-                                                        }
-                                                    }}
-                                                    style={{ fontSize: '0.875rem', textDecoration: 'none' }}
-                                                >
+                                                <small className="text-muted d-flex align-items-center">
                                                     <i className="bi bi-telephone me-1"></i>
                                                     {employee.phone}
-                                                </button>
+                                                </small>
                                             )}
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    {employee.work_site_name ? (
-                                        <Badge bg="secondary" className="site-badge">
-                                            {employee.work_site_name}
-                                        </Badge>
-                                    ) : (
-                                        <Badge bg="info">{t('employee.commonWorkSite')}</Badge>
-                                    )}
+                                    {employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite')}
                                 </td>
                                 <td>
-                                    {employee.position_name || '-'}
+                                    {employee.position_name || employee.defaultPosition?.pos_name || '-'}
                                 </td>
                                 <td>
                                     <Badge bg={getStatusBadgeVariant(employee.status)}>
                                         {t(`status.${employee.status}`)}
                                     </Badge>
                                 </td>
-                                <td onClick={(e) => e.stopPropagation()}>
-                                    <ActionButtons
-                                        primaryAction={{
-                                            icon: 'pencil',
-                                            onClick: () => onEdit(employee),
-                                            title: t('common.edit')
-                                        }}
-                                        dropdownActions={[
-                                            ...(employee.status === 'active' ? [{
-                                                icon: 'trash',
-                                                label: t('employee.deactivate'),
-                                                onClick: () => onDelete(employee),
-                                                variant: 'danger'
-                                            }] : [{
-                                                icon: 'arrow-clockwise',
-                                                label: t('employee.restore'),
-                                                onClick: () => onRestore(employee),
-                                                variant: 'success'
-                                            }])
-                                        ]}
-                                    />
+                                <td onClick={(e) => e.stopPropagation()} className="text-center">
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        className="p-1 text-danger"
+                                        onClick={() => employee.status === 'active' ? onDelete(employee) : onRestore(employee)}
+                                        title={employee.status === ('active' || 'admin') ? t('employee.deactivate') : t('employee.restore')}
+                                    >
+                                        <i className={`bi bi-${employee.status === ('active' || 'admin') ? 'trash' : 'arrow-clockwise'}`}></i>
+                                    </Button>
                                 </td>
                             </tr>
                         ))}

@@ -244,6 +244,8 @@ export const en = {
         restoreConfirmMessage: 'Are you sure you want to restore {name} to active status?',
         useVirtualScroll: 'Virtual scroll',
         confirmCall: 'Call {name} at {phone}?',
+        clickToCall: 'Click to call',
+        noPhoneNumber: 'No phone number available',
 
     },
     errors: {
@@ -511,7 +513,8 @@ export const en = {
         suspended: 'Suspended',
         terminated: 'Terminated',
         onLeave: 'On Leave',
-        training: 'In Training'
+        training: 'In Training',
+        admin: 'Admin',
     },
 
     role: {
@@ -591,6 +594,7 @@ export const en = {
             minStaffError: 'Minimum staff count is 1',
             requiredRoles: 'Required Roles/Skills',
             addRolePlaceholder: 'Add a role or skill...',
+            profession: 'Profession',
         },
         displaySettings: {
             title: 'Display Settings',

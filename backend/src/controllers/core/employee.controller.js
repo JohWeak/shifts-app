@@ -54,7 +54,7 @@ const findAll = async (req, res) => {
             : [
                 'emp_id', 'first_name', 'last_name', 'email', 'phone',
                 'status', 'role', 'default_position_id', 'work_site_id',
-                'createdAt', 'updatedAt'
+                'login', 'createdAt', 'updatedAt'
                 // Не загружаем password, country, city, address по умолчанию
             ];
 
@@ -157,7 +157,7 @@ const findAll = async (req, res) => {
         // Format response
         const employees = rows.map(emp => ({
             ...emp.toJSON(),
-            default_position_name: emp.defaultPosition?.pos_name || null,
+            position_name: emp.defaultPosition?.pos_name || null,
             work_site_name: emp.workSite?.site_name || null
         }));
 

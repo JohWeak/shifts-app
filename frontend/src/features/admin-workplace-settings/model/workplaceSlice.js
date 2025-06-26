@@ -71,9 +71,10 @@ export const createPosition = createAsyncThunk(
     async (positionData, { rejectWithValue }) => {
         try {
             const response = await api.post(API_ENDPOINTS.SETTINGS.POSITIONS, positionData);
-            return response.data;
+            console.log('Create position response:', response); // Для отладки
+            return response; // response уже содержит данные благодаря interceptor
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to create position');
+            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to create position');
         }
     }
 );
@@ -191,8 +192,17 @@ const workplaceSlice = createSlice({
             })
             // Create position
             .addCase(createPosition.fulfilled, (state, action) => {
-                state.positions.push(action.payload);
-                state.positionOperationStatus = 'success';
+                state.loading = false;
+                // Безопасная проверка структуры ответа
+                const newPosition = action.payload;
+                if (newPosition && typeof newPosition === 'object' && newPosition.pos_id) {
+                    state.positions.push(newPosition);
+                    state.positionOperationStatus = 'success';
+                } else {
+                    console.error('Invalid position data received:', newPosition);
+                    state.error = 'Invalid response format';
+                    state.positionOperationStatus = 'error';
+                }
             })
             .addCase(createPosition.rejected, (state, action) => {
                 state.error = action.payload;

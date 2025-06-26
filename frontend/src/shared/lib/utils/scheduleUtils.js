@@ -75,7 +75,9 @@ export const getStatusBadgeVariant = (status) => {
     const variants = {
         published: 'success',
         draft: 'warning',
-        archived: 'secondary'
+        archived: 'secondary',
+        active: 'success',
+        admin: 'danger'
     };
     return variants[status] || 'secondary';
 };
