@@ -1,13 +1,13 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionModal/PositionModal.js
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Button, Row, Col, Alert, Badge } from 'react-bootstrap';
+import { Modal, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { createPosition, updatePosition } from '../../model/workplaceSlice';
 
 import './PositionModal.css';
 
-const PositionModal = ({ show, onHide, onSuccess, position, workSites }) => {
+const PositionModal = ({ show, onHide, onSuccess, position, workSites, defaultSiteId }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
@@ -15,11 +15,9 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites }) => {
         pos_name: '',
         site_id: '',
         profession: '',
-        num_of_emp: 1,
-        required_roles: []
+        num_of_emp: 1
     });
 
-    const [newRole, setNewRole] = useState('');
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
@@ -29,21 +27,18 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites }) => {
                 pos_name: position.pos_name || '',
                 site_id: position.site_id || '',
                 profession: position.profession || '',
-                num_of_emp: position.num_of_emp || 1,
-                required_roles: position.required_roles || []
+                num_of_emp: position.num_of_emp || 1
             });
         } else {
             setFormData({
                 pos_name: '',
-                site_id: workSites.length > 0 ? workSites[0].site_id : '',
+                site_id: defaultSiteId || (workSites.length > 0 ? workSites[0].site_id : ''),
                 profession: '',
-                num_of_emp: 1,
-                required_roles: []
+                num_of_emp: 1
             });
         }
         setErrors({});
-        setNewRole('');
-    }, [position, workSites]);
+    }, [position, workSites, defaultSiteId]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -69,17 +64,6 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites }) => {
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: null }));
         }
-    };
-
-    const handleAddRole = () => {
-        if (newRole.trim() && !formData.required_roles.includes(newRole.trim())) {
-            handleChange('required_roles', [...formData.required_roles, newRole.trim()]);
-            setNewRole('');
-        }
-    };
-
-    const handleRemoveRole = (roleToRemove) => {
-        handleChange('required_roles', formData.required_roles.filter(role => role !== roleToRemove));
     };
 
     const handleSubmit = async (e) => {
@@ -204,45 +188,6 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites }) => {
                             </Form.Group>
                         </Col>
                     </Row>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>{t('workplace.positions.requiredRoles')}</Form.Label>
-                        <div className="d-flex gap-2 mb-2">
-                            <Form.Control
-                                type="text"
-                                value={newRole}
-                                onChange={(e) => setNewRole(e.target.value)}
-                                placeholder={t('workplace.positions.addRolePlaceholder')}
-                                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddRole())}
-                            />
-                            <Button
-                                variant="outline-primary"
-                                onClick={handleAddRole}
-                                disabled={!newRole.trim()}
-                            >
-                                <i className="bi bi-plus"></i>
-                            </Button>
-                        </div>
-                        <div className="roles-container">
-                            {formData.required_roles.map((role, index) => (
-                                <Badge
-                                    key={index}
-                                    bg="secondary"
-                                    className="role-badge"
-                                >
-                                    {role}
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="p-0 ms-1 text-white"
-                                        onClick={() => handleRemoveRole(role)}
-                                    >
-                                        <i className="bi bi-x"></i>
-                                    </Button>
-                                </Badge>
-                            ))}
-                        </div>
-                    </Form.Group>
                 </Modal.Body>
 
                 <Modal.Footer>

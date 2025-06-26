@@ -161,8 +161,9 @@ const PositionsTab = ({ selectedSite }) => {
     };
 
     // Защищенная фильтрация
-    const filteredPositions = (positions && Array.isArray(positions))
+    const filteredPositions = positions && Array.isArray(positions)
         ? positions.filter(position => {
+            if (!position) return false;
             const matchesSearch = position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 position.profession?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSite = !filterSite || position.site_id === parseInt(filterSite);
@@ -254,7 +255,7 @@ const PositionsTab = ({ selectedSite }) => {
                                 <tr>
                                     <th>{t('workplace.positions.name')}</th>
                                     <th>{t('workplace.worksites.title')}</th>
-                                    <th>{t('workplace.positions.roles')}</th>
+                                    <th>{t('workplace.positions.profession')}</th>
                                     <th className="text-center">{t('workplace.positions.defaultStaff')}</th>
                                     <th className="text-center">{t('workplace.positions.shifts')}</th>
                                     <th className="text-center">{t('workplace.positions.employees')}</th>
@@ -343,6 +344,8 @@ const PositionsTab = ({ selectedSite }) => {
                 onSuccess={handleModalSuccess}
                 position={selectedPosition}
                 workSites={workSites}
+                defaultSiteId={filterSite || selectedSite?.site_id}
+
             />
 
             <ManageShiftsModal

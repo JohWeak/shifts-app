@@ -48,14 +48,18 @@ const getAllPositions = async (req, res) => {
 // Create position with support for required_roles
 const createPosition = async (req, res) => {
     try {
-        const { pos_name, site_id, profession, num_of_emp, required_roles } = req.body;
+        const { pos_name, site_id, profession, num_of_emp } = req.body;
+
+        if (!pos_name) {
+            return res.status(400).json({ message: 'Position name is required' });
+        }
 
         const position = await Position.create({
             pos_name,
             site_id,
             profession,
             num_of_emp,
-            required_roles: required_roles || []
+            is_active: true
         });
 
         // Fetch created position with workSite info
@@ -69,6 +73,7 @@ const createPosition = async (req, res) => {
 
         res.status(201).json(createdPosition);
     } catch (error) {
+        console.error('Error creating position:', error);
         res.status(500).json({
             message: 'Error creating position',
             error: error.message
@@ -80,7 +85,7 @@ const createPosition = async (req, res) => {
 const updatePosition = async (req, res) => {
     try {
         const { id } = req.params;
-        const { pos_name, site_id, profession, num_of_emp, required_roles } = req.body;
+        const { pos_name, site_id, profession, num_of_emp } = req.body;
 
         const position = await Position.findByPk(id);
         if (!position) {
@@ -93,8 +98,7 @@ const updatePosition = async (req, res) => {
             pos_name,
             site_id,
             profession,
-            num_of_emp,
-            required_roles: required_roles || []
+            num_of_emp
         });
 
         // Fetch updated position with workSite info
@@ -108,6 +112,7 @@ const updatePosition = async (req, res) => {
 
         res.json(updatedPosition);
     } catch (error) {
+        console.error('Error updating position:', error);
         res.status(500).json({
             message: 'Error updating position',
             error: error.message

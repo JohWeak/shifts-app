@@ -34,14 +34,6 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'site_id'
             }
         },
-        required_roles: {
-            type: DataTypes.JSON,
-            defaultValue: [],
-            get() {
-                const value = this.getDataValue('required_roles');
-                return value || [];
-            }
-        },
         is_active: {
             type: DataTypes.BOOLEAN,
             defaultValue: true
