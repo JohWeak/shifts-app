@@ -19,6 +19,10 @@ const EmployeeFilters = () => {
 
     const [selectedWorkSite, setSelectedWorkSite] = useState(filters.work_site || 'all');
 
+    useEffect(() => {
+        setSelectedWorkSite(filters.work_site || 'all');
+    }, [filters.work_site]);
+
     // Get all positions
     const allPositions = systemSettings?.positions || [];
 

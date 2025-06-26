@@ -43,11 +43,7 @@ const Login = () => {
 
     return (
         <div className="auth-container">
-            {/* Контролы в углу */}
-            <div className="auth-controls">
-                <ThemeToggle variant="icon" />
-                <LanguageSwitch />
-            </div>
+
             <div className="auth-card">
 
                 <div className="auth-header">
@@ -140,11 +136,17 @@ const Login = () => {
                 </div>
 
                 <div className="auth-footer">
+
                     <div className="biometric-placeholder">
                         <p className="mb-2 text-muted">
                             <i className="bi bi-fingerprint me-2" style={{fontSize: '1.5rem'}}></i>
                             Soon: Sign in with Face ID / Fingerprint
                         </p>
+                    </div>
+                    {/* Контролы в углу */}
+                    <div className="auth-controls">
+                        <ThemeToggle variant="icon" />
+                        <LanguageSwitch />
                     </div>
                 </div>
             </div>

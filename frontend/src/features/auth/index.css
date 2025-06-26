@@ -143,16 +143,19 @@
     z-index: 1000;
     border-radius: 0.375rem;
 }
+
 /* Auth Controls */
 .auth-controls {
-    position: fixed;
+    /*position: fixed;*/
     top: 1rem;
     right: 1rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     z-index: 100;
+    justify-content: space-between;
 }
+
 
 [dir="rtl"] .auth-controls {
     right: auto;
@@ -209,6 +212,7 @@
     .auth-card {
         margin: 0 0.5rem;
     }
+
     .auth-controls {
         top: 0.5rem;
         right: 0.5rem;

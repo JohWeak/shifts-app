@@ -10,6 +10,7 @@ import {
     InputGroup
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import WorkSiteModal from '../WorkSiteModal/WorkSiteModal';
@@ -24,6 +25,8 @@ import './WorkSitesTab.css';
 const WorkSitesTab = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+
 
     const {
         workSites = [], // Значение по умолчанию
@@ -90,6 +93,18 @@ const WorkSitesTab = () => {
         setShowModal(false);
         setSelectedSite(null);
         dispatch(fetchWorkSites());
+    };
+
+    // Функция для перехода к отфильтрованному списку сотрудников
+    const handleViewEmployees = (site) => {
+        // Переход на страницу сотрудников с фильтром по work site
+        navigate('/admin/employees', {
+            state: {
+                filters: {
+                    work_site: site.site_id.toString()
+                }
+            }
+        });
     };
 
     // Защищенная фильтрация
@@ -246,10 +261,6 @@ const WorkSitesTab = () => {
     );
 };
 
-// Функция для перехода к отфильтрованному списку сотрудников
-const handleViewEmployees = (site) => {
-    // TODO: Implement navigation to employees page with filter
-    console.log('View employees for site:', site);
-};
+
 
 export default WorkSitesTab;

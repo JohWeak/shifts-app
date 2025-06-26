@@ -45,9 +45,11 @@ const ManageShiftsModal = ({ show, onHide, position }) => {
             const response = await api.get(`/api/positions/${position.pos_id}/shifts`, {
                 params: { includeRequirements: true }
             });
-            setShifts(response.data || []);
+            // response уже содержит массив благодаря interceptor
+            setShifts(Array.isArray(response) ? response : []);
         } catch (err) {
             setError(err.message || 'Failed to load shifts');
+            setShifts([]); // Устанавливаем пустой массив при ошибке
         } finally {
             setLoading(false);
         }

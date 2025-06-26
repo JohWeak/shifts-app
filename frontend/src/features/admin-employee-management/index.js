@@ -1,6 +1,7 @@
 // frontend/src/features/admin-employee-management/index.js
 import React, {useCallback, useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import store from "app/store/store";
 import {fetchSystemSettings} from "../admin-system-settings/model/settingsSlice";
 import {fetchWorkSites} from "../admin-schedule-management/model/scheduleSlice";
@@ -19,7 +20,8 @@ import {
     updateEmployee,
     deleteEmployee,
     clearError,
-    setPagination
+    setPagination,
+    setFilters
 } from './model/employeeSlice';
 import './index.css';
 
@@ -27,6 +29,9 @@ import './index.css';
 const EmployeeManagement = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
+    const location = useLocation();
+
+
     const [showModal, setShowModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -50,6 +55,19 @@ const EmployeeManagement = () => {
         filters = { status: 'active', position: 'all', search: '', work_site: 'all' },
         pagination = { page: 1, pageSize: 10, total: 0 }
     } = employeesState || {};
+
+    // Обработка фильтров из навигации
+    useEffect(() => {
+        if (location.state?.filters) {
+            dispatch(setFilters(location.state.filters));
+            // Очищаем state после применения фильтров
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state, dispatch]);
+
+    useEffect(() => {
+        dispatch(fetchEmployees({ ...filters, ...pagination }));
+    }, [dispatch, filters, pagination]);
 
     useEffect(() => {
         const { systemSettings } = store.getState().settings;

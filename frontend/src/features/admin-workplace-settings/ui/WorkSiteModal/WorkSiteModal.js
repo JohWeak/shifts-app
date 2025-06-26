@@ -50,8 +50,11 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
             newErrors.site_name = t('validation.required');
         }
 
-        if (formData.phone && !/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
-            newErrors.phone = t('validation.invalidPhone');
+        // Валидация телефона только если он заполнен
+        if (formData.phone && formData.phone.trim()) {
+            if (!/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
+                newErrors.phone = t('validation.invalidPhone');
+            }
         }
 
         setErrors(newErrors);

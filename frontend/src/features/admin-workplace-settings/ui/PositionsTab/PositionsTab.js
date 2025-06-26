@@ -11,6 +11,7 @@ import {
     Dropdown, Row, Col
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import ManageShiftsModal from '../ManageShiftsModal/ManageShiftsModal';
@@ -26,6 +27,7 @@ import './PositionsTab.css';
 const PositionsTab = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const {
         positions = [],
@@ -141,8 +143,15 @@ const PositionsTab = () => {
     };
 
     const handleViewEmployees = (position) => {
-        // TODO: Navigate to employees with filter
-        console.log('View employees for position:', position);
+        // Переход на страницу сотрудников с фильтром по позиции
+        navigate('/admin/employees', {
+            state: {
+                filters: {
+                    position: position.pos_id.toString(),
+                    work_site: position.site_id.toString()
+                }
+            }
+        });
     };
 
     // Защищенная фильтрация
