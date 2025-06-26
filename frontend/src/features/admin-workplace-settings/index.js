@@ -1,6 +1,6 @@
 // frontend/src/features/admin-workplace-settings/index.js
 import React, { useState, useEffect } from 'react';
-import { Container, Nav, Tab, Row, Col } from 'react-bootstrap';
+import { Container, Nav, Tab, Card } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -11,7 +11,7 @@ import WorkSitesTab from './ui/WorkSitesTab/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab/DisplaySettingsTab';
 
-import {fetchPositions, fetchWorkSites} from './model/workplaceSlice';
+import { fetchWorkSites } from './model/workplaceSlice';
 
 import './index.css';
 
@@ -20,17 +20,10 @@ const WorkplaceSettings = () => {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('worksites');
 
-    const { loading } = useSelector(state => state.workplace || {});
+    const { loading } = useSelector(state => state.workplace);
 
     useEffect(() => {
-        // Загружаем данные только один раз при монтировании
-        const loadData = async () => {
-            await Promise.all([
-                dispatch(fetchWorkSites()),
-                dispatch(fetchPositions())
-            ]);
-        };
-        loadData();
+        dispatch(fetchWorkSites());
     }, [dispatch]);
 
     if (loading && !activeTab) {
@@ -52,10 +45,10 @@ const WorkplaceSettings = () => {
                     subtitle={t('workplace.subtitle')}
                 />
 
-                <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-                    <Row className="g-4">
-                        <Col lg={3}>
-                            <Nav variant="pills" className="flex-column workplace-nav">
+                <Card className="border-0 shadow-sm">
+                    <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
+                        <Card.Header className="border-bottom bg-none">
+                            <Nav variant="tabs" className="nav-tabs-custom">
                                 <Nav.Item>
                                     <Nav.Link eventKey="worksites">
                                         <i className="bi bi-building me-2"></i>
@@ -75,9 +68,9 @@ const WorkplaceSettings = () => {
                                     </Nav.Link>
                                 </Nav.Item>
                             </Nav>
-                        </Col>
+                        </Card.Header>
 
-                        <Col lg={9}>
+                        <Card.Body className="p-0">
                             <Tab.Content>
                                 <Tab.Pane eventKey="worksites">
                                     <WorkSitesTab />
@@ -89,9 +82,9 @@ const WorkplaceSettings = () => {
                                     <DisplaySettingsTab />
                                 </Tab.Pane>
                             </Tab.Content>
-                        </Col>
-                    </Row>
-                </Tab.Container>
+                        </Card.Body>
+                    </Tab.Container>
+                </Card>
             </Container>
         </AdminLayout>
     );

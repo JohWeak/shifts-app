@@ -1,39 +1,39 @@
 /* frontend/src/features/admin-workplace-settings/index.css */
-.workplace-nav {
-    background-color: var(--bs-body-bg);
-    border-radius: var(--bs-border-radius);
-    padding: 1rem;
-    border: 1px solid var(--bs-border-color);
-    box-shadow: var(--bs-box-shadow-sm);
+
+.nav-tabs-custom {
+    border-bottom: none;
 }
 
-.workplace-nav .nav-link {
-    color: var(--bs-body-color);
-    border-radius: var(--bs-border-radius);
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
-    transition: all 0.2s ease-in-out;
+.nav-tabs-custom .nav-link {
+    color: var(--bs-gray-600);
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.75rem 1.5rem;
     font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-.workplace-nav .nav-link:hover {
-    background-color: var(--bs-gray-100);
+.nav-tabs-custom .nav-link:hover {
     color: var(--bs-primary);
+    border-bottom-color: var(--bs-gray-300);
+    background-color: transparent;
 }
 
-[data-theme="dark"] .workplace-nav .nav-link:hover {
-    background-color: var(--bs-gray-800);
+.nav-tabs-custom .nav-link.active {
+    color: var(--bs-primary);
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid var(--bs-primary);
 }
 
-.workplace-nav .nav-link.active {
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
+.nav-tabs-custom .nav-link i {
+    font-size: 1.1rem;
 }
 
-.workplace-nav .nav-link i {
-    width: 20px;
-    text-align: center;
+[data-theme="dark"] .nav-tabs-custom  {
+    background-color: var(--bs-gray-900);
 }
+
 
 /* Tab Content */
 .workplace-tab-content {
