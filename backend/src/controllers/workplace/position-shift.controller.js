@@ -43,6 +43,20 @@ const createPositionShift = async (req, res) => {
         const { id: position_id } = req.params;
         const { shift_name, start_time, end_time, color, sort_order } = req.body;
 
+        // Format times to ensure they are valid
+        const formatTime = (time) => {
+            if (!time) return null;
+            // Ensure time is in HH:MM:SS format
+            const parts = time.split(':');
+            const hours = parts[0] ? parts[0].padStart(2, '0') : '00';
+            const minutes = parts[1] ? parts[1].padStart(2, '0') : '00';
+            const seconds = parts[2] ? parts[2].padStart(2, '0') : '00';
+            return `${hours}:${minutes}:${seconds}`;
+        };
+
+        const formattedStartTime = formatTime(start_time);
+        const formattedEndTime = formatTime(end_time);
+
         // Validate position exists
         const position = await Position.findByPk(position_id);
         if (!position) {
@@ -70,8 +84,8 @@ const createPositionShift = async (req, res) => {
         const newShift = await PositionShift.create({
             position_id,
             shift_name,
-            start_time,
-            end_time,
+            start_time: formattedStartTime,
+            end_time: formattedEndTime,
             color: color || getDefaultShiftColor(shift_name),
             sort_order: sort_order || existingShifts.length
         });
@@ -208,15 +222,24 @@ function checkTimeOverlap(start1, end1, start2, end2) {
     if (end1Min < start1Min) {
         // Shift 1 is overnight
         if (end2Min < start2Min) {
-            // Both overnight
-            return true; // Simplified - in reality need more complex logic
+            // Both shifts are overnight
+            // Check if they overlap
+            // Overnight shift spans two periods: [start, 24:00) and [00:00, end)
+            // They overlap if:
+            // 1. start2 is between start1 and 24:00, OR
+            // 2. end2 is between 00:00 and end1, OR
+            // 3. shift2 completely contains shift1
+            return start2Min >= start1Min || end2Min <= end1Min ||
+                (start2Min <= start1Min && end2Min >= end1Min);
         }
-        return start2Min >= start1Min || end2Min > 0;
+        // Shift 1 overnight, shift 2 same-day
+        // They overlap if shift 2 starts after shift 1 starts OR ends before shift 1 ends
+        return start2Min >= start1Min || end2Min <= end1Min;
     }
 
     if (end2Min < start2Min) {
-        // Shift 2 is overnight
-        return start1Min >= start2Min || end1Min > 0;
+        // Shift 2 is overnight, shift 1 is same-day
+        return start1Min >= start2Min || end1Min <= end2Min;
     }
 
     // Both are same-day shifts

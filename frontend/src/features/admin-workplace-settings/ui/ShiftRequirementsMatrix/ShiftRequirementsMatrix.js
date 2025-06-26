@@ -40,7 +40,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
         setLoading(true);
         try {
             const response = await api.get(`/api/positions/${positionId}/requirements-matrix`);
-            setMatrix(response.data);
+            setMatrix(response);
         } catch (err) {
             setError(err.message || 'Failed to load requirements');
         } finally {

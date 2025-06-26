@@ -53,6 +53,7 @@ export const en = {
         hours: 'hours',
         minutes: 'minutes',
         retry: 'Retry',
+        total: 'Total',
     },
     auth: {
         createAccount: 'Create Account',
