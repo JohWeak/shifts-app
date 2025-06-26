@@ -7,7 +7,8 @@ import {
     Badge,
     Alert,
     Form,
-    InputGroup
+    InputGroup,
+    Dropdown
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -42,6 +43,9 @@ const WorkSitesTab = () => {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
+    const [selectedSiteId, setSelectedSiteId] = useState(null);
+
+
 
     useEffect(() => {
         if (operationStatus === 'success') {
@@ -105,6 +109,12 @@ const WorkSitesTab = () => {
                 }
             }
         });
+    };
+    const handleRowClick = (site) => {
+        setSelectedSiteId(site.site_id);
+        // Переключаемся на вкладку позиций с фильтром
+        // Нужно будет передать это состояние родительскому компоненту
+        onSelectSite?.(site);
     };
 
     // Защищенная фильтрация
@@ -187,11 +197,16 @@ const WorkSitesTab = () => {
                         </thead>
                         <tbody>
                         {filteredSites.map(site => (
-                            <tr key={site.site_id}>
+                            <tr
+                                key={site.site_id}
+                                className="clickable-row"
+                                onClick={() => handleRowClick(site)}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <td className="fw-semibold">{site.site_name}</td>
                                 <td>{site.address || '-'}</td>
                                 <td>{site.phone || '-'}</td>
-                                <td>
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <Badge
                                         bg={site.is_active ? 'success' : 'secondary'}
                                         className="status-badge"
@@ -202,14 +217,18 @@ const WorkSitesTab = () => {
                                         }
                                     </Badge>
                                 </td>
-                                <td className="text-center">
-                                    <Badge bg="info">{site.totalPositions || 0}</Badge>
-                                </td>
-                                <td className="text-center">
-                                    <Badge bg="primary">{site.totalEmployees || 0}</Badge>
-                                </td>
-                                <td>
+                                <td className="text-center">{site.totalPositions || 0}</td>
+                                <td className="text-center">{site.totalEmployees || 0}</td>
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <div className="workplace-actions">
+                                        <Button
+                                            variant="outline-primary"
+                                            size="sm"
+                                            onClick={() => handleEdit(site)}
+                                            title={t('common.edit')}
+                                        >
+                                            <i className="bi bi-pencil"></i>
+                                        </Button>
                                         <Button
                                             variant="outline-info"
                                             size="sm"
@@ -218,21 +237,25 @@ const WorkSitesTab = () => {
                                         >
                                             <i className="bi bi-people"></i>
                                         </Button>
-                                        <Button
-                                            variant="outline-primary"
-                                            size="sm"
-                                            onClick={() => handleEdit(site)}
-                                        >
-                                            <i className="bi bi-pencil"></i>
-                                        </Button>
-                                        <Button
-                                            variant="outline-danger"
-                                            size="sm"
-                                            onClick={() => handleDelete(site)}
-                                            disabled={site.totalPositions > 0}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </Button>
+                                        <Dropdown align="end">
+                                            <Dropdown.Toggle
+                                                variant="outline-secondary"
+                                                size="sm"
+                                                id={`dropdown-site-${site.site_id}`}
+                                            >
+                                                <i className="bi bi-three-dots"></i>
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item
+                                                    onClick={() => handleDelete(site)}
+                                                    className="text-danger"
+                                                    disabled={site.totalPositions > 0}
+                                                >
+                                                    <i className="bi bi-trash me-2"></i>
+                                                    {t('common.delete')}
+                                                </Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
                                     </div>
                                 </td>
                             </tr>

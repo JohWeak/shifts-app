@@ -24,7 +24,7 @@ import {
 
 import './PositionsTab.css';
 
-const PositionsTab = () => {
+const PositionsTab = ({ selectedSite }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -50,6 +50,12 @@ const PositionsTab = () => {
     const [isInitialized, setIsInitialized] = useState(false);
     const [showShiftsModal, setShowShiftsModal] = useState(false);
     const [positionForShifts, setPositionForShifts] = useState(null);
+
+    useEffect(() => {
+        if (selectedSite) {
+            setFilterSite(selectedSite.site_id.toString());
+        }
+    }, [selectedSite]);
 
     useEffect(() => {
         dispatch(fetchPositions());
@@ -257,7 +263,12 @@ const PositionsTab = () => {
                                 </thead>
                                 <tbody>
                                 {filteredPositions.map(position => (
-                                    <tr key={position.pos_id}>
+                                    <tr
+                                        key={position.pos_id}
+                                        className="clickable-row"
+                                        onClick={() => handleManageShifts(position)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <td className="fw-semibold">{position.pos_name}</td>
                                         <td>
                                             <Badge bg="secondary" className="site-badge">
@@ -278,39 +289,44 @@ const PositionsTab = () => {
                                                 {position.totalEmployees || 0}
                                             </Badge>
                                         </td>
-                                        <td>
-                                            <Dropdown align="end">
-                                                <Dropdown.Toggle
-                                                    variant="outline-secondary"
+                                        <td onClick={(e) => e.stopPropagation()}>
+                                            <div className="workplace-actions">
+                                                <Button
+                                                    variant="outline-primary"
                                                     size="sm"
-                                                    id={`dropdown-${position.pos_id}`}
+                                                    onClick={() => handleEdit(position)}
+                                                    title={t('common.edit')}
                                                 >
-                                                    <i className="bi bi-three-dots"></i>
-                                                </Dropdown.Toggle>
-                                                <Dropdown.Menu>
-                                                    <Dropdown.Item onClick={() => handleManageShifts(position)}>
-                                                        <i className="bi bi-clock me-2"></i>
-                                                        {t('workplace.positions.manageShifts')}
-                                                    </Dropdown.Item>
-                                                    <Dropdown.Item onClick={() => handleViewEmployees(position)}>
-                                                        <i className="bi bi-people me-2"></i>
-                                                        {t('workplace.positions.viewEmployees')}
-                                                    </Dropdown.Item>
-                                                    <Dropdown.Divider />
-                                                    <Dropdown.Item onClick={() => handleEdit(position)}>
-                                                        <i className="bi bi-pencil me-2"></i>
-                                                        {t('common.edit')}
-                                                    </Dropdown.Item>
-                                                    <Dropdown.Item
-                                                        onClick={() => handleDelete(position)}
-                                                        className="text-danger"
-                                                        disabled={position.totalEmployees > 0}
+                                                    <i className="bi bi-pencil"></i>
+                                                </Button>
+                                                <Button
+                                                    variant="outline-info"
+                                                    size="sm"
+                                                    onClick={() => handleViewEmployees(position)}
+                                                    title={t('workplace.positions.viewEmployees')}
+                                                >
+                                                    <i className="bi bi-people"></i>
+                                                </Button>
+                                                <Dropdown align="end">
+                                                    <Dropdown.Toggle
+                                                        variant="outline-secondary"
+                                                        size="sm"
+                                                        id={`dropdown-position-${position.pos_id}`}
                                                     >
-                                                        <i className="bi bi-trash me-2"></i>
-                                                        {t('common.delete')}
-                                                    </Dropdown.Item>
-                                                </Dropdown.Menu>
-                                            </Dropdown>
+                                                        <i className="bi bi-three-dots"></i>
+                                                    </Dropdown.Toggle>
+                                                    <Dropdown.Menu>
+                                                        <Dropdown.Item
+                                                            onClick={() => handleDelete(position)}
+                                                            className="text-danger"
+                                                            disabled={position.totalEmployees > 0}
+                                                        >
+                                                            <i className="bi bi-trash me-2"></i>
+                                                            {t('common.delete')}
+                                                        </Dropdown.Item>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

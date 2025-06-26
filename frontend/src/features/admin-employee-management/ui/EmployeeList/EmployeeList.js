@@ -4,6 +4,8 @@ import { Card, Table, Button, Badge, Spinner, Pagination, Form } from 'react-boo
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import './EmployeeList.css';
+import ActionButtons from "../../../../shared/ui/components/ActionButtons/ActionButtons";
+import {getStatusBadgeVariant} from "../../../../shared/lib/utils/scheduleUtils";
 
 const EmployeeList = ({
                           employees,
@@ -177,8 +179,13 @@ const EmployeeList = ({
                         </thead>
                         <tbody>
                         {employees.map((employee) => (
-                            <tr key={employee.emp_id} className={employee.status === 'inactive' ? 'inactive-row' : ''}>
-                                <td>
+                            <tr
+                                key={employee.emp_id}
+                                className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
+                                onClick={() => onEdit(employee)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <td onClick={(e) => e.stopPropagation()}>
                                     <div className="d-flex align-items-center">
                                         <div className="employee-avatar me-3">
                                             {employee.first_name[0]}{employee.last_name[0]}
@@ -188,73 +195,64 @@ const EmployeeList = ({
                                                 {employee.first_name} {employee.last_name}
                                             </div>
                                             {employee.phone && (
-                                                <small className="text-muted d-flex align-items-center ">
-                                                    <i className="bi bi-telephone me-1 "></i>
+                                                <button
+                                                    className="btn btn-link p-0 text-start text-muted"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (window.confirm(t('employee.confirmCall', {
+                                                            name: `${employee.first_name} ${employee.last_name}`,
+                                                            phone: employee.phone
+                                                        }))) {
+                                                            window.location.href = `tel:${employee.phone}`;
+                                                        }
+                                                    }}
+                                                    style={{ fontSize: '0.875rem', textDecoration: 'none' }}
+                                                >
+                                                    <i className="bi bi-telephone me-1"></i>
                                                     {employee.phone}
-                                                </small>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     {employee.work_site_name ? (
-                                        <Badge bg="info" className="site-badge">
-                                            <i className="bi bi-building me-1"></i>
+                                        <Badge bg="secondary" className="site-badge">
                                             {employee.work_site_name}
                                         </Badge>
                                     ) : (
-                                        <Badge bg="secondary" className="site-badge common">
-                                            <i className="bi bi-globe me-1"></i>
-                                            {t('employee.commonWorkSite')}
-                                        </Badge>
+                                        <Badge bg="info">{t('employee.commonWorkSite')}</Badge>
                                     )}
                                 </td>
                                 <td>
-                                    {employee.default_position_name ||
-                                        <span className="text-muted">{t('employee.noPosition')}</span>}
+                                    {employee.position_name || '-'}
                                 </td>
                                 <td>
-                                    <StatusBadge
-                                        status={employee.status}
-                                        variant={
-                                            employee.status === 'active' ? 'success' :
-                                                employee.status === 'admin' ? 'primary' :
-                                                    'secondary'
-                                        }
+                                    <Badge bg={getStatusBadgeVariant(employee.status)}>
+                                        {t(`status.${employee.status}`)}
+                                    </Badge>
+                                </td>
+                                <td onClick={(e) => e.stopPropagation()}>
+                                    <ActionButtons
+                                        primaryAction={{
+                                            icon: 'pencil',
+                                            onClick: () => onEdit(employee),
+                                            title: t('common.edit')
+                                        }}
+                                        dropdownActions={[
+                                            ...(employee.status === 'active' ? [{
+                                                icon: 'trash',
+                                                label: t('employee.deactivate'),
+                                                onClick: () => onDelete(employee),
+                                                variant: 'danger'
+                                            }] : [{
+                                                icon: 'arrow-clockwise',
+                                                label: t('employee.restore'),
+                                                onClick: () => onRestore(employee),
+                                                variant: 'success'
+                                            }])
+                                        ]}
                                     />
-                                </td>
-                                <td className="text-center">
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="action-btn"
-                                        onClick={() => onEdit(employee)}
-                                        title={t('common.edit')}
-                                    >
-                                        <i className="bi bi-pencil"></i>
-                                    </Button>
-                                    {employee.status === 'inactive' ? (
-                                        <Button
-                                            variant="link"
-                                            size="sm"
-                                            className="action-btn text-success"
-                                            onClick={() => onRestore(employee)}
-                                            title={t('employee.restore')}
-                                        >
-                                            <i className="bi bi-arrow-clockwise"></i>
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            variant="link"
-                                            size="sm"
-                                            className="action-btn text-danger"
-                                            onClick={() => onDelete(employee)}
-                                            title={t('common.delete')}
-                                            disabled={employee.status === 'admin'}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </Button>
-                                    )}
                                 </td>
                             </tr>
                         ))}

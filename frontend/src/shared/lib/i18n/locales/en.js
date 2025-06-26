@@ -243,6 +243,7 @@ export const en = {
         restoreConfirmTitle: 'Restore Employee',
         restoreConfirmMessage: 'Are you sure you want to restore {name} to active status?',
         useVirtualScroll: 'Virtual scroll',
+        confirmCall: 'Call {name} at {phone}?',
 
     },
     errors: {

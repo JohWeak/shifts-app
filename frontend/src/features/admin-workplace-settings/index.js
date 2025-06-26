@@ -11,7 +11,7 @@ import WorkSitesTab from './ui/WorkSitesTab/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab/DisplaySettingsTab';
 
-import { fetchWorkSites } from './model/workplaceSlice';
+import {fetchPositions, fetchWorkSites} from './model/workplaceSlice';
 
 import './index.css';
 
@@ -19,12 +19,27 @@ const WorkplaceSettings = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('worksites');
+    const [selectedSite, setSelectedSite] = useState(null);
 
     const { loading } = useSelector(state => state.workplace);
 
     useEffect(() => {
         dispatch(fetchWorkSites());
+        dispatch(fetchPositions());
     }, [dispatch]);
+
+    const handleSiteSelection = (site) => {
+        setSelectedSite(site);
+        setActiveTab('positions');
+    };
+
+    const handleTabChange = (key) => {
+        setActiveTab(key);
+        // Сбрасываем выбранный сайт при переходе на другие вкладки
+        if (key !== 'positions') {
+            setSelectedSite(null);
+        }
+    };
 
     if (loading && !activeTab) {
         return (
@@ -73,10 +88,10 @@ const WorkplaceSettings = () => {
                         <Card.Body className="p-0">
                             <Tab.Content>
                                 <Tab.Pane eventKey="worksites">
-                                    <WorkSitesTab />
+                                    <WorkSitesTab onSelectSite={handleSiteSelection} />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="positions">
-                                    <PositionsTab />
+                                    <PositionsTab selectedSite={selectedSite} />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="display">
                                     <DisplaySettingsTab />

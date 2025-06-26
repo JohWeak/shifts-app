@@ -202,6 +202,34 @@
 .list-card .d-flex .text-muted{
     font-size: 0.75rem;
 }
+.clickable-row {
+    transition: background-color 0.2s ease;
+}
+
+.clickable-row:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .clickable-row:hover {
+    background-color: var(--bs-gray-900);
+}
+
+/* Стили для телефонной кнопки */
+.btn-link.text-muted:hover {
+    color: var(--bs-primary) !important;
+}
+
+.btn-link.text-muted:hover i {
+    animation: ring 0.3s ease-in-out;
+}
+
+@keyframes ring {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+}
 /* Responsive */
 @media (max-width: 768px) {
     .data-table {
