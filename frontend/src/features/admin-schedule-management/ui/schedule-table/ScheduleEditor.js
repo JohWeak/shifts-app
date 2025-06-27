@@ -224,6 +224,7 @@ const ScheduleEditor = ({
                 onRemovePendingChange={onRemovePendingChange}
                 pendingChanges={pendingChanges}
                 formatEmployeeName={formatEmployeeName}
+                shiftColor={shift.color}
             />
         );
     };
@@ -233,6 +234,27 @@ const ScheduleEditor = ({
         change => change.positionId === position.pos_id
     );
 
+    console.log('Shifts with colors:', shifts);
+
+    // Функция для определения контрастного цвета текста
+    const getContrastColor = (hexColor) => {
+        if (!hexColor) return '#000000';
+
+        // Убираем # если есть
+        const hex = hexColor.replace('#', '');
+
+        // Конвертируем в RGB
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+
+        // Вычисляем яркость
+        const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+
+        // Возвращаем чёрный или белый
+        return brightness > 128 ? '#000000' : '#FFFFFF';
+    };
+
     return (
         <div className="position-schedule-editor mb-4">
             {/* Header */}
@@ -240,12 +262,12 @@ const ScheduleEditor = ({
                 <div>
                     <h6 className="mb-1">{position.pos_name}</h6>
                     <small className="text-muted">
-                        {t('employee.requiredEmployees')}: {position.num_of_emp}
+                        {t('employee.requiredEmployees')}: {position.num_of_emp || 0}
                         <Form.Check
                             type="switch"
                             id={`name-switch-${position.pos_id}`}
                             label={t('employee.showFirstNameOnly')}
-                            className="me-3 d-inline-block"
+                            className="ms-3 d-inline-block"
                             checked={showFirstNameOnly}
                             onChange={(e) => setShowFirstNameOnly(e.target.checked)}
                         />
@@ -343,10 +365,18 @@ const ScheduleEditor = ({
                 {shifts.length > 0 ? (
                     shifts.map(shift => (
                         <tr key={shift.shift_id}>
-                            <td className={`shift-${shift.shift_type} text-center`}>
+                            <td className={`shift-${shift.shift_type} text-center `}
+                                style={{
+                                    backgroundColor: shift.color || '#f8f9fa',
+                                    color: getContrastColor(shift.color || '#f8f9fa'),
+                                    borderLeft: `4px solid ${shift.color || '#6c757d'}`
+                                }}>
                                 <div>
                                     {shift.shift_name}<br/>
-                                    <small className="text-muted">
+                                    <small style={{
+                                        color: getContrastColor(shift.color || '#f8f9fa'),
+                                        opacity: 0.8
+                                    }}>
                                         {formatShiftTime(shift.start_time, shift.duration)}
                                     </small>
                                 </div>

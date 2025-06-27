@@ -169,6 +169,13 @@
     color: var(--bs-gray-100);
 }
 
+.schedule-cell.has-shift-color {
+    position: relative;
+    transition: all var(--transition-base);
+}
+
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .schedule-cell {

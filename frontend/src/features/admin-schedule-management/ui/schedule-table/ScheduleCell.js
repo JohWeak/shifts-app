@@ -21,6 +21,7 @@ const ScheduleCell = ({
                           pendingChanges = {},
                           className = '',
                           formatEmployeeName = null,
+                          shiftColor = null,
                           ...props
                       }) => {
     const {t} = useI18n();
@@ -72,19 +73,31 @@ const ScheduleCell = ({
         if (!isEmpty) baseClasses.push('has-employees');
         if (isEmpty && isEditing) baseClasses.push('table-warning');
         if (isUnderstaffed && !isEmpty) baseClasses.push('table-info');
-        if (isFull) baseClasses.push('table-success');
+
+        if (isFull && !shiftColor) baseClasses.push('table-success');
 
         return baseClasses.join(' ');
     };
 
-    const getCursor = () => isEditing ? 'pointer' : 'default';
+    const getCellStyle = () => {
+        const styles = {};
 
+        if (shiftColor && !isEmpty) {
+            // Светлый фон с прозрачностью
+            styles.backgroundColor = `${shiftColor}20`; // 20 = примерно 12% прозрачности
+            styles.borderLeft = `4px solid ${shiftColor}`;
+            styles.borderBottom = `2px solid ${shiftColor}`;
+        }
+
+        return styles;
+    };
     // Render empty cell
     if (isEmpty) {
         return (
             <td
                 className={getCellClasses()}
                 onClick={handleCellClick}
+                style={shiftColor && isEditing ? { borderLeft: `4px solid ${shiftColor}` } : {}}
                 title={isEditing ? t('employee.clickToAssign') : ''}
                 {...props}
             >
@@ -107,6 +120,7 @@ const ScheduleCell = ({
         <td
             className={getCellClasses()}
             onClick={handleCellClick}
+            style={getCellStyle()}
             title={isEditing ? 'Click on employee name to replace, or click empty space to add' : ''}
             {...props}
         >

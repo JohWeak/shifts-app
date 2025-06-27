@@ -26,14 +26,16 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
         dispatch(setSelectedScheduleId(null));
     };
 
-    // Extract algorithm from text_file JSON
-    console.log('Schedule data:', schedule); // Добавьте для отладки
 
-// Попробуйте разные пути:
-    const algorithm = schedule?.metadata?.algorithm ||
-        schedule?.meta?.algorithm ||
-        schedule?.algorithm ||
-        'Unknown';
+    console.log('Schedule fields:', Object.keys(schedule || {}));
+
+// Может быть алгоритм в другом месте?
+    const algorithm = schedule?.algorithm ||
+        schedule?.generation_algorithm ||
+        schedule?.algo ||
+        schedule?.method ||
+        '-';
+
 
     return (
         <div className="schedule-info-wrapper">
