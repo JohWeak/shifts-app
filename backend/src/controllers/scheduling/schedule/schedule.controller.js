@@ -5,9 +5,9 @@ const {
     Schedule,
     ScheduleAssignment,
     Employee,
-    Shift,
     Position,
-    WorkSite
+    WorkSite,
+    PositionShift
 } = db;
 
 // Теперь не нужна функция-обертка module.exports = (db) => {}
@@ -106,21 +106,35 @@ const getScheduleDetails = async (req, res) => {
 
         console.log(`[ScheduleController] Found ${assignments.length} assignments`);
 
-        // Получить все позиции для данного сайта
-        const positions = await Position.findAll({
-            where: {site_id: schedule.site_id},
-            attributes: ['pos_id', 'pos_name', 'profession', 'num_of_emp', 'num_of_shifts']
+        // Получить все смены через позиции
+        const positionsWithShifts = await Position.findAll({
+            where: { site_id: schedule.site_id },
+            include: [{
+                model: PositionShift,
+                as: 'shifts',
+                where: { is_active: true },
+                required: false
+            }]
         });
 
-        console.log(`[ScheduleController] Found ${positions.length} positions for site`);
-
-        // Получить все смены
-        const shifts = await Shift.findAll({
-            attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type'],
-            order: [['start_time', 'ASC']]
+// Собираем все уникальные смены
+        const shiftsMap = new Map();
+        positionsWithShifts.forEach(position => {
+            position.shifts?.forEach(shift => {
+                if (!shiftsMap.has(shift.id)) {
+                    shiftsMap.set(shift.id, {
+                        shift_id: shift.id,
+                        shift_name: shift.shift_name,
+                        start_time: shift.start_time,
+                        end_time: shift.end_time,
+                        duration: shift.duration_hours,
+                        shift_type: shift.is_night_shift ? 'night' : 'day'
+                    });
+                }
+            });
         });
 
-        console.log(`[ScheduleController] Found ${shifts.length} shifts`);
+        const shifts = Array.from(shiftsMap.values());
 
         // Получить всех сотрудников для данного сайта
         const employees = await Employee.findAll({

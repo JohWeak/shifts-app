@@ -7,7 +7,7 @@ export const ALGORITHM_TYPES = [
 export const DEFAULT_GENERATION_SETTINGS = {
     site_id: null,
     weekStart: '',
-    algorithm: 'basic'
+    algorithm: 'auto'
 };
 
 export const SCHEDULE_STATUS = {

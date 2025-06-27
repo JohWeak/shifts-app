@@ -26,11 +26,10 @@ const getAllPositions = async (req, res) => {
                 },
                 {
                     model: Employee,
-                    as: 'employees',
-                    where: { status: 'active' },
+                    as: 'defaultEmployees', // Используем новую связь
+                    where: { status: ['active', 'admin'] }, // Учитываем и админов
                     required: false,
-                    attributes: ['emp_id'],
-                    through: { attributes: [] }
+                    attributes: ['emp_id']
                 }
             ],
             order: [['pos_name', 'ASC']]
@@ -44,9 +43,9 @@ const getAllPositions = async (req, res) => {
             return {
                 ...posData,
                 totalShifts: posData.shifts?.length || 0,
-                totalEmployees: posData.employees?.length || 0,
+                totalEmployees: posData.defaultEmployees?.length || 0,
                 shifts: undefined, // Убираем массив смен
-                employees: undefined // Убираем массив сотрудников
+                defaultEmployees: undefined
             };
         });
 

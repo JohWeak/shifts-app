@@ -114,6 +114,10 @@ const defineAssociations = () => {
             otherKey: 'emp_id',
             as: 'employees'
         });
+        Position.hasMany(Employee, {
+            foreignKey: 'default_position_id',
+            as: 'defaultEmployees'
+        });
     }
 
     // Position и PositionShift associations
