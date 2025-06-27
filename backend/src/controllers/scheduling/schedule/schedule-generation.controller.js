@@ -1,12 +1,12 @@
 // backend/src/controllers/schedule/schedule-generation.controller.js
 const dayjs = require('dayjs');
 const { formatComparisonResult } = require('./helpers/date-helpers');
-const db = require('models');
+const db = require('../../../models');
 const { Schedule, WorkSite } = db;
 
 // Импортируем сервисы
-const ScheduleGeneratorService = require('services/schedule-generator.service');
-const CPSATBridge = require('services/cp-sat-bridge.service');
+const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
+const CPSATBridge = require('../../../services/cp-sat-bridge.service');
 /**
  * Check Python availability
  */

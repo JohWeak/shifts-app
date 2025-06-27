@@ -117,6 +117,11 @@ class CPSATBridge {
 
             console.log(`[CP-SAT Bridge] Found ${positions.length} active positions`);
 
+            // ВАЖНО: Создаем маппинг для обратной совместимости
+            // Временное решение пока не обновим Python optimizer
+            const shiftIdMapping = {};
+            let temporaryShiftId = 1;
+
             // Build unique shifts array from position shifts
             const shiftsMap = new Map();
             const shiftsArray = [];
@@ -124,8 +129,13 @@ class CPSATBridge {
             positions.forEach(position => {
                 position.shifts?.forEach(posShift => {
                     if (!shiftsMap.has(posShift.id)) {
+                        // Создаем временный ID для совместимости с Python
+                        const tempId = temporaryShiftId++;
+                        shiftIdMapping[tempId] = posShift.id; // Сохраняем маппинг
+
                         const shiftData = {
-                            shift_id: posShift.id,
+                            shift_id: tempId, // Используем временный ID для Python
+                            real_shift_id: posShift.id, // Сохраняем реальный ID
                             shift_name: posShift.shift_name,
                             start_time: posShift.start_time,
                             duration: posShift.duration_hours,
@@ -138,6 +148,10 @@ class CPSATBridge {
                 });
             });
 
+            // Сохраняем маппинг для использования при сохранении результатов
+            this.shiftIdMapping = shiftIdMapping;
+
+            console.log(`[CP-SAT Bridge] Created shift mapping:`, shiftIdMapping);
             console.log(`[CP-SAT Bridge] Collected ${shiftsArray.length} unique shifts from position_shifts`);
 
             // Format employee data
@@ -351,6 +365,7 @@ class CPSATBridge {
                 // Save data to temp file
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
                 const tempFilePath = path.join(__dirname, '..', 'temp', tempFileName);
+                const resultFilePath = tempFilePath.replace('.json', '_result.json');
 
                 // Ensure temp directory exists
                 await fs.mkdir(path.dirname(tempFilePath), { recursive: true });
@@ -379,22 +394,41 @@ class CPSATBridge {
                 });
 
                 pythonProcess.on('close', async (code) => {
-                    // Clean up temp file
-                    try {
-                        await fs.unlink(tempFilePath);
-                    } catch (err) {
-                        console.error('Error deleting temp file:', err);
-                    }
-
                     if (code !== 0) {
+                        // Clean up temp files
+                        try {
+                            await fs.unlink(tempFilePath);
+                            await fs.unlink(resultFilePath).catch(() => {});
+                        } catch (err) {}
+
                         reject(new Error(`Python process exited with code ${code}: ${errorData}`));
                         return;
                     }
 
                     try {
-                        const result = JSON.parse(outputData);
-                        resolve(result);
+                        // Parse the status output
+                        const statusResult = JSON.parse(outputData);
+
+                        if (statusResult.success && statusResult.result_file) {
+                            // Read the actual result from file
+                            const resultData = await fs.readFile(resultFilePath, 'utf8');
+                            const result = JSON.parse(resultData);
+
+                            // Clean up temp files
+                            await fs.unlink(tempFilePath);
+                            await fs.unlink(resultFilePath);
+
+                            resolve(result);
+                        } else {
+                            throw new Error('Python optimizer failed');
+                        }
                     } catch (parseError) {
+                        // Clean up temp files
+                        try {
+                            await fs.unlink(tempFilePath);
+                            await fs.unlink(resultFilePath).catch(() => {});
+                        } catch (err) {}
+
                         reject(new Error(`Failed to parse Python output: ${outputData}`));
                     }
                 });
@@ -427,14 +461,21 @@ class CPSATBridge {
                 }
             });
 
-            // Create assignments
             const assignments = [];
 
             for (const assignment of scheduleData) {
+                // Преобразуем временный shift_id обратно в реальный position_shift id
+                const realShiftId = this.shiftIdMapping[assignment.shift_id];
+
+                if (!realShiftId) {
+                    console.warn(`[CP-SAT Bridge] No mapping found for shift_id ${assignment.shift_id}, skipping`);
+                    continue;
+                }
+
                 assignments.push({
                     schedule_id: newSchedule.id,
                     emp_id: assignment.emp_id,
-                    shift_id: assignment.shift_id,
+                    shift_id: realShiftId, // Используем реальный ID из position_shifts
                     position_id: assignment.position_id,
                     work_date: assignment.date,
                     status: 'scheduled',

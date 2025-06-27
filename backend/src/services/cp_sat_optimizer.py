@@ -344,8 +344,13 @@ if __name__ == '__main__':
         scheduler = UniversalShiftSchedulerCP()
         result = scheduler.optimize_schedule(data)
 
-        # Output result as JSON
-        print(json.dumps(result))
+        # Save result to file instead of printing
+        result_file = args.data_file.replace('.json', '_result.json')
+        with open(result_file, 'w', encoding='utf-8') as f:
+            json.dump(result, f)
+
+        # Print only success status
+        print(json.dumps({"success": True, "result_file": result_file}))
 
     except Exception as e:
         error_result = {
