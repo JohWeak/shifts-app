@@ -68,7 +68,7 @@ const ScheduleCell = ({
 
         if (className) baseClasses.push(className);
         if (isEditing) baseClasses.push('editing-mode');
-        if (!isEmpty) baseClasses.push('has-employees'); // Добавляем этот класс
+        if (!isEmpty) baseClasses.push('has-employees');
         if (isEmpty && isEditing) baseClasses.push('table-warning');
         if (isUnderstaffed && !isEmpty) baseClasses.push('table-info');
         if (isFull) baseClasses.push('table-success');

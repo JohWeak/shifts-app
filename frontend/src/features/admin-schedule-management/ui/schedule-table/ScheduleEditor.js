@@ -1,6 +1,6 @@
 // frontend/src/features/admin-schedule-management/components/ScheduleEditor.js
-import React, {useMemo} from 'react';
-import {Table, Button, Badge, Spinner} from 'react-bootstrap';
+import React, {useMemo, useState} from 'react';
+import {Table, Button, Badge, Spinner, Form} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {getWeekDates} from 'shared/lib/utils/scheduleUtils';
@@ -103,6 +103,35 @@ const ScheduleEditor = ({
         shifts: scheduleDetails?.shifts
     });
     console.log('ScheduleEditor - Employees:', employees);
+
+    const [showFirstNameOnly, setShowFirstNameOnly] = useState(false);
+
+    // Функция для форматирования имени
+    const formatEmployeeName = (employee) => {
+        if (!showFirstNameOnly) {
+            return employee.employee_name || `${employee.first_name} ${employee.last_name}`;
+        }
+
+        const firstName = employee.first_name || employee.employee_name?.split(' ')[0] || '';
+
+        // Проверяем, есть ли дубликаты имени в этой позиции
+        const employeesInPosition = employees.filter(emp =>
+            emp.default_position_id === position.pos_id ||
+            assignments.some(a => a.emp_id === emp.emp_id && a.position_id === position.pos_id)
+        );
+
+        const duplicateNames = employeesInPosition.filter(emp =>
+            (emp.first_name || emp.employee_name?.split(' ')[0]) === firstName
+        );
+
+        if (duplicateNames.length > 1) {
+            const lastName = employee.last_name || employee.employee_name?.split(' ')[1] || '';
+            return `${firstName} ${lastName.charAt(0)}.`;
+        }
+
+        return firstName;
+    };
+
 
     if (!position) {
         return (
@@ -211,6 +240,14 @@ const ScheduleEditor = ({
                     <h6 className="mb-1">{position.pos_name}</h6>
                     <small className="text-muted">
                         {t('employee.requiredEmployees')}: {position.num_of_emp}
+                        <Form.Check
+                            type="switch"
+                            id={`name-switch-${position.pos_id}`}
+                            label={t('employee.showFirstNameOnly')}
+                            className="me-3 d-inline-block"
+                            checked={showFirstNameOnly}
+                            onChange={(e) => setShowFirstNameOnly(e.target.checked)}
+                        />
                         {hasPendingChanges && positionPendingChanges.length > 0 && (
                             <Badge bg="warning" className="ms-2">
                                 {t('position.unsavedChanges')} ({positionPendingChanges.length})
@@ -219,6 +256,7 @@ const ScheduleEditor = ({
                     </small>
                 </div>
                 <div>
+
                     {/* Edit button */}
                     {canEdit && !isEditing && (
                         <Button

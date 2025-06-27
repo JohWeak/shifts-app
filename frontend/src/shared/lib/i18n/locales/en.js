@@ -247,6 +247,7 @@ export const en = {
         confirmCall: 'Call {name} at {phone}?',
         clickToCall: 'Click to call',
         noPhoneNumber: 'No phone number available',
+        showFirstNameOnly: 'Show first name only',
 
     },
     errors: {

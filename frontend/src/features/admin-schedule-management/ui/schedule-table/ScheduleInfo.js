@@ -27,17 +27,13 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
     };
 
     // Extract algorithm from text_file JSON
-    const getAlgorithmName = () => {
-        try {
-            if (schedule.text_file) {
-                const data = JSON.parse(schedule.text_file);
-                return data.algorithm || '-';
-            }
-        } catch (e) {
-            console.error('Error parsing text_file:', e);
-        }
-        return '-';
-    };
+    console.log('Schedule data:', schedule); // Добавьте для отладки
+
+// Попробуйте разные пути:
+    const algorithm = schedule?.metadata?.algorithm ||
+        schedule?.meta?.algorithm ||
+        schedule?.algorithm ||
+        'Unknown';
 
     return (
         <div className="schedule-info-wrapper">
@@ -101,7 +97,7 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
                         <i className="bi bi-gear"></i>
                         <span className="info-label">{t('modal.compareAlgorithms.algorithm')}</span>
                     </div>
-                    <span className="info-value">{getAlgorithmName()}</span>
+                    <span className="info-value">{algorithm}</span>
                 </div>
                 <div className="info-item">
                     <div className="info-item-header">
