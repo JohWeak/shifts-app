@@ -1,13 +1,36 @@
 // backend/src/controllers/schedule/schedule-generation.controller.js
 const dayjs = require('dayjs');
 const { formatComparisonResult } = require('./helpers/date-helpers');
-const db = require('../../../models');
+const db = require('models');
 const { Schedule, WorkSite } = db;
 
 // Импортируем сервисы
-const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
-const CPSATBridge = require('../../../services/cp-sat-bridge.service');
+const ScheduleGeneratorService = require('services/schedule-generator.service');
+const CPSATBridge = require('services/cp-sat-bridge.service');
+/**
+ * Check Python availability
+ */
+const checkPythonAvailability = async () => {
+    const { spawn } = require('child_process');
 
+    return new Promise((resolve) => {
+        const pythonProcess = spawn('python', ['--version']);
+
+        pythonProcess.on('close', (code) => {
+            resolve(code === 0);
+        });
+
+        pythonProcess.on('error', () => {
+            resolve(false);
+        });
+
+        // Timeout after 2 seconds
+        setTimeout(() => {
+            pythonProcess.kill();
+            resolve(false);
+        }, 2000);
+    });
+};
 /**
  * Generate schedule for next week
  */
@@ -190,36 +213,7 @@ const compareAllAlgorithms = async (req, res) => {
     }
 };
 
-/**
- * Check Python availability
- */
-const checkPythonAvailability = async () => {
-    return new Promise((resolve) => {
-        const { spawn } = require('child_process');
 
-        const pythonCheck = spawn('python', ['--version']);
-
-        pythonCheck.on('close', (code) => {
-            if (code === 0) {
-                const ortoolsCheck = spawn('python', ['-c', 'import ortools; print("OK")']);
-
-                ortoolsCheck.on('close', (ortoolsCode) => {
-                    resolve(ortoolsCode === 0);
-                });
-
-                ortoolsCheck.on('error', () => {
-                    resolve(false);
-                });
-            } else {
-                resolve(false);
-            }
-        });
-
-        pythonCheck.on('error', () => {
-            resolve(false);
-        });
-    });
-};
 
 /**
  * Select best algorithm based on results
