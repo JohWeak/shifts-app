@@ -147,33 +147,33 @@
 }
 
 /* Shift Cell Styles */
-.position-schedule-editor td.shift-morning {
-    background-color: rgba(var(--bs-warning-rgb), 0.1);
-}
+/*.position-schedule-editor td.shift-morning {*/
+/*    background-color: rgba(var(--bs-warning-rgb), 0.1);*/
+/*}*/
 
-.position-schedule-editor td.shift-day {
-    background-color: rgba(var(--bs-info-rgb), 0.1);
-}
+/*.position-schedule-editor td.shift-day {*/
+/*    background-color: rgba(var(--bs-info-rgb), 0.1);*/
+/*}*/
 
-.position-schedule-editor td.shift-night {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-}
+/*.position-schedule-editor td.shift-night {*/
+/*    background-color: rgba(var(--bs-primary-rgb), 0.1);*/
+/*}*/
 
 /* Dark theme shift cells */
-[data-theme="dark"] .position-schedule-editor td.shift-morning {
-    background-color: rgba(var(--bs-secondary-rgb), 0.1);
-    color: var(--bs-gray-100);
-}
+/*[data-theme="dark"] .position-schedule-editor td.shift-morning {*/
+/*    background-color: rgba(var(--bs-secondary-rgb), 0.1);*/
+/*    color: var(--bs-gray-100);*/
+/*}*/
 
-[data-theme="dark"] .position-schedule-editor td.shift-day {
-    background-color: rgba(var(--bs-info-rgb), 0.1);
-    color: var(--bs-gray-100);
-}
+/*[data-theme="dark"] .position-schedule-editor td.shift-day {*/
+/*    background-color: rgba(var(--bs-info-rgb), 0.1);*/
+/*    color: var(--bs-gray-100);*/
+/*}*/
 
-[data-theme="dark"] .position-schedule-editor td.shift-night {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-    color: var(--bs-gray-100);
-}
+/*[data-theme="dark"] .position-schedule-editor td.shift-night {*/
+/*    background-color: rgba(var(--bs-primary-rgb), 0.1);*/
+/*    color: var(--bs-gray-100);*/
+/*}*/
 
 /* Shift cell content */
 .position-schedule-editor td.shift-morning,

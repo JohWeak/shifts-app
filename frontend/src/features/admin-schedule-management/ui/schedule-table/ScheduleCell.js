@@ -83,10 +83,8 @@ const ScheduleCell = ({
         const styles = {};
 
         if (shiftColor && !isEmpty) {
-            // Светлый фон с прозрачностью
-            styles.backgroundColor = `${shiftColor}20`; // 20 = примерно 12% прозрачности
-            styles.borderLeft = `4px solid ${shiftColor}`;
-            styles.borderBottom = `2px solid ${shiftColor}`;
+            // Только лёгкий фон, без границ
+            styles.backgroundColor = `${shiftColor}20`;
         }
 
         return styles;

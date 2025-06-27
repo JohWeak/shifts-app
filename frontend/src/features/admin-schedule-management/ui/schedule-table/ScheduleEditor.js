@@ -1,5 +1,5 @@
 // frontend/src/features/admin-schedule-management/components/ScheduleEditor.js
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {Table, Button, Badge, Spinner, Form} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -24,7 +24,21 @@ const ScheduleEditor = ({
                         }) => {
     const {t} = useI18n();
     const {systemSettings} = useSelector(state => state.settings);
-
+    // Загружаем сохранённое состояние переключателя или используем true по умолчанию
+    const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
+        const saved = localStorage.getItem('showFirstNameOnly');
+        return saved !== null ? JSON.parse(saved) : true; // true по умолчанию
+    });
+    const [colorPickerState, setColorPickerState] = useState({
+        show: false,
+        shiftId: null,
+        currentColor: '#6c757d'
+    });
+    // Сохраняем при изменении
+    const handleNameToggle = (checked) => {
+        setShowFirstNameOnly(checked);
+        localStorage.setItem('showFirstNameOnly', JSON.stringify(checked));
+    };
 
     // Extract data from scheduleDetails
     const assignments = useMemo(() => {
@@ -103,8 +117,6 @@ const ScheduleEditor = ({
         shifts: scheduleDetails?.shifts
     });
     console.log('ScheduleEditor - Employees:', employees);
-
-    const [showFirstNameOnly, setShowFirstNameOnly] = useState(false);
 
     // Функция для форматирования имени
     const formatEmployeeName = (employee) => {
@@ -236,23 +248,24 @@ const ScheduleEditor = ({
 
     console.log('Shifts with colors:', shifts);
 
-    // Функция для определения контрастного цвета текста
-    const getContrastColor = (hexColor) => {
-        if (!hexColor) return '#000000';
 
-        // Убираем # если есть
-        const hex = hexColor.replace('#', '');
 
-        // Конвертируем в RGB
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
+    const handleColorEdit = (shiftId, currentColor) => {
+        setColorPickerState({
+            show: true,
+            shiftId: shiftId,
+            currentColor: currentColor || '#6c757d'
+        });
+    };
 
-        // Вычисляем яркость
-        const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    const handleColorChange = async (newColor) => {
+        // Здесь нужно вызвать API для обновления цвета
+        console.log('Update shift', colorPickerState.shiftId, 'with color', newColor);
 
-        // Возвращаем чёрный или белый
-        return brightness > 128 ? '#000000' : '#FFFFFF';
+        // TODO: Вызов API
+        // await updateShiftColor(colorPickerState.shiftId, newColor);
+
+        setColorPickerState({ show: false, shiftId: null, currentColor: '#6c757d' });
     };
 
     return (
@@ -269,7 +282,7 @@ const ScheduleEditor = ({
                             label={t('employee.showFirstNameOnly')}
                             className="ms-3 d-inline-block"
                             checked={showFirstNameOnly}
-                            onChange={(e) => setShowFirstNameOnly(e.target.checked)}
+                            onChange={(e) => handleNameToggle(e.target.checked)}
                         />
                         {hasPendingChanges && positionPendingChanges.length > 0 && (
                             <Badge bg="warning" className="ms-2">
@@ -364,22 +377,42 @@ const ScheduleEditor = ({
                 <tbody>
                 {shifts.length > 0 ? (
                     shifts.map(shift => (
-                        <tr key={shift.shift_id}>
-                            <td className={`shift-${shift.shift_type} text-center `}
+                        <tr key={shift.shift_id} style={{backgroundColor: `${shift.color}` || 'transparent'}}>
+                            <td
+                                className='text-center'
                                 style={{
                                     backgroundColor: shift.color || '#f8f9fa',
-                                    color: getContrastColor(shift.color || '#f8f9fa'),
-                                    borderLeft: `4px solid ${shift.color || '#6c757d'}`
-                                }}>
+                                    position: 'relative'
+                                }}
+                            >
                                 <div>
                                     {shift.shift_name}<br/>
-                                    <small style={{
-                                        color: getContrastColor(shift.color || '#f8f9fa'),
-                                        opacity: 0.8
-                                    }}>
+                                    <small className="text-muted">
                                         {formatShiftTime(shift.start_time, shift.duration)}
                                     </small>
                                 </div>
+                                {/* Кнопка редактирования цвета */}
+                                {canEdit && (
+                                    <button
+                                        className="btn btn-sm position-absolute"
+                                        style={{
+                                            top: '2px',
+                                            right: '2px',
+                                            padding: '2px 6px',
+                                            fontSize: '0.7rem',
+                                            opacity: 0.7,
+                                            background: 'rgba(255,255,255,0.8)',
+                                            border: '1px solid rgba(0,0,0,0.1)'
+                                        }}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleColorEdit(shift.shift_id, shift.color);
+                                        }}
+                                        title="Edit color"
+                                    >
+                                        <i className="bi bi-palette"></i>
+                                    </button>
+                                )}
                             </td>
                             {Array.from({length: 7}, (_, dayIndex) => renderCell(shift, dayIndex))}
                         </tr>
@@ -394,15 +427,58 @@ const ScheduleEditor = ({
                 </tbody>
             </Table>
 
-            {/* Edit Mode Message */}
-            {isEditing && (
-                <div className="alert alert-info mt-3">
-                    <i className="bi bi-pencil me-2"></i>
-                    <strong>{t('position.editPosition')}: {position.pos_name}.</strong> {t('employee.clickToAssignEmployee')}
+            {/* Edit Mode Message */
+            }
+            {
+                isEditing && (
+                    <div className="alert alert-info mt-3">
+                        <i className="bi bi-pencil me-2"></i>
+                        <strong>{t('position.editPosition')}: {position.pos_name}.</strong> {t('employee.clickToAssignEmployee')}
+                    </div>
+                )
+            }
+            {colorPickerState.show && (
+                <div
+                    className="position-fixed top-50 start-50 translate-middle p-4 bg-white rounded shadow-lg"
+                    style={{ zIndex: 1050 }}
+                >
+                    <h6 className="mb-3">Choose shift color</h6>
+                    <input
+                        type="color"
+                        value={colorPickerState.currentColor}
+                        onChange={(e) => setColorPickerState({...colorPickerState, currentColor: e.target.value})}
+                        className="form-control form-control-color mb-3"
+                        style={{ width: '100%', height: '50px' }}
+                    />
+                    <div className="d-flex gap-2">
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleColorChange(colorPickerState.currentColor)}
+                        >
+                            Save
+                        </button>
+                        <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => setColorPickerState({ show: false, shiftId: null, currentColor: '#6c757d' })}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             )}
+
+            {/* Backdrop */}
+            {colorPickerState.show && (
+                <div
+                    className="position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-50"
+                    style={{ zIndex: 1040 }}
+                    onClick={() => setColorPickerState({ show: false, shiftId: null, currentColor: '#6c757d' })}
+                />
+            )}
         </div>
-    );
+
+    )
+        ;
 };
 
 export default ScheduleEditor;
