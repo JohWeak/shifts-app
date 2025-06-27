@@ -14,20 +14,20 @@ async function testScheduleGeneration() {
         console.log(`📅 Testing for site ${siteId}, week starting ${weekStart}\n`);
 
         // Test 1: Simple Algorithm
-        console.log('1️⃣ Testing Simple Algorithm...');
-        try {
-            const simpleResult = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
-            console.log('Result:', simpleResult.success ? '✅ Success' : '❌ Failed');
-            if (simpleResult.success) {
-                console.log(`Assignments: ${simpleResult.schedule.assignments_count}`);
-            } else {
-                console.log('Error:', simpleResult.error);
-            }
-        } catch (error) {
-            console.log('❌ Error:', error.message);
-        }
-
-        console.log('\n' + '-'.repeat(50) + '\n');
+        // console.log('1️⃣ Testing Simple Algorithm...');
+        // try {
+        //     const simpleResult = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+        //     console.log('Result:', simpleResult.success ? '✅ Success' : '❌ Failed');
+        //     if (simpleResult.success) {
+        //         console.log(`Assignments: ${simpleResult.schedule.assignments_count}`);
+        //     } else {
+        //         console.log('Error:', simpleResult.error);
+        //     }
+        // } catch (error) {
+        //     console.log('❌ Error:', error.message);
+        // }
+        //
+        // console.log('\n' + '-'.repeat(50) + '\n');
 
         // Test 2: CP-SAT Algorithm
         console.log('2️⃣ Testing CP-SAT Algorithm...');

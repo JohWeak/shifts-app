@@ -362,13 +362,14 @@ class CPSATBridge {
     async callPythonOptimizer(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                // Save data to temp file
+                // Убедимся что папка temp не в src
+                const tempDir = path.join(__dirname, '..', '..', 'temp'); // backend/temp вместо backend/src/temp
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
-                const tempFilePath = path.join(__dirname, '..', 'temp', tempFileName);
+                const tempFilePath = path.join(tempDir, tempFileName);
                 const resultFilePath = tempFilePath.replace('.json', '_result.json');
 
                 // Ensure temp directory exists
-                await fs.mkdir(path.dirname(tempFilePath), { recursive: true });
+                await fs.mkdir(tempDir, { recursive: true });
 
                 // Write data to file
                 await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2));
@@ -383,57 +384,80 @@ class CPSATBridge {
 
                 let outputData = '';
                 let errorData = '';
+                let processCompleted = false;
 
                 pythonProcess.stdout.on('data', (data) => {
-                    outputData += data.toString();
+                    const chunk = data.toString();
+                    console.log('[Python stdout]:', chunk);
+                    outputData += chunk;
                 });
 
                 pythonProcess.stderr.on('data', (data) => {
-                    errorData += data.toString();
-                    console.error('[CP-SAT Python Error]', data.toString());
+                    const chunk = data.toString();
+                    console.error('[Python stderr]:', chunk);
+                    errorData += chunk;
+                });
+
+                pythonProcess.on('error', (error) => {
+                    console.error('[Python process error]:', error);
+                    if (!processCompleted) {
+                        processCompleted = true;
+                        reject(new Error(`Failed to start Python process: ${error.message}`));
+                    }
                 });
 
                 pythonProcess.on('close', async (code) => {
-                    if (code !== 0) {
-                        // Clean up temp files
-                        try {
-                            await fs.unlink(tempFilePath);
-                            await fs.unlink(resultFilePath).catch(() => {});
-                        } catch (err) {}
+                    if (processCompleted) return;
+                    processCompleted = true;
 
-                        reject(new Error(`Python process exited with code ${code}: ${errorData}`));
-                        return;
-                    }
+                    console.log(`[Python process] Exit code: ${code}`);
 
                     try {
-                        // Parse the status output
-                        const statusResult = JSON.parse(outputData);
+                        if (code !== 0) {
+                            throw new Error(`Python process exited with code ${code}: ${errorData}`);
+                        }
+
+                        // Найдём JSON в выводе Python
+                        const jsonMatch = outputData.match(/\{[^{}]*"success"[^{}]*\}/);
+                        if (!jsonMatch) {
+                            throw new Error('No JSON found in Python output');
+                        }
+
+                        const statusResult = JSON.parse(jsonMatch[0]);
+                        console.log('[CP-SAT Bridge] Status result:', statusResult);
 
                         if (statusResult.success && statusResult.result_file) {
                             // Read the actual result from file
-                            const resultData = await fs.readFile(resultFilePath, 'utf8');
-                            const result = JSON.parse(resultData);
+                            try {
+                                const resultData = await fs.readFile(resultFilePath, 'utf8');
+                                const result = JSON.parse(resultData);
 
-                            // Clean up temp files
-                            await fs.unlink(tempFilePath);
-                            await fs.unlink(resultFilePath);
+                                console.log(`[CP-SAT Bridge] Successfully read result with ${result.schedule?.length || 0} assignments`);
 
-                            resolve(result);
+                                resolve(result);
+                            } catch (fileError) {
+                                console.error('[CP-SAT Bridge] Error reading result file:', fileError);
+                                throw new Error(`Could not read result file: ${fileError.message}`);
+                            }
                         } else {
-                            throw new Error('Python optimizer failed');
+                            throw new Error('Python optimizer reported failure');
                         }
-                    } catch (parseError) {
+                    } catch (error) {
+                        console.error('[CP-SAT Bridge] Error processing result:', error);
+                        reject(error);
+                    } finally {
                         // Clean up temp files
                         try {
-                            await fs.unlink(tempFilePath);
+                            await fs.unlink(tempFilePath).catch(() => {});
                             await fs.unlink(resultFilePath).catch(() => {});
-                        } catch (err) {}
-
-                        reject(new Error(`Failed to parse Python output: ${outputData}`));
+                        } catch (err) {
+                            console.error('Error cleaning temp files:', err);
+                        }
                     }
                 });
 
             } catch (error) {
+                console.error('[CP-SAT Bridge] Setup error:', error);
                 reject(error);
             }
         });

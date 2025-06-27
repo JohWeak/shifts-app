@@ -1,0 +1,18 @@
+{
+  "watch": [
+    "src/"
+  ],
+  "ext": "js",
+  "ignore": [
+    "dev-scripts/*",
+    "temp/*",
+    "src/temp/*",
+
+    "node_modules/",
+
+    "*.test.js",
+    "test*.js"
+  ],
+  "exec": "node src/server.js",
+  "verbose": true
+}
