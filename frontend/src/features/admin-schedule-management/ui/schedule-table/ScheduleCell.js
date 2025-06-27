@@ -20,6 +20,7 @@ const ScheduleCell = ({
                           onRemovePendingChange,  // Добавить в пропсы
                           pendingChanges = {},
                           className = '',
+                          formatEmployeeName = null,
                           ...props
                       }) => {
     const {t} = useI18n();
@@ -126,7 +127,9 @@ const ScheduleCell = ({
             }}
             title={isEditing ? 'Click to replace this employee' : ''}
         >
-            {employee.first_name} {employee.last_name}
+            {formatEmployeeName
+                ? formatEmployeeName(employee)
+                : `${employee.first_name} ${employee.last_name}`}
         </span>
 
                         {isEditing && (
@@ -153,7 +156,9 @@ const ScheduleCell = ({
                             className="employee-name text-success"
                             style={{fontStyle: 'italic'}}
                         >
-                            {assignment.empName || 'New Employee'} {/* Защита от undefined */}
+                            {formatEmployeeName && assignment.employee
+                                ? formatEmployeeName(assignment.employee)
+                                : (assignment.empName || 'New Employee')}
                         </span>
                         <div className="d-flex align-items-center">
                             {isEditing && onRemovePendingChange && (

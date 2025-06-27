@@ -223,6 +223,7 @@ const ScheduleEditor = ({
                     onEmployeeRemove(date, posId, shiftId, empId, assignmentId)}
                 onRemovePendingChange={onRemovePendingChange}
                 pendingChanges={pendingChanges}
+                formatEmployeeName={formatEmployeeName}
             />
         );
     };
