@@ -6,7 +6,7 @@ const {
     Schedule,
     ScheduleAssignment,
     Employee,
-    Shift,
+    PositionShift,
     Position,
     WorkSite
 } = db;
@@ -30,9 +30,9 @@ const exportSchedule = async (req, res) => {
                             attributes: ['emp_id', 'first_name', 'last_name']
                         },
                         {
-                            model: Shift,
+                            model: PositionShift,
                             as: 'shift',
-                            attributes: ['shift_id', 'shift_name', 'start_time', 'duration']
+                            attributes: ['id', 'shift_name', 'start_time', 'duration_hours']
                         },
                         {
                             model: Position,

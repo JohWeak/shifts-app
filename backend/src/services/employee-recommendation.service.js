@@ -92,7 +92,8 @@ class EmployeeRecommendationService {
                         where: {
                             schedule_id: scheduleId
                         },
-                        include: [{ model: Shift, as: 'shift' }]
+                        include: [{ model: PositionShift, as: 'shift' }]
+
                     });
                 }
             } else {

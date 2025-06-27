@@ -13,7 +13,7 @@ const {
     Schedule,
     ScheduleAssignment,
     Employee,
-    Shift,
+    PositionShift,
     Position
 } = db;
 
@@ -67,9 +67,9 @@ const getWeeklySchedule = async (req, res) => {
                     attributes: ['emp_id', 'first_name', 'last_name', 'status']
                 },
                 {
-                    model: Shift,
+                    model: PositionShift,
                     as: 'shift',
-                    attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type']
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift']
                 },
                 {
                     model: Position,

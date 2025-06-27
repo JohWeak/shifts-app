@@ -2,7 +2,7 @@
 const dayjs = require('dayjs');
 const { formatComparisonResult } = require('./helpers/date-helpers');
 const db = require('../../../models');
-const { Schedule, WorkSite } = db;
+const { Schedule, WorkSite, ScheduleAssignment } = db;
 
 // Импортируем сервисы
 const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
@@ -31,10 +31,42 @@ const checkPythonAvailability = async () => {
         }, 2000);
     });
 };
+const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => {
+    try {
+        // Найти существующее расписание для этой недели
+        const existingSchedule = await Schedule.findOne({
+            where: {
+                site_id: siteId,
+                start_date: weekStart
+            },
+            transaction
+        });
+
+        if (existingSchedule) {
+            console.log(`[ScheduleController] Deleting existing schedule ${existingSchedule.id} for week ${weekStart}`);
+
+            // Удалить связанные assignments (каскадно через FK)
+            await ScheduleAssignment.destroy({
+                where: { schedule_id: existingSchedule.id },
+                transaction
+            });
+
+            // Удалить само расписание
+            await existingSchedule.destroy({ transaction });
+
+            console.log(`[ScheduleController] Deleted schedule and its assignments`);
+        }
+    } catch (error) {
+        console.error('[ScheduleController] Error deleting existing schedule:', error);
+        throw error;
+    }
+};
 /**
  * Generate schedule for next week
  */
 const generateNextWeekSchedule = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
+
     try {
         const siteId = req.body.site_id || 1;
         const algorithm = req.body.algorithm || 'auto';
@@ -53,6 +85,9 @@ const generateNextWeekSchedule = async (req, res) => {
         } else {
             weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
         }
+
+        await deleteExistingSchedule(siteId, weekStart, transaction);
+
 
         console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
 
@@ -103,6 +138,8 @@ const generateNextWeekSchedule = async (req, res) => {
                 });
         }
 
+        await transaction.commit();
+
         // Формирование ответа
         if (result && result.success) {
             let fullSchedule = null;
@@ -148,6 +185,7 @@ const generateNextWeekSchedule = async (req, res) => {
         }
 
     } catch (error) {
+        await transaction.rollback();
         console.error('[ScheduleController] Error generating schedule:', error);
         res.status(500).json({
             success: false,
@@ -163,43 +201,62 @@ const generateNextWeekSchedule = async (req, res) => {
 const compareAllAlgorithms = async (req, res) => {
     try {
         const siteId = req.body.site_id || 1;
-
-        let weekStart;
-        if (req.body.week_start) {
-            weekStart = dayjs(req.body.week_start).format('YYYY-MM-DD');
-        } else {
-            weekStart = dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
-        }
+        const weekStart = req.body.week_start || dayjs().add(1, 'week').startOf('week').format('YYYY-MM-DD');
 
         console.log(`[ScheduleController] Comparing algorithms for site ${siteId}, week ${weekStart}`);
 
-        const results = await Promise.allSettled([
-            CPSATBridge.generateOptimalSchedule(db, siteId, weekStart),
-            ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart)
-        ]);
-
         const comparison = {
-            'cp-sat': formatComparisonResult(results[0], 'CP-SAT'),
-            'simple': formatComparisonResult(results[1], 'Simple')
+            'simple': null,
+            'cp-sat': null
         };
 
-        const bestAlgorithm = selectBestResult(comparison);
-        comparison.recommended = bestAlgorithm;
+        // Тест Simple Algorithm (БЕЗ сохранения)
+        try {
+            const simpleService = new ScheduleGeneratorService(db);
+            const data = await simpleService.prepareData(siteId, weekStart);
+            const result = await simpleService.generateOptimalSchedule(data);
 
-        const algorithmNames = ['cp-sat', 'simple'];
-        const bestResult = results.find((result, index) => {
-            return algorithmNames[index] === bestAlgorithm &&
-                result.status === 'fulfilled' &&
-                result.value?.success;
-        });
+            comparison['simple'] = {
+                status: 'success',
+                algorithm: 'simple',
+                assignments_count: result.schedule.length,
+                stats: result.stats
+            };
+        } catch (error) {
+            comparison['simple'] = {
+                status: 'failed',
+                error: error.message
+            };
+        }
+
+        // Тест CP-SAT (БЕЗ сохранения)
+        const pythonAvailable = await checkPythonAvailability();
+        if (pythonAvailable) {
+            try {
+                const bridge = new CPSATBridge(db);
+                const data = await bridge.prepareScheduleData(siteId, weekStart);
+                const pythonResult = await bridge.callPythonOptimizer(data);
+
+                comparison['cp-sat'] = {
+                    status: 'success',
+                    algorithm: 'CP-SAT-Python',
+                    assignments_count: pythonResult.schedule?.length || 0,
+                    coverage_rate: pythonResult.coverage_rate,
+                    solve_time: pythonResult.solve_time,
+                    stats: pythonResult.stats
+                };
+            } catch (error) {
+                comparison['cp-sat'] = {
+                    status: 'failed',
+                    error: error.message
+                };
+            }
+        }
 
         res.json({
             success: true,
-            message: 'Algorithm comparison completed',
-            comparison: comparison,
-            best_algorithm: bestAlgorithm,
-            recommendation: `Use ${bestAlgorithm} algorithm for best results`,
-            saved_schedule: bestResult ? bestResult.value.schedule : null,
+            comparison,
+            recommendation: selectBestResult(comparison),
             week: weekStart
         });
 
@@ -208,7 +265,7 @@ const compareAllAlgorithms = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error during algorithm comparison',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: error.message
         });
     }
 };

@@ -7,7 +7,8 @@ const {
     Employee,
     Position,
     WorkSite,
-    PositionShift
+    PositionShift,
+    Shift  // Оставляем для обратной совместимости
 } = db;
 
 // Теперь не нужна функция-обертка module.exports = (db) => {}
@@ -65,11 +66,12 @@ const getScheduleDetails = async (req, res) => {
 
         // Получить основную информацию о расписании
         const schedule = await Schedule.findByPk(scheduleId, {
-            include: [{
-                model: WorkSite,
-                as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }]
+            include: [
+                {
+                    model: WorkSite,
+                    as: 'workSite'
+                }
+            ]
         });
 
         if (!schedule) {
@@ -91,9 +93,9 @@ const getScheduleDetails = async (req, res) => {
                     attributes: ['emp_id', 'first_name', 'last_name']
                 },
                 {
-                    model: Shift,
+                    model: PositionShift,  // Изменено с Shift на PositionShift
                     as: 'shift',
-                    attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type']
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
                 },
                 {
                     model: Position,
@@ -107,6 +109,13 @@ const getScheduleDetails = async (req, res) => {
         console.log(`[ScheduleController] Found ${assignments.length} assignments`);
 
         // Получить все смены через позиции
+        const positions = await Position.findAll({
+            where: {site_id: schedule.site_id},
+            attributes: ['pos_id', 'pos_name', 'profession']
+        });
+
+
+        // Получить все смены через позиции - ОСТАВЛЯЕМ КАК БЫЛО
         const positionsWithShifts = await Position.findAll({
             where: { site_id: schedule.site_id },
             include: [{
@@ -117,24 +126,26 @@ const getScheduleDetails = async (req, res) => {
             }]
         });
 
-// Собираем все уникальные смены
+        // Собираем все уникальные смены - НЕМНОГО ИЗМЕНЕНО для совместимости
         const shiftsMap = new Map();
         positionsWithShifts.forEach(position => {
             position.shifts?.forEach(shift => {
                 if (!shiftsMap.has(shift.id)) {
                     shiftsMap.set(shift.id, {
-                        shift_id: shift.id,
+                        shift_id: shift.id,  // Используем id как shift_id для совместимости
                         shift_name: shift.shift_name,
                         start_time: shift.start_time,
                         end_time: shift.end_time,
                         duration: shift.duration_hours,
-                        shift_type: shift.is_night_shift ? 'night' : 'day'
+                        shift_type: shift.is_night_shift ? 'night' : (shift.start_time < '12:00:00' ? 'morning' : 'day'),
+                        color: shift.color
                     });
                 }
             });
         });
 
         const shifts = Array.from(shiftsMap.values());
+
 
         // Получить всех сотрудников для данного сайта
         const employees = await Employee.findAll({
@@ -381,9 +392,9 @@ const getRecommendedEmployees = async (req, res) => {
                 work_date: date
             },
             include: [{
-                model: Shift,
+                model: PositionShift,
                 as: 'shift',
-                attributes: ['shift_id', 'start_time', 'duration']
+                attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
             }]
         });
 

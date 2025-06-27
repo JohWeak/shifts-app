@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         shift_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: { model: 'shifts', key: 'shift_id' }
+            references: { model: 'position_shifts', key: 'shift_id' }
         },
         position_id: {
             type: DataTypes.INTEGER,

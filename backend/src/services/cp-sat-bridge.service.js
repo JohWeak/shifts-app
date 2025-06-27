@@ -76,7 +76,8 @@ class CPSATBridge {
             const employees = await Employee.findAll({
                 where: {
                     status: 'active',
-                    role: 'employee'
+                    role: 'employee',
+                    work_site_id: siteId
                 },
                 include: [
                     {
@@ -93,7 +94,7 @@ class CPSATBridge {
                 ]
             });
 
-            console.log(`[CP-SAT Bridge] Found ${employees.length} active employees`);
+            console.log(`[CP-SAT Bridge] Found ${employees.length} active employees for site ${siteId}`);
 
             // Get positions with shifts and requirements
             const positions = await Position.findAll({
@@ -323,7 +324,7 @@ class CPSATBridge {
      * Get existing assignments for the week
      */
     async getExistingAssignments(employeeIds, weekStart) {
-        const { ScheduleAssignment } = this.db;
+        const { ScheduleAssignment, PositionShift, Position } = this.db;
 
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
 
@@ -336,12 +337,12 @@ class CPSATBridge {
             },
             include: [
                 {
-                    model: this.db.Shift,
+                    model: PositionShift,
                     as: 'shift',
-                    attributes: ['shift_id', 'shift_name', 'duration']
+                    attributes: ['id', 'shift_name', 'duration_hours']
                 },
                 {
-                    model: this.db.Position,
+                    model: Position,
                     as: 'position',
                     attributes: ['pos_id', 'pos_name']
                 }

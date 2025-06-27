@@ -6,7 +6,6 @@ const {Sequelize} = require("sequelize");
 
 const db = {};
 
-
 function loadModelsRecursive(directory) {
     const entries = fs.readdirSync(directory, { withFileTypes: true });
 
@@ -31,15 +30,6 @@ function loadModelsRecursive(directory) {
 // Запускаем рекурсивный обход, начиная с текущей директории (__dirname)
 loadModelsRecursive(__dirname);
 
-// Для будущего рефакторинга со связями внутри моделей
-// После загрузки всех моделей, настраиваем ассоциации (связи)
-// Object.keys(db).forEach(modelName => {
-//     if (db[modelName].associate) {
-//         db[modelName].associate(db);
-//         console.log(`🔗 Associated model: ${modelName}`);
-//     }
-// });
-
 // Добавляем Sequelize в db объект
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
@@ -50,7 +40,6 @@ const defineAssociations = () => {
         Employee,
         WorkSite,
         Position,
-        Shift,
         Schedule,
         ScheduleAssignment,
         ScheduleSettings,
@@ -63,171 +52,72 @@ const defineAssociations = () => {
         Workday
     } = db;
 
-    // Employee associations
-    if (Employee && Position) {
-        Employee.belongsTo(Position, {
-            foreignKey: 'default_position_id',
-            as: 'defaultPosition'
-        });
-
-        // Добавляем many-to-many связь
-        Employee.belongsToMany(Position, {
-            through: 'employee_positions',
-            foreignKey: 'emp_id',
-            otherKey: 'position_id',
-            as: 'positions'
-        });
-    }
-
-    if (Employee && EmployeeConstraint) {
-        Employee.hasMany(EmployeeConstraint, {
-            foreignKey: 'emp_id',
-            as: 'constraints'
-        });
-    }
-
-    if (Employee && ScheduleAssignment) {
-        Employee.hasMany(ScheduleAssignment, {
-            foreignKey: 'emp_id',
-            as: 'assignments'
-        });
-    }
-    if (Employee && WorkSite) {
-        Employee.belongsTo(WorkSite, {
-            foreignKey: 'work_site_id',
-            as: 'workSite'
-        });
-    }
-
-    // Position associations
-    if (Position && WorkSite) {
-        Position.belongsTo(WorkSite, {
-            foreignKey: 'site_id',
-            as: 'workSite'
-        });
-    }
-
-    if (Position && Employee) {
-        Position.belongsToMany(Employee, {
-            through: 'employee_positions',
-            foreignKey: 'position_id',
-            otherKey: 'emp_id',
-            as: 'employees'
-        });
-        Position.hasMany(Employee, {
-            foreignKey: 'default_position_id',
-            as: 'defaultEmployees'
-        });
-    }
-
-    // Position и PositionShift associations
-    if (Position && PositionShift) {
-        Position.hasMany(PositionShift, {
-            foreignKey: 'position_id',
-            as: 'shifts'
-        });
-
-        PositionShift.belongsTo(Position, {
-            foreignKey: 'position_id',
-            as: 'position'
-        });
-    }
-
-    // PositionShift и ShiftRequirement associations
-    if (PositionShift && ShiftRequirement) {
-        PositionShift.hasMany(ShiftRequirement, {
-            foreignKey: 'position_shift_id',
-            as: 'requirements'
-        });
-
-        ShiftRequirement.belongsTo(PositionShift, {
-            foreignKey: 'position_shift_id',
-            as: 'shift'
-        });
-    }
-
-
-    // Schedule associations
-    if (Schedule && WorkSite) {
-        Schedule.belongsTo(WorkSite, {
-            foreignKey: 'site_id',
-            as: 'workSite'
-        });
-    }
-
-    if (Schedule && ScheduleAssignment) {
-        Schedule.hasMany(ScheduleAssignment, {
-            foreignKey: 'schedule_id',
-            as: 'assignments',
-            onDelete: 'CASCADE'
-        });
-    }
-
-    // ScheduleAssignment associations
-    if (ScheduleAssignment) {
-        if (Schedule) {
-            ScheduleAssignment.belongsTo(Schedule, {
-                foreignKey: 'schedule_id',
-                as: 'schedule'
-            });
-        }
-
-        if (Employee) {
-            ScheduleAssignment.belongsTo(Employee, {
-                foreignKey: 'emp_id',
-                as: 'employee'
-            });
-        }
-
-        if (Shift) {
-            ScheduleAssignment.belongsTo(Shift, {
-                foreignKey: 'shift_id',
-                as: 'shift'
-            });
-        }
-
+    // =============================
+    // EMPLOYEE ASSOCIATIONS
+    // =============================
+    if (Employee) {
+        // Employee -> Position (default position)
         if (Position) {
-            ScheduleAssignment.belongsTo(Position, {
-                foreignKey: 'position_id',
-                as: 'position'
+            Employee.belongsTo(Position, {
+                foreignKey: 'default_position_id',
+                as: 'defaultPosition'
             });
-        }
-    }
 
-    // ScheduleSettings associations
-    if (ScheduleSettings && WorkSite) {
-        ScheduleSettings.belongsTo(WorkSite, {
-            foreignKey: 'site_id',
-            as: 'workSite'
-        });
-    }
-
-    // EmployeeConstraint associations
-    if (EmployeeConstraint) {
-        if (Employee) {
-            EmployeeConstraint.belongsTo(Employee, {
+            // Employee <-> Position (many-to-many через employee_positions)
+            Employee.belongsToMany(Position, {
+                through: 'employee_positions',
                 foreignKey: 'emp_id',
-                as: 'employee'
+                otherKey: 'position_id',
+                as: 'positions'
             });
         }
 
-        if (Shift) {
-            EmployeeConstraint.belongsTo(Shift, {
-                foreignKey: 'shift_id',
-                as: 'shift'
+        // Employee -> WorkSite
+        if (WorkSite) {
+            Employee.belongsTo(WorkSite, {
+                foreignKey: 'work_site_id',
+                as: 'workSite'
+            });
+        }
+
+        // Employee -> EmployeeConstraint[]
+        if (EmployeeConstraint) {
+            Employee.hasMany(EmployeeConstraint, {
+                foreignKey: 'emp_id',
+                as: 'constraints'
+            });
+        }
+
+        // Employee -> ScheduleAssignment[]
+        if (ScheduleAssignment) {
+            Employee.hasMany(ScheduleAssignment, {
+                foreignKey: 'emp_id',
+                as: 'assignments'
+            });
+        }
+
+        // Employee -> EmployeeQualification[]
+        if (EmployeeQualification) {
+            Employee.hasMany(EmployeeQualification, {
+                foreignKey: 'emp_id',
+                as: 'qualifications'
             });
         }
     }
 
-    // WorkSite associations
+    // =============================
+    // WORKSITE ASSOCIATIONS
+    // =============================
     if (WorkSite) {
-        if (Schedule) {
-            WorkSite.hasMany(Schedule, {
-                foreignKey: 'site_id',
-                as: 'schedules'
+        // WorkSite -> Employee[]
+        if (Employee) {
+            WorkSite.hasMany(Employee, {
+                foreignKey: 'work_site_id',
+                as: 'employees'
             });
         }
 
+        // WorkSite -> Position[]
         if (Position) {
             WorkSite.hasMany(Position, {
                 foreignKey: 'site_id',
@@ -235,34 +125,208 @@ const defineAssociations = () => {
             });
         }
 
+        // WorkSite -> Schedule[]
+        if (Schedule) {
+            WorkSite.hasMany(Schedule, {
+                foreignKey: 'site_id',
+                as: 'schedules'
+            });
+        }
+
+        // WorkSite -> ScheduleSettings[]
         if (ScheduleSettings) {
             WorkSite.hasMany(ScheduleSettings, {
                 foreignKey: 'site_id',
                 as: 'settings'
             });
         }
+    }
+
+    // =============================
+    // POSITION ASSOCIATIONS
+    // =============================
+    if (Position) {
+        // Position -> WorkSite
+        if (WorkSite) {
+            Position.belongsTo(WorkSite, {
+                foreignKey: 'site_id',
+                as: 'workSite'
+            });
+        }
+
+        // Position <-> Employee (many-to-many через employee_positions)
         if (Employee) {
-            WorkSite.hasMany(Employee, {
-                foreignKey: 'work_site_id',
+            Position.belongsToMany(Employee, {
+                through: 'employee_positions',
+                foreignKey: 'position_id',
+                otherKey: 'emp_id',
                 as: 'employees'
+            });
+
+            // Position -> Employee[] (сотрудники с этой позицией по умолчанию)
+            Position.hasMany(Employee, {
+                foreignKey: 'default_position_id',
+                as: 'defaultEmployees'
+            });
+        }
+
+        // Position -> PositionShift[]
+        if (PositionShift) {
+            Position.hasMany(PositionShift, {
+                foreignKey: 'position_id',
+                as: 'shifts'
             });
         }
     }
 
-        if (EmployeeQualification && Employee) {
-            EmployeeQualification.belongsTo(Employee, {
-                foreignKey: 'emp_id',
-                as: 'employee'
-            });
-
-            Employee.hasMany(EmployeeQualification, {
-                foreignKey: 'emp_id',
-                as: 'qualifications'
+    // =============================
+    // POSITION SHIFT ASSOCIATIONS
+    // =============================
+    if (PositionShift) {
+        // PositionShift -> Position
+        if (Position) {
+            PositionShift.belongsTo(Position, {
+                foreignKey: 'position_id',
+                as: 'position'
             });
         }
 
-    };
+        // PositionShift -> ShiftRequirement[]
+        if (ShiftRequirement) {
+            PositionShift.hasMany(ShiftRequirement, {
+                foreignKey: 'position_shift_id',
+                as: 'requirements'
+            });
+        }
+    }
+
+    // =============================
+    // SHIFT REQUIREMENT ASSOCIATIONS
+    // =============================
+    if (ShiftRequirement && PositionShift) {
+        ShiftRequirement.belongsTo(PositionShift, {
+            foreignKey: 'position_shift_id',
+            as: 'shift'
+        });
+    }
+
+    // =============================
+    // SCHEDULE ASSOCIATIONS
+    // =============================
+    if (Schedule) {
+        // Schedule -> WorkSite
+        if (WorkSite) {
+            Schedule.belongsTo(WorkSite, {
+                foreignKey: 'site_id',
+                as: 'workSite'
+            });
+        }
+
+        // Schedule -> ScheduleAssignment[]
+        if (ScheduleAssignment) {
+            Schedule.hasMany(ScheduleAssignment, {
+                foreignKey: 'schedule_id',
+                as: 'assignments',
+                onDelete: 'CASCADE'
+            });
+        }
+    }
+
+    // =============================
+    // SCHEDULE ASSIGNMENT ASSOCIATIONS
+    // =============================
+    if (ScheduleAssignment) {
+        // ScheduleAssignment -> Schedule
+        if (Schedule) {
+            ScheduleAssignment.belongsTo(Schedule, {
+                foreignKey: 'schedule_id',
+                as: 'schedule'
+            });
+        }
+
+        // ScheduleAssignment -> Employee
+        if (Employee) {
+            ScheduleAssignment.belongsTo(Employee, {
+                foreignKey: 'emp_id',
+                as: 'employee'
+            });
+        }
+
+        // ScheduleAssignment -> Position
+        if (Position) {
+            ScheduleAssignment.belongsTo(Position, {
+                foreignKey: 'position_id',
+                as: 'position'
+            });
+        }
+
+        // ScheduleAssignment -> PositionShift (NOT Shift!)
+        if (PositionShift) {
+            ScheduleAssignment.belongsTo(PositionShift, {
+                foreignKey: 'shift_id',
+                as: 'shift'
+            });
+        }
+    }
+
+    // =============================
+    // EMPLOYEE CONSTRAINT ASSOCIATIONS
+    // =============================
+    if (EmployeeConstraint) {
+        // EmployeeConstraint -> Employee
+        if (Employee) {
+            EmployeeConstraint.belongsTo(Employee, {
+                foreignKey: 'emp_id',
+                as: 'employee'
+            });
+        }
+
+        // EmployeeConstraint -> PositionShift (NOT Shift!)
+        if (PositionShift) {
+            EmployeeConstraint.belongsTo(PositionShift, {
+                foreignKey: 'shift_id',
+                as: 'shift'
+            });
+        }
+    }
+
+    // =============================
+    // EMPLOYEE QUALIFICATION ASSOCIATIONS
+    // =============================
+    if (EmployeeQualification && Employee) {
+        EmployeeQualification.belongsTo(Employee, {
+            foreignKey: 'emp_id',
+            as: 'employee'
+        });
+    }
+
+    // =============================
+    // SCHEDULE SETTINGS ASSOCIATIONS
+    // =============================
+    if (ScheduleSettings && WorkSite) {
+        ScheduleSettings.belongsTo(WorkSite, {
+            foreignKey: 'site_id',
+            as: 'workSite'
+        });
+    }
+
+    // =============================
+    // LEGAL CONSTRAINT ASSOCIATIONS
+    // =============================
+    // Добавьте здесь ассоциации для LegalConstraint если нужны
+
+    // =============================
+    // SCHEDULE PERIOD ASSOCIATIONS
+    // =============================
+    // Добавьте здесь ассоциации для SchedulePeriod если нужны
+
+    // =============================
+    // WORKDAY ASSOCIATIONS
+    // =============================
+    // Добавьте здесь ассоциации для Workday если нужны
+};
 
 // Вызываем функцию определения ассоциаций
-    defineAssociations();
-    module.exports = db;
+defineAssociations();
+
+module.exports = db;
