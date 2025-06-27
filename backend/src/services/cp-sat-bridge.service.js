@@ -1,5 +1,4 @@
 // backend/src/services/cp-sat-bridge.service.js
-
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
@@ -7,7 +6,6 @@ const dayjs = require('dayjs');
 const db = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const CONSTRAINTS = require('../config/scheduling-constraints');
-
 
 class CPSATBridge {
     constructor(database) {
@@ -20,10 +18,10 @@ class CPSATBridge {
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
 
-            // 1. Подготовка данных
+            // 1. Prepare data with new structure
             const data = await bridge.prepareScheduleData(siteId, weekStart);
 
-            // 2. Вызов Python оптимизатора
+            // 2. Call Python optimizer
             const pythonResult = await bridge.callPythonOptimizer(data);
 
             if (!pythonResult.success) {
@@ -34,7 +32,7 @@ class CPSATBridge {
                 };
             }
 
-            // 3. Сохранение результатов
+            // 3. Save results
             const savedSchedule = await bridge.saveSchedule(siteId, weekStart, pythonResult.schedule);
 
             return {
@@ -59,13 +57,22 @@ class CPSATBridge {
     }
 
     /**
-     * Подготовка данных для Python оптимизатора с поддержкой новых возможностей
+     * Prepare data for Python optimizer with new position_shifts structure
      */
     async prepareScheduleData(siteId, weekStart) {
         console.log(`[CP-SAT Bridge] Preparing data for site ${siteId}, week ${weekStart}`);
-        const { Employee, Position, Shift, EmployeeConstraint } = this.db;
+
+        const {
+            Employee,
+            Position,
+            PositionShift,
+            ShiftRequirement,
+            EmployeeConstraint,
+            ScheduleAssignment
+        } = this.db;
+
         try {
-            // Получить сотрудников с дефолтными позициями и ограничениями
+            // Get employees with default positions and constraints
             const employees = await Employee.findAll({
                 where: {
                     status: 'active',
@@ -75,7 +82,6 @@ class CPSATBridge {
                     {
                         model: Position,
                         as: 'defaultPosition',
-                        required: false,
                         attributes: ['pos_id', 'pos_name', 'profession']
                     },
                     {
@@ -87,56 +93,72 @@ class CPSATBridge {
                 ]
             });
 
-            // Получить смены и позиции
-            const shifts = await Shift.findAll({
-                order: [['start_time', 'ASC']]
-            });
+            console.log(`[CP-SAT Bridge] Found ${employees.length} active employees`);
 
+            // Get positions with shifts and requirements
             const positions = await Position.findAll({
-                where: { site_id: siteId },
+                where: {
+                    site_id: siteId,
+                    is_active: true
+                },
+                include: [{
+                    model: PositionShift,
+                    as: 'shifts',
+                    where: { is_active: true },
+                    required: false,
+                    include: [{
+                        model: ShiftRequirement,
+                        as: 'requirements',
+                        required: false
+                    }]
+                }],
                 order: [['pos_name', 'ASC']]
             });
 
-            // Проверка наличия данных
-            if (employees.length === 0) {
-                throw new Error('No active employees found');
-            }
-            if (shifts.length === 0) {
-                throw new Error('No shifts configured');
-            }
-            if (positions.length === 0) {
-                throw new Error('No positions found for this site');
-            }
+            console.log(`[CP-SAT Bridge] Found ${positions.length} active positions`);
 
-            // Формирование данных о сотрудниках
-            const employeesData = employees.map(emp => ({
-                emp_id: emp.emp_id,
-                name: `${emp.first_name} ${emp.last_name}`,
-                default_position_id: emp.default_position_id, // Новое поле для привязки к позиции
-                status: emp.status
-            }));
+            // Build unique shifts array from position shifts
+            const shiftsMap = new Map();
+            const shiftsArray = [];
 
-            console.log('[CP-SAT Bridge] Employees with default positions:',
-                employeesData.map(emp => ({
-                    id: emp.emp_id,
-                    name: emp.name,
-                    default_position_id: emp.default_position_id
+            positions.forEach(position => {
+                position.shifts?.forEach(posShift => {
+                    if (!shiftsMap.has(posShift.id)) {
+                        const shiftData = {
+                            shift_id: posShift.id,
+                            shift_name: posShift.shift_name,
+                            start_time: posShift.start_time,
+                            duration: posShift.duration_hours,
+                            shift_type: this.determineShiftType(posShift.start_time),
+                            is_night_shift: posShift.is_night_shift || false
+                        };
+                        shiftsMap.set(posShift.id, shiftData);
+                        shiftsArray.push(shiftData);
+                    }
+                });
+            });
+
+            console.log(`[CP-SAT Bridge] Collected ${shiftsArray.length} unique shifts from position_shifts`);
+
+            // Format employee data
+            const employeesData = employees
+                .filter(emp => emp.default_position_id !== null)
+                .map(emp => ({
+                    emp_id: emp.emp_id,
+                    name: `${emp.first_name} ${emp.last_name}`,
+                    default_position_id: emp.default_position_id,
+                    status: emp.status
+                }));
+
+            console.log(`[CP-SAT Bridge] Employees with default positions: ${JSON.stringify(
+                employeesData.map(e => ({
+                    id: e.emp_id,
+                    name: e.name,
+                    default_position_id: e.default_position_id
                 }))
-            );
+                , null, 2)}`);
 
-            console.log('[CP-SAT Bridge] Will save data to temp file with employees:', employeesData.length);
-
-            // Формирование данных о сменах
-            const shiftsData = shifts.map(shift => ({
-                shift_id: shift.shift_id,
-                shift_name: shift.shift_name,
-                start_time: shift.start_time,
-                duration: shift.duration,
-                shift_type: shift.shift_type,
-                is_night_shift: shift.is_night_shift || false
-            }));
-
-            // Формирование данных о позициях
+            // Format position data
             const positionsData = positions.map(position => ({
                 pos_id: position.pos_id,
                 pos_name: position.pos_name,
@@ -144,7 +166,7 @@ class CPSATBridge {
                 num_of_emp: position.num_of_emp
             }));
 
-            // Формирование дней недели
+            // Generate days array
             const days = [];
             const startDate = new Date(weekStart);
 
@@ -160,28 +182,23 @@ class CPSATBridge {
                 });
             }
 
-            // Формирование ограничений с улучшенной обработкой
-            const constraintsData = await this.processConstraints(employees, days, shifts);
+            // Process constraints
+            const constraintsData = await this.processConstraints(employees, days, shiftsArray);
 
-            // Получение существующих назначений для анализа
-            const existingAssignments = await this.getExistingAssignments(employees.map(e => e.emp_id), weekStart);
+            // Get existing assignments
+            const existingAssignments = await this.getExistingAssignments(
+                employees.map(e => e.emp_id),
+                weekStart
+            );
 
-            // Настройки для алгоритма
+            // Settings for algorithm
             const settings = {
                 week_start: weekStart,
                 site_id: siteId,
-
-                // Жесткие ограничения из конфигурации
                 hard_constraints: CONSTRAINTS.HARD_CONSTRAINTS,
                 soft_constraints: CONSTRAINTS.SOFT_CONSTRAINTS,
                 optimization_weights: CONSTRAINTS.OPTIMIZATION_WEIGHTS,
-
-                // Дополнительные настройки из БД (будут добавлены через админа)
-                // max_cannot_work_days_per_week: systemSettings?.maxCannotWorkDays || 2,
-                // max_prefer_work_days_per_week: systemSettings?.maxPreferWorkDays || 3,
                 max_solve_time: CONSTRAINTS.SOLVER_SETTINGS.max_time_seconds || 120,
-
-                // Флаги
                 enable_overtime: CONSTRAINTS.SOLVER_SETTINGS.enable_overtime,
                 enable_weekend_work: CONSTRAINTS.SOLVER_SETTINGS.enable_weekend_work,
                 strict_rest_requirements: CONSTRAINTS.SOLVER_SETTINGS.strict_rest_requirements
@@ -189,7 +206,7 @@ class CPSATBridge {
 
             const preparedData = {
                 employees: employeesData,
-                shifts: shiftsData,
+                shifts: shiftsArray,
                 positions: positionsData,
                 days: days,
                 constraints: constraintsData,
@@ -203,9 +220,9 @@ class CPSATBridge {
                 prefer_work: constraintsData.prefer_work.length
             });
 
-            console.log(`[CP-SAT Bridge] Data prepared:`, {
+            console.log('[CP-SAT Bridge] Data prepared:', {
                 employees: employeesData.length,
-                shifts: shiftsData.length,
+                shifts: shiftsArray.length,
                 positions: positionsData.length,
                 days: days.length,
                 cannot_work_constraints: constraintsData.cannot_work.length,
@@ -221,247 +238,213 @@ class CPSATBridge {
     }
 
     /**
-     * Обработка ограничений сотрудников
+     * Determine shift type based on start time
+     */
+    determineShiftType(startTime) {
+        const hour = parseInt(startTime.split(':')[0]);
+
+        if (hour >= 6 && hour < 14) {
+            return 'morning';
+        } else if (hour >= 14 && hour < 22) {
+            return 'day';
+        } else {
+            return 'night';
+        }
+    }
+
+    /**
+     * Process employee constraints
      */
     async processConstraints(employees, days, shifts) {
-        const constraintsData = {
-            cannot_work: [],
-            prefer_work: []
-        };
+        const cannotWork = [];
+        const preferWork = [];
 
-        const dayNameToIndex = {
-            'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
-            'thursday': 4, 'friday': 5, 'saturday': 6
-        };
+        for (const emp of employees) {
+            if (!emp.constraints) continue;
 
-        employees.forEach(emp => {
-            if (emp.constraints && emp.constraints.length > 0) {
-                emp.constraints.forEach(constraint => {
-                    const baseConstraint = {
+            for (const constraint of emp.constraints) {
+                const constraintDays = [];
+
+                if (constraint.target_date) {
+                    // Specific date constraint
+                    const targetDate = dayjs(constraint.target_date).format('YYYY-MM-DD');
+                    const dayIndex = days.findIndex(d => d.date === targetDate);
+                    if (dayIndex !== -1) {
+                        constraintDays.push(dayIndex);
+                    }
+                } else if (constraint.day_of_week !== null) {
+                    // Weekly recurring constraint
+                    const dayIndex = days.findIndex(d => d.weekday === constraint.day_of_week);
+                    if (dayIndex !== -1) {
+                        constraintDays.push(dayIndex);
+                    }
+                }
+
+                // Add constraint for each applicable day
+                for (const dayIndex of constraintDays) {
+                    const constraintData = {
                         emp_id: emp.emp_id,
-                        applies_to: constraint.applies_to,
-                        target_date: constraint.target_date,
-                        day_of_week: constraint.day_of_week,
+                        day_index: dayIndex,
                         shift_id: constraint.shift_id,
+                        constraint_type: constraint.constraint_type,
                         reason: constraint.reason
                     };
 
-                    // Для ограничений по дням недели, найти соответствующие дни
-                    if (constraint.applies_to === 'day_of_week' && constraint.day_of_week) {
-                        const targetDayIndex = dayNameToIndex[constraint.day_of_week.toLowerCase()];
-
-                        days.forEach((day, dayIndex) => {
-                            if (day.weekday === targetDayIndex) {
-                                const processedConstraint = {
-                                    ...baseConstraint,
-                                    day_index: dayIndex,
-                                    date: day.date
-                                };
-
-                                if (constraint.constraint_type === 'cannot_work') {
-                                    constraintsData.cannot_work.push(processedConstraint);
-                                } else if (constraint.constraint_type === 'prefer_work') {
-                                    constraintsData.prefer_work.push(processedConstraint);
-                                }
-                            }
-                        });
+                    if (constraint.constraint_type === 'cannot_work') {
+                        cannotWork.push(constraintData);
+                    } else if (constraint.constraint_type === 'prefer_work') {
+                        preferWork.push(constraintData);
                     }
-                    // Для ограничений по конкретным датам
-                    else if (constraint.applies_to === 'specific_date' && constraint.target_date) {
-                        const targetDate = new Date(constraint.target_date).toISOString().split('T')[0];                        const dayIndex = days.findIndex(day => day.date === targetDate);
-
-                        if (dayIndex !== -1) {
-                            const processedConstraint = {
-                                ...baseConstraint,
-                                day_index: dayIndex,
-                                date: targetDate
-                            };
-
-                            if (constraint.constraint_type === 'cannot_work') {
-                                constraintsData.cannot_work.push(processedConstraint);
-                            } else if (constraint.constraint_type === 'prefer_work') {
-                                constraintsData.prefer_work.push(processedConstraint);
-                            }
-                        }
-                    }
-                });
+                }
             }
-        });
+        }
 
-        return constraintsData;
+        return {
+            cannot_work: cannotWork,
+            prefer_work: preferWork
+        };
     }
 
     /**
-     * Получение существующих назначений для анализа
+     * Get existing assignments for the week
      */
     async getExistingAssignments(employeeIds, weekStart) {
-        const { ScheduleAssignment, Shift, Position } = this.db;
-        const { Op } = this.db.Sequelize;
-        try {
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
+        const { ScheduleAssignment } = this.db;
 
-            const assignments = await ScheduleAssignment.findAll({
-                where: {
-                    emp_id: { [Op.in]: employeeIds },
-                    work_date: {
-                        [Op.between]: [weekStart, weekEnd.toISOString().split('T')[0]]
-                    }
+        const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
+
+        const assignments = await ScheduleAssignment.findAll({
+            where: {
+                emp_id: employeeIds,
+                work_date: {
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                }
+            },
+            include: [
+                {
+                    model: this.db.Shift,
+                    as: 'shift',
+                    attributes: ['shift_id', 'shift_name', 'duration']
                 },
-                include: [
-                    { model: Shift, as: 'shift' },
-                    { model: Position, as: 'position' }
-                ]
-            });
+                {
+                    model: this.db.Position,
+                    as: 'position',
+                    attributes: ['pos_id', 'pos_name']
+                }
+            ]
+        });
 
-            return assignments.map(assignment => ({
-                emp_id: assignment.emp_id,
-                date: assignment.work_date,
-                shift_id: assignment.shift_id,
-                position_id: assignment.position_id
-            }));
-
-        } catch (error) {
-            console.warn('[CP-SAT Bridge] Could not get existing assignments:', error.message);
-            return [];
-        }
+        return assignments.map(a => ({
+            emp_id: a.emp_id,
+            date: a.work_date,
+            shift_id: a.shift_id,
+            position_id: a.position_id
+        }));
     }
 
     /**
-     * Вызов Python оптимизатора
+     * Call Python optimizer
      */
     async callPythonOptimizer(data) {
-        const tempId = uuidv4();
-        const inputFile = path.join(__dirname, `temp_input_${tempId}.json`);
-        const outputFile = path.join(__dirname, `temp_output_${tempId}.json`);
-        const pythonScript = path.join(__dirname, 'cp_sat_optimizer.py');
-
-        try {
-            // Записать входные данные
-            await fs.writeFile(inputFile, JSON.stringify(data, null, 2));
-
-            // Вызвать Python скрипт
-            const pythonResult = await this.executePythonScript(pythonScript, inputFile, outputFile);
-
-            // Прочитать результат
-            const resultData = await fs.readFile(outputFile, 'utf8');
-            const result = JSON.parse(resultData);
-
-            return result;
-
-        } catch (error) {
-            console.error('[CP-SAT Bridge] Python execution error:', error);
-            return {
-                success: false,
-                error: error.message
-            };
-        } finally {
-            // Очистка временных файлов
+        return new Promise(async (resolve, reject) => {
             try {
-                await fs.unlink(inputFile);
-                await fs.unlink(outputFile);
-            } catch (cleanupError) {
-                console.warn('[CP-SAT Bridge] Cleanup warning:', cleanupError.message);
+                // Save data to temp file
+                const tempFileName = `schedule_data_${uuidv4()}.json`;
+                const tempFilePath = path.join(__dirname, '..', 'temp', tempFileName);
+
+                // Ensure temp directory exists
+                await fs.mkdir(path.dirname(tempFilePath), { recursive: true });
+
+                // Write data to file
+                await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2));
+
+                console.log(`[CP-SAT Bridge] Saved data to: ${tempFilePath}`);
+
+                // Path to Python script
+                const pythonScriptPath = path.join(__dirname, 'cp_sat_optimizer.py');
+
+                // Spawn Python process
+                const pythonProcess = spawn('python', [pythonScriptPath, tempFilePath]);
+
+                let outputData = '';
+                let errorData = '';
+
+                pythonProcess.stdout.on('data', (data) => {
+                    outputData += data.toString();
+                });
+
+                pythonProcess.stderr.on('data', (data) => {
+                    errorData += data.toString();
+                    console.error('[CP-SAT Python Error]', data.toString());
+                });
+
+                pythonProcess.on('close', async (code) => {
+                    // Clean up temp file
+                    try {
+                        await fs.unlink(tempFilePath);
+                    } catch (err) {
+                        console.error('Error deleting temp file:', err);
+                    }
+
+                    if (code !== 0) {
+                        reject(new Error(`Python process exited with code ${code}: ${errorData}`));
+                        return;
+                    }
+
+                    try {
+                        const result = JSON.parse(outputData);
+                        resolve(result);
+                    } catch (parseError) {
+                        reject(new Error(`Failed to parse Python output: ${outputData}`));
+                    }
+                });
+
+            } catch (error) {
+                reject(error);
             }
-        }
-    }
-
-    /**
-     * Выполнение Python скрипта
-     */
-    executePythonScript(scriptPath, inputFile, outputFile) {
-        return new Promise((resolve, reject) => {
-            const pythonProcess = spawn('python', [
-                scriptPath,
-                '--input', inputFile,
-                '--output', outputFile
-            ]);
-
-            let stdout = '';
-            let stderr = '';
-
-            pythonProcess.stdout.on('data', (data) => {
-                stdout += data.toString();
-                console.log(`[CP-SAT Python] ${data.toString().trim()}`);
-            });
-
-            pythonProcess.stderr.on('data', (data) => {
-                stderr += data.toString();
-                console.error(`[CP-SAT Python Error] ${data.toString().trim()}`);
-            });
-
-            pythonProcess.on('close', (code) => {
-                if (code === 0) {
-                    resolve({ stdout, stderr });
-                } else {
-                    reject(new Error(`Python process exited with code ${code}. Stderr: ${stderr}`));
-                }
-            });
-
-            pythonProcess.on('error', (error) => {
-                reject(new Error(`Failed to start Python process: ${error.message}`));
-            });
-
-            // Таймаут для долгих вычислений
-            setTimeout(() => {
-                pythonProcess.kill();
-                reject(new Error('Python process timeout (exceeded 5 minutes)'));
-            }, 300000); // 5 минут
         });
     }
 
     /**
-     * Сохранение результатов в базу данных
+     * Save schedule to database
      */
-    async saveSchedule(siteId, weekStart, schedule) {
+    async saveSchedule(siteId, weekStart, scheduleData) {
         const { Schedule, ScheduleAssignment } = this.db;
-        const { Op } = this.db.Sequelize;
+
         try {
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
+            const weekEnd = dayjs(weekStart).add(6, 'days');
 
-            // Удалить существующие расписания для этой недели
-            const existingSchedules = await Schedule.findAll({
-                where: {
-                    site_id: siteId,
-                    start_date: {
-                        [Op.between]: [weekStart, weekEnd.toISOString().split('T')[0]]
-                    }
-                }
-            });
-
-            for (const existingSchedule of existingSchedules) {
-                await ScheduleAssignment.destroy({
-                    where: { schedule_id: existingSchedule.id }
-                });
-                await existingSchedule.destroy();
-            }
-
-            // Создать новое расписание
+            // Create schedule record
             const newSchedule = await Schedule.create({
-                start_date: new Date(weekStart),
-                end_date: new Date(weekEnd),
                 site_id: siteId,
+                start_date: weekStart,
+                end_date: weekEnd.format('YYYY-MM-DD'),
                 status: 'draft',
-                text_file: JSON.stringify({
+                metadata: {
                     generated_at: new Date().toISOString(),
                     algorithm: 'CP-SAT-Python',
                     timezone: 'Asia/Jerusalem'
-                })
+                }
             });
 
-            // Создать назначения
-            const assignments = schedule.map((assignment, index) => ({
-                schedule_id: newSchedule.id,
-                emp_id: assignment.emp_id,
-                shift_id: assignment.shift_id,
-                position_id: assignment.position_id,
-                work_date: new Date(assignment.date),
-                status: 'scheduled',
-                notes: `Generated by CP-SAT optimizer - ${index + 1}`
-            }));
+            // Create assignments
+            const assignments = [];
 
-            await ScheduleAssignment.bulkCreate(assignments);
+            for (const assignment of scheduleData) {
+                assignments.push({
+                    schedule_id: newSchedule.id,
+                    emp_id: assignment.emp_id,
+                    shift_id: assignment.shift_id,
+                    position_id: assignment.position_id,
+                    work_date: assignment.date,
+                    status: 'scheduled',
+                    notes: `Generated by CP-SAT optimizer - ${assignment.assignment_index}`
+                });
+            }
+
+            if (assignments.length > 0) {
+                await ScheduleAssignment.bulkCreate(assignments);
+            }
 
             console.log(`[CP-SAT Bridge] Saved schedule with ${assignments.length} assignments`);
 
@@ -479,7 +462,7 @@ class CPSATBridge {
     }
 
     /**
-     * Расчет статистики расписания
+     * Calculate schedule statistics
      */
     calculateScheduleStats(schedule) {
         const stats = {
@@ -490,7 +473,7 @@ class CPSATBridge {
             daily_distribution: {}
         };
 
-        // Распределение по дням
+        // Daily distribution
         schedule.forEach(assignment => {
             if (!stats.daily_distribution[assignment.date]) {
                 stats.daily_distribution[assignment.date] = 0;
