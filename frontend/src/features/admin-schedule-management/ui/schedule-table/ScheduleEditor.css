@@ -206,7 +206,65 @@
     display: block;
     text-align: center;
 }
+.shift-name-cell {
+    position: relative;
+    font-weight: var(--font-semibold);
+    vertical-align: middle;
+}
+.schedule-table .shift-header {
+    align-content: center;
+}
+.shift-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+.shift-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    line-height: 1.2;
+    opacity: 0.7;
+}
+.shift-time {
+    font-size: var(--text-sm);
+    opacity: 0.8;
+    line-height: 1.2;
+}
 
+.shift-color-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base) !important;
+
+}
+
+[data-theme="dark"] .shift-color-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--bs-gray-100);
+}
+
+
+.shift-name-cell:hover .shift-color-btn {
+    opacity: 0.7;
+}
+
+.shift-color-btn:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
+.shift-color-btn:focus {
+    opacity: 1;
+    outline: none;
+}
 /* Responsive adjustments */
 @media (max-width: 1200px) {
     .position-schedule-editor .schedule-table th:first-child,
@@ -221,32 +279,6 @@
         width: calc((100% - 140px) / 7);
     }
 }
-.shift-color-btn {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    opacity: 0;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: opacity 0.2s ease;
-}
-
-[data-theme="dark"] .shift-color-btn {
-    background: rgba(0, 0, 0, 0.7);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: var(--bs-gray-100);
-}
-
-.shift-name-cell:hover .shift-color-btn {
-    opacity: 0.8;
-}
-
-.shift-color-btn:hover {
-    opacity: 1 !important;
-}
-
 @media (max-width: 768px) {
     .position-schedule-editor .schedule-table {
         font-size: var(--text-sm);
@@ -256,4 +288,5 @@
         height: 60px;
         min-height: 60px;
     }
+
 }

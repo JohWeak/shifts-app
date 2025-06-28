@@ -18,6 +18,7 @@ import { useShiftColor } from '../../model/hooks/useShiftColor';
 import './ScheduleEditor.css';
 
 
+
 const ScheduleEditor = ({
                             position,
                             isEditing = false,
@@ -34,6 +35,7 @@ const ScheduleEditor = ({
                         }) => {
     const isMobile = useMediaQuery('(max-width: 1350px)');
     const {t} = useI18n();
+    const { currentTheme } = useShiftColor();
     const isDark = isDarkTheme();
     const {systemSettings} = useSelector(state => state.settings);
 
@@ -44,7 +46,8 @@ const ScheduleEditor = ({
         closeColorPicker,
         previewColor,
         applyColor,
-        getShiftColor
+        getShiftColor,
+        resetShiftColor
     } = useShiftColor();
 
     // Загружаем сохранённое состояние переключателя или используем true по умолчанию
@@ -237,8 +240,6 @@ const ScheduleEditor = ({
     );
 
 
-
-
     return (
         <div className="position-schedule-editor mb-4">
             {/* Header */}
@@ -360,11 +361,13 @@ const ScheduleEditor = ({
                                         position: 'relative'
                                     }}
                                 >
-                                    <div>
-                                        {shift.shift_name}<br/>
-                                        <small style={{ color: textColor, opacity: 0.8 }}>
+                                    <div className="shift-info">
+                                        <div className="shift-name">
+                                            {shift.shift_name}
+                                        </div>
+                                        <div className="shift-time" style={{ color: textColor }}>
                                             {formatShiftTime(shift.start_time, shift.duration)}
-                                        </small>
+                                        </div>
                                     </div>
                                     {/* Кнопка редактирования цвета */}
                                     {canEdit && (
@@ -372,11 +375,16 @@ const ScheduleEditor = ({
                                             className="btn btn-sm shift-color-btn"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                openColorPicker(shift.shift_id, shift.color);
+                                                e.stopPropagation();
+                                                openColorPicker(
+                                                    shift.shift_id,
+                                                    currentColor,
+                                                    shift // передаем объект смены
+                                                );
                                             }}
                                             title={t('shift.editColor')}
                                         >
-                                            <i className="bi bi-palette"></i>
+                                            <i className="bi bi-palette-fill"></i>
                                         </button>
                                     )}
                                 </td>
@@ -412,6 +420,13 @@ const ScheduleEditor = ({
                 onColorChange={previewColor}
                 initialColor={colorPickerState.currentColor}
                 title={t('modal.colorPicker.title')}
+                saveMode={colorPickerState.saveMode}
+                currentTheme={currentTheme}
+                hasLocalColor={colorPickerState.hasLocalColor}
+                originalGlobalColor={colorPickerState.originalGlobalColor}
+                onResetColor={() => {
+                    resetShiftColor(colorPickerState.shiftId);
+                }}
             />
         </div>
 

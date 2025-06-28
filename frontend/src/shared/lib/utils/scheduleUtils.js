@@ -1,6 +1,5 @@
 // frontend/src/shared/lib/utils/scheduleUtils.js
 import { format, addDays, parseISO, isValid } from 'date-fns';
-import { useI18n } from '../i18n/i18nProvider';
 
 /**
  * Получает день начала недели из настроек системы
@@ -104,7 +103,7 @@ export const formatShiftTime = (startTime, duration) => {
  * @param {Date} date - Дата
  * @returns {string} - Отформатированная дата
  */
-export const formatHeaderDate = (date ) => {
+export const formatHeaderDate = (date, isMobile) => {
     return format(date,  'dd/MM');
 };
 

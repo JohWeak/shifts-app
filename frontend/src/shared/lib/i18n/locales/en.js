@@ -73,6 +73,22 @@ export const en = {
         welcome: 'Welcome',
 
     },
+    color: {
+        savingLocally: 'Saving for {theme} theme only (personal)',
+        savingGlobally: 'Saving for all users',
+        resetLocalColors: 'Reset My Colors',
+        confirmReset: 'Are you sure you want to reset your custom colors?',
+        personalColors: 'Personal color settings',
+        quickColors: 'Quick colors',
+        customColor: 'Custom color',
+        preview: 'Preview',
+        sampleText: 'Sample Text',
+        resetToGlobal: 'Reset to default',
+        globalColorIs: 'Default color',
+        resetLocal: 'Reset',
+        confirmResetLocal: 'Reset your custom color for this shift?',
+        apply: 'Apply Color'
+    },
     dashboard: {
         dashboardDesc: 'Quick overview of your scheduling system',
         dashboardTitle: 'Dashboard Overview',
@@ -425,6 +441,10 @@ export const en = {
         analyticsDesc: 'View detailed analytics and generate reports',
 
     },
+    shift:{
+        editColor: 'Edit shift color',
+        colorUpdated: 'Shift color updated',
+    },
     schedule: {
         actions: 'Actions',
         active: 'Active',
@@ -571,6 +591,10 @@ export const en = {
         onLeave: 'On Leave',
         training: 'In Training',
         admin: 'Admin',
+    },
+    theme: {
+        dark: 'Dark',
+        light: 'Light',
     },
 
     role: {
