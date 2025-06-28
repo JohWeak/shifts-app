@@ -149,6 +149,7 @@ class EmployeeRecommendationService {
             const recommendations = {
                 available: [],
                 cross_position: [],
+                other_site: [],
                 unavailable_busy: [],
                 unavailable_hard: [],
                 unavailable_soft: []
@@ -184,7 +185,7 @@ class EmployeeRecommendationService {
                         unavailable_reason: 'already_assigned',
                         assigned_shift: evaluation.assignedShiftToday
                     });
-                } else if (evaluation.hasRestViolation) {  // Перемещаем в hard constraints
+                } else if (evaluation.hasRestViolation) {
                     recommendations.unavailable_hard.push({
                         ...employeeData,
                         unavailable_reason: 'rest_violation',
@@ -202,7 +203,19 @@ class EmployeeRecommendationService {
                         ...employeeData,
                         unavailable_reason: 'soft_constraint',
                         constraint_details: evaluation.constraintDetails.filter(c => c.type === 'prefer_work'),
-                        note: 'Employee prefers different time/shift'
+                        note: 'prefer_different_time'
+                    });
+                } else if (evaluation.isOtherSite && evaluation.isCorrectPosition) {
+                    // Правильная позиция, но другой сайт
+                    recommendations.other_site.push({
+                        ...employeeData,
+                        match_type: 'other_site_same_position'
+                    });
+                } else if (evaluation.isOtherSite) {
+                    // Другой сайт и другая позиция
+                    recommendations.other_site.push({
+                        ...employeeData,
+                        match_type: 'other_site_cross_position'
                     });
                 } else if (evaluation.isCorrectPosition) {
                     recommendations.available.push({
@@ -212,14 +225,12 @@ class EmployeeRecommendationService {
                 } else if (evaluation.hasNoPosition) {
                     recommendations.available.push({
                         ...employeeData,
-                        match_type: 'no_position',
-                        note: 'Employee without assigned position'
+                        match_type: 'no_position'
                     });
                 } else {
                     recommendations.cross_position.push({
                         ...employeeData,
-                        match_type: 'cross_position',
-                        original_position: employee.defaultPosition?.pos_name || 'Not set'
+                        match_type: 'cross_position'
                     });
                 }
             }
@@ -252,6 +263,7 @@ class EmployeeRecommendationService {
             warnings: [],
             isCorrectPosition: false,
             hasNoPosition: false,
+            isOtherSite: false,
             hasHardConstraint: false,
             hasSoftConstraint: false,
             isAlreadyAssignedToday: false,
@@ -267,7 +279,7 @@ class EmployeeRecommendationService {
             evaluation.isAlreadyAssignedToday = true;
             evaluation.canWork = false;
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
-            evaluation.warnings.push(`Already assigned to ${evaluation.assignedShiftToday} on this day`);
+            evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);  // Изменено
             return evaluation; // Return early - can't work two shifts same day
         }
 
@@ -275,15 +287,30 @@ class EmployeeRecommendationService {
         if (!employee.default_position_id) {
             evaluation.hasNoPosition = true;
             evaluation.score += 25;
-            evaluation.reasons.push('Flexible - no assigned position');
+            evaluation.reasons.push('flexible_no_position');
         } else if (employee.default_position_id === targetPosition.pos_id) {
             evaluation.isCorrectPosition = true;
             evaluation.score += 100;
-            evaluation.reasons.push('Primary position match');
+            evaluation.reasons.push('primary_position_match');
         } else {
             evaluation.score -= 20;
-            evaluation.warnings.push(`Cross-position assignment (primary: ${employee.defaultPosition?.pos_name})`);
+            evaluation.warnings.push('cross_position_assignment');
         }
+
+         // Check work site match
+         if (employee.work_site_id && employee.work_site_id !== targetPosition.site_id) {
+             evaluation.isOtherSite = true;
+             evaluation.score -= 30;  // Снижаем приоритет для сотрудников с других сайтов
+             evaluation.warnings.push('different_work_site');
+         } else if (!employee.work_site_id) {
+             // Сотрудник может работать на любом сайте
+             evaluation.score += 10;
+             evaluation.reasons.push('can_work_any_site');
+         } else {
+             // Тот же сайт
+             evaluation.score += 20;
+             evaluation.reasons.push('same_work_site');
+         }
 
         // Check rest periods with adjacent days
         const restViolation = this._checkRestViolations(
@@ -310,7 +337,7 @@ class EmployeeRecommendationService {
                     const constraintDetail = {
                         type: constraint.constraint_type,
                         applies_to: constraint.applies_to,
-                        reason: constraint.reason || 'No reason provided',
+                        reason: constraint.reason || 'no_reason_provided',  // Изменено
                         day_of_week: constraint.day_of_week,
                         shift_id: constraint.shift_id
                     };
@@ -318,16 +345,16 @@ class EmployeeRecommendationService {
                     if (constraint.constraint_type === 'cannot_work') {
                         evaluation.hasHardConstraint = true;
                         evaluation.canWork = false;
-                        evaluation.warnings.push(`Cannot work: ${constraint.reason || 'Hard constraint'}`);
+                        evaluation.warnings.push(`cannot_work_constraint:${constraint.reason || 'hard_constraint'}`);
                         constraintDetail.impact = 'blocking';
                     } else if (constraint.constraint_type === 'prefer_work') {
                         if (constraintApplies && constraint.shift_id === targetShift.shift_id) {
                             evaluation.score += 30;
-                            evaluation.reasons.push('Prefers this shift');
+                            evaluation.reasons.push('prefers_this_shift');  // Изменено
                         } else {
                             evaluation.hasSoftConstraint = true;
                             evaluation.score -= 10;
-                            evaluation.warnings.push('Prefers different time/shift');
+                            evaluation.warnings.push('prefers_different_time_shift');  // Изменено
                         }
                     }
 
@@ -340,10 +367,10 @@ class EmployeeRecommendationService {
         const weeklyAssignments = employeeWeekAssignments.length;
         if (weeklyAssignments > 5) {
             evaluation.score -= (weeklyAssignments - 5) * 10;
-            evaluation.warnings.push(`Already working ${weeklyAssignments} shifts this week`);
+            evaluation.warnings.push(`high_weekly_workload: ${weeklyAssignments}`);
         } else if (weeklyAssignments < 3) {
             evaluation.score += 20;
-            evaluation.reasons.push('Low weekly workload');
+            evaluation.reasons.push(`low_weekly_workload:${weeklyAssignments}`);
         }
 
         return evaluation;
@@ -394,7 +421,7 @@ class EmployeeRecommendationService {
 
                 if (restHours < requiredRest) {
                     return {
-                        message: `Only ${restHours}h rest after ${assignment.shift.shift_name} (need ${requiredRest}h)`,
+                        message: `rest_violation_after:${restHours}:${assignment.shift.shift_name}:${requiredRest}`,
                         previousShift: assignment.shift.shift_name,
                         restHours,
                         requiredRest,
@@ -418,7 +445,7 @@ class EmployeeRecommendationService {
 
                 if (restHours < requiredRest) {
                     return {
-                        message: `Only ${restHours}h rest before ${assignment.shift.shift_name} (need ${requiredRest}h)`,
+                        message: `rest_violation_before:${restHours}:${assignment.shift.shift_name}:${requiredRest}`,
                         nextShift: assignment.shift.shift_name,
                         restHours,
                         requiredRest,

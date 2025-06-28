@@ -44,11 +44,17 @@ export const I18nProvider = ({ children }) => {
         if (typeof template !== 'string') {
             return template;
         }
-        return template.replace(/\{(\w+)\}/g, (match, placeholder) => {
-            // Если в объекте replacements есть ключ, совпадающий с плейсхолдером,
-            // используем его значение. Иначе - оставляем плейсхолдер как есть.
-            return replacements.hasOwnProperty(placeholder) ? replacements[placeholder] : match;
-        });
+        if (Array.isArray(replacements)) {
+            // Для массива используем позиционные параметры {0}, {1}, {2}...
+            return template.replace(/\{(\d+)\}/g, (match, index) => {
+                return replacements[index] !== undefined ? replacements[index] : match;
+            });
+        } else {
+            // Для объекта используем именованные параметры {name}, {count}...
+            return template.replace(/\{(\w+)\}/g, (match, placeholder) => {
+                return replacements.hasOwnProperty(placeholder) ? replacements[placeholder] : match;
+            });
+        }
     };
 
     return (

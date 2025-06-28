@@ -1,18 +1,20 @@
 // frontend/src/features/admin-schedule-management/components/EmployeeSelectionModal.js
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, ListGroup, Badge, Alert, Form, Tab, Tabs } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecommendations } from '../../model/scheduleSlice'; // Импортируем наш thunk
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useState, useEffect} from 'react';
+import {Modal, Button, ListGroup, Badge, Alert, Form, Tab, Tabs} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchRecommendations} from '../../model/scheduleSlice'; // Импортируем наш thunk
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import './EmployeeSelectionModal.css';
 
 
-const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails }) => {
-    const { t } = useI18n();    const dispatch = useDispatch();
+const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails}) => {
+    const {t} = useI18n();
+
+    const dispatch = useDispatch();
 
     // Получаем данные из Redux store
-    const { recommendations, recommendationsLoading, error } = useSelector(state => state.schedule);
+    const {recommendations, recommendationsLoading, error} = useSelector(state => state.schedule);
 
     // Локальное состояние для UI
     const [searchTerm, setSearchTerm] = useState('');
@@ -104,25 +106,43 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
                                     </div>
 
                                     {/* Recommendations */}
-                                    {employee.recommendation?.reasons?.map((reason, idx) => (
-                                        <small key={idx} className="d-block text-success">
-                                            <i className="bi bi-check-circle me-1"></i>
-                                            {t(`recommendation.${reason}`, { defaultValue: reason })}
-                                        </small>
-                                    ))}
+                                    {employee.recommendation?.reasons?.map((reason, idx) => {
+                                        // Разбираем reason с параметрами через двоеточие
+                                        const parts = reason.split(':');
+                                        const key = parts[0];
+                                        const params = parts.slice(1);
+                                        return (
+                                            <small key={idx} className="d-block text-success">
+                                                <i className="bi bi-check-circle me-1"></i>
+                                                {t(`recommendation.${key}`, params) || reason}
+                                            </small>
+                                        );
+                                    })}
 
-                                    {/* Warnings with hours */}
+                                    {/* Warnings with parameters */}
                                     {employee.recommendation?.warnings?.map((warning, idx) => {
-                                        // Extract hours from warning if present
-                                        const hoursMatch = warning.match(/(\d+)h/);
-                                        const hours = hoursMatch ? hoursMatch[1] : null;
+                                        if (warning.startsWith('rest_violation_')) {
+                                            const parts = warning.split(':');
+                                            const key = parts[0];
+                                            const params = parts.slice(1);
+
+                                            return (
+                                                <small key={idx} className="d-block text-danger">
+                                                    <i className="bi bi-exclamation-circle me-1"></i>
+                                                    {t(`recommendation.${key}`, params)}
+                                                </small>
+                                            );
+                                        }
+
+                                        // Общая обработка остальных warnings
+                                        const parts = warning.split(':');
+                                        const key = parts[0];
+                                        const params = parts.slice(1);
 
                                         return (
                                             <small key={idx} className="d-block text-danger">
                                                 <i className="bi bi-exclamation-circle me-1"></i>
-                                                {warning.includes('weekly workload') && hours
-                                                    ? t('recommendation.weeklyHours', { hours })
-                                                    : t(`recommendation.${warning}`, { defaultValue: warning })}
+                                                {t(`recommendation.${key}`, params) || warning}
                                             </small>
                                         );
                                     })}
@@ -194,7 +214,7 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
                 </Form.Group>
 
                 {recommendationsLoading === 'pending' && (
-                    <LoadingState message={t('common.loading')} />
+                    <LoadingState message={t('common.loading')}/>
                 )}
 
                 {error && (
