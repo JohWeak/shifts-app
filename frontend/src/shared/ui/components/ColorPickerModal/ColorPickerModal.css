@@ -18,6 +18,30 @@
     border-radius: 6px;
     text-align: center;
     font-weight: 500;
-    color: #333;
     border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .modal-content {
+    background-color: var(--bs-gray-900);
+    color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .color-preview {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--bs-gray-400);
+}
+
+[data-theme="dark"] .form-control {
+    background-color: var(--bs-gray-800);
+    color: var(--bs-gray-100);
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background-color: var(--bs-gray-700);
+    border-color: var(--bs-gray-600);
 }

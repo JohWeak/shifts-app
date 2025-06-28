@@ -1,15 +1,22 @@
 // frontend/src/features/admin-schedule-management/components/ScheduleEditor.js
-import React, {useMemo, useState, useEffect} from 'react';
-import {Table, Button, Badge, Spinner, Form} from 'react-bootstrap';
-import ScheduleCell from './ScheduleCell';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {getWeekDates} from 'shared/lib/utils/scheduleUtils';
-import {useSelector, useDispatch} from "react-redux";
+import React, { useMemo, useState } from 'react';
 import {format} from "date-fns";
-import {updateShiftColor} from '../../model/scheduleSlice';
+import { Table, Button, Badge, Spinner, Form } from 'react-bootstrap';
+import ScheduleCell from './ScheduleCell';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
-import {updatePositionShiftColor} from 'shared/api/apiService';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
+import {
+    getWeekDates,
+    formatShiftTime,
+    formatHeaderDate,
+    getDayName
+} from 'shared/lib/utils/scheduleUtils';
+import { getContrastTextColor, isDarkTheme } from 'shared/lib/utils/colorUtils';
+import { useSelector } from "react-redux";
+import { useShiftColor } from '../../model/hooks/useShiftColor';
 import './ScheduleEditor.css';
+
 
 const ScheduleEditor = ({
                             position,
@@ -25,93 +32,26 @@ const ScheduleEditor = ({
                             onRemovePendingChange,
                             scheduleDetails
                         }) => {
-    const dispatch = useDispatch();
+    const isMobile = useMediaQuery('(max-width: 1350px)');
     const {t} = useI18n();
-
+    const isDark = isDarkTheme();
     const {systemSettings} = useSelector(state => state.settings);
+
+    // Используем наш хук для управления цветами
+    const {
+        colorPickerState,
+        openColorPicker,
+        closeColorPicker,
+        previewColor,
+        applyColor,
+        getShiftColor
+    } = useShiftColor();
 
     // Загружаем сохранённое состояние переключателя или используем true по умолчанию
     const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
         const saved = localStorage.getItem('showFirstNameOnly');
         return saved !== null ? JSON.parse(saved) : true; // true по умолчанию
     });
-
-    //------------COLOR PICKER------------------------------------
-    // Состояние для color picker
-    const [colorPickerState, setColorPickerState] = useState({
-        show: false,
-        shiftId: null,
-        currentColor: '#6c757d',
-        originalColor: '#6c757d'
-    });
-    const [tempShiftColors, setTempShiftColors] = useState({});
-    const handleColorEdit = (shiftId, currentColor) => {
-        setColorPickerState({
-            show: true,
-            shiftId: shiftId,
-            currentColor: currentColor || '#6c757d',
-            originalColor: currentColor || '#6c757d'
-        });
-    };
-
-    // Предпросмотр цвета на лету
-    const handleColorPreview = (color) => {
-        setTempShiftColors(prev => ({
-            ...prev,
-            [colorPickerState.shiftId]: color
-        }));
-    };
-
-    // Применение выбранного цвета
-    const handleColorSelect = async (color) => {
-        try {
-            // Обновляем в Redux сразу для мгновенного отображения
-            dispatch(updateShiftColor({
-                shiftId: colorPickerState.shiftId,
-                color: color
-            }));
-
-            // Очищаем временный цвет
-            setTempShiftColors(prev => {
-                const newState = {...prev};
-                delete newState[colorPickerState.shiftId];
-                return newState;
-            });
-
-            // Отправляем на сервер
-            await updatePositionShiftColor(colorPickerState.shiftId, color);
-
-        } catch (error) {
-            console.error('Error updating shift color:', error);
-            // Можно показать toast с ошибкой
-        }
-    };
-
-    // При закрытии модала без сохранения
-    const handleColorPickerClose = () => {
-        // Очищаем временный цвет
-        setTempShiftColors(prev => {
-            const newState = {...prev};
-            delete newState[colorPickerState.shiftId];
-            return newState;
-        });
-
-        setColorPickerState({
-            show: false,
-            shiftId: null,
-            currentColor: '#6c757d',
-            originalColor: '#6c757d'
-        });
-    };
-
-    // Получаем актуальный цвет смены (с учётом временного)
-    const getShiftColor = (shift) => {
-        return tempShiftColors[shift.shift_id] || shift.color;
-    };
-
-
-    //-----------------------------------------------------------
-
     // Сохраняем при изменении
     const handleNameToggle = (checked) => {
         setShowFirstNameOnly(checked);
@@ -146,21 +86,6 @@ const ScheduleEditor = ({
         return scheduleDetails?.shifts || position?.shifts || defaultShifts;
     }, [defaultShifts, scheduleDetails?.shifts, position?.shifts]);
 
-    // Helper function to format shift time
-    const formatShiftTime = (startTime, duration) => {
-        if (!startTime) return '';
-
-        const cleanStart = startTime.substring(0, 5);
-        const [hours, minutes] = startTime.split(':').map(Number);
-        const startMinutes = hours * 60 + minutes;
-        const endMinutes = startMinutes + (duration * 60);
-
-        const endHours = Math.floor(endMinutes / 60) % 24;
-        const endMins = endMinutes % 60;
-        const cleanEnd = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-
-        return `${cleanStart}-${cleanEnd}`;
-    };
 
     // Helper function to format date for header
     const weekDates = useMemo(() => {
@@ -168,19 +93,6 @@ const ScheduleEditor = ({
         return getWeekDates(scheduleDetails.schedule.start_date, systemSettings?.weekStartDay || 0);
     }, [scheduleDetails?.schedule?.start_date, systemSettings?.weekStartDay]);
 
-    // Helper function to get day name
-    const getDayName = (dayIndex) => {
-        const dayNames = [
-            t('days.sunday'),
-            t('days.monday'),
-            t('days.tuesday'),
-            t('days.wednesday'),
-            t('days.thursday'),
-            t('days.friday'),
-            t('days.saturday')
-        ];
-        return dayNames[dayIndex];
-    };
 
     // Debug logging
     console.log('ScheduleEditor - Position:', position);
@@ -416,11 +328,11 @@ const ScheduleEditor = ({
             <Table responsive bordered className="schedule-table mb-0">
                 <thead>
                 <tr>
-                    <th className="shift-header">{t('schedule.shift')}</th>
+                    <th className="text-center shift-header">{t('schedule.shift')}</th>
                     {weekDates.map((date, index) => {
                         const dayIndex = date.getDay();
-                        const dayName = getDayName(dayIndex);
-                        const formattedDate = format(date, 'dd/MM');
+                        const dayName = getDayName(dayIndex, t, isMobile);
+                        const formattedDate = formatHeaderDate(date, isMobile);
 
                         return (
                             <th key={index} className="text-center">
@@ -437,39 +349,32 @@ const ScheduleEditor = ({
                 {shifts.length > 0 ? (
                     shifts.map(shift => {
                         const currentColor = getShiftColor(shift);
+                        const textColor = getContrastTextColor(currentColor, isDark);
                         return (
                             <tr key={shift.shift_id} style={{backgroundColor: `${currentColor}` || 'transparent'}}>
                                 <td
-                                    className='text-center'
+                                    className='text-center shift-name-cell'
                                     style={{
                                         backgroundColor: currentColor || '#f8f9fa',
+                                        color: textColor,
                                         position: 'relative'
                                     }}
                                 >
                                     <div>
                                         {shift.shift_name}<br/>
-                                        <small className="text-muted">
+                                        <small style={{ color: textColor, opacity: 0.8 }}>
                                             {formatShiftTime(shift.start_time, shift.duration)}
                                         </small>
                                     </div>
                                     {/* Кнопка редактирования цвета */}
                                     {canEdit && (
                                         <button
-                                            className="btn btn-sm position-absolute"
-                                            style={{
-                                                top: '2px',
-                                                right: '2px',
-                                                padding: '2px 6px',
-                                                fontSize: '0.7rem',
-                                                opacity: 0.7,
-                                                background: 'rgba(255,255,255,0.8)',
-                                                border: '1px solid rgba(0,0,0,0.1)'
-                                            }}
+                                            className="btn btn-sm shift-color-btn"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                handleColorEdit(shift.shift_id, shift.color);
+                                                openColorPicker(shift.shift_id, shift.color);
                                             }}
-                                            title="Edit color"
+                                            title={t('shift.editColor')}
                                         >
                                             <i className="bi bi-palette"></i>
                                         </button>
@@ -499,14 +404,14 @@ const ScheduleEditor = ({
                     </div>
                 )
             }
-            )
+
             <ColorPickerModal
                 show={colorPickerState.show}
-                onHide={handleColorPickerClose}
-                onColorSelect={handleColorSelect}
-                onColorChange={handleColorPreview}
+                onHide={closeColorPicker}
+                onColorSelect={applyColor}
+                onColorChange={previewColor}
                 initialColor={colorPickerState.currentColor}
-                title="Shift Color"
+                title={t('modal.colorPicker.title')}
             />
         </div>
 

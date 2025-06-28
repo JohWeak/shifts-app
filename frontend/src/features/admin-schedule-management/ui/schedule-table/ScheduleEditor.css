@@ -161,18 +161,15 @@
 
 /* Dark theme shift cells */
 /*[data-theme="dark"] .position-schedule-editor td.shift-morning {*/
-/*    background-color: rgba(var(--bs-secondary-rgb), 0.1);*/
-/*    color: var(--bs-gray-100);*/
+/*    color: var(--bs-gray-800) ;*/
 /*}*/
 
 /*[data-theme="dark"] .position-schedule-editor td.shift-day {*/
-/*    background-color: rgba(var(--bs-info-rgb), 0.1);*/
-/*    color: var(--bs-gray-100);*/
+/*    color: var(--bs-gray-800);*/
 /*}*/
 
 /*[data-theme="dark"] .position-schedule-editor td.shift-night {*/
-/*    background-color: rgba(var(--bs-primary-rgb), 0.1);*/
-/*    color: var(--bs-gray-100);*/
+/*    color: var(--bs-gray-800);*/
 /*}*/
 
 /* Shift cell content */
@@ -223,6 +220,31 @@
     .position-schedule-editor .schedule-table td:not(:first-child) {
         width: calc((100% - 140px) / 7);
     }
+}
+.shift-color-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: opacity 0.2s ease;
+}
+
+[data-theme="dark"] .shift-color-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--bs-gray-100);
+}
+
+.shift-name-cell:hover .shift-color-btn {
+    opacity: 0.8;
+}
+
+.shift-color-btn:hover {
+    opacity: 1 !important;
 }
 
 @media (max-width: 768px) {

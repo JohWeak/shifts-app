@@ -92,13 +92,15 @@ export const en = {
         friday: 'Friday',
         saturday: 'Saturday',
         sunday: 'Sunday',
-        mon: 'Mon',
-        tue: 'Tue',
-        wed: 'Wed',
-        thu: 'Thu',
-        fri: 'Fri',
-        sat: 'Sat',
-        sun: 'Sun',
+        short: {
+            monday: 'Mon',
+            tuesday: 'Tue',
+            wednesday: 'Wed',
+            thursday: 'Thu',
+            friday: 'Fri',
+            saturday: 'Sat',
+            sunday: 'Sun',
+        },
         months: {
             april: 'April',
             august: 'August',
@@ -321,6 +323,9 @@ export const en = {
             required: 'Required',
             time: 'Time',
             title: 'Shift Details',
+        },
+        colorPicker:{
+            title: 'Select Color',
         }
     },
     navigation: {

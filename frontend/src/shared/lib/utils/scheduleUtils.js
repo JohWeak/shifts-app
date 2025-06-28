@@ -1,21 +1,27 @@
-//frontend/src/shared/lib/utils/scheduleUtils.js
-import { format, addDays, startOfWeek, parseISO, parse, isValid } from 'date-fns';
+// frontend/src/shared/lib/utils/scheduleUtils.js
+import { format, addDays, parseISO, isValid } from 'date-fns';
+import { useI18n } from '../i18n/i18nProvider';
 
+/**
+ * Получает день начала недели из настроек системы
+ */
 export const getWeekStartDay = (systemSettings) => {
-    // Из настроек системы, а не из локали
     return systemSettings?.weekStartDay ?? 0; // По умолчанию воскресенье
 };
 
+/**
+ * Проверяет, является ли дата началом недели
+ */
 export const isValidWeekStartDate = (date, weekStartDay = 0) => {
     if (!date) return false;
-    // Если это не объект Date, пытаемся его распарсить
     const dateObj = date instanceof Date ? date : new Date(date);
-
     if (!isValid(dateObj)) return false;
-
     return dateObj.getDay() === weekStartDay;
 };
 
+/**
+ * Получает дату начала следующей недели
+ */
 export const getNextWeekStart = (weekStartDay = 0) => {
     const today = new Date();
     const currentDay = today.getDay();
@@ -24,11 +30,9 @@ export const getNextWeekStart = (weekStartDay = 0) => {
     if (currentDay === weekStartDay) {
         daysUntilStart = 7; // Следующая неделя
     } else {
-        // Упрощенная логика для поиска следующего дня
         daysUntilStart = (weekStartDay - currentDay + 7) % 7;
     }
 
-    // Если день сегодня, но нам нужен следующий, добавляем 7 дней
     if (daysUntilStart === 0) {
         daysUntilStart = 7;
     }
@@ -36,19 +40,19 @@ export const getNextWeekStart = (weekStartDay = 0) => {
     return addDays(today, daysUntilStart);
 };
 
+/**
+ * Получает массив дат для недели
+ */
 export const getWeekDates = (startDate, weekStartDay = 0) => {
     const start = parseISO(startDate);
     const dates = [];
 
-    // Убедимся, что начинаем с правильного дня недели
     let currentDate = start;
     if (currentDate.getDay() !== weekStartDay) {
-        // Найти ближайший день начала недели
         const diff = (weekStartDay - currentDate.getDay() + 7) % 7;
         currentDate = addDays(currentDate, diff);
     }
 
-    // Генерируем 7 дней
     for (let i = 0; i < 7; i++) {
         dates.push(addDays(currentDate, i));
     }
@@ -56,6 +60,9 @@ export const getWeekDates = (startDate, weekStartDay = 0) => {
     return dates;
 };
 
+/**
+ * Форматирует диапазон дат расписания
+ */
 export const formatScheduleDate = (startDate, endDate = null) => {
     if (!startDate) return '-';
 
@@ -71,6 +78,68 @@ export const formatScheduleDate = (startDate, endDate = null) => {
     }
 };
 
+/**
+ * Форматирует время смены (например: "06:00-14:00")
+ * @param {string} startTime - Время начала в формате "HH:MM:SS"
+ * @param {number} duration - Длительность в часах
+ * @returns {string} - Отформатированное время
+ */
+export const formatShiftTime = (startTime, duration) => {
+    if (!startTime) return '';
+
+    const cleanStart = startTime.substring(0, 5);
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startMinutes = hours * 60 + minutes;
+    const endMinutes = startMinutes + (duration * 60);
+
+    const endHours = Math.floor(endMinutes / 60) % 24;
+    const endMins = endMinutes % 60;
+    const cleanEnd = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+
+    return `${cleanStart}-${cleanEnd}`;
+};
+
+/**
+ * Форматирует дату для заголовка расписания
+ * @param {Date} date - Дата
+ * @returns {string} - Отформатированная дата
+ */
+export const formatHeaderDate = (date ) => {
+    return format(date,  'dd/MM');
+};
+
+/**
+ * Получает локализованные названия дней недели
+ * @param {function} t - Функция перевода
+ * @param {boolean} short - Использовать короткие названия
+ * @returns {string[]} - Массив названий дней
+ */
+export const getDayNames = (t, short = false) => {
+    const prefix = short ? 'days.short.' : 'days.';
+    return [
+        t(`${prefix}sunday`),
+        t(`${prefix}monday`),
+        t(`${prefix}tuesday`),
+        t(`${prefix}wednesday`),
+        t(`${prefix}thursday`),
+        t(`${prefix}friday`),
+        t(`${prefix}saturday`)
+    ];
+};
+
+/**
+ * Получает название дня по индексу
+ * @param {number} dayIndex - Индекс дня (0-6)
+ * @param {function} t - Функция перевода
+ * @param {boolean} short - Использовать короткое название
+ * @returns {string} - Название дня
+ */
+export const getDayName = (dayIndex, t, short = false) => {
+    const dayNames = getDayNames(t, short);
+    return dayNames[dayIndex] || '';
+};
+
+// Оставляем эти функции, так как они используются
 export const getStatusBadgeVariant = (status) => {
     const variants = {
         published: 'success',
@@ -84,9 +153,4 @@ export const getStatusBadgeVariant = (status) => {
 
 export const canDeleteSchedule = (schedule) => {
     return schedule.status !== 'published';
-};
-
-export const getSiteName = (siteId, sites = []) => {
-    const site = sites.find(s => s.site_id === siteId);
-    return site?.site_name || `Site ${siteId}`;
 };
