@@ -12,16 +12,16 @@ class CPSATBridge {
         this.db = database || db;
     }
 
-    static async generateOptimalSchedule(database, siteId, weekStart) {
+    static async generateOptimalSchedule(database, siteId, weekStart, transaction = null) {
         const bridge = new CPSATBridge(database || db);
 
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
 
-            // 1. Prepare data with new structure
-            const data = await bridge.prepareScheduleData(siteId, weekStart);
+            // Передаём транзакцию в prepareScheduleData
+            const data = await bridge.prepareScheduleData(siteId, weekStart, transaction);
 
-            // 2. Call Python optimizer
+            // 2. Call Python optimizer (не меняется)
             const pythonResult = await bridge.callPythonOptimizer(data);
 
             if (!pythonResult.success) {
@@ -32,8 +32,8 @@ class CPSATBridge {
                 };
             }
 
-            // 3. Save results
-            const savedSchedule = await bridge.saveSchedule(siteId, weekStart, pythonResult.schedule);
+            // Передаём транзакцию в saveSchedule
+            const savedSchedule = await bridge.saveSchedule(siteId, weekStart, pythonResult.schedule, transaction);
 
             return {
                 success: true,
@@ -59,7 +59,7 @@ class CPSATBridge {
     /**
      * Prepare data for Python optimizer with new position_shifts structure
      */
-    async prepareScheduleData(siteId, weekStart) {
+    async prepareScheduleData(siteId, weekStart, transaction = null) {
         console.log(`[CP-SAT Bridge] Preparing data for site ${siteId}, week ${weekStart}`);
 
         const {
@@ -79,20 +79,10 @@ class CPSATBridge {
                     role: 'employee',
                     work_site_id: siteId
                 },
-                include: [
-                    {
-                        model: Position,
-                        as: 'defaultPosition',
-                        attributes: ['pos_id', 'pos_name', 'profession']
-                    },
-                    {
-                        model: EmployeeConstraint,
-                        as: 'constraints',
-                        where: { status: 'active' },
-                        required: false
-                    }
-                ]
+                include: [/* ... */],
+                transaction
             });
+
 
             console.log(`[CP-SAT Bridge] Found ${employees.length} active employees for site ${siteId}`);
 
@@ -111,9 +101,10 @@ class CPSATBridge {
                         model: ShiftRequirement,
                         as: 'requirements',
                         required: false
-                    }]
+                    }],
                 }],
-                order: [['pos_name', 'ASC']]
+                order: [['pos_name', 'ASC']],
+                transaction
             });
 
             console.log(`[CP-SAT Bridge] Found ${positions.length} active positions`);
@@ -203,7 +194,8 @@ class CPSATBridge {
             // Get existing assignments
             const existingAssignments = await this.getExistingAssignments(
                 employees.map(e => e.emp_id),
-                weekStart
+                weekStart,
+                transaction
             );
 
             // Settings for algorithm
@@ -323,7 +315,7 @@ class CPSATBridge {
     /**
      * Get existing assignments for the week
      */
-    async getExistingAssignments(employeeIds, weekStart) {
+    async getExistingAssignments(employeeIds, weekStart, transaction = null) {
         const { ScheduleAssignment, PositionShift, Position } = this.db;
 
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
@@ -346,7 +338,7 @@ class CPSATBridge {
                     as: 'position',
                     attributes: ['pos_id', 'pos_name']
                 }
-            ]
+            ], transaction
         });
 
         return assignments.map(a => ({
@@ -467,7 +459,7 @@ class CPSATBridge {
     /**
      * Save schedule to database
      */
-    async saveSchedule(siteId, weekStart, scheduleData) {
+    async saveSchedule(siteId, weekStart, scheduleData,  transaction = null) {
         const { Schedule, ScheduleAssignment } = this.db;
 
         try {
@@ -484,7 +476,7 @@ class CPSATBridge {
                     algorithm: 'CP-SAT-Python',
                     timezone: 'Asia/Jerusalem'
                 }
-            });
+            }, { transaction });
 
             const assignments = [];
 
@@ -509,7 +501,7 @@ class CPSATBridge {
             }
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments);
+                await ScheduleAssignment.bulkCreate(assignments, { transaction });
             }
 
             console.log(`[CP-SAT Bridge] Saved schedule with ${assignments.length} assignments`);

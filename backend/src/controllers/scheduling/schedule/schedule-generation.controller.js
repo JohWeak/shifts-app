@@ -113,22 +113,22 @@ const generateNextWeekSchedule = async (req, res) => {
         switch (selectedAlgorithm) {
             case 'cp-sat':
                 try {
-                    result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart);
+                    result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart, transaction);
                     if (!result.success) {
                         console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
-                        result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+                        result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction);
                         result.fallback = 'cp-sat-to-simple';
                     }
                 } catch (error) {
                     console.warn(`[ScheduleController] CP-SAT error, falling back to simple: ${error.message}`);
-                    result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+                    result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction);
                     result.fallback = 'cp-sat-to-simple';
                     result.originalError = error.message;
                 }
                 break;
 
             case 'simple':
-                result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart);
+                result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction);
                 break;
 
             default:

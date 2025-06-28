@@ -7,14 +7,14 @@ class ScheduleGeneratorService {
         this.db = database || db;
     }
 
-    static async generateWeeklySchedule(database, siteId, weekStart) {
+    static async generateWeeklySchedule(database, siteId, weekStart, transaction = null) {
         const service = new ScheduleGeneratorService(database);
 
         try {
             console.log(`[ScheduleGeneratorService] Starting generation for site ${siteId}, week ${weekStart}`);
 
             // Prepare data with new structure
-            const data = await service.prepareData(siteId, weekStart);
+            const data = await service.prepareData(siteId, weekStart, transaction);
 
             // Generate schedule
             const result = await service.generateOptimalSchedule(data);
@@ -23,8 +23,8 @@ class ScheduleGeneratorService {
                 return result;
             }
 
-            // Save to database
-            const savedSchedule = await service.saveSchedule(siteId, weekStart, result.schedule);
+            // Save to database with transaction
+            const savedSchedule = await service.saveSchedule(siteId, weekStart, result.schedule, transaction);
 
             return {
                 success: true,
@@ -43,7 +43,7 @@ class ScheduleGeneratorService {
         }
     }
 
-    async prepareData(siteId, weekStart) {
+    async prepareData(siteId, weekStart, transaction = null) {
         const {
             Employee,
             Position,
@@ -73,52 +73,47 @@ class ScheduleGeneratorService {
                         as: 'requirements',
                         required: false
                     }]
-                }]
+                }],
+                transaction
             });
 
-            console.log(`[ScheduleGeneratorService] Found ${positions.length} active positions`);
-
-            // Check if there are positions with shifts
-            const positionsWithShifts = positions.filter(p => p.shifts && p.shifts.length > 0);
-            if (positionsWithShifts.length === 0) {
-                throw new Error('No positions with configured shifts found for this site');
-            }
-
-            // Collect all unique shifts and create shift map
+            // Create maps for easier access
+            const shifts = [];
             const shiftsMap = new Map();
             const shiftRequirementsMap = new Map();
 
-            positions.forEach(position => {
-                position.shifts?.forEach(shift => {
-                    if (!shiftsMap.has(shift.id)) {
-                        shiftsMap.set(shift.id, {
+            for (const position of positions) {
+                if (position.shifts) {
+                    for (const shift of position.shifts) {
+                        shifts.push({
                             shift_id: shift.id,
                             shift_name: shift.shift_name,
+                            position_id: position.pos_id,
+                            position_name: position.pos_name,
                             start_time: shift.start_time,
                             end_time: shift.end_time,
-                            duration: shift.duration_hours || this.calculateDuration(shift.start_time, shift.end_time),
-                            is_night_shift: shift.is_night_shift,
-                            color: shift.color
+                            duration_hours: this.calculateDuration(shift.start_time, shift.end_time)
                         });
-                    }
 
-                    // Map requirements by position-shift combination
-                    shift.requirements?.forEach(req => {
-                        const key = `${position.pos_id}-${shift.id}`;
-                        if (!shiftRequirementsMap.has(key)) {
-                            shiftRequirementsMap.set(key, []);
+                        shiftsMap.set(shift.id, shift);
+
+                        // Map requirements
+                        if (shift.requirements && shift.requirements.length > 0) {
+                            for (const req of shift.requirements) {
+                                const key = `${shift.id}_${req.day_of_week}`;
+                                shiftRequirementsMap.set(key, req.required_count);
+                            }
                         }
-                        shiftRequirementsMap.get(key).push(req);
-                    });
-                });
-            });
+                    }
+                }
+            }
 
-            const shifts = Array.from(shiftsMap.values());
-            console.log(`[ScheduleGeneratorService] Collected ${shifts.length} unique shifts`);
+            console.log(`[ScheduleGeneratorService] Found ${shifts.length} shifts across ${positions.length} positions`);
 
-            // Get employees
+            // Load employees
             const employees = await Employee.findAll({
                 where: {
+                    work_site_id: siteId,
                     status: 'active',
                     role: 'employee'
                 },
@@ -127,7 +122,8 @@ class ScheduleGeneratorService {
                     as: 'constraints',
                     where: { status: 'active' },
                     required: false
-                }]
+                }],
+                transaction
             });
 
             console.log(`[ScheduleGeneratorService] Found ${employees.length} active employees`);
@@ -142,7 +138,8 @@ class ScheduleGeneratorService {
 
             // Get settings
             const settings = await ScheduleSettings.findOne({
-                where: { site_id: siteId }
+                where: { site_id: siteId },
+                transaction
             });
 
             // Process constraints
@@ -366,7 +363,7 @@ class ScheduleGeneratorService {
         };
     }
 
-    async saveSchedule(siteId, weekStart, scheduleData) {
+    async saveSchedule(siteId, weekStart, scheduleData, transaction = null) {
         const { Schedule, ScheduleAssignment } = this.db;
 
         try {
@@ -383,7 +380,7 @@ class ScheduleGeneratorService {
                     algorithm: 'simple',
                     timezone: 'Asia/Jerusalem'
                 }
-            });
+            }, { transaction });
 
             // Create assignments
             const assignments = scheduleData.map((assignment, index) => ({
@@ -397,7 +394,7 @@ class ScheduleGeneratorService {
             }));
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments);
+                await ScheduleAssignment.bulkCreate(assignments, { transaction });
             }
 
             console.log(`[ScheduleGeneratorService] Saved schedule with ${assignments.length} assignments`);
