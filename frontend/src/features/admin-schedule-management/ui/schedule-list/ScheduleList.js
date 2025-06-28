@@ -222,7 +222,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
                 title={t('schedule.deleteSchedule')}
                 message={t('schedule.confirmDelete')}
                 onConfirm={handleDeleteConfirm}
-                onCancel={handleDeleteCancel}
+                onHide={handleDeleteCancel}
                 loading={isDeleting}
                 confirmText={t('schedule.deleteSchedule')}
                 variant="danger"

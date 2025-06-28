@@ -168,7 +168,7 @@ const ScheduleDetails = ({onCellClick}) => {
 
             <ConfirmationModal
                 show={showPublishModal}
-                onCancel={() => setShowPublishModal(false)}
+                onHide={() => setShowPublishModal(false)}
                 onConfirm={() => handleStatusUpdate('published')}
                 title={t('schedule.publishSchedule')}
                 message={t('schedule.confirmPublish')}
@@ -178,7 +178,7 @@ const ScheduleDetails = ({onCellClick}) => {
             />
             <ConfirmationModal
                 show={showUnpublishModal}
-                onCancel={() => setShowUnpublishModal(false)}
+                onHide={() => setShowUnpublishModal(false)}
                 onConfirm={() => handleStatusUpdate('draft')}
                 title={t('schedule.unpublishEdit')}
                 message={t('schedule.confirmUnpublish')}

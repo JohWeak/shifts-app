@@ -1,15 +1,7 @@
 // backend/src/services/employee-recommendation.service.js
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
-const db = require('../models');
-const {
-    Employee,
-    Position,
-    Shift,
-    EmployeeConstraint,
-    ScheduleAssignment,
-    Schedule
-} = db;
+
 
 class EmployeeRecommendationService {
     constructor(db) {
@@ -17,7 +9,14 @@ class EmployeeRecommendationService {
     }
      async getRecommendedEmployees(positionId, shiftId, date, excludeEmployeeIds = [], scheduleId = null) {
 
-         const { Employee, Position, Shift, EmployeeConstraint, ScheduleAssignment, Schedule } = this.db;
+         const {
+             Employee,
+             Position,
+             PositionShift,
+             EmployeeConstraint,
+             ScheduleAssignment,
+             Schedule
+         } = this.db;
          const { Op } = this.db.Sequelize;
 
         try {
@@ -32,7 +31,7 @@ class EmployeeRecommendationService {
             // Load target position and shift
             const [targetPosition, targetShift] = await Promise.all([
                 Position.findByPk(positionId),
-                Shift.findByPk(shiftId)
+                PositionShift.findByPk(shiftId) // Изменено с Shift на PositionShift
             ]);
 
             if (!targetPosition || !targetShift) {
@@ -92,8 +91,10 @@ class EmployeeRecommendationService {
                         where: {
                             schedule_id: scheduleId
                         },
-                        include: [{ model: PositionShift, as: 'shift' }]
-
+                        include: [{
+                            model: PositionShift,
+                            as: 'shift'
+                        }]
                     });
                 }
             } else {
@@ -110,7 +111,7 @@ class EmployeeRecommendationService {
                             [Op.in]: employees.map(e => e.emp_id)
                         }
                     },
-                    include: [{ model: Shift, as: 'shift' }]
+                    include: [{ model: PositionShift, as: 'shift' }]
                 });
             }
 
@@ -371,7 +372,7 @@ class EmployeeRecommendationService {
                 // Previous day assignment
                 const prevShiftEnd = assignmentDate
                     .hour(parseInt(assignment.shift.start_time.split(':')[0]))
-                    .add(assignment.shift.duration, 'hour');
+                    .add(assignment.shift.duration_hours, 'hour');
 
                 const targetShiftStart = targetDate
                     .hour(parseInt(targetShift.start_time.split(':')[0]));
@@ -393,7 +394,7 @@ class EmployeeRecommendationService {
                 // Next day assignment
                 const targetShiftEnd = targetDate
                     .hour(parseInt(targetShift.start_time.split(':')[0]))
-                    .add(targetShift.duration, 'hour');
+                    .add(targetShift.duration_hours, 'hour');
 
                 const nextShiftStart = assignmentDate
                     .hour(parseInt(assignment.shift.start_time.split(':')[0]));
