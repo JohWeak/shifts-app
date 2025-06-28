@@ -11,6 +11,7 @@ class EmployeeRecommendationService {
 
          const {
              Employee,
+             WorkSite,
              Position,
              PositionShift,
              EmployeeConstraint,
@@ -51,6 +52,10 @@ class EmployeeRecommendationService {
                     }
                 },
                 include: [
+                    {
+                        model: WorkSite,  // Добавляем загрузку WorkSite
+                        as: 'workSite'
+                    },
                     {
                         model: Position,
                         as: 'defaultPosition'
@@ -162,9 +167,14 @@ class EmployeeRecommendationService {
                 );
 
                 const employeeData = {
-                    ...employee.toJSON(),
-                    recommendation: evaluation,
-                    default_position_name: employee.defaultPosition?.pos_name || 'No position'
+                    emp_id: employee.emp_id,
+                    first_name: employee.first_name,
+                    last_name: employee.last_name,
+                    default_position_id: employee.default_position_id,
+                    default_position_name: employee.defaultPosition?.pos_name || null,
+                    work_site_id: employee.work_site_id,
+                    work_site_name: employee.workSite?.site_name || null,  // Добавляем название сайта
+                    recommendation: evaluation
                 };
 
                 // Categorize based on evaluation
@@ -172,11 +182,10 @@ class EmployeeRecommendationService {
                     recommendations.unavailable_busy.push({
                         ...employeeData,
                         unavailable_reason: 'already_assigned',
-                        assigned_shift: evaluation.assignedShiftToday,
-                        note: `Already working ${evaluation.assignedShiftToday} on this day`
+                        assigned_shift: evaluation.assignedShiftToday
                     });
-                } else if (evaluation.hasRestViolation) {
-                    recommendations.unavailable_busy.push({
+                } else if (evaluation.hasRestViolation) {  // Перемещаем в hard constraints
+                    recommendations.unavailable_hard.push({
                         ...employeeData,
                         unavailable_reason: 'rest_violation',
                         rest_details: evaluation.restViolationDetails,
@@ -353,20 +362,20 @@ class EmployeeRecommendationService {
     }
 
      _checkRestViolations(empId, employeeAssignments, targetShift, date) {
-        const targetDate = dayjs(date);
+         const constraints = require('../config/scheduling-constraints');
+         const targetDate = dayjs(date);
+         const relevantAssignments = employeeAssignments.filter(a =>
+             a.emp_id === empId &&
+             Math.abs(dayjs(a.work_date).diff(targetDate, 'day')) <= 1
+         );
 
-        for (const assignment of employeeAssignments) {
+        for (const assignment of relevantAssignments) {
             if (!assignment.shift) continue;
-
             const assignmentDate = dayjs(assignment.work_date);
-            const dayDiff = Math.abs(targetDate.diff(assignmentDate, 'day'));
-
-            // Only check adjacent days
-            if (dayDiff !== 1) continue;
-
             let restHours;
             let requiredRest;
             let violationType;
+
 
             if (assignmentDate.isBefore(targetDate)) {
                 // Previous day assignment
@@ -378,7 +387,9 @@ class EmployeeRecommendationService {
                     .hour(parseInt(targetShift.start_time.split(':')[0]));
 
                 restHours = targetShiftStart.diff(prevShiftEnd, 'hour');
-                requiredRest = assignment.shift.is_night_shift ? 12 : 8;
+                requiredRest = assignment.shift.is_night_shift
+                    ? constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_NIGHT_SHIFT
+                    : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'after';
 
                 if (restHours < requiredRest) {
@@ -400,7 +411,9 @@ class EmployeeRecommendationService {
                     .hour(parseInt(assignment.shift.start_time.split(':')[0]));
 
                 restHours = nextShiftStart.diff(targetShiftEnd, 'hour');
-                requiredRest = targetShift.is_night_shift ? 12 : 8;
+                requiredRest = targetShift.is_night_shift
+                    ? constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_NIGHT_SHIFT
+                    : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'before';
 
                 if (restHours < requiredRest) {
