@@ -250,7 +250,22 @@ export const en = {
         clickToCall: 'Click to call',
         noPhoneNumber: 'No phone number available',
         showFirstNameOnly: 'Show first name only',
-
+        tabs: {
+            available: 'Available',
+            crossPosition: 'Other Positions',
+            otherSite: 'Other Sites',
+            unavailable: 'Unavailable'
+        },
+        noWorkSite: 'No work site assigned',
+        flexiblePosition: 'Flexible Employee',
+        otherSite: 'Other Site',
+        flexible: 'Flexible',
+        score: 'Score',
+        preferDifferentTime: 'Prefer Different Time',
+        alreadyWorking: 'Already Working',
+        noMatchingEmployees: 'No employees match your search',
+        noEmployeesInCategory: 'No employees in this category',
+        confirmOverride: 'Are you sure you want to assign {name}?\n\nReason unavailable: {reason}\nNote: {note}'
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.',
@@ -361,6 +376,18 @@ export const en = {
         requirements: 'Requirements',
         saveChanges: 'Save Changes',
         unsavedChanges: 'You have unsaved changes',
+    },
+    recommendation: {
+        weeklyHours: 'Current weekly hours: {hours}h',
+        'Flexible - no assigned position': 'Flexible employee',
+        'Primary position match': 'Primary position match',
+        'Cross-position assignment': 'Can work other positions',
+        'Same work site': 'Same work site',
+        'Different work site': 'Different work site',
+        'Low weekly workload': 'Low weekly workload',
+        'Prefer different time/shift': 'Prefers different time',
+        'Cannot work': 'Cannot work at this time',
+        'Already assigned to': 'Already assigned to'
     },
     reports: {
         dateRange: 'Date Range',

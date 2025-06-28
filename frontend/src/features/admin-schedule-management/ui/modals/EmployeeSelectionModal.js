@@ -57,7 +57,6 @@ const EmployeeSelectionModal = ({ show, onHide, selectedPosition, onEmployeeSele
     };
 
 
-    // --- ЛОГИКА РЕНДЕРИНГА ОСТАЕТСЯ ПОЛНОСТЬЮ БЕЗ ИЗМЕНЕНИЙ ---
     const renderEmployeeList = (employees, type) => {
         const filtered = filterEmployees(employees);
 
