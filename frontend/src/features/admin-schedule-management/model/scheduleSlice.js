@@ -185,6 +185,31 @@ const scheduleSlice = createSlice({
     },
     reducers: {
         // Синхронные экшены для управления UI
+
+        // Обновление цвета смены
+        updateShiftColor: (state, action) => {
+            const { shiftId, color } = action.payload;
+
+            // Обновляем в scheduleDetails
+            if (state.scheduleDetails?.shifts) {
+                const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
+                if (shiftIndex !== -1) {
+                    state.scheduleDetails.shifts[shiftIndex].color = color;
+                }
+            }
+
+            // Также обновляем в positions если там есть shifts
+            if (state.scheduleDetails?.positions) {
+                state.scheduleDetails.positions.forEach(position => {
+                    if (position.shifts) {
+                        const shift = position.shifts.find(s => s.shift_id === shiftId);
+                        if (shift) {
+                            shift.color = color;
+                        }
+                    }
+                });
+            }
+        },
         setActiveTab(state, action) {
             state.activeTab = action.payload;
         },
@@ -397,6 +422,7 @@ export const {
     addPendingChange,
     removePendingChange,
     clearPositionChanges,
+    updateShiftColor,
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

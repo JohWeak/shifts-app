@@ -82,3 +82,10 @@ export const settingsAPI = {
         return response;
     }
 };
+
+export const updatePositionShiftColor = async (shiftId, color) => {
+    const response = await api.put(`/api/positions/shifts/${shiftId}`, {
+        color: color
+    });
+    return response.data;
+};

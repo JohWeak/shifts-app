@@ -1,0 +1,23 @@
+/* frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.css */
+.color-preset-btn {
+    width: 35px;
+    height: 35px;
+    border: 1px solid;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.color-preset-btn:hover {
+    transform: scale(1.1);
+}
+
+.color-preview {
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 500;
+    color: #333;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
