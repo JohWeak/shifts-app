@@ -73,6 +73,19 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
 
         if (!validateForm()) return;
 
+        // Проверяем, деактивируем ли мы сайт
+        if (site && site.is_active && !formData.is_active) {
+            const confirmed = window.confirm(
+                t('workplace.worksites.deactivateWarning', {
+                    siteName: site.site_name
+                })
+            );
+
+            if (!confirmed) {
+                return;
+            }
+        }
+
         setLoading(true);
 
         try {
