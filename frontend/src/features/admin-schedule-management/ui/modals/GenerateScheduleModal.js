@@ -34,12 +34,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
 
     const hasFetched = useRef(false);
 
-    const safeWorkSites = useMemo(() => {
-        const sites = workSites || [];
-        // Фильтруем только активные сайты
-        return sites.filter(site => site.is_active);
-    }, [workSites]);
-
+    const safeWorkSites = useMemo(() => workSites || [], [workSites]);
     const safeAlgorithmTypes = useMemo(() => ALGORITHM_TYPES || [], []);
 
     // Эффект №1: Загрузка данных при открытии модалки
@@ -127,11 +122,6 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                         {t('modal.generateSchedule.title')}
                     </Modal.Title>
                 </Modal.Header>
-                {safeWorkSites.length === 0 && (
-                    <Alert variant="warning">
-                        {t('schedule.noActiveSites')}
-                    </Alert>
-                )}
                 <Modal.Body>
                     {generating ? (
                         <div className="text-center py-5">
@@ -142,6 +132,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                         </div>
                     ) : (
                         <Form onSubmit={handleSubmit}>
+                            {/* ИЗМЕНЕНА СТРУКТУРА ДЛЯ КОРРЕКТНОЙ ШИРИНЫ */}
                             <Row className="mb-3">
                                 <Col md={6}>
                                     <Form.Group controlId="weekStart">

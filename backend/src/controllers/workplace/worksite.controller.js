@@ -124,36 +124,13 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-    const transaction = await db.sequelize.transaction();
-
     try {
         const { id } = req.params;
         const { site_name, address, phone, timezone, is_active } = req.body;
 
         const site = await WorkSite.findByPk(id);
         if (!site) {
-            await transaction.rollback();
             return res.status(404).json({ message: 'Work site not found' });
-        }
-
-        // Если деактивируем work site
-        if (is_active === false && site.is_active === true) {
-            // Деактивируем все позиции этого сайта
-            await db.Position.update(
-                { is_active: false },
-                {
-                    where: { site_id: id },
-                    transaction
-                }
-            );
-
-            console.log(`[WorkSite] Deactivated all positions for site ${id}`);
-        }
-
-        // Если активируем work site обратно
-        if (is_active === true && site.is_active === false) {
-            // Можем оставить позиции неактивными, чтобы админ сам решил какие активировать
-            console.log(`[WorkSite] Reactivated site ${id}, positions remain inactive`);
         }
 
         await site.update({
@@ -162,24 +139,10 @@ const update = async (req, res) => {
             phone,
             timezone,
             is_active
-        }, { transaction });
-
-        await transaction.commit();
-
-        // Возвращаем обновленный work site с количеством позиций
-        const updatedSite = await WorkSite.findByPk(id, {
-            include: [
-                {
-                    model: db.Position,
-                    as: 'positions',
-                    attributes: ['pos_id', 'is_active']
-                }
-            ]
         });
 
-        res.json(updatedSite);
+        res.json(site);
     } catch (error) {
-        await transaction.rollback();
         console.error('Error updating work site:', error);
         res.status(500).json({
             message: 'Error updating work site',

@@ -166,13 +166,8 @@ const EmployeeFilters = () => {
                                     <option value="all">{t('common.all')} {t('workSite.workSite')}</option>
                                     <option value="any">{t('employee.commonWorkSite')}</option>
                                     {workSites?.map((site) => (
-                                        <option
-                                            key={site.site_id}
-                                            value={site.site_id}
-                                            className={!site.is_active ? 'text-muted' : ''}
-                                        >
+                                        <option key={site.site_id} value={site.site_id}>
                                             {site.site_name}
-                                            {!site.is_active && ` (${t('workplace.worksites.inactive')})`}
                                         </option>
                                     ))}
                                 </Form.Select>

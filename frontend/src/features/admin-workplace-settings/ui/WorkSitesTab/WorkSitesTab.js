@@ -45,7 +45,6 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
     const [selectedSiteId, setSelectedSiteId] = useState(null);
-    const [showActiveOnly, setShowActiveOnly] = useState(true);
 
 
     useEffect(() => {
@@ -120,15 +119,12 @@ const WorkSitesTab = ({onSelectSite}) => {
     };
 
     // Защищенная фильтрация
-    const filteredSites = React.useMemo(() => {
-        return workSites.filter(site => {
-            const matchesSearch = site.site_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                site.address?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesActive = !showActiveOnly || site.is_active;
-
-            return matchesSearch && matchesActive;
-        });
-    }, [workSites, searchTerm, showActiveOnly]);
+    const filteredSites = (workSites && Array.isArray(workSites))
+        ? workSites.filter(site =>
+            site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            site.address?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : [];
     // Добавим загрузку данных при монтировании
     useEffect(() => {
         if (!isInitialized) {
@@ -168,36 +164,18 @@ const WorkSitesTab = ({onSelectSite}) => {
                     </Alert>
                 )}
 
-                <div className="d-flex gap-3 mb-4">
-                    <InputGroup style={{maxWidth: '400px'}}>
+                <div className="mb-3">
+                    <InputGroup>
                         <InputGroup.Text>
                             <i className="bi bi-search"></i>
                         </InputGroup.Text>
                         <Form.Control
                             type="text"
-                            placeholder={t('workplace.worksites.search')}
+                            placeholder={t('common.search')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </InputGroup>
-
-                    <Form.Check
-                        type="switch"
-                        id="active-only-switch"
-                        label={t('workplace.worksites.showActiveOnly')}
-                        checked={showActiveOnly}
-                        onChange={(e) => setShowActiveOnly(e.target.checked)}
-                        className="d-flex align-items-center mb-0"
-                    />
-
-                    <Button
-                        variant="primary"
-                        onClick={handleAdd}
-                        className="ms-auto"
-                    >
-                        <i className="bi bi-plus-circle me-2"></i>
-                        {t('workplace.worksites.add')}
-                    </Button>
                 </div>
 
                 {filteredSites.length === 0 ? (
@@ -285,20 +263,6 @@ const WorkSitesTab = ({onSelectSite}) => {
                                 </td>
                             </tr>
                         ))}
-                        {filteredSites.length === 0 && (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    <Alert variant="info" className="mb-0">
-                                        {searchTerm
-                                            ? t('workplace.worksites.noSearchResults')
-                                            : showActiveOnly
-                                                ? t('workplace.worksites.noActiveSites')
-                                                : t('workplace.worksites.noSites')
-                                        }
-                                    </Alert>
-                                </td>
-                            </tr>
-                        )}
                         </tbody>
                     </Table>
                 )}
