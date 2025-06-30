@@ -34,7 +34,11 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
 
     const hasFetched = useRef(false);
 
-    const safeWorkSites = useMemo(() => workSites || [], [workSites]);
+    const safeWorkSites = useMemo(() => {
+        const sites = workSites || [];
+        // Фильтруем только активные сайты
+        return sites.filter(site => site.is_active);
+    }, [workSites]);
     const safeAlgorithmTypes = useMemo(() => ALGORITHM_TYPES || [], []);
 
     // Эффект №1: Загрузка данных при открытии модалки
