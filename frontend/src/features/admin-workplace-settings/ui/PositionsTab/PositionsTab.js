@@ -52,10 +52,14 @@ const PositionsTab = ({ selectedSite }) => {
     const [positionForShifts, setPositionForShifts] = useState(null);
 
     useEffect(() => {
+        // Загружаем позиции с учетом активности выбранного сайта
         if (selectedSite) {
+            dispatch(fetchPositions());
             setFilterSite(selectedSite.site_id.toString());
+        } else {
+            dispatch(fetchPositions());
         }
-    }, [selectedSite]);
+    }, [dispatch, selectedSite]);
 
     useEffect(() => {
         dispatch(fetchPositions());
@@ -161,13 +165,23 @@ const PositionsTab = ({ selectedSite }) => {
     };
 
     // Защищенная фильтрация
+    // И обновим фильтрацию позиций, чтобы показывать все позиции для выбранного сайта,
+// включая неактивные, если сам сайт неактивен (строка ~167):
     const filteredPositions = positions && Array.isArray(positions)
         ? positions.filter(position => {
             if (!position) return false;
             const matchesSearch = position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 position.profession?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSite = !filterSite || position.site_id === parseInt(filterSite);
-            return matchesSearch && matchesSite;
+
+            // Если выбран конкретный сайт, показываем все его позиции
+            // Если фильтр не установлен, показываем только активные позиции активных сайтов
+            if (filterSite) {
+                return matchesSearch && matchesSite;
+            } else {
+                const site = workSites.find(s => s.site_id === position.site_id);
+                return matchesSearch && position.is_active && site?.is_active;
+            }
         })
         : [];
 
@@ -270,7 +284,14 @@ const PositionsTab = ({ selectedSite }) => {
                                         onClick={() => handleManageShifts(position)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        <td className="fw-semibold">{position.pos_name}</td>
+                                        <td className="fw-semibold">
+                                            {position.pos_name}
+                                            {!position.is_active && (
+                                                <Badge bg="secondary" className="ms-2">
+                                                    {t('workplace.positions.inactive')}
+                                                </Badge>
+                                            )}
+                                        </td>
                                         <td>
                                             <Badge bg="secondary" className="site-badge">
                                                 {getSiteName(position.site_id)}

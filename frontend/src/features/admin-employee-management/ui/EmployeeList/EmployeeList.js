@@ -2,9 +2,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Button, Badge, Spinner, Pagination, Form } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import './EmployeeList.css';
-import ActionButtons from "../../../../shared/ui/components/ActionButtons/ActionButtons";
 import {getStatusBadgeVariant} from "../../../../shared/lib/utils/scheduleUtils";
 
 const EmployeeList = ({

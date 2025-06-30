@@ -5,9 +5,18 @@ const { Position, WorkSite, Employee, PositionShift } = db;
 // Get all positions with statistics
 const getAllPositions = async (req, res) => {
     try {
-        const { site_id, includeStats } = req.query;
-        const where = { is_active: true };
+        const { site_id, includeStats, is_active, show_all } = req.query;
+
+        const where = {};
+
+        // Фильтр по сайту
         if (site_id) where.site_id = site_id;
+
+        // Фильтр по активности
+        // По умолчанию показываем только активные, если не указано иное
+        if (show_all !== 'true') {
+            where.is_active = is_active === 'false' ? false : true;
+        }
 
         const positions = await Position.findAll({
             where,
@@ -15,7 +24,7 @@ const getAllPositions = async (req, res) => {
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
+                    attributes: ['site_id', 'site_name', 'is_active']
                 },
                 {
                     model: PositionShift,
@@ -26,8 +35,8 @@ const getAllPositions = async (req, res) => {
                 },
                 {
                     model: Employee,
-                    as: 'defaultEmployees', // Используем новую связь
-                    where: { status: ['active', 'admin'] }, // Учитываем и админов
+                    as: 'defaultEmployees',
+                    where: { status: ['active', 'admin'] },
                     required: false,
                     attributes: ['emp_id']
                 }
@@ -39,12 +48,11 @@ const getAllPositions = async (req, res) => {
         const positionsWithStats = positions.map(position => {
             const posData = position.toJSON();
 
-            // Подсчитываем количество сотрудников с этой позицией по умолчанию
             return {
                 ...posData,
                 totalShifts: posData.shifts?.length || 0,
                 totalEmployees: posData.defaultEmployees?.length || 0,
-                shifts: undefined, // Убираем массив смен
+                shifts: undefined,
                 defaultEmployees: undefined
             };
         });
