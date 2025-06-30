@@ -33,29 +33,54 @@ const checkPythonAvailability = async () => {
 };
 const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => {
     try {
-        // Найти существующее расписание для этой недели
-        const existingSchedule = await Schedule.findOne({
+        const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
+
+        // 1. Удалить ВСЕ assignments для этой недели и сайта
+        // (даже если нет связанного schedule)
+        const deletedAssignments = await ScheduleAssignment.destroy({
             where: {
-                site_id: siteId,
-                start_date: weekStart
+                work_date: {
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                },
+                position_id: {
+                    [db.Sequelize.Op.in]: db.Sequelize.literal(
+                        `(SELECT pos_id FROM positions WHERE site_id = ${siteId})`
+                    )
+                }
             },
             transaction
         });
 
-        if (existingSchedule) {
-            console.log(`[ScheduleController] Deleting existing schedule ${existingSchedule.id} for week ${weekStart}`);
+        if (deletedAssignments > 0) {
+            console.log(`[ScheduleController] Deleted ${deletedAssignments} orphaned assignments`);
+        }
 
-            // Удалить связанные assignments (каскадно через FK)
+        // 2. Найти и удалить существующие расписания
+        const existingSchedules = await Schedule.findAll({
+            where: {
+                site_id: siteId,
+                start_date: {
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                }
+            },
+            transaction
+        });
+
+        for (const schedule of existingSchedules) {
+            console.log(`[ScheduleController] Deleting schedule ${schedule.id} for week ${weekStart}`);
+
+            // Удалить связанные assignments (если остались)
             await ScheduleAssignment.destroy({
-                where: { schedule_id: existingSchedule.id },
+                where: { schedule_id: schedule.id },
                 transaction
             });
 
             // Удалить само расписание
-            await existingSchedule.destroy({ transaction });
-
-            console.log(`[ScheduleController] Deleted schedule and its assignments`);
+            await schedule.destroy({ transaction });
         }
+
+        console.log(`[ScheduleController] Cleaned up ${existingSchedules.length} schedules`);
+
     } catch (error) {
         console.error('[ScheduleController] Error deleting existing schedule:', error);
         throw error;
@@ -92,7 +117,7 @@ const generateNextWeekSchedule = async (req, res) => {
         console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
 
         // Проверим существование сайта
-        const workSite = await WorkSite.findByPk(siteId);
+        const workSite = await WorkSite.findByPk(siteId, { transaction });
         if (!workSite) {
             return res.status(400).json({
                 success: false,
@@ -113,6 +138,7 @@ const generateNextWeekSchedule = async (req, res) => {
         switch (selectedAlgorithm) {
             case 'cp-sat':
                 try {
+                    console.log('[ScheduleController] Attempting CP-SAT generation...');
                     result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart, transaction);
                     if (!result.success) {
                         console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
