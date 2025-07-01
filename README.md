@@ -3,7 +3,7 @@
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=for-the-badge&logo=sequelize&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+
 
 This is a full-stack web application designed to automate and simplify the complex process of creating and managing work schedules. The project tackles the challenges of manual scheduling by offering a powerful algorithm for automatic staff assignment and an intuitive interface for manual adjustments.
 
@@ -38,7 +38,7 @@ This is a full-stack web application designed to automate and simplify the compl
         <li><b>Runtime:</b> Node.js</li>
         <li><b>Framework:</b> Express</li>
         <li><b>ORM:</b> Sequelize</li>
-        <li><b>Database:</b> PostgreSQL</li>
+        <li><b>Database:</b> MySQL</li>
         <li><b>Authentication:</b> JWT (Passport.js)</li>
       </ul>
     </td>
@@ -65,6 +65,6 @@ The backend follows a classic **Layered Architecture** pattern, separating conce
 ### Prerequisites
 -   Node.js (v18.x or later)
 -   npm or yarn
--   PostgreSQL instance running
+-   MySQL instance running
 -   Git
 
