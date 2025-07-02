@@ -650,6 +650,9 @@ export const en = {
             addressPlaceholder: 'e.g., 123 Main Street, Tel Aviv',
             restored: 'Work site successfully restored',
             restoreConfirm: 'Are you sure you want to restore this work site?',
+            noSitesFound: 'No work sites match your criteria',
+            activeOnly: 'Active sites',
+            allSites: 'All sites'
         },
         positions: {
             title: 'Positions',

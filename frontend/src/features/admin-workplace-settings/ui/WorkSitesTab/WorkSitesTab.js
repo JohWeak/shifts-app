@@ -8,7 +8,8 @@ import {
     Alert,
     Form,
     InputGroup,
-    Dropdown
+    Row,
+    Col
 } from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
@@ -44,6 +45,7 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [siteToDelete, setSiteToDelete] = useState(null);
     const [siteToRestore, setSiteToRestore] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('active');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
@@ -138,14 +140,33 @@ const WorkSitesTab = ({onSelectSite}) => {
     };
 
     // Фильтрация сайтов
-    const filteredSites = (workSites && Array.isArray(workSites))
-        ? workSites.filter(site => {
+    // Фильтрация и сортировка сайтов
+    const filteredAndSortedSites = React.useMemo(() => {
+        if (!workSites || !Array.isArray(workSites)) return [];
+
+        // Сначала фильтруем по поисковому запросу
+        let filtered = workSites.filter(site => {
             const matchesSearch = site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 site.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 site.phone?.toLowerCase().includes(searchTerm.toLowerCase());
             return matchesSearch;
-        })
-        : [];
+        });
+
+        // Затем фильтруем по статусу
+        if (statusFilter === 'active') {
+            filtered = filtered.filter(site => site.is_active);
+        }
+
+        // Сортируем: сначала активные по алфавиту, потом неактивные по алфавиту
+        return filtered.sort((a, b) => {
+            // Если статусы разные, активные идут первыми
+            if (a.is_active !== b.is_active) {
+                return a.is_active ? -1 : 1;
+            }
+            // Если статусы одинаковые, сортируем по имени
+            return a.site_name.localeCompare(b.site_name);
+        });
+    }, [workSites, searchTerm, statusFilter]);
 
     if (!isInitialized) {
         dispatch(fetchWorkSites()).then(() => setIsInitialized(true));
@@ -190,22 +211,40 @@ const WorkSitesTab = ({onSelectSite}) => {
                     </Alert>
                 )}
 
-                <InputGroup className="mb-3">
-                    <InputGroup.Text>
-                        <i className="bi bi-search"></i>
-                    </InputGroup.Text>
-                    <Form.Control
-                        type="text"
-                        placeholder={t('common.search')}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </InputGroup>
+                <Row className="mb-3">
+                    <Col md={8}>
+                        <InputGroup>
+                            <InputGroup.Text>
+                                <i className="bi bi-search"></i>
+                            </InputGroup.Text>
+                            <Form.Control
+                                type="text"
+                                placeholder={t('common.search')}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </InputGroup>
+                    </Col>
+                    <Col md={4}>
+                        <Form.Select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="status-filter"
+                        >
+                            <option value="active">{t('workplace.worksites.activeOnly')}</option>
+                            <option value="all">{t('workplace.worksites.allSites')}</option>
+                        </Form.Select>
+                    </Col>
+                </Row>
 
-                {filteredSites.length === 0 ? (
+                {filteredAndSortedSites.length === 0 ? (
                     <div className="workplace-empty">
                         <i className="bi bi-building"></i>
-                        <p>{t('workplace.worksites.noSites')}</p>
+                        <p>
+                            {searchTerm || statusFilter !== 'all'
+                                ? t('workplace.worksites.noSitesFound')
+                                : t('workplace.worksites.noSites')}
+                        </p>
                     </div>
                 ) : (
                     <Table responsive hover className="workplace-table">
@@ -221,7 +260,7 @@ const WorkSitesTab = ({onSelectSite}) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredSites.map(site => (
+                        {filteredAndSortedSites.map(site => (
                             <tr
                                 key={site.site_id}
                                 className={`clickable-row ${!site.is_active ? 'inactive-row' : ''}`}
