@@ -2,6 +2,8 @@
 export const en = {
     common: {
         actions: 'Actions',
+        active: 'Active',
+        inactive: 'Inactive',
         admin: 'Admin',
         alert: 'Alert',
         all: 'All',

@@ -8,7 +8,6 @@ const getWorkSites = async (req, res) => {
         const { includeStats } = req.query;
 
         const workSites = await WorkSite.findAll({
-            where: { is_active: true },
             include: [
                 {
                     model: Position,

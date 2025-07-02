@@ -40,6 +40,7 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [showModal, setShowModal] = useState(false);
     const [selectedSite, setSelectedSite] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
     const [siteToDelete, setSiteToDelete] = useState(null);
     const [siteToRestore, setSiteToRestore] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -136,7 +137,7 @@ const WorkSitesTab = ({onSelectSite}) => {
         }
     };
 
-    // Фильтрация сайтов - показываем ВСЕ сайты
+    // Фильтрация сайтов
     const filteredSites = (workSites && Array.isArray(workSites))
         ? workSites.filter(site => {
             const matchesSearch = site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,17 +146,18 @@ const WorkSitesTab = ({onSelectSite}) => {
             return matchesSearch;
         })
         : [];
+
     if (!isInitialized) {
         dispatch(fetchWorkSites()).then(() => setIsInitialized(true));
     }
 
-    // Добавим загрузку данных при монтировании
-    useEffect(() => {
-        if (!isInitialized) {
-            dispatch(fetchWorkSites());
-            setIsInitialized(true);
-        }
-    }, [dispatch, isInitialized]);
+    // // Добавим загрузку данных при монтировании
+    // useEffect(() => {
+    //     if (!isInitialized) {
+    //         dispatch(fetchWorkSites());
+    //         setIsInitialized(true);
+    //     }
+    // }, [dispatch, isInitialized]);
 
     return (
         <Card className="workplace-tab-content">
@@ -239,8 +241,16 @@ const WorkSitesTab = ({onSelectSite}) => {
                                             : t('common.inactive')}
                                     </Badge>
                                 </td>
-                                <td className="text-center">{site.positionCount || 0}</td>
-                                <td className="text-center">{site.employeeCount || 0}</td>
+                                <td className="text-center">
+                                    <Badge bg="info" pill>
+                                        {site.positionCount || 0}
+                                    </Badge>
+                                </td>
+                                <td className="text-center">
+                                    <Badge bg="primary" pill>
+                                        {site.employeeCount || 0}
+                                    </Badge>
+                                </td>
                                 <td onClick={(e) => e.stopPropagation()}>
                                     <div className="workplace-actions">
                                         <Button
