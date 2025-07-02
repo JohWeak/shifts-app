@@ -27,9 +27,12 @@ const getAllPositions = async (req, res) => {
                 {
                     model: Employee,
                     as: 'defaultEmployees',
-                    where: { status: ['active', 'admin'] },
+                    where: {
+                        status: ['active', 'admin'],
+                        default_position_id: db.Sequelize.col('Position.pos_id') // Явно указываем связь
+                    },
                     required: false,
-                    attributes: ['emp_id']
+                    attributes: ['emp_id', 'first_name', 'last_name']
                 }
             ],
             order: [['pos_name', 'ASC']]

@@ -8,6 +8,7 @@ import {
     Alert,
     Form,
     InputGroup,
+    Dropdown,
     Row,
     Col
 } from 'react-bootstrap';
@@ -41,17 +42,18 @@ const PositionsTab = ({ selectedSite }) => {
         error
     } = useSelector(state => state.workplace || {});
 
+
     const [showModal, setShowModal] = useState(false);
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
     const [positionToDelete, setPositionToDelete] = useState(null);
     const [positionToRestore, setPositionToRestore] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterSite, setFilterSite] = useState('');
     const [showInactive, setShowInactive] = useState(
         localStorage.getItem('showInactivePositions') === 'true' || false
     );
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterSite, setFilterSite] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
@@ -67,6 +69,7 @@ const PositionsTab = ({ selectedSite }) => {
     useEffect(() => {
         dispatch(fetchPositions());
     }, [dispatch]);
+
 
     useEffect(() => {
         if (!isInitialized) {
@@ -181,6 +184,7 @@ const PositionsTab = ({ selectedSite }) => {
     };
 
     const handleViewEmployees = (position) => {
+        // Переход на страницу сотрудников с фильтром по позиции
         navigate('/admin/employees', {
             state: {
                 filters: {
@@ -318,8 +322,8 @@ const PositionsTab = ({ selectedSite }) => {
                         </Row>
 
                         {filteredPositions.length === 0 ? (
-                            <div className="text-center py-5">
-                                <i className="bi bi-briefcase text-muted" style={{ fontSize: '3rem' }}></i>
+                            <div className="workplace-empty">
+                                <i className="bi bi-person-badge"></i>
                                 <p className="mt-3 text-muted">
                                     {searchTerm || filterSite
                                         ? t('workplace.positions.noPositionsFound')
@@ -333,9 +337,9 @@ const PositionsTab = ({ selectedSite }) => {
                                     <th>{t('workplace.positions.name')}</th>
                                     <th>{t('workplace.worksites.title')}</th>
                                     <th>{t('workplace.positions.profession')}</th>
-                                    <th className="text-center">{t('workplace.positions.defaultStaffCount')}</th>
-                                    <th className="text-center">{t('workplace.positions.currentStaff')}</th>
+                                    <th className="text-center">{t('workplace.positions.defaultStaff')}</th>
                                     <th className="text-center">{t('workplace.positions.shifts')}</th>
+                                    <th className="text-center">{t('workplace.positions.employees')}</th>
                                     <th>{t('common.status')}</th>
                                     <th></th>
                                 </tr>
@@ -344,7 +348,9 @@ const PositionsTab = ({ selectedSite }) => {
                                 {filteredPositions.map(position => (
                                     <tr
                                         key={position.pos_id}
-                                        className={!position.is_active ? 'inactive-row' : ''}
+                                        className={!position.is_active ? 'inactive-row' : '"clickable-row"'}
+                                        onClick={() => handleManageShifts(position)}
+                                        style={{ cursor: 'pointer' }}
                                     >
                                         <td className="fw-semibold">{position.pos_name}</td>
                                         <td>
@@ -353,28 +359,25 @@ const PositionsTab = ({ selectedSite }) => {
                                             </Badge>
                                         </td>
                                         <td>{position.profession || '-'}</td>
-                                        <td className="text-center">{position.num_of_emp || 1}</td>
                                         <td className="text-center">
-                                            <Badge bg={position.employeeCount > 0 ? 'primary' : 'secondary'}>
-                                                {position.employeeCount || 0}
+                                            <Badge bg="info">{position.num_of_emp || 1}</Badge>
+                                        </td>
+                                        <td className="text-center">
+                                            <Badge bg="warning" text="dark">
+                                                {position.totalShifts || 0}
                                             </Badge>
                                         </td>
                                         <td className="text-center">
-                                            <Button
-                                                variant="link"
-                                                size="sm"
-                                                onClick={() => handleManageShifts(position)}
-                                                className="p-0"
-                                            >
-                                                <Badge bg="info">{position.totalShifts || 0}</Badge>
-                                            </Button>
+                                            <Badge bg="primary">
+                                                {position.totalEmployees || 0}
+                                            </Badge>
                                         </td>
                                         <td>
                                             <Badge bg={position.is_active ? 'success' : 'secondary'}>
                                                 {position.is_active ? t('common.active') : t('common.inactive')}
                                             </Badge>
                                         </td>
-                                        <td>
+                                        <td onClick={(e) => e.stopPropagation()}>
                                             <div className="workplace-actions">
                                                 <Button
                                                     variant="outline-primary"
@@ -427,8 +430,9 @@ const PositionsTab = ({ selectedSite }) => {
                 onHide={handleModalClose}
                 onSuccess={handleModalSuccess}
                 position={selectedPosition}
-                workSites={workSites.filter(site => site.is_active)}
+                workSites={workSites}
                 defaultSiteId={filterSite || selectedSite?.site_id}
+
             />
 
             <ManageShiftsModal

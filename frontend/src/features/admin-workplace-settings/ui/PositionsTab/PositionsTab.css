@@ -28,7 +28,7 @@
 /* Стили для неактивных строк */
 .positions-table .inactive-row {
     opacity: 0.6;
-    background-color: var(--bs-gray-50);
+    background-color: var(--bs-gray-100);
 }
 
 [data-theme="dark"] .positions-table .inactive-row {
