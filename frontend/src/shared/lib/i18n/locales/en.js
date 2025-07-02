@@ -690,6 +690,7 @@ export const en = {
             deleteConfirmWithEmployees: 'Are you sure you want to deactivate this position? This will also deactivate {{count}} employees',
             deleteConfirm: 'Are you sure you want to deactivate this position?',
             restoreConfirm: 'Are you sure you want to restore this position?',
+            currentStaff: 'Current Staff',
         },
         displaySettings: {
             title: 'Display Settings',
