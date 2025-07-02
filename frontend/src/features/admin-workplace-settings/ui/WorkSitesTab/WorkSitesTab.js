@@ -18,6 +18,7 @@ import WorkSiteModal from '../WorkSiteModal/WorkSiteModal';
 import {
     fetchWorkSites,
     deleteWorkSite,
+    restoreWorkSite,
     clearOperationStatus
 } from '../../model/workplaceSlice';
 
@@ -40,6 +41,7 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [selectedSite, setSelectedSite] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [siteToDelete, setSiteToDelete] = useState(null);
+    const [siteToRestore, setSiteToRestore] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
@@ -55,14 +57,16 @@ const WorkSitesTab = ({onSelectSite}) => {
                     ? t('workplace.worksites.updated')
                     : siteToDelete
                         ? t('workplace.worksites.deleted')
-                        : t('workplace.worksites.created')
+                        : siteToRestore
+                            ? t('workplace.worksites.restored')
+                            : t('workplace.worksites.created')
             );
             setTimeout(() => {
                 setShowAlert(false);
                 dispatch(clearOperationStatus());
             }, 3000);
         }
-    }, [operationStatus, dispatch, t, selectedSite, siteToDelete]);
+    }, [operationStatus, dispatch, t, selectedSite, siteToDelete, siteToRestore]);
 
     const handleEdit = (site) => {
         setSelectedSite(site);
@@ -79,11 +83,25 @@ const WorkSitesTab = ({onSelectSite}) => {
         setShowDeleteConfirm(true);
     };
 
+    const handleRestore = (site) => {
+        setSiteToRestore(site);
+        setShowRestoreConfirm(true);
+    };
+
     const confirmDelete = async () => {
         if (siteToDelete) {
             await dispatch(deleteWorkSite(siteToDelete.site_id));
             setShowDeleteConfirm(false);
             setSiteToDelete(null);
+            dispatch(fetchWorkSites());
+        }
+    };
+
+    const confirmRestore = async () => {
+        if (siteToRestore) {
+            await dispatch(restoreWorkSite(siteToRestore.site_id));
+            setShowRestoreConfirm(false);
+            setSiteToRestore(null);
             dispatch(fetchWorkSites());
         }
     };
@@ -118,13 +136,19 @@ const WorkSitesTab = ({onSelectSite}) => {
         }
     };
 
-    // Защищенная фильтрация
+    // Фильтрация сайтов - показываем ВСЕ сайты
     const filteredSites = (workSites && Array.isArray(workSites))
-        ? workSites.filter(site =>
-            site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            site.address?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        ? workSites.filter(site => {
+            const matchesSearch = site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                site.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                site.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesSearch;
+        })
         : [];
+    if (!isInitialized) {
+        dispatch(fetchWorkSites()).then(() => setIsInitialized(true));
+    }
+
     // Добавим загрузку данных при монтировании
     useEffect(() => {
         if (!isInitialized) {
@@ -164,19 +188,17 @@ const WorkSitesTab = ({onSelectSite}) => {
                     </Alert>
                 )}
 
-                <div className="mb-3">
-                    <InputGroup>
-                        <InputGroup.Text>
-                            <i className="bi bi-search"></i>
-                        </InputGroup.Text>
-                        <Form.Control
-                            type="text"
-                            placeholder={t('common.search')}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </InputGroup>
-                </div>
+                <InputGroup className="mb-3">
+                    <InputGroup.Text>
+                        <i className="bi bi-search"></i>
+                    </InputGroup.Text>
+                    <Form.Control
+                        type="text"
+                        placeholder={t('common.search')}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </InputGroup>
 
                 {filteredSites.length === 0 ? (
                     <div className="workplace-empty">
@@ -200,7 +222,7 @@ const WorkSitesTab = ({onSelectSite}) => {
                         {filteredSites.map(site => (
                             <tr
                                 key={site.site_id}
-                                className="clickable-row"
+                                className={`clickable-row ${!site.is_active ? 'inactive-row' : ''}`}
                                 onClick={() => handleRowClick(site)}
                                 style={{cursor: 'pointer'}}
                             >
@@ -213,52 +235,53 @@ const WorkSitesTab = ({onSelectSite}) => {
                                         className="status-badge"
                                     >
                                         {site.is_active
-                                            ? t('workplace.worksites.active')
-                                            : t('workplace.worksites.inactive')
-                                        }
+                                            ? t('common.active')
+                                            : t('common.inactive')}
                                     </Badge>
                                 </td>
-                                <td className="text-center">
-                                    <Badge
-                                        bg="warning"
-                                        text="dark"
-                                    >
-                                        {site.positionCount || 0}
-                                    </Badge>
-                                </td>
-                                <td className="text-center">
-                                    <Badge
-                                        bg="primary"
-                                    >
-                                        {site.employeeCount || 0}
-                                    </Badge>
-                                </td>
+                                <td className="text-center">{site.positionCount || 0}</td>
+                                <td className="text-center">{site.employeeCount || 0}</td>
                                 <td onClick={(e) => e.stopPropagation()}>
                                     <div className="workplace-actions">
                                         <Button
-                                            variant="outline-primary"
+                                            variant="link"
                                             size="sm"
+                                            className="p-1"
                                             onClick={() => handleEdit(site)}
                                             title={t('common.edit')}
                                         >
                                             <i className="bi bi-pencil"></i>
                                         </Button>
                                         <Button
-                                            variant="outline-info"
+                                            variant="link"
                                             size="sm"
+                                            className="p-1"
                                             onClick={() => handleViewEmployees(site)}
                                             title={t('workplace.worksites.viewEmployees')}
                                         >
                                             <i className="bi bi-people"></i>
                                         </Button>
-                                        <Button
-                                            variant="danger"
-                                            size="sm"
-                                            onClick={() => handleDelete(site)}
-                                            title={t('common.delete')}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </Button>
+                                        {site.is_active ? (
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                className="p-1 text-danger"
+                                                onClick={() => handleDelete(site)}
+                                                title={t('common.delete')}
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                className="p-1 text-success"
+                                                onClick={() => handleRestore(site)}
+                                                title={t('common.restore')}
+                                            >
+                                                <i className="bi bi-arrow-clockwise"></i>
+                                            </Button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
@@ -283,9 +306,17 @@ const WorkSitesTab = ({onSelectSite}) => {
                 message={t('workplace.worksites.deleteConfirm')}
                 confirmVariant="danger"
             />
+
+            <ConfirmationModal
+                show={showRestoreConfirm}
+                onHide={() => setShowRestoreConfirm(false)}
+                onConfirm={confirmRestore}
+                title={t('common.confirm')}
+                message={t('workplace.worksites.restoreConfirm')}
+                confirmVariant="success"
+            />
         </Card>
     );
 };
-
 
 export default WorkSitesTab;

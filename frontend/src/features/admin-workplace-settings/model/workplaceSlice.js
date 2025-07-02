@@ -54,6 +54,18 @@ export const deleteWorkSite = createAsyncThunk(
     }
 );
 
+export const restoreWorkSite = createAsyncThunk(
+    'workplace/restoreWorkSite',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await api.post(`${API_ENDPOINTS.WORKSITES.BASE}/${id}/restore`);
+            return response.site;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to restore work site');
+        }
+    }
+);
+
 export const fetchPositions = createAsyncThunk(
     'workplace/fetchPositions',
     async (_, { rejectWithValue }) => {
@@ -171,6 +183,17 @@ const workplaceSlice = createSlice({
                 state.operationStatus = 'success';
             })
             .addCase(deleteWorkSite.rejected, (state, action) => {
+                state.error = action.payload;
+                state.operationStatus = 'error';
+            })
+            .addCase(restoreWorkSite.fulfilled, (state, action) => {
+                const index = state.workSites.findIndex(site => site.site_id === action.payload.site_id);
+                if (index !== -1) {
+                    state.workSites[index] = action.payload;
+                }
+                state.operationStatus = 'success';
+            })
+            .addCase(restoreWorkSite.rejected, (state, action) => {
                 state.error = action.payload;
                 state.operationStatus = 'error';
             })

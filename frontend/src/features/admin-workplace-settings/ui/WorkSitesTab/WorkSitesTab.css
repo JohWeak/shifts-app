@@ -27,3 +27,54 @@
 [data-theme="dark"] .workplace-table tbody tr:hover {
     background-color: var(--bs-gray-800);
 }
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.workplace-table tbody tr:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.clickable-row {
+    transition: background-color 0.2s ease;
+}
+
+.clickable-row:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .clickable-row:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.workplace-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: flex-end;
+}
+
+[data-theme="dark"] .workplace-table tbody tr:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Styles for inactive rows */
+.inactive-row {
+    opacity: 0.6;
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .inactive-row {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.inactive-row:hover {
+    opacity: 0.8;
+}
+
+/* Success variant for restore button */
+.action-btn.text-success:hover {
+    background: var(--bs-success-bg-subtle);
+    color: var(--bs-success) !important;
+}

@@ -646,6 +646,8 @@ export const en = {
             noSites: 'No work sites found. Add your first site to get started.',
             namePlaceholder: 'e.g., Main Office',
             addressPlaceholder: 'e.g., 123 Main Street, Tel Aviv',
+            restored: 'Work site successfully restored',
+            restoreConfirm: 'Are you sure you want to restore this work site?',
         },
         positions: {
             title: 'Positions',
