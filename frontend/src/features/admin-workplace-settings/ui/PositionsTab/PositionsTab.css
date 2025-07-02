@@ -24,3 +24,38 @@
     background-color: var(--bs-gray-700);
     color: var(--bs-gray-200);
 }
+
+/* Стили для неактивных строк */
+.positions-table .inactive-row {
+    opacity: 0.6;
+    background-color: var(--bs-gray-50);
+}
+
+[data-theme="dark"] .positions-table .inactive-row {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.positions-table .inactive-row:hover {
+    opacity: 0.8;
+}
+
+/* Стили для переключателя */
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* Стили для таблицы позиций */
+.positions-table {
+    margin-bottom: 0;
+}
+
+.positions-table th {
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    border-bottom: 2px solid var(--bs-border-color);
+}
+
+[data-theme="dark"] .positions-table th {
+    color: var(--bs-gray-300);
+}

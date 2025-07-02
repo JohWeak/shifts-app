@@ -8,7 +8,8 @@ import {
     Alert,
     Form,
     InputGroup,
-    Dropdown, Row, Col
+    Row,
+    Col
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +20,9 @@ import PositionModal from '../PositionModal/PositionModal';
 import {
     fetchPositions,
     deletePosition,
-    clearPositionOperationStatus, fetchWorkSites
+    restorePosition,
+    clearPositionOperationStatus,
+    fetchWorkSites
 } from '../../model/workplaceSlice';
 
 import './PositionsTab.css';
@@ -38,13 +41,17 @@ const PositionsTab = ({ selectedSite }) => {
         error
     } = useSelector(state => state.workplace || {});
 
-
     const [showModal, setShowModal] = useState(false);
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
     const [positionToDelete, setPositionToDelete] = useState(null);
+    const [positionToRestore, setPositionToRestore] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterSite, setFilterSite] = useState('');
+    const [showInactive, setShowInactive] = useState(
+        localStorage.getItem('showInactivePositions') === 'true' || false
+    );
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
@@ -60,7 +67,6 @@ const PositionsTab = ({ selectedSite }) => {
     useEffect(() => {
         dispatch(fetchPositions());
     }, [dispatch]);
-
 
     useEffect(() => {
         if (!isInitialized) {
@@ -80,28 +86,22 @@ const PositionsTab = ({ selectedSite }) => {
                     ? t('workplace.positions.updated')
                     : positionToDelete
                         ? t('workplace.positions.deleted')
-                        : t('workplace.positions.created')
+                        : positionToRestore
+                            ? t('workplace.positions.restored')
+                            : t('workplace.positions.created')
             );
             setTimeout(() => {
                 setShowAlert(false);
                 dispatch(clearPositionOperationStatus());
             }, 3000);
         }
-    }, [positionOperationStatus, dispatch, t, selectedPosition, positionToDelete]);
+    }, [positionOperationStatus, dispatch, t, selectedPosition, positionToDelete, positionToRestore]);
 
-    if (loading && positions.length === 0) {
-        return (
-            <Card className="workplace-tab-content">
-                <Card.Body className="text-center py-5">
-                    <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <p className="mt-3 text-muted">{t('common.loading')}</p>
-                </Card.Body>
-            </Card>
-        );
-    }
-
+    // Сохранение состояния переключателя
+    const handleShowInactiveChange = (checked) => {
+        setShowInactive(checked);
+        localStorage.setItem('showInactivePositions', checked.toString());
+    };
 
     const handleEdit = (position) => {
         setSelectedPosition(position);
@@ -118,11 +118,43 @@ const PositionsTab = ({ selectedSite }) => {
         setShowDeleteConfirm(true);
     };
 
+    const handleRestore = (position) => {
+        setPositionToRestore(position);
+        setShowRestoreConfirm(true);
+    };
+
     const confirmDelete = async () => {
         if (positionToDelete) {
-            await dispatch(deletePosition(positionToDelete.pos_id));
+            const result = await dispatch(deletePosition(positionToDelete.pos_id));
+            if (deletePosition.fulfilled.match(result)) {
+                // Показываем информацию о деактивированных работниках
+                const deactivatedCount = result.payload.deactivatedEmployees || 0;
+                if (deactivatedCount > 0) {
+                    setAlertMessage(
+                        t('workplace.positions.deletedWithEmployees', { count: deactivatedCount })
+                    );
+                }
+            }
             setShowDeleteConfirm(false);
             setPositionToDelete(null);
+            dispatch(fetchPositions());
+        }
+    };
+
+    const confirmRestore = async () => {
+        if (positionToRestore) {
+            const result = await dispatch(restorePosition(positionToRestore.pos_id));
+            if (restorePosition.fulfilled.match(result)) {
+                // Показываем информацию о восстановленных работниках
+                const restoredCount = result.payload.restoredEmployees || 0;
+                if (restoredCount > 0) {
+                    setAlertMessage(
+                        t('workplace.positions.restoredWithEmployees', { count: restoredCount })
+                    );
+                }
+            }
+            setShowRestoreConfirm(false);
+            setPositionToRestore(null);
             dispatch(fetchPositions());
         }
     };
@@ -149,7 +181,6 @@ const PositionsTab = ({ selectedSite }) => {
     };
 
     const handleViewEmployees = (position) => {
-        // Переход на страницу сотрудников с фильтром по позиции
         navigate('/admin/employees', {
             state: {
                 filters: {
@@ -160,22 +191,52 @@ const PositionsTab = ({ selectedSite }) => {
         });
     };
 
-    // Защищенная фильтрация
-    const filteredPositions = positions && Array.isArray(positions)
-        ? positions.filter(position => {
+    // Фильтрация и сортировка позиций
+    const filteredPositions = React.useMemo(() => {
+        if (!positions || !Array.isArray(positions)) return [];
+
+        let filtered = positions.filter(position => {
             if (!position) return false;
+
             const matchesSearch = position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 position.profession?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSite = !filterSite || position.site_id === parseInt(filterSite);
-            return matchesSearch && matchesSite;
-        })
-        : [];
+            const matchesActiveFilter = showInactive || position.is_active;
 
+            return matchesSearch && matchesSite && matchesActiveFilter;
+        });
+
+        // Сортировка: сначала активные, потом неактивные
+        return filtered.sort((a, b) => {
+            if (a.is_active !== b.is_active) {
+                return a.is_active ? -1 : 1;
+            }
+            return a.pos_name.localeCompare(b.pos_name);
+        });
+    }, [positions, searchTerm, filterSite, showInactive]);
 
     const getSiteName = (siteId) => {
         const site = workSites.find(s => s.site_id === siteId);
         return site ? site.site_name : '-';
     };
+
+    // Подсчет деактивированных работников для предупреждения
+    const getEmployeeCountForWarning = (position) => {
+        return position.employeeCount || 0;
+    };
+
+    if (loading && positions.length === 0) {
+        return (
+            <Card className="workplace-tab-content">
+                <Card.Body className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-3 text-muted">{t('common.loading')}</p>
+                </Card.Body>
+            </Card>
+        );
+    }
 
     return (
         <Card className="workplace-tab-content">
@@ -185,7 +246,7 @@ const PositionsTab = ({ selectedSite }) => {
                     variant="primary"
                     size="sm"
                     onClick={handleAdd}
-                    disabled={workSites.length === 0}
+                    disabled={workSites.filter(site => site.is_active).length === 0}
                 >
                     <i className="bi bi-plus-circle me-2"></i>
                     {t('workplace.positions.add')}
@@ -209,14 +270,14 @@ const PositionsTab = ({ selectedSite }) => {
                     </Alert>
                 )}
 
-                {workSites.length === 0 ? (
+                {workSites.filter(site => site.is_active).length === 0 ? (
                     <Alert variant="info">
                         {t('workplace.positions.noSitesWarning')}
                     </Alert>
                 ) : (
                     <>
                         <Row className="mb-3">
-                            <Col md={8}>
+                            <Col md={6}>
                                 <InputGroup>
                                     <InputGroup.Text>
                                         <i className="bi bi-search"></i>
@@ -244,23 +305,38 @@ const PositionsTab = ({ selectedSite }) => {
                                         ))}
                                 </Form.Select>
                             </Col>
+                            <Col md={2} className="d-flex align-items-center">
+                                <Form.Check
+                                    type="switch"
+                                    id="show-inactive-positions"
+                                    label={t('workplace.positions.showInactive')}
+                                    checked={showInactive}
+                                    onChange={(e) => handleShowInactiveChange(e.target.checked)}
+                                    className="mb-0"
+                                />
+                            </Col>
                         </Row>
 
                         {filteredPositions.length === 0 ? (
-                            <div className="workplace-empty">
-                                <i className="bi bi-person-badge"></i>
-                                <p>{t('workplace.positions.noPositions')}</p>
+                            <div className="text-center py-5">
+                                <i className="bi bi-briefcase text-muted" style={{ fontSize: '3rem' }}></i>
+                                <p className="mt-3 text-muted">
+                                    {searchTerm || filterSite
+                                        ? t('workplace.positions.noPositionsFound')
+                                        : t('workplace.positions.noPositions')}
+                                </p>
                             </div>
                         ) : (
-                            <Table responsive hover className="workplace-table">
+                            <Table responsive hover className="positions-table">
                                 <thead>
                                 <tr>
                                     <th>{t('workplace.positions.name')}</th>
                                     <th>{t('workplace.worksites.title')}</th>
                                     <th>{t('workplace.positions.profession')}</th>
-                                    <th className="text-center">{t('workplace.positions.defaultStaff')}</th>
+                                    <th className="text-center">{t('workplace.positions.defaultStaffCount')}</th>
+                                    <th className="text-center">{t('workplace.positions.currentStaff')}</th>
                                     <th className="text-center">{t('workplace.positions.shifts')}</th>
-                                    <th className="text-center">{t('workplace.positions.employees')}</th>
+                                    <th>{t('common.status')}</th>
                                     <th></th>
                                 </tr>
                                 </thead>
@@ -268,9 +344,7 @@ const PositionsTab = ({ selectedSite }) => {
                                 {filteredPositions.map(position => (
                                     <tr
                                         key={position.pos_id}
-                                        className="clickable-row"
-                                        onClick={() => handleManageShifts(position)}
-                                        style={{ cursor: 'pointer' }}
+                                        className={!position.is_active ? 'inactive-row' : ''}
                                     >
                                         <td className="fw-semibold">{position.pos_name}</td>
                                         <td>
@@ -279,20 +353,28 @@ const PositionsTab = ({ selectedSite }) => {
                                             </Badge>
                                         </td>
                                         <td>{position.profession || '-'}</td>
+                                        <td className="text-center">{position.num_of_emp || 1}</td>
                                         <td className="text-center">
-                                            <Badge bg="info">{position.num_of_emp || 1}</Badge>
-                                        </td>
-                                        <td className="text-center">
-                                            <Badge bg="warning" text="dark">
-                                                {position.totalShifts || 0}
+                                            <Badge bg={position.employeeCount > 0 ? 'primary' : 'secondary'}>
+                                                {position.employeeCount || 0}
                                             </Badge>
                                         </td>
                                         <td className="text-center">
-                                            <Badge bg="primary">
-                                                {position.totalEmployees || 0}
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => handleManageShifts(position)}
+                                                className="p-0"
+                                            >
+                                                <Badge bg="info">{position.totalShifts || 0}</Badge>
+                                            </Button>
+                                        </td>
+                                        <td>
+                                            <Badge bg={position.is_active ? 'success' : 'secondary'}>
+                                                {position.is_active ? t('common.active') : t('common.inactive')}
                                             </Badge>
                                         </td>
-                                        <td onClick={(e) => e.stopPropagation()}>
+                                        <td>
                                             <div className="workplace-actions">
                                                 <Button
                                                     variant="outline-primary"
@@ -310,14 +392,25 @@ const PositionsTab = ({ selectedSite }) => {
                                                 >
                                                     <i className="bi bi-people"></i>
                                                 </Button>
-                                                <Button
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(position)}
-                                                    title={t('common.delete')}
-                                                >
-                                                    <i className="bi bi-trash"></i>
-                                                </Button>
+                                                {position.is_active ? (
+                                                    <Button
+                                                        variant="danger"
+                                                        size="sm"
+                                                        onClick={() => handleDelete(position)}
+                                                        title={t('common.delete')}
+                                                    >
+                                                        <i className="bi bi-trash"></i>
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        variant="success"
+                                                        size="sm"
+                                                        onClick={() => handleRestore(position)}
+                                                        title={t('common.restore')}
+                                                    >
+                                                        <i className="bi bi-arrow-clockwise"></i>
+                                                    </Button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -334,9 +427,8 @@ const PositionsTab = ({ selectedSite }) => {
                 onHide={handleModalClose}
                 onSuccess={handleModalSuccess}
                 position={selectedPosition}
-                workSites={workSites}
+                workSites={workSites.filter(site => site.is_active)}
                 defaultSiteId={filterSite || selectedSite?.site_id}
-
             />
 
             <ManageShiftsModal
@@ -350,8 +442,23 @@ const PositionsTab = ({ selectedSite }) => {
                 onHide={() => setShowDeleteConfirm(false)}
                 onConfirm={confirmDelete}
                 title={t('common.confirm')}
-                message={t('workplace.positions.deleteConfirm')}
+                message={
+                    positionToDelete && getEmployeeCountForWarning(positionToDelete) > 0
+                        ? t('workplace.positions.deleteConfirmWithEmployees', {
+                            count: getEmployeeCountForWarning(positionToDelete)
+                        })
+                        : t('workplace.positions.deleteConfirm')
+                }
                 confirmVariant="danger"
+            />
+
+            <ConfirmationModal
+                show={showRestoreConfirm}
+                onHide={() => setShowRestoreConfirm(false)}
+                onConfirm={confirmRestore}
+                title={t('common.confirm')}
+                message={t('workplace.positions.restoreConfirm')}
+                confirmVariant="success"
             />
         </Card>
     );

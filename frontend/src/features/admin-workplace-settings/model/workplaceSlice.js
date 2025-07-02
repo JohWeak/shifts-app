@@ -115,6 +115,18 @@ export const deletePosition = createAsyncThunk(
     }
 );
 
+export const restorePosition = createAsyncThunk(
+    'workplace/restorePosition',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await api.post(`${API_ENDPOINTS.SETTINGS.POSITIONS}/${id}/restore`);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to restore position');
+        }
+    }
+);
+
 // Slice
 const workplaceSlice = createSlice({
     name: 'workplace',
@@ -247,7 +259,20 @@ const workplaceSlice = createSlice({
             .addCase(deletePosition.rejected, (state, action) => {
                 state.error = action.payload;
                 state.positionOperationStatus = 'error';
+            })
+            .addCase(restorePosition.fulfilled, (state, action) => {
+                const index = state.positions.findIndex(pos => pos.pos_id === action.payload.position.pos_id);
+                if (index !== -1) {
+                    state.positions[index] = action.payload.position;
+                }
+                state.positionOperationStatus = 'success';
+            })
+            .addCase(restorePosition.rejected, (state, action) => {
+                state.error = action.payload;
+                state.positionOperationStatus = 'error';
             });
+
+
 
 
     }
