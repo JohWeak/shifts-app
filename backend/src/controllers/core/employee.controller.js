@@ -21,10 +21,27 @@ const create = async (req, res) => {
         }
         const employee = await Employee.create(employeeData);
 
+        // Загружаем созданного сотрудника с ассоциациями
+        const employeeWithAssociations = await Employee.findByPk(employee.emp_id, {
+            attributes: { exclude: ['password'] },
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition',
+                    attributes: ['pos_id', 'pos_name']
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                }
+            ]
+        });
+
         res.status(201).json({
             success: true,
             message: 'Employee created successfully',
-            data: employee
+            data: employeeWithAssociations
         });
     } catch (error) {
         res.status(500).json({
