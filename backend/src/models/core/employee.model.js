@@ -50,6 +50,18 @@ module.exports = (sequelize, DataTypes) => {
                     employee.email = null;
                 }
             }
+        },
+        deactivated_by_position: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'positions',
+                key: 'pos_id'
+            }
+        },
+        deactivated_at: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
     });
     return Employee;

@@ -6,7 +6,7 @@ const { Position, WorkSite, Employee, PositionShift } = db;
 const getAllPositions = async (req, res) => {
     try {
         const { site_id, includeStats } = req.query;
-        const where = { is_active: true };
+        const where = {};
         if (site_id) where.site_id = site_id;
 
         const positions = await Position.findAll({
@@ -26,8 +26,8 @@ const getAllPositions = async (req, res) => {
                 },
                 {
                     model: Employee,
-                    as: 'defaultEmployees', // Используем новую связь
-                    where: { status: ['active', 'admin'] }, // Учитываем и админов
+                    as: 'defaultEmployees',
+                    where: { status: ['active', 'admin'] },
                     required: false,
                     attributes: ['emp_id']
                 }
@@ -44,7 +44,7 @@ const getAllPositions = async (req, res) => {
                 ...posData,
                 totalShifts: posData.shifts?.length || 0,
                 totalEmployees: posData.defaultEmployees?.length || 0,
-                shifts: undefined, // Убираем массив смен
+                shifts: undefined,
                 defaultEmployees: undefined
             };
         });
@@ -133,38 +133,63 @@ const updatePosition = async (req, res) => {
     }
 };
 
-// Delete position
+// Delete position with cascade deactivation
 const deletePosition = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
+
     try {
         const { id } = req.params;
 
         const position = await Position.findByPk(id, {
             include: [{
                 model: Employee,
-                as: 'employees',
-                attributes: ['emp_id']
+                as: 'defaultEmployees',
+                where: { status: ['active', 'admin'] },
+                required: false,
+                attributes: ['emp_id', 'first_name', 'last_name', 'status']
             }]
         });
 
         if (!position) {
+            await transaction.rollback();
             return res.status(404).json({
                 message: 'Position not found'
             });
         }
 
-        if (position.employees && position.employees.length > 0) {
-            return res.status(400).json({
-                message: 'Cannot deactivate position with assigned employees'
-            });
+        const activeEmployees = position.defaultEmployees || [];
+        const employeeCount = activeEmployees.length;
+
+        // Деактивируем позицию
+        await position.update({ is_active: false }, { transaction });
+
+        // Деактивируем всех работников с этой позицией по умолчанию
+        if (employeeCount > 0) {
+            await Employee.update(
+                {
+                    status: 'inactive',
+                    // Добавляем метаданные для отслеживания автоматической деактивации
+                    deactivated_by_position: position.pos_id,
+                    deactivated_at: new Date()
+                },
+                {
+                    where: {
+                        default_position_id: id,
+                        status: ['active', 'admin']
+                    },
+                    transaction
+                }
+            );
         }
 
-        // Soft delete - просто деактивируем
-        await position.update({ is_active: false });
+        await transaction.commit();
 
         res.json({
-            message: 'Position deactivated successfully'
+            message: 'Position deactivated successfully',
+            deactivatedEmployees: employeeCount
         });
     } catch (error) {
+        await transaction.rollback();
         console.error('Error deactivating position:', error);
         res.status(500).json({
             message: 'Error deactivating position',
@@ -173,19 +198,43 @@ const deletePosition = async (req, res) => {
     }
 };
 
-// Добавить новый метод restore:
+// Restore position with cascade restoration
 const restorePosition = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
+
     try {
         const { id } = req.params;
 
         const position = await Position.findByPk(id);
         if (!position) {
+            await transaction.rollback();
             return res.status(404).json({
                 message: 'Position not found'
             });
         }
 
-        await position.update({ is_active: true });
+        // Восстанавливаем позицию
+        await position.update({ is_active: true }, { transaction });
+
+        // Восстанавливаем работников, которые были автоматически деактивированы этой позицией
+        const restoredEmployees = await Employee.update(
+            {
+                status: 'active',
+                deactivated_by_position: null,
+                deactivated_at: null
+            },
+            {
+                where: {
+                    default_position_id: id,
+                    status: 'inactive',
+                    deactivated_by_position: id
+                },
+                transaction,
+                returning: true
+            }
+        );
+
+        await transaction.commit();
 
         // Возвращаем с информацией о workSite
         const restoredPosition = await Position.findByPk(id, {
@@ -198,9 +247,11 @@ const restorePosition = async (req, res) => {
 
         res.json({
             message: 'Position restored successfully',
-            position: restoredPosition
+            position: restoredPosition,
+            restoredEmployees: restoredEmployees[0]
         });
     } catch (error) {
+        await transaction.rollback();
         console.error('Error restoring position:', error);
         res.status(500).json({
             message: 'Error restoring position',
