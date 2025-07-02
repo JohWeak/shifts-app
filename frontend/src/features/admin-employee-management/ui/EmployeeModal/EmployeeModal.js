@@ -4,6 +4,7 @@ import {Modal, Form, Button, Row, Col, Alert, Card} from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
+import { fetchPositions } from 'features/admin-workplace-settings/model/workplaceSlice';
 import { countries, getCitiesForCountry } from 'shared/data/locations';
 
 import './EmployeeModal.css';
@@ -14,7 +15,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
     const { systemSettings } = useSelector((state) => state.settings || {});
     const { workSites } = useSelector((state) => state.schedule || {});
-    const positions = systemSettings?.positions || [];
+    const { positions } = useSelector((state) => state.workplace || {}); // Берем из workplace, а не settings
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -38,10 +39,15 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
 
 
     useEffect(() => {
-        if (show && (!workSites || workSites.length === 0)) {
-            dispatch(fetchWorkSites());
+        if (show) {
+            if (!workSites || workSites.length === 0) {
+                dispatch(fetchWorkSites());
+            }
+            if (!positions || positions.length === 0) {
+                dispatch(fetchPositions());
+            }
         }
-    }, [show]);
+    }, [show, workSites, positions, dispatch]);
 
     useEffect(() => {
         if (employee) {
