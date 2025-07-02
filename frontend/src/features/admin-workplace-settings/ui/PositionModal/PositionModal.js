@@ -22,6 +22,7 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites, defaultSi
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        const activeWorkSites = workSites.filter(site => site.is_active);
         if (position) {
             setFormData({
                 pos_name: position.pos_name || '',
@@ -32,7 +33,7 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites, defaultSi
         } else {
             setFormData({
                 pos_name: '',
-                site_id: defaultSiteId || (workSites.length > 0 ? workSites[0].site_id : ''),
+                site_id: defaultSiteId || (activeWorkSites.length > 0 ? activeWorkSites[0].site_id : ''),
                 profession: '',
                 num_of_emp: 1
             });
@@ -140,11 +141,13 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites, defaultSi
                                     onChange={(e) => handleChange('site_id', e.target.value)}
                                     isInvalid={!!errors.site_id}
                                 >
-                                    {workSites.map(site => (
-                                        <option key={site.site_id} value={site.site_id}>
-                                            {site.site_name}
-                                        </option>
-                                    ))}
+                                    {workSites
+                                        .filter(site => site.is_active)
+                                        .map(site => (
+                                            <option key={site.site_id} value={site.site_id}>
+                                                {site.site_name}
+                                            </option>
+                                        ))}
                                 </Form.Select>
                                 <Form.Control.Feedback type="invalid">
                                     {errors.site_id}

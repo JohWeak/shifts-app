@@ -60,10 +60,11 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
 
     // Отдельный эффект для установки дефолтного site_id
     useEffect(() => {
-        if (safeWorkSites.length > 0 && !settings.site_id) {
+        const activeWorkSites = safeWorkSites.filter(site => site.is_active);
+        if (activeWorkSites.length > 0 && !settings.site_id) {
             setSettings(prev => ({
                 ...prev,
-                site_id: safeWorkSites[0].site_id
+                site_id: activeWorkSites[0].site_id
             }));
         }
     }, [safeWorkSites, settings.site_id]);
@@ -158,7 +159,9 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                                                 value={settings.site_id || ''}
                                                 onChange={(e) => setSettings(prev => ({ ...prev, site_id: parseInt(e.target.value) }))}
                                             >
-                                                {safeWorkSites?.map(site => (
+                                                {safeWorkSites
+                                                    ?.filter(site => site.is_active)
+                                                    .map(site => (
                                                     <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
                                                 ))}
                                             </Form.Select>

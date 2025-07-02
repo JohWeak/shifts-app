@@ -235,11 +235,13 @@ const PositionsTab = ({ selectedSite }) => {
                                     onChange={(e) => setFilterSite(e.target.value)}
                                 >
                                     <option value="">{t('workplace.positions.allSites')}</option>
-                                    {workSites.map(site => (
-                                        <option key={site.site_id} value={site.site_id}>
-                                            {site.site_name}
-                                        </option>
-                                    ))}
+                                    {workSites
+                                        .filter(site => site.is_active)
+                                        .map(site => (
+                                            <option key={site.site_id} value={site.site_id}>
+                                                {site.site_name}
+                                            </option>
+                                        ))}
                                 </Form.Select>
                             </Col>
                         </Row>

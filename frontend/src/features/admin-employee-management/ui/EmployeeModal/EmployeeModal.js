@@ -326,11 +326,13 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             onChange={(e) => handleChange('work_site_id', e.target.value)}
                                         >
                                             <option value="any">{t('employee.commonWorkSite')}</option>
-                                            {workSites?.map((site) => (
-                                                <option key={site.site_id} value={site.site_id}>
-                                                    {site.site_name}
-                                                </option>
-                                            ))}
+                                            {workSites
+                                                ?.filter(site => site.is_active)
+                                                .map((site) => (
+                                                    <option key={site.site_id} value={site.site_id}>
+                                                        {site.site_name}
+                                                    </option>
+                                                ))}
                                         </Form.Select>
                                         <Form.Text className="text-muted">
                                             {t('employee.workSiteHelp')}
