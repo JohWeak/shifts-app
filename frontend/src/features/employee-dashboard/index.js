@@ -12,7 +12,7 @@ import ConstraintsSchedule from '../employee-constraints';
 import {logout} from '../auth/model/authSlice';
 
 // Стили теперь будут в этой же папке
-import './index.css';
+import './indexNew.css';
 
 const EmployeeDashboard = () => {
     const {t} = useI18n();

@@ -29,6 +29,7 @@
 .positions-table .inactive-row {
     opacity: 0.6;
     background-color: var(--bs-gray-100);
+
 }
 
 [data-theme="dark"] .positions-table .inactive-row {
@@ -40,6 +41,10 @@
 }
 
 /* Стили для переключателя */
+.workplace-tab-content .form-check-input {
+
+}
+
 .form-check-input:checked {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary);
