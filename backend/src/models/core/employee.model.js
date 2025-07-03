@@ -34,12 +34,35 @@ module.exports = (sequelize, DataTypes) => {
         password: {type: DataTypes.STRING, allowNull: false},
         status: {type: DataTypes.ENUM('active', 'inactive', 'admin'), defaultValue: 'active'},
         role: {type: DataTypes.ENUM('employee', 'admin'), defaultValue: 'employee'},
-        default_position_id: {type: DataTypes.INTEGER, allowNull: true, references: {model: 'positions', key: 'pos_id'}},
+        default_position_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {model: 'positions', key: 'pos_id'}},
         work_site_id: {
             type: DataTypes.INTEGER,
             allowNull: true,
             references: {model: 'work_sites', key: 'site_id'},
             comment: 'Assigned work site for the employee, NULL means can work at any site'
+        },
+        deactivated_at: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        deactivated_by_position: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'positions',
+                key: 'pos_id'
+            }
+        },
+        deactivated_by_worksite: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'work_sites',
+                key: 'site_id'
+            }
         }
     }, {
         tableName: 'employees',
@@ -50,18 +73,6 @@ module.exports = (sequelize, DataTypes) => {
                     employee.email = null;
                 }
             }
-        },
-        deactivated_by_position: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            references: {
-                model: 'positions',
-                key: 'pos_id'
-            }
-        },
-        deactivated_at: {
-            type: DataTypes.DATE,
-            allowNull: true
         }
     });
     return Employee;

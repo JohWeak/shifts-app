@@ -37,6 +37,18 @@ module.exports = (sequelize, DataTypes) => {
         is_active: {
             type: DataTypes.BOOLEAN,
             defaultValue: true
+        },
+        deactivated_by_worksite: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'work_sites',
+                key: 'site_id'
+            }
+        },
+        deactivated_at: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
     }, {
         tableName: 'positions',
