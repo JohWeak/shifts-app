@@ -8,11 +8,8 @@ const {
     Position,
     WorkSite,
     PositionShift,
-    Shift  // Оставляем для обратной совместимости
 } = db;
 
-// Теперь не нужна функция-обертка module.exports = (db) => {}
-// Просто экспортируем объект с методами
 
 const getAllSchedules = async (req, res) => {
     try {

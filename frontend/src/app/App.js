@@ -10,6 +10,8 @@ import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleS
 // Pages
 import Login from '../features/auth';
 import EmployeeDashboard from '../features/employee-dashboard';
+
+
 import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
 import AlgorithmSettings from '../features/admin-algorithm-settings';
@@ -41,11 +43,9 @@ const AppInitializer = ({children}) => {
 
 
 const AppContent = () => {
-    // Теперь useDispatch() вызывается ВНУТРИ Provider, и все работает!
     const dispatch = useDispatch();
 
     useEffect(() => {
-        // Загружаем настройки системы при старте
         dispatch(fetchSystemSettings());
     }, [dispatch]);
 

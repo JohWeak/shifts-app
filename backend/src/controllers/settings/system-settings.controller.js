@@ -27,15 +27,11 @@ const getSystemSettings = async (req, res) => {
                 weekStartDay: 0,
                 dateFormat: 'DD/MM/YYYY',
                 timeFormat: '24h',
-                language: 'en',
-                enableNotifications: true,
                 autoPublishSchedule: false,
                 defaultScheduleDuration: 7,
-                minRestBetweenShifts: 8,
+                minRestBetweenShifts: 11,
                 maxCannotWorkDays: 2,
-                maxPreferWorkDays: 3,
-                defaultEmployeesPerShift: 1,
-                algorithmMaxTime: 120,
+                maxPreferWorkDays: 6,
                 strictLegalCompliance: true
             }
         });
