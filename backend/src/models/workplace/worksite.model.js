@@ -1,4 +1,4 @@
-// backend/src/models/scheduling/worksite.model.js
+// backend/src/models/workplace/worksite.model.js
 module.exports = (sequelize, DataTypes) => {
     const WorkSite = sequelize.define('WorkSite', {
         site_id: {
