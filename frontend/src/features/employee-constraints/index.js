@@ -1,7 +1,7 @@
-// frontend/src/CompareAlgorithmsModal.js/employee/constraints/WeeklySchedule.js
+// frontend/src/features/employee-constraints/index.js
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Table, Button, Alert, Spinner } from 'react-bootstrap';
-import './indexNew.css';
+import './index.css';
 
 const ConstraintsSchedule = () => {
     const [templateData, setTemplateData] = useState(null);

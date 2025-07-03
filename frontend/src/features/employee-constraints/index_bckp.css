@@ -1,0 +1,184 @@
+/* Контейнер ограничений */
+.constraints-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5px;
+    direction: rtl;
+}
+
+/* Анимация встряхивания при ошибке лимитов */
+.constraints-container.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-1px); }
+    20%, 40%, 60%, 80% { transform: translateX(1px); }
+}
+
+/* Кнопки управления ограничениями */
+.constraint-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.rounded-button {
+    min-width: 120px;
+    transition: all 0.2s ease;
+}
+
+/*.rounded-button:hover {*/
+/*    transform: translateY(-1px);*/
+/*    box-shadow: 0 4px 12px rgba(0,0,0,0.15);*/
+/*}*/
+
+/* Сообщение об успехе */
+.success-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 20px;
+    background-color: #e8f5e8;
+    border-radius: 15px;
+    border: 1px solid transparent;
+    margin: 0 auto;
+    max-width: 300px;
+}
+
+/* ПРАВИЛЬНЫЕ стили для таблицы */
+.desktop-constraints .table,
+.mobile-constraints .table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Равная ширина столбцов */
+.desktop-constraints th,
+.desktop-constraints td {
+    width: 12.5%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.mobile-constraints th,
+.mobile-constraints td {
+    width: 25%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* ПРОСТЫЕ стили для ячеек - БЕЗ FLEX! */
+.constraint-cell {
+    background-color: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px 5px;
+    margin: 3px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    text-align: center;
+}
+
+.constraint-cell.cannot-work {
+    background-color: #ffb3c1;
+    /*border-color: #ff1000;*/
+    color: #0c0c0c;
+}
+
+.constraint-cell.prefer-work {
+    background-color: #a9f8dd;
+    /*border-color: #4caf50;*/
+    color: #0c0c0c;
+}
+
+.constraint-cell.neutral {
+    background-color: #f6f6f6;
+    /*border-color: #ddd;*/
+    color: #666;
+}
+
+.constraint-cell.clickable:hover {
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+
+
+}
+
+/* Стили для заголовков */
+
+.shift-header {
+    background-color: #dcdbdb;
+    font-weight: 300;
+    /*color: #4e4f50;*/
+    /*padding: 15px 8px;*/
+}
+
+
+/* Стили для загрузки */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    font-size: 18px;
+    color: #666;
+}
+
+
+/* Стили для заголовка страницы */
+.display-4 {
+    font-size: 2.2rem !important;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+}
+
+.text-muted {
+    font-size: 1rem;
+    /*margin-bottom: 1rem;*/
+}
+
+/* Стили для отключенного состояния */
+.constraint-cell:not(.clickable) {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.constraint-cell:not(.clickable):hover {
+    transform: none;
+    box-shadow: none;
+
+}
+
+/*@media (max-width: 768px) {*/
+/*    .constraints-container {*/
+/*        padding: 15px 10px;*/
+/*    }*/
+
+/*    .constraint-controls {*/
+/*        gap: 12px;*/
+/*    }*/
+
+/*    .rounded-button {*/
+/*        min-width: 100px;*/
+/*        padding: 8px 16px;*/
+/*        font-size: 14px;*/
+/*    }*/
+
+/*    .constraint-cell {*/
+/*        padding: 12px 4px;*/
+/*        margin: 2px;*/
+/*    }*/
+
+/*    .success-message {*/
+/*        max-width: 280px;*/
+/*        padding: 10px 16px;*/
+/*        font-size: 14px;*/
+/*    }*/
+/*}*/

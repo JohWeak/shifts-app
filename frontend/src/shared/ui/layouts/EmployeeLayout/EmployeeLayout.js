@@ -1,9 +1,7 @@
-// frontend/src/widgets/EmployeeLayout/EmployeeLayout.js
-import React from 'react';
+//frontend/src/shared/ui/layouts/EmployeeLayout/EmployeeLayout.jsimport React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Spinner } from 'react-bootstrap';
-import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 
 
 const EmployeeLayout = ({ children }) => {

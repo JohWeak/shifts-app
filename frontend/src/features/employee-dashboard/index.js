@@ -1,4 +1,4 @@
-// frontend/src/features/employee-dashboard/weeklySchedule.js
+// frontend/src/features/employee-dashboard/index.js
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
@@ -10,9 +10,10 @@ import {LanguageSwitch} from '../../shared/ui/components/LanguageSwitch/Language
 import WeeklySchedule from '../employee-schedule';
 import ConstraintsSchedule from '../employee-constraints';
 import {logout} from '../auth/model/authSlice';
+import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 
-// Стили теперь будут в этой же папке
-import './indexNew.css';
+
+import './index.css';
 
 const EmployeeDashboard = () => {
     const {t} = useI18n();
@@ -45,9 +46,11 @@ const EmployeeDashboard = () => {
                 <div className="header-content">
                     <h1>{t('common.appName')}</h1>
                     <div className="user-info">
+                        <LanguageSwitch/>
+                        <ThemeToggle variant="icon" />
                         <span className="welcome-text">{t('auth.welcome')}, {user.name}</span>
                         <div className="header-actions">
-                            <LanguageSwitch/>
+
                             <Dropdown show={showUserMenu} onToggle={setShowUserMenu} className="user-dropdown"
                                       align="end">
                                 <Dropdown.Toggle variant="outline-light" id="user-dropdown" className="user-btn">

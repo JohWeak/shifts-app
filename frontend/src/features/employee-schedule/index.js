@@ -1,7 +1,7 @@
-// frontend/src/CompareAlgorithmsModal.js/employee/schedule/weeklySchedule.js
+// frontend/src/features/employee-schedule/index.js
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Table, Button, Alert, Spinner } from 'react-bootstrap';
-import './indexNew.css';
+import './index.css';
 
 const WeeklySchedule = () => {
     const [scheduleData, setScheduleData] = useState(null);

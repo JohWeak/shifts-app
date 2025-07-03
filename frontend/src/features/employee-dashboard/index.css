@@ -1,14 +1,19 @@
-/* frontend/src/CompareAlgorithmsModal.js/employee/Dashboard.css */
+/* Employee Dashboard - гибридный подход */
+
 .employee-dashboard {
     min-height: 100vh;
-    background-color: #fafafa;
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .employee-dashboard {
+    background-color: var(--bs-black);
 }
 
 /* Header */
 .dashboard-header {
-    background: linear-gradient(135deg,  #3498db 0%, #66eabc 100%);
-    color: white;
-    padding: 20px 0;
+    background: linear-gradient(135deg, #3498db 0%, #66eabc 100%);
+    color: var(--bs-white);
+    padding: 1.25rem 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -18,138 +23,91 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 25px;
+    padding: 0.625rem 1.5rem;
 }
 
 .dashboard-header h1 {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 600;
-    margin: 0 0;
-    padding: 0 10px;
+    margin: 0;
+    padding: 0 0.625rem;
+    color: var(--bs-white);
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 1rem;
 }
 
 .welcome-text {
-    font-size: 16px;
+    font-size: 1rem;
     opacity: 0.9;
 }
 
-
 /* Navigation */
 .dashboard-nav {
-    background: white;
-    border-radius: 5px;
-    border-bottom: 1px solid #eee;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
     display: flex;
     max-width: 1150px;
     margin: 0 auto;
-    padding: 0 5px;
+    padding: 0 0.3rem;
 }
 
 .nav-tab {
     background: none;
     border: none;
-    /*padding: 6px 2px;*/
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
-    color: #666;
-    /*cursor: pointer;*/
+    color: var(--bs-body-color);
+    cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: all 0.2s ease;
+    padding: 0.75rem 1rem;
 }
 
 .nav-tab:hover {
-    color: #3498db;
-    background-color: #f8f9fa;
+    color: var(--bs-primary);
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .nav-tab:hover {
+    background-color: var(--bs-gray-800);
 }
 
 .nav-tab.active {
-    color: #3498db;
-    border-bottom-color: #3498db;
+    color: var(--bs-primary);
+    border-bottom-color: var(--bs-primary);
 }
 
 /* Content */
 .dashboard-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 10px;
+    padding: 0.625rem;
 }
 
 .coming-soon {
     text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 3.75rem 1.25rem;
+    background: var(--bs-body-bg);
+    border-radius: 0.75rem;
+    box-shadow: var(--bs-box-shadow-sm);
 }
 
 .coming-soon h2 {
-    font-size: 24px;
-    margin-bottom: 12px;
-    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--bs-emphasis-color);
 }
 
 .coming-soon p {
-    color: #666;
-    font-size: 16px;
+    color: var(--bs-secondary);
+    font-size: 1rem;
 }
 
-
-
-@media (min-width: 769px) {
-    .nav-tab span.tab-name {
-        display: inline;
-    }
-    .dashboard-header {
-        padding: 10px 0;
-    }
-}
-
-/* Coming soon section */
-.coming-soon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    padding: 2rem;
-}
-
-.coming-soon .display-1 {
-    font-size: 4rem;
-    opacity: 0.3;
-}
-
-.coming-soon h2 {
-    color: #6c757d;
-    margin-bottom: 1rem;
-}
-
-.coming-soon p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-/* Navigation tabs with icons */
-.nav-tab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 12px 20px;
-    transition: all 0.2s ease;
-}
-
-.nav-tab i {
-    font-size: 1.1rem;
-}
-
-
-
+/* User dropdown customization */
 .user-dropdown .dropdown-toggle {
     background: rgba(255, 255, 255, 0.2) !important;
     border: 2px solid rgba(255, 255, 255, 0.3) !important;
@@ -169,85 +127,33 @@
 }
 
 .user-dropdown .dropdown-toggle::after {
-    display: none !important; /* Убрать стрелку */
+    display: none !important;
 }
 
-.user-dropdown .dropdown-toggle i.bi-person-circle {
-    font-size: 28px;
-    color: white;
+/* Icons */
+.bi {
+    font-size: 1.1em;
+    margin-bottom: 2px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-nav {
-        /*flex-direction: column !important;*/
-        padding: 5px 0 5px 0;
-    }
+/* Mobile specific */
+.nav-tabs-mobile {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
 
-    .nav-tabs-mobile {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        width: 100%;
-        padding: 0 10px;
-    }
-
-    .nav-tab {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 2px 4px;
-        min-height: 40px;
-        justify-content: center;
-
-    }
-
-    .nav-tab i {
-        font-size: 24px;
-        margin-bottom: 2px;
-        display: block;
-    }
-
-    .nav-tab:hover {
-        background-color: #f5f5f5;
-    }
-    .header-content {
-        max-width: 1000px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px;
-    }
-
-    .dashboard-header h1 {
-        font-size: 24px;
-        font-weight: 600;
-        margin: 0 0;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .welcome-text {
-        font-size: 1px;
-        opacity: 0;
-    }
-
-    /* Скрыть названия в самих табах */
+@media (min-width: 769px) {
     .nav-tab span.tab-name {
-        display: none;
+        display: inline;
     }
-    /*.user-dropdown .dropdown-toggle {*/
-    /*    width: 40px !important;*/
-    /*    height: 40px !important;*/
-    /*}*/
+    .dashboard-header {
+        padding: 0.625rem 0;
+    }
+}
 
-    /*.user-dropdown .dropdown-toggle i.bi-person-circle {*/
-    /*    font-size: 24px;*/
-    /*}*/
+@media (max-width: 767.98px) {
+    .display-4 {
+        font-size: 1.8rem;
+    }
 }
