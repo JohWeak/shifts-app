@@ -153,7 +153,7 @@ const AdminLayout = ({ children }) => {
                         }}
                     >
                         <i className={`bi bi-${item.icon} nav-icon `}></i>
-                        <span className="me-auto">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
+                        <span className="flex-grow-1">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
                         {item.badge && <Badge bg="primary">{item.badge}</Badge>}
                     </Nav.Link>
                 </Nav.Item>

@@ -96,6 +96,10 @@
 .admin-nav {
     padding: 0 1rem;
 }
+[dir="rtl"] .admin-nav {
+    padding-left: 1rem;
+    padding-right: 0;
+}
 
 /* 2. Общий стиль для ссылок с ПОВЫШЕННОЙ СПЕЦИФИЧНОСТЬЮ. */
 .admin-nav .admin-nav-link {
@@ -193,6 +197,7 @@
     left: auto;
     right: 0;
     transform: translateX(100%);
+    animation-name: slideInRTL;
 }
 
 .admin-layout .mobile-sidebar.closing {
@@ -205,6 +210,7 @@
 
 .admin-layout .mobile-sidebar-content {
     padding: 1rem 0;
+
 }
 
 /* Обновленная кнопка меню */
