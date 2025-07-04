@@ -137,7 +137,7 @@
 }
 
 .nav-icon {
-    margin-right: 0.75rem;
+    margin-inline-end: 0.75rem;
     width: 20px;
     text-align: center;
 
@@ -165,7 +165,7 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
+    z-index: 1015;
     opacity: 0;
     animation: fadeIn 0.3s ease-out forwards;
 }
@@ -268,7 +268,7 @@
 /*}*/
 /* BADGES - дополнения к Bootstrap */
 .admin-nav-link .badge {
-    margin-left: auto;
+    margin-inline-start: auto;
     font-size: 0.8rem;
 }
 .admin-layout .admin-navbar .badge{
