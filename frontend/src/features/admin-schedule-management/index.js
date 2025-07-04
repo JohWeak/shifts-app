@@ -53,7 +53,6 @@ const ScheduleManagement = () => {
     } = useScheduleActions();
 
     // --- Локальное состояние для UI, которое было утеряно ---
-    const [alert, setAlert] = useState(null);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
