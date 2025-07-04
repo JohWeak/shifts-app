@@ -14,6 +14,8 @@ import {
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useSortableData } from 'shared/hooks/useSortableData';
+import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import ManageShiftsModal from '../ManageShiftsModal/ManageShiftsModal';
@@ -199,7 +201,7 @@ const PositionsTab = ({ selectedSite }) => {
     const filteredPositions = React.useMemo(() => {
         if (!positions || !Array.isArray(positions)) return [];
 
-        let filtered = positions.filter(position => {
+        return positions.filter(position => {
             if (!position) return false;
 
             const matchesSearch = position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -209,20 +211,30 @@ const PositionsTab = ({ selectedSite }) => {
 
             return matchesSearch && matchesSite && matchesActiveFilter;
         });
-
-        // Сортировка: сначала активные, потом неактивные
-        return filtered.sort((a, b) => {
-            if (a.is_active !== b.is_active) {
-                return a.is_active ? -1 : 1;
-            }
-            return a.pos_name.localeCompare(b.pos_name);
-        });
     }, [positions, searchTerm, filterSite, showInactive]);
 
     const getSiteName = (siteId) => {
         const site = workSites.find(s => s.site_id === siteId);
         return site ? site.site_name : '-';
     };
+
+// Определяем аксессоры для сортировки
+    const sortingAccessors = React.useMemo(() => ({
+        name: (p) => p.pos_name,
+        site: (p) => getSiteName(p.site_id),
+        profession: (p) => p.profession || '',
+        defaultStaff: (p) => p.num_of_emp || 1,
+        shifts: (p) => p.totalShifts || 0,
+        employees: (p) => p.totalEmployees || 0,
+        status: (p) => (p.is_active ? 0 : 1), // Сортируем по статусу
+    }), [workSites]); // Добавили workSites в зависимости
+
+// Используем хук для сортировки
+    const { sortedItems: sortedPositions, requestSort, sortConfig } = useSortableData(
+        filteredPositions,
+        { field: 'status', order: 'ASC' }, // Начальная сортировка
+        sortingAccessors
+    );
 
     // Подсчет деактивированных работников для предупреждения
     const getEmployeeCountForWarning = (position) => {
@@ -334,18 +346,32 @@ const PositionsTab = ({ selectedSite }) => {
                             <Table responsive hover className="positions-table">
                                 <thead>
                                 <tr>
-                                    <th>{t('workplace.positions.name')}</th>
-                                    <th>{t('workplace.worksites.title')}</th>
-                                    <th>{t('workplace.positions.profession')}</th>
-                                    <th className="text-center">{t('workplace.positions.defaultStaff')}</th>
-                                    <th className="text-center">{t('workplace.positions.shifts')}</th>
-                                    <th className="text-center">{t('workplace.positions.employees')}</th>
-                                    <th>{t('common.status')}</th>
+                                    <SortableHeader sortKey="name" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('workplace.positions.name')}
+                                    </SortableHeader>
+                                    <SortableHeader sortKey="site" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('workplace.worksites.title')}
+                                    </SortableHeader>
+                                    <SortableHeader sortKey="profession" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('workplace.positions.profession')}
+                                    </SortableHeader>
+                                    <SortableHeader sortKey="defaultStaff" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('workplace.positions.defaultStaff')}
+                                    </SortableHeader>
+                                    <SortableHeader sortKey="shifts" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('workplace.positions.shifts')}
+                                    </SortableHeader>
+                                    <SortableHeader sortKey="employees" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('workplace.positions.employees')}
+                                    </SortableHeader>
+                                    <SortableHeader sortKey="status" sortConfig={sortConfig} onSort={requestSort}>
+                                        {t('common.status')}
+                                    </SortableHeader>
                                     <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {filteredPositions.map(position => (
+                                {sortedPositions.map(position => (
                                     <tr
                                         key={position.pos_id}
                                         className={!position.is_active ? 'inactive-row' : '"clickable-row"'}
