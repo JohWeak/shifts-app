@@ -10,7 +10,7 @@ import {
     InputGroup,
     Dropdown,
     Row,
-    Col
+    Col, Spinner
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -56,8 +56,7 @@ const PositionsTab = ({ selectedSite }) => {
     );
     const [searchTerm, setSearchTerm] = useState('');
     const [filterSite, setFilterSite] = useState('');
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
+    const [alertInfo, setAlertInfo] = useState({ show: false, variant: 'success', message: '' });
     const [isInitialized, setIsInitialized] = useState(false);
     const [showShiftsModal, setShowShiftsModal] = useState(false);
     const [positionForShifts, setPositionForShifts] = useState(null);
@@ -83,24 +82,6 @@ const PositionsTab = ({ selectedSite }) => {
         }
     }, [dispatch, isInitialized, workSites.length]);
 
-    useEffect(() => {
-        if (positionOperationStatus === 'success') {
-            setShowAlert(true);
-            setAlertMessage(
-                selectedPosition
-                    ? t('workplace.positions.updated')
-                    : positionToDelete
-                        ? t('workplace.positions.deleted')
-                        : positionToRestore
-                            ? t('workplace.positions.restored')
-                            : t('workplace.positions.created')
-            );
-            setTimeout(() => {
-                setShowAlert(false);
-                dispatch(clearPositionOperationStatus());
-            }, 3000);
-        }
-    }, [positionOperationStatus, dispatch, t, selectedPosition, positionToDelete, positionToRestore]);
 
     // Сохранение состояния переключателя
     const handleShowInactiveChange = (checked) => {
@@ -131,36 +112,60 @@ const PositionsTab = ({ selectedSite }) => {
     const confirmDelete = async () => {
         if (positionToDelete) {
             setShowDeleteConfirm(false);
-            const result = await dispatch(deletePosition(positionToDelete.pos_id));
-            if (deletePosition.fulfilled.match(result)) {
-                // Показываем информацию о деактивированных работниках
-                const deactivatedCount = result.payload.deactivatedEmployees || 0;
-                if (deactivatedCount > 0) {
-                    setAlertMessage(
-                        t('workplace.positions.deletedWithEmployees', { count: deactivatedCount })
-                    );
-                }
+
+            // 1. Показываем алерт "В процессе..."
+            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+
+            try {
+                const result = await dispatch(deletePosition(positionToDelete.pos_id)).unwrap();
+
+                // 2. Успех! Показываем правильный алерт
+                const deactivatedCount = result.deactivatedEmployees || 0;
+                const message = deactivatedCount > 0
+                    ? t('workplace.positions.deletedWithEmployees', { count: deactivatedCount })
+                    : t('workplace.positions.deleted');
+
+                setAlertInfo({ show: true, variant: 'warning', message });
+
+                dispatch(fetchPositions());
+
+            } catch (error) {
+                // 3. Ошибка!
+                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+            } finally {
+                // 4. Очищаем состояние
+                setPositionToDelete(null);
             }
-            setPositionToDelete(null);
-            dispatch(fetchPositions());
         }
     };
 
     const confirmRestore = async () => {
         if (positionToRestore) {
             setShowRestoreConfirm(false);
-            const result = await dispatch(restorePosition(positionToRestore.pos_id));
-            if (restorePosition.fulfilled.match(result)) {
-                // Показываем информацию о восстановленных работниках
-                const restoredCount = result.payload.restoredEmployees || 0;
-                if (restoredCount > 0) {
-                    setAlertMessage(
-                        t('workplace.positions.restoredWithEmployees', { count: restoredCount })
-                    );
-                }
+
+            // 1. Показываем алерт "В процессе..."
+            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+
+            try {
+                const result = await dispatch(restorePosition(positionToRestore.pos_id)).unwrap();
+
+                // 2. Успех!
+                const restoredCount = result.restoredEmployees || 0;
+                const message = restoredCount > 0
+                    ? t('workplace.positions.restoredWithEmployees', { count: restoredCount })
+                    : t('workplace.positions.restored');
+
+                setAlertInfo({ show: true, variant: 'success', message });
+
+                dispatch(fetchPositions());
+
+            } catch (error) {
+                // 3. Ошибка!
+                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+            } finally {
+                // 4. Очищаем состояние
+                setPositionToRestore(null);
             }
-            setPositionToRestore(null);
-            dispatch(fetchPositions());
         }
     };
 
@@ -270,17 +275,27 @@ const PositionsTab = ({ selectedSite }) => {
             </Card.Header>
 
             <Card.Body>
-                {showAlert && (
+                {alertInfo.show && (
                     <Alert
-                        variant="success"
-                        dismissible
-                        onClose={() => setShowAlert(false)}
+                        variant={alertInfo.variant}
+                        onClose={() => setAlertInfo({ ...alertInfo, show: false })}
+                        dismissible={alertInfo.variant !== 'info'}
                     >
-                        {alertMessage}
+                        {alertInfo.variant === 'info' && (
+                            <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="me-2"
+                            />
+                        )}
+                        {alertInfo.message}
                     </Alert>
                 )}
 
-                {error && (
+                {error && !alertInfo.show && (
                     <Alert variant="danger" dismissible onClose={() => dispatch(clearPositionOperationStatus())}>
                         {error}
                     </Alert>

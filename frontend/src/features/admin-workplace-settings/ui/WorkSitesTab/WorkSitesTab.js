@@ -91,7 +91,7 @@ const WorkSitesTab = ({onSelectSite}) => {
                     })
                     : t('workplace.worksites.deleted');
 
-                setAlertInfo({ show: true, variant: 'success', message });
+                setAlertInfo({ show: true, variant: 'warning', message });
 
                 dispatch(fetchWorkSites());
 
