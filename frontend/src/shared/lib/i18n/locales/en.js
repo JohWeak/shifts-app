@@ -56,6 +56,8 @@ export const en = {
         minutes: 'minutes',
         retry: 'Retry',
         total: 'Total',
+        deactivate: 'Deactivate',
+        restore: 'Restore',
     },
     auth: {
         createAccount: 'Create Account',
@@ -648,11 +650,15 @@ export const en = {
             noSites: 'No work sites found. Add your first site to get started.',
             namePlaceholder: 'e.g., Main Office',
             addressPlaceholder: 'e.g., 123 Main Street, Tel Aviv',
-            restored: 'Work site successfully restored',
             restoreConfirm: 'Are you sure you want to restore this work site?',
             noSitesFound: 'No work sites match your criteria',
             activeOnly: 'Active sites',
-            allSites: 'All sites'
+            allSites: 'All sites',
+            restored: 'Work site restored successfully',
+            deletedWithDetails: 'Work site deactivated. {{positions}} positions and {{employees}} employees were also deactivated',
+            restoredWithDetails: 'Work site restored. {{positions}} positions and {{employees}} employees were also restored',
+            deleteConfirmWithDetails: 'Are you sure you want to deactivate "{{site}}"? This will also deactivate {{positions}} positions and {{employees}} employees',
+
         },
         positions: {
             title: 'Positions',

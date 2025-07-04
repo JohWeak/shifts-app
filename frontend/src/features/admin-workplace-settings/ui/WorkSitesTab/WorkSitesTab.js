@@ -55,15 +55,17 @@ const WorkSitesTab = ({onSelectSite}) => {
     useEffect(() => {
         if (operationStatus === 'success') {
             setShowAlert(true);
-            setAlertMessage(
-                selectedSite
-                    ? t('workplace.worksites.updated')
-                    : siteToDelete
-                        ? t('workplace.worksites.deleted')
-                        : siteToRestore
-                            ? t('workplace.worksites.restored')
-                            : t('workplace.worksites.created')
-            );
+            // Создаем детальное сообщение на основе последней операции
+            if (selectedSite) {
+                setAlertMessage(t('workplace.worksites.updated'));
+            } else if (siteToDelete) {
+                setAlertMessage(t('workplace.worksites.deleted'));
+            } else if (siteToRestore) {
+                setAlertMessage(t('workplace.worksites.restored'));
+            } else {
+                setAlertMessage(t('workplace.worksites.created'));
+            }
+
             setTimeout(() => {
                 setShowAlert(false);
                 dispatch(clearOperationStatus());
@@ -93,7 +95,19 @@ const WorkSitesTab = ({onSelectSite}) => {
 
     const confirmDelete = async () => {
         if (siteToDelete) {
-            await dispatch(deleteWorkSite(siteToDelete.site_id));
+            const result = await dispatch(deleteWorkSite(siteToDelete.site_id));
+            if (deleteWorkSite.fulfilled.match(result)) {
+                // Показываем детальную информацию о деактивации
+                const { deactivatedPositions = 0, deactivatedEmployees = 0 } = result.payload;
+                if (deactivatedPositions > 0 || deactivatedEmployees > 0) {
+                    setAlertMessage(
+                        t('workplace.worksites.deletedWithDetails', {
+                            positions: deactivatedPositions,
+                            employees: deactivatedEmployees
+                        })
+                    );
+                }
+            }
             setShowDeleteConfirm(false);
             setSiteToDelete(null);
             dispatch(fetchWorkSites());
@@ -102,7 +116,19 @@ const WorkSitesTab = ({onSelectSite}) => {
 
     const confirmRestore = async () => {
         if (siteToRestore) {
-            await dispatch(restoreWorkSite(siteToRestore.site_id));
+            const result = await dispatch(restoreWorkSite(siteToRestore.site_id));
+            if (restoreWorkSite.fulfilled.match(result)) {
+                // Показываем детальную информацию о восстановлении
+                const { restoredPositions = 0, restoredEmployees = 0 } = result.payload;
+                if (restoredPositions > 0 || restoredEmployees > 0) {
+                    setAlertMessage(
+                        t('workplace.worksites.restoredWithDetails', {
+                            positions: restoredPositions,
+                            employees: restoredEmployees
+                        })
+                    );
+                }
+            }
             setShowRestoreConfirm(false);
             setSiteToRestore(null);
             dispatch(fetchWorkSites());
@@ -137,6 +163,24 @@ const WorkSitesTab = ({onSelectSite}) => {
         if (onSelectSite) {
             onSelectSite(site);
         }
+    };
+
+    // Создаем детальное предупреждение для удаления
+    const getDeleteConfirmMessage = (site) => {
+        if (!site) return '';
+
+        const positionCount = site.positionCount || 0;
+        const employeeCount = site.employeeCount || 0;
+
+        if (positionCount === 0 && employeeCount === 0) {
+            return t('workplace.worksites.deleteConfirm');
+        }
+
+        return t('workplace.worksites.deleteConfirmWithDetails', {
+            site: site.site_name,
+            positions: positionCount,
+            employees: employeeCount
+        });
     };
 
     // Фильтрация сайтов
@@ -281,12 +325,16 @@ const WorkSitesTab = ({onSelectSite}) => {
                                     </Badge>
                                 </td>
                                 <td className="text-center">
-                                    <Badge bg="info" pill>
+                                    <Badge
+                                        bg={site.positionCount > 0 ? 'info' : 'secondary'}
+                                        pill>
                                         {site.positionCount || 0}
                                     </Badge>
                                 </td>
                                 <td className="text-center">
-                                    <Badge bg="primary" pill>
+                                    <Badge
+                                        bg={site.employeeCount > 0 ? 'primary' : 'secondary'}
+                                        pill>
                                         {site.employeeCount || 0}
                                     </Badge>
                                 </td>
@@ -352,8 +400,9 @@ const WorkSitesTab = ({onSelectSite}) => {
                 onHide={() => setShowDeleteConfirm(false)}
                 onConfirm={confirmDelete}
                 title={t('common.confirm')}
-                message={t('workplace.worksites.deleteConfirm')}
+                message={getDeleteConfirmMessage(siteToDelete)}
                 confirmVariant="danger"
+                confirmText={t('common.deactivate')}
             />
 
             <ConfirmationModal
@@ -361,8 +410,9 @@ const WorkSitesTab = ({onSelectSite}) => {
                 onHide={() => setShowRestoreConfirm(false)}
                 onConfirm={confirmRestore}
                 title={t('common.confirm')}
-                message={t('workplace.worksites.restoreConfirm')}
+                message={t('workplace.worksites.restoreConfirm', { site: siteToRestore?.site_name })}
                 confirmVariant="success"
+                confirmText={t('common.restore')}
             />
         </Card>
     );
