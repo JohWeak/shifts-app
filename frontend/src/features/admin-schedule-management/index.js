@@ -70,13 +70,19 @@ const ScheduleManagement = () => {
         const result = await handleGenerate(settings);
 
         if (result.success) {
-            setAlert({ type: 'success', message: t('schedule.generateSuccess') });
+            dispatch(addNotification({
+                message: t('schedule.generateSuccess'),
+                variant: 'success'
+            }));
             setShowGenerateModal(false);
-
 
             dispatch(fetchSchedules());
         } else {
-            setAlert({ type: 'danger', message: actionError || t('schedule.generateError') });
+            dispatch(addNotification({
+                message: actionError || t('schedule.generateError'),
+                variant: 'danger',
+                duration: 5000
+            }));
         }
     };
 
@@ -150,10 +156,14 @@ const ScheduleManagement = () => {
     };
 
     const onScheduleDeleted = (deletedId) => {
-        setAlert({ type: 'success', message: t('schedule.deleteSuccess') });
+        dispatch(addNotification({
+            message: t('schedule.deleteSuccess'),
+            variant: 'success'
+        }));
         if (selectedScheduleId === deletedId) {
             dispatch(setSelectedScheduleId(null));
         }
+
     };
 
     // --- Рендеринг ---
@@ -182,13 +192,6 @@ const ScheduleManagement = () => {
                         <span>{t('schedule.generateSchedule')}</span>
                     </Button>
                 </PageHeader>
-
-                {/* Alert messages */}
-                {alert && (
-                    <Alert variant={alert.type} dismissible onClose={() => setAlert(null)} className="mb-3">
-                        {alert.message}
-                    </Alert>
-                )}
 
                 {/* Main content */}
                 {activeTab === 'view' && selectedScheduleId ? (
