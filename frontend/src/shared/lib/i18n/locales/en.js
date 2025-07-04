@@ -58,6 +58,7 @@ export const en = {
         total: 'Total',
         deactivate: 'Deactivate',
         restore: 'Restore',
+        processing: 'Processing...',
     },
     auth: {
         createAccount: 'Create Account',

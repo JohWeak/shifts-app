@@ -114,7 +114,7 @@ const PositionsTab = ({ selectedSite }) => {
             setShowDeleteConfirm(false);
 
             // 1. Показываем алерт "В процессе..."
-            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
 
             try {
                 const result = await dispatch(deletePosition(positionToDelete.pos_id)).unwrap();
@@ -144,7 +144,7 @@ const PositionsTab = ({ selectedSite }) => {
             setShowRestoreConfirm(false);
 
             // 1. Показываем алерт "В процессе..."
-            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
 
             try {
                 const result = await dispatch(restorePosition(positionToRestore.pos_id)).unwrap();

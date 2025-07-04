@@ -24,6 +24,12 @@ const WorkplaceSettings = () => {
     const { loading } = useSelector(state => state.workplace);
 
     useEffect(() => {
+        if (activeTab === 'positions') {
+            dispatch(fetchPositions());
+        }
+    }, [activeTab, dispatch]);
+
+    useEffect(() => {
         dispatch(fetchWorkSites());
         dispatch(fetchPositions());
     }, [dispatch]);

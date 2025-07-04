@@ -78,7 +78,7 @@ const WorkSitesTab = ({onSelectSite}) => {
     const confirmDelete = async () => {
         if (siteToDelete) {
             setShowDeleteConfirm(false);
-            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
             try {
                 const result = await dispatch(deleteWorkSite(siteToDelete.site_id)).unwrap();
 
@@ -110,7 +110,7 @@ const WorkSitesTab = ({onSelectSite}) => {
             setShowRestoreConfirm(false);
 
             // 1. Показываем алерт "В процессе..."
-            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
 
             try {
                 const result = await dispatch(restoreWorkSite(siteToRestore.site_id)).unwrap();
