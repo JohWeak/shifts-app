@@ -1,11 +1,12 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.js
-import React, { useState } from 'react';
+import React, {useMemo, useState} from 'react';
 import { Card, Table, Button, Badge, Spinner, Pagination, Form } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import './EmployeeList.css';
-import ActionButtons from "../../../../shared/ui/components/ActionButtons/ActionButtons";
-import {getStatusBadgeVariant} from "../../../../shared/lib/utils/scheduleUtils";
+import {getStatusBadgeVariant} from "shared/lib/utils/scheduleUtils";
+
+import { useSortableData } from 'shared/hooks/useSortableData';
+import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 
 const EmployeeList = ({
                           employees,
@@ -16,32 +17,28 @@ const EmployeeList = ({
                           pagination,
                           onPageChange,
                           onPageSizeChange,
-                          onSort,
-                          currentSort
                       }) => {
     const { t } = useI18n();
-    const [sortConfig, setSortConfig] = useState(currentSort || { field: null, order: null });
+
+    // 1. Создаем объект с функциями-аксессорами
+    //    Оборачиваем в useMemo, чтобы объект не создавался заново на каждый рендер
+    const sortingAccessors = useMemo(() => ({
+        name: (employee) => `${employee.first_name} ${employee.last_name}`,
+        workSite: (employee) => employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite'),
+        position: (employee) => employee.position_name || employee.defaultPosition?.pos_name || '-',
+        // Для status аксессор не обязателен, т.к. employee.status и так работает, но для единообразия можно добавить
+        status: (employee) => employee.status,
+    }), [t]); // t - зависимость, если язык изменится
+
+
+    const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
+        employees,
+        { field: 'name', order: 'ASC' }, // Начальная сортировка
+        sortingAccessors // 2. Передаем аксессоры в хук
+    );
 
     const totalPages = Math.ceil(pagination.total / pagination.pageSize);
     const showPagination = totalPages > 1;
-
-    const handleSort = (field) => {
-        let newOrder = 'ASC';
-        if (sortConfig.field === field && sortConfig.order === 'ASC') {
-            newOrder = 'DESC';
-        }
-        setSortConfig({ field, order: newOrder });
-        onSort(field, newOrder);
-    };
-
-    const getSortIcon = (field) => {
-        if (sortConfig.field !== field) {
-            return <i className="bi bi-arrow-down-up text-muted ms-1"></i>;
-        }
-        return sortConfig.order === 'ASC'
-            ? <i className="bi bi-arrow-up ms-1"></i>
-            : <i className="bi bi-arrow-down ms-1"></i>;
-    };
 
     const renderPaginationControls = () => {
         return (
@@ -146,39 +143,39 @@ const EmployeeList = ({
                     <Table hover className="data-table mb-0">
                         <thead>
                         <tr>
-                            <th
-                                className="sortable-header"
-                                onClick={() => handleSort('name')}
+                            <SortableHeader
+                                sortKey="name"
+                                sortConfig={sortConfig}
+                                onSort={requestSort}
                             >
                                 {t('employee.fullName')}
-                                {getSortIcon('name')}
-                            </th>
-                            <th
-                                className="sortable-header"
-                                onClick={() => handleSort('workSite')}
+                            </SortableHeader>
+                            <SortableHeader
+                                sortKey="workSite"
+                                sortConfig={sortConfig}
+                                onSort={requestSort}
                             >
                                 {t('workSite.workSite')}
-                                {getSortIcon('workSite')}
-                            </th>
-                            <th
-                                className="sortable-header"
-                                onClick={() => handleSort('position')}
+                            </SortableHeader>
+                            <SortableHeader
+                                sortKey="position"
+                                sortConfig={sortConfig}
+                                onSort={requestSort}
                             >
                                 {t('employee.position')}
-                                {getSortIcon('position')}
-                            </th>
-                            <th
-                                className="sortable-header"
-                                onClick={() => handleSort('status')}
+                            </SortableHeader>
+                            <SortableHeader
+                                sortKey="status"
+                                sortConfig={sortConfig}
+                                onSort={requestSort}
                             >
                                 {t('employee.status')}
-                                {getSortIcon('status')}
-                            </th>
+                            </SortableHeader>
                             <th className="text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {employees.map((employee) => (
+                        {sortedEmployees.map((employee) => (
                             <tr
                                 key={employee.emp_id}
                                 className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
