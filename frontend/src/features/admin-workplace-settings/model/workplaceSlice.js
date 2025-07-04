@@ -252,6 +252,10 @@ const workplaceSlice = createSlice({
                 state.positionOperationStatus = 'success';
             })
             // Delete position
+            .addCase(deletePosition.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(deletePosition.fulfilled, (state, action) => {
                 state.positions = state.positions.filter(pos => pos.pos_id !== action.payload);
                 state.positionOperationStatus = 'success';
@@ -260,6 +264,7 @@ const workplaceSlice = createSlice({
                 state.error = action.payload;
                 state.positionOperationStatus = 'error';
             })
+            // Restore Position
             .addCase(restorePosition.fulfilled, (state, action) => {
                 const index = state.positions.findIndex(pos => pos.pos_id === action.payload.position.pos_id);
                 if (index !== -1) {

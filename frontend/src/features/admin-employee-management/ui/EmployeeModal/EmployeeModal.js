@@ -95,24 +95,28 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     // Filter positions based on the selected work site
     const getFilteredPositions = () => {
         if (selectedWorkSite === 'any') {
-            // For 'any' work site, show unique position names
+            // For 'any' work site, show unique position names from ACTIVE positions only
             const uniquePositions = [];
             const positionNames = new Set();
 
-            positions.forEach(pos => {
-                if (!positionNames.has(pos.pos_name)) {
-                    positionNames.add(pos.pos_name);
-                    uniquePositions.push({
-                        pos_id: pos.pos_id,
-                        pos_name: pos.pos_name
-                    });
-                }
-            });
+            positions
+                .filter(pos => pos.is_active) // Добавляем фильтр активных позиций
+                .forEach(pos => {
+                    if (!positionNames.has(pos.pos_name)) {
+                        positionNames.add(pos.pos_name);
+                        uniquePositions.push({
+                            pos_id: pos.pos_id,
+                            pos_name: pos.pos_name
+                        });
+                    }
+                });
 
             return uniquePositions;
         } else {
-            // Show positions for specific work site
-            return positions.filter(pos => pos.site_id === parseInt(selectedWorkSite));
+            // Show ACTIVE positions for specific work site
+            return positions.filter(pos =>
+                pos.site_id === parseInt(selectedWorkSite) && pos.is_active
+            );
         }
     };
     const filteredPositions = getFilteredPositions();

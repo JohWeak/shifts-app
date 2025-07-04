@@ -98,9 +98,11 @@ const WorkSitesTab = ({onSelectSite}) => {
     const confirmDelete = async () => {
         if (siteToDelete) {
             const result = await dispatch(deleteWorkSite(siteToDelete.site_id));
+
             if (deleteWorkSite.fulfilled.match(result)) {
                 // Показываем детальную информацию о деактивации
                 const { deactivatedPositions = 0, deactivatedEmployees = 0 } = result.payload;
+                setShowAlert(true);
                 if (deactivatedPositions > 0 || deactivatedEmployees > 0) {
                     setAlertMessage(
                         t('workplace.worksites.deletedWithDetails', {
@@ -108,6 +110,8 @@ const WorkSitesTab = ({onSelectSite}) => {
                             employees: deactivatedEmployees
                         })
                     );
+                } else {
+                    setAlertMessage(t('workplace.worksites.deleted'));
                 }
             }
             setShowDeleteConfirm(false);
@@ -122,6 +126,7 @@ const WorkSitesTab = ({onSelectSite}) => {
             if (restoreWorkSite.fulfilled.match(result)) {
                 // Показываем детальную информацию о восстановлении
                 const { restoredPositions = 0, restoredEmployees = 0 } = result.payload;
+                setShowAlert(true);
                 if (restoredPositions > 0 || restoredEmployees > 0) {
                     setAlertMessage(
                         t('workplace.worksites.restoredWithDetails', {
@@ -129,6 +134,8 @@ const WorkSitesTab = ({onSelectSite}) => {
                             employees: restoredEmployees
                         })
                     );
+                } else {
+                    setAlertMessage(t('workplace.worksites.restored'));
                 }
             }
             setShowRestoreConfirm(false);
@@ -418,22 +425,24 @@ const WorkSitesTab = ({onSelectSite}) => {
 
             <ConfirmationModal
                 show={showDeleteConfirm}
-                onHide={() => setShowDeleteConfirm(false)}
+                onHide={() => !loading && setShowDeleteConfirm(false)} // Блокируем закрытие во время обработки
                 onConfirm={confirmDelete}
                 title={t('common.confirm')}
                 message={getDeleteConfirmMessage(siteToDelete)}
                 confirmVariant="danger"
                 confirmText={t('common.deactivate')}
+                loading={loading}
             />
 
             <ConfirmationModal
                 show={showRestoreConfirm}
-                onHide={() => setShowRestoreConfirm(false)}
+                onHide={() => !loading && setShowRestoreConfirm(false)}
                 onConfirm={confirmRestore}
                 title={t('common.confirm')}
                 message={t('workplace.worksites.restoreConfirm', { site: siteToRestore?.site_name })}
                 confirmVariant="success"
                 confirmText={t('common.restore')}
+                loading={loading}
             />
         </Card>
     );
