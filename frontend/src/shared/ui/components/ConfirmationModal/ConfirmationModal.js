@@ -19,7 +19,6 @@ export const ConfirmationModal = ({
                                       confirmVariant,
                                   }) => {
     const { t } = useI18n();
-
     const finalConfirmText = confirmText || t('common.confirm');
     const finalCancelText = cancelText || t('common.cancel');
     const finalConfirmVariant = confirmVariant || variant;

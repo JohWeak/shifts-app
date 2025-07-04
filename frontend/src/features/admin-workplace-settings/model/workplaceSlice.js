@@ -134,6 +134,8 @@ const workplaceSlice = createSlice({
         workSites: [],
         positions: [],
         loading: false,
+        listLoading: false,       // Для загрузки списков
+        operationLoading: false, // Для CRUD операций
         positionsLoading: false,
         error: null,
         operationStatus: null, // 'success' | 'error' | null
@@ -244,28 +246,44 @@ const workplaceSlice = createSlice({
                 state.positionOperationStatus = 'error';
             })
             // Update position
+            .addCase(updatePosition.pending, (state) => {
+                state.operationLoading = true;
+                state.error = null;
+            })
             .addCase(updatePosition.fulfilled, (state, action) => {
+                state.operationLoading = false;
                 const index = state.positions.findIndex(pos => pos.pos_id === action.payload.pos_id);
                 if (index !== -1) {
                     state.positions[index] = action.payload;
                 }
                 state.positionOperationStatus = 'success';
             })
+            .addCase(updatePosition.rejected, (state, action) => { // <-- ДОБАВЛЯЕМ REJECTED
+                state.operationLoading = false;
+                state.error = action.payload;
+                state.positionOperationStatus = 'error';
+            })
             // Delete position
             .addCase(deletePosition.pending, (state) => {
-                state.loading = true;
+                state.operationLoading = true;
                 state.error = null;
             })
             .addCase(deletePosition.fulfilled, (state, action) => {
+                state.operationLoading = false;
                 state.positions = state.positions.filter(pos => pos.pos_id !== action.payload);
                 state.positionOperationStatus = 'success';
             })
             .addCase(deletePosition.rejected, (state, action) => {
-                state.error = action.payload;
+                state.operationLoading = false;                state.error = action.payload;
                 state.positionOperationStatus = 'error';
             })
             // Restore Position
+            .addCase(restorePosition.pending, (state) => {
+                state.operationLoading = true;
+                state.error = null;
+            })
             .addCase(restorePosition.fulfilled, (state, action) => {
+                state.operationLoading = false;
                 const index = state.positions.findIndex(pos => pos.pos_id === action.payload.position.pos_id);
                 if (index !== -1) {
                     state.positions[index] = action.payload.position;
@@ -273,6 +291,7 @@ const workplaceSlice = createSlice({
                 state.positionOperationStatus = 'success';
             })
             .addCase(restorePosition.rejected, (state, action) => {
+                state.operationLoading = false;
                 state.error = action.payload;
                 state.positionOperationStatus = 'error';
             });

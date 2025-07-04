@@ -36,6 +36,7 @@ const WorkSitesTab = ({onSelectSite}) => {
     const {
         workSites = [], // Значение по умолчанию
         loading,
+        operationLoading,
         error,
         operationStatus
     } = useSelector(state => state.workplace || {}); // Защита от undefined state
@@ -97,8 +98,8 @@ const WorkSitesTab = ({onSelectSite}) => {
 
     const confirmDelete = async () => {
         if (siteToDelete) {
+            setShowDeleteConfirm(false);
             const result = await dispatch(deleteWorkSite(siteToDelete.site_id));
-
             if (deleteWorkSite.fulfilled.match(result)) {
                 // Показываем детальную информацию о деактивации
                 const { deactivatedPositions = 0, deactivatedEmployees = 0 } = result.payload;
@@ -114,7 +115,6 @@ const WorkSitesTab = ({onSelectSite}) => {
                     setAlertMessage(t('workplace.worksites.deleted'));
                 }
             }
-            setShowDeleteConfirm(false);
             setSiteToDelete(null);
             dispatch(fetchWorkSites());
         }
@@ -122,6 +122,7 @@ const WorkSitesTab = ({onSelectSite}) => {
 
     const confirmRestore = async () => {
         if (siteToRestore) {
+            setShowRestoreConfirm(false);
             const result = await dispatch(restoreWorkSite(siteToRestore.site_id));
             if (restoreWorkSite.fulfilled.match(result)) {
                 // Показываем детальную информацию о восстановлении
@@ -138,7 +139,6 @@ const WorkSitesTab = ({onSelectSite}) => {
                     setAlertMessage(t('workplace.worksites.restored'));
                 }
             }
-            setShowRestoreConfirm(false);
             setSiteToRestore(null);
             dispatch(fetchWorkSites());
         }
@@ -239,7 +239,7 @@ const WorkSitesTab = ({onSelectSite}) => {
     //         setIsInitialized(true);
     //     }
     // }, [dispatch, isInitialized]);
-
+    console.log('WorkSitesTab re-render, operationLoading:', operationLoading);
     return (
         <Card className="workplace-tab-content">
             <Card.Header className="d-flex justify-content-between align-items-center">
@@ -425,24 +425,24 @@ const WorkSitesTab = ({onSelectSite}) => {
 
             <ConfirmationModal
                 show={showDeleteConfirm}
-                onHide={() => !loading && setShowDeleteConfirm(false)} // Блокируем закрытие во время обработки
+                onHide={() => !operationLoading && setShowDeleteConfirm(false)} // Блокируем закрытие во время обработки
                 onConfirm={confirmDelete}
                 title={t('common.confirm')}
                 message={getDeleteConfirmMessage(siteToDelete)}
                 confirmVariant="danger"
                 confirmText={t('common.deactivate')}
-                loading={loading}
+                loading={operationLoading}
             />
 
             <ConfirmationModal
                 show={showRestoreConfirm}
-                onHide={() => !loading && setShowRestoreConfirm(false)}
+                onHide={() => !operationLoading && setShowRestoreConfirm(false)}
                 onConfirm={confirmRestore}
                 title={t('common.confirm')}
                 message={t('workplace.worksites.restoreConfirm', { site: siteToRestore?.site_name })}
                 confirmVariant="success"
                 confirmText={t('common.restore')}
-                loading={loading}
+                loading={operationLoading}
             />
         </Card>
     );

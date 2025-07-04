@@ -130,6 +130,7 @@ const PositionsTab = ({ selectedSite }) => {
 
     const confirmDelete = async () => {
         if (positionToDelete) {
+            setShowDeleteConfirm(false);
             const result = await dispatch(deletePosition(positionToDelete.pos_id));
             if (deletePosition.fulfilled.match(result)) {
                 // Показываем информацию о деактивированных работниках
@@ -140,7 +141,6 @@ const PositionsTab = ({ selectedSite }) => {
                     );
                 }
             }
-            setShowDeleteConfirm(false);
             setPositionToDelete(null);
             dispatch(fetchPositions());
         }
@@ -148,6 +148,7 @@ const PositionsTab = ({ selectedSite }) => {
 
     const confirmRestore = async () => {
         if (positionToRestore) {
+            setShowRestoreConfirm(false);
             const result = await dispatch(restorePosition(positionToRestore.pos_id));
             if (restorePosition.fulfilled.match(result)) {
                 // Показываем информацию о восстановленных работниках
@@ -158,7 +159,6 @@ const PositionsTab = ({ selectedSite }) => {
                     );
                 }
             }
-            setShowRestoreConfirm(false);
             setPositionToRestore(null);
             dispatch(fetchPositions());
         }
