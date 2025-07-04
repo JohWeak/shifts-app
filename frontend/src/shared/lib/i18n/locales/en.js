@@ -655,9 +655,9 @@ export const en = {
             activeOnly: 'Active sites',
             allSites: 'All sites',
             restored: 'Work site restored successfully',
-            deletedWithDetails: 'Work site deactivated. {{positions}} positions and {{employees}} employees were also deactivated',
-            restoredWithDetails: 'Work site restored. {{positions}} positions and {{employees}} employees were also restored',
-            deleteConfirmWithDetails: 'Are you sure you want to deactivate "{{site}}"? This will also deactivate {{positions}} positions and {{employees}} employees',
+            deletedWithDetails: 'Work site deactivated. {positions} positions and {employees} employees were also deactivated',
+            restoredWithDetails: 'Work site restored. {positions} positions and {employees} employees were also restored',
+            deleteConfirmWithDetails: 'Are you sure you want to deactivate "{site}"? This will also deactivate {positions} positions and {employees} employees',
 
         },
         positions: {
