@@ -29,6 +29,8 @@ import {
 } from '../../model/workplaceSlice';
 
 import './PositionsTab.css';
+import {addNotification, removeNotification, updateNotification} from "app/model/notificationsSlice";
+import {nanoid} from "@reduxjs/toolkit";
 
 const PositionsTab = ({ selectedSite }) => {
     const { t } = useI18n();
@@ -56,7 +58,6 @@ const PositionsTab = ({ selectedSite }) => {
     );
     const [searchTerm, setSearchTerm] = useState('');
     const [filterSite, setFilterSite] = useState('');
-    const [alertInfo, setAlertInfo] = useState({ show: false, variant: 'success', message: '' });
     const [isInitialized, setIsInitialized] = useState(false);
     const [showShiftsModal, setShowShiftsModal] = useState(false);
     const [positionForShifts, setPositionForShifts] = useState(null);
@@ -114,26 +115,38 @@ const PositionsTab = ({ selectedSite }) => {
             setShowDeleteConfirm(false);
 
             // 1. Показываем алерт "В процессе..."
-            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
-
+            const notificationId = nanoid();
+            dispatch(addNotification({
+                id: notificationId,
+                message: t('common.processing'),
+                variant: 'info',
+                duration: null
+            }));
             try {
                 const result = await dispatch(deletePosition(positionToDelete.pos_id)).unwrap();
 
                 // 2. Успех! Показываем правильный алерт
-                const deactivatedCount = result.deactivatedEmployees || 0;
-                const message = deactivatedCount > 0
-                    ? t('workplace.positions.deletedWithEmployees', { count: deactivatedCount })
-                    : t('workplace.positions.deleted');
 
-                setAlertInfo({ show: true, variant: 'warning', message });
+                const deactivatedCount = result.deactivatedEmployees || 0;
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: deactivatedCount > 0
+                        ? t('workplace.positions.deletedWithEmployees', { count: deactivatedCount })
+                        : t('workplace.positions.deleted'),
+                    variant: 'success',
+                    duration: 3000
+                }));
 
                 dispatch(fetchPositions());
 
             } catch (error) {
-                // 3. Ошибка!
-                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+                dispatch(removeNotification(notificationId));
+                dispatch(addNotification({
+                    message: error.message || t('errors.generic'),
+                    variant: 'danger',
+                    duration: 5000
+                }));
             } finally {
-                // 4. Очищаем состояние
                 setPositionToDelete(null);
             }
         }
@@ -143,27 +156,43 @@ const PositionsTab = ({ selectedSite }) => {
         if (positionToRestore) {
             setShowRestoreConfirm(false);
 
-            // 1. Показываем алерт "В процессе..."
-            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
+            const notificationId = nanoid(); // ID нужен в любом случае
+
+            // 1. Показываем начальное уведомление
+            dispatch(addNotification({
+                id: notificationId,
+                message: t('common.saving'),
+                variant: 'info',
+                duration: null
+            }));
 
             try {
                 const result = await dispatch(restorePosition(positionToRestore.pos_id)).unwrap();
 
-                // 2. Успех!
+                // 2. УСПЕХ: Обновляем существующее уведомление
                 const restoredCount = result.restoredEmployees || 0;
-                const message = restoredCount > 0
+                const successMessage = restoredCount > 0
                     ? t('workplace.positions.restoredWithEmployees', { count: restoredCount })
                     : t('workplace.positions.restored');
 
-                setAlertInfo({ show: true, variant: 'success', message });
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: successMessage,
+                    variant: 'success',
+                    duration: 3000
+                }));
 
                 dispatch(fetchPositions());
 
             } catch (error) {
-                // 3. Ошибка!
-                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+                // 3. ОШИБКА: Тоже обновляем существующее уведомление
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: error.message || t('errors.generic'),
+                    variant: 'danger',
+                    duration: 5000
+                }));
             } finally {
-                // 4. Очищаем состояние
                 setPositionToRestore(null);
             }
         }
@@ -275,31 +304,6 @@ const PositionsTab = ({ selectedSite }) => {
             </Card.Header>
 
             <Card.Body>
-                {alertInfo.show && (
-                    <Alert
-                        variant={alertInfo.variant}
-                        onClose={() => setAlertInfo({ ...alertInfo, show: false })}
-                        dismissible={alertInfo.variant !== 'info'}
-                    >
-                        {alertInfo.variant === 'info' && (
-                            <Spinner
-                                as="span"
-                                animation="border"
-                                size="sm"
-                                role="status"
-                                aria-hidden="true"
-                                className="me-2"
-                            />
-                        )}
-                        {alertInfo.message}
-                    </Alert>
-                )}
-
-                {error && !alertInfo.show && (
-                    <Alert variant="danger" dismissible onClose={() => dispatch(clearPositionOperationStatus())}>
-                        {error}
-                    </Alert>
-                )}
 
                 {workSites.filter(site => site.is_active).length === 0 ? (
                     <Alert variant="info">

@@ -1,4 +1,4 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/AdminLayout.js
+// frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
 import React, { useState, useEffect } from 'react';
 import {
     Container,
@@ -15,7 +15,7 @@ import { logout } from 'features/auth/model/authSlice';
 import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 
-
+import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import './AdminLayout.css';
 import { setActiveTab, setSelectedScheduleId } from 'features/admin-schedule-management/model/scheduleSlice';
@@ -288,6 +288,7 @@ const AdminLayout = ({ children }) => {
                     </div>
                 </>
             )}
+            <GlobalAlerts />
         </div>
     );
 };

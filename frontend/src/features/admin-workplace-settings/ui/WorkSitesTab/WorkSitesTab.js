@@ -18,6 +18,8 @@ import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import WorkSiteModal from '../WorkSiteModal/WorkSiteModal';
+import { nanoid } from '@reduxjs/toolkit';
+import { addNotification, updateNotification } from 'app/model/notificationsSlice';
 import {
     fetchWorkSites,
     deleteWorkSite,
@@ -49,7 +51,6 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [siteToRestore, setSiteToRestore] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('active');
-    const [alertInfo, setAlertInfo] = useState({ show: false, variant: 'success', message: '' });
     const [isInitialized, setIsInitialized] = useState(false);
     const [selectedSiteId, setSelectedSiteId] = useState(null);
 
@@ -78,28 +79,51 @@ const WorkSitesTab = ({onSelectSite}) => {
     const confirmDelete = async () => {
         if (siteToDelete) {
             setShowDeleteConfirm(false);
-            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
+
+            // 1. Создаем ID для нашего уведомления
+            const notificationId = nanoid();
+
+            // 2. Показываем начальное уведомление "В процессе..."
+            dispatch(addNotification({
+                id: notificationId,
+                message: t('common.saving'), // Используем 'saving' или 'processing'
+                variant: 'info',
+                duration: null // Не исчезает само
+            }));
+
             try {
+                // 3. Выполняем асинхронную операцию
                 const result = await dispatch(deleteWorkSite(siteToDelete.site_id)).unwrap();
 
-                // 2. Успех! Показываем правильный алерт
+                // 4. Успех! Обновляем существующее уведомление
                 const { deactivatedPositions = 0, deactivatedEmployees = 0 } = result;
-                const message = (deactivatedPositions > 0 || deactivatedEmployees > 0)
+                const successMessage = (deactivatedPositions > 0 || deactivatedEmployees > 0)
                     ? t('workplace.worksites.deletedWithDetails', {
                         positions: deactivatedPositions,
                         employees: deactivatedEmployees
                     })
                     : t('workplace.worksites.deleted');
 
-                setAlertInfo({ show: true, variant: 'warning', message });
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: successMessage,
+                    variant: 'success',
+                    duration: 3000 // Теперь оно закроется само через 3 сек
+                }));
 
+                // Обновляем данные в таблице
                 dispatch(fetchWorkSites());
 
             } catch (error) {
-                // 3. Ошибка! Показываем алерт с ошибкой
-                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+                // 5. Ошибка! Обновляем существующее уведомление
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: error.message || t('errors.generic'),
+                    variant: 'danger',
+                    duration: null // Ошибки не должны исчезать сами
+                }));
             } finally {
-                // 4. Очищаем состояние
+                // 6. Очищаем состояние
                 setSiteToDelete(null);
             }
         }
@@ -109,30 +133,50 @@ const WorkSitesTab = ({onSelectSite}) => {
         if (siteToRestore) {
             setShowRestoreConfirm(false);
 
-            // 1. Показываем алерт "В процессе..."
-            setAlertInfo({ show: true, variant: 'info', message: t('common.processing') });
+            // 1. Создаем ID для нашего уведомления
+            const notificationId = nanoid();
+
+            // 2. Показываем начальное уведомление "В процессе..."
+            dispatch(addNotification({
+                id: notificationId,
+                message: t('common.saving'),
+                variant: 'info',
+                duration: null // Не исчезает само
+            }));
 
             try {
+                // 3. Выполняем асинхронную операцию
                 const result = await dispatch(restoreWorkSite(siteToRestore.site_id)).unwrap();
 
-                // 2. Успех! Показываем правильный алерт
+                // 4. Успех! Обновляем существующее уведомление
                 const { restoredPositions = 0, restoredEmployees = 0 } = result;
-                const message = (restoredPositions > 0 || restoredEmployees > 0)
+                const successMessage = (restoredPositions > 0 || restoredEmployees > 0)
                     ? t('workplace.worksites.restoredWithDetails', {
                         positions: restoredPositions,
                         employees: restoredEmployees
                     })
                     : t('workplace.worksites.restored');
 
-                setAlertInfo({ show: true, variant: 'success', message });
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: successMessage,
+                    variant: 'success',
+                    duration: 3000 // Закроется само
+                }));
 
+                // Обновляем данные в таблице
                 dispatch(fetchWorkSites());
 
             } catch (error) {
-                // 3. Ошибка!
-                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+                // 5. Ошибка! Обновляем существующее уведомление
+                dispatch(updateNotification({
+                    id: notificationId,
+                    message: error.message || t('errors.generic'),
+                    variant: 'danger',
+                    duration: null // Ошибки не исчезают сами
+                }));
             } finally {
-                // 4. Очищаем состояние
+                // 6. Очищаем состояние
                 setSiteToRestore(null);
             }
         }
@@ -249,32 +293,6 @@ const WorkSitesTab = ({onSelectSite}) => {
             </Card.Header>
 
             <Card.Body>
-                {alertInfo.show && (
-                    <Alert
-                        variant={alertInfo.variant}
-                        onClose={() => setAlertInfo({ ...alertInfo, show: false })}
-                        dismissible={alertInfo.variant !== 'info'} // Нельзя закрыть алерт "в процессе"
-                    >
-                        {alertInfo.variant === 'info' && (
-                            <Spinner
-                                as="span"
-                                animation="border"
-                                size="sm"
-                                role="status"
-                                aria-hidden="true"
-                                className="me-2"
-                            />
-                        )}
-                        {alertInfo.message}
-                    </Alert>
-                )}
-
-                {error && !alertInfo.show && ( // Показываем общую ошибку только если нет другого алерта
-                    <Alert variant="danger" dismissible onClose={() => dispatch(clearOperationStatus())}>
-                        {error}
-                    </Alert>
-                )}
-
                 <Row className="mb-3">
                     <Col md={8}>
                         <InputGroup>

@@ -12,6 +12,8 @@ import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
 import EmployeeSelectionModal from './ui/modals/EmployeeSelectionModal';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useScheduleActions } from './model/hooks/useScheduleActions';
+import { nanoid } from '@reduxjs/toolkit';
+import { addNotification, updateNotification } from 'app/model/notificationsSlice';
 import './index.css';
 
 // Redux Actions

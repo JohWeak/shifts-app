@@ -1,0 +1,62 @@
+/* frontend/src/shared/ui/components/GlobalAlerts/GlobalAlerts.css */
+.global-alerts-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1060;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.global-alert-item {
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    animation: slideInUp 0.3s ease-out forwards;
+    transition: background-color 0.3s ease;
+}
+.global-alert-item.updated {
+    animation: none; /* Сбрасываем анимацию появления */
+    animation: flash 0.6s ease-out; /* Применяем новую анимацию вспышки */
+}
+.global-alert-item.closing {
+    animation: slideOutDown 0.3s ease-in forwards; /* Применяем анимацию исчезновения */
+}
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+@keyframes flash {
+    0% {
+        opacity: 0.7;
+    }
+    70% {
+        opacity: 1;
+        /*box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); !* Чуть увеличим тень для эффекта *!*/
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+
