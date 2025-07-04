@@ -9,7 +9,7 @@ import {
     Form,
     InputGroup,
     Row,
-    Col
+    Col, Spinner
 } from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
@@ -49,32 +49,11 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [siteToRestore, setSiteToRestore] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('active');
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
+    const [alertInfo, setAlertInfo] = useState({ show: false, variant: 'success', message: '' });
     const [isInitialized, setIsInitialized] = useState(false);
     const [selectedSiteId, setSelectedSiteId] = useState(null);
 
 
-    useEffect(() => {
-        if (operationStatus === 'success') {
-            setShowAlert(true);
-            // Создаем детальное сообщение на основе последней операции
-            if (selectedSite) {
-                setAlertMessage(t('workplace.worksites.updated'));
-            } else if (siteToDelete) {
-                setAlertMessage(t('workplace.worksites.deleted'));
-            } else if (siteToRestore) {
-                setAlertMessage(t('workplace.worksites.restored'));
-            } else {
-                setAlertMessage(t('workplace.worksites.created'));
-            }
-
-            setTimeout(() => {
-                setShowAlert(false);
-                dispatch(clearOperationStatus());
-            }, 3000);
-        }
-    }, [operationStatus, dispatch, t, selectedSite, siteToDelete, siteToRestore]);
 
     const handleEdit = (site) => {
         setSelectedSite(site);
@@ -99,48 +78,63 @@ const WorkSitesTab = ({onSelectSite}) => {
     const confirmDelete = async () => {
         if (siteToDelete) {
             setShowDeleteConfirm(false);
-            const result = await dispatch(deleteWorkSite(siteToDelete.site_id));
-            if (deleteWorkSite.fulfilled.match(result)) {
-                // Показываем детальную информацию о деактивации
-                const { deactivatedPositions = 0, deactivatedEmployees = 0 } = result.payload;
-                setShowAlert(true);
-                if (deactivatedPositions > 0 || deactivatedEmployees > 0) {
-                    setAlertMessage(
-                        t('workplace.worksites.deletedWithDetails', {
-                            positions: deactivatedPositions,
-                            employees: deactivatedEmployees
-                        })
-                    );
-                } else {
-                    setAlertMessage(t('workplace.worksites.deleted'));
-                }
+            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+            try {
+                const result = await dispatch(deleteWorkSite(siteToDelete.site_id)).unwrap();
+
+                // 2. Успех! Показываем правильный алерт
+                const { deactivatedPositions = 0, deactivatedEmployees = 0 } = result;
+                const message = (deactivatedPositions > 0 || deactivatedEmployees > 0)
+                    ? t('workplace.worksites.deletedWithDetails', {
+                        positions: deactivatedPositions,
+                        employees: deactivatedEmployees
+                    })
+                    : t('workplace.worksites.deleted');
+
+                setAlertInfo({ show: true, variant: 'success', message });
+
+                dispatch(fetchWorkSites());
+
+            } catch (error) {
+                // 3. Ошибка! Показываем алерт с ошибкой
+                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+            } finally {
+                // 4. Очищаем состояние
+                setSiteToDelete(null);
             }
-            setSiteToDelete(null);
-            dispatch(fetchWorkSites());
         }
     };
 
     const confirmRestore = async () => {
         if (siteToRestore) {
             setShowRestoreConfirm(false);
-            const result = await dispatch(restoreWorkSite(siteToRestore.site_id));
-            if (restoreWorkSite.fulfilled.match(result)) {
-                // Показываем детальную информацию о восстановлении
-                const { restoredPositions = 0, restoredEmployees = 0 } = result.payload;
-                setShowAlert(true);
-                if (restoredPositions > 0 || restoredEmployees > 0) {
-                    setAlertMessage(
-                        t('workplace.worksites.restoredWithDetails', {
-                            positions: restoredPositions,
-                            employees: restoredEmployees
-                        })
-                    );
-                } else {
-                    setAlertMessage(t('workplace.worksites.restored'));
-                }
+
+            // 1. Показываем алерт "В процессе..."
+            setAlertInfo({ show: true, variant: 'info', message: t('common.saving') });
+
+            try {
+                const result = await dispatch(restoreWorkSite(siteToRestore.site_id)).unwrap();
+
+                // 2. Успех! Показываем правильный алерт
+                const { restoredPositions = 0, restoredEmployees = 0 } = result;
+                const message = (restoredPositions > 0 || restoredEmployees > 0)
+                    ? t('workplace.worksites.restoredWithDetails', {
+                        positions: restoredPositions,
+                        employees: restoredEmployees
+                    })
+                    : t('workplace.worksites.restored');
+
+                setAlertInfo({ show: true, variant: 'success', message });
+
+                dispatch(fetchWorkSites());
+
+            } catch (error) {
+                // 3. Ошибка!
+                setAlertInfo({ show: true, variant: 'danger', message: error.message || t('errors.generic') });
+            } finally {
+                // 4. Очищаем состояние
+                setSiteToRestore(null);
             }
-            setSiteToRestore(null);
-            dispatch(fetchWorkSites());
         }
     };
 
@@ -255,17 +249,27 @@ const WorkSitesTab = ({onSelectSite}) => {
             </Card.Header>
 
             <Card.Body>
-                {showAlert && (
+                {alertInfo.show && (
                     <Alert
-                        variant="success"
-                        dismissible
-                        onClose={() => setShowAlert(false)}
+                        variant={alertInfo.variant}
+                        onClose={() => setAlertInfo({ ...alertInfo, show: false })}
+                        dismissible={alertInfo.variant !== 'info'} // Нельзя закрыть алерт "в процессе"
                     >
-                        {alertMessage}
+                        {alertInfo.variant === 'info' && (
+                            <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="me-2"
+                            />
+                        )}
+                        {alertInfo.message}
                     </Alert>
                 )}
 
-                {error && (
+                {error && !alertInfo.show && ( // Показываем общую ошибку только если нет другого алерта
                     <Alert variant="danger" dismissible onClose={() => dispatch(clearOperationStatus())}>
                         {error}
                     </Alert>
