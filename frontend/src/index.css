@@ -3,7 +3,9 @@
 /* 1. Импортируем нашу дизайн-систему. Это должно быть в самом верху. */
 @import './app/design-system.css';
 
-
+html {
+    scrollbar-gutter: stable both-edges;
+}
 /* 2. Глобальные стили для body, использующие переменные из design-system.css */
 body {
     font-family: var(--bs-body-font-family), serif;
