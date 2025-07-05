@@ -4,7 +4,7 @@
 
 /* Плавный переход для фона ячеек */
 .positions-table > tbody > .position-row > td {
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s ease;
 }
 
 /* При наведении на ОБЫЧНУЮ строку переопределяем переменную Bootstrap */
@@ -19,14 +19,17 @@
 
 /* Для АКТИВНОЙ (раскрытой) строки задаем постоянный фон */
 .positions-table > tbody > .position-row.expanded {
-    --bs-table-accent-bg: var(--bs-primary-bg-subtle); /* Используем другую переменную для постоянного фона */
+    --bs-table-accent-bg: var(--bs-gray-200); /* Используем другую переменную для постоянного фона */
     color: var(--bs-emphasis-color);
-    font-weight: 500;
+
 }
 
 /* Для АКТИВНОЙ строки при наведении ОТМЕНЯЕМ стандартный ховер */
 .positions-table > tbody > .position-row.expanded:hover {
-    --bs-table-hover-bg: var(--bs-primary-bg-subtle); /* Задаем тот же цвет, что и у активной */
+    --bs-table-hover-bg:  var(--bs-gray-200); /* Задаем тот же цвет, что и у активной */
+}
+.position-shifts-col{
+    --bs-table-bg: #f4f4f4;
 }
 
 /* Для темной темы */
