@@ -25,9 +25,11 @@
 }
 
 .position-shifts-expanded {
-    animation: expandRow 0.3s ease-out;
+    animation: expandRow 0.5s ease-out;
 }
-
+.position-shifts-expanded.closing {
+    animation: collapseRow 0.2s ease-in forwards;
+}
 @keyframes expandRow {
     from {
         opacity: 0;
@@ -38,6 +40,16 @@
         transform: translateY(0);
     }
 }
+@keyframes collapseRow {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
 
 .position-shifts-expanded .card {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
@@ -45,4 +57,7 @@
 
 .position-shifts-expanded .table {
     margin-bottom: 0;
+}
+.position-shifts-row:hover {
+    --bs-table-hover-bg: transparent;
 }

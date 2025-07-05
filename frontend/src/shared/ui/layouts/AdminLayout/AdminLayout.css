@@ -6,9 +6,10 @@
     font-family: var(--bs-body-font-family), serif;
 }
 
-/*.admin-main-content{*/
-/*    max-width: 1300px;*/
-/*}*/
+.admin-main-content{
+    /*max-width: 1300px;*/
+
+}
 
 /* TOP NAVBAR */
 .admin-navbar {

@@ -1,96 +1,60 @@
-/* frontend/src/features/admin-workplace-settings/ui/PositionsTab/PositionsTab.css */
-.site-badge {
-    font-size: 0.875rem;
-    font-weight: normal;
-}
+/* frontend/src/features/admin-workplace-settings/ui/PositionsTab/PositionsTab.css (ВЕРСИЯ С ИСПРАВЛЕНИЯМИ) */
 
-.position-roles {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-}
+/* === СТИЛИ ДЛЯ СТРОК ТАБЛИЦЫ ПОЗИЦИЙ === */
 
-.role-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.125rem 0.5rem;
-    background-color: var(--bs-gray-200);
-    color: var(--bs-gray-700);
-    border-radius: var(--bs-border-radius-sm);
-    font-size: 0.75rem;
-}
-
-[data-theme="dark"] .role-tag {
-    background-color: var(--bs-gray-700);
-    color: var(--bs-gray-200);
-}
-
-/* Стили для неактивных строк */
-.positions-table .inactive-row {
-    opacity: 0.6;
-    background-color: var(--bs-gray-100);
-
-}
-
-[data-theme="dark"] .positions-table .inactive-row {
-    background-color: rgba(255, 255, 255, 0.03);
-}
-
-.positions-table .inactive-row:hover {
-    opacity: 0.8;
-}
-
-/* Стили для переключателя */
-.workplace-tab-content .form-check-input {
-
-}
-
-.form-check-input:checked {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
-}
-
-/* Стили для таблицы позиций */
-.positions-table {
-    margin-bottom: 0;
-}
-
-.positions-table th {
-    font-weight: 600;
-    color: var(--bs-gray-700);
-    border-bottom: 2px solid var(--bs-border-color);
-}
-
-[data-theme="dark"] .positions-table th {
-    color: var(--bs-gray-300);
-}
-
-.position-row {
+/* Плавный переход для фона ячеек */
+.positions-table > tbody > .position-row > td {
     transition: background-color 0.2s ease;
 }
 
-.position-row:hover {
-    background-color: var(--bs-gray-100);
+/* При наведении на ОБЫЧНУЮ строку переопределяем переменную Bootstrap */
+.positions-table > tbody > .position-row:not(.expanded):hover {
+    --bs-table-hover-bg: var(--bs-gray-200); /* Ваш цвет для ховера */
 }
 
-.position-row.expanded {
-    background-color: var(--bs-primary-bg-subtle);
+/* Для темной темы */
+[data-theme="dark"] .positions-table > tbody > .position-row:not(.expanded):hover {
+    --bs-table-hover-bg: var(--bs-gray-800);
+}
+
+/* Для АКТИВНОЙ (раскрытой) строки задаем постоянный фон */
+.positions-table > tbody > .position-row.expanded {
+    --bs-table-accent-bg: var(--bs-primary-bg-subtle); /* Используем другую переменную для постоянного фона */
+    color: var(--bs-emphasis-color);
     font-weight: 500;
 }
 
-[data-theme="dark"] .position-row:hover {
-    background-color: var(--bs-gray-800);
+/* Для АКТИВНОЙ строки при наведении ОТМЕНЯЕМ стандартный ховер */
+.positions-table > tbody > .position-row.expanded:hover {
+    --bs-table-hover-bg: var(--bs-primary-bg-subtle); /* Задаем тот же цвет, что и у активной */
 }
 
-[data-theme="dark"] .position-row.expanded {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
+/* Для темной темы */
+[data-theme="dark"] .positions-table > tbody > .position-row.expanded,
+[data-theme="dark"] .positions-table > tbody > .position-row.expanded:hover {
+    --bs-table-accent-bg: rgba(var(--bs-primary-rgb), 0.2);
+    --bs-table-hover-bg: rgba(var(--bs-primary-rgb), 0.2);
 }
 
-.positions-table tbody tr {
-    cursor: pointer;
+/* Стили для неактивных строк */
+.positions-table > tbody > .position-row.inactive-row {
+    opacity: 0.6;
+}
+.positions-table > tbody > .position-row.inactive-row:hover {
+    opacity: 0.8;
 }
 
-/* Убираем курсор pointer для раскрытого содержимого */
-.positions-table tbody tr:has(.position-shifts-expanded) {
-    cursor: default;
+
+/* === СТИЛИ ДЛЯ ИКОНКИ РАСКРЫТИЯ (ВАШЕ РЕШЕНИЕ) === */
+
+/* Задаем transition для псевдоэлемента, где и находится иконка */
+.position-row .transition-icon::before {
+    transition: transform 0.3s ease-in-out, color 0.2s ease-in-out;
+    display: inline-block; /* Необходимо для transform */
+}
+
+/* Поворачиваем и окрашиваем ПСЕВДОЭЛЕМЕНТ в раскрытой строке */
+.position-row.expanded .transition-icon::before {
+    transform: rotate(90deg);
+    color: var(--bs-primary);
 }

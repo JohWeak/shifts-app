@@ -28,9 +28,9 @@ import {
     fetchWorkSites
 } from '../../model/workplaceSlice';
 
-import './PositionsTab.css';
 import {addNotification, removeNotification, updateNotification} from "app/model/notificationsSlice";
 import {nanoid} from "@reduxjs/toolkit";
+import './PositionsTab.css';
 
 const PositionsTab = ({selectedSite}) => {
     const {t} = useI18n();
@@ -60,6 +60,7 @@ const PositionsTab = ({selectedSite}) => {
     const [filterSite, setFilterSite] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
     const [expandedPositionId, setExpandedPositionId] = useState(null);
+    const [isClosingPositionId, setIsClosingPositionId] = useState(null);
 
 
     useEffect(() => {
@@ -210,14 +211,30 @@ const PositionsTab = ({selectedSite}) => {
     };
 
     const handleManageShifts = (position, e) => {
-        e.stopPropagation(); // Предотвращаем другие клики
+        e.stopPropagation();
 
-        // Переключаем раскрытие строки
-        if (expandedPositionId === position.pos_id) {
-            setExpandedPositionId(null);
+        const positionId = position.pos_id;
+
+        if (expandedPositionId === positionId) {
+            // Если кликнули на уже открытую, запускаем анимацию закрытия
+            setIsClosingPositionId(positionId);
+            setTimeout(() => {
+                setExpandedPositionId(null);
+                setIsClosingPositionId(null);
+            }, 300); // Время анимации
         } else {
-            setExpandedPositionId(position.pos_id);
+            // Если кликнули на другую, открываем ее
+            setExpandedPositionId(positionId);
         }
+    };
+
+    // Функция для кнопки "вверх" внутри карточки
+    const handleCloseExpanded = (positionId) => {
+        setIsClosingPositionId(positionId);
+        setTimeout(() => {
+            setExpandedPositionId(null);
+            setIsClosingPositionId(null);
+        }, 300);
     };
 
 
@@ -397,10 +414,12 @@ const PositionsTab = ({selectedSite}) => {
                                         <tr
                                             className={`position-row ${!position.is_active ? 'inactive-row' : ''} ${expandedPositionId === position.pos_id ? 'expanded' : ''}`}
                                             onClick={(e) => handleManageShifts(position, e)}
-                                            style={{cursor: 'pointer'}}
+                                            style={{
+                                                cursor: 'pointer',
+                                            }}
                                         >
                                             <td className="fw-semibold">
-                                                <i className={`bi bi-chevron-${expandedPositionId === position.pos_id ? 'up' : 'down'} me-2`}></i>
+                                                <i className={`bi bi-chevron-right me-2 transition-icon`}></i>
                                                 {position.pos_name}
                                             </td>
                                             <td>
@@ -470,7 +489,8 @@ const PositionsTab = ({selectedSite}) => {
                                         {expandedPositionId === position.pos_id && (
                                             <PositionShiftsExpanded
                                                 position={position}
-                                                onClose={() => setExpandedPositionId(null)}
+                                                onClose={() => handleCloseExpanded(position.pos_id)}
+                                                isClosing={isClosingPositionId === position.pos_id}
                                             />
                                         )}
                                     </React.Fragment>
