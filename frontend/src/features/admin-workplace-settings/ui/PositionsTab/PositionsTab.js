@@ -1,5 +1,5 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/PositionsTab.js
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Card,
     Table,
@@ -12,13 +12,13 @@ import {
     Row,
     Col, Spinner
 } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useSortableData } from 'shared/hooks/useSortableData';
+import {useDispatch, useSelector} from 'react-redux';
+import {useNavigate} from 'react-router-dom';
+import {useSortableData} from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-import ManageShiftsModal from '../ManageShiftsModal/ManageShiftsModal';
+import PositionShiftsExpanded from '../PositionShiftsExpanded/PositionShiftsExpanded';
 import PositionModal from '../PositionModal/PositionModal';
 import {
     fetchPositions,
@@ -32,8 +32,8 @@ import './PositionsTab.css';
 import {addNotification, removeNotification, updateNotification} from "app/model/notificationsSlice";
 import {nanoid} from "@reduxjs/toolkit";
 
-const PositionsTab = ({ selectedSite }) => {
-    const { t } = useI18n();
+const PositionsTab = ({selectedSite}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -59,8 +59,8 @@ const PositionsTab = ({ selectedSite }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterSite, setFilterSite] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
-    const [showShiftsModal, setShowShiftsModal] = useState(false);
-    const [positionForShifts, setPositionForShifts] = useState(null);
+    const [expandedPositionId, setExpandedPositionId] = useState(null);
+
 
     useEffect(() => {
         if (selectedSite) {
@@ -131,7 +131,7 @@ const PositionsTab = ({ selectedSite }) => {
                 dispatch(updateNotification({
                     id: notificationId,
                     message: deactivatedCount > 0
-                        ? t('workplace.positions.deletedWithEmployees', { count: deactivatedCount })
+                        ? t('workplace.positions.deletedWithEmployees', {count: deactivatedCount})
                         : t('workplace.positions.deleted'),
                     variant: 'success',
                     duration: 3000
@@ -172,7 +172,7 @@ const PositionsTab = ({ selectedSite }) => {
                 // 2. УСПЕХ: Обновляем существующее уведомление
                 const restoredCount = result.restoredEmployees || 0;
                 const successMessage = restoredCount > 0
-                    ? t('workplace.positions.restoredWithEmployees', { count: restoredCount })
+                    ? t('workplace.positions.restoredWithEmployees', {count: restoredCount})
                     : t('workplace.positions.restored');
 
                 dispatch(updateNotification({
@@ -209,15 +209,17 @@ const PositionsTab = ({ selectedSite }) => {
         dispatch(fetchPositions());
     };
 
-    const handleManageShifts = (position) => {
-        setPositionForShifts(position);
-        setShowShiftsModal(true);
+    const handleManageShifts = (position, e) => {
+        e.stopPropagation(); // Предотвращаем другие клики
+
+        // Переключаем раскрытие строки
+        if (expandedPositionId === position.pos_id) {
+            setExpandedPositionId(null);
+        } else {
+            setExpandedPositionId(position.pos_id);
+        }
     };
 
-    const handleCloseShiftsModal = () => {
-        setShowShiftsModal(false);
-        setPositionForShifts(null);
-    };
 
     const handleViewEmployees = (position) => {
         // Переход на страницу сотрудников с фильтром по позиции
@@ -264,9 +266,9 @@ const PositionsTab = ({ selectedSite }) => {
     }), [workSites]); // Добавили workSites в зависимости
 
 // Используем хук для сортировки
-    const { sortedItems: sortedPositions, requestSort, sortConfig } = useSortableData(
+    const {sortedItems: sortedPositions, requestSort, sortConfig} = useSortableData(
         filteredPositions,
-        { field: 'status', order: 'ASC' }, // Начальная сортировка
+        {field: 'status', order: 'ASC'}, // Начальная сортировка
         sortingAccessors
     );
 
@@ -391,77 +393,87 @@ const PositionsTab = ({ selectedSite }) => {
                                 </thead>
                                 <tbody>
                                 {sortedPositions.map(position => (
-                                    <tr
-                                        key={position.pos_id}
-                                        className={!position.is_active ? 'inactive-row' : '"clickable-row"'}
-                                        onClick={() => handleManageShifts(position)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <td className="fw-semibold">{position.pos_name}</td>
-                                        <td>
-                                            <Badge bg="secondary" className="site-badge">
-                                                {getSiteName(position.site_id)}
-                                            </Badge>
-                                        </td>
-                                        <td>{position.profession || '-'}</td>
-                                        <td className="text-center">
-                                            <Badge bg="info">{position.num_of_emp || 1}</Badge>
-                                        </td>
-                                        <td className="text-center">
-                                            <Badge bg="warning" text="dark">
-                                                {position.totalShifts || 0}
-                                            </Badge>
-                                        </td>
-                                        <td className="text-center">
-                                            <Badge bg="primary">
-                                                {position.totalEmployees || 0}
-                                            </Badge>
-                                        </td>
-                                        <td>
-                                            <Badge bg={position.is_active ? 'success' : 'secondary'}>
-                                                {position.is_active ? t('common.active') : t('common.inactive')}
-                                            </Badge>
-                                        </td>
-                                        <td onClick={(e) => e.stopPropagation()}>
-                                            <div className="workplace-actions">
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(position)}
-                                                    title={t('common.edit')}
-                                                >
-                                                    <i className="bi bi-pencil"></i>
-                                                </Button>
-                                                <Button
-                                                    variant="outline-info"
-                                                    size="sm"
-                                                    onClick={() => handleViewEmployees(position)}
-                                                    title={t('workplace.positions.viewEmployees')}
-                                                >
-                                                    <i className="bi bi-people"></i>
-                                                </Button>
-                                                {position.is_active ? (
+                                    <React.Fragment key={position.pos_id}>
+                                        <tr
+                                            className={`position-row ${!position.is_active ? 'inactive-row' : ''} ${expandedPositionId === position.pos_id ? 'expanded' : ''}`}
+                                            onClick={(e) => handleManageShifts(position, e)}
+                                            style={{cursor: 'pointer'}}
+                                        >
+                                            <td className="fw-semibold">
+                                                <i className={`bi bi-chevron-${expandedPositionId === position.pos_id ? 'up' : 'down'} me-2`}></i>
+                                                {position.pos_name}
+                                            </td>
+                                            <td>
+                                                <Badge bg="secondary" className="site-badge">
+                                                    {getSiteName(position.site_id)}
+                                                </Badge>
+                                            </td>
+                                            <td>{position.profession || '-'}</td>
+                                            <td className="text-center">
+                                                <Badge bg="info">{position.num_of_emp || 1}</Badge>
+                                            </td>
+                                            <td className="text-center">
+                                                <Badge bg="warning" text="dark">
+                                                    {position.totalShifts || 0}
+                                                </Badge>
+                                            </td>
+                                            <td className="text-center">
+                                                <Badge bg="primary">
+                                                    {position.totalEmployees || 0}
+                                                </Badge>
+                                            </td>
+                                            <td>
+                                                <Badge bg={position.is_active ? 'success' : 'secondary'}>
+                                                    {position.is_active ? t('common.active') : t('common.inactive')}
+                                                </Badge>
+                                            </td>
+                                            <td onClick={(e) => e.stopPropagation()}>
+                                                <div className="workplace-actions">
                                                     <Button
-                                                        variant="danger"
+                                                        variant="outline-primary"
                                                         size="sm"
-                                                        onClick={() => handleDelete(position)}
-                                                        title={t('common.delete')}
+                                                        onClick={() => handleEdit(position)}
+                                                        title={t('common.edit')}
                                                     >
-                                                        <i className="bi bi-trash"></i>
+                                                        <i className="bi bi-pencil"></i>
                                                     </Button>
-                                                ) : (
                                                     <Button
-                                                        variant="success"
+                                                        variant="outline-info"
                                                         size="sm"
-                                                        onClick={() => handleRestore(position)}
-                                                        title={t('common.restore')}
+                                                        onClick={() => handleViewEmployees(position)}
+                                                        title={t('workplace.positions.viewEmployees')}
                                                     >
-                                                        <i className="bi bi-arrow-clockwise"></i>
+                                                        <i className="bi bi-people"></i>
                                                     </Button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                    {position.is_active ? (
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            onClick={() => handleDelete(position)}
+                                                            title={t('common.delete')}
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            variant="success"
+                                                            size="sm"
+                                                            onClick={() => handleRestore(position)}
+                                                            title={t('common.restore')}
+                                                        >
+                                                            <i className="bi bi-arrow-clockwise"></i>
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {expandedPositionId === position.pos_id && (
+                                            <PositionShiftsExpanded
+                                                position={position}
+                                                onClose={() => setExpandedPositionId(null)}
+                                            />
+                                        )}
+                                    </React.Fragment>
                                 ))}
                                 </tbody>
                             </Table>
@@ -478,12 +490,6 @@ const PositionsTab = ({ selectedSite }) => {
                 workSites={workSites}
                 defaultSiteId={filterSite || selectedSite?.site_id}
 
-            />
-
-            <ManageShiftsModal
-                show={showShiftsModal}
-                onHide={handleCloseShiftsModal}
-                position={positionForShifts}
             />
 
             <ConfirmationModal

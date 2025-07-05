@@ -64,3 +64,33 @@
 [data-theme="dark"] .positions-table th {
     color: var(--bs-gray-300);
 }
+
+.position-row {
+    transition: background-color 0.2s ease;
+}
+
+.position-row:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.position-row.expanded {
+    background-color: var(--bs-primary-bg-subtle);
+    font-weight: 500;
+}
+
+[data-theme="dark"] .position-row:hover {
+    background-color: var(--bs-gray-800);
+}
+
+[data-theme="dark"] .position-row.expanded {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.positions-table tbody tr {
+    cursor: pointer;
+}
+
+/* Убираем курсор pointer для раскрытого содержимого */
+.positions-table tbody tr:has(.position-shifts-expanded) {
+    cursor: default;
+}

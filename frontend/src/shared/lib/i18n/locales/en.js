@@ -730,6 +730,7 @@ export const en = {
             deleteConfirm: 'Are you sure you want to delete this shift?',
             noShifts: 'No shifts configured for this position',
             createFirst: 'Create First Shift',
+            titleFor: 'Shifts for {position}',
 
             // Form fields
             name: 'Shift Name',

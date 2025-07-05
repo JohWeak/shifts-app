@@ -1,4 +1,4 @@
-// frontend/src/features/admin-workplace-settings/ui/ManageShiftsModal/ManageShiftsModal.js
+// frontend/src/features/admin-workplace-settings/ui/PositionShiftsExpanded/PositionShiftsExpanded.js
 import React, { useState, useEffect } from 'react';
 import {
     Modal,
@@ -6,9 +6,6 @@ import {
     Table,
     Badge,
     Alert,
-    Form,
-    Row,
-    Col,
     Card,
     OverlayTrigger,
     Tooltip, Nav
@@ -18,11 +15,11 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import ShiftForm from '../ShiftForm/ShiftForm';
 import ShiftRequirementsMatrix from '../ShiftRequirementsMatrix/ShiftRequirementsMatrix';
 import api from 'shared/api';
-import { API_ENDPOINTS } from 'shared/config/apiEndpoints';
+import { fetchPositionShifts, deletePositionShift } from '../../model/workplaceSlice';
 
-import './ManageShiftsModal.css';
+import './PositionShiftsExpanded.css';
 
-const ManageShiftsModal = ({ show, onHide, position }) => {
+const PositionShiftsExpanded = ({ position, onClose }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
@@ -34,10 +31,10 @@ const ManageShiftsModal = ({ show, onHide, position }) => {
     const [activeView, setActiveView] = useState('shifts'); // 'shifts' or 'matrix'
 
     useEffect(() => {
-        if (show && position) {
+        if (position) {
             fetchShifts();
         }
-    }, [show, position]);
+    }, [position]);
 
     const fetchShifts = async () => {
         setLoading(true);
@@ -110,18 +107,26 @@ const ManageShiftsModal = ({ show, onHide, position }) => {
     if (!position) return null;
 
     return (
-        <>
-            <Modal show={show} onHide={onHide} size="xl">
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        {t('workplace.shifts.manageTitle')} - {position.pos_name}
-                        <small className="text-muted ms-2">
-                            ({position.workSite?.site_name || position.site_name})
-                        </small>
-                    </Modal.Title>
-                </Modal.Header>
+        <tr>
+            <td colSpan="8" className="p-0"> {/* Количество колонок в вашей таблице */}
+                <div className="position-shifts-expanded">
+                    <Card className="m-3 border-primary">
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                    <h6 className="mb-0">
+                        <i className="bi bi-clock-history me-2"></i>
+                        {t('workplace.shifts.titleFor', { position: position.pos_name })}
+                    </h6>
+                    <Button
+                        variant="link"
+                        size="sm"
+                        onClick={onClose}
+                        className="text-secondary"
+                    >
+                        <i className="bi bi-chevron-up"></i>
+                    </Button>
+                </Card.Header>
 
-                <Modal.Body>
+                <Card.Body>
                     {error && (
                         <Alert variant="danger" dismissible onClose={() => setError(null)}>
                             {error}
@@ -253,15 +258,11 @@ const ManageShiftsModal = ({ show, onHide, position }) => {
                             onUpdate={fetchShifts}
                         />
                     )}
-                </Modal.Body>
+                </Card.Body>
 
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={onHide}>
-                        {t('common.close')}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
+                    </Card>
+                </div>
+            </td>
             {showShiftForm && (
                 <ShiftForm
                     show={showShiftForm}
@@ -271,8 +272,9 @@ const ManageShiftsModal = ({ show, onHide, position }) => {
                     shift={selectedShift}
                 />
             )}
-        </>
+        </tr>
+
     );
 };
 
-export default ManageShiftsModal;
+export default PositionShiftsExpanded;
