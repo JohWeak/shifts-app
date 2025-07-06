@@ -134,12 +134,7 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                     </Nav.Item>
                                 </Nav>
 
-                                {activeView === 'shifts' && (
-                                    <Button variant="primary" size="sm" onClick={handleAddShift}>
-                                        <i className="bi bi-plus-circle me-2"></i>
-                                        {t('workplace.shifts.addShift')}
-                                    </Button>
-                                )}
+
                             </div>
 
                             {loading ? (
@@ -234,6 +229,12 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                             </tr>
                                         ))}
                                         </tbody>
+                                        {activeView === 'shifts' && (
+                                            <Button className={"mt-2"} variant="primary" size="sm" onClick={handleAddShift}>
+                                                <i className="bi bi-plus-circle me-2"></i>
+                                                {t('workplace.shifts.addShift')}
+                                            </Button>
+                                        )}
                                     </Table>
                                 )
                             ) : (
