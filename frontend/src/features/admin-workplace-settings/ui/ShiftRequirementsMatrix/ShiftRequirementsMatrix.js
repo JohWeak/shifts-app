@@ -10,17 +10,27 @@ import {
     Tooltip,
     Spinner
 } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import api from 'shared/api';
+import {
+    fetchRequirementsMatrix,
+    updateShiftRequirement,
+    createShiftRequirement
+} from '../../model/workplaceSlice';
 import './ShiftRequirementsMatrix.css';
 
 const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
     const { t } = useI18n();
+    const dispatch = useDispatch();
 
-    const [matrix, setMatrix] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const {
+        requirementsMatrix,
+        matrixLoading,
+        error
+    } = useSelector(state => state.workplace);
+
+    const matrix = requirementsMatrix[positionId];
     const [saving, setSaving] = useState({});
-    const [error, setError] = useState(null);
 
     const daysOfWeek = [
         { id: 0, name: t('days.sunday'), short: t('days.sun') },
@@ -33,20 +43,10 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
     ];
 
     useEffect(() => {
-        loadMatrix();
-    }, [positionId]);
-
-    const loadMatrix = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get(`/api/positions/${positionId}/requirements-matrix`);
-            setMatrix(response);
-        } catch (err) {
-            setError(err.message || 'Failed to load requirements');
-        } finally {
-            setLoading(false);
+        if (positionId) {
+            dispatch(fetchRequirementsMatrix(positionId));
         }
-    };
+    }, [positionId, dispatch]);
 
     const updateRequirement = async (shiftId, dayOfWeek, value) => {
         const key = `${shiftId}-${dayOfWeek}`;
@@ -57,39 +57,35 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
             const requirement = shift.requirements[dayOfWeek];
 
             if (requirement.requirement_id) {
-                // Update existing
-                await api.put(`/api/positions/requirements/${requirement.requirement_id}`, {
-                    required_staff_count: value,
-                    is_working_day: value > 0
-                });
+                await dispatch(updateShiftRequirement({
+                    requirementId: requirement.requirement_id,
+                    data: {
+                        required_staff_count: value,
+                        is_working_day: value > 0
+                    }
+                })).unwrap();
             } else {
-                // Create new
-                await api.post(`/api/positions/shifts/${shiftId}/requirements`, {
-                    day_of_week: dayOfWeek,
-                    required_staff_count: value,
-                    is_recurring: true,
-                    is_working_day: value > 0
-                });
+                await dispatch(createShiftRequirement({
+                    shiftId,
+                    data: {
+                        day_of_week: dayOfWeek,
+                        required_staff_count: value,
+                        is_recurring: true,
+                        is_working_day: value > 0
+                    }
+                })).unwrap();
             }
 
-            // Update local state
-            setMatrix(prev => {
-                const newMatrix = { ...prev };
-                const shiftIndex = newMatrix.shifts.findIndex(s => s.id === shiftId);
-                newMatrix.shifts[shiftIndex].requirements[dayOfWeek] = {
-                    ...newMatrix.shifts[shiftIndex].requirements[dayOfWeek],
-                    required_staff: value,
-                    is_working_day: value > 0
-                };
-                return newMatrix;
-            });
+            // Перезагружаем матрицу для обновления данных
+            dispatch(fetchRequirementsMatrix(positionId));
 
         } catch (err) {
-            setError(err.message || 'Failed to update requirement');
+            console.error('Failed to update requirement:', err);
         } finally {
             setSaving(prev => ({ ...prev, [key]: false }));
         }
     };
+
 
     const handleCellChange = (shiftId, dayOfWeek, value) => {
         const numValue = parseInt(value) || 0;
@@ -113,7 +109,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
         return total;
     };
 
-    if (loading) {
+    if (matrixLoading) {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" />
@@ -129,7 +125,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                 <Button
                     variant="link"
                     size="sm"
-                    onClick={loadMatrix}
+                    onClick={() => dispatch(fetchRequirementsMatrix(positionId))}
                     className="ms-2"
                 >
                     {t('common.retry')}

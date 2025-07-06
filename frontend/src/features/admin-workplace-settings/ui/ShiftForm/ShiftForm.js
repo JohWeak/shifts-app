@@ -9,12 +9,14 @@ import {
     Alert,
     InputGroup
 } from 'react-bootstrap';
+import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import api from 'shared/api';
+import { createPositionShift, updatePositionShift } from '../../model/workplaceSlice';
 import './ShiftForm.css';
 
 const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
     const { t } = useI18n();
+    const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
         shift_name: '',
@@ -145,22 +147,22 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
         setLoading(true);
 
         try {
-            const endpoint = shift
-                ? `/api/positions/shifts/${shift.id}`
-                : `/api/positions/${positionId}/shifts`;
-
-            const method = shift ? 'PUT' : 'POST';
-
-            await api.request({
-                url: endpoint,
-                method,
-                data: formData
-            });
+            if (shift) {
+                await dispatch(updatePositionShift({
+                    shiftId: shift.id,
+                    shiftData: formData
+                })).unwrap();
+            } else {
+                await dispatch(createPositionShift({
+                    positionId,
+                    shiftData: formData
+                })).unwrap();
+            }
 
             onSuccess();
         } catch (error) {
             setErrors({
-                submit: error.response?.data?.message || t('common.error')
+                submit: error || t('common.error')
             });
         } finally {
             setLoading(false);

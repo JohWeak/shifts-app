@@ -38,6 +38,11 @@ export const API_ENDPOINTS = {
         SYSTEM: '/api/settings/system',
         POSITIONS: '/api/positions',
         POSITION_UPDATE: (id) => `/api/positions/${id}`,
+        POSITION_SHIFTS: '/api/positions/:id/shifts',
+        POSITION_SHIFT: '/api/positions/shifts/:id',
+        SHIFT_REQUIREMENTS: '/api/positions/shifts/:id/requirements',
+        SHIFT_REQUIREMENT: '/api/positions/requirements/:id',
+        POSITION_REQUIREMENTS_MATRIX: '/api/positions/:id/requirements-matrix'
     },
     POSITIONS: {
         BY_SITE: (siteId) => `/api/sites/${siteId}/positions`,

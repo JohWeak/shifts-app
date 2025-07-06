@@ -127,6 +127,110 @@ export const restorePosition = createAsyncThunk(
     }
 );
 
+// Position Shifts
+export const fetchPositionShifts = createAsyncThunk(
+    'workplace/fetchPositionShifts',
+    async (positionId, { rejectWithValue }) => {
+        try {
+            const response = await api.get(
+                API_ENDPOINTS.SETTINGS.POSITION_SHIFTS.replace(':id', positionId)
+            );
+            return { positionId, shifts: response };
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch position shifts');
+        }
+    }
+);
+
+export const createPositionShift = createAsyncThunk(
+    'workplace/createPositionShift',
+    async ({ positionId, shiftData }, { rejectWithValue }) => {
+        try {
+            const response = await api.post(
+                API_ENDPOINTS.SETTINGS.POSITION_SHIFTS.replace(':id', positionId),
+                shiftData
+            );
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to create shift');
+        }
+    }
+);
+
+export const updatePositionShift = createAsyncThunk(
+    'workplace/updatePositionShift',
+    async ({ shiftId, shiftData }, { rejectWithValue }) => {
+        try {
+            const response = await api.put(
+                API_ENDPOINTS.SETTINGS.POSITION_SHIFT.replace(':id', shiftId),
+                shiftData
+            );
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to update shift');
+        }
+    }
+);
+
+export const deletePositionShift = createAsyncThunk(
+    'workplace/deletePositionShift',
+    async (shiftId, { rejectWithValue }) => {
+        try {
+            await api.delete(
+                API_ENDPOINTS.SETTINGS.POSITION_SHIFT.replace(':id', shiftId)
+            );
+            return shiftId;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to delete shift');
+        }
+    }
+);
+
+// Requirements Matrix
+export const fetchRequirementsMatrix = createAsyncThunk(
+    'workplace/fetchRequirementsMatrix',
+    async (positionId, { rejectWithValue }) => {
+        try {
+            const response = await api.get(
+                API_ENDPOINTS.SETTINGS.POSITION_REQUIREMENTS_MATRIX.replace(':id', positionId)
+            );
+            return { positionId, matrix: response };
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch requirements matrix');
+        }
+    }
+);
+
+export const updateShiftRequirement = createAsyncThunk(
+    'workplace/updateShiftRequirement',
+    async ({ requirementId, data }, { rejectWithValue }) => {
+        try {
+            const response = await api.put(
+                API_ENDPOINTS.SETTINGS.SHIFT_REQUIREMENT.replace(':id', requirementId),
+                data
+            );
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to update requirement');
+        }
+    }
+);
+
+export const createShiftRequirement = createAsyncThunk(
+    'workplace/createShiftRequirement',
+    async ({ shiftId, data }, { rejectWithValue }) => {
+        try {
+            const response = await api.post(
+                API_ENDPOINTS.SETTINGS.SHIFT_REQUIREMENTS.replace(':id', shiftId),
+                data
+            );
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to create requirement');
+        }
+    }
+);
+
 // Slice
 const workplaceSlice = createSlice({
     name: 'workplace',
@@ -139,7 +243,12 @@ const workplaceSlice = createSlice({
         positionsLoading: false,
         error: null,
         operationStatus: null, // 'success' | 'error' | null
-        positionOperationStatus: null
+        positionOperationStatus: null,
+        positionShifts: {}, // { [positionId]: shifts[] }
+        requirementsMatrix: {}, // { [positionId]: matrix }
+        shiftsLoading: false,
+        matrixLoading: false,
+        shiftOperationStatus: null
     },
     reducers: {
         clearOperationStatus: (state) => {
@@ -149,7 +258,11 @@ const workplaceSlice = createSlice({
         clearPositionOperationStatus: (state) => {
             state.positionOperationStatus = null;
             state.error = null;
+        },
+        clearShiftOperationStatus: (state) => {
+            state.shiftOperationStatus = null;
         }
+
     },
     extraReducers: (builder) => {
         // Fetch work sites
@@ -294,6 +407,85 @@ const workplaceSlice = createSlice({
                 state.operationLoading = false;
                 state.error = action.payload;
                 state.positionOperationStatus = 'error';
+            })
+            // Position Shifts
+            .addCase(fetchPositionShifts.pending, (state) => {
+                state.shiftsLoading = true;
+            })
+            .addCase(fetchPositionShifts.fulfilled, (state, action) => {
+                state.shiftsLoading = false;
+                state.positionShifts[action.payload.positionId] = action.payload.shifts;
+            })
+            .addCase(fetchPositionShifts.rejected, (state, action) => {
+                state.shiftsLoading = false;
+                state.error = action.payload;
+            })
+
+            // Create shift
+            .addCase(createPositionShift.fulfilled, (state, action) => {
+                state.shiftOperationStatus = 'success';
+                // Обновляем локальный список если он загружен
+                const positionId = action.meta.arg.positionId;
+                if (state.positionShifts[positionId]) {
+                    state.positionShifts[positionId].push(action.payload);
+                }
+            })
+            .addCase(createPositionShift.rejected, (state, action) => {
+                state.error = action.payload;
+                state.shiftOperationStatus = 'error';
+            })
+
+            // Update shift
+            .addCase(updatePositionShift.fulfilled, (state, action) => {
+                state.shiftOperationStatus = 'success';
+                // Обновляем в всех загруженных позициях
+                Object.keys(state.positionShifts).forEach(posId => {
+                    const shiftIndex = state.positionShifts[posId].findIndex(
+                        s => s.id === action.payload.id
+                    );
+                    if (shiftIndex !== -1) {
+                        state.positionShifts[posId][shiftIndex] = action.payload;
+                    }
+                });
+            })
+            .addCase(updatePositionShift.rejected, (state, action) => {
+                state.error = action.payload;
+                state.shiftOperationStatus = 'error';
+            })
+
+            // Delete shift
+            .addCase(deletePositionShift.fulfilled, (state, action) => {
+                state.shiftOperationStatus = 'success';
+                // Удаляем из всех загруженных позиций
+                Object.keys(state.positionShifts).forEach(posId => {
+                    state.positionShifts[posId] = state.positionShifts[posId].filter(
+                        s => s.id !== action.payload
+                    );
+                });
+            })
+            .addCase(deletePositionShift.rejected, (state, action) => {
+                state.error = action.payload;
+                state.shiftOperationStatus = 'error';
+            })
+
+            // Requirements Matrix
+            .addCase(fetchRequirementsMatrix.pending, (state) => {
+                state.matrixLoading = true;
+            })
+            .addCase(fetchRequirementsMatrix.fulfilled, (state, action) => {
+                state.matrixLoading = false;
+                state.requirementsMatrix[action.payload.positionId] = action.payload.matrix;
+            })
+            .addCase(fetchRequirementsMatrix.rejected, (state, action) => {
+                state.matrixLoading = false;
+                state.error = action.payload;
+            })
+            .addCase(updateShiftRequirement.rejected, (state, action) => {
+                state.error = action.payload;
+            })
+
+            .addCase(createShiftRequirement.rejected, (state, action) => {
+                state.error = action.payload;
             });
 
 
@@ -302,5 +494,9 @@ const workplaceSlice = createSlice({
     }
 });
 
-export const { clearOperationStatus, clearPositionOperationStatus } = workplaceSlice.actions;
+export const {
+    clearOperationStatus,
+    clearPositionOperationStatus,
+    clearShiftOperationStatus
+} = workplaceSlice.actions;
 export default workplaceSlice.reducer;
