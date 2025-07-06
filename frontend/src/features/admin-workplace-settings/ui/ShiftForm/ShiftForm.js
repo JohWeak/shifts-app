@@ -29,13 +29,13 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
 
     // Предустановленные цвета для смен
     const presetColors = [
-        { color: '#ffc107', name: 'Yellow' },
-        { color: '#fd7e14', name: 'Orange' },
-        { color: '#6610f2', name: 'Purple' },
-        { color: '#28a745', name: 'Green' },
-        { color: '#dc3545', name: 'Red' },
-        { color: '#17a2b8', name: 'Cyan' },
-        { color: '#6c757d', name: 'Gray' }
+        { color: '#fbe9bd', name: 'Yellow' },
+        { color: '#b4dbfb', name: 'Blue' },
+        { color: '#fbc0c5', name: 'Pink' },
+        { color: '#dafdcb', name: 'Green' },
+        { color: '#fbaafb', name: 'Purple' },
+        { color: '#96f6e5', name: 'Cyan' },
+        { color: '#DEB887', name: 'Beige' }
     ];
 
     useEffect(() => {
