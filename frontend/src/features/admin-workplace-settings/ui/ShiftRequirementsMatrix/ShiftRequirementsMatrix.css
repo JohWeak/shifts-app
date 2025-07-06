@@ -80,7 +80,7 @@
 .total-cell, .day-total, .grand-total {
     text-align: center;
     vertical-align: middle;
-    background-color: var(--bs-gray-50);
+    background-color: var(--bs-gray-100);
 }
 
 [data-bs-theme="dark"] .total-cell,
