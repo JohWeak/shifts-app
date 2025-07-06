@@ -58,6 +58,3 @@
 .position-shifts-expanded .table {
     margin-bottom: 0;
 }
-.position-shifts-row:hover {
-    --bs-table-hover-bg: transparent;
-}

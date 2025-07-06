@@ -110,20 +110,6 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
         <tr className="position-shifts-row">
             <td colSpan="8" className="position-shifts-col p-0">
                 <div className={`position-shifts-expanded ${isClosing ? 'closing' : ''}`}>                    <Card className="m-3">
-                        <Card.Header className="d-flex justify-content-between align-items-center">
-                            <h6 className="mb-0">
-                                <i className="bi bi-clock-history me-2"></i>
-                                {t('workplace.shifts.titleFor', {position: position.pos_name})}
-                            </h6>
-                            <Button
-                                variant="link"
-                                size="sm"
-                                onClick={onClose}
-                                className="text-secondary"
-                            >
-                                <i className="bi bi-chevron-up"></i>
-                            </Button>
-                        </Card.Header>
 
                         <Card.Body>
                             {error && (
