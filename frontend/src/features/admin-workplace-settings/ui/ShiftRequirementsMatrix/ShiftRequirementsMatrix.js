@@ -29,7 +29,8 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
         error
     } = useSelector(state => state.workplace);
 
-    const matrix = requirementsMatrix[positionId];
+    const reduxMatrix = requirementsMatrix[positionId];
+    const [localMatrix, setLocalMatrix] = useState(null);
     const [saving, setSaving] = useState({});
 
     const daysOfWeek = [
@@ -43,6 +44,12 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
     ];
 
     useEffect(() => {
+        if (reduxMatrix) {
+            setLocalMatrix(reduxMatrix);
+        }
+    }, [reduxMatrix]);
+
+    useEffect(() => {
         if (positionId) {
             dispatch(fetchRequirementsMatrix(positionId));
         }
@@ -52,14 +59,40 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
         const key = `${shiftId}-${dayOfWeek}`;
         setSaving(prev => ({ ...prev, [key]: true }));
 
+        // Оптимистичное обновление локального состояния
+        setLocalMatrix(prev => {
+            if (!prev) return prev;
+
+            const newMatrix = { ...prev };
+            const shiftIndex = newMatrix.shifts.findIndex(s => s.id === shiftId);
+
+            if (shiftIndex !== -1) {
+                newMatrix.shifts = [...newMatrix.shifts];
+                newMatrix.shifts[shiftIndex] = {
+                    ...newMatrix.shifts[shiftIndex],
+                    requirements: {
+                        ...newMatrix.shifts[shiftIndex].requirements,
+                        [dayOfWeek]: {
+                            ...newMatrix.shifts[shiftIndex].requirements[dayOfWeek],
+                            required_staff: value,
+                            is_working_day: value > 0
+                        }
+                    }
+                };
+            }
+
+            return newMatrix;
+        });
+
         try {
-            const shift = matrix.shifts.find(s => s.id === shiftId);
+            const shift = localMatrix.shifts.find(s => s.id === shiftId);
             const requirement = shift.requirements[dayOfWeek];
 
             if (requirement.requirement_id) {
                 await dispatch(updateShiftRequirement({
                     requirementId: requirement.requirement_id,
                     data: {
+                        day_of_week: dayOfWeek,
                         required_staff_count: value,
                         is_working_day: value > 0
                     }
@@ -75,12 +108,15 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                     }
                 })).unwrap();
             }
-
-            // Перезагружаем матрицу для обновления данных
             dispatch(fetchRequirementsMatrix(positionId));
+
+
+            // Не перезагружаем всю матрицу, только при ошибке
 
         } catch (err) {
             console.error('Failed to update requirement:', err);
+            // При ошибке перезагружаем для синхронизации
+            dispatch(fetchRequirementsMatrix(positionId));
         } finally {
             setSaving(prev => ({ ...prev, [key]: false }));
         }
@@ -95,8 +131,8 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
     };
 
     const getTotalForDay = (dayOfWeek) => {
-        if (!matrix) return 0;
-        return matrix.shifts.reduce((sum, shift) => {
+        if (!localMatrix) return 0;
+        return localMatrix.shifts.reduce((sum, shift) => {
             return sum + (shift.requirements[dayOfWeek]?.required_staff || 0);
         }, 0);
     };
@@ -134,7 +170,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
         );
     }
 
-    if (!matrix || !shifts.length) {
+    if (!localMatrix || !shifts.length) {
         return (
             <Alert variant="info">
                 {t('workplace.shifts.noShiftsForMatrix')}
@@ -166,7 +202,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {matrix.shifts.map(shift => (
+                    {localMatrix.shifts.map(shift => (
                         <tr key={shift.id}>
                             <td className="shift-cell">
                                 <div className="d-flex align-items-center">
@@ -228,7 +264,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                         ))}
                         <td className="grand-total">
                             <Badge bg="success">
-                                {matrix.shifts.reduce((total, shift) =>
+                                {localMatrix.shifts.reduce((total, shift) =>
                                     total + getTotalForShift(shift), 0
                                 )}
                             </Badge>

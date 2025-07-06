@@ -111,7 +111,7 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
             <td colSpan="8" className="position-shifts-col p-0">
                 <div className={`position-shifts-expanded ${isClosing ? 'closing' : ''}`}>                    <Card className="m-3">
 
-                        <Card.Body>
+                        <Card.Body className={"pb-1"}>
                             {error && (
                                 <Alert variant="danger" dismissible onClose={() => setError(null)}>
                                     {error}
@@ -229,13 +229,8 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                             </tr>
                                         ))}
                                         </tbody>
-                                        {activeView === 'shifts' && (
-                                            <Button className={"mt-2"} variant="primary" size="sm" onClick={handleAddShift}>
-                                                <i className="bi bi-plus-circle me-2"></i>
-                                                {t('workplace.shifts.addShift')}
-                                            </Button>
-                                        )}
                                     </Table>
+
                                 )
                             ) : (
                                 <ShiftRequirementsMatrix
@@ -245,8 +240,17 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                 />
                             )}
                         </Card.Body>
+                    <div className="position-shifts-expanded-footer d-flex ms-3 mb-3 mt-0">
+                        {activeView === 'shifts' && (
+                            <Button className={"mt-2 p-2 rounded-2"} variant="primary" size="sm" onClick={handleAddShift}>
+                                <i className="bi bi-plus-circle me-2"></i>
+                                {t('workplace.shifts.addShift')}
+                            </Button>
 
-                    </Card>
+                        )}
+                    </div>
+
+                </Card>
                 </div>
             </td>
             {showShiftForm && (
