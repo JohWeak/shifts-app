@@ -99,6 +99,21 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
         }
     };
 
+    const handleStepChange = (shiftId, dayOfWeek, step) => {
+        // Находим текущее значение
+        const currentShift = localMatrix.shifts.find(s => s.id === shiftId);
+        if (!currentShift) return;
+        const currentValue = currentShift.requirements[dayOfWeek]?.required_staff || 0;
+
+        // Вычисляем новое значение, не выходя за пределы min/max
+        let newValue = currentValue + step;
+        if (newValue < 0) newValue = 0;
+        if (newValue > 99) newValue = 99;
+
+        // Вызываем уже существующий обработчик изменений
+        handleCellChange(shiftId, dayOfWeek, newValue.toString());
+    };
+
     const handleReset = () => {
         if (reduxMatrix) {
             setLocalMatrix(JSON.parse(JSON.stringify(reduxMatrix)));
@@ -271,7 +286,15 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
 
                                 return (
                                     <td key={day.id} className="requirement-cell">
-                                        <div className="requirement-input-wrapper">
+                                        <div className="custom-number-input">
+                                            <button
+                                                type="button"
+                                                className="btn-decrement"
+                                                onClick={() => handleStepChange(shift.id, day.id, -1)}
+                                                tabIndex="-1" // Убираем из навигации по Tab, чтобы не мешать
+                                            >
+                                                -
+                                            </button>
                                             <Form.Control
                                                 type="number"
                                                 min="0"
@@ -280,7 +303,14 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                                                 onChange={(e) => handleCellChange(shift.id, day.id, e.target.value)}
                                                 className={`requirement-input ${requirement?.required_staff === 0 ? 'non-working' : ''}`}
                                             />
-
+                                            <button
+                                                type="button"
+                                                className="btn-increment"
+                                                onClick={() => handleStepChange(shift.id, day.id, +1)}
+                                                tabIndex="-1"
+                                            >
+                                                +
+                                            </button>
                                         </div>
                                     </td>
                                 );
