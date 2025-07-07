@@ -32,7 +32,13 @@ export const API_ENDPOINTS = {
     // Constraints
     CONSTRAINTS: {
         BASE: '/api/constraints',
-        EMPLOYEE: (empId) => `/api/constraints/employee/${empId}`
+        EMPLOYEE: (empId) => `/api/constraints/employee/${empId}`,
+        WEEKLY: '/api/constraints/weekly',
+        SUBMIT: '/api/constraints/submit',
+        PERMANENT_REQUESTS: (empId) => `/api/constraints/permanent-requests/${empId}`,
+        PERMANENT_REQUEST: '/api/constraints/permanent-request',
+        PENDING_REQUESTS: '/api/constraints/pending-requests',
+        REVIEW_REQUEST: (id) => `/api/constraints/review-request/${id}`,
     },
     SETTINGS: {
         SYSTEM: '/api/settings/system',

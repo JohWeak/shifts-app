@@ -14,10 +14,13 @@ import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleS
 // Pages
 import Login from '../features/auth';
 
-import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import EmployeeLayout from '../shared/ui/layouts/EmployeeLayout/EmployeeLayout';
-
 import EmployeeDashboard from '../features/employee-dashboard';
+import EmployeeSchedule from '../features/employee-schedule';
+import EmployeeConstraints from '../features/employee-constraints';
+import EmployeeRequests from '../features/employee-requests'; // Создадим позже
+
+import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
 import AlgorithmSettings from '../features/admin-algorithm-settings';
@@ -48,9 +51,13 @@ const router = createBrowserRouter([
     { path: "/login", element: <Login /> },
     {
         path: "/employee",
-        element: <EmployeeLayout />,
+        element: <ProtectedRoute><EmployeeLayout /></ProtectedRoute>,
         children: [
             { path: "dashboard", element: <EmployeeDashboard /> },
+            { path: "schedule", element: <EmployeeSchedule /> },
+            { path: "constraints", element: <EmployeeConstraints /> },
+            { path: "requests", element: <EmployeeRequests /> },
+            { index: true, element: <Navigate to="dashboard" replace /> },
         ],
     },
     {
@@ -63,6 +70,8 @@ const router = createBrowserRouter([
             { path: "employees", element: <EmployeeManagement /> },
             { path: "workplace", element: <WorkplaceSettings /> },
             { path: "reports", element: <Reports /> },
+            { path: "my-employee-profile", element: <EmployeeLayout /> }, // Админ как работник
+
         ],
     },
     { path: "/", element: <Navigate to="/login" replace /> },

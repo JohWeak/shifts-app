@@ -158,7 +158,6 @@ export const en = {
         employees: 'Employees',
         hireDate: 'Hire Date',
         manageEmployees: 'Manage Employees',
-        myRequests: 'My Requests',
         noAvailableEmployees: 'No available employees for this shift',
         position: 'Position',
         preferred: 'Preferred',
@@ -291,7 +290,10 @@ export const en = {
         alreadyWorking: 'Already Working',
         noMatchingEmployees: 'No employees match your search',
         noEmployeesInCategory: 'No employees in this category',
-        confirmOverride: 'Are you sure you want to assign {name}?\n\nReason unavailable: {reason}\nNote: {note}'
+        confirmOverride: 'Are you sure you want to assign {name}?\n\nReason unavailable: {reason}\nNote: {note}',
+        portal: 'Employee Portal',
+        schedule: 'Schedule',
+        myRequests: 'My Requests',
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.',

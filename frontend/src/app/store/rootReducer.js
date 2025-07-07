@@ -6,6 +6,7 @@ import positionReducer from 'features/admin-position-settings/model/positionSlic
 import employeeReducer from 'features/admin-employee-management/model/employeeSlice';
 import workplaceReducer from 'features/admin-workplace-settings/model/workplaceSlice';
 import notificationsReducer from '../model/notificationsSlice';
+import constraintReducer from 'features/employee-constraints/model/constraintSlice';
 
 export const rootReducer = combineReducers({
     auth: authReducer,
@@ -15,7 +16,7 @@ export const rootReducer = combineReducers({
     employees: employeeReducer,
     workplace: workplaceReducer,
     notifications: notificationsReducer,
-    //constraints: constraintsReducer,
+    constraints: constraintReducer,
 
 
 });
