@@ -289,11 +289,11 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                                         <div className="custom-number-input">
                                             <button
                                                 type="button"
-                                                className="btn-decrement"
-                                                onClick={() => handleStepChange(shift.id, day.id, -1)}
-                                                tabIndex="-1" // Убираем из навигации по Tab, чтобы не мешать
+                                                className="btn-increment"
+                                                onClick={() => handleStepChange(shift.id, day.id, +1)}
+                                                tabIndex="-1"
                                             >
-                                                -
+                                                +
                                             </button>
                                             <Form.Control
                                                 type="number"
@@ -303,13 +303,14 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                                                 onChange={(e) => handleCellChange(shift.id, day.id, e.target.value)}
                                                 className={`requirement-input ${requirement?.required_staff === 0 ? 'non-working' : ''}`}
                                             />
+
                                             <button
                                                 type="button"
-                                                className="btn-increment"
-                                                onClick={() => handleStepChange(shift.id, day.id, +1)}
-                                                tabIndex="-1"
+                                                className="btn-decrement"
+                                                onClick={() => handleStepChange(shift.id, day.id, -1)}
+                                                tabIndex="-1" // Убираем из навигации по Tab, чтобы не мешать
                                             >
-                                                +
+                                                -
                                             </button>
                                         </div>
                                     </td>

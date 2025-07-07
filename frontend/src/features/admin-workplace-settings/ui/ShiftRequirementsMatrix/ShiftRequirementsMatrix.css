@@ -58,21 +58,13 @@
     display: inline-block;
 }
 
-.requirement-input {
-    width: 50px;
-    text-align: center;
-    padding: 0.25rem;
-}
+
 
 .requirement-input.non-working {
-    background-color: var(--bs-gray-200);
+    background-color: var(--bs-accordion-active-bg);
     color: var(--bs-gray-600);
 }
 
-[data-bs-theme="dark"] .requirement-input.non-working {
-    background-color: var(--bs-gray-700);
-    color: var(--bs-gray-400);
-}
 
 .saving-indicator {
     position: absolute;
@@ -103,11 +95,9 @@
     text-align: right;
 }
 .custom-number-input {
-
-    display: flex;
+    width: 45px;
     align-items: center;
-    position: relative; /* Нужно для позиционирования, если понадобится */
-    height: 38px; /* Стандартная высота инпута Bootstrap, можно подкорректировать */
+    margin: 0 auto;
 }
 
 /* 2. Стили для кнопок "+" и "-" */
@@ -118,11 +108,11 @@
     color: #495057;
     cursor: pointer;
     height: 100%;
-    width: 22px; /* Ширина кнопок */
+    width: 45px; /* Ширина кнопок */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.2rem;
+    font-size: 1rem;
     line-height: 1;
     user-select: none; /* Запрещаем выделение текста на кнопках */
     transition: background-color 0.25s ease-in-out;
@@ -134,28 +124,27 @@
 }
 
 /* Скругляем нужные углы */
-.custom-number-input .btn-decrement {
-    border-right: none; /* Убираем правую рамку, чтобы она слилась с инпутом */
+.custom-number-input .btn-increment {
+    border-bottom: none;
     border-top-left-radius: 0.375rem; /* Стандартный радиус Bootstrap */
-    border-bottom-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
 }
 
-.custom-number-input .btn-increment {
-    border-left: none; /* Убираем левую рамку */
-    border-top-right-radius: 0.375rem;
+.custom-number-input .btn-decrement {
+    border-top: none;
+    border-bottom-left-radius: 0.375rem;
     border-bottom-right-radius: 0.375rem;
 }
 
 /* 3. Стили для самого инпута */
 .custom-number-input .requirement-input {
     text-align: center;
-    /* Убираем рамки, которые теперь рисуются на кнопках */
-    border-left: none;
-    border-right: none;
     border-radius: 0; /* Убираем скругление у самого инпута */
     height: 100%;
     /* Убираем стандартные стрелки (спиннеры) */
     -moz-appearance: textfield; /* Для Firefox */
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
 }
 
 /* Для Chrome, Safari, Edge, Opera */
@@ -178,7 +167,6 @@
 }
 @media (max-width: 768px) {
     .requirement-input {
-        width: 50px;
         font-size: 0.875rem;
     }
 
