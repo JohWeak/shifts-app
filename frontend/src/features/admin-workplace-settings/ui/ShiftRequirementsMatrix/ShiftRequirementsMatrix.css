@@ -164,6 +164,18 @@
     -webkit-appearance: none;
     margin: 0;
 }
+
+[data-theme="dark"] .custom-number-input .btn-decrement,
+[data-theme="dark"] .custom-number-input .btn-increment {
+    background-color: #2b3035; /* Примерный цвет для темной темы */
+    border-color: #495057;
+    color: #f8f9fa;
+}
+
+[data-theme="dark"] .custom-number-input .btn-decrement:hover,
+[data-theme="dark"] .custom-number-input .btn-increment:hover {
+    background-color: #343a40;
+}
 @media (max-width: 768px) {
     .requirement-input {
         width: 50px;
