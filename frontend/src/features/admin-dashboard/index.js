@@ -1,6 +1,5 @@
 // frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js
 import React, { useState, useEffect } from 'react';
-import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 
 import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
@@ -44,7 +43,6 @@ const AdminDashboard = () => {
     };
 
     return (
-        <AdminLayout>
             <Container fluid className="admin-dashboard p-2">
                 <PageHeader
                     icon="speedometer2"
@@ -208,7 +206,6 @@ const AdminDashboard = () => {
                     </Col>
                 </Row>
             </Container>
-        </AdminLayout>
     );
 };
 

@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Card, Form, Button, Row, Col, Alert, Spinner, Nav, Tab} from 'react-bootstrap';
-import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {fetchSystemSettings, updateSystemSettings} from './model/settingsSlice';
@@ -50,16 +49,13 @@ const SystemSettings = () => {
 
     if (loading === 'pending' && !localSettings.weekStartDay !== undefined) {
         return (
-            <AdminLayout>
                 <Container className="d-flex justify-content-center align-items-center" style={{minHeight: '60vh'}}>
                     <Spinner animation="border"/>
                 </Container>
-            </AdminLayout>
         );
     }
 
     return (
-        <AdminLayout>
             <Container fluid className="px-0">
                 <PageHeader
                     icon="gear"
@@ -611,7 +607,6 @@ const SystemSettings = () => {
                     </Row>
                 </Tab.Container>
             </Container>
-        </AdminLayout>
     );
 };
 

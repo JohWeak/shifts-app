@@ -8,7 +8,6 @@ const Reports = () => {
     const { t } = useI18n();
 
     return (
-        <AdminLayout>
             <Container fluid className="px-0">
                 <PageHeader
                     icon="graph-up-arrow"
@@ -24,7 +23,6 @@ const Reports = () => {
                     </Card.Body>
                 </Card>
             </Container>
-        </AdminLayout>
     );
 };
 

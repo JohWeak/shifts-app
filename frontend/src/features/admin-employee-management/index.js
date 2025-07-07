@@ -6,7 +6,6 @@ import store from "app/store/store";
 import {fetchSystemSettings} from "../admin-system-settings/model/settingsSlice";
 import {fetchWorkSites} from "../admin-schedule-management/model/scheduleSlice";
 import { Container, Card, Button, Row, Col, Alert } from 'react-bootstrap';
-import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import EmployeeList from './ui/EmployeeList/EmployeeList';
 import EmployeeModal from './ui/EmployeeModal/EmployeeModal';
@@ -235,7 +234,6 @@ const EmployeeManagement = () => {
     };
 
     return (
-        <AdminLayout>
             <div className="employee-management">
                 <PageHeader
                     title={t('employee.management')}
@@ -322,7 +320,6 @@ const EmployeeManagement = () => {
                     confirmText={t('employee.restore')}
                 />
             </div>
-        </AdminLayout>
     );
 };
 

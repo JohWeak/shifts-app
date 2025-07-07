@@ -1,5 +1,6 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
 import React, { useState, useEffect } from 'react';
+import { Outlet } from 'react-router-dom';
 import {
     Container,
     Navbar,
@@ -20,7 +21,7 @@ import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import './AdminLayout.css';
 import { setActiveTab, setSelectedScheduleId } from 'features/admin-schedule-management/model/scheduleSlice';
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = () => {
     const { t } = useI18n();
     const navigate = useNavigate();
     const location = useLocation();
@@ -261,7 +262,7 @@ const AdminLayout = ({ children }) => {
                 {/* Main Content Area */}
                 <div className="admin-content-area">
                     <main className="admin-main-content">
-                        {children}
+                        <Outlet />
                     </main>
                 </div>
             </div>

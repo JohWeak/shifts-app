@@ -2,7 +2,6 @@
 import React, {useState, useEffect} from 'react';
 import {Container, Nav, Tab, Card} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
-import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -49,16 +48,16 @@ const WorkplaceSettings = () => {
 
     if (loading && !activeTab) {
         return (
-            <AdminLayout>
+
                 <Container fluid>
                     <LoadingState/>
                 </Container>
-            </AdminLayout>
+
         );
     }
 
     return (
-        <AdminLayout>
+
             <Container fluid className="px-0">
                 <PageHeader
                     icon="building"
@@ -108,7 +107,6 @@ const WorkplaceSettings = () => {
                     </Tab.Container>
                 </Card>
             </Container>
-        </AdminLayout>
     );
 };
 

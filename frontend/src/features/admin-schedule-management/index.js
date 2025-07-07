@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {Container, Spinner, Alert, Button} from 'react-bootstrap';
 
 // Widgets, UI, etc.
-import AdminLayout from 'shared/ui/layouts/AdminLayout/AdminLayout';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import ScheduleList from './ui/schedule-list/ScheduleList';
 import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
@@ -170,7 +169,6 @@ const ScheduleManagement = () => {
     const scheduleExists = !!selectedScheduleId;
 
     return (
-        <AdminLayout>
             <Container fluid className="p-2">
                 <PageHeader
                     icon="calendar-week"
@@ -223,7 +221,6 @@ const ScheduleManagement = () => {
                 <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={() => {}} />
                 <EmployeeSelectionModal show={showEmployeeModal} onHide={() => setShowEmployeeModal(false)} selectedPosition={selectedCell} onEmployeeSelect={handleEmployeeSelect} scheduleDetails={scheduleDetails} />
             </Container>
-        </AdminLayout>
     );
 };
 

@@ -59,6 +59,11 @@ export const en = {
         deactivate: 'Deactivate',
         restore: 'Restore',
         processing: 'Processing...',
+        unsavedChanges: 'Unsaved Changes',
+        unsavedChangesMessage: 'You have unsaved changes',
+        saveAndContinue: 'Save and Continue',
+        stayOnPage: 'Stay on Page',
+        discardChanges: 'Discard Changes',
     },
     auth: {
         createAccount: 'Create Account',

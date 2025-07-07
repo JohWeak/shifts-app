@@ -1,17 +1,19 @@
 // frontend/src/features/admin-workplace-settings/ui/ShiftRequirementsMatrix/ShiftRequirementsMatrix.js
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Table,
     Form,
     Button,
     Badge,
     Alert,
-    OverlayTrigger,
-    Tooltip,
     Spinner
 } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {isEqual} from 'lodash';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useBlocker} from 'react-router-dom';
+
 import {
     fetchRequirementsMatrix,
     updateShiftRequirement,
@@ -19,8 +21,8 @@ import {
 } from '../../model/workplaceSlice';
 import './ShiftRequirementsMatrix.css';
 
-const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
-    const { t } = useI18n();
+const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     const {
@@ -31,23 +33,45 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
 
     const reduxMatrix = requirementsMatrix[positionId];
     const [localMatrix, setLocalMatrix] = useState(null);
-    const [saving, setSaving] = useState({});
+    const [isChanged, setIsChanged] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Состояние для модального окна
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const blocker = useBlocker(isChanged);
+
 
     const daysOfWeek = [
-        { id: 0, name: t('days.sunday'), short: t('days.sun') },
-        { id: 1, name: t('days.monday'), short: t('days.mon') },
-        { id: 2, name: t('days.tuesday'), short: t('days.tue') },
-        { id: 3, name: t('days.wednesday'), short: t('days.wed') },
-        { id: 4, name: t('days.thursday'), short: t('days.thu') },
-        { id: 5, name: t('days.friday'), short: t('days.fri') },
-        { id: 6, name: t('days.saturday'), short: t('days.sat') }
+        {id: 0, name: t('days.sunday'), short: t('days.sun')},
+        {id: 1, name: t('days.monday'), short: t('days.mon')},
+        {id: 2, name: t('days.tuesday'), short: t('days.tue')},
+        {id: 3, name: t('days.wednesday'), short: t('days.wed')},
+        {id: 4, name: t('days.thursday'), short: t('days.thu')},
+        {id: 5, name: t('days.friday'), short: t('days.fri')},
+        {id: 6, name: t('days.saturday'), short: t('days.sat')}
     ];
-
+    // Эффект для блокировки ухода со страницы, если есть изменения
+    useEffect(() => {
+        if (blocker && blocker.state === "blocked") {
+            setShowConfirmModal(true);
+        }
+    }, [blocker]);
     useEffect(() => {
         if (reduxMatrix) {
-            setLocalMatrix(reduxMatrix);
+            // Используем глубокое копирование, чтобы избежать мутаций
+            setLocalMatrix(JSON.parse(JSON.stringify(reduxMatrix)));
         }
     }, [reduxMatrix]);
+
+    useEffect(() => {
+        if (localMatrix && reduxMatrix) {
+            // Способ сравнить вложенные объекты
+            setIsChanged(!isEqual(localMatrix, reduxMatrix));
+        } else {
+            setIsChanged(false);
+        }
+    }, [localMatrix, reduxMatrix]);
+
 
     useEffect(() => {
         if (positionId) {
@@ -55,79 +79,103 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
         }
     }, [positionId, dispatch]);
 
-    const updateRequirement = async (shiftId, dayOfWeek, value) => {
-        const key = `${shiftId}-${dayOfWeek}`;
-        setSaving(prev => ({ ...prev, [key]: true }));
-
-        // Оптимистичное обновление локального состояния
-        setLocalMatrix(prev => {
-            if (!prev) return prev;
-
-            const newMatrix = { ...prev };
-            const shiftIndex = newMatrix.shifts.findIndex(s => s.id === shiftId);
-
-            if (shiftIndex !== -1) {
-                newMatrix.shifts = [...newMatrix.shifts];
-                newMatrix.shifts[shiftIndex] = {
-                    ...newMatrix.shifts[shiftIndex],
-                    requirements: {
-                        ...newMatrix.shifts[shiftIndex].requirements,
-                        [dayOfWeek]: {
-                            ...newMatrix.shifts[shiftIndex].requirements[dayOfWeek],
-                            required_staff: value,
-                            is_working_day: value > 0
-                        }
-                    }
-                };
-            }
-
-            return newMatrix;
-        });
-
-        try {
-            const shift = localMatrix.shifts.find(s => s.id === shiftId);
-            const requirement = shift.requirements[dayOfWeek];
-
-            if (requirement.requirement_id) {
-                await dispatch(updateShiftRequirement({
-                    requirementId: requirement.requirement_id,
-                    data: {
-                        day_of_week: dayOfWeek,
-                        required_staff_count: value,
-                        is_working_day: value > 0
-                    }
-                })).unwrap();
-            } else {
-                await dispatch(createShiftRequirement({
-                    shiftId,
-                    data: {
-                        day_of_week: dayOfWeek,
-                        required_staff_count: value,
-                        is_recurring: true,
-                        is_working_day: value > 0
-                    }
-                })).unwrap();
-            }
-            dispatch(fetchRequirementsMatrix(positionId));
-
-
-            // Не перезагружаем всю матрицу, только при ошибке
-
-        } catch (err) {
-            console.error('Failed to update requirement:', err);
-            // При ошибке перезагружаем для синхронизации
-            dispatch(fetchRequirementsMatrix(positionId));
-        } finally {
-            setSaving(prev => ({ ...prev, [key]: false }));
-        }
-    };
-
 
     const handleCellChange = (shiftId, dayOfWeek, value) => {
         const numValue = parseInt(value) || 0;
         if (numValue >= 0 && numValue <= 99) {
-            updateRequirement(shiftId, dayOfWeek, numValue);
+            setLocalMatrix(prev => {
+                const newMatrix = JSON.parse(JSON.stringify(prev)); // Глубокая копия
+                const shiftIndex = newMatrix.shifts.findIndex(s => s.id === shiftId);
+
+                if (shiftIndex !== -1) {
+                    newMatrix.shifts[shiftIndex].requirements[dayOfWeek] = {
+                        ...newMatrix.shifts[shiftIndex].requirements[dayOfWeek],
+                        required_staff: numValue,
+                        is_working_day: numValue > 0,
+                    };
+                }
+                return newMatrix;
+            });
         }
+    };
+
+    const handleReset = () => {
+        if (reduxMatrix) {
+            setLocalMatrix(JSON.parse(JSON.stringify(reduxMatrix)));
+        }
+    };
+
+    const handleSave = async () => {
+        if (!isChanged) return;
+        setIsSaving(true);
+        const changesToCreate = [];
+        const changesToUpdate = [];
+
+        localMatrix.shifts.forEach((shift) => {
+            daysOfWeek.forEach(day => {
+                const localReq = shift.requirements[day.id];
+                // Находим оригинальную смену и требование для сравнения
+                const originalShift = reduxMatrix.shifts.find(s => s.id === shift.id);
+                if (!originalShift) return;
+                const originalReq = originalShift.requirements[day.id];
+
+                if (localReq.required_staff !== originalReq.required_staff) {
+                    const payload = {
+                        day_of_week: day.id,
+                        required_staff_count: localReq.required_staff,
+                        is_working_day: localReq.required_staff > 0,
+                        is_recurring: true,
+                    };
+
+                    if (originalReq.requirement_id) {
+                        changesToUpdate.push(dispatch(updateShiftRequirement({
+                            requirementId: originalReq.requirement_id,
+                            data: payload
+                        })));
+                    } else {
+                        changesToCreate.push(dispatch(createShiftRequirement({
+                            shiftId: shift.id,
+                            data: payload
+                        })));
+                    }
+                }
+            });
+        });
+
+        try {
+            await Promise.all([...changesToUpdate, ...changesToCreate]);
+            dispatch(fetchRequirementsMatrix(positionId));
+        } catch (err) {
+            console.error('Failed to save changes:', err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+
+    const handleConfirmSave = async () => {
+        await handleSave();
+        setShowConfirmModal(false);
+        setTimeout(() => {
+            if (blocker && blocker.proceed) {
+                blocker.proceed();
+            }
+        }, 0);
+    };
+
+    const handleConfirmReset = () => {
+        handleReset();
+        setShowConfirmModal(false);
+        setTimeout(() => {
+            if (blocker && blocker.proceed) {
+                blocker.proceed();
+            }
+        }, 0);
+    };
+
+    const handleConfirmCancel = () => {
+        setShowConfirmModal(false);
+        blocker.reset(); // Отменяем переход
     };
 
     const getTotalForDay = (dayOfWeek) => {
@@ -148,7 +196,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
     if (matrixLoading) {
         return (
             <div className="text-center py-5">
-                <Spinner animation="border" />
+                <Spinner animation="border"/>
                 <p className="mt-3">{t('common.loading')}</p>
             </div>
         );
@@ -208,7 +256,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                                 <div className="d-flex align-items-center">
                                     <div
                                         className="shift-color-dot me-2"
-                                        style={{ backgroundColor: shift.color }}
+                                        style={{backgroundColor: shift.color}}
                                     />
                                     <div>
                                         <div className="fw-semibold">{shift.name}</div>
@@ -220,8 +268,6 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                             </td>
                             {daysOfWeek.map(day => {
                                 const requirement = shift.requirements[day.id];
-                                const key = `${shift.id}-${day.id}`;
-                                const isSaving = saving[key];
 
                                 return (
                                     <td key={day.id} className="requirement-cell">
@@ -233,13 +279,8 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                                                 value={requirement?.required_staff || 0}
                                                 onChange={(e) => handleCellChange(shift.id, day.id, e.target.value)}
                                                 className={`requirement-input ${requirement?.required_staff === 0 ? 'non-working' : ''}`}
-                                                disabled={isSaving}
                                             />
-                                            {isSaving && (
-                                                <div className="saving-indicator">
-                                                    <Spinner size="sm" />
-                                                </div>
-                                            )}
+
                                         </div>
                                     </td>
                                 );
@@ -279,7 +320,52 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate }) => {
                     <i className="bi bi-info-circle me-1"></i>
                     {t('workplace.shifts.matrixLegend')}
                 </small>
+                {/* Панель с кнопками */}
+                <div className={`actions-toolbar ${isChanged ? 'visible' : ''}`}>
+                    <Button
+                        variant="outline-secondary"
+                        onClick={handleReset}
+                        disabled={isSaving}
+                    >
+                        <i className="bi bi-arrow-counterclockwise me-2"></i>
+                        {t('common.reset')}
+                    </Button>
+                    <Button
+                        variant="success"
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        style={{minWidth: '100px'}}
+                    >
+                        {isSaving ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"
+                                         className="me-2"/>
+                                {t('common.saving')}
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-check-lg me-2"></i>
+                                {t('common.save')}
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
+
+
+            {/* Модальное окно */}
+            <ConfirmationModal
+                show={showConfirmModal}
+                title={t('common.unsavedChanges')}
+                message={t('common.unsavedChangesMessage')}
+                onHide={handleConfirmReset}
+                onConfirm={handleConfirmSave}
+                loading={isSaving}
+                confirmText={t('common.saveAndContinue')}
+                confirmVariant="success"
+                cancelText={t('common.discardChanges')}
+            >
+            </ConfirmationModal>
         </div>
     );
 };

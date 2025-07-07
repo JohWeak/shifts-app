@@ -82,6 +82,34 @@
     vertical-align: middle;
     background-color: var(--bs-gray-100);
 }
+.actions-toolbar {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    gap: 0.5rem;
+    transform: translateX(200%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1050;
+}
+
+.actions-toolbar.visible {
+    transform: translateX(0);
+}
+
+[dir="rtl"] .actions-toolbar {
+    right: auto;
+    left: 2rem;
+    transform: translateX(-200%);
+}
+
+[dir="rtl"] .actions-toolbar.visible {
+    transform: translateX(0);
+}
 
 [data-bs-theme="dark"] .total-cell,
 [data-bs-theme="dark"] .day-total,

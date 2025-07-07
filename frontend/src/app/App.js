@@ -1,6 +1,10 @@
 import React, {useEffect} from 'react';
-import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
-import {Provider, useDispatch} from 'react-redux';
+import {
+    createBrowserRouter,
+    RouterProvider,
+    Navigate,
+    Outlet
+} from 'react-router-dom';import {Provider, useDispatch} from 'react-redux';
 import store from 'app/store/store';
 import {I18nProvider} from 'shared/lib/i18n/i18nProvider';
 import {ErrorBoundary} from 'shared/ui/components/ErrorBoundary/ErrorBoundary';
@@ -9,9 +13,11 @@ import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleS
 
 // Pages
 import Login from '../features/auth';
+
+import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
+import EmployeeLayout from '../shared/ui/layouts/EmployeeLayout/EmployeeLayout';
+
 import EmployeeDashboard from '../features/employee-dashboard';
-
-
 import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
 import AlgorithmSettings from '../features/admin-algorithm-settings';
@@ -27,114 +33,53 @@ import './App.css';
  * Main Application Component
  * Defines routing structure and authentication flow
  */
-const AppInitializer = ({children}) => {
+const AppInitializer = ({ children }) => {
     const dispatch = useDispatch();
-
     useEffect(() => {
-        // Загружаем данные параллельно при старте приложения
         Promise.all([
             dispatch(fetchSystemSettings()),
             dispatch(fetchWorkSites())
         ]);
     }, [dispatch]);
-
     return children;
 };
 
-
-const AppContent = () => {
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(fetchSystemSettings());
-    }, [dispatch]);
-
-    return (
-        <Router>
-            <ErrorBoundary>
-                <div className="app">
-                    <Routes>
-                        {/* Public Route */}
-                        <Route
-                            path="/login"
-                            element={<Login/>}
-                        />
-                        {/* Employee Route */}
-                        <Route
-                            path="/employee/dashboard"
-                            element=
-                                {<ProtectedRoute
-                                    allowedRole="employee">
-                                    <EmployeeDashboard/>
-                                </ProtectedRoute>}
-                        />
-                        {/* Admin Routes */}
-                        <Route
-                            path="/admin"
-                            element=
-                                {<ProtectedRoute
-                                    allowedRole="admin">
-                                    <AdminDashboard/>
-                                </ProtectedRoute>}
-                        />
-                        <Route
-                            path="/admin/schedules"
-                            element={<ProtectedRoute
-                                allowedRole="admin">
-                                <ScheduleManagement/>
-                            </ProtectedRoute>}
-                        />
-                        <Route
-                            path="/admin/algorithms"
-                            element=
-                                {<ProtectedRoute
-                                    allowedRole="admin">
-                                    <AlgorithmSettings/>
-                                </ProtectedRoute>}
-                        />
-                        <Route
-                            path="/admin/employees"
-                            element=
-                                {<ProtectedRoute
-                                    allowedRole="admin">
-                                    <EmployeeManagement/>
-                                </ProtectedRoute>}
-                        />
-                        <Route path="/admin/workplace"
-
-                               element={<ProtectedRoute
-                                   allowedRole="admin">
-                                   <WorkplaceSettings/>
-                        </ProtectedRoute>}/>
-                        <Route
-                            path="/admin/reports"
-                            element=
-                                {<ProtectedRoute
-                                    allowedRole="admin">
-                                    <Reports/>
-                                </ProtectedRoute>}
-                        />
-                        {/* Default Redirects */}
-                        <Route
-                            path="/"
-                            element={<Navigate to="/login" replace/>}/>
-                        <Route
-                            path="*"
-                            element={<Navigate to="/login" replace/>}/>
-                    </Routes>
-                </div>
-            </ErrorBoundary>
-        </Router>
-    );
-};
-
+const router = createBrowserRouter([
+    { path: "/login", element: <Login /> },
+    {
+        path: "/employee",
+        element: <EmployeeLayout />,
+        children: [
+            { path: "dashboard", element: <EmployeeDashboard /> },
+        ],
+    },
+    {
+        path: "/admin",
+        element: <AdminLayout />,
+        children: [
+            { index: true, element: <AdminDashboard /> },
+            { path: "schedules", element: <ScheduleManagement /> },
+            { path: "algorithms", element: <AlgorithmSettings /> },
+            { path: "employees", element: <EmployeeManagement /> },
+            { path: "workplace", element: <WorkplaceSettings /> },
+            { path: "reports", element: <Reports /> },
+        ],
+    },
+    { path: "/", element: <Navigate to="/login" replace /> },
+    { path: "*", element: <Navigate to="/login" replace /> },
+]);
+// --- Конец новой части ---
 
 function App() {
     return (
         <Provider store={store}>
             <I18nProvider>
                 <AppInitializer>
-                    <AppContent/>
+                    <ErrorBoundary>
+                        <div className="app">
+                            <RouterProvider router={router} />
+                        </div>
+                    </ErrorBoundary>
                 </AppInitializer>
             </I18nProvider>
         </Provider>
