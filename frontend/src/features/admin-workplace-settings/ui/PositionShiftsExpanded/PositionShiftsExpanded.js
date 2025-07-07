@@ -8,14 +8,13 @@ import {
     Alert,
     Card,
     OverlayTrigger,
-    Tooltip, Nav
+    Tooltip, Nav, Spinner
 } from 'react-bootstrap';
 import {useDispatch} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import ShiftForm from '../ShiftForm/ShiftForm';
 import ShiftRequirementsMatrix from '../ShiftRequirementsMatrix/ShiftRequirementsMatrix';
 import api from 'shared/api';
-import {fetchPositionShifts, deletePositionShift} from '../../model/workplaceSlice';
 
 import './PositionShiftsExpanded.css';
 
@@ -109,15 +108,14 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
     return (
         <tr className="position-shifts-row">
             <td colSpan="8" className="position-shifts-col p-0">
-                <div className={`position-shifts-expanded ${isClosing ? 'closing' : ''}`}>                    <Card className="m-3">
-
+                <div className={`position-shifts-expanded ${isClosing ? 'closing' : ''}`}>
+                    <Card className="m-3">
                         <Card.Body className={"pb-1"}>
                             {error && (
                                 <Alert variant="danger" dismissible onClose={() => setError(null)}>
                                     {error}
                                 </Alert>
                             )}
-
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <Nav variant="pills" activeKey={activeView} onSelect={setActiveView}>
                                     <Nav.Item>
@@ -133,10 +131,7 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                         </Nav.Link>
                                     </Nav.Item>
                                 </Nav>
-
-
                             </div>
-
                             {loading ? (
                                 <div className="text-center py-5">
                                     <div className="spinner-border text-primary" role="status">
@@ -237,20 +232,51 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                     positionId={position.pos_id}
                                     shifts={shifts}
                                     onUpdate={fetchShifts}
+                                    renderActions={({isChanged, isSaving, handleSave, handleReset}) => (
+                                        <div className={`card-actions-toolbar ${isChanged ? 'visible' : ''}`}>
+                                            <Button
+                                                variant="outline-secondary"
+                                                onClick={handleReset}
+                                                disabled={isSaving}
+                                            >
+                                                <i className="bi bi-arrow-counterclockwise me-2"></i>
+                                                {t('common.reset')}
+                                            </Button>
+                                            <Button
+                                                variant="success"
+                                                onClick={handleSave}
+                                                disabled={isSaving}
+                                                style={{minWidth: '100px'}}
+                                            >
+                                                {isSaving ? (
+                                                    <>
+                                                        <Spinner as="span" animation="border" size="sm"
+                                                                 className="me-2"/>
+                                                        {t('common.saving')}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i className="bi bi-check-lg me-2"></i>
+                                                        {t('common.save')}
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    )}
                                 />
                             )}
                         </Card.Body>
-                    <div className="position-shifts-expanded-footer d-flex ms-3 mb-3 mt-0">
-                        {activeView === 'shifts' && (
-                            <Button className={"mt-2 p-2 rounded-2"} variant="primary" size="sm" onClick={handleAddShift}>
-                                <i className="bi bi-plus-circle me-2"></i>
-                                {t('workplace.shifts.addShift')}
-                            </Button>
+                        <div className="position-shifts-expanded-footer d-flex ms-3 mb-3 mt-0">
+                            {activeView === 'shifts' && (
+                                <Button className={"mt-2 p-2 rounded-2"} variant="primary" size="sm"
+                                        onClick={handleAddShift}>
+                                    <i className="bi bi-plus-circle me-2"></i>
+                                    {t('workplace.shifts.addShift')}
+                                </Button>
 
-                        )}
-                    </div>
-
-                </Card>
+                            )}
+                        </div>
+                    </Card>
                 </div>
             </td>
             {showShiftForm && (
@@ -264,7 +290,7 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
             )}
         </tr>
 
-    );
+);
 };
 
 export default PositionShiftsExpanded;

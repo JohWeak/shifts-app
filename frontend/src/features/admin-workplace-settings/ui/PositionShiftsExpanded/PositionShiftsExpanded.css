@@ -51,10 +51,43 @@
     }
 }
 
-.position-shifts-expanded .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
 .position-shifts-expanded .table {
     margin-bottom: 0;
+}
+
+.position-shifts-expanded .card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    position: relative;
+    overflow: hidden; /* Это ключ к тому, чтобы кнопки выезжали "из-за края" */
+}
+
+/* Контейнер для кнопок */
+.card-actions-toolbar {
+    position: absolute; /* Позиционируем относительно Card */
+    bottom: 1rem;      /* Отступ снизу */
+    right: 1rem;       /* Отступ справа */
+
+    display: flex;
+    gap: 0.5rem;
+
+    /* Начальное состояние - за пределами видимости */
+    transform: translateX(calc(100% + 2rem)); /* Смещаем вправо на всю свою ширину + отступ */
+    transition: transform 0.3s ease-in-out;
+    z-index: 2; /* Чтобы быть поверх футера, если он есть */
+}
+
+/* Видимое состояние */
+.card-actions-toolbar.visible {
+    transform: translateX(0);
+}
+
+/* Для RTL языков - опционально, но хорошая практика */
+[dir="rtl"] .card-actions-toolbar {
+    right: auto;
+    left: 1rem;
+    transform: translateX(calc(-100% - 2rem));
+}
+
+[dir="rtl"] .card-actions-toolbar.visible {
+    transform: translateX(0);
 }

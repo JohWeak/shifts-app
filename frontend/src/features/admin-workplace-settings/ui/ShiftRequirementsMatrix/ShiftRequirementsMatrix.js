@@ -21,7 +21,7 @@ import {
 } from '../../model/workplaceSlice';
 import './ShiftRequirementsMatrix.css';
 
-const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate}) => {
+const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) => {
     const {t} = useI18n();
     const dispatch = useDispatch();
 
@@ -320,38 +320,13 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate}) => {
                     <i className="bi bi-info-circle me-1"></i>
                     {t('workplace.shifts.matrixLegend')}
                 </small>
-                {/* Панель с кнопками */}
-                <div className={`actions-toolbar ${isChanged ? 'visible' : ''}`}>
-                    <Button
-                        variant="outline-secondary"
-                        onClick={handleReset}
-                        disabled={isSaving}
-                    >
-                        <i className="bi bi-arrow-counterclockwise me-2"></i>
-                        {t('common.reset')}
-                    </Button>
-                    <Button
-                        variant="success"
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        style={{minWidth: '100px'}}
-                    >
-                        {isSaving ? (
-                            <>
-                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"
-                                         className="me-2"/>
-                                {t('common.saving')}
-                            </>
-                        ) : (
-                            <>
-                                <i className="bi bi-check-lg me-2"></i>
-                                {t('common.save')}
-                            </>
-                        )}
-                    </Button>
-                </div>
             </div>
-
+            {renderActions && renderActions({
+                isChanged,
+                isSaving,
+                handleSave,
+                handleReset
+            })}
 
             {/* Модальное окно */}
             <ConfirmationModal
