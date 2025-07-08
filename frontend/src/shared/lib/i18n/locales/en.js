@@ -535,15 +535,23 @@ export const en = {
         fullSchedule: 'Full Schedule',
         noActiveSchedule: 'No active schedule available',
         noPersonalAssignments: 'You have no assignments in the current schedule',
-        currentWeek: 'Current Week',
-        nextWeek: 'Next Week',
         noScheduleForWeek: 'No schedule found for {week}',
         noPersonalAssignmentsForWeek: 'You have no assignments for {week}',
-        noScheduleAvailable: 'No schedule available for current or next week',
         shiftDetails: 'Shift Details',
         dayOff: 'Day Off',
         noShifts: 'No shifts scheduled',
         weekOf: 'Week of',
+        weeklySchedule: 'Weekly Schedule',
+        scheduleFor: 'Schedule for: {name}',
+        personalSchedule: 'Personal Schedule',
+        desktopView: 'Desktop View',
+        noScheduleAvailable: 'No schedule available',
+        noSchedulePublished: 'No schedule has been published for this week.',
+        loadingSchedule: 'Loading schedule...',
+        errorLoadingSchedule: 'Error loading schedule',
+        tryAgain: 'Try Again',
+        currentWeek: 'Current Week',
+        nextWeek: 'Next Week'
     },
     settings: {
         systemSettings: 'System Settings',
@@ -803,7 +811,9 @@ export const en = {
             staffRequirementsHint: 'Set the number of employees needed for each shift on each day',
             noShiftsForMatrix: 'Please create shifts first to configure requirements',
             matrixLegend: 'Enter 0 to mark a shift as non-working on specific days',
-            shift: 'Shift'
+            shift: 'Shift',
+            morning: 'Morning',
+            day: 'Day', // 'day' в твоем коде - это 'afternoon'
         },
     },
     workSite: {
