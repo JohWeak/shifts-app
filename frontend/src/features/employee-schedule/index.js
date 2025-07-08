@@ -21,6 +21,7 @@ const EmployeeSchedule = () => {
 
     // Check if user has assigned position for full schedule access
     const hasAssignedPosition = user?.position_id || user?.default_position_id;
+    console.log('User', user);
 
     return (
         <Container fluid className="employee-schedule-container">

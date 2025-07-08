@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {Container, Spinner, Alert, Button} from 'react-bootstrap';
+import {Container, Spinner, Button} from 'react-bootstrap';
 
 // Widgets, UI, etc.
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -11,8 +11,7 @@ import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
 import EmployeeSelectionModal from './ui/modals/EmployeeSelectionModal';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useScheduleActions } from './model/hooks/useScheduleActions';
-import { nanoid } from '@reduxjs/toolkit';
-import { addNotification, updateNotification } from 'app/model/notificationsSlice';
+import { addNotification } from 'app/model/notificationsSlice';
 import './index.css';
 
 // Redux Actions

@@ -19,7 +19,6 @@ const {
 
 const getWeeklySchedule = async (req, res) => {
     try {
-        const { positionId } = req.params;
         const empId = req.userId;
         const { date } = req.query;
 
@@ -198,7 +197,7 @@ const getAdminWeeklySchedule = async (req, res) => {
                     attributes: ['emp_id', 'first_name', 'last_name', 'status', 'default_position_id']
                 },
                 {
-                    model: Shift,
+                    model: PositionShift,
                     as: 'shift',
                     attributes: ['shift_id', 'shift_name', 'start_time', 'duration', 'shift_type']
                 },

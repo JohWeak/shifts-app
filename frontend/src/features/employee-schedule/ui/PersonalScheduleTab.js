@@ -34,6 +34,7 @@ const PersonalScheduleTab = () => {
             const currentResponse = await scheduleAPI.fetchWeeklySchedule();
             console.log('Current week response:', currentResponse);
 
+
             if (currentResponse?.data) {
                 setCurrentWeekData(currentResponse.data);
 
