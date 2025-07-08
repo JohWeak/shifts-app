@@ -324,6 +324,7 @@ export const en = {
             noArchiveData: 'No Archive Data', // 'Нет архивных данных' для ru, 'אין נתוני ארכיון' для he
             noArchiveDataDesc: 'No past schedules found for the selected period',
             yourShiftsHighlighted: 'Your shifts are highlighted',
+            noScheduleForThisWeek: 'No schedule available for this week',
         },
     },
     errors: {

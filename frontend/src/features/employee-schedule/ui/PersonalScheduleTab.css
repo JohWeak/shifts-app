@@ -122,7 +122,17 @@
 [data-theme="dark"] .shift-time {
     color: var(--bs-gray-400);
 }
+/* Week Selector */
+.week-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 0;
+}
 
+.week-selector .btn {
+    min-width: 150px;
+}
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .week-header {
@@ -151,6 +161,10 @@
     .shift-time::before {
         content: "•";
         margin-right: 0.5rem;
+    }
+    .week-selector .btn {
+        min-width: 120px;
+        font-size: 0.875rem;
     }
 }
 
