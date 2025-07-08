@@ -551,7 +551,8 @@ export const en = {
         errorLoadingSchedule: 'Error loading schedule',
         tryAgain: 'Try Again',
         currentWeek: 'Current Week',
-        nextWeek: 'Next Week'
+        nextWeek: 'Next Week',
+
     },
     settings: {
         systemSettings: 'System Settings',
