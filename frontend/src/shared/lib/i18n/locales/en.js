@@ -64,6 +64,12 @@ export const en = {
         saveAndContinue: 'Save and Continue',
         stayOnPage: 'Stay on Page',
         discardChanges: 'Discard Changes',
+        desktopView: 'Desktop View',
+        mobileView: 'Mobile View',
+        unknown: 'Unknown',
+        user: 'User',
+        notAssigned: 'Not Assigned',
+
     },
     auth: {
         createAccount: 'Create Account',
@@ -304,6 +310,8 @@ export const en = {
         networkError: 'Network error. Please check your connection.',
         permissionDenied: 'You do not have permission to perform this action.',
         weekStartInvalid: 'Please select a {day} as the week start date',
+        fetchScheduleFailed: 'Failed to fetch schedule',
+
     },
     modal: {
         compareAlgorithms: {
@@ -404,6 +412,7 @@ export const en = {
         requirements: 'Requirements',
         saveChanges: 'Save Changes',
         unsavedChanges: 'You have unsaved changes',
+        defaultPosition: 'Position',
     },
     recommendation: {
         'weeklyHours': 'Current weekly hours: {hours}h',
@@ -518,6 +527,23 @@ export const en = {
         backToSchedules: 'Back to Schedules',
         scheduleInformation: 'Schedule Information',
         inactive: 'Inactive',
+        date: 'Date',
+        day: 'Day',
+        time: 'Time',
+        position: 'Position',
+        dateDay: 'Date/Day',
+        fullSchedule: 'Full Schedule',
+        noActiveSchedule: 'No active schedule available',
+        noPersonalAssignments: 'You have no assignments in the current schedule',
+        currentWeek: 'Current Week',
+        nextWeek: 'Next Week',
+        noScheduleForWeek: 'No schedule found for {week}',
+        noPersonalAssignmentsForWeek: 'You have no assignments for {week}',
+        noScheduleAvailable: 'No schedule available for current or next week',
+        shiftDetails: 'Shift Details',
+        dayOff: 'Day Off',
+        noShifts: 'No shifts scheduled',
+        weekOf: 'Week of',
     },
     settings: {
         systemSettings: 'System Settings',
@@ -593,6 +619,11 @@ export const en = {
     },
     site: {
         workSite: 'Work Site',
+    },
+    shifts: {
+        morning: 'Morning',
+        day: 'Day',
+        night: 'Night',
     },
     status: {
         active: 'Active',

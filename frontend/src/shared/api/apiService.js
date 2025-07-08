@@ -12,6 +12,14 @@ export const authAPI = {
 export const scheduleAPI = {
     fetchSchedules: () => api.get(API_ENDPOINTS.SCHEDULES.BASE),
     fetchScheduleDetails: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
+    fetchAdminWeeklySchedule: () => api.get(API_ENDPOINTS.SCHEDULES.ADMIN.WEEKLY),
+    fetchWeeklySchedule: (weekStart) => {
+        console.log('fetchWeeklySchedule called with weekStart:', weekStart);
+        return api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
+            params: weekStart ? { date: weekStart } : {} // Изменено с week_start на date!
+        });
+    },
+
     generateSchedule: (settings) => api.post(API_ENDPOINTS.SCHEDULES.GENERATE, settings),
     updateScheduleStatus: (scheduleId, status) => api.put(API_ENDPOINTS.SCHEDULES.STATUS(scheduleId), { status }),
     deleteSchedule: (scheduleId) => api.delete(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
@@ -63,6 +71,32 @@ export const employeeAPI = {
             }
         });
     }
+};
+
+export const constraintAPI = {
+    // Get weekly constraints grid
+    getWeeklyConstraints: (params) =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY, { params }),
+
+    // Submit weekly constraints
+    submitWeeklyConstraints: (constraints) =>
+        api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT, { constraints }),
+
+    // Get permanent constraint requests
+    getPermanentRequests: (empId) =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS(empId)),
+
+    // Submit permanent constraint request
+    submitPermanentRequest: (data) =>
+        api.post(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUEST, data),
+
+    // Admin: get all pending requests
+    getPendingRequests: () =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.PENDING_REQUESTS),
+
+    // Admin: approve/reject request
+    reviewRequest: (requestId, data) =>
+        api.put(API_ENDPOINTS.CONSTRAINTS.REVIEW_REQUEST(requestId), data),
 };
 
 export const positionAPI = {

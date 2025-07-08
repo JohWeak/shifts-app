@@ -1,3 +1,5 @@
+import api from "../api";
+
 export const API_ENDPOINTS = {
     // Auth
     AUTH: {
@@ -14,9 +16,12 @@ export const API_ENDPOINTS = {
         STATUS: (id) => `/api/schedules/${id}/status`,
         ASSIGNMENTS: (id) => `/api/schedules/${id}/update-assignments`,
         EXPORT: (id) => `/api/schedules/${id}/export`,
-        COMPARE: '/api/schedules/compare-algorithms'
+        COMPARE: '/api/schedules/compare-algorithms',
+        WEEKLY: '/api/schedules/weekly',
+        ADMIN: {
+            WEEKLY: '/api/schedules/admin/weekly',
+        }
     },
-
     // Employees
     EMPLOYEES: {
         BASE: '/api/employees',
