@@ -28,28 +28,35 @@ const PersonalScheduleTab = () => {
         setError(null);
 
         try {
-            // Fetch both current and next week schedules
+            // Fetch current week schedule
             const response = await scheduleAPI.fetchWeeklySchedule();
+            console.log('Current week response:', response);
 
-            if (response.data.success) {
-                // Parse the data to separate current and next week
+            if (response?.data?.success) {
                 const data = response.data;
                 setCurrentWeekData(data);
 
-                // For now, we'll need to make another call for next week
-                // This could be optimized on backend to return both weeks
-                const nextWeekStart = addWeeks(parseISO(data.week.start), 1);
-                const nextWeekResponse = await scheduleAPI.fetchWeeklySchedule(
-                    format(nextWeekStart, 'yyyy-MM-dd')
-                );
+                // Fetch next week schedule
+                if (data.week && data.week.start) {
+                    const nextWeekStart = addWeeks(parseISO(data.week.start), 1);
+                    const nextWeekResponse = await scheduleAPI.fetchWeeklySchedule(
+                        format(nextWeekStart, 'yyyy-MM-dd')
+                    );
+                    console.log('Next week response:', nextWeekResponse);
 
-                if (nextWeekResponse.data.success) {
-                    setNextWeekData(nextWeekResponse.data);
+                    if (nextWeekResponse?.data?.success) {
+                        setNextWeekData(nextWeekResponse.data);
+                    }
+                }
+            } else {
+                // Если success false, но есть сообщение
+                if (response?.data?.message) {
+                    console.log('Schedule message:', response.data.message);
                 }
             }
         } catch (err) {
             console.error('Error fetching schedule:', err);
-            setError(err.response?.data?.message || t('errors.fetchFailed'));
+            setError(err.response?.data?.message || err.message || t('errors.fetchFailed'));
         } finally {
             setLoading(false);
         }
@@ -60,6 +67,31 @@ const PersonalScheduleTab = () => {
 
         const hasPosition = user?.position_id || user?.default_position_id;
         const hasWorksite = user?.work_site_id || user?.default_site_id;
+
+        // Если расписание пустое
+        if (weekData.schedule.length === 0) {
+            return (
+                <Card className="week-schedule-card mb-4">
+                    <Card.Header className="week-header">
+                        <h5 className="mb-0">
+                            <i className="bi bi-calendar-week me-2"></i>
+                            {weekTitle}
+                        </h5>
+                        {weekData.week && (
+                            <Badge bg="secondary" className="week-badge">
+                                {formatWeekRange(weekData.week)}
+                            </Badge>
+                        )}
+                    </Card.Header>
+                    <Card.Body className="text-center py-4">
+                        <p className="text-muted mb-0">
+                            <i className="bi bi-calendar-x me-2"></i>
+                            {t('employee.schedule.noSchedule')}
+                        </p>
+                    </Card.Body>
+                </Card>
+            );
+        }
 
         return (
             <Card className="week-schedule-card mb-4">
@@ -86,26 +118,40 @@ const PersonalScheduleTab = () => {
                             </thead>
                             <tbody>
                             {weekData.schedule.map((day, index) => {
-                                const assignment = day.shifts.find(s =>
-                                    s.employees.some(e => e.emp_id === user.emp_id)
-                                );
+                                // Ищем смену текущего пользователя
+                                let userAssignment = null;
+
+                                if (day.shifts && day.shifts.length > 0) {
+                                    for (const shift of day.shifts) {
+                                        const employee = shift.employees?.find(e => e.emp_id === user.emp_id);
+                                        if (employee) {
+                                            userAssignment = {
+                                                ...shift,
+                                                position_name: employee.position,
+                                                // site_name нужно добавить в ответ API если требуется
+                                            };
+                                            break;
+                                        }
+                                    }
+                                }
+
                                 const isToday = new Date().toDateString() === parseISO(day.date).toDateString();
 
                                 return (
-                                    <tr key={day.date} className={`${isToday ? 'today-row' : ''} ${!assignment ? 'day-off-row' : ''}`}>
+                                    <tr key={day.date} className={`${isToday ? 'today-row' : ''} ${!userAssignment ? 'day-off-row' : ''}`}>
                                         <td className="date-cell">
                                             {formatHeaderDate(parseISO(day.date))}
                                             {isToday && <Badge bg="primary" className="ms-2 today-badge">{t('common.today')}</Badge>}
                                         </td>
                                         <td className="day-cell">
-                                            {getDayName(parseISO(day.date).getDay(), t)}
+                                            {day.day_name || getDayName(parseISO(day.date).getDay(), t)}
                                         </td>
                                         <td className="shift-cell">
-                                            {assignment ? (
+                                            {userAssignment ? (
                                                 <div className="shift-info">
-                                                    <span className="shift-name">{assignment.shift_name}</span>
+                                                    <span className="shift-name">{userAssignment.shift_name}</span>
                                                     <span className="shift-time">
-                                                            {formatShiftTime(assignment.start_time, assignment.duration)}
+                                                            {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
                                                         </span>
                                                 </div>
                                             ) : (
@@ -117,12 +163,12 @@ const PersonalScheduleTab = () => {
                                         </td>
                                         {!hasPosition && (
                                             <td className="position-cell">
-                                                {assignment?.position_name || '-'}
+                                                {userAssignment?.position_name || '-'}
                                             </td>
                                         )}
                                         {!hasWorksite && (
                                             <td className="site-cell">
-                                                {assignment?.site_name || '-'}
+                                                {userAssignment?.site_name || '-'}
                                             </td>
                                         )}
                                     </tr>

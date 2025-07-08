@@ -44,7 +44,7 @@ const EmployeeLayout = () => {
                 <Container fluid>
                     <Navbar.Brand className="d-flex align-items-center">
                         <i className="bi bi-calendar-check me-2"></i>
-                        {t('app.name')}
+                        {t('common.appName')}
                     </Navbar.Brand>
 
                     <div className="ms-auto d-flex align-items-center gap-3">
@@ -52,7 +52,7 @@ const EmployeeLayout = () => {
                             {user?.first_name} {user?.last_name}
                         </span>
                         <LanguageSwitch />
-                        <ThemeToggle />
+                        <ThemeToggle variant="icon" />
                         <button
                             className="btn btn-outline-light btn-sm"
                             onClick={handleLogout}

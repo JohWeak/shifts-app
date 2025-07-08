@@ -32,7 +32,6 @@ const FullScheduleTab = () => {
         setError(null);
 
         try {
-            // This endpoint should return full schedule for the position
             const response = await api.get(`/api/schedules/position/${positionId}/weekly`);
 
             if (response.data.success) {

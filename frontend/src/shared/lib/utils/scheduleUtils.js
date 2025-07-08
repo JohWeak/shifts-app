@@ -96,6 +96,8 @@ export const formatScheduleDate = (startDate, endDate = null) => {
 export const formatShiftTime = (startTime, duration) => {
     if (!startTime) return '';
 
+    const durationHours = typeof duration === 'number' ? duration : parseFloat(duration) || 0;
+
     const cleanStart = startTime.substring(0, 5);
     const [hours, minutes] = startTime.split(':').map(Number);
     const startMinutes = hours * 60 + minutes;

@@ -72,6 +72,7 @@ export const en = {
         today: 'Today',
         startDate: 'Start Date',
         endDate: 'End Date',
+        tryAgain: 'Try Again',
 
     },
     auth: {
@@ -175,6 +176,7 @@ export const en = {
         requests: {
             permanent: 'Permanent Requests',
             temporary: 'Temporary Requests',
+            title: 'Requests',
         },
         requestShiftSwap: 'Request Shift Swap',
         requestTimeOff: 'Request Time Off',
@@ -334,6 +336,7 @@ export const en = {
         permissionDenied: 'You do not have permission to perform this action.',
         weekStartInvalid: 'Please select a {day} as the week start date',
         fetchScheduleFailed: 'Failed to fetch schedule',
+        fetchFailed: 'Failed to fetch data',
 
     },
     modal: {
