@@ -1,0 +1,167 @@
+/* frontend/src/features/employee-schedule/ui/PersonalScheduleTab.css */
+
+/* Week Schedule Card */
+.week-schedule-card {
+    border: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.week-schedule-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Week Header */
+.week-header {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary-dark));
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+}
+
+[data-theme="dark"] .week-header {
+    background: linear-gradient(135deg, var(--bs-gray-700), var(--bs-gray-800));
+}
+
+.week-badge {
+    font-size: 0.875rem;
+    font-weight: normal;
+}
+
+/* Table Styling */
+.personal-schedule-table {
+    margin-bottom: 0;
+}
+
+.personal-schedule-table th {
+    background: var(--bs-gray-50);
+    color: var(--bs-gray-700);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--bs-gray-200);
+    padding: 0.75rem 1rem;
+}
+
+[data-theme="dark"] .personal-schedule-table th {
+    background: var(--bs-gray-800);
+    color: var(--bs-gray-300);
+    border-bottom-color: var(--bs-gray-700);
+}
+
+/* Column Widths */
+.date-column { width: 120px; }
+.day-column { width: 140px; }
+.shift-column { flex: 1; }
+.position-column { width: 180px; }
+.site-column { width: 160px; }
+
+/* Row Styling */
+.personal-schedule-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.personal-schedule-table tbody tr:hover {
+    background-color: var(--bs-gray-50);
+}
+
+[data-theme="dark"] .personal-schedule-table tbody tr:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Today Row */
+.today-row {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.today-row:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.today-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Day Off Row */
+.day-off-row {
+    color: var(--bs-gray-500);
+}
+
+.day-off {
+    color: var(--bs-gray-500);
+    font-style: italic;
+}
+
+/* Shift Info */
+.shift-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.shift-name {
+    font-weight: 600;
+    color: var(--bs-gray-800);
+}
+
+[data-theme="dark"] .shift-name {
+    color: var(--bs-gray-200);
+}
+
+.shift-time {
+    font-size: 0.875rem;
+    color: var(--bs-gray-600);
+}
+
+[data-theme="dark"] .shift-time {
+    color: var(--bs-gray-400);
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+    .week-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .personal-schedule-table {
+        font-size: 0.875rem;
+    }
+
+    .personal-schedule-table th,
+    .personal-schedule-table td {
+        padding: 0.5rem;
+    }
+
+    .date-column { width: 80px; }
+    .day-column { width: 60px; }
+
+    .shift-info {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    .shift-time::before {
+        content: "•";
+        margin-right: 0.5rem;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .week-header i,
+[dir="rtl"] .day-off i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] .shift-time::before {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}

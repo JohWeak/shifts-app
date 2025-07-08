@@ -1,0 +1,176 @@
+/* frontend/src/features/employee-schedule/ui/FullScheduleTab.css */
+
+/* Position Info Card */
+.position-info-card {
+    border: none;
+    background: var(--bs-gray-50);
+    border-radius: 0.5rem;
+}
+
+[data-theme="dark"] .position-info-card {
+    background: var(--bs-gray-800);
+}
+
+/* Table Container */
+.table-container {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Full Schedule Table */
+.full-schedule-table {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+.full-schedule-table th {
+    background: var(--bs-gray-100);
+    font-weight: 600;
+    white-space: nowrap;
+    position: relative;
+}
+
+[data-theme="dark"] .full-schedule-table th {
+    background: var(--bs-gray-800);
+}
+
+/* Sticky Column */
+.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--bs-white);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .sticky-column {
+    background: var(--bs-gray-900);
+}
+
+/* Headers */
+.shift-header-cell {
+    min-width: 150px;
+    text-align: center;
+}
+
+.day-header-cell {
+    min-width: 120px;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.day-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.day-date {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
+}
+
+/* Shift Info */
+.shift-info-cell {
+    padding: 0.75rem;
+}
+
+.shift-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.shift-header-name {
+    font-weight: 600;
+}
+
+.shift-header-time {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
+}
+
+/* Shift Cells */
+.employee-cell {
+    padding: 0.5rem;
+    vertical-align: top;
+}
+
+.shift-cell {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    min-height: 60px;
+    transition: all 0.2s ease;
+}
+
+.shift-cell:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.current-user-shift {
+    border: 2px solid var(--bs-primary);
+    font-weight: 600;
+}
+
+.shift-employees {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.employee-name {
+    line-height: 1.3;
+}
+
+.empty-shift {
+    text-align: center;
+    color: var(--bs-gray-400);
+}
+
+/* Legend */
+.legend {
+    text-align: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+    .full-schedule-table {
+        font-size: 0.75rem;
+    }
+
+    .shift-header-cell {
+        min-width: 100px;
+    }
+
+    .day-header-cell {
+        min-width: 100px;
+    }
+
+    .shift-cell {
+        min-height: 50px;
+        padding: 0.375rem;
+    }
+}
+
+/* Custom Scrollbar */
+.table-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--bs-gray-100);
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-400);
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-600);
+}

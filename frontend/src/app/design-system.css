@@ -7,6 +7,7 @@
 :root {
     /* Bootstrap CSS Variables Override */
     --bs-primary: #0066cc;
+    --bs-primary-dark: #004480;
     --bs-primary-rgb: 0, 102, 204;
     --bs-primary-hover: #66b3ff;
     --bs-secondary: #6c757d;
@@ -26,7 +27,8 @@
 
     /* Bootstrap Grays */
     --bs-white: #ffffff;
-    --bs-gray-100: #f8f9fa;
+    --bs-gray-50: #f8f9fa;
+    --bs-gray-100: #f1f3f5;
     --bs-gray-200: #e9ecef;
     --bs-gray-300: #dee2e6;
     --bs-gray-400: #ced4da;

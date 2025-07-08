@@ -1,195 +1,116 @@
-/*!* Employee Schedule - гибридный подход *!*/
+/* frontend/src/features/employee-schedule/index.css */
 
-/*.schedule-container {*/
-/*    max-width: 1200px;*/
-/*    margin: 0 auto;*/
-/*    padding: 1rem;*/
-/*}*/
+/* Container */
+.employee-schedule-container {
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
 
-/*!* Table Borders *!*/
-/*.table-bordered th,*/
-/*.table-bordered td {*/
-/*    border: 3px solid var(--bs-gray-100) !important;*/
-/*    vertical-align: middle;*/
-/*}*/
+/* Main Card */
+.schedule-card {
+    border: none;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--bs-white);
+    transition: box-shadow 0.3s ease;
+}
 
-/*[data-theme="dark"] .table-bordered th,*/
-/*[data-theme="dark"] .table-bordered td {*/
-/*    border-color: var(--bs-gray-800) !important;*/
-/*}*/
+[data-theme="dark"] .schedule-card {
+    background: var(--bs-gray-900);
+}
 
-/*!* Shift Color Classes *!*/
-/*td.shift-morning,*/
-/*th.shift-morning {*/
-/*    background-color: #fff3cd !important;*/
-/*}*/
+/* Tabs Styling */
+.employee-schedule-tabs {
+    border-bottom: 2px solid var(--bs-gray-200);
+    background: var(--bs-gray-100);
+}
 
-/*td.shift-afternoon,*/
-/*th.shift-afternoon {*/
-/*    background-color: #d1ecf1 !important;*/
-/*}*/
+[data-theme="dark"] .employee-schedule-tabs {
+    border-bottom-color: var(--bs-gray-700);
+    background: var(--bs-gray-800);
+}
 
-/*td.shift-night,*/
-/*th.shift-night {*/
-/*    background-color: #cce5ff !important;*/
-/*}*/
+.employee-schedule-tabs .nav-link {
+    color: var(--bs-gray-600);
+    border: none;
+    border-radius: 0;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
 
-/*[data-theme="dark"] td.shift-morning,*/
-/*[data-theme="dark"] th.shift-morning {*/
-/*    background-color: rgba(255, 193, 7, 0.15) !important;*/
-/*}*/
+[data-theme="dark"] .employee-schedule-tabs .nav-link {
+    color: var(--bs-gray-400);
+}
 
-/*[data-theme="dark"] td.shift-afternoon,*/
-/*[data-theme="dark"] th.shift-afternoon {*/
-/*    background-color: rgba(13, 202, 240, 0.15) !important;*/
-/*}*/
+.employee-schedule-tabs .nav-link:hover:not(.disabled) {
+    color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), 0.05);
+}
 
-/*[data-theme="dark"] td.shift-night,*/
-/*[data-theme="dark"] th.shift-night {*/
-/*    background-color: rgba(13, 110, 253, 0.15) !important;*/
-/*}*/
+.employee-schedule-tabs .nav-link.active {
+    color: var(--bs-primary);
+    background: var(--bs-white);
+    border-bottom: 3px solid var(--bs-primary);
+    margin-bottom: -2px;
+}
 
-/*!* Shift Header Styling *!*/
-/*.shift-header {*/
-/*    background-color: var(--bs-gray-200) !important;*/
-/*    font-weight: bold;*/
-/*}*/
+[data-theme="dark"] .employee-schedule-tabs .nav-link.active {
+    background: var(--bs-gray-900);
+}
 
-/*[data-theme="dark"] .shift-header {*/
-/*    background-color: var(--bs-gray-700) !important;*/
-/*}*/
+.employee-schedule-tabs .nav-link.disabled {
+    color: var(--bs-gray-400);
+    cursor: not-allowed;
+}
 
-/*.table-header {*/
-/*    background-color: var(--bs-secondary) !important;*/
-/*    color: var(--bs-white) !important;*/
-/*    font-weight: bold;*/
-/*}*/
+/* Tab Content */
+.tab-content-wrapper {
+    padding: 1.5rem;
+    min-height: 400px;
+}
 
-/*!* Desktop Schedule *!*/
-/*.desktop-schedule {*/
-/*    display: block;*/
-/*    width: 100%;*/
-/*}*/
+/* Mobile Responsive */
+@media (max-width: 767px) {
+    .employee-schedule-container {
+        padding: 0.5rem;
+    }
 
-/*!* Mobile General Schedule *!*/
-/*.mobile-schedule-general {*/
-/*    display: none;*/
-/*    width: 100%;*/
-/*}*/
+    .employee-schedule-tabs .nav-link {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
 
-/*.mobile-schedule-general th,*/
-/*.mobile-schedule-general td {*/
-/*    text-align: center;*/
-/*    padding: 0.5rem;*/
-/*}*/
+    .employee-schedule-tabs .nav-link i {
+        display: none;
+    }
 
-/*.mobile-schedule-general .day-date-col {*/
-/*    font-weight: bold;*/
-/*    background-color: var(--bs-gray-100);*/
-/*    min-width: 90px;*/
-/*}*/
+    .tab-content-wrapper {
+        padding: 1rem;
+    }
+}
 
-/*[data-theme="dark"] .mobile-schedule-general .day-date-col {*/
-/*    background-color: var(--bs-gray-800);*/
-/*}*/
+/* Animations */
+.tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+}
 
-/*.mobile-schedule-general .shift-name-header {*/
-/*    font-weight: bold;*/
-/*}*/
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-/*!* Employee Personal Schedule *!*/
-/*.employee-schedule {*/
-/*    display: block;*/
-/*    width: 100%;*/
-/*}*/
-
-/*.employee-schedule th,*/
-/*.employee-schedule td {*/
-/*    text-align: center;*/
-/*    padding: 0.5rem;*/
-/*    border: 3px solid var(--bs-gray-100) !important;*/
-/*}*/
-
-/*[data-theme="dark"] .employee-schedule th,*/
-/*[data-theme="dark"] .employee-schedule td {*/
-/*    border-color: var(--bs-gray-800) !important;*/
-/*}*/
-
-/*.employee-schedule thead .table-header {*/
-/*    background-color: var(--bs-secondary) !important;*/
-/*    color: var(--bs-white) !important;*/
-/*    font-weight: bold;*/
-/*}*/
-
-/*.employee-schedule thead th:not(.table-header) {*/
-/*    background-color: var(--bs-gray-100);*/
-/*    font-weight: bold;*/
-/*    color: var(--bs-emphasis-color);*/
-/*}*/
-
-/*[data-theme="dark"] .employee-schedule thead th:not(.table-header) {*/
-/*    background-color: var(--bs-gray-800);*/
-/*}*/
-
-/*.employee-schedule tr.employee-not-working-row td {*/
-/*    background-color: var(--bs-gray-100) !important;*/
-/*}*/
-
-/*[data-theme="dark"] .employee-schedule tr.employee-not-working-row td {*/
-/*    background-color: var(--bs-gray-800) !important;*/
-/*}*/
-
-/*.employee-schedule td.employee-date-cell {*/
-/*    font-weight: bold;*/
-/*}*/
-
-/*!* Current User Highlighting *!*/
-/*.fw-bold.text-primary {*/
-/*    font-weight: bold !important;*/
-/*    color: var(--bs-primary) !important;*/
-/*    text-shadow: 0 0 2px rgba(var(--bs-primary-rgb), 0.3);*/
-/*}*/
-
-/*!* Button Group Styling *!*/
-/*.button-group-custom {*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    gap: 0.75rem;*/
-/*    flex-wrap: wrap;*/
-/*}*/
-
-/*.rounded-button {*/
-/*    border-radius: 0.75rem !important;*/
-/*    padding: 0.5rem 1rem;*/
-/*    margin: 0;*/
-/*}*/
-
-/*!* Loading and Error States *!*/
-/*.text-center .spinner-border {*/
-/*    width: 3rem;*/
-/*    height: 3rem;*/
-/*}*/
-
-/*!* Responsive Design *!*/
-/*@media (max-width: 767.98px) {*/
-/*    .schedule-container {*/
-/*        padding: 0.5rem;*/
-/*    }*/
-
-/*    .display-4 {*/
-/*        font-size: 1.8rem;*/
-/*    }*/
-
-/*    .mobile-schedule-general {*/
-/*        display: table !important;*/
-/*    }*/
-
-/*    .button-group-custom {*/
-/*        gap: 0.5rem;*/
-/*    }*/
-
-/*    .rounded-button {*/
-/*        font-size: 0.875rem;*/
-/*        padding: 0.375rem 0.75rem;*/
-/*    }*/
-/*}*/
+/* RTL Support */
+[dir="rtl"] .employee-schedule-tabs .nav-link i {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}

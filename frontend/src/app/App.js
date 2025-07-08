@@ -15,7 +15,6 @@ import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleS
 import Login from '../features/auth';
 
 import EmployeeLayout from '../shared/ui/layouts/EmployeeLayout/EmployeeLayout';
-import EmployeeDashboard from '../features/employee-dashboard';
 import EmployeeSchedule from '../features/employee-schedule';
 import EmployeeConstraints from '../features/employee-constraints';
 import EmployeeRequests from '../features/employee-requests'; // Создадим позже
@@ -51,13 +50,13 @@ const router = createBrowserRouter([
     { path: "/login", element: <Login /> },
     {
         path: "/employee",
-        element: <ProtectedRoute><EmployeeLayout /></ProtectedRoute>,
+        element: <ProtectedRoute allowedRole="employee"><EmployeeLayout /></ProtectedRoute>,
         children: [
-            { path: "dashboard", element: <EmployeeDashboard /> },
+            { index: true, element: <Navigate to="/employee/schedule" replace /> },
+            { path: "dashboard", element: <Navigate to="/employee/schedule" replace /> },
             { path: "schedule", element: <EmployeeSchedule /> },
             { path: "constraints", element: <EmployeeConstraints /> },
             { path: "requests", element: <EmployeeRequests /> },
-            { index: true, element: <Navigate to="dashboard" replace /> },
         ],
     },
     {

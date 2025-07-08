@@ -69,6 +69,9 @@ export const en = {
         unknown: 'Unknown',
         user: 'User',
         notAssigned: 'Not Assigned',
+        today: 'Today',
+        startDate: 'Start Date',
+        endDate: 'End Date',
 
     },
     auth: {
@@ -298,8 +301,28 @@ export const en = {
         noEmployeesInCategory: 'No employees in this category',
         confirmOverride: 'Are you sure you want to assign {name}?\n\nReason unavailable: {reason}\nNote: {note}',
         portal: 'Employee Portal',
-        schedule: 'Schedule',
         myRequests: 'My Requests',
+        schedule: {
+            title: 'My Schedule',
+            subtitle: 'View your weekly work schedule',
+            personalSchedule: 'Personal',
+            fullSchedule: 'Full Schedule',
+            archive: 'Archive',
+            currentWeek: 'Current Week',
+            nextWeek: 'Next Week',
+            date: 'Date',
+            day: 'Day',
+            shift: 'Shift',
+            dayOff: 'Day Off',
+            noSchedule: 'No Schedule Available',
+            noScheduleDesc: 'There are no published schedules for you at this time.',
+            positionRequired: 'You need to be assigned to a position to view the full schedule',
+            hours: 'Hours', // 'Часы' для ru, 'שעות' для he
+            shifts: 'shifts', // 'смен' для ru, 'משמרות' для he
+            noArchiveData: 'No Archive Data', // 'Нет архивных данных' для ru, 'אין נתוני ארכיון' для he
+            noArchiveDataDesc: 'No past schedules found for the selected period',
+            yourShiftsHighlighted: 'Your shifts are highlighted',
+        },
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.',

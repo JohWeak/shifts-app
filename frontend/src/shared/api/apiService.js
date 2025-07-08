@@ -123,3 +123,19 @@ export const updatePositionShiftColor = async (shiftId, color) => {
     });
     return response.data;
 };
+
+// Добавляем объединенный экспорт в конце файла
+export const apiService = {
+    ...api, // базовые методы get, post, put, delete
+    auth: authAPI,
+    schedule: scheduleAPI,
+    worksite: worksiteAPI,
+    employee: employeeAPI,
+    constraint: constraintAPI,
+    position: positionAPI,
+    settings: settingsAPI,
+    updatePositionShiftColor
+};
+
+// Также экспортируем по умолчанию для обратной совместимости
+export default apiService;
