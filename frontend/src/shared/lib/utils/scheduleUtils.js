@@ -1,11 +1,21 @@
 // frontend/src/shared/lib/utils/scheduleUtils.js
-import { format, addDays, parseISO, isValid } from 'date-fns';
-
+import { format, addDays, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
 /**
  * Получает день начала недели из настроек системы
  */
 export const getWeekStartDay = (systemSettings) => {
     return systemSettings?.weekStartDay ?? 0; // По умолчанию воскресенье
+};
+
+/**
+ * Получает дату начала следующей недели на основе текущей даты
+ * @param {string} currentWeekStartDate - Дата начала текущей недели в формате ISO
+ * @returns {string} - Дата начала следующей недели в формате 'YYYY-MM-DD'
+ */
+export const getNextWeekStartDate = (currentWeekStartDate) => {
+    const date = parseISO(currentWeekStartDate);
+    const nextWeekDate = addDays(date, 7);
+    return format(nextWeekDate, 'yyyy-MM-dd'); // Возвращаем в нужном для API формате
 };
 
 /**
@@ -103,7 +113,7 @@ export const formatShiftTime = (startTime, duration) => {
  * @param {Date} date - Дата
  * @returns {string} - Отформатированная дата
  */
-export const formatHeaderDate = (date, isMobile) => {
+export const formatHeaderDate = (date) => {
     return format(date,  'dd/MM');
 };
 
@@ -149,7 +159,27 @@ export const getStatusBadgeVariant = (status) => {
     };
     return variants[status] || 'secondary';
 };
-
+/**
+ * Форматирует диапазон дат недели для заголовка.
+ * Принимает объект week из ответа API.
+ * @param {object} week - Объект { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
+ * @returns {string} - Отформатированная строка, например "Jul 15 - Jul 21, 2024"
+ */
+export const formatWeekRange = (week) => {
+    if (!week || !week.start || !week.end) return '';
+    try {
+        const start = parseISO(week.start);
+        const end = parseISO(week.end);
+        // Проверяем, в одном ли году даты, для красивого форматирования
+        if (start.getFullYear() === end.getFullYear()) {
+            return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
+        } else {
+            return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
+        }
+    } catch {
+        return `${week.start} - ${week.end}`;
+    }
+};
 export const canDeleteSchedule = (schedule) => {
     return schedule.status !== 'published';
 };
