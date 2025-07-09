@@ -18,16 +18,30 @@ const FullScheduleTab = () => {
     const [error, setError] = useState(null);
     const [scheduleData, setScheduleData] = useState(null);
     const tableRef = useRef(null);
+    const [employeeData, setEmployeeData] = useState(null);
 
     const positionId = user?.position_id || user?.default_position_id;
 
     useEffect(() => {
-        if (positionId) {
-            fetchFullSchedule();
-        }
-    }, [positionId]);
+        // Сначала получаем данные о сотруднике из weekly endpoint
+        fetchEmployeeData();
+    }, []);
 
-    const fetchFullSchedule = async () => {
+    const fetchEmployeeData = async () => {
+        try {
+            const data = await scheduleAPI.fetchWeeklySchedule();
+            if (data?.employee) {
+                setEmployeeData(data.employee);
+                if (data.employee.position_id) {
+                    fetchFullSchedule(data.employee.position_id);
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching employee data:', err);
+        }
+    };
+
+    const fetchFullSchedule = async (positionId) => {
         setLoading(true);
         setError(null);
 
@@ -75,7 +89,15 @@ const FullScheduleTab = () => {
             </div>
         );
     };
-
+    if (!employeeData?.position_id) {
+        return (
+            <EmptyState
+                icon={<i className="bi bi-person-x display-1"></i>}
+                title={t('employee.schedule.positionRequired')}
+                description={t('employee.schedule.positionRequiredDesc')}
+            />
+        );
+    }
     if (loading) {
         return <LoadingState message={t('common.loading')} />;
     }

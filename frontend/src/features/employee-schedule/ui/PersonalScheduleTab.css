@@ -133,6 +133,15 @@
 .week-selector .btn {
     min-width: 150px;
 }
+.employee-info-card {
+    border: none;
+    background: var(--bs-gray-50);
+    border-radius: 0.5rem;
+}
+
+[data-theme="dark"] .employee-info-card {
+    background: var(--bs-gray-800);
+}
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .week-header {

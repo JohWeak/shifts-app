@@ -18,7 +18,8 @@ const PersonalScheduleTab = () => {
     const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
     const [nextWeekData, setNextWeekData] = useState(null);
-    const [activeWeek, setActiveWeek] = useState('current'); // 'current' or 'next'
+    const [activeWeek, setActiveWeek] = useState('current');
+    const [employeeInfo, setEmployeeInfo] = useState(null);
 
     useEffect(() => {
         fetchSchedules();
@@ -31,24 +32,28 @@ const PersonalScheduleTab = () => {
         try {
             // Fetch current week schedule
             console.log('Fetching current week schedule...');
-            const currentResponse = await scheduleAPI.fetchWeeklySchedule();
-            console.log('Current week response:', currentResponse);
+            const currentData = await scheduleAPI.fetchWeeklySchedule();
+            console.log('Current week data:', currentData);
 
+            if (currentData) {
+                setCurrentWeekData(currentData);
 
-            if (currentResponse?.data) {
-                setCurrentWeekData(currentResponse.data);
+                // Save employee info from first response
+                if (currentData.employee) {
+                    setEmployeeInfo(currentData.employee);
+                }
 
-                // Always try to fetch next week
-                if (currentResponse.data.week?.start) {
-                    const nextWeekStart = addWeeks(parseISO(currentResponse.data.week.start), 1);
+                // Fetch next week if we have week dates
+                if (currentData.week?.start) {
+                    const nextWeekStart = addWeeks(parseISO(currentData.week.start), 1);
                     const nextWeekDateStr = format(nextWeekStart, 'yyyy-MM-dd');
 
                     console.log('Fetching next week schedule for date:', nextWeekDateStr);
-                    const nextResponse = await scheduleAPI.fetchWeeklySchedule(nextWeekDateStr);
-                    console.log('Next week response:', nextResponse);
+                    const nextData = await scheduleAPI.fetchWeeklySchedule(nextWeekDateStr);
+                    console.log('Next week data:', nextData);
 
-                    if (nextResponse?.data) {
-                        setNextWeekData(nextResponse.data);
+                    if (nextData) {
+                        setNextWeekData(nextData);
                     }
                 }
             }
@@ -63,8 +68,9 @@ const PersonalScheduleTab = () => {
     const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData) return null;
 
-        const hasPosition = user?.position_id || user?.default_position_id;
-        const hasWorksite = user?.work_site_id || user?.default_site_id;
+        const employee = employeeInfo || weekData.employee;
+        const hasPosition = employee?.position_id;
+        const hasWorksite = employee?.site_id;
 
         // Check if we have schedule data
         const hasSchedule = weekData.schedule && weekData.schedule.length > 0;
@@ -110,14 +116,14 @@ const PersonalScheduleTab = () => {
                                     if (day.shifts && Array.isArray(day.shifts)) {
                                         for (const shift of day.shifts) {
                                             if (shift.employees && Array.isArray(shift.employees)) {
-                                                const employee = shift.employees.find(e =>
-                                                    e.emp_id === user.emp_id || e.emp_id === user.id
+                                                const isAssigned = shift.employees.find(e =>
+                                                    e.is_current_user ||
+                                                    e.emp_id === employee?.emp_id
                                                 );
-                                                if (employee) {
+                                                if (isAssigned) {
                                                     userAssignment = {
                                                         ...shift,
-                                                        position_name: employee.position,
-                                                        is_current_user: true
+                                                        employee_info: isAssigned
                                                     };
                                                     break;
                                                 }
@@ -139,7 +145,7 @@ const PersonalScheduleTab = () => {
                                                 )}
                                             </td>
                                             <td className="day-cell">
-                                                {day.day_name || getDayName(dateObj.getDay(), t)}
+                                                {getDayName(day.day_of_week ?? dateObj.getDay(), t)}
                                             </td>
                                             <td className="shift-cell">
                                                 {userAssignment ? (
@@ -158,12 +164,12 @@ const PersonalScheduleTab = () => {
                                             </td>
                                             {!hasPosition && (
                                                 <td className="position-cell">
-                                                    {userAssignment?.position_name || '-'}
+                                                    {userAssignment?.employee_info?.position || '-'}
                                                 </td>
                                             )}
                                             {!hasWorksite && (
                                                 <td className="site-cell">
-                                                    {userAssignment?.site_name || '-'}
+                                                    {userAssignment?.employee_info?.site_name || '-'}
                                                 </td>
                                             )}
                                         </tr>
@@ -207,9 +213,30 @@ const PersonalScheduleTab = () => {
         );
     }
 
-    // Tabs view for switching between weeks
+    // Display employee info if available
+    const employee = employeeInfo || currentWeekData?.employee || nextWeekData?.employee;
+
     return (
         <div className="personal-schedule-content">
+            {/* Employee info card */}
+            {employee && (
+                <Card className="employee-info-card mb-3">
+                    <Card.Body className="py-2">
+                        <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{employee.name}</strong>
+                                {employee.position_name && (
+                                    <span className="text-muted ms-2">• {employee.position_name}</span>
+                                )}
+                            </div>
+                            {employee.site_name && (
+                                <Badge bg="info">{employee.site_name}</Badge>
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+            )}
+
             {/* Week selector buttons */}
             <div className="week-selector mb-3">
                 <Button

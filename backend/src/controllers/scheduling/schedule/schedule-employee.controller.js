@@ -3,7 +3,6 @@ const dayjs = require('dayjs');
 const { Op } = require('sequelize');
 const {
     calculateWeekBounds,
-    getHebrewDayName,
     formatDisplayDate,
     ISRAEL_TIMEZONE,
     DATE_FORMAT
@@ -14,24 +13,51 @@ const {
     ScheduleAssignment,
     Employee,
     PositionShift,
-    Position
+    Position,
+    WorkSite
 } = db;
 
 const getWeeklySchedule = async (req, res) => {
     try {
-        const empId = req.userId;
+        const userId = req.userId;
         const { date } = req.query;
 
-        const employee = await Employee.findByPk(empId);
+        console.log('[GetWeeklySchedule] User ID:', userId);
+
+        // Get employee by user ID
+        // Ищем сотрудника по emp_id = userId
+        const employee = await Employee.findByPk(userId, {
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition',
+                    attributes: ['pos_id', 'pos_name']
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                }
+            ]
+        });
+
+
         if (!employee) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found for this user'
             });
         }
 
+        console.log('[GetWeeklySchedule] Employee found:', {
+            emp_id: employee.emp_id,
+            name: `${employee.first_name} ${employee.last_name}`,
+            position: employee.defaultPosition?.pos_name
+        });
+
         const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
 
+        // Find published schedule for this week
         const schedule = await Schedule.findOne({
             where: {
                 start_date: { [Op.lte]: weekEndStr },
@@ -49,10 +75,19 @@ const getWeeklySchedule = async (req, res) => {
                     start: weekStartStr,
                     end: weekEndStr
                 },
-                schedule: []
+                schedule: [],
+                employee: {
+                    emp_id: employee.emp_id,
+                    name: `${employee.first_name} ${employee.last_name}`,
+                    position_id: employee.default_position_id,
+                    position_name: employee.defaultPosition?.pos_name,
+                    site_id: employee.work_site_id,
+                    site_name: employee.workSite?.site_name
+                }
             });
         }
 
+        // Get all assignments for the week including worksite info
         const assignments = await ScheduleAssignment.findAll({
             where: {
                 schedule_id: schedule.id,
@@ -64,20 +99,29 @@ const getWeeklySchedule = async (req, res) => {
                 {
                     model: Employee,
                     as: 'employee',
-                    attributes: ['emp_id', 'first_name', 'last_name', 'status']
+                    attributes: ['emp_id', 'first_name', 'last_name']
                 },
                 {
                     model: PositionShift,
                     as: 'shift',
-                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift']
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'color']
                 },
                 {
                     model: Position,
                     as: 'position',
-                    attributes: ['pos_id', 'pos_name', 'profession']
+                    attributes: ['pos_id', 'pos_name']
                 }
             ],
             order: [['work_date', 'ASC'], ['shift', 'start_time', 'ASC']]
+        });
+
+        // Add WorkSite info from schedule
+        const scheduleWithSite = await Schedule.findByPk(schedule.id, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name']
+            }]
         });
 
         // Build weekly schedule data
@@ -87,21 +131,24 @@ const getWeeklySchedule = async (req, res) => {
         for (let i = 0; i < 7; i++) {
             const currentDay = weekStart.add(i, 'day');
             const dateStr = currentDay.format(DATE_FORMAT);
+            const dayOfWeek = currentDay.day(); // 0 = Sunday, 6 = Saturday
 
             const dayAssignments = assignments.filter(
                 assignment => assignment.work_date === dateStr
             );
 
+            // Group assignments by shift
             const shiftsMap = new Map();
+
             dayAssignments.forEach(assignment => {
-                const shiftId = assignment.shift.shift_id;
+                const shiftId = assignment.shift.id;
                 if (!shiftsMap.has(shiftId)) {
                     shiftsMap.set(shiftId, {
                         shift_id: shiftId,
                         shift_name: assignment.shift.shift_name,
                         start_time: assignment.shift.start_time,
-                        duration: assignment.shift.duration,
-                        shift_type: assignment.shift.shift_type,
+                        duration: assignment.shift.duration_hours,
+                        color: assignment.shift.color,
                         employees: []
                     });
                 }
@@ -110,13 +157,14 @@ const getWeeklySchedule = async (req, res) => {
                     emp_id: assignment.employee.emp_id,
                     name: `${assignment.employee.first_name} ${assignment.employee.last_name}`,
                     position: assignment.position.pos_name,
-                    is_current_user: assignment.employee.emp_id === empId
+                    site_name: scheduleWithSite.workSite?.site_name,
+                    is_current_user: assignment.employee.emp_id === employee.emp_id
                 });
             });
 
             weekSchedule.push({
                 date: dateStr,
-                day_name: getHebrewDayName(dateStr),
+                day_of_week: dayOfWeek,
                 display_date: formatDisplayDate(dateStr),
                 shifts: Array.from(shiftsMap.values())
             });
@@ -129,9 +177,13 @@ const getWeeklySchedule = async (req, res) => {
                 start: weekStartStr,
                 end: weekEndStr
             },
-            current_employee: {
-                emp_id: empId,
-                name: `${employee.first_name} ${employee.last_name}`
+            employee: {
+                emp_id: employee.emp_id,
+                name: `${employee.first_name} ${employee.last_name}`,
+                position_id: employee.default_position_id,
+                position_name: employee.defaultPosition?.pos_name,
+                site_id: employee.work_site_id,
+                site_name: employee.workSite?.site_name
             },
             schedule: weekSchedule,
             metadata: {
@@ -244,10 +296,10 @@ const getPositionWeeklySchedule = async (req, res) => {
     try {
         const { positionId } = req.params;
         const { date } = req.query;
-        const empId = req.userId;
+        const userId = req.userId;
 
         // Проверяем, что у сотрудника есть доступ к этой позиции
-        const employee = await Employee.findByPk(empId);
+        const employee = await Employee.findByPk(userId);
         if (!employee) {
             return res.status(404).json({
                 success: false,

@@ -13,11 +13,12 @@ export const scheduleAPI = {
     fetchSchedules: () => api.get(API_ENDPOINTS.SCHEDULES.BASE),
     fetchScheduleDetails: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
     fetchAdminWeeklySchedule: () => api.get(API_ENDPOINTS.SCHEDULES.ADMIN.WEEKLY),
-    fetchWeeklySchedule: (weekStart) => {
+    fetchWeeklySchedule: async (weekStart) => {
         console.log('fetchWeeklySchedule called with weekStart:', weekStart);
-        return api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
-            params: weekStart ? { date: weekStart } : {} // Изменено с week_start на date!
+        const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
+            params: weekStart ? { date: weekStart } : {}
         });
+        return response.data; // Возвращаем data напрямую
     },
 
     generateSchedule: (settings) => api.post(API_ENDPOINTS.SCHEDULES.GENERATE, settings),
