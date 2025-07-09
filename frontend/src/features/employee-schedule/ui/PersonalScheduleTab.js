@@ -33,7 +33,7 @@ const PersonalScheduleTab = () => {
             // Fetch current week schedule
             console.log('Fetching current week schedule...');
             const currentData = await scheduleAPI.fetchWeeklySchedule();
-            console.log('Current week data:', currentData);
+            console.log('Current week data received:', currentData);
 
             if (currentData) {
                 setCurrentWeekData(currentData);
@@ -43,17 +43,23 @@ const PersonalScheduleTab = () => {
                     setEmployeeInfo(currentData.employee);
                 }
 
-                // Fetch next week if we have week dates
+                // Fetch next week using data from current response
                 if (currentData.week?.start) {
                     const nextWeekStart = addWeeks(parseISO(currentData.week.start), 1);
                     const nextWeekDateStr = format(nextWeekStart, 'yyyy-MM-dd');
 
                     console.log('Fetching next week schedule for date:', nextWeekDateStr);
-                    const nextData = await scheduleAPI.fetchWeeklySchedule(nextWeekDateStr);
-                    console.log('Next week data:', nextData);
 
-                    if (nextData) {
-                        setNextWeekData(nextData);
+                    try {
+                        const nextData = await scheduleAPI.fetchWeeklySchedule(nextWeekDateStr);
+                        console.log('Next week data received:', nextData);
+
+                        if (nextData) {
+                            setNextWeekData(nextData);
+                        }
+                    } catch (nextErr) {
+                        console.error('Error fetching next week:', nextErr);
+                        // Не прерываем общую загрузку, если следующая неделя не загрузилась
                     }
                 }
             }
@@ -64,6 +70,12 @@ const PersonalScheduleTab = () => {
             setLoading(false);
         }
     };
+
+    // Добавим useEffect для отладки
+    useEffect(() => {
+        console.log('State updated - currentWeekData:', currentWeekData);
+        console.log('State updated - nextWeekData:', nextWeekData);
+    }, [currentWeekData, nextWeekData]);
 
     const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData) return null;
@@ -276,6 +288,15 @@ const PersonalScheduleTab = () => {
                         </p>
                     </Card.Body>
                 </Card>
+            )}
+            {/* Debug info in development */}
+            {process.env.NODE_ENV === 'development' && (
+                <div className="mt-3 p-3 bg-light small">
+                    <strong>Debug Info:</strong>
+                    <div>Current week data: {currentWeekData ? 'Loaded' : 'Not loaded'}</div>
+                    <div>Next week data: {nextWeekData ? 'Loaded' : 'Not loaded'}</div>
+                    <div>Active week: {activeWeek}</div>
+                </div>
             )}
         </div>
     );

@@ -41,7 +41,9 @@ api.interceptors.response.use(
         // Список endpoints, которые должны возвращать полный ответ
         const fullResponseEndpoints = [
             '/api/employees',
-
+            '/api/schedules/weekly',      // Добавляем для employee schedule
+            '/api/schedules/position',    // Добавляем для full schedule
+            '/api/schedules/employee',    // Добавляем для archive
             // Добавьте другие endpoints, которым нужен полный ответ
         ];
 
@@ -50,15 +52,21 @@ api.interceptors.response.use(
             response.config.url.includes(endpoint) && !response.config.url.includes('/recommendations')
         );
 
+
+
         if (needsFullResponse) {
+            console.log('Returning full response.data:', response.data);
             return response.data;
         }
 
         // Для остальных используем старую логику
         if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+            console.log('Returning response.data.data:', response.data.data);
             return response.data.data;
+
         }
 
+        console.log('Returning response.data as is:', response.data);
         return response.data;
     },
     (error) => {

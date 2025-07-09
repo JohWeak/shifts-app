@@ -10,6 +10,7 @@ import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from '
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO } from 'date-fns';
 import './FullScheduleTab.css';
+import {scheduleAPI} from "shared/api/apiService";
 
 const FullScheduleTab = () => {
     const { t } = useI18n();
@@ -33,7 +34,7 @@ const FullScheduleTab = () => {
             if (data?.employee) {
                 setEmployeeData(data.employee);
                 if (data.employee.position_id) {
-                    fetchFullSchedule(data.employee.position_id);
+                    await fetchFullSchedule(data.employee.position_id);
                 }
             }
         } catch (err) {

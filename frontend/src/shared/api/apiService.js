@@ -14,11 +14,17 @@ export const scheduleAPI = {
     fetchScheduleDetails: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
     fetchAdminWeeklySchedule: () => api.get(API_ENDPOINTS.SCHEDULES.ADMIN.WEEKLY),
     fetchWeeklySchedule: async (weekStart) => {
-        console.log('fetchWeeklySchedule called with weekStart:', weekStart);
-        const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
-            params: weekStart ? { date: weekStart } : {}
-        });
-        return response.data; // Возвращаем data напрямую
+        try {
+            console.log('fetchWeeklySchedule called with weekStart:', weekStart);
+            const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
+                params: weekStart ? { date: weekStart } : {}
+            });
+            console.log('fetchWeeklySchedule raw response:', response);
+            return response;
+        } catch (error) {
+            console.error('fetchWeeklySchedule error:', error);
+            throw error;
+        }
     },
 
     generateSchedule: (settings) => api.post(API_ENDPOINTS.SCHEDULES.GENERATE, settings),
