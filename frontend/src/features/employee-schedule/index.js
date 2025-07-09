@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import { scheduleAPI } from 'shared/api/apiService';
 
 // Import sub-components
 import PersonalScheduleTab from './ui/PersonalScheduleTab';
@@ -17,11 +18,39 @@ const EmployeeSchedule = () => {
     const { t } = useI18n();
     const [activeTab, setActiveTab] = useState('personal');
     const { user } = useSelector(state => state.auth);
-    const { loading } = useSelector(state => state.schedule || {});
+    const [loading, setLoading] = useState(true);
+    const [employeeData, setEmployeeData] = useState(null);
 
-    // Check if user has assigned position for full schedule access
-    const hasAssignedPosition = user?.position_id || user?.default_position_id;
-    console.log('User', user);
+    useEffect(() => {
+        fetchEmployeeData();
+    }, []);
+
+    const fetchEmployeeData = async () => {
+        try {
+            // Получаем данные о сотруднике через weekly endpoint
+            const data = await scheduleAPI.fetchWeeklySchedule();
+            console.log('Employee data from weekly endpoint:', data);
+
+            if (data?.employee) {
+                setEmployeeData(data.employee);
+            }
+        } catch (err) {
+            console.error('Error fetching employee data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Проверяем наличие позиции у сотрудника
+    const hasAssignedPosition = employeeData?.position_id || false;
+
+    if (loading) {
+        return (
+            <Container fluid className="employee-schedule-container">
+                <LoadingState message={t('common.loading')} />
+            </Container>
+        );
+    }
 
     return (
         <Container fluid className="employee-schedule-container">
@@ -59,6 +88,11 @@ const EmployeeSchedule = () => {
                                 <span>
                                     <i className="bi bi-calendar3 me-2"></i>
                                     {t('employee.schedule.fullSchedule')}
+                                    {!hasAssignedPosition && (
+                                        <i className="bi bi-lock ms-2"
+                                           title={t('employee.schedule.positionRequired')}
+                                        ></i>
+                                    )}
                                 </span>
                             }
                             disabled={!hasAssignedPosition}
@@ -84,6 +118,17 @@ const EmployeeSchedule = () => {
                     </Tabs>
                 </Card.Body>
             </Card>
+
+            {/* Debug info in development */}
+            {process.env.NODE_ENV === 'development' && employeeData && (
+                <div className="mt-3 p-3 bg-light small rounded">
+                    <strong>Employee Debug Info:</strong>
+                    <div>Name: {employeeData.name}</div>
+                    <div>Position ID: {employeeData.position_id || 'None'}</div>
+                    <div>Position: {employeeData.position_name || 'Not assigned'}</div>
+                    <div>Site: {employeeData.site_name || 'Not assigned'}</div>
+                </div>
+            )}
         </Container>
     );
 };

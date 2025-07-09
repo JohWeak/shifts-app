@@ -298,8 +298,16 @@ const getPositionWeeklySchedule = async (req, res) => {
         const { date } = req.query;
         const userId = req.userId;
 
+        console.log('[GetPositionWeeklySchedule] Position ID:', positionId, 'User ID:', userId);
+
         // Проверяем, что у сотрудника есть доступ к этой позиции
-        const employee = await Employee.findByPk(userId);
+        const employee = await Employee.findByPk(userId, {
+            include: [{
+                model: Position,
+                as: 'defaultPosition'
+            }]
+        });
+
         if (!employee) {
             return res.status(404).json({
                 success: false,
@@ -343,7 +351,7 @@ const getPositionWeeklySchedule = async (req, res) => {
             });
         }
 
-        // Получаем информацию о позиции
+        // Получаем информацию о позиции со сменами
         const position = await Position.findByPk(positionId, {
             include: [{
                 model: PositionShift,
@@ -401,7 +409,8 @@ const getPositionWeeklySchedule = async (req, res) => {
                 const shiftAssignments = dayAssignments.filter(a => a.shift_id === shift.id);
                 const employees = shiftAssignments.map(a => ({
                     emp_id: a.employee.emp_id,
-                    name: `${a.employee.first_name} ${a.employee.last_name}`
+                    name: `${a.employee.first_name} ${a.employee.last_name}`,
+                    is_current_user: a.employee.emp_id === employee.emp_id
                 }));
 
                 dayShifts.push({

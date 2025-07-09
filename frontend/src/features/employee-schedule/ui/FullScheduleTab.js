@@ -1,7 +1,7 @@
 // frontend/src/features/employee-schedule/ui/FullScheduleTab.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Table, Alert, Card, Badge } from 'react-bootstrap';
+import { Table, Alert, Card, Badge, Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
@@ -9,7 +9,7 @@ import api from 'shared/api';
 import { scheduleAPI } from 'shared/api/apiService';
 import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
-import { parseISO } from 'date-fns';
+import { parseISO, addWeeks, format } from 'date-fns';
 import './FullScheduleTab.css';
 
 const FullScheduleTab = () => {
@@ -17,7 +17,9 @@ const FullScheduleTab = () => {
     const { user } = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [scheduleData, setScheduleData] = useState(null);
+    const [currentWeekData, setCurrentWeekData] = useState(null);
+    const [nextWeekData, setNextWeekData] = useState(null);
+    const [activeWeek, setActiveWeek] = useState('current');
     const [employeeData, setEmployeeData] = useState(null);
     const tableRef = useRef(null);
 
@@ -28,16 +30,22 @@ const FullScheduleTab = () => {
     const fetchEmployeeData = async () => {
         try {
             console.log('Fetching employee data...');
-            // Используем тот же endpoint что и в PersonalScheduleTab
             const data = await scheduleAPI.fetchWeeklySchedule();
             console.log('Employee data received:', data);
 
             if (data?.employee) {
                 setEmployeeData(data.employee);
 
-                // Если у сотрудника есть позиция, загружаем полное расписание
                 if (data.employee.position_id) {
+                    // Загружаем текущую неделю
                     await fetchFullSchedule(data.employee.position_id);
+
+                    // Загружаем следующую неделю
+                    if (data.week?.start) {
+                        const nextWeekStart = addWeeks(parseISO(data.week.start), 1);
+                        const nextWeekDateStr = format(nextWeekStart, 'yyyy-MM-dd');
+                        await fetchFullSchedule(data.employee.position_id, nextWeekDateStr, true);
+                    }
                 } else {
                     setLoading(false);
                 }
@@ -51,64 +59,171 @@ const FullScheduleTab = () => {
         }
     };
 
-    const fetchFullSchedule = async (positionId) => {
+    const fetchFullSchedule = async (positionId, date = null, isNextWeek = false) => {
         try {
-            console.log('Fetching full schedule for position:', positionId);
-            const response = await api.get(`/api/schedules/position/${positionId}/weekly`);
-            console.log('Full schedule response:', response);
+            console.log('Fetching full schedule for position:', positionId, 'date:', date);
+            const params = date ? { date } : {};
+            const response = await api.get(`/api/schedules/position/${positionId}/weekly`, { params });
+            console.log('Full schedule response:', response.data);
 
             if (response.data?.success) {
-                setScheduleData(response.data);
-            } else {
-                setError(t('employee.schedule.noSchedule'));
+                if (isNextWeek) {
+                    setNextWeekData(response.data);
+                } else {
+                    setCurrentWeekData(response.data);
+                }
             }
         } catch (err) {
             console.error('Error fetching full schedule:', err);
-            // Если endpoint не существует, показываем заглушку
-            if (err.response?.status === 404) {
-                setError(t('employee.schedule.fullScheduleNotAvailable'));
-            } else {
-                setError(err.response?.data?.message || t('errors.fetchFailed'));
+            if (!isNextWeek) {
+                if (err.response?.status === 404) {
+                    setError(t('employee.schedule.fullScheduleNotAvailable'));
+                } else {
+                    setError(err.response?.data?.message || t('errors.fetchFailed'));
+                }
             }
         } finally {
-            setLoading(false);
+            if (!isNextWeek) {
+                setLoading(false);
+            }
         }
     };
 
     const renderShiftCell = (shift, employees) => {
-        const isCurrentUser = employees.some(emp =>
-            emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
+        const hasCurrentUser = employees.some(emp =>
+            emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
         );
         const bgColor = shift.color || '#e9ecef';
         const textColor = getContrastTextColor(bgColor);
 
         return (
             <div
-                className={`shift-cell ${isCurrentUser ? 'current-user-shift' : ''}`}
+                className={`shift-cell ${hasCurrentUser ? 'current-user-shift' : ''}`}
                 style={{
                     backgroundColor: bgColor,
                     color: textColor
                 }}
             >
-                <div className="shift-name">{shift.shift_name}</div>
-                <div className="shift-time">
-                    {formatShiftTime(shift.start_time, shift.duration)}
-                </div>
                 <div className="shift-employees">
-                    {employees.map((emp, idx) => (
-                        <div
-                            key={emp.emp_id}
-                            className={`employee-name ${
-                                emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
-                                    ? 'fw-bold'
-                                    : ''
-                            }`}
-                        >
-                            {emp.name}
-                        </div>
-                    ))}
+                    {employees.length > 0 ? (
+                        employees.map((emp, idx) => (
+                            <div
+                                key={emp.emp_id}
+                                className={`employee-name ${
+                                    emp.is_current_user || emp.emp_id === employeeData?.emp_id
+                                        ? 'fw-bold'
+                                        : ''
+                                }`}
+                            >
+                                {emp.name}
+                            </div>
+                        ))
+                    ) : (
+                        <span className="empty-slot">-</span>
+                    )}
                 </div>
             </div>
+        );
+    };
+
+    // Функция для рендеринга расписания конкретной недели
+    const renderWeekSchedule = (weekData) => {
+        if (!weekData || !weekData.days || !weekData.shifts) {
+            return (
+                <Card className="text-center py-5">
+                    <Card.Body>
+                        <p className="text-muted">
+                            {weekData?.message || t('employee.schedule.noSchedule')}
+                        </p>
+                    </Card.Body>
+                </Card>
+            );
+        }
+
+        const { week, position, shifts, days } = weekData;
+
+        return (
+            <>
+                <Card className="position-info-card mb-3">
+                    <Card.Body className="d-flex justify-content-between align-items-center py-2">
+                        <div>
+                            <h6 className="mb-0">{position?.name || employeeData?.position_name}</h6>
+                            <small className="text-muted">
+                                {position?.site_name || employeeData?.site_name}
+                            </small>
+                        </div>
+                        {week && (
+                            <Badge bg="primary">
+                                {formatWeekRange(week)}
+                            </Badge>
+                        )}
+                    </Card.Body>
+                </Card>
+
+                <div className="table-container" ref={tableRef}>
+                    <div className="table-scroll-wrapper">
+                        <Table className="full-schedule-table" bordered>
+                            <thead>
+                            <tr>
+                                <th className="shift-header-cell sticky-column">
+                                    {t('employee.schedule.shift')}
+                                </th>
+                                {days.map(day => {
+                                    const dateObj = parseISO(day.date);
+                                    const isToday = new Date().toDateString() === dateObj.toDateString();
+
+                                    return (
+                                        <th key={day.date} className={`day-header-cell ${isToday ? 'today-column' : ''}`}>
+                                            <div className="day-name">
+                                                {getDayName(dateObj.getDay(), t)}
+                                            </div>
+                                            <div className="day-date">
+                                                {formatHeaderDate(dateObj)}
+                                            </div>
+                                            {isToday && (
+                                                <Badge bg="primary" className="today-badge mt-1">
+                                                    {t('common.today')}
+                                                </Badge>
+                                            )}
+                                        </th>
+                                    );
+                                })}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {shifts.map(shift => (
+                                <tr key={shift.id}>
+                                    <td className="shift-info-cell sticky-column">
+                                        <div
+                                            className="shift-header-info"
+                                            style={{
+                                                backgroundColor: shift.color || '#f8f9fa',
+                                                color: getContrastTextColor(shift.color || '#f8f9fa')
+                                            }}
+                                        >
+                                            <span className="shift-header-name">{shift.shift_name}</span>
+                                            <span className="shift-header-time">
+                                                    {formatShiftTime(shift.start_time, shift.duration)}
+                                                </span>
+                                        </div>
+                                    </td>
+                                    {days.map(day => {
+                                        const dayShift = day.shifts.find(s => s.shift_id === shift.id);
+                                        const employees = dayShift?.employees || [];
+
+                                        return (
+                                            <td key={`${day.date}-${shift.id}`} className="employee-cell">
+                                                {renderShiftCell(shift, employees)}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+                    </div>
+                </div>
+            </>
         );
     };
 
@@ -135,7 +250,9 @@ const FullScheduleTab = () => {
         );
     }
 
-    if (!scheduleData) {
+    const hasAnyData = currentWeekData || nextWeekData;
+
+    if (!hasAnyData) {
         return (
             <EmptyState
                 icon={<i className="bi bi-calendar-x display-1"></i>}
@@ -145,95 +262,44 @@ const FullScheduleTab = () => {
         );
     }
 
-    const { week, position, shifts, days } = scheduleData;
-
-    // Временное решение - если нет структуры данных, показываем простое сообщение
-    if (!days || !shifts) {
-        return (
-            <Card className="text-center py-5">
-                <Card.Body>
-                    <h5>{t('employee.schedule.fullScheduleComingSoon')}</h5>
-                    <p className="text-muted">
-                        {t('employee.schedule.positionScheduleWillBeAvailable')}
-                    </p>
-                    <div className="mt-3">
-                        <Badge bg="info" className="me-2">{employeeData.position_name}</Badge>
-                        {employeeData.site_name && <Badge bg="secondary">{employeeData.site_name}</Badge>}
-                    </div>
-                </Card.Body>
-            </Card>
-        );
-    }
-
     return (
         <div className="full-schedule-content">
-            <Card className="position-info-card mb-3">
-                <Card.Body className="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 className="mb-1">{position?.name || employeeData.position_name}</h6>
-                        <small className="text-muted">
-                            {position?.site_name || employeeData.site_name}
+            {/* Week selector */}
+            <div className="week-selector mb-3">
+                <Button
+                    variant={activeWeek === 'current' ? 'primary' : 'outline-primary'}
+                    size="sm"
+                    onClick={() => setActiveWeek('current')}
+                    className="me-2"
+                    disabled={!currentWeekData}
+                >
+                    {t('employee.schedule.currentWeek')}
+                    {currentWeekData?.week && (
+                        <small className="d-block">
+                            {format(parseISO(currentWeekData.week.start), 'dd/MM')} -
+                            {format(parseISO(currentWeekData.week.end), 'dd/MM')}
                         </small>
-                    </div>
-                    {week && (
-                        <Badge bg="primary">
-                            {formatWeekRange(week)}
-                        </Badge>
                     )}
-                </Card.Body>
-            </Card>
-
-            <div className="table-container" ref={tableRef}>
-                <div className="table-scroll-wrapper">
-                    <Table className="full-schedule-table" bordered>
-                        <thead>
-                        <tr>
-                            <th className="shift-header-cell sticky-column">
-                                {t('employee.schedule.shift')}
-                            </th>
-                            {days.map(day => (
-                                <th key={day.date} className="day-header-cell">
-                                    <div className="day-name">
-                                        {getDayName(parseISO(day.date).getDay(), t)}
-                                    </div>
-                                    <div className="day-date">
-                                        {formatHeaderDate(parseISO(day.date))}
-                                    </div>
-                                </th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {shifts.map(shift => (
-                            <tr key={shift.id}>
-                                <td className="shift-info-cell sticky-column">
-                                    <div className="shift-header-info">
-                                        <span className="shift-header-name">{shift.shift_name}</span>
-                                        <span className="shift-header-time">
-                                                {formatShiftTime(shift.start_time, shift.duration)}
-                                            </span>
-                                    </div>
-                                </td>
-                                {days.map(day => {
-                                    const dayShift = day.shifts.find(s => s.shift_id === shift.id);
-                                    const employees = dayShift?.employees || [];
-
-                                    return (
-                                        <td key={`${day.date}-${shift.id}`} className="employee-cell">
-                                            {employees.length > 0 ? (
-                                                renderShiftCell(shift, employees)
-                                            ) : (
-                                                <div className="empty-shift">-</div>
-                                            )}
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </Table>
-                </div>
+                </Button>
+                <Button
+                    variant={activeWeek === 'next' ? 'primary' : 'outline-primary'}
+                    size="sm"
+                    onClick={() => setActiveWeek('next')}
+                    disabled={!nextWeekData}
+                >
+                    {t('employee.schedule.nextWeek')}
+                    {nextWeekData?.week && (
+                        <small className="d-block">
+                            {format(parseISO(nextWeekData.week.start), 'dd/MM')} -
+                            {format(parseISO(nextWeekData.week.end), 'dd/MM')}
+                        </small>
+                    )}
+                </Button>
             </div>
+
+            {/* Display selected week */}
+            {activeWeek === 'current' && currentWeekData && renderWeekSchedule(currentWeekData)}
+            {activeWeek === 'next' && nextWeekData && renderWeekSchedule(nextWeekData)}
 
             <div className="legend mt-3">
                 <small className="text-muted">
