@@ -325,6 +325,9 @@ export const en = {
             noArchiveDataDesc: 'No past schedules found for the selected period',
             yourShiftsHighlighted: 'Your shifts are highlighted',
             noScheduleForThisWeek: 'No schedule available for this week',
+            fullScheduleNotAvailable: 'Full schedule view is not available yet',
+            fullScheduleComingSoon: 'Full Schedule Coming Soon',
+            positionScheduleWillBeAvailable: 'The full position schedule will be available soon',
         },
     },
     errors: {

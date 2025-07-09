@@ -6,11 +6,11 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import api from 'shared/api';
+import { scheduleAPI } from 'shared/api/apiService';
 import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO } from 'date-fns';
 import './FullScheduleTab.css';
-import {scheduleAPI} from "shared/api/apiService";
 
 const FullScheduleTab = () => {
     const { t } = useI18n();
@@ -18,50 +18,67 @@ const FullScheduleTab = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [scheduleData, setScheduleData] = useState(null);
-    const tableRef = useRef(null);
     const [employeeData, setEmployeeData] = useState(null);
-
-    const positionId = user?.position_id || user?.default_position_id;
+    const tableRef = useRef(null);
 
     useEffect(() => {
-        // Сначала получаем данные о сотруднике из weekly endpoint
         fetchEmployeeData();
     }, []);
 
     const fetchEmployeeData = async () => {
         try {
+            console.log('Fetching employee data...');
+            // Используем тот же endpoint что и в PersonalScheduleTab
             const data = await scheduleAPI.fetchWeeklySchedule();
+            console.log('Employee data received:', data);
+
             if (data?.employee) {
                 setEmployeeData(data.employee);
+
+                // Если у сотрудника есть позиция, загружаем полное расписание
                 if (data.employee.position_id) {
                     await fetchFullSchedule(data.employee.position_id);
+                } else {
+                    setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         } catch (err) {
             console.error('Error fetching employee data:', err);
+            setError(err.response?.data?.message || t('errors.fetchFailed'));
+            setLoading(false);
         }
     };
 
     const fetchFullSchedule = async (positionId) => {
-        setLoading(true);
-        setError(null);
-
         try {
+            console.log('Fetching full schedule for position:', positionId);
             const response = await api.get(`/api/schedules/position/${positionId}/weekly`);
+            console.log('Full schedule response:', response);
 
-            if (response.data.success) {
+            if (response.data?.success) {
                 setScheduleData(response.data);
+            } else {
+                setError(t('employee.schedule.noSchedule'));
             }
         } catch (err) {
             console.error('Error fetching full schedule:', err);
-            setError(err.response?.data?.message || t('errors.fetchFailed'));
+            // Если endpoint не существует, показываем заглушку
+            if (err.response?.status === 404) {
+                setError(t('employee.schedule.fullScheduleNotAvailable'));
+            } else {
+                setError(err.response?.data?.message || t('errors.fetchFailed'));
+            }
         } finally {
             setLoading(false);
         }
     };
 
     const renderShiftCell = (shift, employees) => {
-        const isCurrentUser = employees.some(emp => emp.emp_id === user.emp_id);
+        const isCurrentUser = employees.some(emp =>
+            emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
+        );
         const bgColor = shift.color || '#e9ecef';
         const textColor = getContrastTextColor(bgColor);
 
@@ -81,7 +98,11 @@ const FullScheduleTab = () => {
                     {employees.map((emp, idx) => (
                         <div
                             key={emp.emp_id}
-                            className={`employee-name ${emp.emp_id === user.emp_id ? 'fw-bold' : ''}`}
+                            className={`employee-name ${
+                                emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
+                                    ? 'fw-bold'
+                                    : ''
+                            }`}
                         >
                             {emp.name}
                         </div>
@@ -90,6 +111,12 @@ const FullScheduleTab = () => {
             </div>
         );
     };
+
+    if (loading) {
+        return <LoadingState message={t('common.loading')} />;
+    }
+
+    // Проверяем, есть ли у сотрудника позиция
     if (!employeeData?.position_id) {
         return (
             <EmptyState
@@ -98,9 +125,6 @@ const FullScheduleTab = () => {
                 description={t('employee.schedule.positionRequiredDesc')}
             />
         );
-    }
-    if (loading) {
-        return <LoadingState message={t('common.loading')} />;
     }
 
     if (error) {
@@ -123,17 +147,39 @@ const FullScheduleTab = () => {
 
     const { week, position, shifts, days } = scheduleData;
 
+    // Временное решение - если нет структуры данных, показываем простое сообщение
+    if (!days || !shifts) {
+        return (
+            <Card className="text-center py-5">
+                <Card.Body>
+                    <h5>{t('employee.schedule.fullScheduleComingSoon')}</h5>
+                    <p className="text-muted">
+                        {t('employee.schedule.positionScheduleWillBeAvailable')}
+                    </p>
+                    <div className="mt-3">
+                        <Badge bg="info" className="me-2">{employeeData.position_name}</Badge>
+                        {employeeData.site_name && <Badge bg="secondary">{employeeData.site_name}</Badge>}
+                    </div>
+                </Card.Body>
+            </Card>
+        );
+    }
+
     return (
         <div className="full-schedule-content">
             <Card className="position-info-card mb-3">
                 <Card.Body className="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 className="mb-1">{position.name}</h6>
-                        <small className="text-muted">{position.site_name}</small>
+                        <h6 className="mb-1">{position?.name || employeeData.position_name}</h6>
+                        <small className="text-muted">
+                            {position?.site_name || employeeData.site_name}
+                        </small>
                     </div>
-                    <Badge bg="primary">
-                        {formatWeekRange(week)}
-                    </Badge>
+                    {week && (
+                        <Badge bg="primary">
+                            {formatWeekRange(week)}
+                        </Badge>
+                    )}
                 </Card.Body>
             </Card>
 
