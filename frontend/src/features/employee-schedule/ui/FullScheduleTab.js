@@ -43,6 +43,10 @@ const FullScheduleTab = () => {
         const saved = localStorage.getItem('employee_showFirstNameOnly');
         return saved !== null ? JSON.parse(saved) : true;
     });
+    const handleNameToggle = (checked) => {
+        setShowFirstNameOnly(checked);
+        localStorage.setItem('employee_showFirstNameOnly', JSON.stringify(checked));
+    };
 
     const fetchEmployeeData = async () => {
         try {
@@ -147,7 +151,7 @@ const FullScheduleTab = () => {
                                             : ''
                                     }`}
                                 >
-                                    {formatEmployeeName(firstName, lastName, showFirstNameOnly)}
+                                    {formatEmployeeName(firstName, lastName, !showFirstNameOnly)}
                                 </div>
                             );
                         })
@@ -184,6 +188,8 @@ const FullScheduleTab = () => {
                     position={position?.name || employeeData?.position_name}
                     week={week}
                     showNameToggle={true}
+                    showFirstNameOnly={showFirstNameOnly}
+                    onNameToggle={handleNameToggle}
                 />
 
                 <div className="table-container" ref={tableRef}>

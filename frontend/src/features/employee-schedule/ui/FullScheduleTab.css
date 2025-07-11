@@ -33,21 +33,14 @@
     background: var(--bs-gray-100);
     font-weight: 600;
     white-space: nowrap;
-    position: relative;
+    /*position: relative;*/
 }
 
 [data-theme="dark"] .full-schedule-table th {
     background: var(--bs-gray-800);
 }
 
-/* Sticky Column */
-.sticky-column {
-    position: sticky;
-    left: 0;
-    z-index: 10;
-    background: var(--bs-white);
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-}
+
 
 [data-theme="dark"] .sticky-column {
     background: var(--bs-gray-900);
@@ -55,8 +48,11 @@
 
 /* Headers */
 .shift-header-cell {
-    min-width: 150px;
-    text-align: center;
+    min-width: 100px;
+    text-align: start;
+    align-content: center;
+    margin: 5;
+
 }
 
 .day-header-cell {
@@ -74,7 +70,14 @@
     font-size: 0.75rem;
     color: var(--bs-gray-600);
 }
-
+/* Sticky Column */
+.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--bs-white);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
 /* Shift Info */
 .shift-info-cell {
     padding: 0.75rem;
@@ -94,6 +97,7 @@
     font-size: 0.75rem;
     color: var(--bs-gray-600);
 }
+
 
 /* Shift Cells */
 .employee-cell {
@@ -201,7 +205,7 @@
 
 /* Custom Scrollbar */
 .table-scroll-wrapper::-webkit-scrollbar {
-    height: 8px;
+    height: 28px;
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-track {
@@ -230,7 +234,7 @@
 [dir="rtl"] .shift-header-info .color-picker-btn{
     position: absolute;
     top: 18px;
-    left: 0px;
+    left: 0;
 }
 .shift-header-info:hover .color-picker-btn {
     opacity: 0.7;

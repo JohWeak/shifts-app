@@ -20,17 +20,12 @@ export const ScheduleHeaderCard = ({
                                        week,
                                        className = '',
                                        empName = '',
-                                       showNameToggle = false}) => {
+                                       showNameToggle = false,
+                                       showFirstNameOnly,
+                                       onNameToggle,
+                                   }) => {
 
     const { t } = useI18n();
-    const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
-        const saved = localStorage.getItem('employee_showFirstNameOnly');
-        return saved !== null ? JSON.parse(saved) : true;
-    });
-    const handleNameToggle = (checked) => {
-        setShowFirstNameOnly(checked);
-        localStorage.setItem('employee_showFirstNameOnly', JSON.stringify(checked));
-    };
     const showSubtitle = position || site;
 
     return (
@@ -68,9 +63,9 @@ export const ScheduleHeaderCard = ({
                         <Form.Check
                             type="switch"
                             id="name-display-toggle"
-                            label={t('employee.showFirstNameOnly')}
+                            label={t('employee.showFullName')}
                             checked={showFirstNameOnly}
-                            onChange={(e) => handleNameToggle(e.target.checked)}
+                            onChange={(e) => onNameToggle(e.target.checked)}
                             className="mt-2 small"
                         />
                     )}

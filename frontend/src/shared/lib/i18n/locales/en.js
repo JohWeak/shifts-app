@@ -304,6 +304,7 @@ export const en = {
         portal: 'Employee Portal',
         myRequests: 'My Requests',
         showFirstNameOnly: 'First Name',
+        showFullName: 'Full Name',
         schedule: {
             title: 'My Schedule',
             subtitle: 'View your weekly work schedule',
