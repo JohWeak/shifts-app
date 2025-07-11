@@ -1,8 +1,8 @@
 // frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import './ColorPickerModal.css';
 import {useI18n} from "../../../lib/i18n/i18nProvider";
+import './ColorPickerModal.css';
 
 const PRESET_COLORS = [
     '#FFE4A3', // Светло-жёлтый

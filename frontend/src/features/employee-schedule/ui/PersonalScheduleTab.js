@@ -9,8 +9,10 @@ import { scheduleAPI } from 'shared/api/apiService';
 import { formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO, addWeeks, format } from 'date-fns';
-import './PersonalScheduleTab.css';
 import {ScheduleHeaderCard, WeekSelector} from "./";
+import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
+import './PersonalScheduleTab.css';
 
 const PersonalScheduleTab = () => {
     const { t } = useI18n();
@@ -22,6 +24,14 @@ const PersonalScheduleTab = () => {
     const [nextWeekData, setNextWeekData] = useState(null);
     const [activeWeek, setActiveWeek] = useState('current');
     const [employeeInfo, setEmployeeInfo] = useState(null);
+    const {
+        colorPickerState,
+        openColorPicker,
+        closeColorPicker,
+        previewColor,
+        applyColor,
+        getShiftColor
+    } = useShiftColor();
 
     useEffect(() => {
         fetchSchedules();
@@ -116,7 +126,7 @@ const PersonalScheduleTab = () => {
 
                             const dateObj = parseISO(day.date);
                             const isToday = new Date().toDateString() === dateObj.toDateString();
-                            const bgColor = userAssignment?.color || '#f8f9fa';
+                            const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
                             const textColor = getContrastTextColor(bgColor);
 
                             return (
@@ -148,7 +158,24 @@ const PersonalScheduleTab = () => {
                                                 {userAssignment ? (
                                                     <>
                                                         <div className="shift-name fw-bold">
+                                                            <Button
+                                                                variant="link"
+                                                                size="sm"
+                                                                className="color-picker-btn p-0 me-2"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    openColorPicker(
+                                                                        userAssignment.shift_id,
+                                                                        getShiftColor(userAssignment),
+                                                                        userAssignment
+                                                                    );
+                                                                }}
+                                                                title={t('shift.editColor')}
+                                                            >
+                                                                <i className="bi bi-palette"></i>
+                                                            </Button>
                                                             {userAssignment.shift_name}
+
                                                         </div>
                                                         <div className="shift-time small">
                                                             {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
@@ -172,6 +199,18 @@ const PersonalScheduleTab = () => {
                                 </Card>
                             );
                         })}
+                        <ColorPickerModal
+                            show={colorPickerState.show}
+                            onHide={closeColorPicker}
+                            onColorSelect={applyColor}
+                            onColorChange={previewColor}
+                            initialColor={colorPickerState.currentColor}
+                            title={t('modal.colorPicker.title')}
+                            saveMode={colorPickerState.saveMode}
+                            currentTheme={colorPickerState.currentTheme}
+                            hasLocalColor={colorPickerState.hasLocalColor}
+                            originalGlobalColor={colorPickerState.originalGlobalColor}
+                        />
                     </div>
                 )}
             </>

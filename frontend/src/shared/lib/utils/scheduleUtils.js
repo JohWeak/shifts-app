@@ -185,3 +185,17 @@ export const formatWeekRange = (week) => {
 export const canDeleteSchedule = (schedule) => {
     return schedule.status !== 'published';
 };
+/**
+ * Форматирует имя сотрудника
+ * @param {string} firstName - Имя
+ * @param {string} lastName - Фамилия
+ * @param {boolean} firstNameOnly - Показывать только имя
+ * @returns {string} - Отформатированное имя
+ */
+export const formatEmployeeName = (firstName, lastName, firstNameOnly = false) => {
+    if (!firstName && !lastName) return '-';
+    if (firstNameOnly) {
+        return firstName || lastName || '-';
+    }
+    return `${firstName || ''} ${lastName || ''}`.trim();
+};

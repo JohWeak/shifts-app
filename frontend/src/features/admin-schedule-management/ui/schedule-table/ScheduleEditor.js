@@ -14,7 +14,7 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor, isDarkTheme } from 'shared/lib/utils/colorUtils';
 import { useSelector } from "react-redux";
-import { useShiftColor } from '../../model/hooks/useShiftColor';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './ScheduleEditor.css';
 
 

@@ -1,21 +1,24 @@
 // frontend/src/features/employee-schedule/ui/FullScheduleTab.js
-import React, { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { Table, Alert, Card, Badge, Button } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useState, useEffect, useRef} from 'react';
+import {useSelector} from 'react-redux';
+import {Table, Alert, Card, Badge, Button} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import api from 'shared/api';
-import { scheduleAPI } from 'shared/api/apiService';
-import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
-import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
-import { parseISO, addWeeks, format } from 'date-fns';
-import { ScheduleHeaderCard, WeekSelector } from './';
+import {scheduleAPI} from 'shared/api/apiService';
+import {formatWeekRange, formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
+import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
+import {parseISO, addWeeks, format} from 'date-fns';
+import {useShiftColor} from 'shared/hooks/useShiftColor';
+import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
+import {formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
+import {ScheduleHeaderCard, WeekSelector} from './';
 import './FullScheduleTab.css';
 
 const FullScheduleTab = () => {
-    const { t } = useI18n();
-    const { user } = useSelector(state => state.auth);
+    const {t} = useI18n();
+    const {user} = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
@@ -23,10 +26,23 @@ const FullScheduleTab = () => {
     const [activeWeek, setActiveWeek] = useState('current');
     const [employeeData, setEmployeeData] = useState(null);
     const tableRef = useRef(null);
+    const {
+        colorPickerState,
+        openColorPicker,
+        closeColorPicker,
+        previewColor,
+        applyColor,
+        getShiftColor
+    } = useShiftColor();
 
     useEffect(() => {
         fetchEmployeeData();
     }, []);
+
+    const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
+        const saved = localStorage.getItem('employee_showFirstNameOnly');
+        return saved !== null ? JSON.parse(saved) : true;
+    });
 
     const fetchEmployeeData = async () => {
         try {
@@ -63,8 +79,8 @@ const FullScheduleTab = () => {
     const fetchFullSchedule = async (positionId, date = null, isNextWeek = false) => {
         try {
             console.log('Fetching full schedule for position:', positionId, 'date:', date);
-            const params = date ? { date } : {};
-            const response = await api.get(`/api/schedules/position/${positionId}/weekly`, { params });
+            const params = date ? {date} : {};
+            const response = await api.get(`/api/schedules/position/${positionId}/weekly`, {params});
 
             // Логируем полный response для отладки
             console.log('Full schedule response:', response);
@@ -104,7 +120,7 @@ const FullScheduleTab = () => {
         const hasCurrentUser = employees.some(emp =>
             emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
         );
-        const bgColor = shift.color || '#e9ecef';
+        const bgColor = getShiftColor(shift);
         const textColor = getContrastTextColor(bgColor);
 
         return (
@@ -117,18 +133,24 @@ const FullScheduleTab = () => {
             >
                 <div className="shift-employees">
                     {employees.length > 0 ? (
-                        employees.map((emp, idx) => (
-                            <div
-                                key={emp.emp_id}
-                                className={`employee-name ${
-                                    emp.is_current_user || emp.emp_id === employeeData?.emp_id
-                                        ? 'fw-bold'
-                                        : ''
-                                }`}
-                            >
-                                {emp.name}
-                            </div>
-                        ))
+                        employees.map((emp, idx) => {
+                            // Парсим имя и фамилию из полного имени
+                            const [firstName, ...lastNameParts] = emp.name.split(' ');
+                            const lastName = lastNameParts.join(' ');
+
+                            return (
+                                <div
+                                    key={emp.emp_id}
+                                    className={`employee-name ${
+                                        emp.is_current_user || emp.emp_id === employeeData?.emp_id
+                                            ? 'fw-bold'
+                                            : ''
+                                    }`}
+                                >
+                                    {formatEmployeeName(firstName, lastName, showFirstNameOnly)}
+                                </div>
+                            );
+                        })
                     ) : (
                         <span className="empty-slot">-</span>
                     )}
@@ -151,7 +173,7 @@ const FullScheduleTab = () => {
             );
         }
 
-        const { week, position, shifts, days } = weekData;
+        const {week, position, shifts, days} = weekData;
 
         return (
             <>
@@ -161,6 +183,7 @@ const FullScheduleTab = () => {
                     site={position?.site_name || employeeData?.site_name}
                     position={position?.name || employeeData?.position_name}
                     week={week}
+                    showNameToggle={true}
                 />
 
                 <div className="table-container" ref={tableRef}>
@@ -176,7 +199,8 @@ const FullScheduleTab = () => {
                                     const isToday = new Date().toDateString() === dateObj.toDateString();
 
                                     return (
-                                        <th key={day.date} className={`day-header-cell ${isToday ? 'today-column' : ''}`}>
+                                        <th key={day.date}
+                                            className={`day-header-cell ${isToday ? 'today-column' : ''}`}>
                                             <div className="day-name">
                                                 {getDayName(dateObj.getDay(), t)}
                                             </div>
@@ -200,15 +224,33 @@ const FullScheduleTab = () => {
                                         <div
                                             className="shift-header-info"
                                             style={{
-                                                backgroundColor: shift.color || '#f8f9fa',
-                                                color: getContrastTextColor(shift.color || '#f8f9fa')
+                                                backgroundColor: getShiftColor(shift),
+                                                color: getContrastTextColor(getShiftColor(shift))
                                             }}
                                         >
-                                            <span className="shift-header-name">{shift.shift_name}</span>
+                                            <span className="shift-header-name">{shift.shift_name}
+                                            </span>
                                             <span className="shift-header-time">
                                                     {formatShiftTime(shift.start_time, shift.duration)}
-                                                </span>
+                                            </span>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                className="color-picker-btn p-1"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openColorPicker(
+                                                        shift.id,
+                                                        getShiftColor(shift),
+                                                        shift
+                                                    );
+                                                }}
+                                                title={t('shift.editColor')}
+                                            >
+                                                <i className="bi bi-palette"></i>
+                                            </Button>
                                         </div>
+
                                     </td>
                                     {days.map(day => {
                                         const dayShift = day.shifts.find(s => s.shift_id === shift.id);
@@ -226,12 +268,24 @@ const FullScheduleTab = () => {
                         </Table>
                     </div>
                 </div>
+                <ColorPickerModal
+                    show={colorPickerState.show}
+                    onHide={closeColorPicker}
+                    onColorSelect={applyColor}
+                    onColorChange={previewColor}
+                    initialColor={colorPickerState.currentColor}
+                    title={t('modal.colorPicker.title')}
+                    saveMode={colorPickerState.saveMode}
+                    currentTheme={colorPickerState.currentTheme}
+                    hasLocalColor={colorPickerState.hasLocalColor}
+                    originalGlobalColor={colorPickerState.originalGlobalColor}
+                />
             </>
         );
     };
 
     if (loading) {
-        return <LoadingState message={t('common.loading')} />;
+        return <LoadingState message={t('common.loading')}/>;
     }
 
     // Проверяем, есть ли у сотрудника позиция
@@ -271,12 +325,6 @@ const FullScheduleTab = () => {
             {activeWeek === 'current' && currentWeekData && renderWeekSchedule(currentWeekData)}
             {activeWeek === 'next' && nextWeekData && renderWeekSchedule(nextWeekData)}
 
-            {/*<div className="legend mt-3">*/}
-            {/*    <small className="text-muted">*/}
-            {/*        <i className="bi bi-info-circle me-1"></i>*/}
-            {/*        {t('employee.schedule.yourShiftsHighlighted')}*/}
-            {/*    </small>*/}
-            {/*</div>*/}
 
             {/* New shared component */}
             <WeekSelector

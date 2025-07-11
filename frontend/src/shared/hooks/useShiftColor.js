@@ -1,7 +1,7 @@
 // frontend/src/features/admin-schedule-management/hooks/useShiftColor.js
 import {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateShiftColor } from '../scheduleSlice';
+import { updateShiftColor } from '../../features/admin-schedule-management/model/scheduleSlice';
 import { updatePositionShiftColor } from 'shared/api/apiService';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 

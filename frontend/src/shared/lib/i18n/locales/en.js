@@ -285,7 +285,6 @@ export const en = {
         confirmCall: 'Call {name} at {phone}?',
         clickToCall: 'Click to call',
         noPhoneNumber: 'No phone number available',
-        showFirstNameOnly: 'Show first name only',
         tabs: {
             available: 'Available',
             crossPosition: 'Other Positions',
@@ -304,6 +303,7 @@ export const en = {
         confirmOverride: 'Are you sure you want to assign {name}?\n\nReason unavailable: {reason}\nNote: {note}',
         portal: 'Employee Portal',
         myRequests: 'My Requests',
+        showFirstNameOnly: 'First Name',
         schedule: {
             title: 'My Schedule',
             subtitle: 'View your weekly work schedule',

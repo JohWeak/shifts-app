@@ -1,7 +1,10 @@
-import React from 'react';
-import {Card, Badge} from 'react-bootstrap';
+//frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard.js
+import React, { useState, useEffect } from 'react';
+import {Card, Badge, Form} from 'react-bootstrap';
 import {formatWeekRange} from 'shared/lib/utils/scheduleUtils';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './ScheduleHeaderCard.css';
+
 
 // Пропсы:
 // - title: Основной заголовок (имя сотрудника или должность)
@@ -10,7 +13,24 @@ import './ScheduleHeaderCard.css';
 // - week: Объект недели для бейджа
 // - className: Дополнительные классы для Card
 
-export const ScheduleHeaderCard = ({title, position, site, week, className = '', empName = ''}) => {
+export const ScheduleHeaderCard = ({
+                                       title,
+                                       position,
+                                       site,
+                                       week,
+                                       className = '',
+                                       empName = '',
+                                       showNameToggle = false}) => {
+
+    const { t } = useI18n();
+    const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
+        const saved = localStorage.getItem('employee_showFirstNameOnly');
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+    const handleNameToggle = (checked) => {
+        setShowFirstNameOnly(checked);
+        localStorage.setItem('employee_showFirstNameOnly', JSON.stringify(checked));
+    };
     const showSubtitle = position || site;
 
     return (
@@ -43,6 +63,16 @@ export const ScheduleHeaderCard = ({title, position, site, week, className = '',
                     )}
                     {empName && (
                         <span className="fw-semibold">{empName}</span>
+                    )}
+                    {showNameToggle && (
+                        <Form.Check
+                            type="switch"
+                            id="name-display-toggle"
+                            label={t('employee.showFirstNameOnly')}
+                            checked={showFirstNameOnly}
+                            onChange={(e) => handleNameToggle(e.target.checked)}
+                            className="mt-2 small"
+                        />
                     )}
                 </div>
             </Card.Body>
