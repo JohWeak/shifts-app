@@ -125,7 +125,7 @@ const ColorPickerModal = ({
 
                 {/* Custom color picker */}
                 <div>
-                    <label className="form-label small text-muted">Custom color:</label>
+                    <label className="form-label small text-muted">{(t('color.customColor'))}:</label>
                     <div className="d-flex gap-2 align-items-center">
                         <input
                             type="color"
