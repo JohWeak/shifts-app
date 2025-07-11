@@ -271,12 +271,12 @@ const FullScheduleTab = () => {
             {activeWeek === 'current' && currentWeekData && renderWeekSchedule(currentWeekData)}
             {activeWeek === 'next' && nextWeekData && renderWeekSchedule(nextWeekData)}
 
-            <div className="legend mt-3">
-                <small className="text-muted">
-                    <i className="bi bi-info-circle me-1"></i>
-                    {t('employee.schedule.yourShiftsHighlighted')}
-                </small>
-            </div>
+            {/*<div className="legend mt-3">*/}
+            {/*    <small className="text-muted">*/}
+            {/*        <i className="bi bi-info-circle me-1"></i>*/}
+            {/*        {t('employee.schedule.yourShiftsHighlighted')}*/}
+            {/*    </small>*/}
+            {/*</div>*/}
 
             {/* New shared component */}
             <WeekSelector

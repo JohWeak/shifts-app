@@ -28,9 +28,22 @@
     .week-selector-fixed {
         bottom: 45px;
         padding: 1rem 1.5rem;
+        background-color: transparent;
+        backdrop-filter: blur(15px);
+    }
+    [data-theme="dark"] .week-selector-fixed {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(15px);
     }
     .week-selector-fixed .btn {
-        min-width: 50%;
+        min-width: 40%;
+        /*border-top: none;*/
+        /*border-top-left-radius: 0;*/
+        /*border-top-right-radius: 0;*/
+        /*padding-top: 0.5rem;*/
+        /*margin-top: -1rem;*/
+        /*box-shadow: 0 6px 6px -4px rgba(0,0,0,0.25) inset;*/
     }
+
 }
 

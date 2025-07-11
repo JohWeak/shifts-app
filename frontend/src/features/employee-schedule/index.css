@@ -128,7 +128,14 @@
         padding: 0.75rem 0.5rem;
         font-size: 0.875rem;
     }
-
+    .employee-schedule-tabs{
+        background: transparent;
+        backdrop-filter: blur(15px);
+    }
+    [data-theme="dark"] .employee-schedule-tabs{
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(15%);
+    }
     .employee-schedule-tabs .nav-link i {
         display: none;
     }
