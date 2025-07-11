@@ -7,6 +7,7 @@ import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import { scheduleAPI } from 'shared/api/apiService';
 import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
+import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO, addWeeks, format } from 'date-fns';
 import './PersonalScheduleTab.css';
 
@@ -30,7 +31,6 @@ const PersonalScheduleTab = () => {
         setError(null);
 
         try {
-            // Fetch current week schedule
             console.log('Fetching current week schedule...');
             const currentData = await scheduleAPI.fetchWeeklySchedule();
             console.log('Current week data received:', currentData);
@@ -38,28 +38,21 @@ const PersonalScheduleTab = () => {
             if (currentData) {
                 setCurrentWeekData(currentData);
 
-                // Save employee info from first response
                 if (currentData.employee) {
                     setEmployeeInfo(currentData.employee);
                 }
 
-                // Fetch next week using data from current response
                 if (currentData.week?.start) {
                     const nextWeekStart = addWeeks(parseISO(currentData.week.start), 1);
                     const nextWeekDateStr = format(nextWeekStart, 'yyyy-MM-dd');
 
-                    console.log('Fetching next week schedule for date:', nextWeekDateStr);
-
                     try {
                         const nextData = await scheduleAPI.fetchWeeklySchedule(nextWeekDateStr);
-                        console.log('Next week data received:', nextData);
-
                         if (nextData) {
                             setNextWeekData(nextData);
                         }
                     } catch (nextErr) {
                         console.error('Error fetching next week:', nextErr);
-                        // Не прерываем общую загрузку, если следующая неделя не загрузилась
                     }
                 }
             }
@@ -71,128 +64,137 @@ const PersonalScheduleTab = () => {
         }
     };
 
-    // Добавим useEffect для отладки
-    useEffect(() => {
-        console.log('State updated - currentWeekData:', currentWeekData);
-        console.log('State updated - nextWeekData:', nextWeekData);
-    }, [currentWeekData, nextWeekData]);
-
-    const renderWeekSchedule = (weekData, weekTitle) => {
+    const renderWeekSchedule = (weekData) => {
         if (!weekData) return null;
 
         const employee = employeeInfo || weekData.employee;
-        const hasPosition = employee?.position_id;
-        const hasWorksite = employee?.site_id;
-
-        // Check if we have schedule data
         const hasSchedule = weekData.schedule && weekData.schedule.length > 0;
 
         return (
-            <Card className="week-schedule-card">
-                <Card.Header className="week-header">
-                    <h5 className="mb-0">
-                        <i className="bi bi-calendar-week me-2"></i>
-                        {weekTitle}
-                    </h5>
-                    {weekData.week && (
-                        <Badge bg="secondary" className="week-badge">
-                            {formatWeekRange(weekData.week)}
-                        </Badge>
-                    )}
-                </Card.Header>
-                <Card.Body className="p-0">
-                    {!hasSchedule ? (
-                        <div className="text-center py-4">
+            <>
+                {/* Header Card - similar to FullScheduleTab */}
+                <Card className="schedule-info-card mb-3">
+                    <Card.Body className="d-flex justify-content-between align-items-center py-2">
+                        <div>
+                            <h6 className="mb-0">{employee?.name}</h6>
+                            <small className="text-muted">
+                                {employee?.position_name && (
+                                    <>
+                                        <i className="bi bi-person-badge me-1"></i>
+                                        {employee.position_name}
+                                    </>
+                                )}
+                                {employee?.position_name && employee?.site_name && ' • '}
+                                {employee?.site_name && (
+                                    <>
+                                        <i className="bi bi-building me-1"></i>
+                                        {employee.site_name}
+                                    </>
+                                )}
+                            </small>
+                        </div>
+                        {weekData.week && (
+                            <Badge bg="primary">
+                                {formatWeekRange(weekData.week)}
+                            </Badge>
+                        )}
+                    </Card.Body>
+                </Card>
+
+                {/* Schedule Content */}
+                {!hasSchedule ? (
+                    <Card className="text-center py-4">
+                        <Card.Body>
                             <p className="text-muted mb-0">
                                 <i className="bi bi-calendar-x me-2"></i>
                                 {weekData.message || t('employee.schedule.noSchedule')}
                             </p>
-                        </div>
-                    ) : (
-                        <div className="table-responsive">
-                            <Table className="personal-schedule-table mb-0" hover>
-                                <thead>
-                                <tr>
-                                    <th className="date-column">{t('employee.schedule.date')}</th>
-                                    <th className="day-column">{t('employee.schedule.day')}</th>
-                                    <th className="shift-column">{t('employee.schedule.shift')}</th>
-                                    {!hasPosition && <th className="position-column">{t('employee.position')}</th>}
-                                    {!hasWorksite && <th className="site-column">{t('employee.workSite')}</th>}
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {weekData.schedule.map((day, index) => {
-                                    // Find user's assignment for this day
-                                    let userAssignment = null;
+                        </Card.Body>
+                    </Card>
+                ) : (
+                    <div className="personal-schedule-list">
+                        {weekData.schedule.map((day, index) => {
+                            let userAssignment = null;
 
-                                    if (day.shifts && Array.isArray(day.shifts)) {
-                                        for (const shift of day.shifts) {
-                                            if (shift.employees && Array.isArray(shift.employees)) {
-                                                const isAssigned = shift.employees.find(e =>
-                                                    e.is_current_user ||
-                                                    e.emp_id === employee?.emp_id
-                                                );
-                                                if (isAssigned) {
-                                                    userAssignment = {
-                                                        ...shift,
-                                                        employee_info: isAssigned
-                                                    };
-                                                    break;
-                                                }
-                                            }
+                            if (day.shifts && Array.isArray(day.shifts)) {
+                                for (const shift of day.shifts) {
+                                    if (shift.employees && Array.isArray(shift.employees)) {
+                                        const isAssigned = shift.employees.find(e =>
+                                            e.is_current_user ||
+                                            e.emp_id === employee?.emp_id
+                                        );
+                                        if (isAssigned) {
+                                            userAssignment = {
+                                                ...shift,
+                                                employee_info: isAssigned
+                                            };
+                                            break;
                                         }
                                     }
+                                }
+                            }
 
-                                    const dateObj = parseISO(day.date);
-                                    const isToday = new Date().toDateString() === dateObj.toDateString();
+                            const dateObj = parseISO(day.date);
+                            const isToday = new Date().toDateString() === dateObj.toDateString();
+                            const bgColor = userAssignment?.color || '#f8f9fa';
+                            const textColor = getContrastTextColor(bgColor);
 
-                                    return (
-                                        <tr key={day.date} className={`${isToday ? 'today-row' : ''} ${!userAssignment ? 'day-off-row' : ''}`}>
-                                            <td className="date-cell">
-                                                {formatHeaderDate(dateObj)}
+                            return (
+                                <Card
+                                    key={day.date}
+                                    className={`day-card mb-2 ${isToday ? 'today-card' : ''} ${!userAssignment ? 'day-off-card' : ''}`}
+                                    style={userAssignment ? {
+                                        backgroundColor: bgColor,
+                                        color: textColor,
+                                        borderColor: bgColor
+                                    } : {}}
+                                >
+                                    <Card.Body className="py-2">
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <div className="day-info">
+                                                <strong className="day-name">
+                                                    {getDayName(day.day_of_week ?? dateObj.getDay(), t)}
+                                                </strong>
+                                                <span className="day-date ms-2">
+                                                    {formatHeaderDate(dateObj)}
+                                                </span>
                                                 {isToday && (
                                                     <Badge bg="primary" className="ms-2 today-badge">
                                                         {t('common.today')}
                                                     </Badge>
                                                 )}
-                                            </td>
-                                            <td className="day-cell">
-                                                {getDayName(day.day_of_week ?? dateObj.getDay(), t)}
-                                            </td>
-                                            <td className="shift-cell">
+                                            </div>
+                                            <div className="shift-info text-end">
                                                 {userAssignment ? (
-                                                    <div className="shift-info">
-                                                        <span className="shift-name">{userAssignment.shift_name}</span>
-                                                        <span className="shift-time">
-                                                                {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
-                                                            </span>
-                                                    </div>
+                                                    <>
+                                                        <div className="shift-name fw-bold">
+                                                            {userAssignment.shift_name}
+                                                        </div>
+                                                        <div className="shift-time small">
+                                                            {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
+                                                        </div>
+                                                    </>
                                                 ) : (
-                                                    <span className="day-off">
-                                                            <i className="bi bi-house-door me-1"></i>
+                                                    <div className="day-off">
+                                                        <i className="bi bi-house-door me-1"></i>
                                                         {t('employee.schedule.dayOff')}
-                                                        </span>
+                                                    </div>
                                                 )}
-                                            </td>
-                                            {!hasPosition && (
-                                                <td className="position-cell">
-                                                    {userAssignment?.employee_info?.position || '-'}
-                                                </td>
-                                            )}
-                                            {!hasWorksite && (
-                                                <td className="site-cell">
-                                                    {userAssignment?.employee_info?.site_name || '-'}
-                                                </td>
-                                            )}
-                                        </tr>
-                                    );
-                                })}
-                                </tbody>
-                            </Table>
-                        </div>
-                    )}
-                </Card.Body>
-            </Card>
+                                            </div>
+                                        </div>
+                                        {userAssignment && !employee?.position_id && (
+                                            <div className="mt-1 small">
+                                                <i className="bi bi-geo-alt me-1"></i>
+                                                {userAssignment.employee_info?.position || '-'}
+                                            </div>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                )}
+            </>
         );
     };
 
@@ -212,7 +214,6 @@ const PersonalScheduleTab = () => {
         );
     }
 
-    // Show appropriate content based on available data
     const hasAnyData = currentWeekData || nextWeekData;
 
     if (!hasAnyData) {
@@ -225,79 +226,49 @@ const PersonalScheduleTab = () => {
         );
     }
 
-    // Display employee info if available
-    const employee = employeeInfo || currentWeekData?.employee || nextWeekData?.employee;
-
     return (
         <div className="personal-schedule-content">
-            {/* Employee info card */}
-            {employee && (
-                <Card className="employee-info-card mb-3">
-                    <Card.Body className="py-2">
-                        <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{employee.name}</strong>
-                                {employee.position_name && (
-                                    <span className="text-muted ms-2">• {employee.position_name}</span>
-                                )}
-                            </div>
-                            {employee.site_name && (
-                                <Badge bg="info">{employee.site_name}</Badge>
-                            )}
-                        </div>
-                    </Card.Body>
-                </Card>
+            {/* Display selected week */}
+            {activeWeek === 'current' && currentWeekData && (
+                renderWeekSchedule(currentWeekData)
             )}
 
-            {/* Week selector buttons */}
-            <div className="week-selector mb-3">
+            {activeWeek === 'next' && nextWeekData && (
+                renderWeekSchedule(nextWeekData)
+            )}
+
+            {/* Fixed bottom week selector */}
+            <div className="week-selector-fixed">
                 <Button
                     variant={activeWeek === 'current' ? 'primary' : 'outline-primary'}
                     size="sm"
                     onClick={() => setActiveWeek('current')}
                     className="me-2"
+                    disabled={!currentWeekData}
                 >
                     {t('employee.schedule.currentWeek')}
+                    {currentWeekData?.week && (
+                        <small className="d-block">
+                            {format(parseISO(currentWeekData.week.start), 'dd/MM')} -
+                            {format(parseISO(currentWeekData.week.end), 'dd/MM')}
+                        </small>
+                    )}
                 </Button>
                 <Button
                     variant={activeWeek === 'next' ? 'primary' : 'outline-primary'}
                     size="sm"
                     onClick={() => setActiveWeek('next')}
+                    disabled={!nextWeekData}
                 >
                     {t('employee.schedule.nextWeek')}
+                    {nextWeekData?.week && (
+                        <small className="d-block">
+                            {format(parseISO(nextWeekData.week.start), 'dd/MM')} -
+                            {format(parseISO(nextWeekData.week.end), 'dd/MM')}
+                        </small>
+                    )}
                 </Button>
             </div>
-
-            {/* Display selected week */}
-            {activeWeek === 'current' && currentWeekData && (
-                renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))
-            )}
-
-            {activeWeek === 'next' && nextWeekData && (
-                renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))
-            )}
-
-            {/* If selected week has no data */}
-            {((activeWeek === 'current' && !currentWeekData) ||
-                (activeWeek === 'next' && !nextWeekData)) && (
-                <Card className="text-center py-4">
-                    <Card.Body>
-                        <p className="text-muted mb-0">
-                            <i className="bi bi-calendar-x me-2"></i>
-                            {t('employee.schedule.noScheduleForThisWeek')}
-                        </p>
-                    </Card.Body>
-                </Card>
-            )}
-            {/* Debug info in development */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="mt-3 p-3 bg-light small">
-                    <strong>Debug Info:</strong>
-                    <div>Current week data: {currentWeekData ? 'Loaded' : 'Not loaded'}</div>
-                    <div>Next week data: {nextWeekData ? 'Loaded' : 'Not loaded'}</div>
-                    <div>Active week: {activeWeek}</div>
-                </div>
-            )}
         </div>
     );
 };

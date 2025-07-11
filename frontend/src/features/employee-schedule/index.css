@@ -67,11 +67,57 @@
     cursor: not-allowed;
 }
 
-/* Tab Content */
+/* Tab Content with padding for fixed tabs */
 .tab-content-wrapper {
     padding: 1.5rem;
-    min-height: 400px;
+    min-height: calc(100vh - 200px); /* Account for header and fixed tabs */
+    padding-bottom: 140px; /* Space for fixed week selector and tabs */
 }
+
+/* Fixed tabs at bottom */
+.employee-schedule-tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bs-white);
+    border-top: 2px solid var(--bs-gray-200);
+    border-bottom: none;
+    z-index: 1030;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .employee-schedule-tabs {
+    background: var(--bs-gray-900);
+    border-top-color: var(--bs-gray-700);
+}
+
+.employee-schedule-tabs .nav-link {
+    border-bottom: none;
+    border-top: 3px solid transparent;
+    margin-bottom: 0;
+    margin-top: -2px;
+}
+
+.employee-schedule-tabs .nav-link.active {
+    border-bottom: none;
+    border-top-color: var(--bs-primary);
+    background: var(--bs-white);
+}
+
+[data-theme="dark"] .employee-schedule-tabs .nav-link.active {
+    background: var(--bs-gray-900);
+}
+
+/* Main container adjustment */
+.employee-schedule-container {
+    padding-bottom: 60px; /* Space for fixed tabs */
+}
+
+.schedule-card {
+    margin-bottom: 1rem;
+}
+
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
@@ -90,6 +136,7 @@
 
     .tab-content-wrapper {
         padding: 1rem;
+        padding-bottom: 140px;
     }
 }
 
