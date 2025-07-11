@@ -73,7 +73,7 @@ const EmployeeSchedule = () => {
                             eventKey="personal"
                             title={
                                 <span>
-                                    <i className="bi bi-person-calendar me-2"></i>
+                                    <i className="bi bi-person-square me-2"></i>
                                     {t('employee.schedule.personalSchedule')}
                                 </span>
                             }
