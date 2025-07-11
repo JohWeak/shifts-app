@@ -126,4 +126,7 @@
         width: 100%;
         justify-content: center;
     }
+    .tab-content > .tab-pane {
+        padding: 0.5rem;
+    }
 }

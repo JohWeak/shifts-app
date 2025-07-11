@@ -75,9 +75,9 @@ const PersonalScheduleTab = () => {
             <>
                 {/* Header Card - similar to FullScheduleTab */}
                 <ScheduleHeaderCard
-                    title={employee?.name}
                     position={employee?.position_name}
                     site={employee?.site_name}
+                    empName={employee?.name}
                     week={weekData.week}
                 />
 

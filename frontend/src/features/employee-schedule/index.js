@@ -1,23 +1,24 @@
 // frontend/src/features/employee-schedule/index.js
 import React, { useState, useEffect } from 'react';
 import { Container, Tab, Tabs, Card } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import { scheduleAPI } from 'shared/api/apiService';
 
 // Import sub-components
-import PersonalScheduleTab from './ui/PersonalScheduleTab';
-import FullScheduleTab from './ui/FullScheduleTab';
-import ArchiveTab from './ui/ArchiveTab';
+import {
+    PersonalScheduleTab,
+    FullScheduleTab,
+    ArchiveTab
+} from './ui';
+
 
 import './index.css';
 
 const EmployeeSchedule = () => {
     const { t } = useI18n();
     const [activeTab, setActiveTab] = useState('personal');
-    const { user } = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [employeeData, setEmployeeData] = useState(null);
 
@@ -119,16 +120,6 @@ const EmployeeSchedule = () => {
                 </Card.Body>
             </Card>
 
-            {/* Debug info in development */}
-            {process.env.NODE_ENV === 'development' && employeeData && (
-                <div className="mt-3 p-3 bg-light small rounded">
-                    <strong>Employee Debug Info:</strong>
-                    <div>Name: {employeeData.name}</div>
-                    <div>Position ID: {employeeData.position_id || 'None'}</div>
-                    <div>Position: {employeeData.position_name || 'Not assigned'}</div>
-                    <div>Site: {employeeData.site_name || 'Not assigned'}</div>
-                </div>
-            )}
         </Container>
     );
 };

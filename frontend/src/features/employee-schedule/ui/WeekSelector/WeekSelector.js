@@ -2,19 +2,12 @@ import React from 'react';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { Button } from 'react-bootstrap';
 import { format, parseISO } from 'date-fns';
-import './WeekSelector.css'; // Подключаем стили
+import './WeekSelector.css';
 
-// Пропсы:
-// - activeWeek: 'current' или 'next'
-// - onWeekChange: функция-обработчик для смены недели (e.g. setActiveWeek)
-// - currentWeekData: данные для текущей недели
-// - nextWeekData: данные для следующей недели
-// - isFixed: (опционально) boolean, чтобы управлять классом. По твоему запросу, он всегда будет фиксированным.
 
 export const WeekSelector = ({ activeWeek, onWeekChange, currentWeekData, nextWeekData }) => {
     const { t } = useI18n();
 
-    // Мы всегда используем фиксированный контейнер, как ты и хотел
     return (
         <div className="week-selector-fixed">
             <Button

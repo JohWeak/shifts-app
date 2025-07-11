@@ -6,6 +6,9 @@
     max-width: 1400px;
     margin: 0 auto;
 }
+.employee-schedule-container .page-header {
+    padding: 0;
+}
 
 /* Main Card */
 .schedule-card {
@@ -15,65 +18,20 @@
     background: var(--bs-white);
     transition: box-shadow 0.3s ease;
 }
+/* Main container adjustment */
+.employee-schedule-container {
+    padding-bottom: 60px; /* Space for fixed tabs */
+}
+
+.schedule-card {
+    margin-bottom: 140px;
+}
 
 [data-theme="dark"] .schedule-card {
     background: var(--bs-gray-900);
 }
 
 /* Tabs Styling */
-.employee-schedule-tabs {
-    border-bottom: 2px solid var(--bs-gray-200);
-    background: var(--bs-gray-100);
-}
-
-[data-theme="dark"] .employee-schedule-tabs {
-    border-bottom-color: var(--bs-gray-700);
-    background: var(--bs-gray-800);
-}
-
-.employee-schedule-tabs .nav-link {
-    color: var(--bs-gray-600);
-    border: none;
-    border-radius: 0;
-    padding: 1rem 1.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-[data-theme="dark"] .employee-schedule-tabs .nav-link {
-    color: var(--bs-gray-400);
-}
-
-.employee-schedule-tabs .nav-link:hover:not(.disabled) {
-    color: var(--bs-primary);
-    background: rgba(var(--bs-primary-rgb), 0.05);
-}
-
-.employee-schedule-tabs .nav-link.active {
-    color: var(--bs-primary);
-    background: var(--bs-white);
-    border-bottom: 3px solid var(--bs-primary);
-    margin-bottom: -2px;
-}
-
-[data-theme="dark"] .employee-schedule-tabs .nav-link.active {
-    background: var(--bs-gray-900);
-}
-
-.employee-schedule-tabs .nav-link.disabled {
-    color: var(--bs-gray-400);
-    cursor: not-allowed;
-}
-
-/* Tab Content with padding for fixed tabs */
-.tab-content-wrapper {
-    padding: 1.5rem;
-    min-height: calc(100vh - 200px); /* Account for header and fixed tabs */
-    padding-bottom: 140px; /* Space for fixed week selector and tabs */
-}
-
 /* Fixed tabs at bottom */
 .employee-schedule-tabs {
     position: fixed;
@@ -98,26 +56,60 @@
     margin-bottom: 0;
     margin-top: -2px;
 }
+.employee-schedule-tabs .nav-link {
+    color: var(--bs-gray-600);
+    border: none;
+    border-radius: 0;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
 
 .employee-schedule-tabs .nav-link.active {
     border-bottom: none;
     border-top-color: var(--bs-primary);
     background: var(--bs-white);
 }
+.employee-schedule-tabs .nav-link.active {
+    color: var(--bs-primary);
+    background: var(--bs-white);
+    border-bottom: 3px solid var(--bs-primary);
+    margin-bottom: -2px;
+}
+.employee-schedule-tabs .nav-link:hover:not(.disabled) {
+    color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), 0.05);
+}
 
+.employee-schedule-tabs .nav-link.disabled {
+    color: var(--bs-gray-400);
+    cursor: not-allowed;
+}
 [data-theme="dark"] .employee-schedule-tabs .nav-link.active {
     background: var(--bs-gray-900);
 }
 
-/* Main container adjustment */
-.employee-schedule-container {
-    padding-bottom: 60px; /* Space for fixed tabs */
+[data-theme="dark"] .employee-schedule-tabs {
+    border-top-color: var(--bs-gray-700);
+    background: var(--bs-gray-800);
 }
 
-.schedule-card {
-    margin-bottom: 1rem;
+[data-theme="dark"] .employee-schedule-tabs .nav-link {
+    color: var(--bs-gray-400);
+}
+[data-theme="dark"] .employee-schedule-tabs .nav-link.active {
+    background: var(--bs-gray-900);
 }
 
+
+/* Tab Content with padding for fixed tabs */
+.tab-content-wrapper {
+    padding: 1.5rem;
+    /*min-height: calc(100vh - 200px); !* Account for header and fixed tabs *!*/
+}
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
@@ -135,8 +127,7 @@
     }
 
     .tab-content-wrapper {
-        padding: 1rem;
-        padding-bottom: 140px;
+        padding: 0.5rem;
     }
 }
 

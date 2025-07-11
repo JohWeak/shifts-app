@@ -157,8 +157,9 @@ const FullScheduleTab = () => {
             <>
                 <ScheduleHeaderCard
                     className="position-info-card"
-                    title={position?.name || employeeData?.position_name}
+                    title=''
                     site={position?.site_name || employeeData?.site_name}
+                    position={position?.name || employeeData?.position_name}
                     week={week}
                 />
 

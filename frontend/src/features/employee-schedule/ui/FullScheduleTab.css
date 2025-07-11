@@ -137,10 +137,6 @@
     text-align: center;
 }
 
-.week-selector .btn small {
-    font-size: 0.75rem;
-    opacity: 0.8;
-}
 /* Today column highlight */
 .today-column {
     background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
