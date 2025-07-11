@@ -10,6 +10,7 @@ import { scheduleAPI } from 'shared/api/apiService';
 import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO, addWeeks, format } from 'date-fns';
+import { ScheduleHeaderCard, WeekSelector } from './';
 import './FullScheduleTab.css';
 
 const FullScheduleTab = () => {
@@ -154,21 +155,12 @@ const FullScheduleTab = () => {
 
         return (
             <>
-                <Card className="position-info-card mb-3">
-                    <Card.Body className="d-flex justify-content-between align-items-center py-2">
-                        <div>
-                            <h6 className="mb-0">{position?.name || employeeData?.position_name}</h6>
-                            <small className="text-muted">
-                                {position?.site_name || employeeData?.site_name}
-                            </small>
-                        </div>
-                        {week && (
-                            <Badge bg="primary">
-                                {formatWeekRange(week)}
-                            </Badge>
-                        )}
-                    </Card.Body>
-                </Card>
+                <ScheduleHeaderCard
+                    className="position-info-card"
+                    title={position?.name || employeeData?.position_name}
+                    site={position?.site_name || employeeData?.site_name}
+                    week={week}
+                />
 
                 <div className="table-container" ref={tableRef}>
                     <div className="table-scroll-wrapper">
@@ -274,39 +266,6 @@ const FullScheduleTab = () => {
 
     return (
         <div className="full-schedule-content">
-            {/* Week selector */}
-            <div className="week-selector mb-3">
-                <Button
-                    variant={activeWeek === 'current' ? 'primary' : 'outline-primary'}
-                    size="sm"
-                    onClick={() => setActiveWeek('current')}
-                    className="me-2"
-                    disabled={!currentWeekData}
-                >
-                    {t('employee.schedule.currentWeek')}
-                    {currentWeekData?.week && (
-                        <small className="d-block">
-                            {format(parseISO(currentWeekData.week.start), 'dd/MM')} -
-                            {format(parseISO(currentWeekData.week.end), 'dd/MM')}
-                        </small>
-                    )}
-                </Button>
-                <Button
-                    variant={activeWeek === 'next' ? 'primary' : 'outline-primary'}
-                    size="sm"
-                    onClick={() => setActiveWeek('next')}
-                    disabled={!nextWeekData}
-                >
-                    {t('employee.schedule.nextWeek')}
-                    {nextWeekData?.week && (
-                        <small className="d-block">
-                            {format(parseISO(nextWeekData.week.start), 'dd/MM')} -
-                            {format(parseISO(nextWeekData.week.end), 'dd/MM')}
-                        </small>
-                    )}
-                </Button>
-            </div>
-
             {/* Display selected week */}
             {activeWeek === 'current' && currentWeekData && renderWeekSchedule(currentWeekData)}
             {activeWeek === 'next' && nextWeekData && renderWeekSchedule(nextWeekData)}
@@ -317,6 +276,14 @@ const FullScheduleTab = () => {
                     {t('employee.schedule.yourShiftsHighlighted')}
                 </small>
             </div>
+
+            {/* New shared component */}
+            <WeekSelector
+                activeWeek={activeWeek}
+                onWeekChange={setActiveWeek}
+                currentWeekData={currentWeekData}
+                nextWeekData={nextWeekData}
+            />
         </div>
     );
 };
