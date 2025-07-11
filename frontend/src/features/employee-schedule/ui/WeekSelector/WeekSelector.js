@@ -14,7 +14,6 @@ export const WeekSelector = ({ activeWeek, onWeekChange, currentWeekData, nextWe
                 variant={activeWeek === 'current' ? 'primary' : 'outline-primary'}
                 size="sm"
                 onClick={() => onWeekChange('current')}
-                className="me-2"
                 disabled={!currentWeekData}
             >
                 {t('employee.schedule.currentWeek')}
