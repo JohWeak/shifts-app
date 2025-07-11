@@ -39,13 +39,13 @@ const FullScheduleTab = () => {
         fetchEmployeeData();
     }, []);
 
-    const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
-        const saved = localStorage.getItem('employee_showFirstNameOnly');
-        return saved !== null ? JSON.parse(saved) : true;
+    const [showFullName, setShowFullName] = useState(() => {
+        const saved = localStorage.getItem('employee_showFullName'); // Новый ключ
+        return saved !== null ? JSON.parse(saved) : false; // По умолчанию выключено (false)
     });
-    const handleNameToggle = (checked) => {
-        setShowFirstNameOnly(checked);
-        localStorage.setItem('employee_showFirstNameOnly', JSON.stringify(checked));
+    const handleNameDisplayToggle = (checked) => {
+        setShowFullName(checked);
+        localStorage.setItem('employee_showFullName', JSON.stringify(checked)); // Новый ключ
     };
 
     const fetchEmployeeData = async () => {
@@ -151,7 +151,7 @@ const FullScheduleTab = () => {
                                             : ''
                                     }`}
                                 >
-                                    {formatEmployeeName(firstName, lastName, !showFirstNameOnly)}
+                                    {formatEmployeeName(firstName, lastName, showFullName)}
                                 </div>
                             );
                         })
@@ -188,8 +188,8 @@ const FullScheduleTab = () => {
                     position={position?.name || employeeData?.position_name}
                     week={week}
                     showNameToggle={true}
-                    showFirstNameOnly={showFirstNameOnly}
-                    onNameToggle={handleNameToggle}
+                    showFullName={showFullName}
+                    onNameToggle={handleNameDisplayToggle}
                 />
 
                 <div className="table-container" ref={tableRef}>

@@ -1,21 +1,12 @@
 /* frontend/src/features/employee-schedule/ui/FullScheduleTab.css */
 
-/* Position Info Card */
-.position-info-card {
-    border: none;
-    background: var(--bs-gray-50);
-    border-radius: 0.5rem;
-}
 
-[data-theme="dark"] .position-info-card {
-    background: var(--bs-gray-800);
-}
 
 /* Table Container */
 .table-container {
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .table-scroll-wrapper {
@@ -49,10 +40,17 @@
 /* Headers */
 .shift-header-cell {
     min-width: 100px;
-    text-align: start;
+    text-align: center;
     align-content: center;
-    margin: 5;
+    font-size: 1.2rem;
+    font-weight: 300;
 
+    /*justify-items: center!important;*/
+
+}
+
+.full-schedule-table tr:first-child {
+  justify-content: center;
 }
 
 .day-header-cell {
@@ -74,9 +72,14 @@
 .sticky-column {
     position: sticky;
     left: 0;
+    border-left: none;
     z-index: 10;
     background: var(--bs-white);
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+[dir="rtl"] .sticky-column {
+    border-right: none;
+    right: 0;
 }
 /* Shift Info */
 .shift-info-cell {
@@ -205,7 +208,7 @@
 
 /* Custom Scrollbar */
 .table-scroll-wrapper::-webkit-scrollbar {
-    height: 28px;
+    height: 18px;
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-track {
@@ -213,11 +216,23 @@
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: var(--bs-gray-400);
+    background: var(--bs-gray-300);
     border-radius: 4px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-400);
+}
+[data-theme="dark"] .table-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--bs-gray-800);
+}
+[data-theme="dark"] .table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
     background: var(--bs-gray-600);
 }
 
@@ -243,8 +258,6 @@
 .shift-header-info .color-picker-btn:hover {
     opacity: 1 !important;
 }
-
-
 
 /* Mobile Responsive */
 @media (max-width: 767px) {

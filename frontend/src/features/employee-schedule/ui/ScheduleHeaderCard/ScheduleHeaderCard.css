@@ -1,0 +1,4 @@
+.schedule-info-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: var(--bs-gray-200) 1px solid!important;
+}

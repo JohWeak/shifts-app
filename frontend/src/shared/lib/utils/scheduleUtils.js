@@ -189,13 +189,13 @@ export const canDeleteSchedule = (schedule) => {
  * Форматирует имя сотрудника
  * @param {string} firstName - Имя
  * @param {string} lastName - Фамилия
- * @param {boolean} firstNameOnly - Показывать только имя
+ * @param {boolean} showFullName - Показывать полное имя
  * @returns {string} - Отформатированное имя
  */
-export const formatEmployeeName = (firstName, lastName, firstNameOnly = false) => {
+export const formatEmployeeName = (firstName, lastName, showFullName = false) => {
     if (!firstName && !lastName) return '-';
-    if (firstNameOnly) {
-        return firstName || lastName || '-';
+    if (showFullName) {
+        return `${firstName || ''} ${lastName || ''}`.trim();
     }
-    return `${firstName || ''} ${lastName || ''}`.trim();
+    return firstName || lastName || '-';
 };

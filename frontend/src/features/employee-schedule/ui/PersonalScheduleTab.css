@@ -1,16 +1,6 @@
 /* frontend/src/features/employee-schedule/ui/PersonalScheduleTab.css */
 
 /* Schedule info card - same as full schedule */
-.schedule-info-card {
-    border: none;
-    background: var(--bs-gray-50);
-    border-radius: 0.5rem;
-}
-
-[data-theme="dark"] .schedule-info-card {
-    background: var(--bs-gray-800);
-}
-
 
 /* Day card */
 .day-card {
