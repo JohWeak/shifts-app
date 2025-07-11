@@ -15,10 +15,9 @@ export const ScheduleHeaderCard = ({title, position, site, week, className = '',
 
     return (
         <Card className={`schedule-info-card mb-3 ${className}`}>
-            <Card.Body className="d-flex justify-content-between  py-2">
+            <Card.Body className="d-flex justify-content-between py-2">
                 <div className="d-flex flex-column align-items-start gap-1">
                     {title && <h6 className="mb-0">{title}</h6>}
-
                     {showSubtitle && (
                         <small className="text-muted">
                             {position && (
@@ -36,7 +35,7 @@ export const ScheduleHeaderCard = ({title, position, site, week, className = '',
                         </small>
                     )}
                 </div>
-                <div className="d-flex flex-column align-items-end ">
+                <div className="d-flex flex-column align-items-end justify-content-center">
                     {week && (
                         <Badge bg="primary mt-1">
                             {formatWeekRange(week)}
@@ -45,7 +44,6 @@ export const ScheduleHeaderCard = ({title, position, site, week, className = '',
                     {empName && (
                         <span className="fw-semibold">{empName}</span>
                     )}
-
                 </div>
             </Card.Body>
         </Card>

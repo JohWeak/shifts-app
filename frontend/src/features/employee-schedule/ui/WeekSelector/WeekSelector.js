@@ -18,12 +18,12 @@ export const WeekSelector = ({ activeWeek, onWeekChange, currentWeekData, nextWe
                 disabled={!currentWeekData}
             >
                 {t('employee.schedule.currentWeek')}
-                {currentWeekData?.week && (
-                    <small className="d-block">
-                        {format(parseISO(currentWeekData.week.start), 'dd/MM')} -
-                        {format(parseISO(currentWeekData.week.end), 'dd/MM')}
-                    </small>
-                )}
+                {/*{currentWeekData?.week && (*/}
+                {/*    <small className="d-block">*/}
+                {/*        {format(parseISO(currentWeekData.week.start), 'dd/MM')} -*/}
+                {/*        {format(parseISO(currentWeekData.week.end), 'dd/MM')}*/}
+                {/*    </small>*/}
+                {/*)}*/}
             </Button>
             <Button
                 variant={activeWeek === 'next' ? 'primary' : 'outline-primary'}
@@ -32,12 +32,12 @@ export const WeekSelector = ({ activeWeek, onWeekChange, currentWeekData, nextWe
                 disabled={!nextWeekData}
             >
                 {t('employee.schedule.nextWeek')}
-                {nextWeekData?.week && (
-                    <small className="d-block">
-                        {format(parseISO(nextWeekData.week.start), 'dd/MM')} -
-                        {format(parseISO(nextWeekData.week.end), 'dd/MM')}
-                    </small>
-                )}
+                {/*{nextWeekData?.week && (*/}
+                {/*    <small className="d-block">*/}
+                {/*        {format(parseISO(nextWeekData.week.start), 'dd/MM')} -*/}
+                {/*        {format(parseISO(nextWeekData.week.end), 'dd/MM')}*/}
+                {/*    </small>*/}
+                {/*)}*/}
             </Button>
         </div>
     );
