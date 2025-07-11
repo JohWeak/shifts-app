@@ -1,4 +1,4 @@
-// frontend/src/features/admin-schedule-management/hooks/useShiftColor.js
+// frontend/src/shared/hooks/useShiftColor.js
 import {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateShiftColor } from '../../features/admin-schedule-management/model/scheduleSlice';

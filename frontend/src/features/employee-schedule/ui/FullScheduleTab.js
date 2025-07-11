@@ -8,7 +8,7 @@ import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import api from 'shared/api';
 import {scheduleAPI} from 'shared/api/apiService';
 import {formatWeekRange, formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
-import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
+import {getContrastTextColor, isDarkTheme} from 'shared/lib/utils/colorUtils';
 import {parseISO, addWeeks, format} from 'date-fns';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
@@ -32,8 +32,10 @@ const FullScheduleTab = () => {
         closeColorPicker,
         previewColor,
         applyColor,
-        getShiftColor
+        getShiftColor,
+        currentTheme
     } = useShiftColor();
+    const isDark = isDarkTheme();
 
     useEffect(() => {
         fetchEmployeeData();
@@ -124,8 +126,8 @@ const FullScheduleTab = () => {
         const hasCurrentUser = employees.some(emp =>
             emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
         );
-        const bgColor = getShiftColor(shift);
-        const textColor = getContrastTextColor(bgColor);
+        const bgColor = getShiftColor({ ...shift, shift_id: shift.id });
+        const textColor = getContrastTextColor(bgColor, isDark);
 
         return (
             <div
@@ -230,8 +232,8 @@ const FullScheduleTab = () => {
                                         <div
                                             className="shift-header-info"
                                             style={{
-                                                backgroundColor: getShiftColor(shift),
-                                                color: getContrastTextColor(getShiftColor(shift))
+                                                backgroundColor: getShiftColor({ ...shift, shift_id: shift.id }),
+                                                color: getContrastTextColor(getShiftColor({ ...shift, shift_id: shift.id }), isDark)
                                             }}
                                         >
                                             <span className="shift-header-name">{shift.shift_name}
@@ -282,7 +284,7 @@ const FullScheduleTab = () => {
                     initialColor={colorPickerState.currentColor}
                     title={t('modal.colorPicker.title')}
                     saveMode={colorPickerState.saveMode}
-                    currentTheme={colorPickerState.currentTheme}
+                    currentTheme={currentTheme}
                     hasLocalColor={colorPickerState.hasLocalColor}
                     originalGlobalColor={colorPickerState.originalGlobalColor}
                 />

@@ -1,6 +1,5 @@
 // frontend/src/features/employee-schedule/ui/PersonalScheduleTab.js
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Badge, Button, Card } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -16,8 +15,6 @@ import './PersonalScheduleTab.css';
 
 const PersonalScheduleTab = () => {
     const { t } = useI18n();
-    const dispatch = useDispatch();
-    const { user } = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
@@ -30,7 +27,8 @@ const PersonalScheduleTab = () => {
         closeColorPicker,
         previewColor,
         applyColor,
-        getShiftColor
+        getShiftColor,
+        currentTheme,
     } = useShiftColor();
 
     useEffect(() => {
@@ -207,7 +205,7 @@ const PersonalScheduleTab = () => {
                             initialColor={colorPickerState.currentColor}
                             title={t('modal.colorPicker.title')}
                             saveMode={colorPickerState.saveMode}
-                            currentTheme={colorPickerState.currentTheme}
+                            currentTheme={currentTheme}
                             hasLocalColor={colorPickerState.hasLocalColor}
                             originalGlobalColor={colorPickerState.originalGlobalColor}
                         />
