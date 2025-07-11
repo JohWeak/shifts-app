@@ -64,14 +64,24 @@ const FullScheduleTab = () => {
             console.log('Fetching full schedule for position:', positionId, 'date:', date);
             const params = date ? { date } : {};
             const response = await api.get(`/api/schedules/position/${positionId}/weekly`, { params });
-            console.log('Full schedule response:', response.data);
 
-            if (response.data?.success) {
+            // Логируем полный response для отладки
+            console.log('Full schedule response:', response);
+            console.log('Full schedule response.data:', response.data);
+
+            // API может возвращать данные в response или response.data
+            const data = response.data || response;
+
+            if (data?.success) {
                 if (isNextWeek) {
-                    setNextWeekData(response.data);
+                    setNextWeekData(data);
+                    console.log('Next week data set:', data);
                 } else {
-                    setCurrentWeekData(response.data);
+                    setCurrentWeekData(data);
+                    console.log('Current week data set:', data);
                 }
+            } else {
+                console.log('No success in response:', data);
             }
         } catch (err) {
             console.error('Error fetching full schedule:', err);
