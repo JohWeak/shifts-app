@@ -14,11 +14,87 @@
 }
 
 .color-preview {
-    padding: 12px;
+    padding: 7px;
     border-radius: 6px;
     text-align: center;
     font-weight: 500;
     border: 1px solid rgba(0, 0, 0, 0.1);
+}
+/* --- НОВЫЕ СТИЛИ ДЛЯ ШТОРКИ (BOTTOM SHEET) --- */
+
+.bottom-sheet.modal-dialog {
+    /* Располагаем внизу экрана */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--bs-box-shadow);
+    /* Убираем стандартные отступы и ставим 100% ширины */
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+
+    /* Анимация выезжания */
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .bottom-sheet.modal-dialog {
+    transform: translateY(0); /* Конечное положение */
+}
+
+.bottom-sheet .modal-content {
+    /* Скругляем только верхние углы для вида "шторки" */
+    border-radius: 1.25rem 1.25rem 0 0;
+    border: none; /* Убираем стандартную рамку */
+}
+.bottom-sheet-backdrop.modal-backdrop {
+    /* Убираем затемнение, делая фон прозрачным */
+    background-color: transparent;
+}
+
+.preset-colors-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto; /* Включаем горизонтальную прокрутку */
+    padding-bottom: 0.5rem; /* Отступ для тени скроллбара */
+    -ms-overflow-style: none;  /* IE и Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+/* Скрываем скроллбар в Chrome, Safari */
+.preset-colors-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.form-control-color {
+    width: 50px;
+    height: 40px;
+    padding: 0.25rem;
+}
+
+.global-color-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--bs-border-color);
+    display: inline-block;
+}
+
+/* Стили для кнопки-крестика */
+.btn.rounded-circle {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Переопределяем стили для темной темы, чтобы они работали с новым классом */
+[data-theme="dark"] .bottom-sheet .modal-content {
+    background-color: var(--bs-gray-900);
+    color: var(--bs-gray-100);
 }
 
 /* Dark theme support */
@@ -44,4 +120,10 @@
 [data-theme="dark"] .btn-secondary {
     background-color: var(--bs-gray-700);
     border-color: var(--bs-gray-600);
+}
+
+@media (max-width: 767px) {
+    .preset-colors-wrapper {
+        /*justify-content: space-between;*/
+    }
 }
