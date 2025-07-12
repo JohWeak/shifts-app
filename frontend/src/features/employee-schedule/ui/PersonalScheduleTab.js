@@ -157,10 +157,11 @@ const PersonalScheduleTab = () => {
                                                 {userAssignment ? (
                                                     <>
                                                         <div className="shift-name fw-bold">
+                                                            {userAssignment.shift_name}
                                                             <Button
                                                                 variant="link"
                                                                 size="sm"
-                                                                className="color-picker-btn p-0 me-2"
+                                                                className="color-picker-btn p-0 ms-2"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     openColorPicker(
@@ -173,7 +174,7 @@ const PersonalScheduleTab = () => {
                                                             >
                                                                 <i className="bi bi-palette"></i>
                                                             </Button>
-                                                            {userAssignment.shift_name}
+
 
                                                         </div>
                                                         <div className="shift-time small">
@@ -181,9 +182,34 @@ const PersonalScheduleTab = () => {
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <div className="day-off" style={{ color: 'inherit' }}>
-                                                        <i className="bi bi-house-door me-1"></i>
+                                                    <div className="day-off d-flex align-items-center" style={{ color: 'inherit' }}>
+                                                        {/* --- НАЧАЛО ИЗМЕНЕНИЙ --- */}
                                                         {t('employee.schedule.dayOff')}
+                                                        <Button
+                                                            variant="link"
+                                                            size="sm"
+                                                            className="color-picker-btn p-0 ms-2"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+
+                                                                // 1. Создаем "фальшивый" объект смены для выходного
+                                                                const dayOffShift = {
+                                                                    shift_id: 'day_off', // Наш специальный ключ
+                                                                    shift_name: t('employee.schedule.dayOff') // Название для заголовка модала
+                                                                };
+
+                                                                // 2. Вызываем openColorPicker
+                                                                openColorPicker(
+                                                                    dayOffShift.shift_id,
+                                                                    getShiftColor(dayOffShift), // Получаем текущий цвет для выходного
+                                                                    dayOffShift // Передаем сам объект
+                                                                );
+                                                            }}
+                                                            title={t('employee.schedule.editDayOffColor')} // Новый текст для title
+                                                        >
+                                                            <i className="bi bi-house-door"></i>
+                                                        </Button>
+
                                                     </div>
                                                 )}
                                             </div>

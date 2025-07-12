@@ -214,7 +214,7 @@
 .schedule-table .shift-header {
     align-content: center;
 }
-.shift-info {
+.shift-name-cell .shift-info {
     display: flex;
     flex-direction: column;
     align-items: center;
