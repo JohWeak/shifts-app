@@ -268,6 +268,7 @@ export const he = {
         clickToCall: 'לחץ להתקשרות',
         noPhoneNumber: 'אין מספר טלפון זמין',
         showFirstNameOnly: 'הצג שם פרטי בלבד',
+        showFullName: 'הצג שם מלא',
         tabs: {
             available: 'זמינים',
             crossPosition: 'תפקידים אחרים',

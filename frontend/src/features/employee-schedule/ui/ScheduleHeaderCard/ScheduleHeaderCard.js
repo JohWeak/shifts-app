@@ -66,7 +66,7 @@ export const ScheduleHeaderCard = ({
                             label={t('employee.showFullName')}
                             checked={showFullName}
                             onChange={(e) => onNameToggle(e.target.checked)}
-                            className="mt-1 text-muted w-100"
+                            className="mt-1 me-1 text-muted "
                         />
                     )}
                 </div>

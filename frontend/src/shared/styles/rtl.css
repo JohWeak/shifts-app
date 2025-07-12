@@ -61,18 +61,18 @@
 }
 
 [dir="rtl"] .dropdown-toggle::after {
-    margin-right: 0.255em;
+    margin-right: 0.25em;
     margin-left: 0;
 }
 
 /* Forms */
 [dir="rtl"] .form-check {
-    padding-right: 1.5em;
+    padding-right: 0.5em;
     padding-left: 0;
 }
 
 [dir="rtl"] .form-check-input {
-    margin-right: -1.5em;
+    margin-right: 0.5em;
     margin-left: 0;
 }
 

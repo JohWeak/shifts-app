@@ -7,3 +7,12 @@
     border-color: var(--bs-gray-800)!important;
     background-color: var(--bs-gray-800) ;
 }
+
+.schedule-info-card .form-check-input{
+    height: 1.25rem;
+    margin-inline-end: 0.25rem;
+}
+
+.schedule-info-card .form-check-label{
+    font-size: 0.9rem;
+}
