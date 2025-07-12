@@ -2,7 +2,7 @@
 
 /* Navbar */
 .employee-navbar {
-    /*height: 56px;*/
+    height: 56px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1040!important;
 }
@@ -175,6 +175,8 @@
 }
 
 /* RTL Support */
+
+
 [dir="rtl"] .nav-tab-item i {
     margin-left: 0.5rem;
     margin-right: 0;

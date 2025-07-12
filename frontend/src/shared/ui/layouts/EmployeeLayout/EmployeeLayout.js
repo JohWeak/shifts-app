@@ -72,7 +72,7 @@ const EmployeeLayout = () => {
                         <LanguageSwitch />
 
                         {/* User Menu */}
-                        <Dropdown align="end">
+                        <Dropdown align='end' className="user-dropdown">
                             <Dropdown.Toggle as={CustomToggle}>
                                 <div className="user-avatar">
                                     <i className="bi bi-person-circle"></i>
