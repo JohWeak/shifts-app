@@ -1,12 +1,13 @@
 // frontend/src/shared/ui/layouts/EmployeeLayout/EmployeeLayout.js
-import React from 'react';
+import React, { useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { Container, Navbar, Nav, Spinner } from 'react-bootstrap';
+import { useSelector, useDispatch } from 'react-redux';
+import { Container, Navbar, Nav, Spinner, Dropdown } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
+import { logout } from 'features/auth/model/authSlice';
 import './EmployeeLayout.css';
 
 const EmployeeLayout = () => {
@@ -14,11 +15,13 @@ const EmployeeLayout = () => {
     const { t } = useI18n();
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [showNav, setShowNav] = useState(false);
 
     if (loading === 'pending') {
         return (
             <div className="d-flex justify-content-center align-items-center vh-100">
-                <Spinner animation="border" />
+                <Spinner animation="border" variant="primary" />
             </div>
         );
     }
@@ -34,37 +37,82 @@ const EmployeeLayout = () => {
     ];
 
     const handleLogout = () => {
-        // Dispatch logout action
+        dispatch(logout());
         navigate('/login');
     };
 
+    const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+        <button
+            ref={ref}
+            onClick={(e) => {
+                e.preventDefault();
+                onClick(e);
+            }}
+            className="user-menu-toggle"
+        >
+            {children}
+        </button>
+    ));
+
     return (
         <>
-            <Navbar bg="primary" variant="dark" expand="lg" className="employee-navbar">
-                <Container fluid>
-                    <Navbar.Brand className="d-flex align-items-center">
+            {/* Header */}
+            <Navbar bg="primary" variant="dark" expand={false} fixed="top" className="employee-navbar">
+                <Container fluid className='mx-1'>
+                    <Navbar.Brand className="d-flex align-items-center app-name">
                         <i className="bi bi-calendar-check me-2"></i>
-                        {t('common.appName')}
+                        <span className="d-none d-sm-inline">{t('app.name')}</span>
                     </Navbar.Brand>
 
-                    <div className="ms-auto d-flex align-items-center gap-3">
-                        <span className="navbar-text text-white">
-                            {user?.first_name} {user?.last_name}
-                        </span>
+                    <div className="d-flex align-items-center gap-2">
+                        {/* Theme Toggle */}
+                        <ThemeToggle variant='icon' />
+
+                        {/* Language Switch */}
                         <LanguageSwitch />
-                        <ThemeToggle variant="icon" />
-                        <button
-                            className="btn btn-outline-light btn-sm"
-                            onClick={handleLogout}
-                        >
-                            <i className="bi bi-box-arrow-right"></i>
-                        </button>
+
+                        {/* User Menu */}
+                        <Dropdown align="end">
+                            <Dropdown.Toggle as={CustomToggle}>
+                                <div className="user-avatar">
+                                    <i className="bi bi-person-circle"></i>
+                                </div>
+                                <span className="user-name d-none d-md-inline ms-2">
+                                    {user?.name || user?.email}
+                                </span>
+                                <i className="bi bi-chevron-down ms-1"></i>
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu className="user-dropdown-menu">
+                                <Dropdown.Header>
+                                    <div className="user-info">
+                                        <strong>{user?.name || user?.email}</strong>
+                                        <small className="text-muted d-block">{user?.role}</small>
+                                    </div>
+                                </Dropdown.Header>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={() => navigate('/employee/profile')}>
+                                    <i className="bi bi-person me-2"></i>
+                                    {t('employee.profile')}
+                                </Dropdown.Item>
+                                <Dropdown.Item onClick={() => navigate('/employee/settings')}>
+                                    <i className="bi bi-gear me-2"></i>
+                                    {t('employee.settings')}
+                                </Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={handleLogout} className="text-danger">
+                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                    {t('auth.logout')}
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </div>
                 </Container>
             </Navbar>
 
+            {/* Navigation Tabs */}
             <Nav className="employee-nav-tabs">
-                <Container fluid>
+                <Container fluid className="px-0">
                     <div className="nav-tabs-wrapper">
                         {navItems.map(item => (
                             <Nav.Link
@@ -80,6 +128,7 @@ const EmployeeLayout = () => {
                 </Container>
             </Nav>
 
+            {/* Main Content */}
             <main className="employee-main-content">
                 <GlobalAlerts />
                 <Outlet />

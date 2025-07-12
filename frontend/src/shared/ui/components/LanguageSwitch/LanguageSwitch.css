@@ -10,8 +10,11 @@
     background-color: transparent;
     color: var(--bs-body-color);
     transition: all 0.2s ease;
-    margin-right: 1rem;
-    margin-left: 0.5rem;
+    /*margin-right: 1rem;*/
+    /*margin-left: 0.5rem;*/
+    border-radius: 0.5rem;
+    /*max-width: 56px;*/
+
 }
 
 .language-switch .dropdown-toggle:hover {
@@ -33,7 +36,7 @@
 }
 
 .language-switch .dropdown-menu {
-    min-width: 140px;
+    /*min-width: 140px;*/
     border: 1px solid var(--bs-border-color);
     box-shadow: var(--bs-box-shadow);
     z-index: 1065;

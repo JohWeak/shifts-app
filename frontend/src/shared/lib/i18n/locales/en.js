@@ -93,6 +93,9 @@ export const en = {
         welcome: 'Welcome',
 
     },
+    app:{
+        name: 'Schedule System',
+    },
     color: {
         savingLocally: 'Saving for {theme} theme only (personal)',
         savingGlobally: 'Saving for all users',
@@ -306,6 +309,8 @@ export const en = {
         myRequests: 'My Requests',
         showFirstNameOnly: 'First Name',
         showFullName: 'Full Name',
+        profile: 'Profile',
+        settings: 'Settings',
         schedule: {
             title: 'My Schedule',
             subtitle: 'View your weekly work schedule',
