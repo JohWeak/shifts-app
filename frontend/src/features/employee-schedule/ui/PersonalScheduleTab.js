@@ -29,6 +29,8 @@ const PersonalScheduleTab = () => {
         applyColor,
         getShiftColor,
         currentTheme,
+        hasLocalColor,
+        resetShiftColor,
     } = useShiftColor();
 
     useEffect(() => {
@@ -205,8 +207,9 @@ const PersonalScheduleTab = () => {
                             title={t('modal.colorPicker.title')}
                             saveMode={colorPickerState.saveMode}
                             currentTheme={currentTheme}
-                            hasLocalColor={colorPickerState.hasLocalColor}
+                            hasLocalColor={hasLocalColor}
                             originalGlobalColor={colorPickerState.originalGlobalColor}
+                            onResetColor={resetShiftColor}
                         />
                     </div>
                 )}

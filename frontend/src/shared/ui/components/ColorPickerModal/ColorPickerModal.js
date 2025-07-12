@@ -76,11 +76,8 @@ const ColorPickerModal = ({
     };
     const handleReset = () => {
         if (onResetColor) {
+            // Просто вызываем колбэк. Вся логика - в хуке.
             onResetColor();
-            // Возвращаем к глобальному цвету
-            if (originalGlobalColor) {
-                handleColorChange(originalGlobalColor);
-            }
         }
     };
 
@@ -109,73 +106,75 @@ const ColorPickerModal = ({
                                 : t('color.savingGlobally')
                             }
                         </span>
-                        {/* Кнопка сброса для локальных настроек */}
-                        {saveMode === 'local' && hasLocalColor && onResetColor && (
-                            <Button
-                                variant="link"
-                                size="sm"
-                                className="p-0 text-decoration-none"
-                                onClick={handleReset}
-                                title={t('color.resetToGlobal')}
-                            >
-                                <i className="bi bi-arrow-counterclockwise text-warning"></i>
-                            </Button>
-                        )}
+
                     </small>
                 </div>
                 {/* Preset colors */}
                 <Row className="g-1 align-items-center preset-colors-wrapper mb-2">
                     {PRESET_COLORS.map(color => (
                         <Col xs="auto">
-                        <button
-                            key={color}
-                            className="color-preset-btn flex-shrink-0"
-                            style={{
-                                backgroundColor: color,
-                                borderColor: selectedColor === color ? '#0d6efd' : '#dee2e6',
-                                borderWidth: selectedColor === color ? '2px' : '1px'
-                            }}
-                            onClick={() => handleColorChange(color)}
-                        />
+                            <button
+                                key={color}
+                                className="color-preset-btn flex-shrink-0"
+                                style={{
+                                    backgroundColor: color,
+                                    borderColor: selectedColor === color ? '#0d6efd' : '#dee2e6',
+                                    borderWidth: selectedColor === color ? '2px' : '1px'
+                                }}
+                                onClick={() => handleColorChange(color)}
+                            />
                         </Col>
                     ))}
 
                 </Row>
-                {/* Custom color picker */}
-                <Row className="g-2 align-items-center mb-2">
-                    <Col>
-                        <div className="color-preview" style={{
-                            backgroundColor: selectedColor,
-                            color: getContrastTextColor(selectedColor, isDarkTheme())
-                        }}
-                        >
-                            {t('color.sampleText')}
-                        </div>
-                    </Col>
-                    <Col xs="auto">
-                        <input
-                            type="color"
-                            value={selectedColor}
-                            onChange={(e) => handleColorChange(e.target.value)}
-                            className="form-control form-control-color"
-                        />
-                    </Col>
-                </Row>
-
                 {/* 5. Ряд с HEX и глобальным цветом */}
-                <Row className="g-2 align-items-center small text-muted justify-content-between">
+                <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
+                    <Col xs="auto" className="d-flex align-items-center">
+                        <label className='me-2'>{t('color.customColor')}:</label>
+                        {/*{selectedColor.toUpperCase()}*/}
+                    </Col>
                     {saveMode === 'local' && hasLocalColor && originalGlobalColor && (
                         <Col xs="auto" className="d-flex align-items-center">
                             <i className="bi bi-globe me-2"></i>
                             <span className="me-1">{t('color.globalColorIs')}:</span>
-                            <div className="global-color-swatch" style={{ backgroundColor: originalGlobalColor }}></div>
+                            <div className="global-color-swatch" style={{backgroundColor: originalGlobalColor}}></div>
+                            {/* Кнопка сброса для локальных настроек */}
+                            {saveMode === 'local' && hasLocalColor && onResetColor && (
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    className=" text-decoration-none"
+                                    onClick={handleReset}
+                                    title={t('color.resetToGlobal')}
+                                >
+                                    <i className="bi bi-arrow-counterclockwise text-warning"></i>
+                                </Button>
+                            )}
                         </Col>
                     )}
-                    <Col xs="auto" className="d-flex align-items-center">
-                        {selectedColor.toUpperCase()}
-                    </Col>
 
                 </Row>
+                {/* Custom color picker */}
+                <Row className="g-2 align-items-center mb-2">
+                    {/*<Col>*/}
+                    {/*    <div className="color-preview" style={{*/}
+                    {/*        backgroundColor: selectedColor,*/}
+                    {/*        color: getContrastTextColor(selectedColor, isDarkTheme())*/}
+                    {/*    }}*/}
+                    {/*    >*/}
+                    {/*        {t('color.sampleText')}*/}
+                    {/*    </div>*/}
+                    {/*</Col>*/}
+                    <input
+                        type="color"
+                        value={selectedColor}
+                        onChange={(e) => handleColorChange(e.target.value)}
+                        className="form-control form-control-color"
+                    />
+
+                </Row>
+
+
 
             </Container>
         </Modal>

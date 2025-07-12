@@ -33,7 +33,9 @@ const FullScheduleTab = () => {
         previewColor,
         applyColor,
         getShiftColor,
-        currentTheme
+        currentTheme,
+        hasLocalColor,
+        resetShiftColor,
     } = useShiftColor();
     const isDark = isDarkTheme();
 
@@ -287,8 +289,9 @@ const FullScheduleTab = () => {
                     title={t('modal.colorPicker.title')}
                     saveMode={colorPickerState.saveMode}
                     currentTheme={currentTheme}
-                    hasLocalColor={colorPickerState.hasLocalColor}
+                    hasLocalColor={hasLocalColor} // <-- Передаем правильный флаг
                     originalGlobalColor={colorPickerState.originalGlobalColor}
+                    onResetColor={resetShiftColor}
                 />
             </>
         );

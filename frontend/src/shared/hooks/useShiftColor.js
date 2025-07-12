@@ -213,9 +213,11 @@ export const useShiftColor = () => {
         getShiftColor,
         currentTheme,
         isAdmin,
-        hasLocalColors: ThemeColorService.hasCustomColors(currentTheme, isAdmin && currentTheme === 'dark'),
+        hasLocalColor: colorPickerState.hasLocalColor,
+        resetShiftColor: () => resetShiftColor(colorPickerState.shiftId), // Сразу передаем shiftId
+        // hasLocalColors: ThemeColorService.hasCustomColors(currentTheme, isAdmin && currentTheme === 'dark'),
         resetColors: () => ThemeColorService.clearColors(currentTheme, isAdmin && currentTheme === 'dark'),
-        resetShiftColor, // Новый метод для сброса цвета конкретной смены
+        // resetShiftColor, // Новый метод для сброса цвета конкретной смены
         determineSaveMode // Экспортируем для тестирования
     };
 };
