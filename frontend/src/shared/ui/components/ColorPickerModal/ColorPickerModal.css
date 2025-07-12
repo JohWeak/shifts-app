@@ -23,31 +23,27 @@
 /* --- НОВЫЕ СТИЛИ ДЛЯ ШТОРКИ (BOTTOM SHEET) --- */
 
 .bottom-sheet.modal-dialog {
-    /* Располагаем внизу экрана */
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     backdrop-filter: blur(10px);
     box-shadow: var(--bs-box-shadow);
-    /* Убираем стандартные отступы и ставим 100% ширины */
     margin: 0;
     width: 100%;
     max-width: 100%;
-
-    /* Анимация выезжания */
-    transform: translateY(100%);
+    transform: translateY(100%) !important;
     transition: transform 0.3s ease-out;
 }
 
 .modal.show .bottom-sheet.modal-dialog {
-    transform: translateY(0); /* Конечное положение */
+    transform: translateY(0) !important; /* Конечное положение */
 }
 
 .bottom-sheet .modal-content {
     /* Скругляем только верхние углы для вида "шторки" */
-    border-radius: 1.25rem 1.25rem 0 0;
-    border: none; /* Убираем стандартную рамку */
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    /*border: none; !* Убираем стандартную рамку *!*/
 }
 .bottom-sheet-backdrop.modal-backdrop {
     /* Убираем затемнение, делая фон прозрачным */
@@ -121,7 +117,18 @@
     background-color: var(--bs-gray-700);
     border-color: var(--bs-gray-600);
 }
+/* --- НОВОЕ ПРАВИЛО ДЛЯ ДЕСКТОПА --- */
+@media (min-width: 576px) { /* 576px - это стандартный брейкпоинт Bootstrap для 'sm' */
+    .bottom-sheet.modal-dialog {
+        max-width: 480px; /* Ограничиваем ширину */
+        margin: 0 auto 1rem auto; /* Центрируем и добавляем отступ снизу */
+        border-radius: 1rem; /* Скругляем все углы на десктопе */
+    }
 
+    .bottom-sheet .modal-content {
+        border-radius: 1rem!important; /* Важно, чтобы и контент имел такие же скругления */
+    }
+}
 @media (max-width: 767px) {
     .preset-colors-wrapper {
         /*justify-content: space-between;*/

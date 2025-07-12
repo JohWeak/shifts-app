@@ -1,8 +1,9 @@
 // frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
 import React, {useState, useEffect} from 'react';
 import {Modal, Button, Container, Col, Row} from 'react-bootstrap';
-import {useI18n} from "../../../lib/i18n/i18nProvider";
+import {useI18n} from "shared/lib/i18n/i18nProvider";
 import './ColorPickerModal.css';
+import {getContrastTextColor, isDarkTheme} from "shared/lib/utils/colorUtils";
 
 const PRESET_COLORS = [
     '#FFE4A3', // Светло-жёлтый
@@ -43,8 +44,14 @@ const ColorPickerModal = ({
 
     const handleColorChange = (color) => {
         setSelectedColor(color);
+        // Немедленно вызываем onColorSelect, чтобы применить цвет.
+        // Это и есть "сохранение на лету".
+        if (onColorSelect) {
+            onColorSelect(color);
+        }
+        // onColorChange больше не нужен, но если он есть, вызовем и его.
         if (onColorChange) {
-            onColorChange(color); // Обновляем превью на лету
+            onColorChange(color);
         }
     };
 
@@ -57,9 +64,14 @@ const ColorPickerModal = ({
     // Отменяет изменения и закрывает шторку
     const handleCancelAndClose = () => {
         // Откатываем цвет к тому, который был при открытии
-        if (onColorChange) {
+        // и СОХРАНЯЕМ этот откат.
+        if (onColorSelect) {
+            onColorSelect(originalColorOnOpen);
+        }
+        if (onColorChange) { // для превью
             onColorChange(originalColorOnOpen);
         }
+        // И после отката закрываем.
         onHide();
     };
     const handleReset = () => {
@@ -76,7 +88,6 @@ const ColorPickerModal = ({
         <Modal
             show={show}
             onHide={handleClose}
-            animation={false}
             dialogClassName="bottom-sheet"
             backdropClassName="bottom-sheet-backdrop"
             contentClassName="shadow-lg"
@@ -133,7 +144,11 @@ const ColorPickerModal = ({
                 {/* Custom color picker */}
                 <Row className="g-2 align-items-center mb-2">
                     <Col>
-                        <div className="color-preview" style={{ backgroundColor: selectedColor }}>
+                        <div className="color-preview" style={{
+                            backgroundColor: selectedColor,
+                            color: getContrastTextColor(selectedColor, isDarkTheme())
+                        }}
+                        >
                             {t('color.sampleText')}
                         </div>
                     </Col>

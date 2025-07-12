@@ -29,7 +29,7 @@ export const ScheduleHeaderCard = ({
     const showSubtitle = position || site;
 
     return (
-        <Card className={`schedule-info-card mb-2 ${className}`}>
+        <Card className={`schedule-info-card mb-3 ${className}`}>
             <Card.Body className="d-flex justify-content-between py-2">
                 <div className="d-flex flex-column align-items-start gap-1">
                     {title && <h6 className="mb-0">{title}</h6>}

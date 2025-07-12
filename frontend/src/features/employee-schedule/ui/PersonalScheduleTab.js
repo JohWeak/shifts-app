@@ -133,13 +133,12 @@ const PersonalScheduleTab = () => {
                                     className={`day-card mb-2 ${isToday ? 'today-card' : ''} ${!userAssignment ? 'day-off-card' : ''}`}
                                     style={userAssignment ? {
                                         backgroundColor: bgColor,
-                                        color: textColor,
                                         borderColor: bgColor
                                     } : {}}
                                 >
                                     <Card.Body className="py-2">
                                         <div className="d-flex justify-content-between align-items-center">
-                                            <div className="day-info">
+                                            <div className="day-info" style={{ color: textColor }}>
                                                 <span className="day-date ">
                                                     {formatHeaderDate(dateObj)}
                                                 </span>
@@ -152,7 +151,7 @@ const PersonalScheduleTab = () => {
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <div className="shift-info text-end">
+                                            <div className="shift-info text-end" style={{ color: textColor }}>
                                                 {userAssignment ? (
                                                     <>
                                                         <div className="shift-name fw-bold">
@@ -180,7 +179,7 @@ const PersonalScheduleTab = () => {
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <div className="day-off">
+                                                    <div className="day-off" style={{ color: 'inherit' }}>
                                                         <i className="bi bi-house-door me-1"></i>
                                                         {t('employee.schedule.dayOff')}
                                                     </div>

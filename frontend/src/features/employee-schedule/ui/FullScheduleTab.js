@@ -127,7 +127,7 @@ const FullScheduleTab = () => {
             emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
         );
         const bgColor = getShiftColor({ ...shift, shift_id: shift.id });
-        const textColor = getContrastTextColor(bgColor, isDark);
+        const textColor = getContrastTextColor(bgColor);
 
         return (
             <div
@@ -152,6 +152,7 @@ const FullScheduleTab = () => {
                                             ? 'fw-bold'
                                             : ''
                                     }`}
+                                    style={{ color: textColor }}
                                 >
                                     {formatEmployeeName(firstName, lastName, showFullName)}
                                 </div>
@@ -274,6 +275,7 @@ const FullScheduleTab = () => {
                             ))}
                             </tbody>
                         </Table>
+
                     </div>
                 </div>
                 <ColorPickerModal

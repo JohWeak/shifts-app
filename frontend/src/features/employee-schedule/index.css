@@ -156,14 +156,14 @@
         justify-content: center;
     }
 
-    .employee-schedule-container .page-header-card {
-        border-bottom:none;
-        margin-bottom: -0.2rem!important;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1) inset;
+    /*.employee-schedule-container .page-header-card {*/
+    /*    border-bottom:none;*/
+    /*    margin-bottom: -0.2rem!important;*/
+    /*    border-bottom-left-radius: 0;*/
+    /*    border-bottom-right-radius: 0;*/
+    /*    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1) inset;*/
 
-    }
+    /*}*/
 
 }
 
