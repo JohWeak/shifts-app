@@ -143,8 +143,8 @@ const ColorPickerModal = ({
                     </Col>
                     {saveMode === 'local' && hasLocalColor && originalGlobalColor && (
                         <Col xs="auto" className="d-flex align-items-center">
-                            <i className="bi bi-globe me-2"></i>
-                            <span className="me-1">{t('color.globalColorIs')}:</span>
+                            <i className="bi bi-globe me-1"></i>
+                            <span className="me-2">{t('color.globalColorIs')}:</span>
                             <div className="global-color-swatch" style={{backgroundColor: originalGlobalColor}}></div>
                             {/* Кнопка сброса для локальных настроек */}
                             {saveMode === 'local' && hasLocalColor && onResetColor && (
