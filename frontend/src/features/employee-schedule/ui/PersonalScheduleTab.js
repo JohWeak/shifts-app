@@ -126,17 +126,26 @@ const PersonalScheduleTab = () => {
 
                             const dateObj = parseISO(day.date);
                             const isToday = new Date().toDateString() === dateObj.toDateString();
-                            const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
+                            // const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
+
+                            // Создаем "фальшивый" объект смены для выходного
+                            const dayOffShift = { shift_id: 'day_off' };
+                            // Если есть смена, берем ее цвет. Если нет - берем цвет выходного.
+                            const bgColor = userAssignment
+                                ? getShiftColor(userAssignment)
+                                : getShiftColor(dayOffShift); // <-- Используем наш ключ
+
+                            // Устанавливаем цвет текста
                             const textColor = getContrastTextColor(bgColor);
 
                             return (
                                 <Card
                                     key={day.date}
                                     className={`day-card mb-2 ${isToday ? 'today-card' : ''} ${!userAssignment ? 'day-off-card' : ''}`}
-                                    style={userAssignment ? {
+                                    style={{
                                         backgroundColor: bgColor,
                                         borderColor: bgColor
-                                    } : {}}
+                                    }}
                                 >
                                     <Card.Body className="py-2">
                                         <div className="d-flex justify-content-between align-items-center">

@@ -330,6 +330,7 @@ export const en = {
             fullScheduleNotAvailable: 'Full schedule view is not available yet',
             fullScheduleComingSoon: 'Full Schedule Coming Soon',
             positionScheduleWillBeAvailable: 'The full position schedule will be available soon',
+            editDayOffColor: 'Edit Day Off Color',
         },
     },
     errors: {
