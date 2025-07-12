@@ -1,8 +1,8 @@
 // frontend/src/shared/hooks/useShiftColor.js
 import {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateShiftColor } from '../../features/admin-schedule-management/model/scheduleSlice';
-import { updatePositionShiftColor } from 'shared/api/apiService';
+import {useDispatch, useSelector} from 'react-redux';
+import {updateShiftColor} from '../../features/admin-schedule-management/model/scheduleSlice';
+import {updatePositionShiftColor} from 'shared/api/apiService';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 export const useShiftColor = () => {
@@ -195,17 +195,29 @@ export const useShiftColor = () => {
             }
         }
 
-        // Обновляем Redux с глобальным цветом
-        if (colorPickerState.originalGlobalColor) {
-            dispatch(updateShiftColor({
-                shiftId: shiftId,
-                color: colorPickerState.originalGlobalColor
-            }));
-            return colorPickerState.originalGlobalColor;
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
 
-        }
-        // Возвращаем дефолтный цвет, если глобального нет
-        return '#6c757d';
+        // 1. Получаем объект смены из состояния модала
+        const shiftObject = colorPickerState.shift;
+        if (!shiftObject) return; // Защита на всякий случай
+
+        // 2. Диспатчим экшен с глобальным цветом из БД, чтобы Redux был в порядке
+        const globalColor = shiftObject.color || '#6c757d';
+        dispatch(updateShiftColor({
+            shiftId: shiftId,
+            color: globalColor
+        }));
+
+        // 3. А теперь самое главное: вычисляем, какой цвет ДОЛЖЕН БЫТЬ после сброса
+        //    с учетом всех правил (включая темную тему админа и т.д.)
+        //    Мы как бы "симулируем" вызов getShiftColor для сброшенного состояния.
+
+        // Создаем "сброшенный" объект смены, где локального цвета уже нет
+        const resetShift = { ...shiftObject, color: globalColor };
+
+        // Вызываем ThemeColorService, чтобы он определил правильный цвет для текущей темы
+        // 4. Возвращаем этот ПРАВИЛЬНЫЙ цвет
+        return ThemeColorService.getShiftColor(resetShift, currentTheme, user?.role);
     };
 
     return {
@@ -216,6 +228,8 @@ export const useShiftColor = () => {
         applyColor,
         getShiftColor,
         currentTheme,
+        userRole: user?.role,
+        shiftObject: colorPickerState.shift,
         isAdmin,
         hasLocalColor: colorPickerState.hasLocalColor,
         resetShiftColor: () => resetShiftColor(colorPickerState.shiftId), // Сразу передаем shiftId

@@ -1,9 +1,10 @@
 // frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useMemo} from 'react';
 import {Modal, Button, Container, Col, Row} from 'react-bootstrap';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 import './ColorPickerModal.css';
 import {getContrastTextColor, isDarkTheme, lightenColor} from "shared/lib/utils/colorUtils";
+import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 const PRESET_COLORS = [
     '#FFE4A3', // Светло-жёлтый
@@ -27,32 +28,42 @@ const ColorPickerModal = ({
                               saveMode = 'global',
                               currentTheme = 'light',
                               hasLocalColor = false,
-                              onResetColor = null,          // проп для сброса
-                              originalGlobalColor = null    // глобальный цвет из БД
+                              onResetColor = null,
+                              shiftObject = null,
+                              userRole = 'employee',
+                              originalGlobalColor = null
                           }) => {
     const [selectedColor, setSelectedColor] = useState(initialColor);
     const [originalColorOnOpen, setOriginalColorOnOpen] = useState(initialColor);
     const {t} = useI18n();
 
+    const themeAwareGlobalColor = useMemo(() => {
+        if (shiftObject) {
+            const resetShift = { ...shiftObject, color: originalGlobalColor };
+            return ThemeColorService.getShiftColor(resetShift, currentTheme, userRole);
+        }
+        return originalGlobalColor || '#6c757d';
+    }, [shiftObject, originalGlobalColor, currentTheme, userRole]);
+
+    // 2. Вычисляем "на лету", есть ли у нас кастомный цвет.
+    // Это и есть наш новый `hasLocalColor`.
+    const hasActiveLocalColor = selectedColor !== themeAwareGlobalColor;
+
     useEffect(() => {
         if (show) {
-            // Когда модал открывается, запоминаем текущий цвет
-            setOriginalColorOnOpen(initialColor);
             setSelectedColor(initialColor);
         }
     }, [show, initialColor]);
 
+
     const handleColorChange = (color) => {
         setSelectedColor(color);
-        // Немедленно вызываем onColorSelect, чтобы применить цвет.
-        // Это и есть "сохранение на лету".
-        if (onColorSelect) {
-            onColorSelect(color);
-        }
-        // onColorChange больше не нужен, но если он есть, вызовем и его.
-        if (onColorChange) {
-            onColorChange(color);
-        }
+        if (onColorChange) { onColorChange(color); }
+    };
+
+    const handleSaveAndClose = () => {
+        if (onColorSelect) { onColorSelect(selectedColor); }
+        onHide();
     };
 
     // Просто закрывает шторку (сохраняя изменения)
@@ -63,36 +74,22 @@ const ColorPickerModal = ({
 
     // Отменяет изменения и закрывает шторку
     const handleCancelAndClose = () => {
-        // Откатываем цвет к тому, который был при открытии
-        // и СОХРАНЯЕМ этот откат.
-        if (onColorSelect) {
-            onColorSelect(originalColorOnOpen);
-        }
-        if (onColorChange) { // для превью
-            onColorChange(originalColorOnOpen);
-        }
-        // И после отката закрываем.
+        if (onColorChange) { onColorChange(initialColor); }
         onHide();
     };
+
     const handleReset = () => {
         if (onResetColor) {
-            // Вызываем колбэк и СРАЗУ ЖЕ получаем новый цвет
             const newColor = onResetColor();
-
-            // Обновляем состояние модала этим новым цветом
-            setSelectedColor(newColor);
-
-            // И также обновляем превью в таблице
-            if (onColorChange) {
-                onColorChange(newColor);
-            }
+            if (newColor) { handleColorChange(newColor); }
         }
     };
+
     const colorInputRef = useRef(null);
     return (
         <Modal
             show={show}
-            onHide={handleClose}
+            onHide={handleSaveAndClose}
             dialogClassName="bottom-sheet"
             backdropClassName="bottom-sheet-backdrop"
             contentClassName="shadow-lg"
@@ -141,17 +138,17 @@ const ColorPickerModal = ({
                         <label className='me-2'>{t('color.customColor')}</label>
                         {/*{selectedColor.toUpperCase()}*/}
                     </Col>
-                    {saveMode === 'local' && hasLocalColor && originalGlobalColor && (
+                    {saveMode === 'local' && hasActiveLocalColor && (
                         <Col xs="auto" className="d-flex align-items-center">
-                            <i className="bi bi-globe me-1"></i>
+                            <i className="bi bi-globe small me-1 mt-0"></i>
                             <span className="me-2">{t('color.globalColorIs')}:</span>
-                            <div className="global-color-swatch" style={{backgroundColor: originalGlobalColor}}></div>
+                            <div className="global-color-swatch" style={{ backgroundColor: themeAwareGlobalColor }}></div>
                             {/* Кнопка сброса для локальных настроек */}
                             {saveMode === 'local' && hasLocalColor && onResetColor && (
                                 <Button
                                     variant="link"
                                     size="sm"
-                                    className=" text-decoration-none"
+                                    className=" text-decoration-none py-0"
                                     onClick={handleReset}
                                     title={t('color.resetToGlobal')}
                                 >

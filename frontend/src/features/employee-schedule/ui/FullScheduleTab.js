@@ -289,7 +289,7 @@ const FullScheduleTab = () => {
                     title={t('modal.colorPicker.title')}
                     saveMode={colorPickerState.saveMode}
                     currentTheme={currentTheme}
-                    hasLocalColor={hasLocalColor} // <-- Передаем правильный флаг
+                    hasLocalColor={hasLocalColor}
                     originalGlobalColor={colorPickerState.originalGlobalColor}
                     onResetColor={resetShiftColor}
                 />
