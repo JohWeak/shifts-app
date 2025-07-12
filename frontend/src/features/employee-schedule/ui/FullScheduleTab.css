@@ -94,10 +94,11 @@
 
 .shift-header-name {
     font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .shift-header-time {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: var(--bs-gray-600);
 }
 
@@ -287,6 +288,12 @@
     }
     .shift-header-info .color-picker-btn {
         opacity: 0.8;
+    }
+    .shift-header-time {
+        font-size: 0.75rem;
+    }
+    .shift-header-name {
+        font-size: 0.85rem;
     }
 }
 
