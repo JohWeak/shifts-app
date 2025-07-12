@@ -76,8 +76,16 @@ const ColorPickerModal = ({
     };
     const handleReset = () => {
         if (onResetColor) {
-            // Просто вызываем колбэк. Вся логика - в хуке.
-            onResetColor();
+            // Вызываем колбэк и СРАЗУ ЖЕ получаем новый цвет
+            const newColor = onResetColor();
+
+            // Обновляем состояние модала этим новым цветом
+            setSelectedColor(newColor);
+
+            // И также обновляем превью в таблице
+            if (onColorChange) {
+                onColorChange(newColor);
+            }
         }
     };
 
@@ -130,7 +138,7 @@ const ColorPickerModal = ({
                 {/* 5. Ряд с HEX и глобальным цветом */}
                 <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
                     <Col xs="auto" className="d-flex align-items-center">
-                        <label className='me-2'>{t('color.customColor')}:</label>
+                        <label className='me-2'>{t('color.customColor')}</label>
                         {/*{selectedColor.toUpperCase()}*/}
                     </Col>
                     {saveMode === 'local' && hasLocalColor && originalGlobalColor && (

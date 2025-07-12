@@ -201,7 +201,11 @@ export const useShiftColor = () => {
                 shiftId: shiftId,
                 color: colorPickerState.originalGlobalColor
             }));
+            return colorPickerState.originalGlobalColor;
+
         }
+        // Возвращаем дефолтный цвет, если глобального нет
+        return '#6c757d';
     };
 
     return {
