@@ -8,7 +8,7 @@ import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import api from 'shared/api';
 import {scheduleAPI} from 'shared/api/apiService';
 import {formatWeekRange, formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
-import {getContrastTextColor, isDarkTheme} from 'shared/lib/utils/colorUtils';
+import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO, addWeeks, format} from 'date-fns';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
@@ -37,7 +37,6 @@ const FullScheduleTab = () => {
         hasLocalColor,
         resetShiftColor,
     } = useShiftColor();
-    const isDark = isDarkTheme();
 
     useEffect(() => {
         fetchEmployeeData();
@@ -236,7 +235,7 @@ const FullScheduleTab = () => {
                                             className="shift-header-info"
                                             style={{
                                                 backgroundColor: getShiftColor({ ...shift, shift_id: shift.id }),
-                                                color: getContrastTextColor(getShiftColor({ ...shift, shift_id: shift.id }), isDark)
+                                                color: getContrastTextColor(getShiftColor({ ...shift, shift_id: shift.id }))
                                             }}
                                         >
                                             <span className="shift-header-name">{shift.shift_name}
@@ -252,7 +251,7 @@ const FullScheduleTab = () => {
                                                     e.stopPropagation();
                                                     openColorPicker(
                                                         shift.id,
-                                                        getShiftColor(shift),
+                                                        getShiftColor({ ...shift, shift_id: shift.id }),
                                                         shift
                                                     );
                                                 }}

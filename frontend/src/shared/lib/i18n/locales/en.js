@@ -108,6 +108,7 @@ export const en = {
         resetLocal: 'Reset',
         confirmResetLocal: 'Reset your custom color for this shift?',
         apply: 'Apply Color',
+        pickColor: 'Pick custom color',
     },
     dashboard: {
         dashboardDesc: 'Quick overview of your scheduling system',

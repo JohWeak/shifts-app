@@ -171,7 +171,7 @@ const ColorPickerModal = ({
                         onClick={() => colorInputRef.current?.click()} // При клике "нажимаем" на скрытый инпут
                     >
                         {/* Текст, который ты хотел наложить */}
-                        {t('color.sampleText')}
+                        {t('color.pickColor')}
                         <i className="bi bi-eyedropper ms-2"></i>
                     </div>
 

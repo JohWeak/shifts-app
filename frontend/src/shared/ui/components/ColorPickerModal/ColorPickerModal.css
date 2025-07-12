@@ -83,7 +83,7 @@
     transition: background-color 0.2s ease-in-out; /* Анимируем только цвет фона */
 }
 .color-preview-button:hover {
-     filter: brightness(1.03);
+     filter: brightness(1.06);
 }
 .global-color-swatch {
     width: 20px;
