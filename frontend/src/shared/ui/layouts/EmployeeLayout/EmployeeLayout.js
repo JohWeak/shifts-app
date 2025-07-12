@@ -12,7 +12,7 @@ import './EmployeeLayout.css';
 
 const EmployeeLayout = () => {
     const { isAuthenticated, loading, user } = useSelector(state => state.auth);
-    const { t } = useI18n();
+    const { t, direction } = useI18n();
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -72,7 +72,7 @@ const EmployeeLayout = () => {
                         <LanguageSwitch />
 
                         {/* User Menu */}
-                        <Dropdown align='end' className="user-dropdown">
+                        <Dropdown align={direction === 'rtl' ? 'start' : 'end'}>
                             <Dropdown.Toggle as={CustomToggle}>
                                 <div className="user-avatar">
                                     <i className="bi bi-person-circle"></i>

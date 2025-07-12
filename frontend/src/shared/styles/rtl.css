@@ -55,14 +55,137 @@
     border-bottom-right-radius: 0 !important;
 }
 
-/* Dropdowns */
 [dir="rtl"] .dropdown-menu {
+    text-align: right;
+    right: auto !important;
+    left: 0 !important;
+}
+
+/* Dropdown align-end для RTL - инвертируем поведение */
+[dir="rtl"] .dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Bootstrap 5 dropdown positioning for RTL */
+[dir="rtl"] .dropdown-menu[data-bs-popper] {
+    right: auto !important;
+    left: 0 !important;
+}
+
+/* Navbar dropdowns specifically */
+[dir="rtl"] .navbar .dropdown-menu {
+    right: auto !important;
+    left: 0 !important;
+}
+
+/* User menu dropdown - специальное правило для правого края */
+[dir="rtl"] .navbar .ms-auto .dropdown-menu,
+[dir="rtl"] .navbar .me-auto .dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Dropdown items with icons */
+[dir="rtl"] .dropdown-item > i:first-child,
+[dir="rtl"] .dropdown-item > .bi:first-child {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+/* Dropdown header alignment */
+[dir="rtl"] .dropdown-header {
     text-align: right;
 }
 
-[dir="rtl"] .dropdown-toggle::after {
-    margin-right: 0.25em;
+/* Dropdown divider - ensure full width */
+[dir="rtl"] .dropdown-divider {
+    margin-right: 0;
     margin-left: 0;
+}
+
+/* Dropdown toggle caret */
+[dir="rtl"] .dropdown-toggle::after {
+    margin-right: 0.255em;
+    margin-left: 0;
+}
+
+/* Prevent dropdown from going off-screen */
+[dir="rtl"] .dropdown-menu {
+    min-width: 10rem;
+    max-width: calc(100vw - 2rem);
+}
+
+/* Mobile specific RTL dropdown adjustments */
+@media (max-width: 767px) {
+    [dir="rtl"] .dropdown-menu {
+        position: absolute !important;
+        transform: none !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        margin-top: 0.5rem;
+    }
+
+    /* For dropdowns near left edge in RTL */
+    [dir="rtl"] .navbar-brand + * .dropdown-menu {
+        right: auto !important;
+        left: 0 !important;
+    }
+}
+
+/* Dark theme adjustments for dropdowns */
+[data-theme="dark"][dir="rtl"] .dropdown-menu {
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"][dir="rtl"] .dropdown-item {
+    color: var(--bs-gray-100);
+}
+
+[data-theme="dark"][dir="rtl"] .dropdown-item:hover,
+[data-theme="dark"][dir="rtl"] .dropdown-item:focus {
+    background-color: var(--bs-gray-700);
+    color: var(--bs-white);
+}
+
+[data-theme="dark"][dir="rtl"] .dropdown-divider {
+    border-color: var(--bs-gray-700);
+}
+
+/* Fix for dropdown animation in RTL */
+[dir="rtl"] .dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    transform: translate(0, 0) !important;
+}
+
+/* Ensure dropdown stays within viewport */
+.dropdown-menu {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for dropdown in RTL */
+[dir="rtl"] .dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+[dir="rtl"] .dropdown-menu::-webkit-scrollbar-track {
+    background: var(--bs-gray-100);
+}
+
+[dir="rtl"] .dropdown-menu::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-400);
+    border-radius: 3px;
+}
+
+[data-theme="dark"][dir="rtl"] .dropdown-menu::-webkit-scrollbar-track {
+    background: var(--bs-gray-800);
+}
+
+[data-theme="dark"][dir="rtl"] .dropdown-menu::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-600);
 }
 
 /* Forms */
