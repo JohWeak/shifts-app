@@ -1,9 +1,9 @@
 // frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Modal, Button, Container, Col, Row} from 'react-bootstrap';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 import './ColorPickerModal.css';
-import {getContrastTextColor, isDarkTheme} from "shared/lib/utils/colorUtils";
+import {getContrastTextColor, isDarkTheme, lightenColor} from "shared/lib/utils/colorUtils";
 
 const PRESET_COLORS = [
     '#FFE4A3', // Светло-жёлтый
@@ -88,7 +88,7 @@ const ColorPickerModal = ({
             }
         }
     };
-
+    const colorInputRef = useRef(null);
     return (
         <Modal
             show={show}
@@ -164,20 +164,35 @@ const ColorPickerModal = ({
                 </Row>
                 {/* Custom color picker */}
                 <Row className="g-2 align-items-center mb-2">
-                    {/*<Col>*/}
-                    {/*    <div className="color-preview" style={{*/}
-                    {/*        backgroundColor: selectedColor,*/}
-                    {/*        color: getContrastTextColor(selectedColor, isDarkTheme())*/}
-                    {/*    }}*/}
-                    {/*    >*/}
-                    {/*        {t('color.sampleText')}*/}
-                    {/*    </div>*/}
-                    {/*</Col>*/}
+                    {/* 1. Наша красивая, кастомная кнопка на всю ширину */}
+                    <div
+                        className="color-preview-button" // Используем наш кастомный класс
+                        style={{
+                            backgroundColor: selectedColor,
+                            color: getContrastTextColor(selectedColor, isDarkTheme())
+                        }}
+                        onClick={() => colorInputRef.current?.click()} // При клике "нажимаем" на скрытый инпут
+                    >
+                        {/* Текст, который ты хотел наложить */}
+                        {t('color.sampleText')}
+                        <i className="bi bi-eyedropper ms-2"></i>
+                    </div>
+
+                    {/* 2. Настоящий, но полностью невидимый инпут */}
                     <input
                         type="color"
+                        ref={colorInputRef}
                         value={selectedColor}
                         onChange={(e) => handleColorChange(e.target.value)}
-                        className="form-control form-control-color"
+                        style={{
+                            // Прячем его, но оставляем функциональным
+                            opacity: 0,
+                            position: 'absolute',
+                            width: 0,
+                            height: 0,
+                            border: 'none',
+                            padding: 0
+                        }}
                     />
 
                 </Row>
