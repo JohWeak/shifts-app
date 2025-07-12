@@ -60,8 +60,8 @@ const EmployeeLayout = () => {
             <Navbar bg="primary" variant="dark" expand={false} fixed="top" className="employee-navbar">
                 <Container fluid className='mx-1'>
                     <Navbar.Brand className="d-flex align-items-center app-name">
-                        <i className="bi bi-calendar-check me-2"></i>
-                        <span className="d-none d-sm-inline">{t('app.name')}</span>
+                        <i className="bi bi-calendar-check"></i>
+                        <span className="d-none d-sm-inline ms-2">{t('app.name')}</span>
                     </Navbar.Brand>
 
                     <div className="d-flex align-items-center gap-2">

@@ -27,8 +27,9 @@
 @media (max-width: 767px) {
     .week-selector-fixed {
         bottom: 45px;
-        padding: 1rem 1.5rem;
+        padding: 1rem 1rem;
         background-color: transparent;
+        justify-content: space-between;
         backdrop-filter: blur(15px);
     }
     [data-theme="dark"] .week-selector-fixed {

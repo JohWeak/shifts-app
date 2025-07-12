@@ -21,7 +21,8 @@
 /* Today card */
 .today-card {
     border-width: 2px;
-    border-color: var(--bs-primary) !important;
+    /*border-color: var(--bs-primary) !important;*/
+    border-color: rgba(var(--bs-primary-rgb), 0.3)!important;
 }
 
 /* Day off card */

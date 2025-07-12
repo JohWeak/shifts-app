@@ -42,49 +42,61 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: var(--bs-white);
-    border-top: 2px solid var(--bs-gray-200);
+    /*border-top: 2px solid var(--bs-gray-200);*/
     border-bottom: none;
     z-index: 1030;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    background-color: transparent;
+    border-top: none; /* Убираем рамку отсюда */
+
 }
+/* 4. Создаем "фейковый" фон с помощью псевдоэлемента ::before */
+.employee-schedule-tabs::before {
+    content: ''; /* Обязательно для псевдоэлементов */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+
+    /* 5. Задаем ВЫСОТУ нашей фоновой панели */
+    height: 55px;
+
+    /* 6. Переносим стили фона и рамки сюда */
+    background: var(--bs-white);
+
+    /* 7. Помещаем фон ЗА дочерними элементами (табами) */
+    z-index: -1;
+}
+
 
 [data-theme="dark"] .employee-schedule-tabs {
     background: var(--bs-gray-900);
     border-top-color: var(--bs-gray-700);
 }
 
-.employee-schedule-tabs .nav-link {
-    border-bottom: none;
-    border-top: 3px solid transparent;
-    margin-bottom: 0;
-    margin-top: -2px;
-}
 
 .employee-schedule-tabs .nav-link {
-    color: var(--bs-gray-600);
-    border: none;
-    border-radius: 0;
+    color: var(--bs-gray-700);
     padding: 1rem 1.5rem;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease;
     position: relative;
     overflow: hidden;
+    border-bottom: none;
+
 }
 
 
 .employee-schedule-tabs .nav-link.active {
     border-bottom: none;
-    border-top-color: var(--bs-primary);
-    background: var(--bs-white);
+    border-radius: var(--radius-sm)!important;
+    font-weight: 700;
+    color: var(--bs-primary) !important;
+    background: rgba(var(--bs-primary-rgb), 0.03) !important;
+    border-top: 3px solid rgba(var(--bs-primary-rgb), 0.7)!important;
+
 }
 
-.employee-schedule-tabs .nav-link.active {
-    color: var(--bs-primary);
-    background: var(--bs-white);
-    border-bottom: 3px solid var(--bs-primary);
-    margin-bottom: -2px;
-}
 
 .employee-schedule-tabs .nav-link:hover:not(.disabled) {
     color: var(--bs-primary);
@@ -100,18 +112,18 @@
     background: var(--bs-gray-900);
 }
 
-[data-theme="dark"] .employee-schedule-tabs {
-    border-top-color: var(--bs-gray-700);
-    background: var(--bs-gray-800);
+[data-theme="dark"] .employee-schedule-tabs .nav-link:hover {
+    border: transparent;
 }
 
+[data-theme="dark"] .employee-schedule-tabs::before {
+    background: var(--bs-gray-800);
+    border-top-color: var(--bs-gray-700);
+}
 [data-theme="dark"] .employee-schedule-tabs .nav-link {
     color: var(--bs-gray-400);
 }
 
-[data-theme="dark"] .employee-schedule-tabs .nav-link.active {
-    background: var(--bs-gray-900);
-}
 
 
 /* Tab Content with padding for fixed tabs */
@@ -129,14 +141,17 @@
         padding: 0.75rem 0.5rem;
         font-size: 0.875rem;
     }
-    .employee-schedule-tabs{
+
+    .employee-schedule-tabs {
         background: transparent;
         backdrop-filter: blur(15px);
     }
-    [data-theme="dark"] .employee-schedule-tabs{
+
+    [data-theme="dark"] .employee-schedule-tabs {
         background: rgba(53, 58, 64, 0.8);
         backdrop-filter: blur(15%);
     }
+
     .employee-schedule-tabs .nav-link i {
         display: none;
     }
@@ -155,27 +170,22 @@
         display: flex;
         justify-content: center;
     }
+    .employee-schedule-tabs::before {
+        height: 45px;
+    }
 
-    /*.employee-schedule-container .page-header-card {*/
-    /*    border-bottom:none;*/
-    /*    margin-bottom: -0.2rem!important;*/
-    /*    border-bottom-left-radius: 0;*/
-    /*    border-bottom-right-radius: 0;*/
-    /*    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1) inset;*/
-
-    /*}*/
 
 }
 
 /* Animations */
-.tab-pane {
-    animation: fadeIn 0.3s ease-in-out;
+.schedule-card .employee-schedule-tabs {
+    animation: navUp 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
+@keyframes navUp {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
