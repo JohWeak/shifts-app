@@ -5,6 +5,8 @@
     height: 56px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1040!important;
+
+
 }
 
 .employee-navbar .navbar-brand {
@@ -70,11 +72,17 @@
 .employee-nav-tabs {
     position: fixed;
     top: 56px; /* Height of navbar */
-    left: 0;
-    right: 0;
     background-color: transparent;
     border-bottom: none;
     z-index: 1030;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1376px;
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+
+
 }
 .employee-nav-tabs:before {
     content: ''; /* Обязательно для псевдоэлементов */
@@ -87,16 +95,19 @@
     background: var(--bs-white);
     z-index: -1;
     background: var(--bs-white);
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+
 
 }
 
 [data-theme="dark"] .employee-nav-tabs {
     background: var(--bs-gray-800);
-    border-bottom-color: var(--bs-gray-700);
+    /*border-bottom-color: var(--bs-gray-700);*/
 }
 [data-theme="dark"] .employee-nav-tabs:before {
     background: var(--bs-gray-800);
-    border-bottom-color: var(--bs-gray-700);
+    /*border-bottom-color: var(--bs-gray-700);*/
 }
 .nav-tabs-wrapper {
     display: flex;
@@ -151,7 +162,7 @@
 }
 
 [data-theme="dark"] .employee-main-content {
-    background: var(--bs-black);
+    background: #191d1e;
 }
 
 /* Mobile Responsive */

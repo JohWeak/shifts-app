@@ -6,11 +6,10 @@
     max-width: 1400px;
     margin: 0 auto;
 }
-
-.employee-schedule-container .page-header {
-    padding: 0;
-
+[data-theme="dark"] .employee-schedule-container .page-header-card {
+    background-color: var(--bs-gray-900);
 }
+
 
 
 /* Main Card */
@@ -24,11 +23,11 @@
 
 /* Main container adjustment */
 .employee-schedule-container {
-    padding-bottom: 60px; /* Space for fixed tabs */
+    padding-bottom: 1rem; /* Space for fixed tabs */
 }
 
 .schedule-card {
-    margin-bottom: 140px;
+    margin-bottom: 130px;
 }
 
 [data-theme="dark"] .schedule-card {
@@ -40,13 +39,20 @@
 .employee-schedule-tabs {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
+
     /*border-top: 2px solid var(--bs-gray-200);*/
     border-bottom: none;
     z-index: 1030;
     background-color: transparent;
     border-top: none; /* Убираем рамку отсюда */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1376px;
+    border-left: 1px solid var(--bs-gray-200);
+    border-right: 1px solid var(--bs-gray-200);
+
+
 
 }
 /* 4. Создаем "фейковый" фон с помощью псевдоэлемента ::before */
@@ -63,7 +69,6 @@
 
     /* 6. Переносим стили фона и рамки сюда */
     background: var(--bs-white);
-
     /* 7. Помещаем фон ЗА дочерними элементами (табами) */
     z-index: -1;
 }
@@ -72,6 +77,8 @@
 [data-theme="dark"] .employee-schedule-tabs {
     background: var(--bs-gray-900);
     border-top-color: var(--bs-gray-700);
+    border-left: 1px solid var(--bs-gray-700);
+    border-right: 1px solid var(--bs-gray-700);
 }
 
 
@@ -130,11 +137,23 @@
 .tab-content-wrapper {
     /*padding: 1.5rem;*/
 }
+.employee-schedule-container .page-header-card {
+    margin-bottom: 0.75rem!important;
+}
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .employee-schedule-container {
         padding: 0.5rem;
+    }
+    .employee-schedule-container {
+        padding-bottom: 0.25rem; /* Space for fixed tabs */
+    }
+    .employee-schedule-container .page-header {
+        padding: 0;
+    }
+    .employee-schedule-container .page-header-card {
+        margin-bottom: 0.5rem!important;
     }
 
     .employee-schedule-tabs .nav-link {
@@ -143,8 +162,8 @@
     }
 
     .employee-schedule-tabs {
-        background: transparent;
-        backdrop-filter: blur(15px);
+        /*background: transparent;*/
+        /*backdrop-filter: blur(15px);*/
     }
 
     [data-theme="dark"] .employee-schedule-tabs {
