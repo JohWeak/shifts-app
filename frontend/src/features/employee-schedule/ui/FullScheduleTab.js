@@ -214,14 +214,15 @@ const FullScheduleTab = () => {
                                             <div className="day-name">
                                                 {getDayName(dateObj.getDay(), t)}
                                             </div>
+                                            {isToday? (
+                                                <Badge bg="primary" className="today-badge mt-1">
+                                                    {formatHeaderDate(dateObj)}
+                                                </Badge>
+                                            ) : (
                                             <div className="day-date">
                                                 {formatHeaderDate(dateObj)}
                                             </div>
-                                            {isToday && (
-                                                <Badge bg="primary" className="today-badge mt-1">
-                                                    {t('common.today')}
-                                                </Badge>
-                                            )}
+                                        )}
                                         </th>
                                     );
                                 })}
