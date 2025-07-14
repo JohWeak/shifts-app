@@ -39,7 +39,7 @@ const FullScheduleTab = () => {
     } = useShiftColor();
 
     useEffect(() => {
-        fetchEmployeeData();
+        void fetchEmployeeData();
     }, []);
 
     const [showFullName, setShowFullName] = useState(() => {
