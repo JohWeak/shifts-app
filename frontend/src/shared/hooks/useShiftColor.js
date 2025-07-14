@@ -91,14 +91,18 @@ export const useShiftColor = () => {
         });
     };
 
-    const closeColorPicker = (shouldResetPreview = true) => {
-        if (shouldResetPreview) {
-            setTempShiftColors(prev => {
-                const newState = { ...prev };
+    const closeColorPicker = () => {
+        // --- ПЕРЕНОСИМ ОЧИСТКУ СЮДА ---
+        // Очищаем временный цвет при любом закрытии модала.
+        setTempShiftColors(prev => {
+            const newState = { ...prev };
+            // Проверяем, есть ли shiftId, чтобы не было ошибок
+            if (colorPickerState.shiftId) {
                 delete newState[colorPickerState.shiftId];
-                return newState;
-            });
-        }
+            }
+            return newState;
+        });
+        // ---------------------------------
 
         setColorPickerState({
             show: false,
@@ -116,44 +120,49 @@ export const useShiftColor = () => {
     };
 
     const applyColor = async (color, customSaveMode = null) => {
-        try {
-            const shiftId = colorPickerState.shiftId;
-            const saveMode = customSaveMode || colorPickerState.saveMode;
+        const shiftId = colorPickerState.shiftId;
+        const saveMode = customSaveMode || colorPickerState.saveMode;
+        // Запоминаем цвет для возможного отката
+        const originalColorForRevert = colorPickerState.originalColor;
 
-            if (saveMode === 'local') {
-                // Сохраняем локально. НЕ ТРОГАЕМ REDUX.
-                // Redux должен продолжать хранить истинный глобальный цвет.
-                ThemeColorService.setColor(
-                    shiftId,
-                    color,
-                    currentTheme,
-                    isAdmin && currentTheme === 'dark'
-                );
-            } else { // saveMode === 'global'
-                // Сохраняем глобально в БД
-                await updatePositionShiftColor(shiftId, color);
+        // Очищаем превью СРАЗУ, так как дальше UI будет управляться Redux или localStorage
+        setTempShiftColors(prev => {
+            const newState = { ...prev };
+            delete newState[shiftId];
+            return newState;
+        });
 
-                // --- ПЕРЕМЕСТИЛИ СЮДА ---
-                // И только после успешного сохранения в БД,
-                // обновляем наше представление этих данных в Redux.
-                dispatch(updateShiftColor({
-                    shiftId: shiftId,
-                    color: color
-                }));
+        if (saveMode === 'local') {
+            // Локальное сохранение. Просто и надежно. Не трогаем Redux.
+            try {
+                ThemeColorService.setColor(shiftId, color, currentTheme, isAdmin && currentTheme === 'dark');
+                return true;
+            } catch (error) {
+                console.error('Ошибка сохранения в localStorage:', error);
+                return false;
             }
+        } else { // saveMode === 'global'
+            // --- ЛОГИКА ОПТИМИСТИЧНОГО ОБНОВЛЕНИЯ С ОТКАТОМ ---
 
-            // Очищаем временный цвет для превью в любом случае
-            setTempShiftColors(prev => {
-                const newState = { ...prev };
-                delete newState[shiftId];
-                return newState;
-            });
+            // 1. ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ UI:
+            // Диспатчим новый цвет немедленно. "Мигания" не будет.
+            dispatch(updateShiftColor({ shiftId, color }));
 
-
-            return true;
-        } catch (error) {
-            console.error('Error updating shift color:', error);
-            return false;
+            // 2. ФОНОВОЕ СОХРАНЕНИЕ В БД:
+            try {
+                // Пытаемся сохранить данные на сервере.
+                // Мы не ждем (await) завершения здесь в основном потоке,
+                // чтобы UI оставался отзывчивым.
+                await updatePositionShiftColor(shiftId, color);
+                return true;
+            } catch (error) {
+                // 3. ОТКАТ ПРИ ОШИБКЕ СЕТИ:
+                console.error('Сетевая ошибка, откат UI:', error);
+                // Если сохранение не удалось, диспатчим старый цвет обратно.
+                dispatch(updateShiftColor({ shiftId, color: originalColorForRevert }));
+                // Можно показать пользователю уведомление об ошибке.
+                return false;
+            }
         }
     };
 

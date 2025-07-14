@@ -60,13 +60,10 @@ const ColorPickerModal = ({
         if (onColorChange) { onColorChange(color); }
     };
 
-    const handleSaveAndClose = async () => {
+    const handleSaveAndClose =  () => {
         if (onColorSelect) {
-            // 1. ЖДЕМ, пока onColorSelect (т.е. applyColor) полностью завершится.
-            //    Внутри него теперь происходит и сохранение, и очистка tempShiftColors.
-            await onColorSelect(selectedColor);
+            onColorSelect(selectedColor);
         }
-        // 2. И только ПОСЛЕ этого закрываем модал.
         onHide();
     };
 
@@ -174,7 +171,7 @@ const ColorPickerModal = ({
                 {/* 5. Ряд с HEX и глобальным цветом */}
                 <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
 
-                    {saveMode === 'local' && hasActiveLocalColor && (
+                    {saveMode === 'local' && currentTheme === 'light' && hasActiveLocalColor && (
                         <Col xs="auto" className="d-flex align-items-center">
                             <i className="bi bi-globe small me-1 mt-0"></i>
                             <span className="me-2">{t('color.globalColorIs')}:</span>

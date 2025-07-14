@@ -156,27 +156,7 @@ export const fetchWorkSites = createAsyncThunk(
     }
 );
 
-export const updateShiftColor = createAsyncThunk(
-    'schedule/updateShiftColor',
-    // payloadCreator принимает объект { shiftId, color, saveMode, currentTheme, isAdmin }
-    async (payload, { rejectWithValue, getState }) => {
-        try {
-            const { shiftId, color, saveMode, currentTheme, isAdmin } = payload;
 
-            if (saveMode === 'local') {
-                ThemeColorService.setColor(shiftId, color, currentTheme, isAdmin && currentTheme === 'dark');
-                // Для локального режима просто возвращаем то, что сохранили
-            } else {
-                // 1. Вызываем API и СОХРАНЯЕМ ответ сервера
-                await updatePositionShiftColor(shiftId, color);
-            }
-            return { shiftId, color };
-
-        } catch (error) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
 
 // --- Слайс (Slice) ---
 
@@ -208,7 +188,23 @@ const scheduleSlice = createSlice({
     },
     reducers: {
         // Синхронные экшены для управления UI
+        updateShiftColor: (state, action) => {
+            const { shiftId, color } = action.payload;
 
+            if (state.scheduleDetails?.shifts) {
+                const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
+                if (shiftIndex !== -1) {
+                    state.scheduleDetails.shifts[shiftIndex].color = color;
+                }
+            }
+            if (state.scheduleDetails?.positions) {
+                state.scheduleDetails.positions.forEach(position => {
+                    if (position.shifts?.find(s => s.shift_id === shiftId)) {
+                        position.shifts.find(s => s.shift_id === shiftId).color = color;
+                    }
+                });
+            }
+        },
         setActiveTab(state, action) {
             state.activeTab = action.payload;
         },
@@ -408,26 +404,7 @@ const scheduleSlice = createSlice({
                 state.loading = 'failed';
                 state.error = action.payload;
             })
-            .addCase(updateShiftColor.fulfilled, (state, action) => {
-                const { shiftId, color } = action.payload;
 
-                if (state.scheduleDetails?.shifts) {
-                    const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
-                    if (shiftIndex !== -1) {
-                        state.scheduleDetails.shifts[shiftIndex].color = color;
-                    }
-                }
-                if (state.scheduleDetails?.positions) {
-                    state.scheduleDetails.positions.forEach(position => {
-                        if (position.shifts) {
-                            const shift = position.shifts.find(s => s.shift_id === shiftId);
-                            if (shift) {
-                                shift.color = color;
-                            }
-                        }
-                    });
-                }
-            });
     },
 });
 
@@ -439,6 +416,7 @@ export const {
     addPendingChange,
     removePendingChange,
     clearPositionChanges,
+    updateShiftColor,
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;
