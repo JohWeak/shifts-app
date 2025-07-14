@@ -34,7 +34,6 @@ const ColorPickerModal = ({
                               originalGlobalColor = null
                           }) => {
     const [selectedColor, setSelectedColor] = useState(initialColor);
-    const [originalColorOnOpen, setOriginalColorOnOpen] = useState(initialColor);
     const {t} = useI18n();
 
     const themeAwareGlobalColor = useMemo(() => {
@@ -66,11 +65,6 @@ const ColorPickerModal = ({
         onHide();
     };
 
-    // Просто закрывает шторку (сохраняя изменения)
-    const handleClose = () => {
-        // Здесь мы НЕ откатываем цвет. Изменения остаются.
-        onHide();
-    };
 
     // Отменяет изменения и закрывает шторку
     const handleCancelAndClose = () => {

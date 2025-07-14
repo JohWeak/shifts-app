@@ -186,16 +186,60 @@ export const canDeleteSchedule = (schedule) => {
     return schedule.status !== 'published';
 };
 /**
- * Форматирует имя сотрудника
- * @param {string} firstName - Имя
- * @param {string} lastName - Фамилия
- * @param {boolean} showFullName - Показывать полное имя
- * @returns {string} - Отформатированное имя
+ * Форматирует имя сотрудника с учетом различных опций.
+ * @param {object | string} employeeOrFirstName - Объект сотрудника или имя.
+ * @param {object | string} [optionsOrLastName] - Объект опций или фамилия.
+ * @param {boolean} [legacyShowFullName] - (Для совместимости) Флаг полного имени.
+ * @returns {string} - Отформатированное имя.
  */
-export const formatEmployeeName = (firstName, lastName, showFullName = false) => {
-    if (!firstName && !lastName) return '-';
-    if (showFullName) {
-        return `${firstName || ''} ${lastName || ''}`.trim();
+export const formatEmployeeName = (employeeOrFirstName, optionsOrLastName = {}, legacyShowFullName = false) => {
+    if (typeof employeeOrFirstName === 'string') {
+        // --- РЕЖИМ ОБРАТНОЙ СОВМЕСТИМОСТИ ---
+        const firstName = employeeOrFirstName;
+        const lastName = typeof optionsOrLastName === 'string' ? optionsOrLastName : '';
+        const showFullName = legacyShowFullName;
+
+        if (!firstName && !lastName) return '-';
+        if (showFullName) {
+            return `${firstName || ''} ${lastName || ''}`.trim();
+        }
+        return firstName || lastName || '-';
     }
-    return firstName || lastName || '-';
+
+    // --- НОВЫЙ РЕЖИМ РАБОТЫ С ОБЪЕКТАМИ ---
+    const employee = employeeOrFirstName;
+    const {
+        showFullName = false,
+        checkDuplicates = false,
+        contextEmployees = []
+    } = optionsOrLastName;
+
+    if (!employee) return '-';
+
+    // Извлекаем имена из разных возможных полей
+    const fullName = employee.employee_name || `${employee.first_name || ''} ${employee.last_name || ''}`.trim();
+    const firstName = employee.first_name || fullName.split(' ')[0] || '';
+    const lastName = employee.last_name || fullName.split(' ').slice(1).join(' ') || '';
+
+    if (!firstName && !lastName) return '-';
+
+    // Если нужно полное имя, возвращаем его
+    if (showFullName) {
+        return fullName;
+    }
+
+    // --- ЛОГИКА ПРОВЕРКИ ДУБЛИКАТОВ ---
+    // Она сработает, только если переданы нужные опции
+    if (checkDuplicates && contextEmployees.length > 0) {
+        const duplicateNames = contextEmployees.filter(emp =>
+            (emp.first_name || emp.employee_name?.split(' ')[0]) === firstName
+        );
+
+        if (duplicateNames.length > 1) {
+            return `${firstName} ${lastName.charAt(0) || ''}.`.trim();
+        }
+    }
+
+    // По умолчанию возвращаем только имя
+    return firstName;
 };

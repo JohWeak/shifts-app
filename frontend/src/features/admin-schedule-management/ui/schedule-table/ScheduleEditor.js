@@ -14,6 +14,7 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor, isDarkTheme } from 'shared/lib/utils/colorUtils';
 import { useSelector } from "react-redux";
+import { formatEmployeeName as formatEmployeeNameUtil } from 'shared/lib/utils/scheduleUtils'
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './ScheduleEditor.css';
 
@@ -113,28 +114,18 @@ const ScheduleEditor = ({
 
     // Функция для форматирования имени
     const formatEmployeeName = (employee) => {
-        if (!showFirstNameOnly) {
-            return employee.employee_name || `${employee.first_name} ${employee.last_name}`;
-        }
-
-        const firstName = employee.first_name || employee.employee_name?.split(' ')[0] || '';
-
-        // Проверяем, есть ли дубликаты имени в этой позиции
+        // 1. Собираем контекст: находим всех сотрудников в текущей позиции
         const employeesInPosition = employees.filter(emp =>
             emp.default_position_id === position.pos_id ||
             assignments.some(a => a.emp_id === emp.emp_id && a.position_id === position.pos_id)
         );
 
-        const duplicateNames = employeesInPosition.filter(emp =>
-            (emp.first_name || emp.employee_name?.split(' ')[0]) === firstName
-        );
-
-        if (duplicateNames.length > 1) {
-            const lastName = employee.last_name || employee.employee_name?.split(' ')[1] || '';
-            return `${firstName} ${lastName.charAt(0)}.`;
-        }
-
-        return firstName;
+        // 2. Вызываем нашу утилиту с нужными опциями
+        return formatEmployeeNameUtil(employee, {
+            showFullName: !showFirstNameOnly,
+            checkDuplicates: true, // Включаем проверку на дубликаты
+            contextEmployees: employeesInPosition // Передаем список для проверки
+        });
     };
 
 
