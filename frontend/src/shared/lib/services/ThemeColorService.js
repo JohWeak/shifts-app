@@ -29,24 +29,18 @@ class ThemeColorService {
 
     // Получить цвет смены с учетом всех источников
     static getShiftColor(shift, theme, userRole = 'employee') {
-        // Приоритеты:
-        // 1. Локальные настройки пользователя (для всех)
-        // 2. Локальные настройки админа для темной темы
-        // 3. Глобальный цвет из БД
 
-        // Если это "смена" выходного дня, у нее нет цвета в БД.
-        if (shift.shift_id === 'day_off') {
-            // Возвращаем дефолтный цвет для выходного в зависимости от темы
-            return theme === 'dark' ? '#343a40' : '#f8f9fa'; // Темно-серый или светло-серый
+        const isAdmin = userRole === 'admin';
+
+        // 1. Если я НЕ админ, то сначала проверяю свои локальные настройки
+        if (!isAdmin) {
+            const userColors = this.getColors(theme, false);
+            if (userColors[shift.shift_id]) {
+                return userColors[shift.shift_id];
+            }
         }
 
-        // Проверяем личные настройки пользователя
-        const userColors = this.getColors(theme, false);
-        if (userColors[shift.shift_id]) {
-            return userColors[shift.shift_id];
-        }
-
-        // Для темной темы проверяем админские локальные настройки
+        // 2. Для темной темы (и для админа, и для работника) проверяем админские настройки
         if (theme === 'dark') {
             const adminDarkColors = this.getColors('dark', true);
             if (adminDarkColors[shift.shift_id]) {
@@ -54,8 +48,21 @@ class ThemeColorService {
             }
         }
 
-        // Возвращаем глобальный цвет из БД
-        return shift.color || '#6c757d';
+        // Логика для выходного дня остается
+        if (shift.shift_id === 'day_off') {
+            return theme === 'dark' ? '#343a40' : '#f8f9fa';
+        }
+
+        // 3. Если ничего не найдено, возвращаем глобальный цвет из БД
+        //    Для админа в светлой теме это будет первый же шаг после проверки 'day_off'.
+        const dbColor = shift.color || '#6c757d';
+
+        // И возвращаем дефолтный для темной темы, если нет глобального
+        if (theme === 'dark' && !shift.color) {
+            return '#495057';
+        }
+
+        return dbColor;
     }
 
     // Проверить наличие кастомных цветов

@@ -1,7 +1,8 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
+import {employeeAPI, scheduleAPI, worksiteAPI, updatePositionShiftColor} from 'shared/api/apiService';
 import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
+import ThemeColorService from "../../../shared/lib/services/ThemeColorService";
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -155,6 +156,28 @@ export const fetchWorkSites = createAsyncThunk(
     }
 );
 
+export const updateShiftColor = createAsyncThunk(
+    'schedule/updateShiftColor',
+    // payloadCreator принимает объект { shiftId, color, saveMode, currentTheme, isAdmin }
+    async (payload, { rejectWithValue, getState }) => {
+        try {
+            const { shiftId, color, saveMode, currentTheme, isAdmin } = payload;
+
+            if (saveMode === 'local') {
+                ThemeColorService.setColor(shiftId, color, currentTheme, isAdmin && currentTheme === 'dark');
+                // Для локального режима просто возвращаем то, что сохранили
+            } else {
+                // 1. Вызываем API и СОХРАНЯЕМ ответ сервера
+                await updatePositionShiftColor(shiftId, color);
+            }
+            return { shiftId, color };
+
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 // --- Слайс (Slice) ---
 
 
@@ -186,30 +209,6 @@ const scheduleSlice = createSlice({
     reducers: {
         // Синхронные экшены для управления UI
 
-        // Обновление цвета смены
-        updateShiftColor: (state, action) => {
-            const { shiftId, color } = action.payload;
-
-            // Обновляем в scheduleDetails
-            if (state.scheduleDetails?.shifts) {
-                const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
-                if (shiftIndex !== -1) {
-                    state.scheduleDetails.shifts[shiftIndex].color = color;
-                }
-            }
-
-            // Также обновляем в positions если там есть shifts
-            if (state.scheduleDetails?.positions) {
-                state.scheduleDetails.positions.forEach(position => {
-                    if (position.shifts) {
-                        const shift = position.shifts.find(s => s.shift_id === shiftId);
-                        if (shift) {
-                            shift.color = color;
-                        }
-                    }
-                });
-            }
-        },
         setActiveTab(state, action) {
             state.activeTab = action.payload;
         },
@@ -408,9 +407,27 @@ const scheduleSlice = createSlice({
             .addCase(updateScheduleStatus.rejected, (state, action) => {
                 state.loading = 'failed';
                 state.error = action.payload;
+            })
+            .addCase(updateShiftColor.fulfilled, (state, action) => {
+                const { shiftId, color } = action.payload;
+
+                if (state.scheduleDetails?.shifts) {
+                    const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
+                    if (shiftIndex !== -1) {
+                        state.scheduleDetails.shifts[shiftIndex].color = color;
+                    }
+                }
+                if (state.scheduleDetails?.positions) {
+                    state.scheduleDetails.positions.forEach(position => {
+                        if (position.shifts) {
+                            const shift = position.shifts.find(s => s.shift_id === shiftId);
+                            if (shift) {
+                                shift.color = color;
+                            }
+                        }
+                    });
+                }
             });
-
-
     },
 });
 
@@ -422,7 +439,6 @@ export const {
     addPendingChange,
     removePendingChange,
     clearPositionChanges,
-    updateShiftColor,
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

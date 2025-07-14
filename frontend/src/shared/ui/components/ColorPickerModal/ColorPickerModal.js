@@ -60,16 +60,22 @@ const ColorPickerModal = ({
         if (onColorChange) { onColorChange(color); }
     };
 
-    const handleSaveAndClose = () => {
-        if (onColorSelect) { onColorSelect(selectedColor); }
+    const handleSaveAndClose = async () => {
+        if (onColorSelect) {
+            // 1. ЖДЕМ, пока onColorSelect (т.е. applyColor) полностью завершится.
+            //    Внутри него теперь происходит и сохранение, и очистка tempShiftColors.
+            await onColorSelect(selectedColor);
+        }
+        // 2. И только ПОСЛЕ этого закрываем модал.
         onHide();
     };
 
-
-    // Отменяет изменения и закрывает шторку
+// Отменяет изменения и закрывает шторку
     const handleCancelAndClose = () => {
-        if (onColorChange) { onColorChange(initialColor); }
-        onHide();
+        if (onColorChange) {
+            onColorChange(initialColor);
+        }
+        onHide(); // onHide здесь - это closeColorPicker, который должен быть вызван для отмены.
     };
 
     const handleReset = () => {
@@ -108,53 +114,9 @@ const ColorPickerModal = ({
 
                     </small>
                 </div>
-                {/* Preset colors */}
-                <Row className="g-1 align-items-center preset-colors-wrapper mb-2">
-                    {PRESET_COLORS.map(color => (
-                        <Col xs="auto">
-                            <button
-                                key={color}
-                                className="color-preset-btn flex-shrink-0"
-                                style={{
-                                    backgroundColor: color,
-                                    borderColor: selectedColor === color ? '#0d6efd' : '#dee2e6',
-                                    borderWidth: selectedColor === color ? '2px' : '1px'
-                                }}
-                                onClick={() => handleColorChange(color)}
-                            />
-                        </Col>
-                    ))}
 
-                </Row>
-                {/* 5. Ряд с HEX и глобальным цветом */}
-                <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
-                    <Col xs="auto" className="d-flex align-items-center">
-                        <label className='me-2'>{t('color.customColor')}</label>
-                        {/*{selectedColor.toUpperCase()}*/}
-                    </Col>
-                    {saveMode === 'local' && hasActiveLocalColor && (
-                        <Col xs="auto" className="d-flex align-items-center">
-                            <i className="bi bi-globe small me-1 mt-0"></i>
-                            <span className="me-2">{t('color.globalColorIs')}:</span>
-                            <div className="global-color-swatch" style={{ backgroundColor: themeAwareGlobalColor }}></div>
-                            {/* Кнопка сброса для локальных настроек */}
-                            {saveMode === 'local' && hasLocalColor && onResetColor && (
-                                <Button
-                                    variant="link"
-                                    size="sm"
-                                    className=" text-decoration-none py-0"
-                                    onClick={handleReset}
-                                    title={t('color.resetToGlobal')}
-                                >
-                                    <i className="bi bi-arrow-counterclockwise text-warning"></i>
-                                </Button>
-                            )}
-                        </Col>
-                    )}
-
-                </Row>
                 {/* Custom color picker */}
-                <Row className="g-2 align-items-center mb-2">
+                <Row className="gx-0 align-items-center mb-2">
                     {/* 1. Наша красивая, кастомная кнопка на всю ширину */}
                     <div
                         className="color-preview-button" // Используем наш кастомный класс
@@ -187,6 +149,53 @@ const ColorPickerModal = ({
                     />
 
                 </Row>
+                {/* Preset colors */}
+                <Col xs="auto" className="d-flex align-items-center small text-muted">
+                    <label className='mb-1'>{t('color.quickColors')}</label>
+                    {/*{selectedColor.toUpperCase()}*/}
+                </Col>
+                <Row className="g-1 align-items-center preset-colors-wrapper mb-2">
+                    {PRESET_COLORS.map(color => (
+                        <Col xs="auto">
+                            <button
+                                key={color}
+                                className="color-preset-btn flex-shrink-0"
+                                style={{
+                                    backgroundColor: color,
+                                    borderColor: selectedColor === color ? '#0d6efd' : '#dee2e6',
+                                    borderWidth: selectedColor === color ? '2px' : '1px'
+                                }}
+                                onClick={() => handleColorChange(color)}
+                            />
+                        </Col>
+                    ))}
+
+                </Row>
+                {/* 5. Ряд с HEX и глобальным цветом */}
+                <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
+
+                    {saveMode === 'local' && hasActiveLocalColor && (
+                        <Col xs="auto" className="d-flex align-items-center">
+                            <i className="bi bi-globe small me-1 mt-0"></i>
+                            <span className="me-2">{t('color.globalColorIs')}:</span>
+                            <div className="global-color-swatch" style={{ backgroundColor: themeAwareGlobalColor }}></div>
+                            {/* Кнопка сброса для локальных настроек */}
+                            {saveMode === 'local' && hasLocalColor && onResetColor && (
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    className=" text-decoration-none py-0"
+                                    onClick={handleReset}
+                                    title={t('color.resetToGlobal')}
+                                >
+                                    <i className="bi bi-arrow-counterclockwise text-warning"></i>
+                                </Button>
+                            )}
+                        </Col>
+                    )}
+
+                </Row>
+
 
 
 

@@ -2,12 +2,14 @@
 import {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {updateShiftColor} from '../../features/admin-schedule-management/model/scheduleSlice';
-import {updatePositionShiftColor} from 'shared/api/apiService';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
+import {updatePositionShiftColor} from "../api/apiService";
 
 export const useShiftColor = () => {
     const dispatch = useDispatch();
     const { user } = useSelector(state => state.auth);
+
+
     const isAdmin = user?.role === 'admin';
     const [currentTheme, setCurrentTheme] = useState(
         document.documentElement.getAttribute('data-theme') || 'light'
@@ -89,13 +91,14 @@ export const useShiftColor = () => {
         });
     };
 
-    const closeColorPicker = () => {
-        // Очищаем временный цвет
-        setTempShiftColors(prev => {
-            const newState = { ...prev };
-            delete newState[colorPickerState.shiftId];
-            return newState;
-        });
+    const closeColorPicker = (shouldResetPreview = true) => {
+        if (shouldResetPreview) {
+            setTempShiftColors(prev => {
+                const newState = { ...prev };
+                delete newState[colorPickerState.shiftId];
+                return newState;
+            });
+        }
 
         setColorPickerState({
             show: false,
@@ -118,35 +121,34 @@ export const useShiftColor = () => {
             const saveMode = customSaveMode || colorPickerState.saveMode;
 
             if (saveMode === 'local') {
-                // Сохраняем локально
+                // Сохраняем локально. НЕ ТРОГАЕМ REDUX.
+                // Redux должен продолжать хранить истинный глобальный цвет.
                 ThemeColorService.setColor(
                     shiftId,
                     color,
                     currentTheme,
-                    isAdmin && currentTheme === 'dark' // Для админа в темной теме
+                    isAdmin && currentTheme === 'dark'
                 );
-
-                // Обновляем Redux для текущей сессии
-                dispatch(updateShiftColor({
-                    shiftId: shiftId,
-                    color: color
-                }));
-            } else {
+            } else { // saveMode === 'global'
                 // Сохраняем глобально в БД
                 await updatePositionShiftColor(shiftId, color);
 
+                // --- ПЕРЕМЕСТИЛИ СЮДА ---
+                // И только после успешного сохранения в БД,
+                // обновляем наше представление этих данных в Redux.
                 dispatch(updateShiftColor({
                     shiftId: shiftId,
                     color: color
                 }));
             }
 
-            // Очищаем временный цвет
+            // Очищаем временный цвет для превью в любом случае
             setTempShiftColors(prev => {
                 const newState = { ...prev };
                 delete newState[shiftId];
                 return newState;
             });
+
 
             return true;
         } catch (error) {
