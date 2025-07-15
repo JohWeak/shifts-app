@@ -1,6 +1,6 @@
 import React from 'react';
 import './PageHeader.css';
-import {Card} from "react-bootstrap";
+import {Container, Row, Col, Card} from 'react-bootstrap';
 
 const PageHeader = ({
                         title,

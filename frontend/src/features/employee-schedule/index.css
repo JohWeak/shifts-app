@@ -142,6 +142,15 @@
     margin-bottom: 0.75rem!important;
 }
 
+.full-schedule-toggle {
+    margin: 0;
+}
+
+.full-schedule-toggle .form-check-label {
+    font-weight: normal;
+    cursor: pointer;
+}
+
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .employee-schedule-container {

@@ -16,3 +16,12 @@
 .schedule-info-card .form-check-label{
     font-size: 0.9rem;
 }
+
+.schedule-info-card .week-title {
+    color: var(--bs-gray-700);
+    font-weight: 600;
+}
+
+[data-theme="dark"] .schedule-info-card .week-title {
+    color: var(--bs-gray-300);
+}

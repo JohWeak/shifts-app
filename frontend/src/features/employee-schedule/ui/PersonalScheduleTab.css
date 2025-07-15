@@ -54,7 +54,39 @@
 .color-picker-btn:hover {
     opacity: 1 !important;
 }
+/* Week sections */
+.week-schedule-section {
+    margin-bottom: 2rem;
+}
 
+.week-title {
+    color: var(--bs-gray-700);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .week-title {
+    color: var(--bs-gray-300);
+}
+
+/* Remove bottom padding as we don't have fixed buttons anymore */
+.personal-schedule-content {
+    padding-bottom: 1rem;
+}
+
+/* Remove fixed week selector styles */
+.week-selector-fixed {
+    display: none;
+}
+
+/* Position and site info in card */
+.day-card .border-top {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="dark"] .day-card .border-top {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
 
 /* Mobile responsive */
 @media (max-width: 767px) {

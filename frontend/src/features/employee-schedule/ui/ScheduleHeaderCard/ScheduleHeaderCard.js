@@ -32,7 +32,7 @@ export const ScheduleHeaderCard = ({
         <Card className={`schedule-info-card mb-3 ${className}`}>
             <Card.Body className="d-flex justify-content-between py-2">
                 <div className="d-flex flex-column align-items-start gap-1">
-                    {title && <h6 className="mb-0">{title}</h6>}
+                    {title && <h6 className=" week-title mb-2">{title} </h6>}
                     {showSubtitle && (
                         <small className="text-muted">
                             {position && (
@@ -50,9 +50,9 @@ export const ScheduleHeaderCard = ({
                         </small>
                     )}
                 </div>
-                <div className="d-flex flex-column align-items-end justify-content-center">
+                <div className="d-flex flex-column align-items-end justify-content-start">
                     {week && (
-                        <Badge bg="primary mt-1">
+                        <Badge bg="primary mb-2">
                             {formatWeekRange(week)}
                         </Badge>
                     )}

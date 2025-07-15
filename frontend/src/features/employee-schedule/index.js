@@ -1,7 +1,8 @@
 // frontend/src/features/employee-schedule/index.js
 import React, { useState, useEffect } from 'react';
-import { Container, Tab, Tabs, Card } from 'react-bootstrap';
+import { Container, Tab, Tabs, Card, Form } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useSelector } from 'react-redux';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import { scheduleAPI } from 'shared/api/apiService';
@@ -19,12 +20,23 @@ import './index.css';
 const EmployeeSchedule = () => {
     const { t } = useI18n();
     const [activeTab, setActiveTab] = useState('personal');
+    const { user } = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [employeeData, setEmployeeData] = useState(null);
+
+    // Состояние для переключателя Full Schedule
+    const [showFullSchedule, setShowFullSchedule] = useState(() => {
+        const saved = localStorage.getItem('employee_showFullSchedule');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
 
     useEffect(() => {
         fetchEmployeeData();
     }, []);
+
+    useEffect(() => {
+        localStorage.setItem('employee_showFullSchedule', JSON.stringify(showFullSchedule));
+    }, [showFullSchedule]);
 
     const fetchEmployeeData = async () => {
         try {
@@ -53,12 +65,25 @@ const EmployeeSchedule = () => {
         );
     }
 
+    // Элемент переключателя для PageHeader
+    const headerExtra = hasAssignedPosition ? (
+        <Form.Check
+            type="switch"
+            id="full-schedule-toggle"
+            label={t('employee.schedule.fullSchedule')}
+            checked={showFullSchedule}
+            onChange={(e) => setShowFullSchedule(e.target.checked)}
+            className="full-schedule-toggle"
+        />
+    ) : null;
+
     return (
         <Container fluid className="employee-schedule-container">
             <PageHeader
                 icon="calendar-week"
                 title={t('employee.schedule.title')}
                 subtitle={t('employee.schedule.subtitle')}
+                actions={headerExtra}
             />
 
             <Card className="schedule-card shadow-sm">
@@ -73,33 +98,17 @@ const EmployeeSchedule = () => {
                             eventKey="personal"
                             title={
                                 <span>
-                                    <i className="bi bi-person-square me-2"></i>
-                                    {t('employee.schedule.personalSchedule')}
+                                    <i className="bi bi-calendar-week me-2"></i>
+                                    {t('employee.schedule.title')}
                                 </span>
                             }
                         >
                             <div className="tab-content-wrapper">
-                                <PersonalScheduleTab />
-                            </div>
-                        </Tab>
-
-                        <Tab
-                            eventKey="full"
-                            title={
-                                <span>
-                                    <i className="bi bi-calendar3 me-2"></i>
-                                    {t('employee.schedule.fullSchedule')}
-                                    {!hasAssignedPosition && (
-                                        <i className="bi bi-lock ms-2"
-                                           title={t('employee.schedule.positionRequired')}
-                                        ></i>
-                                    )}
-                                </span>
-                            }
-                            disabled={!hasAssignedPosition}
-                        >
-                            <div className="tab-content-wrapper">
-                                <FullScheduleTab />
+                                {showFullSchedule && hasAssignedPosition ? (
+                                    <FullScheduleTab />
+                                ) : (
+                                    <PersonalScheduleTab />
+                                )}
                             </div>
                         </Tab>
 
@@ -119,7 +128,6 @@ const EmployeeSchedule = () => {
                     </Tabs>
                 </Card.Body>
             </Card>
-
         </Container>
     );
 };

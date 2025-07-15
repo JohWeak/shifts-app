@@ -23,7 +23,6 @@ const FullScheduleTab = () => {
     const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
     const [nextWeekData, setNextWeekData] = useState(null);
-    const [activeWeek, setActiveWeek] = useState('current');
     const [employeeData, setEmployeeData] = useState(null);
     const tableRef = useRef(null);
     const {
@@ -127,7 +126,7 @@ const FullScheduleTab = () => {
         const hasCurrentUser = employees.some(emp =>
             emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
         );
-        const bgColor = getShiftColor({ ...shift, shift_id: shift.id });
+        const bgColor = getShiftColor({...shift, shift_id: shift.id});
         const textColor = getContrastTextColor(bgColor);
 
         return (
@@ -153,7 +152,7 @@ const FullScheduleTab = () => {
                                             ? 'fw-bold'
                                             : ''
                                     }`}
-                                    style={{ color: textColor }}
+                                    style={{color: textColor}}
                                 >
                                     {formatEmployeeName(firstName, lastName, showFullName)}
                                 </div>
@@ -168,7 +167,7 @@ const FullScheduleTab = () => {
     };
 
     // Функция для рендеринга расписания конкретной недели
-    const renderWeekSchedule = (weekData) => {
+    const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData || !weekData.days || !weekData.shifts) {
             return (
                 <Card className="text-center py-5">
@@ -184,10 +183,11 @@ const FullScheduleTab = () => {
         const {week, position, shifts, days} = weekData;
 
         return (
-            <>
+            <div className="week-schedule-section mb-3">
+
                 <ScheduleHeaderCard
                     className="position-info-card"
-                    title=''
+                    title={weekTitle}
                     site={position?.site_name || employeeData?.site_name}
                     position={position?.name || employeeData?.position_name}
                     week={week}
@@ -214,15 +214,15 @@ const FullScheduleTab = () => {
                                             <div className="day-name">
                                                 {getDayName(dateObj.getDay(), t)}
                                             </div>
-                                            {isToday? (
+                                            {isToday ? (
                                                 <Badge bg="primary" className="today-badge mt-1">
                                                     {formatHeaderDate(dateObj)}
                                                 </Badge>
                                             ) : (
-                                            <div className="day-date">
-                                                {formatHeaderDate(dateObj)}
-                                            </div>
-                                        )}
+                                                <div className="day-date">
+                                                    {formatHeaderDate(dateObj)}
+                                                </div>
+                                            )}
                                         </th>
                                     );
                                 })}
@@ -235,8 +235,11 @@ const FullScheduleTab = () => {
                                         <div
                                             className="shift-header-info"
                                             style={{
-                                                backgroundColor: getShiftColor({ ...shift, shift_id: shift.id }),
-                                                color: getContrastTextColor(getShiftColor({ ...shift, shift_id: shift.id }))
+                                                backgroundColor: getShiftColor({...shift, shift_id: shift.id}),
+                                                color: getContrastTextColor(getShiftColor({
+                                                    ...shift,
+                                                    shift_id: shift.id
+                                                }))
                                             }}
                                         >
                                             <span className="shift-header-name">{shift.shift_name}
@@ -252,7 +255,7 @@ const FullScheduleTab = () => {
                                                     e.stopPropagation();
                                                     openColorPicker(
                                                         shift.id,
-                                                        getShiftColor({ ...shift, shift_id: shift.id }),
+                                                        getShiftColor({...shift, shift_id: shift.id}),
                                                         shift
                                                     );
                                                 }}
@@ -280,20 +283,8 @@ const FullScheduleTab = () => {
 
                     </div>
                 </div>
-                <ColorPickerModal
-                    show={colorPickerState.show}
-                    onHide={closeColorPicker}
-                    onColorSelect={applyColor}
-                    onColorChange={previewColor}
-                    initialColor={colorPickerState.currentColor}
-                    title={t('modal.colorPicker.title')}
-                    saveMode={colorPickerState.saveMode}
-                    currentTheme={currentTheme}
-                    hasLocalColor={hasLocalColor}
-                    originalGlobalColor={colorPickerState.originalGlobalColor}
-                    onResetColor={resetShiftColor}
-                />
-            </>
+
+            </div>
         );
     };
 
@@ -334,17 +325,21 @@ const FullScheduleTab = () => {
 
     return (
         <div className="full-schedule-content">
-            {/* Display selected week */}
-            {activeWeek === 'current' && currentWeekData && renderWeekSchedule(currentWeekData)}
-            {activeWeek === 'next' && nextWeekData && renderWeekSchedule(nextWeekData)}
+            {currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
+            {nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
 
-
-            {/* New shared component */}
-            <WeekSelector
-                activeWeek={activeWeek}
-                onWeekChange={setActiveWeek}
-                currentWeekData={currentWeekData}
-                nextWeekData={nextWeekData}
+            <ColorPickerModal
+                show={colorPickerState.show}
+                onHide={closeColorPicker}
+                onColorSelect={applyColor}
+                onColorChange={previewColor}
+                initialColor={colorPickerState.currentColor}
+                title={t('modal.colorPicker.title')}
+                saveMode={colorPickerState.saveMode}
+                currentTheme={currentTheme}
+                hasLocalColor={hasLocalColor}
+                originalGlobalColor={colorPickerState.originalGlobalColor}
+                onResetColor={resetShiftColor}
             />
         </div>
     );

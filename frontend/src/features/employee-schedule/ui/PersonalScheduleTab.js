@@ -1,14 +1,15 @@
 // frontend/src/features/employee-schedule/ui/PersonalScheduleTab.js
 import React, { useState, useEffect } from 'react';
-import { Alert, Badge, Button, Card } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { Container, Table, Alert, Badge, Button, Card, Row, Col } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import { scheduleAPI } from 'shared/api/apiService';
-import { formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
+import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO, addWeeks, format } from 'date-fns';
-import {ScheduleHeaderCard, WeekSelector} from "./";
+import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './PersonalScheduleTab.css';
@@ -19,22 +20,19 @@ const PersonalScheduleTab = () => {
     const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
     const [nextWeekData, setNextWeekData] = useState(null);
-    const [activeWeek, setActiveWeek] = useState('current');
     const [employeeInfo, setEmployeeInfo] = useState(null);
+
     const {
         colorPickerState,
         openColorPicker,
         closeColorPicker,
         previewColor,
         applyColor,
-        getShiftColor,
-        currentTheme,
-        hasLocalColor,
-        resetShiftColor,
+        getShiftColor
     } = useShiftColor();
 
     useEffect(() => {
-        fetchSchedules();
+        void fetchSchedules();
     }, []);
 
     const fetchSchedules = async () => {
@@ -42,13 +40,11 @@ const PersonalScheduleTab = () => {
         setError(null);
 
         try {
-            console.log('Fetching current week schedule...');
             const currentData = await scheduleAPI.fetchWeeklySchedule();
-            console.log('Current week data received:', currentData);
 
             if (currentData) {
                 setCurrentWeekData(currentData);
-
+                console.log('Employee data received:', currentData.employee);
                 if (currentData.employee) {
                     setEmployeeInfo(currentData.employee);
                 }
@@ -75,23 +71,25 @@ const PersonalScheduleTab = () => {
         }
     };
 
-    const renderWeekSchedule = (weekData) => {
+    const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData) return null;
 
         const employee = employeeInfo || weekData.employee;
         const hasSchedule = weekData.schedule && weekData.schedule.length > 0;
-
+        const hasPosition = employee?.position_id;
+        const hasWorkSite = employee?.site_id;
+        console.log('Employee Worksite Info:', employee?.site_name, employee.position_name)
         return (
-            <>
-                {/* Header Card - similar to FullScheduleTab */}
+            <div className="week-schedule-section mb-4">
                 <ScheduleHeaderCard
-                    position={employee?.position_name}
-                    site={employee?.site_name}
+                    className="position-info-card"
+                    title={weekTitle}
                     empName={employee?.name}
+                    site={employee?.site_name}
+                    position={employee?.position_name}
                     week={weekData.week}
                 />
 
-                {/* Schedule Content */}
                 {!hasSchedule ? (
                     <Card className="text-center py-4">
                         <Card.Body>
@@ -126,129 +124,92 @@ const PersonalScheduleTab = () => {
 
                             const dateObj = parseISO(day.date);
                             const isToday = new Date().toDateString() === dateObj.toDateString();
-                            // const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
-
-                            // Создаем "фальшивый" объект смены для выходного
-                            const dayOffShift = { shift_id: 'day_off' };
-                            // Если есть смена, берем ее цвет. Если нет - берем цвет выходного.
-                            const bgColor = userAssignment
-                                ? getShiftColor(userAssignment)
-                                : getShiftColor(dayOffShift); // <-- Используем наш ключ
-
-                            // Устанавливаем цвет текста
+                            const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
                             const textColor = getContrastTextColor(bgColor);
 
                             return (
                                 <Card
                                     key={day.date}
                                     className={`day-card mb-2 ${isToday ? 'today-card' : ''} ${!userAssignment ? 'day-off-card' : ''}`}
-                                    style={{
+                                    style={userAssignment ? {
                                         backgroundColor: bgColor,
+                                        color: textColor,
                                         borderColor: bgColor
-                                    }}
+                                    } : {}}
                                 >
                                     <Card.Body className="py-2">
                                         <div className="d-flex justify-content-between align-items-center">
-                                            <div className="day-info" style={{ color: textColor }}>
-                                                <span className="day-date ">
-                                                    {formatHeaderDate(dateObj)}
-                                                </span>
-                                                <strong className="day-name ms-2">
+                                            <div className="day-info">
+                                                <strong className="day-name">
                                                     {getDayName(day.day_of_week ?? dateObj.getDay(), t)}
                                                 </strong>
+                                                <span className="day-date ms-2">
+                                                    {formatHeaderDate(dateObj)}
+                                                </span>
                                                 {isToday && (
                                                     <Badge bg="primary" className="ms-2 today-badge">
                                                         {t('common.today')}
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <div className="shift-info text-end" style={{ color: textColor }}>
+                                            <div className="shift-info text-end">
                                                 {userAssignment ? (
                                                     <>
                                                         <div className="shift-name fw-bold">
                                                             {userAssignment.shift_name}
-                                                            <Button
-                                                                variant="link"
-                                                                size="sm"
-                                                                className="color-picker-btn p-0 ms-2"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    openColorPicker(
-                                                                        userAssignment.shift_id,
-                                                                        getShiftColor(userAssignment),
-                                                                        userAssignment
-                                                                    );
-                                                                }}
-                                                                title={t('shift.editColor')}
-                                                            >
-                                                                <i className="bi bi-palette"></i>
-                                                            </Button>
-
-
                                                         </div>
                                                         <div className="shift-time small">
                                                             {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
                                                         </div>
-                                                    </>
-                                                ) : (
-                                                    <div className="day-off d-flex align-items-center" style={{ color: 'inherit' }}>
-                                                        {/* --- НАЧАЛО ИЗМЕНЕНИЙ --- */}
-                                                        {t('employee.schedule.dayOff')}
                                                         <Button
                                                             variant="link"
                                                             size="sm"
                                                             className="color-picker-btn p-0 ms-2"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-
-                                                                // 1. Создаем "фальшивый" объект смены для выходного
-                                                                const dayOffShift = {
-                                                                    shift_id: 'day_off', // Наш специальный ключ
-                                                                    shift_name: t('employee.schedule.dayOff') // Название для заголовка модала
-                                                                };
-
-                                                                // 2. Вызываем openColorPicker
                                                                 openColorPicker(
-                                                                    dayOffShift.shift_id,
-                                                                    getShiftColor(dayOffShift), // Получаем текущий цвет для выходного
-                                                                    dayOffShift // Передаем сам объект
+                                                                    userAssignment.shift_id,
+                                                                    getShiftColor(userAssignment),
+                                                                    userAssignment
                                                                 );
                                                             }}
-                                                            title={t('employee.schedule.editDayOffColor')} // Новый текст для title
+                                                            title={t('shift.editColor')}
                                                         >
-                                                            <i className="bi bi-house-door"></i>
+                                                            <i className="bi bi-palette"></i>
                                                         </Button>
-
+                                                    </>
+                                                ) : (
+                                                    <div className="day-off">
+                                                        <i className="bi bi-house-door me-1"></i>
+                                                        {t('employee.schedule.dayOff')}
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
-                                        {userAssignment && !employee?.position_id && (
-                                            <div className="mt-1 small">
-                                                <i className="bi bi-geo-alt me-1"></i>
-                                                {userAssignment.employee_info?.position || '-'}
+                                        {/* Показываем позицию и сайт если работник не привязан к позиции */}
+                                        {userAssignment && (!hasPosition || !hasWorkSite) && (
+                                            <div className="mt-2 pt-2 border-top small">
+                                                {userAssignment.employee_info?.position && (
+                                                    <div>
+                                                        <i className="bi bi-person-badge me-1"></i>
+                                                        {userAssignment.employee_info.position}
+                                                    </div>
+                                                )}
+                                                {userAssignment.employee_info?.site_name && (
+                                                    <div>
+                                                        <i className="bi bi-building me-1"></i>
+                                                        {userAssignment.employee_info.site_name}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </Card.Body>
                                 </Card>
                             );
                         })}
-                        <ColorPickerModal
-                            show={colorPickerState.show}
-                            onHide={closeColorPicker}
-                            onColorSelect={applyColor}
-                            onColorChange={previewColor}
-                            initialColor={colorPickerState.currentColor}
-                            title={t('modal.colorPicker.title')}
-                            saveMode={colorPickerState.saveMode}
-                            currentTheme={currentTheme}
-                            hasLocalColor={hasLocalColor}
-                            originalGlobalColor={colorPickerState.originalGlobalColor}
-                            onResetColor={resetShiftColor}
-                        />
                     </div>
                 )}
-            </>
+            </div>
         );
     };
 
@@ -282,24 +243,22 @@ const PersonalScheduleTab = () => {
 
     return (
         <div className="personal-schedule-content">
-            {/* Display selected week */}
-            {activeWeek === 'current' && currentWeekData && (
-                renderWeekSchedule(currentWeekData)
-            )}
+            {currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
+            {nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
 
-            {activeWeek === 'next' && nextWeekData && (
-                renderWeekSchedule(nextWeekData)
-            )}
-
-            {/* New shared component */}
-            <WeekSelector
-                activeWeek={activeWeek}
-                onWeekChange={setActiveWeek}
-                currentWeekData={currentWeekData}
-                nextWeekData={nextWeekData}
+            <ColorPickerModal
+                show={colorPickerState.show}
+                onHide={closeColorPicker}
+                onColorSelect={applyColor}
+                onColorChange={previewColor}
+                initialColor={colorPickerState.currentColor}
+                title={t('modal.colorPicker.title')}
+                saveMode={colorPickerState.saveMode}
+                currentTheme={colorPickerState.currentTheme}
+                hasLocalColor={colorPickerState.hasLocalColor}
+                originalGlobalColor={colorPickerState.originalGlobalColor}
             />
         </div>
-
     );
 };
 
