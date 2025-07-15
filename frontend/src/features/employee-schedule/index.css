@@ -35,16 +35,15 @@
 }
 
 /* Tabs Styling */
-/* Fixed tabs at bottom */
+/* Fixed tabs at top */
 .employee-schedule-tabs {
     position: fixed;
-    bottom: 0;
-
+    top: 56px;
     /*border-top: 2px solid var(--bs-gray-200);*/
-    border-bottom: none;
+    border-top: none;
     z-index: 1030;
     background-color: transparent;
-    border-top: none; /* Убираем рамку отсюда */
+    border-bottom: none; /* Убираем рамку отсюда */
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
@@ -59,13 +58,13 @@
 .employee-schedule-tabs::before {
     content: ''; /* Обязательно для псевдоэлементов */
     position: absolute;
-    bottom: 0;
+    bottom: 56px;
     left: 0;
     right: 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
 
     /* 5. Задаем ВЫСОТУ нашей фоновой панели */
-    height: 55px;
+    height: 54px;
 
     /* 6. Переносим стили фона и рамки сюда */
     background: var(--bs-white);
@@ -76,7 +75,7 @@
 
 [data-theme="dark"] .employee-schedule-tabs {
     background: var(--bs-gray-900);
-    border-top-color: var(--bs-gray-700);
+    border-bottom-color: var(--bs-gray-700);
     border-left: 1px solid var(--bs-gray-700);
     border-right: 1px solid var(--bs-gray-700);
 }
@@ -95,12 +94,12 @@
 
 
 .employee-schedule-tabs .nav-link.active {
-    border-bottom: none;
+    border-top: none;
     border-radius: var(--radius-sm)!important;
     font-weight: 700;
     color: var(--bs-primary) !important;
     background: rgba(var(--bs-primary-rgb), 0.03) !important;
-    border-top: 3px solid rgba(var(--bs-primary-rgb), 0.7)!important;
+    border-bottom: 3px solid rgba(var(--bs-primary-rgb), 0.7)!important;
 
 }
 
