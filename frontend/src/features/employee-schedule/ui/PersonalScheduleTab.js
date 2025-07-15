@@ -1,21 +1,21 @@
 // frontend/src/features/employee-schedule/ui/PersonalScheduleTab.js
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Table, Alert, Badge, Button, Card, Row, Col } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Container, Table, Alert, Badge, Button, Card, Row, Col} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import { scheduleAPI } from 'shared/api/apiService';
-import { formatWeekRange, formatShiftTime, getDayName, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
-import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
-import { parseISO, addWeeks, format } from 'date-fns';
+import {scheduleAPI} from 'shared/api/apiService';
+import {formatWeekRange, formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
+import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
+import {parseISO, addWeeks, format} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
-import { useShiftColor } from 'shared/hooks/useShiftColor';
+import {useShiftColor} from 'shared/hooks/useShiftColor';
 import './PersonalScheduleTab.css';
 
 const PersonalScheduleTab = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
@@ -140,17 +140,19 @@ const PersonalScheduleTab = () => {
                                     <Card.Body className="py-2">
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div className="day-info">
-                                                <strong className="day-name">
+                                                {isToday ? (
+                                                    <Badge bg="primary" className="today-badge">
+                                                        {formatHeaderDate(dateObj)}
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="day-date ">
+                                                        {formatHeaderDate(dateObj)}
+                                                    </span>
+                                                )}
+                                                <strong className="day-name ms-2">
                                                     {getDayName(day.day_of_week ?? dateObj.getDay(), t)}
                                                 </strong>
-                                                <span className="day-date ms-2">
-                                                    {formatHeaderDate(dateObj)}
-                                                </span>
-                                                {isToday && (
-                                                    <Badge bg="primary" className="ms-2 today-badge">
-                                                        {t('common.today')}
-                                                    </Badge>
-                                                )}
+
                                             </div>
                                             <div className="shift-info text-end">
                                                 {userAssignment ? (
@@ -161,22 +163,7 @@ const PersonalScheduleTab = () => {
                                                         <div className="shift-time small">
                                                             {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
                                                         </div>
-                                                        <Button
-                                                            variant="link"
-                                                            size="sm"
-                                                            className="color-picker-btn p-0 ms-2"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                openColorPicker(
-                                                                    userAssignment.shift_id,
-                                                                    getShiftColor(userAssignment),
-                                                                    userAssignment
-                                                                );
-                                                            }}
-                                                            title={t('shift.editColor')}
-                                                        >
-                                                            <i className="bi bi-palette"></i>
-                                                        </Button>
+
                                                     </>
                                                 ) : (
                                                     <div className="day-off">
@@ -184,19 +171,35 @@ const PersonalScheduleTab = () => {
                                                         {t('employee.schedule.dayOff')}
                                                     </div>
                                                 )}
+                                                <Button
+                                                    variant="link"
+                                                    size="sm"
+                                                    className="color-picker-btn p-0 ms-2"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openColorPicker(
+                                                            userAssignment.shift_id,
+                                                            getShiftColor(userAssignment),
+                                                            userAssignment
+                                                        );
+                                                    }}
+                                                    title={t('shift.editColor')}
+                                                >
+                                                    <i className="bi bi-palette"></i>
+                                                </Button>
                                             </div>
                                         </div>
                                         {/* Показываем позицию и сайт если работник не привязан к позиции */}
                                         {userAssignment && (!hasPosition || !hasWorkSite) && (
-                                            <div className="mt-2 pt-2 border-top small">
+                                            <div className="mt-2 pt-2 border-top small d-flex justify-content-between">
                                                 {userAssignment.employee_info?.position && (
-                                                    <div>
+                                                    <div className="me-1">
                                                         <i className="bi bi-person-badge me-1"></i>
                                                         {userAssignment.employee_info.position}
                                                     </div>
                                                 )}
                                                 {userAssignment.employee_info?.site_name && (
-                                                    <div>
+                                                    <div className="ms-1">
                                                         <i className="bi bi-building me-1"></i>
                                                         {userAssignment.employee_info.site_name}
                                                     </div>
@@ -214,7 +217,7 @@ const PersonalScheduleTab = () => {
     };
 
     if (loading) {
-        return <LoadingState message={t('common.loading')} />;
+        return <LoadingState message={t('common.loading')}/>;
     }
 
     if (error) {
