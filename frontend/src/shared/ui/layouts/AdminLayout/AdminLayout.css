@@ -159,7 +159,10 @@
 }
 
 .admin-main-content {
-    padding: 2rem;
+    padding: 1rem;
+}
+.admin-main-content .card {
+    border-radius: calc(var(--radius-lg) - 0px);
 }
 
 /* Mobile Sidebar - Кастомная реализация */

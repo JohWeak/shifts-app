@@ -165,7 +165,6 @@ const ScheduleCell = ({
                     >
                         <span
                             className="employee-name text-success"
-                            style={{fontStyle: 'italic'}}
                         >
                             {formatEmployeeName && assignment.employee
                                 ? formatEmployeeName(assignment.employee)

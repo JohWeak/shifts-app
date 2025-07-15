@@ -112,7 +112,7 @@ const ScheduleDetails = ({onCellClick}) => {
 
     return (
         <>
-            <Card className="mb-4 ">
+            <Card className="mb-3 ">
                 <Card.Body>
                     <ScheduleInfo
                         schedule={scheduleDetails.schedule}

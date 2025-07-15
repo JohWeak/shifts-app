@@ -78,7 +78,7 @@
 
 }
 .employee-editable {
-    font-style: italic;
+    /*font-style: italic;*/
 }
 
 .schedule-cell.editing-mode .employee-name.employee-clickable:hover {
