@@ -73,6 +73,7 @@
     position: fixed;
     bottom: 0; /* Height of navbar */
     background-color: transparent;
+    backdrop-filter: blur(15px);
     border-top: none;
     z-index: 1030;
     left: 50%;
@@ -91,10 +92,9 @@
     left: 0;
     right: 0;
     box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
-    height: 46px;
-    background: var(--bs-white);
+    height: 56px;
+    /*background: var(--bs-white);*/
     z-index: -1;
-    background: var(--bs-white);
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
 
@@ -111,7 +111,7 @@
 }
 .nav-tabs-wrapper {
     display: flex;
-    height: 48px;
+    height: 58px;
 }
 
 .employee-nav-tabs .nav-tab-item {
@@ -168,17 +168,15 @@
 /* Mobile Responsive */
 @media (max-width: 767px) {
     /* Keep text labels on mobile */
-    .employee-nav-tabs .nav-tab-item span {
-        display: inline !important;
-    }
+
 
     .employee-nav-tabs .nav-tab-item {
-        font-size: 0.875rem;
-        padding: 0 0.75rem;
+        flex-direction: column;
+        font-size: 0.675rem;
+        padding: 0.5rem 0.75rem 1rem;
     }
 
-    .employee-nav-tabs .nav-tab-item i {
-        display:none
+    .employee-nav-tabs .nav-tab-item .span {
     }
 
     .employee-navbar .user-name {
@@ -190,6 +188,7 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+
     }
 
     .nav-tabs-wrapper::-webkit-scrollbar {

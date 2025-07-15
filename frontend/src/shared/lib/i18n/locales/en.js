@@ -318,6 +318,8 @@ export const en = {
             fullSchedule: 'Full Schedule',
             archive: 'Archive',
             currentWeek: 'Current Week',
+            current: 'Current',
+            next: 'Next',
             nextWeek: 'Next Week',
             date: 'Date',
             day: 'Day',

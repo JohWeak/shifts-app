@@ -1,7 +1,7 @@
 /* Fixed week selector */
 .week-selector-fixed {
     position: fixed!important;
-    bottom: 55px; /* Adjust if needed, e.g., based on main tab bar height */
+    top: 55px; /* Adjust if needed, e.g., based on main tab bar height */
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 1.5rem);
@@ -28,15 +28,18 @@
 
 @media (max-width: 767px) {
     .week-selector-fixed {
-        bottom: 45px;
-        padding-left: 0;
-        padding-right: 0;
+        top: 105px;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
         justify-content: space-between;
 
     }
 
     .week-selector-fixed .btn{
-        min-width: 45%;
+        min-width: 20%;
+    }
+    .week-selector-fixed .btn .d-block{
+        display: none!important;
     }
 
 }

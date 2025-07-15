@@ -43,6 +43,8 @@
     border-top: none;
     z-index: 1030;
     background-color: transparent;
+    backdrop-filter: blur(5px);
+
     border-bottom: none; /* Убираем рамку отсюда */
     left: 50%;
     transform: translateX(-50%);
@@ -67,7 +69,7 @@
     height: 54px;
 
     /* 6. Переносим стили фона и рамки сюда */
-    background: var(--bs-white);
+    /*background: var(--bs-white);*/
     /* 7. Помещаем фон ЗА дочерними элементами (табами) */
     z-index: -1;
 }

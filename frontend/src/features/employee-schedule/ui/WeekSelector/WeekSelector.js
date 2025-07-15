@@ -16,7 +16,7 @@ export const WeekSelector = ({activeWeek, onWeekChange, currentWeekData, nextWee
                     onClick={() => onWeekChange('current')}
                     disabled={!currentWeekData}
                 >
-                    {t('employee.schedule.currentWeek')}
+                    {t('employee.schedule.current')}
                     {currentWeekData?.week && (
                         <small className="d-block">
                             {format(parseISO(currentWeekData.week.start), 'dd/MM')} -
@@ -30,7 +30,7 @@ export const WeekSelector = ({activeWeek, onWeekChange, currentWeekData, nextWee
                     onClick={() => onWeekChange('next')}
                     disabled={!nextWeekData}
                 >
-                    {t('employee.schedule.nextWeek')}
+                    {t('employee.schedule.next')}
                     {nextWeekData?.week && (
                         <small className="d-block">
                             {format(parseISO(nextWeekData.week.start), 'dd/MM')} -
