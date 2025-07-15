@@ -206,7 +206,7 @@ const AdminLayout = () => {
                             <ThemeToggle variant="icon" />
                             <LanguageSwitch />
 
-                        <Dropdown align="end">
+                        <Dropdown align="end" className='ms-3'>
                             <Dropdown.Toggle
                                 className="user-dropdown-btn border-0 shadow-sm"
                                 id="user-dropdown"

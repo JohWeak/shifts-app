@@ -17,11 +17,16 @@
 
 }
 
-.language-switch .dropdown-toggle:hover {
-    background-color: var(--bs-gray-100);
-    border-color: var(--bs-primary);
-    color: var(--bs-primary);
-}
+/*.language-switch .dropdown-toggle:hover {*/
+/*    background-color: var(--bs-gray-100);*/
+/*    border-color: var(--bs-primary);*/
+/*    color: var(--bs-primary);*/
+/*}*/
+
+/*.language-switch .dropdown-toggle .btn-check:checked+.btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check)+.btn:active{*/
+/*    background-color: var(--bs-gray-200)!important;*/
+/*    color:black!important;*/
+/*}*/
 
 [data-theme="dark"] .language-switch .dropdown-toggle {
     border-color: var(--bs-gray-600);

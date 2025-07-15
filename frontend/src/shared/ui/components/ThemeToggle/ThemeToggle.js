@@ -34,7 +34,7 @@ const ThemeToggle = ({ variant = 'button' }) => {
             variant="outline-secondary"
             size="sm"
             onClick={toggleTheme}
-            className="theme-toggle-btn"
+            className="theme-toggle-btn ms-2"
         >
             <i className={`bi bi-${theme === 'light' ? 'moon-stars' : 'sun'}`}></i>
             <span>{theme === 'light' ? 'Dark' : 'Light'}</span>
