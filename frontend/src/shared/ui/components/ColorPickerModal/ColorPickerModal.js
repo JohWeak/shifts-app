@@ -118,6 +118,7 @@ const ColorPickerModal = ({
             dialogClassName="bottom-sheet"
             backdropClassName="bottom-sheet-backdrop"
             contentClassName="shadow-lg"
+            className="color-picker-modal"
         >
             <Container className="pt-2 pb-3">
                 <div className="d-flex justify-content-between align-items-center mb-2">
