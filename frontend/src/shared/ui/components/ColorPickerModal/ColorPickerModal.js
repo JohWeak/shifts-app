@@ -1,9 +1,9 @@
 // frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
 import React, {useState, useEffect, useRef, useMemo} from 'react';
-import {Modal, Button, Container, Col, Row} from 'react-bootstrap';
+import {Modal, Button, Container, Col, Row, Form} from 'react-bootstrap';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 import './ColorPickerModal.css';
-import {getContrastTextColor, isDarkTheme, lightenColor} from "shared/lib/utils/colorUtils";
+import {getContrastTextColor, isDarkTheme, hexToHsl, hslToHex} from "shared/lib/utils/colorUtils";
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 const PRESET_COLORS = [
@@ -15,7 +15,13 @@ const PRESET_COLORS = [
     '#F0E68C', // Хаки
     '#87CEEB', // Небесно-голубой
     '#DEB887', // Бежевый
+    '#B2F2E8', // Светлая бирюза (новый)
+    '#FFDAB9', // Персиковый (новый)
+    '#E6E6FA', // Лаванда (новый)
+    '#FFFFFF', // Белый
+    '#000000', // Черный
 ];
+
 
 const ColorPickerModal = ({
                               show,
@@ -23,7 +29,6 @@ const ColorPickerModal = ({
                               onColorSelect,
                               initialColor = '#6c757d',
                               title = 'Select Color',
-                              showPreview = true,
                               onColorChange = null,
                               saveMode = 'global',
                               currentTheme = 'light',
@@ -35,54 +40,77 @@ const ColorPickerModal = ({
                           }) => {
     const [selectedColor, setSelectedColor] = useState(initialColor);
     const {t} = useI18n();
+    const colorInputRef = useRef(null);
+
+    // --- НОВЫЕ СОСТОЯНИЯ ДЛЯ СЛАЙДЕРА ---
+    const [activeHslBase, setActiveHslBase] = useState(null); // [h, s, l] базового цвета
+    const [brightness, setBrightness] = useState(50); // 0-100 для слайдера
 
     const themeAwareGlobalColor = useMemo(() => {
         if (shiftObject) {
-            const resetShift = { ...shiftObject, color: originalGlobalColor };
-            return ThemeColorService.getShiftColor(resetShift, currentTheme, userRole);
+            return ThemeColorService.getShiftColor({
+                ...shiftObject,
+                color: originalGlobalColor
+            }, currentTheme, userRole);
         }
         return originalGlobalColor || '#6c757d';
     }, [shiftObject, originalGlobalColor, currentTheme, userRole]);
 
-    // 2. Вычисляем "на лету", есть ли у нас кастомный цвет.
-    // Это и есть наш новый `hasLocalColor`.
     const hasActiveLocalColor = selectedColor !== themeAwareGlobalColor;
 
     useEffect(() => {
         if (show) {
-            setSelectedColor(initialColor);
+            updateColorAndSlider(initialColor);
         }
     }, [show, initialColor]);
 
-
-    const handleColorChange = (color) => {
-        setSelectedColor(color);
-        if (onColorChange) { onColorChange(color); }
+    const updateColorAndSlider = (newColor) => {
+        const hsl = hexToHsl(newColor);
+        setActiveHslBase(hsl);
+        // Инвертированная логика: HSL lightness 1.0 (ярко) = слайдер 0.
+        setBrightness(100 - Math.round(hsl[2] * 100));
+        setSelectedColor(newColor);
+        if (onColorChange) {
+            onColorChange(newColor);
+        }
     };
 
-    const handleSaveAndClose =  () => {
+    const handleSaveAndClose = () => {
         if (onColorSelect) {
             onColorSelect(selectedColor);
         }
         onHide();
     };
 
-// Отменяет изменения и закрывает шторку
     const handleCancelAndClose = () => {
         if (onColorChange) {
             onColorChange(initialColor);
         }
-        onHide(); // onHide здесь - это closeColorPicker, который должен быть вызван для отмены.
+        onHide();
     };
 
     const handleReset = () => {
         if (onResetColor) {
             const newColor = onResetColor();
-            if (newColor) { handleColorChange(newColor); }
+            if (newColor) {
+                updateColorAndSlider(newColor);
+            }
+        }
+    };
+    // --- НОВАЯ ФУНКЦИЯ ДЛЯ ОБРАБОТКИ ИЗМЕНЕНИЯ ЯРКОСТИ ---
+    const handleBrightnessChange = (e) => {
+        const sliderValue = parseInt(e.target.value, 10);
+        setBrightness(sliderValue);
+
+        const newLightness = (100 - sliderValue) / 100;
+
+        const newHexColor = hslToHex(activeHslBase[0], activeHslBase[1], newLightness);
+        setSelectedColor(newHexColor);
+        if (onColorChange) {
+            onColorChange(newHexColor);
         }
     };
 
-    const colorInputRef = useRef(null);
     return (
         <Modal
             show={show}
@@ -98,106 +126,95 @@ const ColorPickerModal = ({
                         <i className="bi bi-x-lg"></i>
                     </Button>
                 </div>
-                {/* Индикатор режима сохранения */}
+
                 <div className={`alert ${saveMode === 'local' ? 'alert-info' : 'alert-success'} py-2 px-3 mb-3 small`}>
                     <small className="d-flex align-items-center justify-content-between">
                         <span>
                             <i className={`bi ${saveMode === 'local' ? 'bi-person' : 'bi-globe'} me-1`}></i>
-                            {saveMode === 'local'
-                                ? t('color.savingLocally', {theme: t(`theme.${currentTheme}`)})
-                                : t('color.savingGlobally')
-                            }
+                            {saveMode === 'local' ? t('color.savingLocally', {theme: t(`theme.${currentTheme}`)}) : t('color.savingGlobally')}
                         </span>
-
                     </small>
                 </div>
 
-                {/* Custom color picker */}
                 <Row className="gx-0 align-items-center mb-2">
-                    {/* 1. Наша красивая, кастомная кнопка на всю ширину */}
                     <div
-                        className="color-preview-button" // Используем наш кастомный класс
+                        className="color-preview-button"
                         style={{
                             backgroundColor: selectedColor,
                             color: getContrastTextColor(selectedColor, isDarkTheme())
                         }}
-                        onClick={() => colorInputRef.current?.click()} // При клике "нажимаем" на скрытый инпут
+                        onClick={() => colorInputRef.current?.click()}
                     >
-                        {/* Текст, который ты хотел наложить */}
                         {t('color.pickColor')}
                         <i className="bi bi-eyedropper ms-2"></i>
                     </div>
-
-                    {/* 2. Настоящий, но полностью невидимый инпут */}
                     <input
                         type="color"
                         ref={colorInputRef}
                         value={selectedColor}
-                        onChange={(e) => handleColorChange(e.target.value)}
-                        style={{
-                            // Прячем его, но оставляем функциональным
-                            opacity: 0,
-                            position: 'absolute',
-                            width: 0,
-                            height: 0,
-                            border: 'none',
-                            padding: 0
-                        }}
+                        onChange={(e) => updateColorAndSlider(e.target.value)}
+                        style={{opacity: 0, position: 'absolute', width: 0, height: 0, border: 'none', padding: 0}}
                     />
+                </Row>
+
+                <Row className="d-flex justify-content-between align-items-center small text-muted">
+                    <Col xs="auto" >
+                        <label>{t('color.quickColors')}</label>
+                    </Col>
+
+                        {saveMode === 'local' && currentTheme === 'light' && hasActiveLocalColor && (
+                            <Col xs="auto" className="d-flex align-items-center">
+                                <i className="bi bi-globe small me-1 mt-0"></i>
+                                <span className="me-2">{t('color.globalColorIs')}:</span>
+                                <div className="global-color-swatch"
+                                     style={{backgroundColor: themeAwareGlobalColor}}></div>
+                                {saveMode === 'local' && hasLocalColor && onResetColor && (
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        className=" text-decoration-none py-0"
+                                        onClick={handleReset}
+                                        title={t('color.resetToGlobal')}
+                                    >
+                                        <i className="bi bi-arrow-counterclockwise text-warning"></i>
+                                    </Button>
+                                )}
+                            </Col>
+                        )}
 
                 </Row>
-                {/* Preset colors */}
-                <Col xs="auto" className="d-flex align-items-center small text-muted">
-                    <label className='mb-1'>{t('color.quickColors')}</label>
-                </Col>
-                <div className="g-1 align-items-center preset-colors-wrapper mb-2">
+                <div className="g-1 align-items-center preset-colors-wrapper my-2 py-1">
                     {PRESET_COLORS.map(color => (
-                        <Col xs="auto">
+                        <Col xs="auto" key={color}>
                             <button
-                                key={color}
                                 className="color-preset-btn flex-shrink-0"
                                 style={{
                                     backgroundColor: color,
-                                    borderColor: selectedColor === color ? '#0d6efd' : '#dee2e6',
+                                    borderColor: selectedColor === color ? '#43a1ff' : '#dee2e6',
                                     borderWidth: selectedColor === color ? '2px' : '1px'
                                 }}
-                                onClick={() => handleColorChange(color)}
+                                onClick={() => updateColorAndSlider(color)}
                             />
                         </Col>
                     ))}
-
                 </div>
-                {/* 5. Ряд с HEX и глобальным цветом */}
+                <div className="brightness-slider-container">
+                    <Form.Range
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={brightness}
+                        onChange={handleBrightnessChange}
+                        className="brightness-slider"
+                    />
+                </div>
                 <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
 
-                    {saveMode === 'local' && currentTheme === 'light' && hasActiveLocalColor && (
-                        <Col xs="auto" className="d-flex align-items-center">
-                            <i className="bi bi-globe small me-1 mt-0"></i>
-                            <span className="me-2">{t('color.globalColorIs')}:</span>
-                            <div className="global-color-swatch" style={{ backgroundColor: themeAwareGlobalColor }}></div>
-                            {/* Кнопка сброса для локальных настроек */}
-                            {saveMode === 'local' && hasLocalColor && onResetColor && (
-                                <Button
-                                    variant="link"
-                                    size="sm"
-                                    className=" text-decoration-none py-0"
-                                    onClick={handleReset}
-                                    title={t('color.resetToGlobal')}
-                                >
-                                    <i className="bi bi-arrow-counterclockwise text-warning"></i>
-                                </Button>
-                            )}
-                        </Col>
-                    )}
-
                 </Row>
-
-
-
-
             </Container>
         </Modal>
-    );
+    )
+        ;
 };
 
 export default ColorPickerModal;
