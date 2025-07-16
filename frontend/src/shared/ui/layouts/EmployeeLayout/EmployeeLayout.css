@@ -151,7 +151,7 @@
 
 /* Main Content */
 .employee-main-content {
-    margin-top: 104px; /* navbar + tabs height */
+    margin-top: 56px;
     min-height: calc(100vh - 104px);
     background: var(--bs-gray-50);
 }

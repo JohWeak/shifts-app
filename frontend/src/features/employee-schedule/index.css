@@ -4,138 +4,30 @@
 .employee-schedule-container {
     padding: 1rem;
     max-width: 1400px;
-    margin: 0 auto;
+    margin-bottom: 58px;
 }
 [data-theme="dark"] .employee-schedule-container .page-header-card {
     background-color: var(--bs-gray-900);
-}
 
-
-
-/* Main Card */
-.schedule-card {
-    border: none;
-    border-radius: 0.75rem;
-    overflow: hidden;
-    background: var(--bs-white);
-    transition: box-shadow 0.3s ease;
 }
 
 /* Main container adjustment */
 .employee-schedule-container {
-    padding-bottom: 1rem; /* Space for fixed tabs */
-}
-
-.schedule-card {
-    margin-bottom: 130px;
-}
-
-[data-theme="dark"] .schedule-card {
-    background: var(--bs-gray-900);
-}
-
-/* Tabs Styling */
-/* Fixed tabs at top */
-.employee-schedule-tabs {
-    position: fixed;
-    top: 56px;
-    /*border-top: 2px solid var(--bs-gray-200);*/
-    border-top: none;
-    z-index: 1030;
-    background-color: transparent;
-    backdrop-filter: blur(5px);
-
-    border-bottom: none; /* Убираем рамку отсюда */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 1376px;
-    border-left: 1px solid var(--bs-gray-200);
-    border-right: 1px solid var(--bs-gray-200);
-
-
-
-}
-/* 4. Создаем "фейковый" фон с помощью псевдоэлемента ::before */
-.employee-schedule-tabs::before {
-    content: ''; /* Обязательно для псевдоэлементов */
-    position: absolute;
-    bottom: 56px;
-    left: 0;
-    right: 0;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-
-    /* 5. Задаем ВЫСОТУ нашей фоновой панели */
-    height: 54px;
-
-    /* 6. Переносим стили фона и рамки сюда */
-    /*background: var(--bs-white);*/
-    /* 7. Помещаем фон ЗА дочерними элементами (табами) */
-    z-index: -1;
-}
-
-
-[data-theme="dark"] .employee-schedule-tabs {
-    background: var(--bs-gray-900);
-    border-bottom-color: var(--bs-gray-700);
-    border-left: 1px solid var(--bs-gray-700);
-    border-right: 1px solid var(--bs-gray-700);
-}
-
-
-.employee-schedule-tabs .nav-link {
-    color: var(--bs-gray-700);
-    padding: 1rem 1.5rem;
-    font-weight: 500;
-    transition: background 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    border-bottom: none;
-
-}
-
-
-.employee-schedule-tabs .nav-link.active {
-    border-top: none;
-    border-radius: var(--radius-sm)!important;
-    font-weight: 700;
-    color: var(--bs-primary) !important;
-    background: rgba(var(--bs-primary-rgb), 0.03) !important;
-    border-bottom: 3px solid rgba(var(--bs-primary-rgb), 0.7)!important;
-
-}
-
-
-.employee-schedule-tabs .nav-link:hover:not(.disabled) {
-    color: var(--bs-primary);
-    background: rgba(var(--bs-primary-rgb), 0.05);
-}
-
-.employee-schedule-tabs .nav-link.disabled {
-    color: var(--bs-gray-400);
-    cursor: not-allowed;
-}
-
-[data-theme="dark"] .employee-schedule-tabs .nav-link.active {
-    background: var(--bs-gray-900);
-}
-
-[data-theme="dark"] .employee-schedule-tabs .nav-link:hover {
-    border: transparent;
-}
-
-[data-theme="dark"] .employee-schedule-tabs::before {
-    background: var(--bs-gray-800);
-    border-top-color: var(--bs-gray-700);
-}
-[data-theme="dark"] .employee-schedule-tabs .nav-link {
-    color: var(--bs-gray-400);
+     /* Space for fixed tabs */
 }
 
 
 
 .employee-schedule-container .page-header-card {
-    margin-bottom: 0.75rem!important;
+    /*margin-bottom: 0.75rem!important;*/
+    border-color: var(--bs-gray-200);
+    box-shadow: var(--bs-box-shadow-sm);
+}
+[data-theme="dark"] .employee-schedule-container .page-header-card {
+    background-color: var(--bs-gray-900);
+    border-color: var(--bs-gray-900);
+
+
 }
 
 

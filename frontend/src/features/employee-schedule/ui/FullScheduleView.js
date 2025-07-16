@@ -7,7 +7,7 @@ import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import api from 'shared/api';
 import {scheduleAPI} from 'shared/api/apiService';
-import {formatWeekRange, formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
+import { formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO, addWeeks, format} from 'date-fns';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
