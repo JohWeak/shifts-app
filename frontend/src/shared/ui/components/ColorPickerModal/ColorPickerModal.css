@@ -23,7 +23,7 @@
     box-shadow: var(--bs-box-shadow);
     margin: 0 auto 1rem auto; /* Центрируем и добавляем отступ снизу */
     width: 90%;
-    max-width: 100%;
+    max-width: 480px;
     border-radius: 1rem; /* Скругляем все углы на десктопе */
 
     transform: translateY(100%) !important;
@@ -35,8 +35,9 @@
 }
 
 .bottom-sheet .modal-content {
-    border-radius: 1rem!important; /* Важно, чтобы и контент имел такие же скругления */
+    border-radius: 1rem !important; /* Важно, чтобы и контент имел такие же скругления */
 }
+
 .bottom-sheet-backdrop.modal-backdrop {
     /* Убираем затемнение, делая фон прозрачным */
     background-color: transparent;
@@ -46,13 +47,7 @@
     display: flex;
     gap: 0.5rem;
     overflow-x: auto; /* Включаем горизонтальную прокрутку */
-    /*padding-bottom: 0.5rem; !* Отступ для тени скроллбара *!*/
-    -ms-overflow-style: none;  /* IE и Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-/* Скрываем скроллбар в Chrome, Safari */
-.preset-colors-wrapper::-webkit-scrollbar {
-    display: none;
+
 }
 
 .color-preview-button {
@@ -63,13 +58,14 @@
     font-weight: 500;
     border: 1px solid var(--bs-border-color);
     cursor: pointer;
-
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
+
 .color-preview-button:hover {
-     filter: brightness(1.03);
-     box-shadow: 0 3px 26px -22px rgba(0,0,0,0.65);
+    filter: brightness(1.03);
+    box-shadow: 0 3px 26px -22px rgba(0, 0, 0, 0.65);
 }
+
 .global-color-swatch {
     width: 20px;
     height: 20px;
@@ -87,9 +83,11 @@
     align-items: center;
     justify-content: center;
 }
-.color-picker-modal >.btn, .btn-sm {
-    font-size: 0.75rem!important;
+
+.color-picker-modal > .btn, .btn-sm {
+    font-size: 0.75rem !important;
 }
+
 /* --- Стили для слайдера яркости --- */
 .brightness-slider-container {
     background-color: transparent !important;
@@ -110,24 +108,26 @@
 
 /* 2. Стилизуем "полоску" (трек) для WebKit браузеров */
 .brightness-slider::-webkit-slider-runnable-track {
-    height: 12px!important;
+    height: 12px !important;
 }
 
 
 /* 3. Стилизуем "бегунок" (thumb) для WebKit браузеров */
 .brightness-slider::-webkit-slider-thumb {
     -webkit-appearance: none; /* Обязательно для кастомизации */
-    height: 18px!important; /* Высота бегунка */
-    width: 28px!important;  /* <<<< ВАШЕ ТРЕБОВАНИЕ: делаем бегунок шире */
-    background: var(--bs-primary)!important;
-    margin-top: -3px!important;
+    height: 18px !important; /* Высота бегунка */
+    width: 28px !important; /* <<<< ВАШЕ ТРЕБОВАНИЕ: делаем бегунок шире */
+    background: var(--bs-primary) !important;
+    margin-top: -3px !important;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
+
 .brightness-slider::-webkit-slider-thumb:hover {
-    background-color: var(--bs-primary-hover)!important;
+    background-color: var(--bs-primary-hover) !important;
 }
+
 .brightness-slider::-webkit-slider-thumb:active {
-    transform: scale(1.1)!important;
+    transform: scale(1.1) !important;
 }
 
 /* Dark theme support */
@@ -155,10 +155,15 @@
     border-color: var(--bs-gray-600);
 }
 
-/* --- НОВОЕ ПРАВИЛО ДЛЯ ДЕСКТОПА --- */
-@media (min-width: 576px) { /* 576px - это стандартный брейкпоинт Bootstrap для 'sm' */
-    .bottom-sheet.modal-dialog {
-        max-width: 480px; /* Ограничиваем ширину */
+@media (max-width: 1400px) {
+    .preset-colors-wrapper {
+        -ms-overflow-style: none; /* IE и Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    /* Скрываем скроллбар в Chrome, Safari */
+    .preset-colors-wrapper::-webkit-scrollbar {
+        display: none;
     }
 
 }

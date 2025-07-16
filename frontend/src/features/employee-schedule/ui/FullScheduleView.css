@@ -76,6 +76,7 @@
     z-index: 10;
     background: var(--bs-white);
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    align-content: center;
 }
 [dir="rtl"] .sticky-column {
     border-right: none;
@@ -212,6 +213,7 @@
 /* Custom Scrollbar */
 .table-scroll-wrapper::-webkit-scrollbar {
     height: 18px;
+
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-track {
@@ -225,6 +227,7 @@
 
 .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
     background: var(--bs-gray-400);
+    cursor: pointer;
 }
 [data-theme="dark"] .table-scroll-wrapper::-webkit-scrollbar-track {
     background: var(--bs-gray-800);

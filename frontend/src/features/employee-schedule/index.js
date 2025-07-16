@@ -1,7 +1,7 @@
 // frontend/src/features/employee-schedule/index.js
 import React, {useState, useEffect} from 'react';
 import {useSelector} from 'react-redux';
-import {Container, Form, Alert, Button} from 'react-bootstrap'; // Добавлен Button
+import {Container, Form, Alert, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {parseISO, addWeeks, format} from 'date-fns';
 
@@ -13,7 +13,6 @@ import PersonalScheduleView from './ui/PersonalScheduleView';
 import FullScheduleView from './ui/FullScheduleView';
 
 import {scheduleAPI} from 'shared/api/apiService';
-import api from 'shared/api';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 
 import './index.css';
@@ -69,7 +68,7 @@ const EmployeeSchedule = () => {
             }
 
             if (showFullSchedule && initialData?.employee?.position_id) {
-                // --- Логика для полного расписания с использованием apiService ---
+                // --- Логика для полного расписания
                 const positionId = initialData.employee.position_id;
 
                 // Загрузка текущей недели
