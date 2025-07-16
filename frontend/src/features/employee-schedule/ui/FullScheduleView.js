@@ -1,4 +1,4 @@
-// frontend/src/features/employee-schedule/ui/FullScheduleTab.js
+// frontend/src/features/employee-schedule/ui/FullScheduleView.js
 import React, {useState, useEffect, useRef} from 'react';
 import {useSelector} from 'react-redux';
 import {Table, Alert, Card, Badge, Button} from 'react-bootstrap';
@@ -13,10 +13,10 @@ import {parseISO, addWeeks, format} from 'date-fns';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import {formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
-import {ScheduleHeaderCard, WeekSelector} from './';
-import './FullScheduleTab.css';
+import {ScheduleHeaderCard} from './';
+import './FullScheduleView.css';
 
-const FullScheduleTab = () => {
+const FullScheduleView = () => {
     const {t, direction} = useI18n();
     const {user} = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
@@ -345,4 +345,4 @@ const FullScheduleTab = () => {
     );
 };
 
-export default FullScheduleTab;
+export default FullScheduleView;

@@ -26,6 +26,13 @@ export const scheduleAPI = {
             throw error;
         }
     },
+    fetchPositionWeeklySchedule: async (positionId, weekStart) => {
+        console.log('fetchPositionWeeklySchedule called with positionId:', positionId, 'weekStart:', weekStart);
+        const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY_BY_POSITION(positionId), {
+            params: weekStart ? { date: weekStart } : {}
+        });
+        return response.data || response;
+    },
 
     generateSchedule: (settings) => api.post(API_ENDPOINTS.SCHEDULES.GENERATE, settings),
     updateScheduleStatus: (scheduleId, status) => api.put(API_ENDPOINTS.SCHEDULES.STATUS(scheduleId), { status }),

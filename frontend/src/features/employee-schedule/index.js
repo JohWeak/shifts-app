@@ -8,18 +8,13 @@ import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import { scheduleAPI } from 'shared/api/apiService';
 
 // Import sub-components
-import {
-    PersonalScheduleTab,
-    FullScheduleTab,
-    ArchiveTab
-} from './ui';
-
+import PersonalScheduleView from './ui/PersonalScheduleView';
+import FullScheduleView from './ui/FullScheduleView';
 
 import './index.css';
 
 const EmployeeSchedule = () => {
     const { t, direction } = useI18n();
-    const [activeTab, setActiveTab] = useState('personal');
     const { user } = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [employeeData, setEmployeeData] = useState(null);
@@ -66,7 +61,7 @@ const EmployeeSchedule = () => {
     }
 
     // Элемент переключателя для PageHeader
-    const headerExtra = hasAssignedPosition ? (
+    const headerActions = hasAssignedPosition ? (
         <Form.Check
             type="switch"
             id="full-schedule-toggle"
@@ -84,51 +79,14 @@ const EmployeeSchedule = () => {
                 icon="calendar-week"
                 title={t('employee.schedule.title')}
                 subtitle={t('employee.schedule.subtitle')}
-                actions={headerExtra}
+                actions={headerActions}
             />
 
-            <Card className="schedule-card shadow-sm">
-                <Card.Body className="p-0">
-                    <Tabs
-                        activeKey={activeTab}
-                        onSelect={(k) => setActiveTab(k)}
-                        className="employee-schedule-tabs"
-                        fill
-                    >
-                        <Tab
-                            eventKey="personal"
-                            title={
-                                <span>
-                                    <i className="bi bi-calendar-week me-2"></i>
-                                    {t('employee.schedule.title')}
-                                </span>
-                            }
-                        >
-                            <div className="tab-content-wrapper">
-                                {showFullSchedule && hasAssignedPosition ? (
-                                    <FullScheduleTab />
-                                ) : (
-                                    <PersonalScheduleTab />
-                                )}
-                            </div>
-                        </Tab>
-
-                        <Tab
-                            eventKey="archive"
-                            title={
-                                <span>
-                                    <i className="bi bi-archive me-2"></i>
-                                    {t('employee.schedule.archive')}
-                                </span>
-                            }
-                        >
-                            <div className="tab-content-wrapper">
-                                <ArchiveTab />
-                            </div>
-                        </Tab>
-                    </Tabs>
-                </Card.Body>
-            </Card>
+            {showFullSchedule && hasAssignedPosition ? (
+                <FullScheduleView employeeData={employeeData} />
+            ) : (
+                <PersonalScheduleView employeeData={employeeData} />
+            )}
         </Container>
     );
 };

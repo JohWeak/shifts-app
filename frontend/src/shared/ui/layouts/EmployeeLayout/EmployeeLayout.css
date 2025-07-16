@@ -94,14 +94,8 @@
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
 
-
-
 }
 
-[data-theme="dark"] .employee-nav-tabs {
-    /*background: var(--bs-gray-800);*/
-    /*border-bottom-color: var(--bs-gray-700);*/
-}
 [data-theme="dark"] .employee-nav-tabs:before {
     background: var(--bs-gray-800);
     background: linear-gradient(180deg, rgba(41, 41, 41, 0.4) 0%, rgba(53, 58, 64, 0.95) 5%);

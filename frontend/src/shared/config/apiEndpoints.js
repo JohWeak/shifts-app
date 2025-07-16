@@ -1,5 +1,4 @@
-import api from "../api";
-
+//frontend/src/shared/config/apiEndpoints.js
 export const API_ENDPOINTS = {
     // Auth
     AUTH: {
@@ -20,7 +19,8 @@ export const API_ENDPOINTS = {
         WEEKLY: '/api/schedules/weekly',
         ADMIN: {
             WEEKLY: '/api/schedules/admin/weekly',
-        }
+        },
+        WEEKLY_BY_POSITION: (positionId) => `/api/schedules/position/${positionId}/weekly`,
     },
     // Employees
     EMPLOYEES: {

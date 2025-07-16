@@ -1,4 +1,4 @@
-// frontend/src/features/employee-schedule/ui/PersonalScheduleTab.js
+// frontend/src/features/employee-schedule/ui/PersonalScheduleView.js
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Table, Alert, Badge, Button, Card, Row, Col} from 'react-bootstrap';
@@ -12,9 +12,9 @@ import {parseISO, addWeeks, format} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
-import './PersonalScheduleTab.css';
+import './PersonalScheduleView.css';
 
-const PersonalScheduleTab = () => {
+const PersonalScheduleView = () => {
     const {t} = useI18n();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -267,4 +267,4 @@ const PersonalScheduleTab = () => {
     );
 };
 
-export default PersonalScheduleTab;
+export default PersonalScheduleView;
