@@ -104,7 +104,7 @@
 }
 [data-theme="dark"] .employee-nav-tabs:before {
     background: var(--bs-gray-800);
-    background: linear-gradient(180deg,rgba(25, 25, 25, 0.4) 0%, rgba(20, 20, 20, 0.95) 5%);
+    background: linear-gradient(180deg, rgba(41, 41, 41, 0.4) 0%, rgba(53, 58, 64, 0.95) 5%);
 }
 .nav-tabs-wrapper {
     display: flex;
@@ -115,7 +115,7 @@
 .employee-nav-tabs .nav-tab-item {
     flex: 1;
     padding: 0 1rem;
-    color: var(--bs-gray-800);
+    color: var(--bs-gray-700);
     text-decoration: none;
     border-top: 3px solid transparent;
     background: transparent;
