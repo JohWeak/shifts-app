@@ -269,6 +269,7 @@ export const he = {
         noPhoneNumber: 'אין מספר טלפון זמין',
         showFirstNameOnly: 'הצג שם פרטי בלבד',
         showFullName: 'הצג שם מלא',
+
         tabs: {
             available: 'זמינים',
             crossPosition: 'תפקידים אחרים',
@@ -290,6 +291,7 @@ export const he = {
             subtitle: 'צפה בלוח הזמנים השבועי שלך',
             personalSchedule: 'אישי',
             fullSchedule: 'לוח מלא',
+            fullView: 'תצוגה מלאה',
             archive: 'ארכיון',
             currentWeek: 'השבוע הנוכחי',
             nextWeek: 'השבוע הבא',

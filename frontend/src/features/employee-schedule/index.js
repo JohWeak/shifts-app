@@ -18,7 +18,7 @@ import {
 import './index.css';
 
 const EmployeeSchedule = () => {
-    const { t } = useI18n();
+    const { t, direction } = useI18n();
     const [activeTab, setActiveTab] = useState('personal');
     const { user } = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
@@ -74,7 +74,7 @@ const EmployeeSchedule = () => {
             checked={showFullSchedule}
             onChange={(e) => setShowFullSchedule(e.target.checked)}
             className="full-schedule-toggle"
-            reverse
+            reverse={direction === 'ltr'}
         />
     ) : null;
 

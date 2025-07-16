@@ -17,7 +17,7 @@ import {ScheduleHeaderCard, WeekSelector} from './';
 import './FullScheduleTab.css';
 
 const FullScheduleTab = () => {
-    const {t} = useI18n();
+    const {t, direction} = useI18n();
     const {user} = useSelector(state => state.auth);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

@@ -1,5 +1,11 @@
 // frontend/src/shared/lib/utils/scheduleUtils.js
 import { format, addDays, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
+import { enUS, he, ru } from 'date-fns/locale'; // Пример для en, he, ru
+const dateFnsLocales = {
+    en: enUS,
+    he: he,
+    ru: ru
+};
 /**
  * Получает день начала недели из настроек системы
  */
@@ -162,26 +168,39 @@ export const getStatusBadgeVariant = (status) => {
     return variants[status] || 'secondary';
 };
 /**
- * Форматирует диапазон дат недели для заголовка.
- * Принимает объект week из ответа API.
- * @param {object} week - Объект { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
- * @returns {string} - Отформатированная строка, например "Jul 15 - Jul 21, 2024"
+ * Форматирует диапазон дат недели с учетом локализации.
+ * @param {object} week - Объект недели с { start, end }.
+ * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
+ * @returns {string} - Отформатированная строка.
  */
-export const formatWeekRange = (week) => {
+export const formatWeekRange = (week, currentLocale = 'en') => {
     if (!week || !week.start || !week.end) return '';
+
+    // Получаем нужный объект локали из нашей карты, или английский по умолчанию
+    const locale = dateFnsLocales[currentLocale] || enUS;
+
     try {
         const start = parseISO(week.start);
         const end = parseISO(week.end);
-        // Проверяем, в одном ли году даты, для красивого форматирования
+
+        // Используем гибкий формат 'LLLL d', который date-fns сама адаптирует под язык.
+        // 'LLLL' -> полное название месяца ('January', 'Январь', 'ינואר')
+        // 'MMM' -> сокращенное название ('Jan', 'Янв', 'ינו')
+        // Используй 'LLLL' для полной локализации.
+        const monthDayFormat = 'LLLL d';
+
         if (start.getFullYear() === end.getFullYear()) {
-            return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
+            // Форматируем с учетом локали
+            return `${format(start, monthDayFormat, { locale })} - ${format(end, 'LLLL d, yyyy', { locale })}`;
         } else {
-            return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
+            return `${format(start, 'LLLL d, yyyy', { locale })} - ${format(end, 'LLLL d, yyyy', { locale })}`;
         }
     } catch {
+        // Фоллбэк остается без изменений
         return `${week.start} - ${week.end}`;
     }
 };
+
 export const canDeleteSchedule = (schedule) => {
     return schedule.status !== 'published';
 };

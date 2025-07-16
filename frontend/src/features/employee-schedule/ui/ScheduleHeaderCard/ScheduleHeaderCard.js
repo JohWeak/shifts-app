@@ -17,7 +17,7 @@ export const ScheduleHeaderCard = ({
                                        onNameToggle,
                                    }) => {
 
-    const {t} = useI18n();
+    const {t, direction, locale} = useI18n();
     const showSubtitle = position || site;
 
     return (
@@ -33,7 +33,7 @@ export const ScheduleHeaderCard = ({
                     <div>
                         {week && (
                             <Badge bg="primary mb-2">
-                                {formatWeekRange(week)}
+                                {formatWeekRange(week, locale)}
                             </Badge>
                         )}
                     </div>
@@ -68,7 +68,7 @@ export const ScheduleHeaderCard = ({
                                 checked={showFullName}
                                 onChange={(e) => onNameToggle(e.target.checked)}
                                 className="mt-1 me-1 text-muted"
-                                reverse
+                                reverse={direction === 'ltr'}
                             />
                         )}
                     </div>

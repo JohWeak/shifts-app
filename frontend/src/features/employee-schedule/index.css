@@ -140,9 +140,9 @@
 
 
 .full-schedule-toggle .form-check-label {
-    font-weight: normal;
     cursor: pointer;
-    color: var(--bs-gray-700);
+    color: #777;
+    font-size: 14px;
 }
 
 
