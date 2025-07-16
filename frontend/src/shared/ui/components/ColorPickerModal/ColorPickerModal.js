@@ -173,7 +173,7 @@ const ColorPickerModal = ({
                                     <Button
                                         variant="link"
                                         size="sm"
-                                        className=" text-decoration-none py-0"
+                                        className=" text-decoration-none py-0 reset-color-btn"
                                         onClick={handleReset}
                                         title={t('color.resetToGlobal')}
                                     >

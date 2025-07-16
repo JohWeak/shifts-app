@@ -84,7 +84,7 @@
     justify-content: center;
 }
 
-.color-picker-modal > .btn, .btn-sm {
+.color-picker-modal .reset-color-btn {
     font-size: 0.75rem !important;
 }
 
