@@ -122,7 +122,7 @@ const FullScheduleView = () => {
         }
     };
 
-    const renderShiftCell = (shift, employees) => {
+    const renderShiftCell = (shift, employees, onNameClick) => {
         const hasCurrentUser = employees.some(emp =>
             emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
         );
@@ -136,6 +136,8 @@ const FullScheduleView = () => {
                     backgroundColor: bgColor,
                     color: textColor
                 }}
+                onClick={onNameClick}
+                title={t('employee.schedule.toggleNameFormatHint')}
             >
                 <div className="shift-employees">
                     {employees.length > 0 ? (
@@ -183,7 +185,7 @@ const FullScheduleView = () => {
         const {week, position, shifts, days} = weekData;
 
         return (
-            <div className="week-schedule-section mb-3">
+            <Card className="week-schedule-section mb-4 p-2">
 
                 <ScheduleHeaderCard
                     className="position-info-card"
@@ -191,9 +193,6 @@ const FullScheduleView = () => {
                     site={position?.site_name || employeeData?.site_name}
                     position={position?.name || employeeData?.position_name}
                     week={week}
-                    showNameToggle={true}
-                    showFullName={showFullName}
-                    onNameToggle={handleNameDisplayToggle}
                 />
 
                 <div className="table-container" ref={tableRef}>
@@ -272,7 +271,7 @@ const FullScheduleView = () => {
 
                                         return (
                                             <td key={`${day.date}-${shift.id}`} className="employee-cell">
-                                                {renderShiftCell(shift, employees)}
+                                                {renderShiftCell(shift, employees, () => handleNameDisplayToggle(!showFullName))}
                                             </td>
                                         );
                                     })}
@@ -284,7 +283,7 @@ const FullScheduleView = () => {
                     </div>
                 </div>
 
-            </div>
+            </Card>
         );
     };
 

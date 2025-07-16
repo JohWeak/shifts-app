@@ -104,6 +104,8 @@
 .employee-cell {
     padding: 0.5rem;
     vertical-align: top;
+    cursor: pointer;
+
 }
 
 .shift-cell {

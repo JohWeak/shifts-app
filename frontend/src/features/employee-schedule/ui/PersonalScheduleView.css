@@ -59,6 +59,10 @@
     border-color: var(--bs-gray-200)!important;
     box-shadow: var(--shadow-sm);
 }
+[data-theme="dark"] .week-schedule-section {
+    border-color: var(--bs-gray-800)!important;
+
+}
 
 
 [data-theme="dark"] .week-title {

@@ -340,6 +340,7 @@ export const en = {
             fullScheduleComingSoon: 'Full Schedule Coming Soon',
             positionScheduleWillBeAvailable: 'The full position schedule will be available soon',
             editDayOffColor: 'Edit Day Off Color',
+            toggleNameFormatHint: 'Toggle between full name and first name',
         },
     },
     errors: {

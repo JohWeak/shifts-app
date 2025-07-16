@@ -39,9 +39,9 @@ export const ScheduleHeaderCard = ({
                     </div>
                 </div>
 
-                <div className="d-flex justify-content-between">
+                <div className="d-flex justify-content-between align-items-center">
                     {showSubtitle && (
-                        <small className="d-flex flex-column gap-1 text-muted">
+                        <small className="d-flex gap-2 text-muted ">
                             {site && (
                                 <span className="d-block">
                                     <i className="bi bi-building me-1"></i>
@@ -50,7 +50,7 @@ export const ScheduleHeaderCard = ({
                             )}
                             {position && (
                                 <span className="d-block">
-                                    <i className="bi bi-person-badge me-1"></i>
+                                    <i className="bi bi-person-badge ms-1 me-1"></i>
                                     {position}
                                 </span>
                             )}
