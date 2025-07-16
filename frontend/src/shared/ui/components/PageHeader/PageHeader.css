@@ -4,7 +4,6 @@
 
 .page-header-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
@@ -14,6 +13,7 @@
 
 .page-header-text {
     min-width: 0; /* Позволяет тексту сжиматься */
+    align-content: start;
 }
 
 .page-header h1 {
@@ -39,6 +39,9 @@
     gap: 0.5rem;
     align-items: center;
     flex-shrink: 0;
+    justify-self: end;
+    margin-right: var(--space-4);
+    margin-left: auto;
 }
 
 

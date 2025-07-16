@@ -183,7 +183,7 @@ const PersonalScheduleTab = () => {
 
                                                     </>
                                                 ) : (
-                                                    <div className="day-off">
+                                                    <div className="day-off text-muted">
                                                         {t('employee.schedule.dayOff')}
                                                         <i className="bi bi-house-door ms-1"></i>
                                                     </div>

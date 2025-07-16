@@ -191,7 +191,7 @@
 
     --bs-btn-color: #5da6ff;
     --bs-btn-border-color: #5da6ff;
-    --bs-btn-hover-bg: #5da6ff;
+    /*--bs-btn-hover-bg: #5da6ff;*/
     --bs-btn-hover-border-color: #5da6ff;
     --bs-btn-hover-color: #000;
     --bs-btn-active-bg: #5da6ff;
@@ -246,10 +246,22 @@
     --bs-form-select-color: var(--bs-body-color);
     --bs-form-select-bg: var(--bs-gray-900);
 
+
     /* Dark Theme Shadows */
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
     --shadow-base: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+
+    .form-switch .form-check-input{
+        background-color: var(--bs-gray-800);
+        background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27%3e%3ccircle r=%273%27 fill=%27%2386b7fe%27/%3e%3c/svg%3e");
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: var(--bs-primary);
+        background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27%3e%3ccircle r=%273%27 fill=%27%23fff%27/%3e%3c/svg%3e");
+    }
+
 }
 
 /* Apply outline button variables for all themes */
@@ -315,6 +327,9 @@
     --bs-btn-hover-bg: var(--bs-btn-outline-dark-hover-bg);
     --bs-btn-hover-color: var(--bs-btn-outline-dark-hover-color);
     --bs-btn-hover-border-color: var(--bs-btn-outline-dark-hover-bg);
+}
+.form-switch .form-check-input{
+    height: 1.25rem;
 }
 
 /* Smooth transitions */

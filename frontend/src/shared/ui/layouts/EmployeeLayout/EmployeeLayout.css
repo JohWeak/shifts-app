@@ -72,18 +72,12 @@
 .employee-nav-tabs {
     position: fixed;
     bottom: 0; /* Height of navbar */
-    background-color: transparent;
-    backdrop-filter: blur(15px);
     border-top: none;
     z-index: 1030;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: 1376px;
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
-
-
 }
 .employee-nav-tabs:before {
     content: ''; /* Обязательно для псевдоэлементов */
@@ -92,26 +86,30 @@
     left: 0;
     right: 0;
     box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
-    height: 56px;
-    /*background: var(--bs-white);*/
+    height: 57px;
     z-index: -1;
+    background: #f2f2f2;
+    background: linear-gradient(180deg,rgba(242, 242, 242, 0.2) 0%, rgba(255, 255, 255, 0.76) 5%);
+    backdrop-filter: blur(5px);
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
+
 
 
 }
 
 [data-theme="dark"] .employee-nav-tabs {
-    background: var(--bs-gray-800);
+    /*background: var(--bs-gray-800);*/
     /*border-bottom-color: var(--bs-gray-700);*/
 }
 [data-theme="dark"] .employee-nav-tabs:before {
     background: var(--bs-gray-800);
-    /*border-bottom-color: var(--bs-gray-700);*/
+    background: linear-gradient(180deg,rgba(25, 25, 25, 0.4) 0%, rgba(20, 20, 20, 0.95) 5%);
 }
 .nav-tabs-wrapper {
     display: flex;
     height: 58px;
+
 }
 
 .employee-nav-tabs .nav-tab-item {
@@ -129,6 +127,9 @@
     white-space: nowrap;
     font-weight: 500;
     position: relative;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+
 }
 
 [data-theme="dark"] .employee-nav-tabs .nav-tab-item {
@@ -146,7 +147,7 @@
     border-top-color: rgba(var(--bs-primary-rgb), 0.8);
     background: rgba(var(--bs-primary-rgb), 0.03);
     font-weight: 700;
-    border-radius: var(--radius-sm);
+    border-radius: 3px;
 
 }
 
@@ -169,14 +170,18 @@
 @media (max-width: 767px) {
     /* Keep text labels on mobile */
 
-
+    .employee-nav-tabs:before {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
     .employee-nav-tabs .nav-tab-item {
         flex-direction: column;
         font-size: 0.675rem;
         padding: 0.5rem 0.75rem 1rem;
     }
 
-    .employee-nav-tabs .nav-tab-item .span {
+    .employee-nav-tabs .nav-tab-item i{
+        margin: 0!important;
     }
 
     .employee-navbar .user-name {
@@ -234,7 +239,9 @@
     height: 31px;
     width: 31px;
 }
-
+.employee-navbar .theme-toggle-icon .bi-moon-stars{
+    color: #4800a5;
+}
 /* Smooth transitions */
 * {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
