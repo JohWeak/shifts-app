@@ -167,6 +167,17 @@ export const getStatusBadgeVariant = (status) => {
     };
     return variants[status] || 'secondary';
 };
+
+/**
+ * Превращает первую букву строки в заглавную.
+ * @param {string} str - Входящая строка.
+ * @returns {string} - Строка с заглавной первой буквой.
+ */
+export const capitalizeFirstLetter = (str) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 /**
  * Форматирует диапазон дат недели с учетом локализации.
  * @param {object} week - Объект недели с { start, end }.
@@ -191,7 +202,9 @@ export const formatWeekRange = (week, currentLocale = 'en') => {
 
         if (start.getFullYear() === end.getFullYear()) {
             // Форматируем с учетом локали
-            return `${format(start, monthDayFormat, { locale })} - ${format(end, 'LLLL d, yyyy', { locale })}`;
+            const startFormatted = capitalizeFirstLetter(format(start, 'LLLL d', { locale }));
+            const endFormatted = capitalizeFirstLetter(format(end, 'LLLL d, yyyy', { locale }));
+            return `${startFormatted} - ${endFormatted}`;
         } else {
             return `${format(start, 'LLLL d, yyyy', { locale })} - ${format(end, 'LLLL d, yyyy', { locale })}`;
         }
