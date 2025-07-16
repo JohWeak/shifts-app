@@ -316,6 +316,7 @@ export const en = {
             subtitle: 'View your weekly work schedule',
             personalSchedule: 'Personal',
             fullSchedule: 'Full Schedule',
+            fullView: 'Full View',
             archive: 'Archive',
             currentWeek: 'Current Week',
             current: 'Current',

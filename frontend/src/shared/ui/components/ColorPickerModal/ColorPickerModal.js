@@ -149,9 +149,8 @@ const ColorPickerModal = ({
                 {/* Preset colors */}
                 <Col xs="auto" className="d-flex align-items-center small text-muted">
                     <label className='mb-1'>{t('color.quickColors')}</label>
-                    {/*{selectedColor.toUpperCase()}*/}
                 </Col>
-                <Row className="g-1 align-items-center preset-colors-wrapper mb-2">
+                <div className="g-1 align-items-center preset-colors-wrapper mb-2">
                     {PRESET_COLORS.map(color => (
                         <Col xs="auto">
                             <button
@@ -167,7 +166,7 @@ const ColorPickerModal = ({
                         </Col>
                     ))}
 
-                </Row>
+                </div>
                 {/* 5. Ряд с HEX и глобальным цветом */}
                 <Row className="g-2 align-items-center small text-muted justify-content-between mb-2">
 

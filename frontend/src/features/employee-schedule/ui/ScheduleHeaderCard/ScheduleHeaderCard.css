@@ -22,6 +22,6 @@
     font-weight: 600;
 }
 
-[data-theme="dark"] .schedule-info-card.week-title {
-    color: var(--bs-gray-300);
+[data-theme="dark"] .schedule-info-card .week-title {
+    color: var(--bs-gray-400);
 }

@@ -134,23 +134,22 @@
 
 
 
-/* Tab Content with padding for fixed tabs */
-.tab-content-wrapper {
-    /*padding: 1.5rem;*/
-}
 .employee-schedule-container .page-header-card {
     margin-bottom: 0.75rem!important;
 }
 
-.full-schedule-toggle {
-    margin: 0;
-}
 
 .full-schedule-toggle .form-check-label {
     font-weight: normal;
     cursor: pointer;
+    color: var(--bs-gray-700);
 }
 
+
+.full-schedule-toggle.form-check-input{
+    height: 1.25rem;
+    margin-inline-end: 0.25rem;
+}
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .employee-schedule-container {
@@ -190,13 +189,13 @@
     }
 
     .employee-schedule-container .page-header .page-header-text .h3 {
-        font-weight: 400;
+        font-weight: 600;
         margin-bottom: 0.2rem !important;
     }
 
     .employee-schedule-container .page-header-card .card-body {
-        padding: 0.5rem;
-        display: flex;
+        padding: 0.5rem 0.75rem;
+        /*display: flex;*/
         justify-content: center;
     }
     .employee-schedule-tabs::before {

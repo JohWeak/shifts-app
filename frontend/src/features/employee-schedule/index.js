@@ -70,10 +70,11 @@ const EmployeeSchedule = () => {
         <Form.Check
             type="switch"
             id="full-schedule-toggle"
-            label={t('employee.schedule.fullSchedule')}
+            label={t('employee.schedule.fullView')}
             checked={showFullSchedule}
             onChange={(e) => setShowFullSchedule(e.target.checked)}
             className="full-schedule-toggle"
+            reverse
         />
     ) : null;
 
