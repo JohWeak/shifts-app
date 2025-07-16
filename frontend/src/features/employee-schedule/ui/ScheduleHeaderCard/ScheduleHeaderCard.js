@@ -1,8 +1,8 @@
 //frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard.js
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {Card, Badge, Form, Col, Row} from 'react-bootstrap';
 import {formatWeekRange} from 'shared/lib/utils/scheduleUtils';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './ScheduleHeaderCard.css';
 
 export const ScheduleHeaderCard = ({
@@ -17,51 +17,62 @@ export const ScheduleHeaderCard = ({
                                        onNameToggle,
                                    }) => {
 
-    const { t } = useI18n();
+    const {t} = useI18n();
     const showSubtitle = position || site;
 
     return (
         <Card className={`schedule-info-card mb-3 ${className}`}>
-            <Card.Body className="d-flex justify-content-between py-2">
-                <div className="d-flex flex-column align-items-start gap-1">
-                    {title && <h6 className=" week-title mb-2">{title} </h6>}
+            <Card.Body className=" py-2">
+                <div className="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                    <div>
+                        {title && (
+                            <h6 className="week-title">
+                                {title}
+                            </h6>)}
+                    </div>
+                    <div>
+                        {week && (
+                            <Badge bg="primary mb-2">
+                                {formatWeekRange(week)}
+                            </Badge>
+                        )}
+                    </div>
+                </div>
+
+                <div className="d-flex justify-content-between">
                     {showSubtitle && (
-                        <small className="text-muted">
-                            {position && (
-                                <span className="d-block">
-                                    <i className="bi bi-person-badge me-1"></i>
-                                    {position}
-                                </span>
-                            )}
+                        <small className="d-flex flex-column gap-1 text-muted">
                             {site && (
                                 <span className="d-block">
                                     <i className="bi bi-building me-1"></i>
                                     {site}
                                 </span>
                             )}
+                            {position && (
+                                <span className="d-block">
+                                    <i className="bi bi-person-badge me-1"></i>
+                                    {position}
+                                </span>
+                            )}
                         </small>
                     )}
+                    <div>
+                        {empName && (
+                            <span className="fw-semibold">{empName}</span>
+                        )}
+                        {showNameToggle && (
+                            <Form.Check
+                                type="switch"
+                                id="name-display-toggle"
+                                label={t('employee.showFullName')}
+                                checked={showFullName}
+                                onChange={(e) => onNameToggle(e.target.checked)}
+                                className="mt-1 me-1 text-muted "
+                            />
+                        )}
+                    </div>
                 </div>
-                <div className="d-flex flex-column align-items-end justify-content-start">
-                    {week && (
-                        <Badge bg="primary mb-2">
-                            {formatWeekRange(week)}
-                        </Badge>
-                    )}
-                    {empName && (
-                        <span className="fw-semibold">{empName}</span>
-                    )}
-                    {showNameToggle && (
-                        <Form.Check
-                            type="switch"
-                            id="name-display-toggle"
-                            label={t('employee.showFullName')}
-                            checked={showFullName}
-                            onChange={(e) => onNameToggle(e.target.checked)}
-                            className="mt-1 me-1 text-muted "
-                        />
-                    )}
-                </div>
+
             </Card.Body>
         </Card>
     );

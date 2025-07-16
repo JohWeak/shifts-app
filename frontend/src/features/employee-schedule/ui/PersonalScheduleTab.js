@@ -142,18 +142,17 @@ const PersonalScheduleTab = () => {
                                     <Card.Body className="py-2">
                                         <div className="d-flex justify-content-between align-items-center">
                                             <div className="day-info">
-                                                {isToday ? (
-                                                    <Badge bg="primary" className="today-badge">
-                                                        {formatHeaderDate(dateObj)}
-                                                    </Badge>
-                                                ) : (
                                                     <span className="day-date ">
                                                         {formatHeaderDate(dateObj)}
                                                     </span>
-                                                )}
                                                 <strong className="day-name ms-2">
                                                     {getDayName(day.day_of_week ?? dateObj.getDay(), t)}
                                                 </strong>
+                                                {isToday && (
+                                                    <Badge bg="primary" className="today-badge ms-1 small">
+                                                        {t('common.today')}
+                                                    </Badge>
+                                                )}
 
                                             </div>
                                             <div className="shift-info text-end">
