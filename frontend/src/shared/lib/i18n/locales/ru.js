@@ -136,6 +136,7 @@ export const ru = {
     },
     employee: {
         addEmployee: 'Добавить сотрудника',
+        archive: 'Архив',
         assignedToShift: 'Назначен на смену',
         assignments: 'Назначения',
         availability: 'Доступность',

@@ -158,6 +158,7 @@ export const en = {
     },
     employee: {
         addEmployee: 'Add Employee',
+        archive: 'Archive',
         assignedToShift: 'Assigned to Shift',
         assignments: 'Assignments',
         availability: 'Availability',

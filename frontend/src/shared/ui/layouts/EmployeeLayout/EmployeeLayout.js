@@ -34,6 +34,7 @@ const EmployeeLayout = () => {
         { path: '/employee/schedule', icon: 'calendar-week', label: t('employee.schedule.title') },
         { path: '/employee/constraints', icon: 'shield-check', label: t('employee.constraints') },
         { path: '/employee/requests', icon: 'envelope', label: t('employee.requests.title') },
+        { path: '/employee/archive', icon: 'archive', label: t('employee.archive') },
     ];
 
     const handleLogout = () => {

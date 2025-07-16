@@ -17,7 +17,8 @@ import Login from '../features/auth';
 import EmployeeLayout from '../shared/ui/layouts/EmployeeLayout/EmployeeLayout';
 import EmployeeSchedule from '../features/employee-schedule';
 import EmployeeConstraints from '../features/employee-constraints';
-import EmployeeRequests from '../features/employee-requests'; // Создадим позже
+import EmployeeRequests from '../features/employee-requests';
+import EmployeeArchive from '../features/employee-archive';
 
 import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import AdminDashboard from '../features/admin-dashboard';
@@ -30,7 +31,6 @@ import EmployeeManagement from 'features/admin-employee-management'
 
 import {ProtectedRoute} from '../shared/lib/auth/ProtectedRoute';
 import './App.css';
-
 /**
  * Main Application Component
  * Defines routing structure and authentication flow
@@ -53,10 +53,10 @@ const router = createBrowserRouter([
         element: <ProtectedRoute allowedRole="employee"><EmployeeLayout /></ProtectedRoute>,
         children: [
             { index: true, element: <Navigate to="/employee/schedule" replace /> },
-            { path: "dashboard", element: <Navigate to="/employee/schedule" replace /> },
             { path: "schedule", element: <EmployeeSchedule /> },
             { path: "constraints", element: <EmployeeConstraints /> },
             { path: "requests", element: <EmployeeRequests /> },
+            { path: "archive", element: <EmployeeArchive /> },
         ],
     },
     {

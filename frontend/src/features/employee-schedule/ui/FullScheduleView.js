@@ -13,7 +13,7 @@ import {parseISO, addWeeks, format} from 'date-fns';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import {formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
-import {ScheduleHeaderCard} from './';
+import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './FullScheduleView.css';
 
 const FullScheduleView = () => {
