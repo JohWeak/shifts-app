@@ -11,13 +11,20 @@
 
 }
 
-.employee-schedule-container {
+.week-schedule-section {
+    border-color: var(--bs-gray-200)!important;
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg)!important;
+}
+[data-theme="dark"] .week-schedule-section {
+    border-color: var(--bs-gray-800)!important;
+
 }
 
 
 
+
 .employee-schedule-container .page-header-card {
-    /*margin-bottom: 0.75rem!important;*/
     border-color: var(--bs-gray-200);
     box-shadow: var(--bs-box-shadow-sm);
 }
@@ -26,13 +33,6 @@
     border-color: var(--bs-gray-900);
 
 
-}
-
-
-.full-schedule-toggle .form-check-label {
-    cursor: pointer;
-    color: #777;
-    font-size: 14px;
 }
 
 
@@ -46,7 +46,7 @@
         padding: 0.5rem;
     }
     .employee-schedule-container {
-        padding-bottom: 0.25rem; /* Space for fixed tabs */
+        padding-bottom: 0.25rem;
     }
     .employee-schedule-container .page-header {
         padding: 0;
@@ -55,28 +55,6 @@
         margin-bottom: 0.5rem!important;
     }
 
-    .employee-schedule-tabs .nav-link {
-        padding: 0.75rem 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .employee-schedule-tabs {
-        /*background: transparent;*/
-        /*backdrop-filter: blur(15px);*/
-    }
-
-    [data-theme="dark"] .employee-schedule-tabs {
-        background: rgba(53, 58, 64, 0.8);
-        backdrop-filter: blur(15%);
-    }
-
-    .employee-schedule-tabs .nav-link i {
-        display: none;
-    }
-
-    .tab-content-wrapper {
-        padding: 0.5rem;
-    }
 
     .employee-schedule-container .page-header .page-header-text .h3 {
         font-weight: 600;
@@ -93,26 +71,4 @@
     }
 
 
-}
-
-/* Animations */
-.schedule-card .employee-schedule-tabs {
-    animation: navUp 0.3s ease-in-out;
-}
-
-@keyframes navUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* RTL Support */
-[dir="rtl"] .employee-schedule-tabs .nav-link i {
-    margin-left: 0.5rem;
-    margin-right: 0;
 }

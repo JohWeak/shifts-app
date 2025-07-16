@@ -15,7 +15,6 @@ export const scheduleAPI = {
     fetchAdminWeeklySchedule: () => api.get(API_ENDPOINTS.SCHEDULES.ADMIN.WEEKLY),
     fetchWeeklySchedule: async (weekStart) => {
         try {
-            console.log('fetchWeeklySchedule called with weekStart:', weekStart);
             const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
                 params: weekStart ? { date: weekStart } : {}
             });

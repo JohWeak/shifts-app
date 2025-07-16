@@ -3,10 +3,11 @@
 
 
 /* Table Container */
-.table-container {
-    border-radius: 0.5rem;
+.week-schedule-section .table-container {
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 0.5rem 0.5rem;
+    border-left: none;
+    border-right: none;
 }
 
 .table-scroll-wrapper {
@@ -15,10 +16,12 @@
 }
 
 /* Full Schedule Table */
-.full-schedule-table {
-    margin-bottom: 0;
+.full-schedule-table{
+    margin-bottom: 0!important;
     font-size: 0.875rem;
+
 }
+
 
 .full-schedule-table th {
     background: var(--bs-gray-100);
