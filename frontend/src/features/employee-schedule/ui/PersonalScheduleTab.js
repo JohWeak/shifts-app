@@ -127,6 +127,8 @@ const PersonalScheduleTab = () => {
                             const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
                             const textColor = getContrastTextColor(bgColor);
 
+
+
                             return (
                                 <Card
                                     key={day.date}
@@ -159,6 +161,22 @@ const PersonalScheduleTab = () => {
                                                     <>
                                                         <div className="shift-name fw-bold">
                                                             {userAssignment.shift_name}
+                                                            <Button
+                                                                variant="link"
+                                                                size="sm"
+                                                                className="color-picker-btn p-0 ms-1"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    openColorPicker(
+                                                                        userAssignment.shift_id,
+                                                                        getShiftColor(userAssignment),
+                                                                        userAssignment
+                                                                    );
+                                                                }}
+                                                                title={t('shift.editColor')}
+                                                            >
+                                                                <i className="bi bi-palette"></i>
+                                                            </Button>
                                                         </div>
                                                         <div className="shift-time small">
                                                             {formatShiftTime(userAssignment.start_time, userAssignment.duration)}
@@ -167,26 +185,11 @@ const PersonalScheduleTab = () => {
                                                     </>
                                                 ) : (
                                                     <div className="day-off">
-                                                        <i className="bi bi-house-door me-1"></i>
                                                         {t('employee.schedule.dayOff')}
+                                                        <i className="bi bi-house-door ms-1"></i>
                                                     </div>
                                                 )}
-                                                <Button
-                                                    variant="link"
-                                                    size="sm"
-                                                    className="color-picker-btn p-0 ms-2"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openColorPicker(
-                                                            userAssignment.shift_id,
-                                                            getShiftColor(userAssignment),
-                                                            userAssignment
-                                                        );
-                                                    }}
-                                                    title={t('shift.editColor')}
-                                                >
-                                                    <i className="bi bi-palette"></i>
-                                                </Button>
+
                                             </div>
                                         </div>
                                         {/* Показываем позицию и сайт если работник не привязан к позиции */}

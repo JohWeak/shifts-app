@@ -87,7 +87,9 @@
 [data-theme="dark"] .day-card .border-top {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
-
+.personal-schedule-list .today-badge{
+    margin-inline-start: -0.5rem;
+}
 /* Mobile responsive */
 @media (max-width: 767px) {
     .day-card .day-info {

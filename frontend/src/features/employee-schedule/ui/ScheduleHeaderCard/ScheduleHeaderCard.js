@@ -1,17 +1,9 @@
 //frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard.js
 import React, { useState, useEffect } from 'react';
-import {Card, Badge, Form} from 'react-bootstrap';
+import {Card, Badge, Form, Col, Row} from 'react-bootstrap';
 import {formatWeekRange} from 'shared/lib/utils/scheduleUtils';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './ScheduleHeaderCard.css';
-
-
-// Пропсы:
-// - title: Основной заголовок (имя сотрудника или должность)
-// - position: Название должности для подзаголовка
-// - site: Название объекта для подзаголовка
-// - week: Объект недели для бейджа
-// - className: Дополнительные классы для Card
 
 export const ScheduleHeaderCard = ({
                                        title,
