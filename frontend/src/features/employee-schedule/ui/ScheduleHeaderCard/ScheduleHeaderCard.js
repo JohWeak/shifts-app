@@ -22,7 +22,7 @@ export const ScheduleHeaderCard = ({
 
     return (
         <Card className={`schedule-info-card ${className}`}>
-            <Card.Body className=" py-2">
+            <Card.Body className=" ">
                 <div className="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
                     <div>
                         {title && (
