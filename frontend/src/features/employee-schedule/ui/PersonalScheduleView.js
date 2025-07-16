@@ -80,7 +80,7 @@ const PersonalScheduleView = () => {
         const hasWorkSite = employee?.site_id;
         console.log('Employee Worksite Info:', employee?.site_name, employee.position_name)
         return (
-            <div className="week-schedule-section mb-4">
+            <Card className="week-schedule-section mb-4 p-2">
                 <ScheduleHeaderCard
                     className="position-info-card"
                     title={weekTitle}
@@ -214,7 +214,7 @@ const PersonalScheduleView = () => {
                         })}
                     </div>
                 )}
-            </div>
+            </Card>
         );
     };
 

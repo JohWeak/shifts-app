@@ -21,7 +21,7 @@ export const ScheduleHeaderCard = ({
     const showSubtitle = position || site;
 
     return (
-        <Card className={`schedule-info-card mb-3 ${className}`}>
+        <Card className={`schedule-info-card mb-2 ${className}`}>
             <Card.Body className=" py-2">
                 <div className="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
                     <div>

@@ -1,6 +1,10 @@
 .schedule-info-card {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border: var(--bs-gray-200) 1px solid!important;
+    /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);*/
+    border-color: var(--bs-gray-200) !important;
+    margin: -8px;
+    marging-bottom: 8px;
+    border-bottom-left-radius: 0!important;
+    border-bottom-right-radius: 0!important;
 }
 
 [data-theme="dark"] .schedule-info-card {
