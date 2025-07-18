@@ -17,7 +17,7 @@ const MonthlyStats = ({ monthData }) => {
     return (
         <Card className="monthly-stats">
             <Card.Body>
-                <Row>
+                <Row >
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{totalShifts}</div>
                         <div className="stat-label">{t('employee.archive.totalShifts')}</div>

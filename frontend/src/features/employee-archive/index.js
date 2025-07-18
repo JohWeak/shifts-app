@@ -114,7 +114,6 @@ const EmployeeArchive = () => {
                         availableMonths={availableMonths}
                         getShiftColor={getShiftColor}
                     />
-
                     {selectedDate && (
                         <ShiftDetailsPanel
                             shift={getSelectedDayShift()}

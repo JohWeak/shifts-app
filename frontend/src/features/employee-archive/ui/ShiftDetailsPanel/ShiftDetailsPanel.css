@@ -22,6 +22,7 @@
     color: var(--bs-secondary);
     flex-shrink: 0;
     transform: translateY(1px);
+    width: 1rem;
 }
 
 .detail-label {

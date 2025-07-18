@@ -1,6 +1,10 @@
 /* frontend/src/features/employee-archive/ui/CalendarView/CalendarView.css */
 .calendar-view {
     width: 100%;
+    border-top-left-radius: 0!important;
+    border-top-right-radius: 0!important;
+    border-top: none;
+    margin-bottom: 0.5rem;
 }
 
 
@@ -8,8 +12,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /*padding: 0.5rem;*/
-    background-color: var(--bs-gray-100);
 }
 
 .calendar-header .nav-button {
