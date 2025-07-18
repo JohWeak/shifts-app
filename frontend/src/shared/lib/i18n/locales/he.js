@@ -76,6 +76,17 @@ export const he = {
         username: 'שם משתמש',
         welcome: 'ברוך שובך!',
     },
+    calendar: {
+        weekDays: {
+            sun: 'א׳',
+            mon: 'ב׳',
+            tue: 'ג׳',
+            wed: 'ד׳',
+            thu: 'ה׳',
+            fri: 'ו׳',
+            sat: 'ש׳',
+        }
+    },
     color: {
         savingLocally: 'שמירה עבור ערכת נושא {theme} בלבד (אישי)',
         savingGlobally: 'שמירה עבור כל המשתמשים',
@@ -135,6 +146,17 @@ export const he = {
         },
     },
     employee: {
+        archiveSubtitle: 'צפייה במשמרות עבר ועתיד',
+        archive: {
+            title: 'ארכיון',
+            totalShifts: 'סה״כ משמרות',
+            totalDays: 'ימי עבודה',
+            totalHours: 'סה״כ שעות',
+            noShiftOnDate: 'אין משמרת מתוכננת לתאריך זה',
+            duration: 'משך',
+            position: 'תפקיד',
+            worksite: 'אתר עבודה',
+        },
         addEmployee: 'הוסף עובד',
         assignedToShift: 'שובץ למשמרת',
         assignments: 'שיבוצים',

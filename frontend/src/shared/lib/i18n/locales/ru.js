@@ -76,6 +76,17 @@ export const ru = {
         username: 'Имя пользователя',
         welcome: 'С возвращением!',
     },
+    calendar: {
+        weekDays: {
+            sun: 'Вс',
+            mon: 'Пн',
+            tue: 'Вт',
+            wed: 'Ср',
+            thu: 'Чт',
+            fri: 'Пт',
+            sat: 'Сб',
+        }
+    },
     color: {
         savingLocally: 'Сохранение только для темы {theme} (персонально)',
         savingGlobally: 'Сохранение для всех пользователей',
@@ -135,8 +146,19 @@ export const ru = {
         },
     },
     employee: {
+
+        archiveSubtitle: 'Просмотр прошлых и будущих смен',
+        archive: {
+            title: 'Архив',
+            totalShifts: 'Всего смен',
+            totalDays: 'Рабочих дней',
+            totalHours: 'Всего часов',
+            noShiftOnDate: 'На эту дату смена не назначена',
+            duration: 'Продолжительность',
+            position: 'Должность',
+            worksite: 'Объект',
+        },
         addEmployee: 'Добавить сотрудника',
-        archive: 'Архив',
         assignedToShift: 'Назначен на смену',
         assignments: 'Назначения',
         availability: 'Доступность',
