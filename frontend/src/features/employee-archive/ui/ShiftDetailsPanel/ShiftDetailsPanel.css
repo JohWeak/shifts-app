@@ -2,7 +2,10 @@
 .shift-details-panel {
     margin-bottom: 58px;
 }
+.no-shift-details-panel .card-body{
+    padding: 0.25rem;
 
+}
 .detail-item {
     display: flex;
     align-items: center;
@@ -28,5 +31,10 @@
 @media (max-width: 576px) {
     .detail-item {
         font-size: 0.875rem;
+    }
+}
+@media (max-width: 376px) {
+    .workplace-info {
+        flex-direction: column;
     }
 }

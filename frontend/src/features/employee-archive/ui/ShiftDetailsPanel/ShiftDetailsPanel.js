@@ -12,10 +12,13 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
 
     if (!shift) {
         return (
-            <Card className="shift-details-panel">
-                <Card.Body className="text-center text-muted">
-                    <Calendar size={48} className="mb-3" />
-                    <p>{t('employee.archive.noShiftOnDate')}</p>
+            <Card className="no-shift-details-panel">
+                <Card.Header
+                    className="shift-details-header d-flex align-items-center justify-content-center ">
+                    <Calendar size={20} />
+                </Card.Header>
+                <Card.Body className="text-center text-muted py-2 px-3">
+                    <span>{t('employee.archive.noShiftOnDate')}</span>
                 </Card.Body>
             </Card>
         );
@@ -24,7 +27,7 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
     const shiftColor = getShiftColor({ shift_id: shift.shift_id, color: shift.color });
 
     return (
-        <Card className="shift-details-panel ">
+        <Card className="shift-details-panel">
             <Card.Header
                 style={{
                     backgroundColor: shiftColor,
@@ -48,7 +51,7 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
                 {/*    <Calendar className="detail-icon" />*/}
                 {/*    <span>{formatFullDate(selectedDate, locale)}</span>*/}
                 {/*</div>*/}
-                <div className="workplace-info d-flex gap-2">
+                <div className="workplace-info d-flex gap-2 justify-content-between">
                 {shift.position_name && (
                     <div className="detail-item">
                         <span className="detail-label">{t('employee.archive.position')}:</span>

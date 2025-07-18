@@ -3,36 +3,36 @@
     width: 100%;
 }
 
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
+    /*padding: 0.5rem;*/
     background-color: var(--bs-gray-100);
 }
 
-.nav-button {
+.calendar-header .nav-button {
     background: none;
     border: none;
-    font-size: 1.5rem;
-    padding: 5px 10px;
+    /*padding: 5px 10px;*/
     cursor: pointer;
     color: var(--bs-primary);
     transition: opacity 0.2s;
 }
 
-.nav-button:hover:not(:disabled) {
+.calendar-header .nav-button:hover:not(:disabled) {
     opacity: 0.7;
 }
 
-.nav-button:disabled {
+.calendar-header .nav-button:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
 .calendar-view .month-selector {
     text-decoration: none;
-    color: var(--bs-dark);
+    color: var(--bs-body-color);
     font-size: 1.25rem;
     font-weight: 500;
 }
@@ -45,32 +45,33 @@
 .calendar-view .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
+    gap: 4px;
     padding: 10px;
 }
 
 .calendar-view .calendar-weekday {
     text-align: center;
     font-weight: 600;
-    padding: 10px;
-    color: var(--bs-secondary);
+    color: var(--bs-body-tertiary);
+    padding-bottom: 1rem;
     font-size: 0.875rem;
 }
 
 .calendar-view .calendar-cell {
     aspect-ratio: 1;
-    border: 1px solid var(--bs-gray-300);
-    padding: 8px;
+    border: 1px solid var(--bs-border-color);
+    padding: 0.75rem;
     cursor: pointer;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: all 0.2s;
+    border-radius: var(--radius-sm);
 }
 
 .calendar-view .calendar-cell:hover {
-    background-color: var(--bs-gray-100);
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
 }
 
 .calendar-view .calendar-cell.empty {
@@ -79,12 +80,11 @@
 }
 
 .calendar-view .calendar-cell.today {
-    background-color: var(--bs-primary-bg-subtle);
-    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-success-rgb), 0.1);
 }
 
 .calendar-view .calendar-cell.selected {
-    background-color: var(--bs-primary);
+    background-color: var(--bs-primary-hover);
     color: white;
 }
 
@@ -106,7 +106,10 @@
 @media (max-width: 768px) {
     .calendar-view .calendar-grid {
         gap: 1px;
-        padding: 5px;
+        padding: 0.5rem;
+    }
+    .calendar-view .card-body {
+        padding: 0.25rem;
     }
 
     .calendar-view .calendar-cell {
@@ -117,6 +120,9 @@
     .calendar-view .shift-indicator {
         width: 6px;
         height: 6px;
+    }
+    .calendar-view .month-selector {
+        font-size: 1rem;
     }
 }
 

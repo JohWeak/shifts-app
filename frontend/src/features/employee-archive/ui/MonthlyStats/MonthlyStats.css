@@ -22,7 +22,7 @@
     color: var(--bs-gray-400);
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .stat-value {
         font-size: 1.25rem;
     }
