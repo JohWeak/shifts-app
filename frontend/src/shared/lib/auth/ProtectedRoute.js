@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 
-export const ProtectedRoute = ({ children, requireAdmin = false }) => {
+export const ProtectedRoute = ({ children, allowedRole }) => {
     // Получаем все нужные состояния из Redux store
     const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
     const location = useLocation();
@@ -20,8 +20,9 @@ export const ProtectedRoute = ({ children, requireAdmin = false }) => {
     }
 
     // 3. Если роль не совпадает
-    if (requireAdmin && user?.role !== 'admin') {
-        return <Navigate to="/employee/dashboard" replace />;
+    if (allowedRole && user?.role !== allowedRole) {
+        const homePath = user.role === 'admin' ? '/admin' : '/employee';
+        return <Navigate to={homePath} replace />;
     }
 
     // 4. Если все проверки пройдены

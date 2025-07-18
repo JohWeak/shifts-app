@@ -36,7 +36,7 @@ const Login = () => {
     // Эффект для редиректа после успешного входа
     useEffect(() => {
         if (isAuthenticated && user) {
-            const redirectPath = user.role === 'admin' ? '/admin' : '/employee/dashboard';
+            const redirectPath = user.role === 'admin' ? '/admin' : '/employee/schedule';
             navigate(redirectPath, {replace: true});
         }
     }, [isAuthenticated, user, navigate]);
