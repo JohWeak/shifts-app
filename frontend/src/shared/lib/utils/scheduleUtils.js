@@ -1,5 +1,15 @@
 // frontend/src/shared/lib/utils/scheduleUtils.js
-import { format, addDays, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
+import {
+    format,
+    addDays,
+    parseISO,
+    isValid,
+    startOfWeek,
+    endOfWeek,
+    startOfMonth,
+    endOfMonth,
+    eachDayOfInterval
+} from 'date-fns';
 import { enUS, he, ru } from 'date-fns/locale'; // Пример для en, he, ru
 const dateFnsLocales = {
     en: enUS,
