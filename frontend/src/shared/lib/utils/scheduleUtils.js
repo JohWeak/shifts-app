@@ -8,7 +8,8 @@ import {
     endOfWeek,
     startOfMonth,
     endOfMonth,
-    eachDayOfInterval
+    eachDayOfInterval,
+    isSameDay
 } from 'date-fns';
 import { enUS, he, ru } from 'date-fns/locale'; // Пример для en, he, ru
 const dateFnsLocales = {
@@ -408,4 +409,35 @@ export const isToday = (date) => {
     return date.getDate() === today.getDate() &&
         date.getMonth() === today.getMonth() &&
         date.getFullYear() === today.getFullYear();
+};
+
+/**
+ * Проверяет, что две даты являются одним и тем же календарным днем.
+ * Безопасно обрабатывает null/undefined.
+ * @param {Date | null} dateLeft - Первая дата
+ * @param {Date | null} dateRight - Вторая дата
+ * @returns {boolean}
+ */
+export const isSameDate = (dateLeft, dateRight) => {
+    if (!dateLeft || !dateRight) return false;
+    // Используем isSameDay из date-fns для надежного сравнения
+    return isSameDay(dateLeft, dateRight);
+};
+
+/**
+ * Форматирует дату в строку 'ГГГГ-ММ-ДД' (ISO Date).
+ * @param {Date} date - Дата
+ * @returns {string} - Отформатированная дата
+ */
+export const formatToIsoDate = (date) => {
+    return format(date, 'yyyy-MM-dd');
+};
+
+/**
+ * Форматирует дату в строку 'ГГГГ-ММ'.
+ * @param {Date} date - Дата
+ * @returns {string} - Отформатированный год и месяц
+ */
+export const formatToYearMonth = (date) => {
+    return format(date, 'yyyy-MM');
 };

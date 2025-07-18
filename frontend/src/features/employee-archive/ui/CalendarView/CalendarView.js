@@ -7,7 +7,12 @@ import {
     formatMonthYear,
     getMonthDays,
     formatDayNumber,
-    isToday as checkIsToday, getDayNames
+    isToday,
+    getDayNames,
+    getShiftForDate,
+    isSameDate,
+    formatToIsoDate,
+    formatToYearMonth
 } from 'shared/lib/utils/scheduleUtils';
 import './CalendarView.css';
 
@@ -35,7 +40,7 @@ const CalendarView = ({
     };
 
     const renderMonthSelector = () => {
-        const currentMonthStr = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
+        const currentMonthStr = formatToYearMonth(selectedMonth);
 
         return (
             <Dropdown>
@@ -65,10 +70,7 @@ const CalendarView = ({
     const renderCalendar = () => {
         const days = getMonthDays(selectedMonth);
         const firstDayOfWeek = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1).getDay();
-
-        // Add empty cells for days before the month starts
         const emptyCells = Array(firstDayOfWeek).fill(null);
-
         const weekDays = getDayNames(t, true);
 
         return (
@@ -87,23 +89,18 @@ const CalendarView = ({
 
                 {/* Days of the month */}
                 {days.map(day => {
-                    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
-                    const shift = monthData?.shifts?.find(s => s.work_date === dateStr);
-                    const isSelected = selectedDate &&
-                        selectedDate.getDate() === day.getDate() &&
-                        selectedDate.getMonth() === day.getMonth() &&
-                        selectedDate.getFullYear() === day.getFullYear();
-                    const hasShift = !!shift;
-                    const isTodayDate = checkIsToday(day);
-
+                    const dateStr = formatToIsoDate(day);
+                    const shift = getShiftForDate(day, monthData?.shifts);
+                    const isSelected = isSameDate(selectedDate, day);
+                    const isTodayDate = isToday(day);
                     return (
                         <div
                             key={dateStr}
-                            className={`calendar-cell ${isTodayDate ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasShift ? 'has-shift' : ''}`}
+                            className={`calendar-cell ${isTodayDate ? 'today' : ''} ${isSelected ? 'selected' : ''} ${shift ? 'has-shift' : ''}`}
                             onClick={() => onDateSelect(day)}
                         >
                             <div className="calendar-date">{formatDayNumber(day)}</div>
-                            {hasShift && (
+                            {shift && (
                                 <div
                                     className="shift-indicator"
                                     style={{ backgroundColor: getShiftColor({ shift_id: shift.shift_id, color: shift.color }) }}
@@ -118,14 +115,12 @@ const CalendarView = ({
 
     const isPreviousDisabled = () => {
         if (!availableMonths.length) return true;
-        const currentMonthStr = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
-        return availableMonths[0] === currentMonthStr;
+        return availableMonths[0] === formatToYearMonth(selectedMonth);
     };
 
     const isNextDisabled = () => {
         if (!availableMonths.length) return true;
-        const currentMonthStr = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
-        return availableMonths[availableMonths.length - 1] === currentMonthStr;
+        return availableMonths[availableMonths.length - 1] === formatToYearMonth(selectedMonth);
     };
 
     return (
