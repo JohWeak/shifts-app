@@ -1,50 +1,48 @@
 // frontend/src/features/employee-archive/ui/ShiftDetailsPanel/ShiftDetailsPanel.js
 import React from 'react';
-import { Card } from 'react-bootstrap';
-import { Clock, Calendar } from 'react-bootstrap-icons';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { formatShiftTime, formatFullDate } from 'shared/lib/utils/scheduleUtils';
+import {Card} from 'react-bootstrap';
+import {Clock, Calendar} from 'react-bootstrap-icons';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {formatShiftTime, formatFullDate} from 'shared/lib/utils/scheduleUtils';
 import './ShiftDetailsPanel.css';
 import {getContrastTextColor} from "../../../../shared/lib/utils/colorUtils";
 
-const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
-    const { t, locale } = useI18n();
-
-    if (!shift) {
-        return (
-            <Card className="no-shift-details-panel">
-                <Card.Header
-                    className="shift-details-header d-flex align-items-center  ">
-                    <Calendar size={20} className="opacity-50" />
-                </Card.Header>
-                <Card.Body className=" text-muted py-2 px-3">
-                    <span>{t('employee.archive.noShiftOnDate')}</span>
-                </Card.Body>
-            </Card>
-        );
-    }
-
-    const shiftColor = getShiftColor({ shift_id: shift.shift_id, color: shift.color });
+const ShiftDetailsPanel = ({shift, selectedDate, getShiftColor}) => {
+    const {t, locale} = useI18n();
+    const shiftColor = shift ? getShiftColor({shift_id: shift.shift_id, color: shift.color}) : null;
 
     return (
         <Card className="shift-details-panel">
             <Card.Header
-                style={{
+                // Стиль применяется только если есть shiftColor
+                style={shiftColor ? {
                     backgroundColor: shiftColor,
                     color: getContrastTextColor(shiftColor)
-            }}
-                className="shift-details-header d-flex align-items-center justify-content-between ">
-                <div className="detail-item align-items-center gap-2 ">
+                } : {}}
+                // Динамически добавляем класс для выравнивания
+                className={`shift-details-header d-flex align-items-center ${shift ? 'justify-content-between' : ''}`}
+            >
+                {/* --- Левый блок (всегда видимый контейнер) --- */}
+                <div className="d-flex align-items-center gap-2">
                     <Calendar size={20} className="opacity-50"/>
-                    <span className="detail-label">{shift.shift_name}</span>
-                    {/*<Clock className="detail-icon" />*/}
-                    <span>
-                        {formatShiftTime(shift.start_time, shift.end_time)}
-                    </span>
+
+                    {/* Дополнительная информация появляется только при наличии смены */}
+                    {shift && (
+                        <div className="detail-item">
+                            <span className="detail-label">{shift.shift_name}</span>
+                            <span>
+                    {formatShiftTime(shift.start_time, shift.end_time)}
+                </span>
+                        </div>
+                    )}
                 </div>
-                <div className="detail-item">
-                    <span>{shift.duration_hours} {t('common.hours')}</span>
-                </div>
+
+                {/* --- Правый блок (появляется только при наличии смены) --- */}
+                {shift && (
+                    <div className="detail-item">
+                        <span>{shift.duration_hours} {t('common.hours')}</span>
+                    </div>
+                )}
 
             </Card.Header>
             <Card.Body className="py-2 px-3">
@@ -52,21 +50,26 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
                 {/*    <Calendar className="detail-icon" />*/}
                 {/*    <span>{formatFullDate(selectedDate, locale)}</span>*/}
                 {/*</div>*/}
-                <div className="workplace-info d-flex gap-2 justify-content-between">
-                {shift.position_name && (
-                    <div className="detail-item">
-                        <span className="detail-label">{t('employee.archive.position')}:</span>
-                        <span>{shift.position_name}</span>
+                {shift ? (
+                    <div className="workplace-info d-flex gap-2 justify-content-between">
+                        {shift.position_name && (
+                            <div className="detail-item">
+                                <span className="detail-label">{t('employee.archive.position')}:</span>
+                                <span>{shift.position_name}</span>
+                            </div>
+                        )}
+                        {shift.site_name && (
+                            <div className="detail-item ">
+                                <span className="detail-label">{t('employee.archive.worksite')}:</span>
+                                <span>{shift.site_name}</span>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="text-muted">
+                        <span>{t('employee.archive.noShiftOnDate')}</span>
                     </div>
                 )}
-
-                {shift.site_name && (
-                    <div className="detail-item ">
-                        <span className="detail-label">{t('employee.archive.worksite')}:</span>
-                        <span>{shift.site_name}</span>
-                    </div>
-                )}
-                </div>
             </Card.Body>
         </Card>
     );
