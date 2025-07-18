@@ -14,10 +14,10 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
         return (
             <Card className="no-shift-details-panel">
                 <Card.Header
-                    className="shift-details-header d-flex align-items-center justify-content-center ">
-                    <Calendar size={20} />
+                    className="shift-details-header d-flex align-items-center  ">
+                    <Calendar size={20} className="opacity-50" />
                 </Card.Header>
-                <Card.Body className="text-center text-muted py-2 px-3">
+                <Card.Body className=" text-muted py-2 px-3">
                     <span>{t('employee.archive.noShiftOnDate')}</span>
                 </Card.Body>
             </Card>
@@ -34,7 +34,8 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
                     color: getContrastTextColor(shiftColor)
             }}
                 className="shift-details-header d-flex align-items-center justify-content-between ">
-                <div className="detail-item align-items-center ">
+                <div className="detail-item align-items-center gap-2 ">
+                    <Calendar size={20} className="opacity-50"/>
                     <span className="detail-label">{shift.shift_name}</span>
                     {/*<Clock className="detail-icon" />*/}
                     <span>
