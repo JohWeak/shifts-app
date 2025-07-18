@@ -220,7 +220,7 @@
     align-items: center;
     gap: 2px;
 }
-.shift-name {
+.position-schedule-editor .schedule-table .shift-name {
     font-size: var(--text-base);
     font-weight: var(--font-semibold);
     line-height: 1.2;

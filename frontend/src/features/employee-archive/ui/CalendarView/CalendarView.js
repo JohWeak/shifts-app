@@ -7,7 +7,7 @@ import {
     formatMonthYear,
     getMonthDays,
     formatDayNumber,
-    isToday as checkIsToday
+    isToday as checkIsToday, getDayNames
 } from 'shared/lib/utils/scheduleUtils';
 import './CalendarView.css';
 
@@ -69,15 +69,7 @@ const CalendarView = ({
         // Add empty cells for days before the month starts
         const emptyCells = Array(firstDayOfWeek).fill(null);
 
-        const weekDays = [
-            t('calendar.weekDays.sun'),
-            t('calendar.weekDays.mon'),
-            t('calendar.weekDays.tue'),
-            t('calendar.weekDays.wed'),
-            t('calendar.weekDays.thu'),
-            t('calendar.weekDays.fri'),
-            t('calendar.weekDays.sat')
-        ];
+        const weekDays = getDayNames(t, true);
 
         return (
             <div className="calendar-grid">

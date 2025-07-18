@@ -227,7 +227,7 @@ export const capitalizeFirstLetter = (str) => {
  */
 export const formatFullDate = (date, currentLocale ='en') => {
     const locale = dateFnsLocales[currentLocale] || enUS;
-    return capitalizeFirstLetter(format(date, 'EEEE, LLLL d, yyyy', { locale }));
+    return capitalizeFirstLetter(format(date, 'EEEE, d MMMM, yyyy', { locale }));
 };
 
 /**

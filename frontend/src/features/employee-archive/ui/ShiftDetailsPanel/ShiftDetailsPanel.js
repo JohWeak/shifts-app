@@ -32,10 +32,13 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
             }}
                 className="shift-details-header d-flex align-items-center justify-content-between ">
                 <div className="detail-item align-items-center ">
-                    <span className="detail-label">{shift.shift_name}</span>
+                    <span className="header-shift-name">{shift.shift_name}</span>
+                    {/*<Clock className="detail-icon" />*/}
                     <span>
                         {formatShiftTime(shift.start_time, shift.end_time)}
                     </span>
+
+
                 </div>
                 <div className="detail-item">
                     <Calendar className="detail-icon" />
