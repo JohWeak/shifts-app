@@ -32,25 +32,23 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
             }}
                 className="shift-details-header d-flex align-items-center justify-content-between ">
                 <div className="detail-item align-items-center ">
-                    <span className="header-shift-name">{shift.shift_name}</span>
+                    <span className="detail-label">{shift.shift_name}</span>
                     {/*<Clock className="detail-icon" />*/}
                     <span>
                         {formatShiftTime(shift.start_time, shift.end_time)}
                     </span>
-
-
                 </div>
                 <div className="detail-item">
-                    <Calendar className="detail-icon" />
-                    <span>{formatFullDate(selectedDate, locale)}</span>
-                </div>
-            </Card.Header>
-            <Card.Body>
-                <div className="detail-item">
-                    <span className="detail-label">{t('employee.archive.duration')}:</span>
                     <span>{shift.duration_hours} {t('common.hours')}</span>
                 </div>
 
+            </Card.Header>
+            <Card.Body className="py-2 px-3">
+                {/*<div className="detail-item">*/}
+                {/*    <Calendar className="detail-icon" />*/}
+                {/*    <span>{formatFullDate(selectedDate, locale)}</span>*/}
+                {/*</div>*/}
+                <div className="workplace-info d-flex gap-2">
                 {shift.position_name && (
                     <div className="detail-item">
                         <span className="detail-label">{t('employee.archive.position')}:</span>
@@ -59,11 +57,12 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
                 )}
 
                 {shift.site_name && (
-                    <div className="detail-item">
+                    <div className="detail-item ">
                         <span className="detail-label">{t('employee.archive.worksite')}:</span>
                         <span>{shift.site_name}</span>
                     </div>
                 )}
+                </div>
             </Card.Body>
         </Card>
     );

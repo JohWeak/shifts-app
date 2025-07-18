@@ -13,12 +13,7 @@
     margin-bottom: 0;
     opacity: 0.9;
 }
-.shift-details-header .header-shift-name{
-    font-size: 1rem;
-    font-weight: 600;
-    margin-inline-end: 0.5rem;
-    transform: scale(1.05);
-}
+
 
 .detail-icon {
     color: var(--bs-secondary);
