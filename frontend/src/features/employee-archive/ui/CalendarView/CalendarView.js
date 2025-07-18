@@ -3,6 +3,7 @@ import React, {useEffect} from 'react';
 import { Card, Dropdown } from 'react-bootstrap';
 import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth } from 'date-fns';
+import { enUS, he, ru } from 'date-fns/locale';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './CalendarView.css';
 
@@ -15,8 +16,17 @@ const CalendarView = ({
                           availableMonths,
                           getShiftColor
                       }) => {
-    const { t, locale } = useI18n();
+    const { t, locale: currentLocale } = useI18n();
+    const getDateFnsLocale = () => {
+        const localeMap = {
+            en: enUS,
+            he: he,
+            ru: ru
+        };
+        return localeMap[currentLocale] || enUS;
+    };
 
+    const dateLocale = getDateFnsLocale();
     useEffect(() => {
         const handleKeyDown = (e) => {
             switch (e.key) {
@@ -57,7 +67,7 @@ const CalendarView = ({
         return (
             <Dropdown>
                 <Dropdown.Toggle variant="link" className="month-selector">
-                    {format(selectedMonth, 'MMMM yyyy', { locale })}
+                    {format(selectedMonth, 'MMMM yyyy', { locale: dateLocale })}
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="month-dropdown-menu">
                     {availableMonths.map(monthStr => {
@@ -70,7 +80,7 @@ const CalendarView = ({
                                 active={monthStr === currentMonthStr}
                                 onClick={() => onMonthChange(date)}
                             >
-                                {format(date, 'MMMM yyyy', { locale })}
+                                {format(date, 'MMMM yyyy', { locale: dateLocale })}
                             </Dropdown.Item>
                         );
                     })}

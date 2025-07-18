@@ -73,6 +73,7 @@ export const en = {
         startDate: 'Start Date',
         endDate: 'End Date',
         tryAgain: 'Try Again',
+        changeColor: 'Change Color',
 
     },
     auth: {

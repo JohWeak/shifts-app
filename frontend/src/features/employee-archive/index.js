@@ -101,7 +101,7 @@ const EmployeeArchive = () => {
         <Container fluid className="employee-archive-container">
             <PageHeader
                 icon="archive"
-                title={t('employee.archive')}
+                title={t('employee.archive.title')}
                 subtitle={t('employee.archiveSubtitle')}
             />
 

@@ -25,15 +25,15 @@ const MonthlyStats = ({ monthData }) => {
                 <Row>
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{totalShifts}</div>
-                        <div className="stat-label">{t('employee.archive.totalShifts')}</div>
+                        <div className="stat-label">{t('employee.archiveTotalShifts')}</div>
                     </Col>
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{totalDays}</div>
-                        <div className="stat-label">{t('employee.archive.totalDays')}</div>
+                        <div className="stat-label">{t('employee.archiveTotalDays')}</div>
                     </Col>
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{formatHours(totalHours)}</div>
-                        <div className="stat-label">{t('employee.archive.totalHours')}</div>
+                        <div className="stat-label">{t('employee.archiveTotalHours')}</div>
                     </Col>
                 </Row>
             </Card.Body>
