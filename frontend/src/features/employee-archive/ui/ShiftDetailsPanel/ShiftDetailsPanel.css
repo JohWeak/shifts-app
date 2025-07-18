@@ -1,17 +1,17 @@
 /* frontend/src/features/employee-archive/ui/ShiftDetailsPanel/ShiftDetailsPanel.css */
 .shift-details-panel {
-    margin-top: 20px;
+    margin-bottom: 58px;
 }
 
 .detail-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
 }
-
-.detail-item:last-child {
+.shift-details-header .detail-item{
     margin-bottom: 0;
+
 }
 
 .detail-icon {
@@ -21,7 +21,6 @@
 
 .detail-label {
     font-weight: 600;
-    margin-right: 5px;
 }
 
 @media (max-width: 576px) {

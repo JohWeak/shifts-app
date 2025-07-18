@@ -1,11 +1,11 @@
 /* frontend/src/features/employee-archive/ui/MonthlyStats/MonthlyStats.css */
-.monthly-stats {
-    margin-top: 20px;
+.monthly-stats .card-body {
+    padding: 0.25rem;
 }
 
 .stat-item {
     text-align: center;
-    padding: 10px;
+    padding: 0.25rem;
 }
 
 .stat-value {
@@ -17,12 +17,14 @@
 .stat-label {
     font-size: 0.875rem;
     color: var(--bs-secondary);
-    margin-top: 5px;
+}
+[data-theme="dark"] .stat-label {
+    color: var(--bs-gray-400);
 }
 
 @media (max-width: 576px) {
     .stat-value {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .stat-label {

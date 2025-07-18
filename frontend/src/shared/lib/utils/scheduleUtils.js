@@ -220,6 +220,17 @@ export const capitalizeFirstLetter = (str) => {
 };
 
 /**
+ * Форматирует полную дату
+ * @param {Date} date - Дата
+ * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
+ * @returns {string} - Полная дата
+ */
+export const formatFullDate = (date, currentLocale ='en') => {
+    const locale = dateFnsLocales[currentLocale] || enUS;
+    return capitalizeFirstLetter(format(date, 'EEEE, LLLL d, yyyy', { locale }));
+};
+
+/**
  * Форматирует диапазон дат недели с учетом локализации.
  * @param {object} week - Объект недели с { start, end }.
  * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
@@ -227,20 +238,11 @@ export const capitalizeFirstLetter = (str) => {
  */
 export const formatWeekRange = (week, currentLocale = 'en') => {
     if (!week || !week.start || !week.end) return '';
-
-    // Получаем нужный объект локали из нашей карты, или английский по умолчанию
     const locale = dateFnsLocales[currentLocale] || enUS;
 
     try {
         const start = parseISO(week.start);
         const end = parseISO(week.end);
-
-        // Используем гибкий формат 'LLLL d', который date-fns сама адаптирует под язык.
-        // 'LLLL' -> полное название месяца ('January', 'Январь', 'ינואר')
-        // 'MMM' -> сокращенное название ('Jan', 'Янв', 'ינו')
-        // Используй 'LLLL' для полной локализации.
-        const monthDayFormat = 'LLLL d';
-
         if (start.getFullYear() === end.getFullYear()) {
             // Форматируем с учетом локали
             const startFormatted = capitalizeFirstLetter(format(start, 'LLLL d', { locale }));
@@ -250,7 +252,6 @@ export const formatWeekRange = (week, currentLocale = 'en') => {
             return `${format(start, 'LLLL d, yyyy', { locale })} - ${format(end, 'LLLL d, yyyy', { locale })}`;
         }
     } catch {
-        // Фоллбэк остается без изменений
         return `${week.start} - ${week.end}`;
     }
 };
@@ -395,14 +396,7 @@ export const formatDayNumber = (date) => {
     return format(date, 'd');
 };
 
-/**
- * Форматирует полную дату
- * @param {Date} date - Дата
- * @returns {string} - Полная дата
- */
-export const formatFullDate = (date) => {
-    return format(date, 'EEEE, MMMM d, yyyy');
-};
+
 
 /**
  * Проверяет, является ли дата сегодняшним днем

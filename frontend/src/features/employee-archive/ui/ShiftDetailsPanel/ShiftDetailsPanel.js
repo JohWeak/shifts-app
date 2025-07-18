@@ -5,9 +5,10 @@ import { Clock, Calendar } from 'react-bootstrap-icons';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { formatShiftTime, formatFullDate } from 'shared/lib/utils/scheduleUtils';
 import './ShiftDetailsPanel.css';
+import {getContrastTextColor} from "../../../../shared/lib/utils/colorUtils";
 
 const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
 
     if (!shift) {
         return (
@@ -23,23 +24,25 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
     const shiftColor = getShiftColor({ shift_id: shift.shift_id, color: shift.color });
 
     return (
-        <Card className="shift-details-panel">
-            <Card.Header style={{ backgroundColor: shiftColor, color: '#fff' }}>
-                <h5 className="mb-0">{shift.shift_name}</h5>
-            </Card.Header>
-            <Card.Body>
-                <div className="detail-item">
-                    <Calendar className="detail-icon" />
-                    <span>{formatFullDate(selectedDate)}</span>
-                </div>
-
-                <div className="detail-item">
-                    <Clock className="detail-icon" />
+        <Card className="shift-details-panel ">
+            <Card.Header
+                style={{
+                    backgroundColor: shiftColor,
+                    color: getContrastTextColor(shiftColor)
+            }}
+                className="shift-details-header d-flex align-items-center justify-content-between ">
+                <div className="detail-item align-items-center ">
+                    <span className="detail-label">{shift.shift_name}</span>
                     <span>
                         {formatShiftTime(shift.start_time, shift.end_time)}
                     </span>
                 </div>
-
+                <div className="detail-item">
+                    <Calendar className="detail-icon" />
+                    <span>{formatFullDate(selectedDate, locale)}</span>
+                </div>
+            </Card.Header>
+            <Card.Body>
                 <div className="detail-item">
                     <span className="detail-label">{t('employee.archive.duration')}:</span>
                     <span>{shift.duration_hours} {t('common.hours')}</span>
