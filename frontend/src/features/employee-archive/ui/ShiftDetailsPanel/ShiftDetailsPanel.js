@@ -36,7 +36,7 @@ const ShiftDetailsPanel = ({ shift, selectedDate, getShiftColor }) => {
                 <div className="detail-item">
                     <Clock className="detail-icon" />
                     <span>
-                        {formatShiftTime(shift.start_time, shift.duration_hours)} - {formatShiftTime(shift.end_time, shift.duration_hours)}
+                        {formatShiftTime(shift.start_time, shift.end_time)}
                     </span>
                 </div>
 

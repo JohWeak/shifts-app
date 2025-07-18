@@ -99,18 +99,13 @@ const EmployeeArchive = () => {
 
     return (
         <Container fluid className="employee-archive-container">
-            <PageHeader
-                icon="archive"
-                title={t('employee.archive.title')}
-                subtitle={t('employee.archive.subtitle')}
-            />
-
             {error && <ErrorMessage message={error} />}
 
             {loading ? (
                 <LoadingState />
             ) : (
                 <div className="archive-content">
+                    <MonthlyStats monthData={monthData} />
                     <CalendarView
                         selectedMonth={selectedMonth}
                         onMonthChange={handleMonthChange}
@@ -120,8 +115,6 @@ const EmployeeArchive = () => {
                         availableMonths={availableMonths}
                         getShiftColor={getShiftColor}
                     />
-
-                    <MonthlyStats monthData={monthData} />
 
                     {selectedDate && (
                         <ShiftDetailsPanel

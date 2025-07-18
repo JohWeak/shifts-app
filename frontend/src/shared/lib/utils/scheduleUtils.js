@@ -104,26 +104,57 @@ export const formatScheduleDate = (startDate, endDate = null) => {
 };
 
 /**
- * Форматирует время смены (например: "06:00-14:00")
- * @param {string} startTime - Время начала в формате "HH:MM:SS"
- * @param {number} duration - Длительность в часах
- * @returns {string} - Отформатированное время
+ * Форматирует диапазон времени смены (например: "06:00-14:00").
+ * Может принимать либо длительность, либо время окончания.
+ * @param {string} startTime - Время начала в формате "HH:MM:SS".
+ * @param {number | string} endOrDuration - Длительность в часах (number) ИЛИ время окончания в формате "HH:MM:SS" (string).
+ * @returns {string} - Отформатированное время.
  */
-export const formatShiftTime = (startTime, duration) => {
-    if (!startTime) return '';
+export const formatShiftTime = (startTime, endOrDuration) => {
+    // Проверка на наличие базовых данных
+    if (!startTime || !endOrDuration) return '';
 
-    const durationHours = typeof duration === 'number' ? duration : parseFloat(duration) || 0;
+    try {
+        // Форматируем время начала (всегда нужно)
+        const cleanStart = startTime.substring(0, 5);
+        let cleanEnd;
 
-    const cleanStart = startTime.substring(0, 5);
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const startMinutes = hours * 60 + minutes;
-    const endMinutes = startMinutes + (duration * 60);
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
 
-    const endHours = Math.floor(endMinutes / 60) % 24;
-    const endMins = endMinutes % 60;
-    const cleanEnd = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+        // Проверяем, является ли второй аргумент ВРЕМЕНЕМ ОКОНЧАНИЯ (т.е. строкой с ':')
+        if (typeof endOrDuration === 'string' && endOrDuration.includes(':')) {
+            // --- Сценарий 1: Передано startTime + endTime ---
+            const endTime = endOrDuration;
+            cleanEnd = endTime.substring(0, 5);
 
-    return `${cleanStart}-${cleanEnd}`;
+        } else {
+            // --- Сценарий 2: Передано startTime + duration ---
+            const duration = typeof endOrDuration === 'number'
+                ? endOrDuration
+                : parseFloat(endOrDuration);
+
+            // Добавим проверку на случай, если duration не является числом
+            if (isNaN(duration)) {
+                console.warn('Некорректная длительность в formatShiftTime:', endOrDuration);
+                return cleanStart; // Возвращаем только время начала
+            }
+
+            // Ваша оригинальная, рабочая логика для вычисления времени окончания
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startMinutes = hours * 60 + minutes;
+            const endMinutes = startMinutes + (duration * 60);
+
+            const endHours = Math.floor(endMinutes / 60) % 24;
+            const endMins = endMinutes % 60;
+            cleanEnd = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+        }
+
+        return `${cleanStart}-${cleanEnd}`;
+
+    } catch (error) {
+        console.error("Ошибка при форматировании времени смены:", error);
+        return startTime;
+    }
 };
 
 /**
