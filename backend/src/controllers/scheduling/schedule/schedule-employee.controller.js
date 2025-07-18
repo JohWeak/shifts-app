@@ -469,15 +469,15 @@ const getEmployeeArchiveSummary = async (req, res) => {
             });
         }
 
-        // Get first and last shift dates - используем правильное имя колонки emp_id
+        // Get first and last shift dates
         const firstAssignment = await ScheduleAssignment.findOne({
-            where: { emp_id: employee.emp_id }, // Исправлено с employee_id на emp_id
+            where: { emp_id: employee.emp_id },
             order: [['work_date', 'ASC']],
             attributes: ['work_date']
         });
 
         const lastAssignment = await ScheduleAssignment.findOne({
-            where: { emp_id: employee.emp_id }, // Исправлено с employee_id на emp_id
+            where: { emp_id: employee.emp_id },
             order: [['work_date', 'DESC']],
             attributes: ['work_date']
         });
@@ -495,7 +495,8 @@ const getEmployeeArchiveSummary = async (req, res) => {
         const endDate = dayjs(lastAssignment.work_date);
         let current = startDate.startOf('month');
 
-        while (current.isSameOrBefore(endDate, 'month')) {
+        //  isSameOrBefore
+        while (current.valueOf() <= endDate.startOf('month').valueOf()) {
             availableMonths.push(current.format('YYYY-MM'));
             current = current.add(1, 'month');
         }

@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import CalendarView from './ui/CalendarView/CalendarView';
