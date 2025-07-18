@@ -324,3 +324,53 @@ export const getShiftForDate = (date, shifts) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return shifts.find(shift => shift.work_date === dateStr) || null;
 };
+
+/**
+ * Форматирует месяц и год
+ * @param {Date} date - Дата
+ * @returns {string} - Отформатированный месяц и год
+ */
+export const formatMonthYear = (date) => {
+    return format(date, 'MMMM yyyy');
+};
+
+/**
+ * Получает все дни месяца
+ * @param {Date} date - Любая дата в месяце
+ * @returns {Array<Date>} - Массив дат месяца
+ */
+export const getMonthDays = (date) => {
+    const start = startOfMonth(date);
+    const end = endOfMonth(date);
+    return eachDayOfInterval({ start, end });
+};
+
+/**
+ * Форматирует число дня
+ * @param {Date} date - Дата
+ * @returns {string} - Число дня
+ */
+export const formatDayNumber = (date) => {
+    return format(date, 'd');
+};
+
+/**
+ * Форматирует полную дату
+ * @param {Date} date - Дата
+ * @returns {string} - Полная дата
+ */
+export const formatFullDate = (date) => {
+    return format(date, 'EEEE, MMMM d, yyyy');
+};
+
+/**
+ * Проверяет, является ли дата сегодняшним днем
+ * @param {Date} date - Дата для проверки
+ * @returns {boolean}
+ */
+export const isToday = (date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear();
+};

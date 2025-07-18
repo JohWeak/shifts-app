@@ -1,5 +1,5 @@
 // frontend/src/features/employee-archive/index.js
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -93,7 +93,7 @@ const EmployeeArchive = () => {
 
     const getSelectedDayShift = () => {
         if (!selectedDate || !monthData?.shifts) return null;
-        const dateStr = selectedDate.toISOString().split('T')[0];
+        const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
         return monthData.shifts.find(shift => shift.work_date === dateStr);
     };
 
@@ -102,7 +102,7 @@ const EmployeeArchive = () => {
             <PageHeader
                 icon="archive"
                 title={t('employee.archive.title')}
-                subtitle={t('employee.archiveSubtitle')}
+                subtitle={t('employee.archive.subtitle')}
             />
 
             {error && <ErrorMessage message={error} />}

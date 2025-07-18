@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, Row, Col } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { formatMinutesToHours } from 'shared/lib/utils/scheduleUtils';
 import './MonthlyStats.css';
 
 const MonthlyStats = ({ monthData }) => {
@@ -13,27 +14,21 @@ const MonthlyStats = ({ monthData }) => {
 
     const { totalShifts, totalDays, totalHours } = monthData.stats;
 
-    const formatHours = (minutes) => {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return `${hours}:${mins.toString().padStart(2, '0')}`;
-    };
-
     return (
         <Card className="monthly-stats">
             <Card.Body>
                 <Row>
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{totalShifts}</div>
-                        <div className="stat-label">{t('employee.archiveTotalShifts')}</div>
+                        <div className="stat-label">{t('employee.archive.totalShifts')}</div>
                     </Col>
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{totalDays}</div>
-                        <div className="stat-label">{t('employee.archiveTotalDays')}</div>
+                        <div className="stat-label">{t('employee.archive.totalDays')}</div>
                     </Col>
                     <Col xs={4} className="stat-item">
-                        <div className="stat-value">{formatHours(totalHours)}</div>
-                        <div className="stat-label">{t('employee.archiveTotalHours')}</div>
+                        <div className="stat-value">{formatMinutesToHours(totalHours)}</div>
+                        <div className="stat-label">{t('employee.archive.totalHours')}</div>
                     </Col>
                 </Row>
             </Card.Body>

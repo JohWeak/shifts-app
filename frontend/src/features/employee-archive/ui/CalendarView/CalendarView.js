@@ -1,10 +1,14 @@
 // frontend/src/features/employee-archive/ui/CalendarView/CalendarView.js
-import React, {useEffect} from 'react';
+import React from 'react';
 import { Card, Dropdown } from 'react-bootstrap';
 import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth } from 'date-fns';
-import { enUS, he, ru } from 'date-fns/locale';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {
+    formatMonthYear,
+    getMonthDays,
+    formatDayNumber,
+    isToday as checkIsToday
+} from 'shared/lib/utils/scheduleUtils';
 import './CalendarView.css';
 
 const CalendarView = ({
@@ -16,38 +20,7 @@ const CalendarView = ({
                           availableMonths,
                           getShiftColor
                       }) => {
-    const { t, locale: currentLocale } = useI18n();
-    const getDateFnsLocale = () => {
-        const localeMap = {
-            en: enUS,
-            he: he,
-            ru: ru
-        };
-        return localeMap[currentLocale] || enUS;
-    };
-
-    const dateLocale = getDateFnsLocale();
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            switch (e.key) {
-                case 'ArrowLeft':
-                    if (!isPreviousDisabled()) {
-                        handlePreviousMonth();
-                    }
-                    break;
-                case 'ArrowRight':
-                    if (!isNextDisabled()) {
-                        handleNextMonth();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedMonth, availableMonths]);
+    const { t } = useI18n();
 
     const handlePreviousMonth = () => {
         const newMonth = new Date(selectedMonth);
@@ -62,12 +35,12 @@ const CalendarView = ({
     };
 
     const renderMonthSelector = () => {
-        const currentMonthStr = format(selectedMonth, 'yyyy-MM');
+        const currentMonthStr = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
 
         return (
             <Dropdown>
                 <Dropdown.Toggle variant="link" className="month-selector">
-                    {format(selectedMonth, 'MMMM yyyy', { locale: dateLocale })}
+                    {formatMonthYear(selectedMonth)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="month-dropdown-menu">
                     {availableMonths.map(monthStr => {
@@ -80,7 +53,7 @@ const CalendarView = ({
                                 active={monthStr === currentMonthStr}
                                 onClick={() => onMonthChange(date)}
                             >
-                                {format(date, 'MMMM yyyy', { locale: dateLocale })}
+                                {formatMonthYear(date)}
                             </Dropdown.Item>
                         );
                     })}
@@ -90,12 +63,8 @@ const CalendarView = ({
     };
 
     const renderCalendar = () => {
-        const monthStart = startOfMonth(selectedMonth);
-        const monthEnd = endOfMonth(selectedMonth);
-        const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-        // Get the first day of the week (0 = Sunday, 1 = Monday, etc.)
-        const firstDayOfWeek = monthStart.getDay();
+        const days = getMonthDays(selectedMonth);
+        const firstDayOfWeek = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1).getDay();
 
         // Add empty cells for days before the month starts
         const emptyCells = Array(firstDayOfWeek).fill(null);
@@ -126,18 +95,22 @@ const CalendarView = ({
 
                 {/* Days of the month */}
                 {days.map(day => {
-                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
                     const shift = monthData?.shifts?.find(s => s.work_date === dateStr);
-                    const isSelected = selectedDate && format(selectedDate, 'yyyy-MM-dd') === dateStr;
+                    const isSelected = selectedDate &&
+                        selectedDate.getDate() === day.getDate() &&
+                        selectedDate.getMonth() === day.getMonth() &&
+                        selectedDate.getFullYear() === day.getFullYear();
                     const hasShift = !!shift;
+                    const isTodayDate = checkIsToday(day);
 
                     return (
                         <div
                             key={dateStr}
-                            className={`calendar-cell ${isToday(day) ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasShift ? 'has-shift' : ''}`}
+                            className={`calendar-cell ${isTodayDate ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasShift ? 'has-shift' : ''}`}
                             onClick={() => onDateSelect(day)}
                         >
-                            <div className="calendar-date">{format(day, 'd')}</div>
+                            <div className="calendar-date">{formatDayNumber(day)}</div>
                             {hasShift && (
                                 <div
                                     className="shift-indicator"
@@ -153,13 +126,13 @@ const CalendarView = ({
 
     const isPreviousDisabled = () => {
         if (!availableMonths.length) return true;
-        const currentMonthStr = format(selectedMonth, 'yyyy-MM');
+        const currentMonthStr = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
         return availableMonths[0] === currentMonthStr;
     };
 
     const isNextDisabled = () => {
         if (!availableMonths.length) return true;
-        const currentMonthStr = format(selectedMonth, 'yyyy-MM');
+        const currentMonthStr = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
         return availableMonths[availableMonths.length - 1] === currentMonthStr;
     };
 

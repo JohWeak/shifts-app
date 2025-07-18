@@ -469,15 +469,15 @@ const getEmployeeArchiveSummary = async (req, res) => {
             });
         }
 
-        // Get first and last shift dates
+        // Get first and last shift dates - используем правильное имя колонки emp_id
         const firstAssignment = await ScheduleAssignment.findOne({
-            where: { employee_id: employee.emp_id },
+            where: { emp_id: employee.emp_id }, // Исправлено с employee_id на emp_id
             order: [['work_date', 'ASC']],
             attributes: ['work_date']
         });
 
         const lastAssignment = await ScheduleAssignment.findOne({
-            where: { employee_id: employee.emp_id },
+            where: { emp_id: employee.emp_id }, // Исправлено с employee_id на emp_id
             order: [['work_date', 'DESC']],
             attributes: ['work_date']
         });
@@ -549,10 +549,10 @@ const getEmployeeArchiveMonth = async (req, res) => {
             .endOf('month')
             .format(DATE_FORMAT);
 
-        // Get all assignments for the month
+        // Get all assignments for the month - используем правильное имя колонки emp_id
         const assignments = await ScheduleAssignment.findAll({
             where: {
-                employee_id: employee.emp_id,
+                emp_id: employee.emp_id, // Исправлено с employee_id на emp_id
                 work_date: {
                     [Op.between]: [monthStart, monthEnd]
                 }
@@ -571,7 +571,6 @@ const getEmployeeArchiveMonth = async (req, res) => {
                 {
                     model: Schedule,
                     as: 'schedule',
-                    attributes: ['id'],
                     include: [{
                         model: WorkSite,
                         as: 'workSite',
@@ -579,10 +578,7 @@ const getEmployeeArchiveMonth = async (req, res) => {
                     }]
                 }
             ],
-            order: [['work_date', 'ASC']],
-            // raw для оптимизации
-            raw: false,
-            nest: true
+            order: [['work_date', 'ASC']]
         });
 
         // Calculate statistics
