@@ -156,9 +156,30 @@ export const en = {
             september: 'September'
         },
     },
+    calendar: {
+        weekDays: {
+            sun: 'Sun',
+            mon: 'Mon',
+            tue: 'Tue',
+            wed: 'Wed',
+            thu: 'Thu',
+            fri: 'Fri',
+            sat: 'Sat',
+        }
+    },
     employee: {
+        archiveSubtitle: 'View your past and future shifts',
+        archive: {
+            title: 'Archive',
+            totalShifts: 'Total Shifts',
+            totalDays: 'Work Days',
+            totalHours: 'Total Hours',
+            noShiftOnDate: 'No shift scheduled for this date',
+            duration: 'Duration',
+            position: 'Position',
+            worksite: 'Worksite',
+        },
         addEmployee: 'Add Employee',
-        archive: 'Archive',
         assignedToShift: 'Assigned to Shift',
         assignments: 'Assignments',
         availability: 'Availability',

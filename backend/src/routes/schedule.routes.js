@@ -13,6 +13,9 @@ const router = express.Router();
 // === EMPLOYEE ROUTES ===
 router.get('/weekly', verifyToken, employeeController.getWeeklySchedule);
 router.get('/position/:positionId/weekly', verifyToken, employeeController.getPositionWeeklySchedule);
+router.get('/employee/archive/summary', verifyToken, employeeController.getEmployeeArchiveSummary);
+router.get('/employee/archive/month', verifyToken, employeeController.getEmployeeArchiveMonth);
+
 
 // === ADMIN ROUTES ===
 router.get('/stats/overview', ...[verifyToken, isAdmin], exportController.getScheduleStats);

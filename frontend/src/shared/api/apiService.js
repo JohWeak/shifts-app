@@ -58,7 +58,13 @@ export const scheduleAPI = {
             console.error('Export failed:', error);
             throw error;
         }
-    }
+    },
+    fetchEmployeeArchiveSummary: () => api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_SUMMARY),
+
+    fetchEmployeeArchiveMonth: (year, month) =>
+        api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_MONTH, {
+            params: { year, month }
+        }),
 };
 
 export const worksiteAPI = {

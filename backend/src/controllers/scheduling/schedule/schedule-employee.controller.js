@@ -456,8 +456,181 @@ const getPositionWeeklySchedule = async (req, res) => {
     }
 };
 
+const getEmployeeArchiveSummary = async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        // Get employee
+        const employee = await Employee.findByPk(userId);
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found'
+            });
+        }
+
+        // Get first and last shift dates
+        const firstAssignment = await ScheduleAssignment.findOne({
+            where: { employee_id: employee.emp_id },
+            order: [['work_date', 'ASC']],
+            attributes: ['work_date']
+        });
+
+        const lastAssignment = await ScheduleAssignment.findOne({
+            where: { employee_id: employee.emp_id },
+            order: [['work_date', 'DESC']],
+            attributes: ['work_date']
+        });
+
+        if (!firstAssignment || !lastAssignment) {
+            return res.json({
+                success: true,
+                data: { availableMonths: [] }
+            });
+        }
+
+        // Generate list of available months
+        const availableMonths = [];
+        const startDate = dayjs(firstAssignment.work_date);
+        const endDate = dayjs(lastAssignment.work_date);
+        let current = startDate.startOf('month');
+
+        while (current.isSameOrBefore(endDate, 'month')) {
+            availableMonths.push(current.format('YYYY-MM'));
+            current = current.add(1, 'month');
+        }
+
+        res.json({
+            success: true,
+            data: { availableMonths }
+        });
+
+    } catch (error) {
+        console.error('[GetEmployeeArchiveSummary] Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving archive summary',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
+const getEmployeeArchiveMonth = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { year, month } = req.query;
+
+        if (!year || !month) {
+            return res.status(400).json({
+                success: false,
+                message: 'Year and month are required'
+            });
+        }
+
+        // Get employee
+        const employee = await Employee.findByPk(userId);
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found'
+            });
+        }
+
+        // Calculate month boundaries
+        const monthStart = dayjs()
+            .year(parseInt(year))
+            .month(parseInt(month) - 1)
+            .startOf('month')
+            .format(DATE_FORMAT);
+
+        const monthEnd = dayjs()
+            .year(parseInt(year))
+            .month(parseInt(month) - 1)
+            .endOf('month')
+            .format(DATE_FORMAT);
+
+        // Get all assignments for the month
+        const assignments = await ScheduleAssignment.findAll({
+            where: {
+                employee_id: employee.emp_id,
+                work_date: {
+                    [Op.between]: [monthStart, monthEnd]
+                }
+            },
+            include: [
+                {
+                    model: PositionShift,
+                    as: 'shift',
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'color']
+                },
+                {
+                    model: Position,
+                    as: 'position',
+                    attributes: ['pos_id', 'pos_name']
+                },
+                {
+                    model: Schedule,
+                    as: 'schedule',
+                    attributes: ['id'],
+                    include: [{
+                        model: WorkSite,
+                        as: 'workSite',
+                        attributes: ['site_id', 'site_name']
+                    }]
+                }
+            ],
+            order: [['work_date', 'ASC']],
+            // raw для оптимизации
+            raw: false,
+            nest: true
+        });
+
+        // Calculate statistics
+        const totalShifts = assignments.length;
+        const uniqueDays = new Set(assignments.map(a => a.work_date)).size;
+        const totalMinutes = assignments.reduce((sum, a) => {
+            return sum + (a.shift.duration_hours * 60);
+        }, 0);
+
+        // Format shifts data
+        const shifts = assignments.map(assignment => ({
+            shift_id: assignment.shift.id,
+            shift_name: assignment.shift.shift_name,
+            work_date: assignment.work_date,
+            start_time: assignment.shift.start_time,
+            end_time: assignment.shift.end_time,
+            duration_hours: assignment.shift.duration_hours,
+            color: assignment.shift.color,
+            position_name: assignment.position?.pos_name,
+            site_name: assignment.schedule?.workSite?.site_name
+        }));
+
+        res.json({
+            success: true,
+            data: {
+                shifts,
+                stats: {
+                    totalShifts,
+                    totalDays: uniqueDays,
+                    totalHours: totalMinutes
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('[GetEmployeeArchiveMonth] Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving archive data',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+};
+
 module.exports = {
     getWeeklySchedule,
     getAdminWeeklySchedule,
-    getPositionWeeklySchedule
+    getPositionWeeklySchedule,
+    getEmployeeArchiveSummary,
+    getEmployeeArchiveMonth
 };

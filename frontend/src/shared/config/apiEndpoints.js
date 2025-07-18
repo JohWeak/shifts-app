@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
             WEEKLY: '/api/schedules/admin/weekly',
         },
         WEEKLY_BY_POSITION: (positionId) => `/api/schedules/position/${positionId}/weekly`,
+        EMPLOYEE_ARCHIVE_SUMMARY: '/api/schedules/employee/archive/summary',
+        EMPLOYEE_ARCHIVE_MONTH: '/api/schedules/employee/archive/month',
     },
     // Employees
     EMPLOYEES: {

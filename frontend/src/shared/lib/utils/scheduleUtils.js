@@ -275,3 +275,52 @@ export const formatEmployeeName = (employeeOrFirstName, optionsOrLastName = {}, 
     // По умолчанию возвращаем только имя
     return firstName;
 };
+
+/**
+ * Форматирует часы из минут в формат ЧЧ:ММ
+ * @param {number} minutes - Количество минут
+ * @returns {string} - Отформатированное время
+ */
+export const formatMinutesToHours = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}:${mins.toString().padStart(2, '0')}`;
+};
+
+/**
+ * Получает список месяцев между двумя датами
+ * @param {Date|string} startDate - Начальная дата
+ * @param {Date|string} endDate - Конечная дата
+ * @returns {Array} - Массив объектов с информацией о месяцах
+ */
+export const getMonthsBetweenDates = (startDate, endDate) => {
+    const start = startDate instanceof Date ? startDate : parseISO(startDate);
+    const end = endDate instanceof Date ? endDate : parseISO(endDate);
+
+    const months = [];
+    let current = new Date(start.getFullYear(), start.getMonth(), 1);
+    const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+
+    while (current <= endMonth) {
+        months.push({
+            date: new Date(current),
+            value: format(current, 'yyyy-MM'),
+            label: format(current, 'MMMM yyyy')
+        });
+        current.setMonth(current.getMonth() + 1);
+    }
+
+    return months;
+};
+
+/**
+ * Проверяет, есть ли у даты смена
+ * @param {Date} date - Дата для проверки
+ * @param {Array} shifts - Массив смен
+ * @returns {Object|null} - Объект смены или null
+ */
+export const getShiftForDate = (date, shifts) => {
+    if (!shifts || !Array.isArray(shifts)) return null;
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return shifts.find(shift => shift.work_date === dateStr) || null;
+};

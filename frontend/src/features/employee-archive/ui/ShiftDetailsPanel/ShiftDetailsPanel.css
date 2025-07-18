@@ -1,0 +1,31 @@
+/* frontend/src/features/employee-archive/ui/ShiftDetailsPanel/ShiftDetailsPanel.css */
+.shift-details-panel {
+    margin-top: 20px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-icon {
+    color: var(--bs-secondary);
+    flex-shrink: 0;
+}
+
+.detail-label {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+@media (max-width: 576px) {
+    .detail-item {
+        font-size: 0.875rem;
+    }
+}

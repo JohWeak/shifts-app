@@ -1,0 +1,147 @@
+/* frontend/src/features/employee-archive/ui/CalendarView/CalendarView.css */
+.calendar-view {
+    width: 100%;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--bs-gray-100);
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: var(--bs-primary);
+    transition: opacity 0.2s;
+}
+
+.nav-button:hover:not(:disabled) {
+    opacity: 0.7;
+}
+
+.nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.month-selector {
+    text-decoration: none;
+    color: var(--bs-dark);
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.month-dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding: 10px;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-weight: 600;
+    padding: 10px;
+    color: var(--bs-secondary);
+    font-size: 0.875rem;
+}
+
+.calendar-cell {
+    aspect-ratio: 1;
+    border: 1px solid var(--bs-gray-300);
+    padding: 8px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.calendar-cell:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.calendar-cell.empty {
+    cursor: default;
+    border: none;
+}
+
+.calendar-cell.today {
+    background-color: var(--bs-primary-bg-subtle);
+    border-color: var(--bs-primary);
+}
+
+.calendar-cell.selected {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.calendar-cell.has-shift {
+    font-weight: 500;
+}
+
+.calendar-date {
+    font-size: 0.875rem;
+}
+
+.shift-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .calendar-grid {
+        gap: 1px;
+        padding: 5px;
+    }
+
+    .calendar-cell {
+        padding: 4px;
+        font-size: 0.75rem;
+    }
+
+    .shift-indicator {
+        width: 6px;
+        height: 6px;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .nav-button {
+    transform: scaleX(-1);
+}
+/* RTL Support */
+[dir="rtl"] .calendar-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-button svg {
+    transform: scaleX(-1);
+}
+
+[dir="rtl"] .calendar-grid {
+    direction: rtl;
+}
+
+[dir="rtl"] .detail-item {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .detail-label {
+    margin-right: 0;
+    margin-left: 5px;
+}
