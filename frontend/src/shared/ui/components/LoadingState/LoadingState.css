@@ -20,18 +20,18 @@
 /* Стили для нового прогресс-бара */
 .progress-bar-container {
     width: 100%;
-    max-width: 300px; /* Ограничим ширину для эстетики */
+    max-width: 300px;
     height: 4px;
-    background-color: #e9ecef; /* Светло-серый фон */
+    background-color: #e9ecef;
     border-radius: 2px;
-    overflow: hidden; /* Важно, чтобы анимация не вылезала за пределы */
+    overflow: hidden;
 }
 
 .progress-bar-indeterminate {
     width: 100%;
     height: 100%;
-    background-color: var(--bs-primary); /* Используем основной цвет из Bootstrap */
-    animation: indeterminate-progress 1.5s infinite ease-in-out;
+    background-color: var(--bs-primary);
+    animation: indeterminate-progress 5s infinite ease-in-out;
 }
 
 @keyframes indeterminate-progress {
