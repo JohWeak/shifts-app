@@ -3,18 +3,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
 
 // Async thunks
-export const fetchConstraints = createAsyncThunk(
-    'constraints/fetchConstraints',
-    async ({ empId, weekStart }) => {
-        const response = await constraintAPI.getWeeklyConstraints({ empId, weekStart });
+export const fetchWeeklyConstraints = createAsyncThunk(
+    'constraints/fetchWeeklyConstraints',
+    async ({ weekStart }) => {
+        const response = await constraintAPI.getWeeklyConstraints({ weekStart });
         return response.data;
     }
 );
 
-export const submitConstraints = createAsyncThunk(
-    'constraints/submitConstraints',
-    async (constraints) => {
-        const response = await constraintAPI.submitWeeklyConstraints(constraints);
+export const submitWeeklyConstraints = createAsyncThunk(
+    'constraints/submitWeeklyConstraints',
+    async (constraintsData) => {
+        const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
         return response.data;
     }
 );
@@ -30,52 +30,131 @@ export const fetchPermanentRequests = createAsyncThunk(
 const constraintSlice = createSlice({
     name: 'constraints',
     initialState: {
-        weeklyConstraints: [],
+        // Weekly constraints data
+        weeklyTemplate: null,
+        weeklyConstraints: {},
+        weekStart: null,
+
+        // Permanent requests
         permanentRequests: [],
+
+        // UI states
         loading: false,
+        submitting: false,
         error: null,
         submitStatus: null,
+        limitError: '',
+
+        // Settings
+        currentMode: 'cannot_work', // 'cannot_work' | 'prefer_work'
+        isSubmitted: false,
+        canEdit: true,
     },
     reducers: {
+        setCurrentMode: (state, action) => {
+            state.currentMode = action.payload;
+            state.limitError = '';
+        },
+
+        updateConstraint: (state, action) => {
+            const { date, shiftType, status } = action.payload;
+
+            if (!state.weeklyConstraints[date]) {
+                state.weeklyConstraints[date] = {
+                    day_status: 'neutral',
+                    shifts: {}
+                };
+            }
+
+            if (shiftType) {
+                // Update specific shift
+                state.weeklyConstraints[date].shifts[shiftType] = status;
+            } else {
+                // Update whole day
+                state.weeklyConstraints[date].day_status = status;
+                // Update all shifts for this day
+                if (state.weeklyTemplate) {
+                    const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
+                    if (dayTemplate) {
+                        dayTemplate.shifts.forEach(shift => {
+                            state.weeklyConstraints[date].shifts[shift.shift_type] = status;
+                        });
+                    }
+                }
+            }
+        },
+
+        setLimitError: (state, action) => {
+            state.limitError = action.payload;
+        },
+
         clearSubmitStatus: (state) => {
             state.submitStatus = null;
         },
-        updateLocalConstraint: (state, action) => {
-            const { date, shiftType, constraintType } = action.payload;
-            // Local state update logic
+
+        resetConstraints: (state) => {
+            state.weeklyConstraints = {};
+            state.limitError = '';
+            state.isSubmitted = false;
         }
     },
     extraReducers: (builder) => {
         builder
-            // Fetch constraints
-            .addCase(fetchConstraints.pending, (state) => {
+            // Fetch weekly constraints
+            .addCase(fetchWeeklyConstraints.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchConstraints.fulfilled, (state, action) => {
+            .addCase(fetchWeeklyConstraints.fulfilled, (state, action) => {
                 state.loading = false;
-                state.weeklyConstraints = action.payload;
+                state.weeklyTemplate = action.payload;
+                state.isSubmitted = action.payload.constraints.already_submitted;
+                state.canEdit = action.payload.constraints.can_edit;
+
+                // Initialize constraints from template
+                const initialConstraints = {};
+                action.payload.constraints.template.forEach(day => {
+                    initialConstraints[day.date] = {
+                        day_status: day.day_status || 'neutral',
+                        shifts: {}
+                    };
+                    day.shifts.forEach(shift => {
+                        initialConstraints[day.date].shifts[shift.shift_type] = shift.status || 'neutral';
+                    });
+                });
+                state.weeklyConstraints = initialConstraints;
             })
-            .addCase(fetchConstraints.rejected, (state, action) => {
+            .addCase(fetchWeeklyConstraints.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             })
+
             // Submit constraints
-            .addCase(submitConstraints.pending, (state) => {
-                state.loading = true;
+            .addCase(submitWeeklyConstraints.pending, (state) => {
+                state.submitting = true;
                 state.submitStatus = 'pending';
+                state.error = null;
             })
-            .addCase(submitConstraints.fulfilled, (state) => {
-                state.loading = false;
+            .addCase(submitWeeklyConstraints.fulfilled, (state) => {
+                state.submitting = false;
                 state.submitStatus = 'success';
+                state.isSubmitted = true;
+                state.canEdit = false;
             })
-            .addCase(submitConstraints.rejected, (state, action) => {
-                state.loading = false;
+            .addCase(submitWeeklyConstraints.rejected, (state, action) => {
+                state.submitting = false;
                 state.submitStatus = 'error';
                 state.error = action.error.message;
             });
     }
 });
 
-export const { clearSubmitStatus, updateLocalConstraint } = constraintSlice.actions;
+export const {
+    setCurrentMode,
+    updateConstraint,
+    setLimitError,
+    clearSubmitStatus,
+    resetConstraints
+} = constraintSlice.actions;
+
 export default constraintSlice.reducer;

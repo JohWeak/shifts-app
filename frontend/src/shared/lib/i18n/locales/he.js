@@ -788,4 +788,32 @@ export const he = {
         workSitePhone: 'טלפון אתר העבודה',
         workSitePhoneHint: 'מספר טלפון של אתר העבודה',
     },
+    constraints: {
+        title: 'אילוצים שבועיים',
+        subtitle: 'סמן את הזמינות שלך לשבוע הקרוב',
+        noTemplate: 'אין תבנית לוח זמנים זמינה',
+
+        cannotWork: 'לא יכול לעבוד',
+        preferWork: 'מעדיף לעבוד',
+        wholeDay: 'כל היום',
+        shiftTime: 'משמרת/זמן',
+
+        instructions: {
+            title: 'הוראות:',
+            selectMode: 'בחר מצב (לא יכול לעבוד / מעדיף לעבוד)',
+            clickCells: 'לחץ על תאים כדי לסמן את האילוצים שלך',
+            limits: 'מגבלות: {cannotWork} ימים עבור "לא יכול לעבוד", {preferWork} ימים עבור "מעדיף לעבוד"'
+        },
+
+        errors: {
+            maxCannotWork: 'מקסימום {max} ימים של "לא יכול לעבוד"',
+            maxPreferWork: 'מקסימום {max} ימים של "מעדיף לעבוד"'
+        },
+
+        submit: 'שלח אילוצים',
+        submitSuccess: 'האילוצים נשלחו בהצלחה!',
+        alreadySubmitted: 'כבר שלחת אילוצים לשבוע זה'
+    },
+
+
 };

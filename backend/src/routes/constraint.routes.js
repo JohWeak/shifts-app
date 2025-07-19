@@ -1,16 +1,41 @@
 // backend/src/routes/constraint.routes.js
 const express = require('express');
-const constraintController = require('../controllers/scheduling/constraint.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
-
 const router = express.Router();
+const constraintController = require('../controllers/scheduling/constraint.controller');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth.middleware');
 
-router.get('/employee/:empId', verifyToken, constraintController.getEmployeeConstraints);
-router.post('/', verifyToken, constraintController.createConstraint);
-router.put('/:id', verifyToken, constraintController.updateConstraint);
-router.delete('/:id', verifyToken, constraintController.deleteConstraint);
-router.get('/weekly-grid', verifyToken, constraintController.getWeeklyConstraintsGrid);
-router.post('/submit-weekly', verifyToken, constraintController.submitWeeklyConstraints);
-router.get('/period', verifyToken, constraintController.getConstraintsForPeriod);
+// Employee routes
+router.get('/weekly-grid',
+    authenticateToken,
+    constraintController.getWeeklyConstraintsGrid
+);
+
+router.post('/submit-weekly',
+    authenticateToken,
+    constraintController.submitWeeklyConstraints
+);
+
+router.get('/permanent-requests/:empId',
+    authenticateToken,
+    constraintController.getPermanentConstraintRequests
+);
+
+router.post('/permanent-request',
+    authenticateToken,
+    constraintController.submitPermanentConstraintRequest
+);
+
+// Admin routes
+router.get('/pending-requests',
+    authenticateToken,
+    authorizeRoles(['admin']),
+    constraintController.getPendingRequests
+);
+
+router.put('/review-request/:id',
+    authenticateToken,
+    authorizeRoles(['admin']),
+    constraintController.reviewPermanentConstraintRequest
+);
 
 module.exports = router;

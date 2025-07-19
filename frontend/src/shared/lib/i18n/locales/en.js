@@ -114,6 +114,8 @@ export const en = {
         apply: 'Apply Color',
         pickColor: 'Pick custom color',
     },
+
+
     dashboard: {
         dashboardDesc: 'Quick overview of your scheduling system',
         dashboardTitle: 'Dashboard Overview',
@@ -157,17 +159,7 @@ export const en = {
             september: 'September'
         },
     },
-    calendar: {
-        weekDays: {
-            sun: 'Sun',
-            mon: 'Mon',
-            tue: 'Tue',
-            wed: 'Wed',
-            thu: 'Thu',
-            fri: 'Fri',
-            sat: 'Sat',
-        }
-    },
+
     employee: {
         archiveSubtitle: 'View your past and future shifts',
         archive: {
@@ -892,6 +884,52 @@ export const en = {
         workSiteAddressHint: 'Work site address',
         workSitePhone: 'Work Site Phone',
         workSitePhoneHint: 'Work site phone number',
+    },
+    constraints: {
+        title: 'Weekly Constraints',
+        subtitle: 'Mark your availability for the upcoming week',
+        noTemplate: 'No schedule template available',
+
+        cannotWork: 'Cannot Work',
+        preferWork: 'Prefer to Work',
+        wholeDay: 'Whole Day',
+        shiftTime: 'Shift/Time',
+
+        instructions: {
+            title: 'Instructions:',
+            selectMode: 'Select a mode (Cannot Work / Prefer to Work)',
+            clickCells: 'Click on cells to mark your constraints',
+            limits: 'Limits: {cannotWork} days for "Cannot Work", {preferWork} days for "Prefer to Work"'
+        },
+
+        errors: {
+            maxCannotWork: 'Maximum {max} days of "Cannot Work"',
+            maxPreferWork: 'Maximum {max} days of "Prefer to Work"'
+        },
+
+        submit: 'Submit Constraints',
+        submitSuccess: 'Constraints submitted successfully!',
+        alreadySubmitted: 'You have already submitted constraints for this week'
+    },
+
+
+    calendar: {
+        weekDays: {
+            sunday: 'Sunday',
+            monday: 'Monday',
+            tuesday: 'Tuesday',
+            wednesday: 'Wednesday',
+            thursday: 'Thursday',
+            friday: 'Friday',
+            saturday: 'Saturday',
+            sun: 'Sun',
+            mon: 'Mon',
+            tue: 'Tue',
+            wed: 'Wed',
+            thu: 'Thu',
+            fri: 'Fri',
+            sat: 'Sat'
+        }
     }
 
 };

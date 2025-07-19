@@ -49,7 +49,9 @@ const defineAssociations = () => {
         ShiftRequirement,
         LegalConstraint,
         SchedulePeriod,
-        Workday
+        Workday,
+        PermanentConstraintRequest,
+        PermanentConstraint
     } = db;
 
     // =============================
@@ -309,6 +311,57 @@ const defineAssociations = () => {
             as: 'workSite'
         });
     }
+    // =============================
+    // PERMANENT CONSTRAINT REQUEST ASSOCIATIONS
+    // =============================
+    if (PermanentConstraintRequest) {
+        // PermanentConstraintRequest -> Employee
+        if (Employee) {
+            PermanentConstraintRequest.belongsTo(Employee, {
+                foreignKey: 'emp_id',
+                as: 'employee'
+            });
+
+            PermanentConstraintRequest.belongsTo(Employee, {
+                foreignKey: 'reviewed_by',
+                as: 'reviewer'
+            });
+        }
+
+        // PermanentConstraintRequest -> PositionShift
+        if (PositionShift) {
+            PermanentConstraintRequest.belongsTo(PositionShift, {
+                foreignKey: 'shift_id',
+                as: 'shift'
+            });
+        }
+    }
+    // =============================
+    // PERMANENT CONSTRAINT ASSOCIATIONS
+    // =============================
+    if (PermanentConstraint) {
+        // PermanentConstraint -> Employee
+        if (Employee) {
+            PermanentConstraint.belongsTo(Employee, {
+                foreignKey: 'emp_id',
+                as: 'employee'
+            });
+
+            PermanentConstraint.belongsTo(Employee, {
+                foreignKey: 'approved_by',
+                as: 'approver'
+            });
+        }
+
+        // PermanentConstraint -> PositionShift
+        if (PositionShift) {
+            PermanentConstraint.belongsTo(PositionShift, {
+                foreignKey: 'shift_id',
+                as: 'shift'
+            });
+        }
+    }
+
 
     // =============================
     // LEGAL CONSTRAINT ASSOCIATIONS

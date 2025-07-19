@@ -1,93 +1,57 @@
 // frontend/src/features/employee-constraints/index.js
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Container, Card, Table, Button, Alert, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {
+    fetchWeeklyConstraints,
+    submitWeeklyConstraints,
+    updateConstraint,
+    setCurrentMode,
+    setLimitError,
+    clearSubmitStatus
+} from './model/constraintSlice';
 import './index.css';
 
 const ConstraintsSchedule = () => {
-    const [templateData, setTemplateData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentMode, setCurrentMode] = useState('cannot_work'); // 'cannot_work' | 'prefer_work'
-    const [constraints, setConstraints] = useState({});
-    const [submitted, setSubmitted] = useState(false);
-    const [serverSubmitted, setServerSubmitted] = useState(false);
-    const [limitError, setLimitError] = useState('');
+    const dispatch = useDispatch();
+    const { t } = useI18n();
+
+    // Redux state
+    const {
+        weeklyTemplate,
+        weeklyConstraints,
+        loading,
+        submitting,
+        error,
+        submitStatus,
+        limitError,
+        currentMode,
+        isSubmitted,
+        canEdit
+    } = useSelector(state => state.constraints);
+
+    const { user } = useSelector(state => state.auth);
+
+    // Local state for UI effects
     const [shakeEffect, setShakeEffect] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
-        // Обработчик для неперехваченных ошибок
-        const handleUnhandledRejection = (event) => {
-            console.error('Unhandled promise rejection:', event.reason);
-            // Не показывать ошибку пользователю, только логировать
-        };
-
-        window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-        return () => {
-            window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-        };
-    }, []);
+        // Load constraints on component mount
+        dispatch(fetchWeeklyConstraints({}));
+    }, [dispatch]);
 
     useEffect(() => {
-        fetchConstraintsTemplate();
-    }, []);
-
-
-    const fetchConstraintsTemplate = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-
-            if (!token) {
-                setError('No authentication token found');
-                return;
-            }
-
-
-            const response = await fetch('http://localhost:5000/api/constraints/weekly-grid', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load constraints');
-            }
-            setTemplateData(data);
-
-            // Установить состояние на основе серверных данных
-            const isAlreadySubmitted = data.constraints.already_submitted;
-            setServerSubmitted(isAlreadySubmitted);
-            setSubmitted(isAlreadySubmitted);
-
-            // Build initial constraints state from template с существующими данными
-            const initialConstraints = {};
-            data.constraints.template.forEach(day => {
-                initialConstraints[day.date] = {
-                    day_status: day.day_status || 'neutral', // Загрузить существующий статус дня
-                    shifts: {}
-                };
-                day.shifts.forEach(shift => {
-                    initialConstraints[day.date].shifts[shift.shift_type] = shift.status; // Загрузить существующие статусы смен
-                });
-            });
-            setConstraints(initialConstraints);
-
-        } catch (err) {
-            console.error('Error fetching constraints template:', err);
-            setError(err.message);
-            setTemplateData(null);
-            setConstraints({});
-        } finally {
-            setLoading(false);
+        // Handle submit success
+        if (submitStatus === 'success') {
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+                dispatch(clearSubmitStatus());
+            }, 3000);
         }
-    };
+    }, [submitStatus, dispatch]);
 
     const triggerShakeEffect = () => {
         setShakeEffect(true);
@@ -103,125 +67,83 @@ const ConstraintsSchedule = () => {
                 count++;
             } else {
                 // Check if any shift has this constraint
-                const hasShiftConstraint = Object.values(dayConstraints.shifts).some(status => status === modeToCheck);
+                const hasShiftConstraint = Object.values(dayConstraints.shifts).some(
+                    status => status === modeToCheck
+                );
                 if (hasShiftConstraint) {
                     count++;
                 }
             }
         });
 
-        const limits = templateData?.constraints?.limits;
+        const limits = weeklyTemplate?.constraints?.limits;
         if (modeToCheck === 'cannot_work' && count > limits?.cannot_work_days) {
-            return `מקסימום ${limits.cannot_work_days} ימים של "לא יכול לעבוד"`;
+            return t('constraints.errors.maxCannotWork', { max: limits.cannot_work_days });
         }
         if (modeToCheck === 'prefer_work' && count > limits?.prefer_work_days) {
-            return `מקסימום ${limits.prefer_work_days} ימים של "מעדיף לעבוד"`;
+            return t('constraints.errors.maxPreferWork', { max: limits.prefer_work_days });
         }
         return null;
     };
 
     const handleCellClick = (date, shiftType = null) => {
-        if (!templateData?.constraints?.can_edit || submitted) {
+        if (!canEdit || isSubmitted) {
             return;
         }
 
-        setLimitError('');
+        dispatch(setLimitError(''));
 
-        const newConstraints = { ...constraints };
-        const dayConstraints = { ...newConstraints[date] };
+        const currentConstraints = weeklyConstraints[date] || { day_status: 'neutral', shifts: {} };
+        const currentStatus = shiftType ?
+            currentConstraints.shifts[shiftType] || 'neutral' :
+            currentConstraints.day_status || 'neutral';
 
-        if (shiftType) {
-            // Clicking on specific shift
-            const currentStatus = dayConstraints.shifts[shiftType];
+        let newStatus = 'neutral';
 
-            if (currentStatus === currentMode) {
-                // Same mode - set to neutral
-                dayConstraints.shifts[shiftType] = 'neutral';
-            } else {
-                // Different mode - check limits first
-                const testConstraints = { ...newConstraints };
+        if (currentStatus !== currentMode) {
+            // Check limits before applying
+            const testConstraints = { ...weeklyConstraints };
+
+            if (shiftType) {
                 testConstraints[date] = {
-                    ...dayConstraints,
+                    ...currentConstraints,
                     shifts: {
-                        ...dayConstraints.shifts,
+                        ...currentConstraints.shifts,
                         [shiftType]: currentMode
                     }
                 };
-
-                const limitError = checkLimits(testConstraints, currentMode);
-                if (limitError) {
-                    setLimitError(limitError);
-                    triggerShakeEffect();
-                    return;
-                }
-
-                // Set new mode
-                dayConstraints.shifts[shiftType] = currentMode;
-            }
-
-            // НОВАЯ ЛОГИКА: Управление статусом всего дня
-            // Проверить все статусы смен после изменения
-            const shiftStatuses = Object.values(dayConstraints.shifts);
-            const uniqueStatuses = [...new Set(shiftStatuses.filter(status => status !== 'neutral'))];
-
-            if (uniqueStatuses.length === 0) {
-                // Все смены neutral - день тоже neutral
-                dayConstraints.day_status = 'neutral';
-            } else if (uniqueStatuses.length === 1 && shiftStatuses.every(status => status === uniqueStatuses[0] || status === 'neutral')) {
-                // Все не-neutral смены имеют одинаковый статус И нет смешения
-                const allSameStatus = shiftStatuses.every(status => status === uniqueStatuses[0]);
-                if (allSameStatus) {
-                    dayConstraints.day_status = uniqueStatuses[0];
-                } else {
-                    dayConstraints.day_status = 'neutral'; // Смешанные статусы
-                }
             } else {
-                // Смешанные статусы - день neutral
-                dayConstraints.day_status = 'neutral';
-            }
-
-        } else {
-            // Clicking on whole day
-            if (dayConstraints.day_status === currentMode) {
-                // Same mode - set whole day to neutral
-                dayConstraints.day_status = 'neutral';
-                Object.keys(dayConstraints.shifts).forEach(type => {
-                    dayConstraints.shifts[type] = 'neutral';
+                // Set whole day
+                const dayShifts = {};
+                weeklyTemplate.constraints.template
+                    .find(d => d.date === date)
+                    ?.shifts.forEach(shift => {
+                    dayShifts[shift.shift_type] = currentMode;
                 });
-            } else {
-                // Different mode - check limits first
-                const testConstraints = { ...newConstraints };
+
                 testConstraints[date] = {
                     day_status: currentMode,
-                    shifts: {}
+                    shifts: dayShifts
                 };
-                Object.keys(dayConstraints.shifts).forEach(type => {
-                    testConstraints[date].shifts[type] = currentMode;
-                });
-
-                const limitError = checkLimits(testConstraints, currentMode);
-                if (limitError) {
-                    setLimitError(limitError);
-                    triggerShakeEffect();
-                    return;
-                }
-
-                // Set whole day to current mode
-                dayConstraints.day_status = currentMode;
-                Object.keys(dayConstraints.shifts).forEach(type => {
-                    dayConstraints.shifts[type] = currentMode;
-                });
             }
+
+            const limitError = checkLimits(testConstraints, currentMode);
+            if (limitError) {
+                dispatch(setLimitError(limitError));
+                triggerShakeEffect();
+                return;
+            }
+
+            newStatus = currentMode;
         }
 
-        newConstraints[date] = dayConstraints;
-        setConstraints(newConstraints);
+        dispatch(updateConstraint({ date, shiftType, status: newStatus }));
     };
 
     const getCellClass = (date, shiftType = null) => {
-        if (!constraints[date]) return 'constraint-cell neutral';
+        if (!weeklyConstraints[date]) return 'constraint-cell neutral';
 
-        const dayConstraints = constraints[date];
+        const dayConstraints = weeklyConstraints[date];
         let status;
 
         if (shiftType) {
@@ -233,197 +155,220 @@ const ConstraintsSchedule = () => {
         const baseClass = 'constraint-cell';
         const statusClass = status === 'cannot_work' ? 'cannot-work' :
             status === 'prefer_work' ? 'prefer-work' : 'neutral';
-        const clickableClass = templateData?.constraints?.canEdit && !submitted ? 'clickable' : '';
+        const clickableClass = canEdit && !isSubmitted ? 'clickable' : '';
 
         return `${baseClass} ${statusClass} ${clickableClass}`;
     };
 
+    const handleSubmit = async () => {
+        const formattedConstraints = [];
+
+        Object.keys(weeklyConstraints).forEach(date => {
+            const dayConstraints = weeklyConstraints[date];
+
+            // Check whole day constraint
+            if (dayConstraints.day_status !== 'neutral') {
+                formattedConstraints.push({
+                    emp_id: user.id,
+                    constraint_type: dayConstraints.day_status,
+                    target_date: date,
+                    applies_to: 'specific_date'
+                });
+            } else {
+                // Check individual shift constraints
+                Object.keys(dayConstraints.shifts).forEach(shiftType => {
+                    const status = dayConstraints.shifts[shiftType];
+                    if (status !== 'neutral') {
+                        const shift = weeklyTemplate.constraints.template
+                            .find(d => d.date === date)
+                            ?.shifts.find(s => s.shift_type === shiftType);
+
+                        if (shift) {
+                            formattedConstraints.push({
+                                emp_id: user.id,
+                                constraint_type: status,
+                                target_date: date,
+                                applies_to: 'specific_date',
+                                shift_id: shift.shift_id
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        dispatch(submitWeeklyConstraints({
+            constraints: formattedConstraints,
+            week_start: weeklyTemplate.weekStart
+        }));
+    };
+
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        return `${day}/${month}`;
+    };
+
     const getShiftIcon = (shiftType) => {
-        switch (shiftType) {
-            case 'morning': return <i className="bi bi-sunrise"></i>;
-            case 'day': return <i className="bi bi-sun"></i>;
-            case 'night': return <i className="bi bi-moon-stars"></i>;
-            default: return null;
-        }
+        const icons = {
+            morning: '🌅',
+            day: '☀️',
+            night: '🌙'
+        };
+        return icons[shiftType] || '';
     };
 
     const formatTime = (startTime, duration) => {
+        if (!startTime) return '';
         const [hours, minutes] = startTime.split(':');
-        const start = parseInt(hours);
-        const endHour = (start + duration) % 24;
-        const endTime = `${endHour.toString().padStart(2, '0')}:${minutes}`;
-        const cleanStart = startTime.substring(0, 5);
-        const cleanEnd = endTime.substring(0, 5);
-        return `${cleanStart}-${cleanEnd}`;
-    };
-
-    const handleSubmit = async () => {
-        try {
-            const token = localStorage.getItem('token');
-
-            if (!token) {
-                setLimitError('No authentication token found');
-                return;
-            }
-
-
-            const response = await fetch('http://localhost:5000/api/constraints/submit-weekly', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    week_start: templateData.week.start,
-                    constraints: constraints
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                setSubmitted(true);
-                setServerSubmitted(true);
-                setLimitError(''); // Очистить ошибки
-                // Можно показать success message
-                console.log('Constraints saved successfully:', result.message);
-            } else {
-                const errorMessage = result.error || `Server error: ${response.status}`;
-                setLimitError(errorMessage);
-                triggerShakeEffect();
-                console.error('Server error:', errorMessage);
-            }
-        } catch (error) {
-            console.error('Error submitting constraints:', error);
-            setLimitError('Network error. Please try again.');
-            triggerShakeEffect();
-        }
-    };
-
-    const handleEdit = () => {
-        setSubmitted(false);
-    };
-
-    const handleClearAll = () => {
-        if (!templateData?.constraints?.template) return;
-
-        const clearedConstraints = {};
-        templateData.constraints.template.forEach(day => {
-            clearedConstraints[day.date] = {
-                day_status: 'neutral',
-                shifts: {}
-            };
-            day.shifts.forEach(shift => {
-                clearedConstraints[day.date].shifts[shift.shift_type] = 'neutral';
-            });
-        });
-
-        setConstraints(clearedConstraints);
-        setLimitError('');
+        const start = `${hours}:${minutes}`;
+        const endHours = parseInt(hours) + Math.floor(duration / 60);
+        const endMinutes = parseInt(minutes) + (duration % 60);
+        const end = `${endHours}:${endMinutes.toString().padStart(2, '0')}`;
+        return `${start}-${end}`;
     };
 
     if (loading) {
         return (
-            <Container className="constraints-container text-center">
-                <Spinner animation="border" role="status" className="m-4">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                <p>טוען תבנית אילוצים...</p>
-            </Container>
+            <div className="loading">
+                <Spinner animation="border" />
+                <span className="ms-2">{t('common.loading')}</span>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <Container className="constraints-container">
-                <Alert variant="danger">
-                    <Alert.Heading>שגיאה בטעינת תבנית אילוצים</Alert.Heading>
-                    <p>{error}</p>
-                    <Button variant="outline-danger" onClick={fetchConstraintsTemplate}>
-                        נסה שוב
-                    </Button>
-                </Alert>
+            <Container className="mt-4">
+                <Alert variant="danger">{error}</Alert>
             </Container>
         );
     }
 
-    if (!templateData?.constraints?.template?.length) {
+    if (!weeklyTemplate) {
         return (
-            <Container className="constraints-container">
-                <Alert variant="info">
-                    <Alert.Heading>אין תבנית זמינה</Alert.Heading>
-                    <p>לא ניתן לטעון תבנית אילוצים לשבוע הבא.</p>
-                </Alert>
+            <Container className="mt-4">
+                <Alert variant="info">{t('constraints.noTemplate')}</Alert>
             </Container>
         );
     }
 
-    const canEdit = templateData.constraints.can_edit && !templateData.constraints.deadline_passed && !submitted;
+    const { cannotWorkColor, preferWorkColor } = weeklyTemplate.colors || {
+        cannotWorkColor: '#dc3545',
+        preferWorkColor: '#28a745'
+    };
 
     return (
-        <Container className={`constraints-container ${shakeEffect ? 'shake' : ''}`}>
-            <div className="text-center mb-4">
-                <h1 className="display-4 text-dark">אילוצי עבודה</h1>
-                <p className="text-muted">
-                    שבוע: {templateData.week.start} - {templateData.week.end}
-                </p>
-                {templateData.constraints.deadline_passed && (
-                    <Alert variant="warning">
-                        זמן הגשת האילוצים הסתיים ב-{new Date(templateData.constraints.deadline).toLocaleString('he-IL')}
-                    </Alert>
-                )}
-            </div>
+        <Container fluid className="employee-constraints-container p-3">
+            {/* Header */}
+            <Card className="shadow-sm mb-4 border-0">
+                <Card.Header className="bg-white border-0 py-3">
+                    <h1 className="display-4 mb-3">{t('constraints.title')}</h1>
+                    <p className="text-muted lead">{t('constraints.subtitle')}</p>
+                </Card.Header>
+            </Card>
 
-            {/* Control Buttons and Success Message */}
-            <div className="text-center mb-4" >
-                {!submitted && canEdit ? (
-                    <div className="constraint-controls">
-                        <Button
-                            variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
-                            onClick={() => setCurrentMode('cannot_work')}
-                            className="rounded-button me-2"
-                        >
-                            לא עובד
-                        </Button>
-                        <Button
-                            variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
-                            onClick={() => setCurrentMode('prefer_work')}
-                            className="rounded-button"
-                        >
-                            מעדיף לעבוד
-                        </Button>
+            {/* Instructions and Controls */}
+            <Card className="shadow-sm mb-4">
+                <Card.Body>
+                    <div className="row align-items-center">
+                        <div className="col-md-8">
+                            <h5>{t('constraints.instructions.title')}</h5>
+                            <ul className="mb-0">
+                                <li>{t('constraints.instructions.selectMode')}</li>
+                                <li>{t('constraints.instructions.clickCells')}</li>
+                                <li>{t('constraints.instructions.limits', {
+                                    cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
+                                    preferWork: weeklyTemplate.constraints.limits.prefer_work_days
+                                })}</li>
+                            </ul>
+                        </div>
+                        <div className="col-md-4 text-end">
+                            <div className="btn-group" role="group">
+                                <Button
+                                    variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
+                                    onClick={() => dispatch(setCurrentMode('cannot_work'))}
+                                    disabled={isSubmitted}
+                                    style={{
+                                        backgroundColor: currentMode === 'cannot_work' ? cannotWorkColor : 'transparent',
+                                        borderColor: cannotWorkColor
+                                    }}
+                                >
+                                    {t('constraints.cannotWork')}
+                                </Button>
+                                <Button
+                                    variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
+                                    onClick={() => dispatch(setCurrentMode('prefer_work'))}
+                                    disabled={isSubmitted}
+                                    style={{
+                                        backgroundColor: currentMode === 'prefer_work' ? preferWorkColor : 'transparent',
+                                        borderColor: preferWorkColor
+                                    }}
+                                >
+                                    {t('constraints.preferWork')}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                ) : serverSubmitted ? (
-                    <div className="success-message">
-                        <i className="bi bi-check-circle-fill text-success me-2" style={{ fontSize: '20px' }}></i>
-                        <span className="text-success ">האילוצים נשמרו בהצלחה</span>
-                    </div>
-                ) : null}
-            </div>
 
+                    {limitError && (
+                        <Alert variant="warning" className={`mt-3 ${shakeEffect ? 'shake' : ''}`}>
+                            {limitError}
+                        </Alert>
+                    )}
+
+                    {showSuccess && (
+                        <Alert variant="success" className="mt-3">
+                            {t('constraints.submitSuccess')}
+                        </Alert>
+                    )}
+
+                    {isSubmitted && (
+                        <Alert variant="info" className="mt-3">
+                            {t('constraints.alreadySubmitted')}
+                        </Alert>
+                    )}
+                </Card.Body>
+            </Card>
 
             {/* Desktop Table */}
             <Card className="shadow desktop-constraints d-none d-md-block">
                 <Card.Body className="p-0">
                     <div className="table-responsive">
-                        <Table bordered className="mb-0">
+                        <Table bordered hover className="mb-0">
                             <thead>
-                            <tr className="table-header">
-                                <th className="text-center" style={{width: '15%'}}>יום</th>
-                                {templateData.constraints.template.map(day => (
-                                    <th key={day.date}
-                                        className={`text-center ${getCellClass(day.date)}`}
-                                        onClick={() => handleCellClick(day.date)}
-                                    >
-                                        {day.day_name}<br/>
-                                        <small>{day.display_date}</small>
+                            <tr>
+                                <th className="text-center shift-header">{t('constraints.shiftTime')}</th>
+                                {weeklyTemplate.constraints.template.map(day => (
+                                    <th key={day.date} className="text-center">
+                                        <div>{t(`calendar.weekDays.${day.weekday}`)}</div>
+                                        <small className="text-muted">{formatDate(day.date)}</small>
                                     </th>
                                 ))}
                             </tr>
                             </thead>
                             <tbody>
-                            {['morning', 'day', 'night'].map(shiftType => {
-                                const sampleShift = templateData.constraints.template[0].shifts.find(s => s.shift_type === shiftType);
+                            {/* Whole day row */}
+                            <tr>
+                                <td className="shift-header text-center align-middle">
+                                    <strong>{t('constraints.wholeDay')}</strong>
+                                </td>
+                                {weeklyTemplate.constraints.template.map(day => (
+                                    <td key={`all-${day.date}`}
+                                        className={getCellClass(day.date)}
+                                        onClick={() => handleCellClick(day.date)}
+                                    >
+                                        {/* Empty cell for user interaction */}
+                                    </td>
+                                ))}
+                            </tr>
+
+                            {/* Individual shift rows */}
+                            {Object.keys(weeklyTemplate.shiftTypes).map(shiftType => {
+                                const sampleShift = weeklyTemplate.constraints.template[0]?.shifts
+                                    .find(s => s.shift_type === shiftType);
+
                                 if (!sampleShift) return null;
 
                                 return (
@@ -432,7 +377,7 @@ const ConstraintsSchedule = () => {
                                             {getShiftIcon(shiftType)}<br/>
                                             {formatTime(sampleShift.start_time, sampleShift.duration)}
                                         </td>
-                                        {templateData.constraints.template.map(day => (
+                                        {weeklyTemplate.constraints.template.map(day => (
                                             <td key={`${day.date}-${shiftType}`}
                                                 className={getCellClass(day.date, shiftType)}
                                                 onClick={() => handleCellClick(day.date, shiftType)}
@@ -455,29 +400,34 @@ const ConstraintsSchedule = () => {
                     <Table bordered className="mb-0">
                         <thead>
                         <tr>
-                            <th className="text-center">יום</th>
-                            <th className="shift-header text-center">בוקר</th>
-                            <th className="shift-header text-center">צהריים</th>
-                            <th className="shift-header text-center">לילה</th>
+                            <th className="text-center">{t('common.day')}</th>
+                            <th className="shift-header text-center">{t('shift.morning')}</th>
+                            <th className="shift-header text-center">{t('shift.day')}</th>
+                            <th className="shift-header text-center">{t('shift.night')}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {templateData.constraints.template.map(day => (
+                        {weeklyTemplate.constraints.template.map(day => (
                             <tr key={day.date}>
-                                <td className={`text-center ${getCellClass(day.date)}`}
-                                    onClick={() => handleCellClick(day.date)}
-                                >
-                                    {day.day_name}<br/>
-                                    <small>{day.display_date}</small>
+                                <td className="text-center">
+                                    <div>{t(`calendar.weekDays.${day.weekday}`)}</div>
+                                    <small className="text-muted">{formatDate(day.date)}</small>
                                 </td>
-                                {['morning', 'day', 'night'].map(shiftType => (
-                                    <td key={shiftType}
-                                        className={getCellClass(day.date, shiftType)}
-                                        onClick={() => handleCellClick(day.date, shiftType)}
-                                    >
-                                        {/* Empty cell for user interaction */}
-                                    </td>
-                                ))}
+                                {['morning', 'day', 'night'].map(shiftType => {
+                                    const shift = day.shifts.find(s => s.shift_type === shiftType);
+                                    return shift ? (
+                                        <td key={`${day.date}-${shiftType}`}
+                                            className={getCellClass(day.date, shiftType)}
+                                            onClick={() => handleCellClick(day.date, shiftType)}
+                                        >
+                                            {/* Empty cell */}
+                                        </td>
+                                    ) : (
+                                        <td key={`${day.date}-${shiftType}`} className="text-center text-muted">
+                                            -
+                                        </td>
+                                    );
+                                })}
                             </tr>
                         ))}
                         </tbody>
@@ -485,36 +435,27 @@ const ConstraintsSchedule = () => {
                 </Card.Body>
             </Card>
 
-            {/* Error Message */}
-            {limitError && (
-                <Alert variant="danger" className="mt-3">
-                    {limitError}
-                </Alert>
-            )}
-
-            {/* Submit/Edit/Clear Controls  */}
-            <div className="text-center mt-4">
-                {templateData?.constraints?.can_edit && (
-                    <>
-                        {!submitted ? (
-                            <div className="constraint-controls">
-                                <Button variant="primary" onClick={handleSubmit} className="rounded-button me-2">
-                                    שלח
-                                </Button>
-                                <Button variant="outline-secondary" onClick={handleClearAll} className="rounded-button">
-                                    <i className="bi bi-eraser me-1"></i>
-                                    נקה
-                                </Button>
-                            </div>
+            {/* Submit Button */}
+            {canEdit && !isSubmitted && (
+                <div className="text-center mt-4">
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="px-5"
+                    >
+                        {submitting ? (
+                            <>
+                                <Spinner size="sm" className="me-2" />
+                                {t('common.saving')}
+                            </>
                         ) : (
-                            <Button variant="secondary" onClick={handleEdit} className="rounded-button">
-                                <i className="bi bi-pencil me-1"></i>
-                                ערוך
-                            </Button>
+                            t('constraints.submit')
                         )}
-                    </>
-                )}
-            </div>
+                    </Button>
+                </div>
+            )}
         </Container>
     );
 };

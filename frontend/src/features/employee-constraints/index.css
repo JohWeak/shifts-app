@@ -79,3 +79,34 @@
     transform: none;
     box-shadow: none;
 }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+/* Mobile specific styles */
+@media (max-width: 767px) {
+    .employee-constraints-container {
+        padding: 1rem !important;
+    }
+
+    .constraint-cell {
+        padding: 0.5rem 0.2rem;
+        font-size: 0.875rem;
+    }
+
+    .mobile-constraints table {
+        font-size: 0.875rem;
+    }
+
+    .mobile-constraints th,
+    .mobile-constraints td {
+        padding: 0.5rem 0.25rem;
+    }
+}

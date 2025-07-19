@@ -98,8 +98,8 @@ export const constraintAPI = {
         api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY, { params }),
 
     // Submit weekly constraints
-    submitWeeklyConstraints: (constraints) =>
-        api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT, { constraints }),
+    submitWeeklyConstraints: (data) =>
+        api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT, data),
 
     // Get permanent constraint requests
     getPermanentRequests: (empId) =>
