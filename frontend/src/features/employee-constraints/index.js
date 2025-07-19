@@ -208,7 +208,7 @@ const ConstraintsSchedule = () => {
                 if (status !== 'neutral') {
                     const shift = weeklyTemplate.constraints.template
                         .find(d => d.date === date)
-                        ?.shifts.find(s => s.shift_type === shiftType);
+                        ?.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);
 
                     if (shift) {
                         formattedConstraints.push({
