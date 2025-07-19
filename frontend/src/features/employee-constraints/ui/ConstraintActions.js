@@ -14,6 +14,7 @@ const ConstraintActions = ({
                                onClear,
                                submitting,
                                onShowInstructions,
+                               onColorButtonClick
                            }) => {
     const {t} = useI18n();
 
@@ -21,7 +22,8 @@ const ConstraintActions = ({
         <Card className={"shadow-sm mb-4"}>
             <Card.Body>
                 <div
-                    className="d-flex justify-content-between align-items-center gap-3 flex-wrap">                    {/* Левая часть: Кнопка "Помощь" и Настройки цвета */}
+                    className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    {/* Левая часть: Помощь */}
                     <div className="d-flex align-items-center gap-2">
                         <Button
                             variant="outline-secondary"
@@ -30,14 +32,6 @@ const ConstraintActions = ({
                             title={t('constraints.instructions.title')}
                         >
                             <i className="bi bi-question-lg"></i>
-                        </Button>
-                        <Button
-                            variant="outline-secondary"
-                            className="rounded-circle"
-                            onClick={onShowColorSettings}
-                            title={t('constraints.colorSettings')}
-                        >
-                            <i className="bi bi-palette"></i>
                         </Button>
                     </div>
 
@@ -57,14 +51,20 @@ const ConstraintActions = ({
                                     <Button
                                         variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
                                         onClick={() => onModeChange('cannot_work')}
+                                        className="d-flex align-items-center"
                                     >
                                         {t('constraints.cannotWork')}
+                                        <span className="vr mx-2"></span>
+                                        <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('cannotWork'); }}></i>
                                     </Button>
                                     <Button
                                         variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
                                         onClick={() => onModeChange('prefer_work')}
+                                        className="d-flex align-items-center"
                                     >
                                         {t('constraints.preferWork')}
+                                        <span className="vr mx-2"></span>
+                                        <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('preferWork'); }}></i>
                                     </Button>
                                 </div>
 
@@ -74,17 +74,8 @@ const ConstraintActions = ({
                                         <i className="bi bi-arrow-counterclockwise"></i>
                                     </Button>
                                     <Button variant="primary" onClick={onSubmit} disabled={submitting}>
-                                        {submitting ? (
-                                            <>
-                                                <Spinner size="sm" as="span" animation="border" className="me-2"/>
-                                                {t('common.saving')}
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-check-lg me-1"></i>
-                                                {t('common.submit')}
-                                            </>
-                                        )}
+                                        {submitting ? <Spinner size="sm" as="span" className="me-2" /> : <i className="bi bi-check-lg me-1"></i>}
+                                        {submitting ? t('common.saving') : t('common.submit')}
                                     </Button>
                                 </div>
                             </>

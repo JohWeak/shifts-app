@@ -47,11 +47,17 @@ const ConstraintsSchedule = () => {
     const { user } = useSelector(state => state.auth);
 
     // Local state
-    const [showColorPicker, setShowColorPicker] = useState(false);
-    const [colorPickerConfig, setColorPickerConfig] = useState(null);
-    const [shiftColors, setShiftColors] = useState({
-        cannotWork: '#dc3545',
-        preferWork: '#28a745'
+    const [colorPickerConfig, setColorPickerConfig] = useState({
+        show: false,
+        mode: null,      // 'cannotWork' или 'preferWork'
+        initialColor: '#ffffff'
+    });
+    const [shiftColors, setShiftColors] = useState(() => {
+        const savedColors = localStorage.getItem('constraintColors');
+        return savedColors ? JSON.parse(savedColors) : {
+            cannotWork: '#dc3545', // Красный по умолчанию
+            preferWork: '#28a745'  // Зеленый по умолчанию
+        };
     });
     const [showInstructionsToast, setShowInstructionsToast] = useState(false);
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
@@ -76,15 +82,6 @@ const ConstraintsSchedule = () => {
         }
 
     }, [submitStatus, isSubmitted, loading, dispatch, t]);
-
-    useEffect(() => {
-        // Load saved colors from localStorage
-        const savedColors = localStorage.getItem('constraintColors');
-        if (savedColors) {
-            setShiftColors(JSON.parse(savedColors));
-        }
-    }, []);
-
 
 
     const checkLimits = (newConstraints, modeToCheck) => {
@@ -234,25 +231,35 @@ const ConstraintsSchedule = () => {
         }));
     };
 
-    const handleColorChange = (colorType) => {
+    const handleColorButtonClick = (mode) => {
         setColorPickerConfig({
-            type: colorType,
-            currentColor: shiftColors[colorType],
-            title: colorType === 'cannotWork'
-                ? t('constraints.cannotWorkColor')
-                : t('constraints.preferWorkColor')
+            show: true,
+            mode: mode,
+            initialColor: shiftColors[mode]
         });
-        setShowColorPicker(true);
     };
 
-    const handleColorSelect = (color) => {
+    const handleColorSelect = (newColor) => {
+        const { mode } = colorPickerConfig;
+        if (!mode) return;
+
+        // Обновляем стейт с цветами
         const newColors = {
             ...shiftColors,
-            [colorPickerConfig.type]: color
+            [mode]: newColor
         };
         setShiftColors(newColors);
+
+        // Сохраняем в localStorage
         localStorage.setItem('constraintColors', JSON.stringify(newColors));
-        setShowColorPicker(false);
+
+        // Закрываем модал
+        setColorPickerConfig({ show: false, mode: null, initialColor: '#ffffff' });
+    };
+
+    // --- ИЗМЕНЕНИЕ 5: Обработчик для простого закрытия модала ---
+    const handleColorPickerHide = () => {
+        setColorPickerConfig({ show: false, mode: null, initialColor: '#ffffff' });
     };
 
     if (loading) {
@@ -298,7 +305,8 @@ const ConstraintsSchedule = () => {
                 currentMode={currentMode}
                 onModeChange={(mode) => dispatch(setCurrentMode(mode))}
                 isSubmitted={isSubmitted}
-                onShowColorSettings={() => setColorPickerConfig({ showSettings: true })}
+                onShowColorSettings={() => {}}
+                onColorButtonClick={handleColorButtonClick}
                 onSubmit={handleSubmit}
                 onEdit={handleEdit}
                 onClear={handleClear}
@@ -333,65 +341,20 @@ const ConstraintsSchedule = () => {
 
 
             {/* Color Picker Modal */}
-            {showColorPicker && colorPickerConfig && !colorPickerConfig.showSettings && (
+            {colorPickerConfig.show && (
                 <ColorPickerModal
-                    show={showColorPicker}
-                    onHide={() => setShowColorPicker(false)}
+                    show={colorPickerConfig.show}
+                    onHide={handleColorPickerHide}
                     onColorSelect={handleColorSelect}
-                    initialColor={colorPickerConfig.currentColor}
-                    title={colorPickerConfig.title}
+                    initialColor={colorPickerConfig.initialColor}
+                    title={
+                        colorPickerConfig.mode === 'cannotWork'
+                            ? t('constraints.cannotWorkColor')
+                            : t('constraints.preferWorkColor')
+                    }
+                    // Передаем только нужные пропсы, чтобы включить только слайдер и пикер
+                    saveMode="local"
                 />
-            )}
-
-            {/* Color Settings Modal */}
-            {showColorPicker && colorPickerConfig?.showSettings && (
-                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">{t('constraints.colorSettings')}</h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowColorPicker(false)}
-                                />
-                            </div>
-                            <div className="modal-body">
-                                <div className="mb-3">
-                                    <label className="form-label">{t('constraints.cannotWorkColor')}</label>
-                                    <div
-                                        className="color-preview d-inline-block ms-2 border"
-                                        style={{
-                                            width: '30px',
-                                            height: '30px',
-                                            backgroundColor: shiftColors.cannotWork,
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => handleColorChange('cannotWork')}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="form-label">{t('constraints.preferWorkColor')}</label>
-                                    <div
-                                        className="color-preview d-inline-block ms-2 border"
-                                        style={{
-                                            width: '30px',
-                                            height: '30px',
-                                            backgroundColor: shiftColors.preferWork,
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => handleColorChange('preferWork')}
-                                    />
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <Button variant="secondary" onClick={() => setShowColorPicker(false)}>
-                                    {t('common.close')}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             )}
         </Container>
     );
