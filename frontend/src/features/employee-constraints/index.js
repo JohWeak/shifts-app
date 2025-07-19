@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Button, Spinner } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { addNotification } from 'app/model/notificationsSlice';
+import { addNotification, removeNotification } from 'app/model/notificationsSlice';
 
 // Components
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -19,7 +19,6 @@ import {
     submitWeeklyConstraints,
     updateConstraint,
     setCurrentMode,
-    setLimitError,
     clearSubmitStatus
 } from './model/constraintSlice';
 
@@ -37,7 +36,6 @@ const ConstraintsSchedule = () => {
         submitting,
         error,
         submitStatus,
-        limitError,
         currentMode,
         isSubmitted,
         canEdit
@@ -46,13 +44,13 @@ const ConstraintsSchedule = () => {
     const { user } = useSelector(state => state.auth);
 
     // Local state
-    const [shakeEffect, setShakeEffect] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [colorPickerConfig, setColorPickerConfig] = useState(null);
     const [shiftColors, setShiftColors] = useState({
         cannotWork: '#dc3545',
         preferWork: '#28a745'
     });
+    const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
 
     useEffect(() => {
         dispatch(fetchWeeklyConstraints({}));
@@ -61,12 +59,29 @@ const ConstraintsSchedule = () => {
     useEffect(() => {
         if (submitStatus === 'success') {
             dispatch(addNotification({
-                type: 'success',
-                message: t('constraints.submitSuccess')
+                id: 'constraint-submit-success',
+                message: t('constraints.submitSuccess'),
+                variant: 'success'
             }));
             dispatch(clearSubmitStatus());
         }
-    }, [submitStatus, dispatch, t]);
+
+        // Показываем уведомление, если ограничения уже были отправлены ранее
+        if (!loading && isSubmitted) {
+            dispatch(addNotification({
+                id: 'constraints-already-submitted',
+                message: t('constraints.alreadySubmitted'),
+                variant: 'success', // Используем success для красивой зеленой галочки
+                duration: 5000 // Пусть повисит 5 секунд
+            }));
+        }
+
+        // Очищаем уведомление при размонтировании компонента
+        return () => {
+            dispatch(removeNotification('constraints-already-submitted'));
+        }
+
+    }, [submitStatus, isSubmitted, loading, dispatch, t]);
 
     useEffect(() => {
         // Load saved colors from localStorage
@@ -76,10 +91,6 @@ const ConstraintsSchedule = () => {
         }
     }, []);
 
-    const triggerShakeEffect = () => {
-        setShakeEffect(true);
-        setTimeout(() => setShakeEffect(false), 500);
-    };
 
     const checkLimits = (newConstraints, modeToCheck) => {
         let count = 0;
@@ -109,7 +120,7 @@ const ConstraintsSchedule = () => {
             return;
         }
 
-        dispatch(setLimitError(''));
+        dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
 
         const currentConstraints = weeklyConstraints[date] || { shifts: {} };
         const currentStatus = currentConstraints.shifts[shiftType] || 'neutral';
@@ -134,8 +145,12 @@ const ConstraintsSchedule = () => {
 
             const limitError = checkLimits(testConstraints, currentMode);
             if (limitError) {
-                dispatch(setLimitError(limitError));
-                triggerShakeEffect();
+                dispatch(addNotification({
+                    id: LIMIT_ERROR_NOTIFICATION_ID, // Стабильный ID
+                    message: limitError,
+                    variant: 'warning',
+                    duration: 4000
+                }));
                 return;
             }
 
@@ -242,16 +257,6 @@ const ConstraintsSchedule = () => {
                 subtitle={t('constraints.subtitle')}
             />
 
-            <ConstraintInstructions
-                currentMode={currentMode}
-                onModeChange={(mode) => dispatch(setCurrentMode(mode))}
-                limits={weeklyTemplate.constraints.limits}
-                isSubmitted={isSubmitted}
-                limitError={limitError}
-                shakeEffect={shakeEffect}
-                onShowColorSettings={() => setColorPickerConfig({ showSettings: true })}
-            />
-
             <ConstraintGrid
                 template={weeklyTemplate.constraints.template}
                 constraints={weeklyConstraints}
@@ -268,7 +273,7 @@ const ConstraintsSchedule = () => {
                         size="lg"
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="px-5"
+                        className="px-2"
                     >
                         {submitting ? (
                             <>
@@ -281,6 +286,15 @@ const ConstraintsSchedule = () => {
                     </Button>
                 </div>
             )}
+
+            <ConstraintInstructions
+                currentMode={currentMode}
+                onModeChange={(mode) => dispatch(setCurrentMode(mode))}
+                limits={weeklyTemplate.constraints.limits}
+                isSubmitted={isSubmitted}
+                onShowColorSettings={() => setColorPickerConfig({ showSettings: true })}
+            />
+
 
             {/* Color Picker Modal */}
             {showColorPicker && colorPickerConfig && !colorPickerConfig.showSettings && (

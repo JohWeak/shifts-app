@@ -12,10 +12,6 @@ const GlobalAlerts = () => {
     return (
         <div className="global-alerts-container">
             {notifications.map((notification) => (
-                // 👇 --- ИЗМЕНЕНИЕ ЗДЕСЬ --- 👇
-                // Мы создаем уникальный ключ из ID и счетчика обновлений.
-                // Когда updateCount меняется, ключ тоже меняется, и React
-                // перемонтирует компонент AlertItem, запуская анимацию заново.
                 <AlertItem
                     key={`${notification.id}-${notification.updateCount}`}
                     notification={notification}

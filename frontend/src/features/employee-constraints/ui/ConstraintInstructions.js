@@ -18,17 +18,6 @@ const ConstraintInstructions = ({
         <Card className="shadow-sm mb-4">
             <Card.Body>
                 <div className="row align-items-center">
-                    <div className="col-md-8">
-                        <h5>{t('constraints.instructions.title')}</h5>
-                        <ul className="mb-0">
-                            <li>{t('constraints.instructions.selectMode')}</li>
-                            <li>{t('constraints.instructions.clickCells')}</li>
-                            <li>{t('constraints.instructions.limits', {
-                                cannotWork: limits.cannot_work_days,
-                                preferWork: limits.prefer_work_days
-                            })}</li>
-                        </ul>
-                    </div>
                     <div className="col-md-4 text-end">
                         <div className="btn-group mb-2" role="group">
                             <Button
@@ -56,6 +45,17 @@ const ConstraintInstructions = ({
                                 {t('constraints.colorSettings')}
                             </Button>
                         </div>
+                    </div>
+                    <div className="col-md-8">
+                        <h5>{t('constraints.instructions.title')}</h5>
+                        <ul className="mb-0">
+                            <li>{t('constraints.instructions.selectMode')}</li>
+                            <li>{t('constraints.instructions.clickCells')}</li>
+                            <li>{t('constraints.instructions.limits', {
+                                cannotWork: limits.cannot_work_days,
+                                preferWork: limits.prefer_work_days
+                            })}</li>
+                        </ul>
                     </div>
                 </div>
 
