@@ -15,10 +15,15 @@ const ConstraintGrid = ({
 
     const getShiftIcon = (shiftType) => {
         switch (shiftType) {
-            case 'morning': return <i className="bi bi-sunrise"></i>;
-            case ('evening' || 'day'): return <i className="bi bi-sun"></i>;
-            case 'night': return <i className="bi bi-moon-stars"></i>;
-            default: return null;
+            case 'morning':
+                return <i className="bi bi-sunrise"></i>;
+            case 'evening':
+            case 'day':
+                return <i className="bi bi-sun"></i>;
+            case 'night':
+                return <i className="bi bi-moon-stars"></i>;
+            default:
+                return null;
         }
     };
 

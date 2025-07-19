@@ -1,6 +1,17 @@
 // backend/src/controllers/constraint.controller.js
 const db = require('../../models');
-const { EmployeeConstraint, Employee, PositionShift, Position, Workday } = db;
+const {
+    EmployeeConstraint,
+    Employee,
+    PositionShift,
+    ScheduleSettings,
+    Position,
+    ShiftRequirement,
+    Workday,
+    PermanentConstraintRequest,
+    PermanentConstraint
+} = db;
+
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 
@@ -10,7 +21,7 @@ const getEmployeeConstraints = async (req, res) => {
         const { empId } = req.params;
         const constraints = await EmployeeConstraint.findAll({
             where: { emp_id: empId, status: 'active' },
-            include: [{ model: Shift, as: 'shift' }],
+            include: [{ model: PositionShift, as: 'shift' }],
             order: [['created_at', 'DESC']]
         });
 
@@ -65,7 +76,7 @@ const deleteConstraint = async (req, res) => {
     }
 };
 
-// Get weekly constraints grid
+// Get a weekly constraints grid
 const getWeeklyConstraintsGrid = async (req, res) => {
     try {
         const empId = req.userId; // From auth middleware
@@ -110,7 +121,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
         });
 
         // Get system settings for limits
-        const settings = await db.ScheduleSettings.findOne();
+        const settings = await ScheduleSettings.findOne();
 
         // Build week template
         const template = [];
@@ -130,7 +141,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 if (!shiftTypes[shift.shift_type]) {
                     shiftTypes[shift.shift_type] = {
                         start_time: shift.start_time,
-                        duration: shift.duration_minutes
+                        duration: shift.duration_hours
                     };
                 }
 
@@ -138,7 +149,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                     shift_id: shift.id,
                     shift_type: shift.shift_type,
                     start_time: shift.start_time,
-                    duration: shift.duration_minutes,
+                    duration: shift.duration_hours,
                     status: constraint ? constraint.constraint_type : 'neutral'
                 };
             });
@@ -165,14 +176,15 @@ const getWeeklyConstraintsGrid = async (req, res) => {
             weekStart: startDate.format('YYYY-MM-DD'),
             employee: {
                 id: employee.emp_id,
-                name: employee.full_name,
+                first_name: employee.first_name,
+                last_name: employee.last_name,
                 position: employee.defaultPosition.pos_name
             },
             constraints: {
                 template,
                 limits: {
                     cannot_work_days: settings?.max_cannot_work_days || 2,
-                    prefer_work_days: settings?.max_prefer_work_days || 2
+                    prefer_work_days: settings?.max_prefer_work_days || 6
                 },
                 already_submitted: alreadySubmitted,
                 can_edit: canEdit
@@ -267,7 +279,7 @@ const getPermanentConstraintRequests = async (req, res) => {
             });
         }
 
-        const requests = await db.PermanentConstraintRequest.findAll({
+        const requests = await PermanentConstraintRequest.findAll({
             where: { emp_id: empId },
             include: [{
                 model: PositionShift,
@@ -305,7 +317,7 @@ const submitPermanentConstraintRequest = async (req, res) => {
         }
 
         // Check if similar request already pending
-        const existingRequest = await db.PermanentConstraintRequest.findOne({
+        const existingRequest = await PermanentConstraintRequest.findOne({
             where: {
                 emp_id: empId,
                 day_of_week,
@@ -322,7 +334,7 @@ const submitPermanentConstraintRequest = async (req, res) => {
         }
 
         // Create request
-        const request = await db.PermanentConstraintRequest.create({
+        const request = await PermanentConstraintRequest.create({
             emp_id: empId,
             day_of_week,
             shift_id,
@@ -350,7 +362,7 @@ const submitPermanentConstraintRequest = async (req, res) => {
 // Get all pending permanent constraint requests (Admin)
 const getPendingRequests = async (req, res) => {
     try {
-        const requests = await db.PermanentConstraintRequest.findAll({
+        const requests = await PermanentConstraintRequest.findAll({
             where: { status: 'pending' },
             include: [
                 {
@@ -397,7 +409,7 @@ const reviewPermanentConstraintRequest = async (req, res) => {
         }
 
         // Get request
-        const request = await db.PermanentConstraintRequest.findByPk(id);
+        const request = await PermanentConstraintRequest.findByPk(id);
         if (!request || request.status !== 'pending') {
             return res.status(404).json({
                 success: false,
@@ -415,7 +427,7 @@ const reviewPermanentConstraintRequest = async (req, res) => {
 
         // If approved, create permanent constraint
         if (status === 'approved') {
-            await db.PermanentConstraint.create({
+            await PermanentConstraint.create({
                 emp_id: request.emp_id,
                 day_of_week: request.day_of_week,
                 shift_id: request.shift_id,

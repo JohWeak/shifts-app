@@ -4,7 +4,7 @@ const {Employee, Position, EmployeeConstraint, WorkSite} = db;
 const bcrypt = require('bcryptjs');
 const {Op} = require("sequelize");
 
-// redis для кэша? мбмб
+// redis для кэша?
 
 
 // Create new employee

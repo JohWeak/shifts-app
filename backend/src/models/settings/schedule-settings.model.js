@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         generation_time: { type: DataTypes.TIME, defaultValue: '13:00:00' },
         constraint_deadline_hours: { type: DataTypes.INTEGER, defaultValue: 72 },
         max_cannot_work_days: { type: DataTypes.INTEGER, defaultValue: 2 },
+        max_prefer_work_days: { type: DataTypes.INTEGER, defaultValue: 6 },
         schedule_weeks_ahead: { type: DataTypes.INTEGER, defaultValue: 1 },
         max_consecutive_work_days: { type: DataTypes.INTEGER, defaultValue: 6 },
         min_rest_base_hours: { type: DataTypes.INTEGER, defaultValue: 11 },
