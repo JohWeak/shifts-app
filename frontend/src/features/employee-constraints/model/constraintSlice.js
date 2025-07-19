@@ -90,12 +90,25 @@ const constraintSlice = createSlice({
         },
 
         resetConstraints: (state) => {
-            state.weeklyConstraints = {};
-            state.limitError = '';
-            state.isSubmitted = false;
-            state.canEdit = true;
+            const initialConstraints = {};
+            // Проверяем, что у нас есть шаблон, на основе которого можно сбросить состояние
+            if (state.weeklyTemplate) {
+                state.weeklyTemplate.constraints.template.forEach(day => {
+                    initialConstraints[day.date] = {
+                        day_status: 'neutral', // Сбрасываем и статус дня
+                        shifts: {}
+                    };
+                    day.shifts.forEach(shift => {
+                        const type = getShiftTypeByTime(shift.start_time, shift.duration);
+                        initialConstraints[day.date].shifts[type] = 'neutral'; // Сбрасываем статус смены
+                    });
+                });
+            }
 
+            state.weeklyConstraints = initialConstraints;
+            state.isSubmitted = false;
         },
+
         enableEditing: (state) => {
             state.isSubmitted = false;
             state.canEdit = true;
