@@ -1,9 +1,11 @@
 // frontend/src/features/employee-constraints/index.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Button, Spinner, Toast, ToastContainer } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { addNotification, removeNotification } from 'app/model/notificationsSlice';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
+
 
 // Components
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -26,10 +28,15 @@ import {
 
 import './index.css';
 import {getShiftTypeByTime} from "../../shared/lib/utils/scheduleUtils";
+import {hexToRgba} from "../../shared/lib/utils/colorUtils";
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
     const { t } = useI18n();
+    const containerRef = useRef(null);
+    const { getShiftColor } = useShiftColor();
+
+
 
     // Redux state
     const {
@@ -65,6 +72,19 @@ const ConstraintsSchedule = () => {
     useEffect(() => {
         dispatch(fetchWeeklyConstraints({}));
     }, [dispatch]);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        // Определяем цвет для hover в зависимости от текущего режима
+        const hoverColor = currentMode === 'cannot_work'
+            ? hexToRgba(shiftColors.cannotWork, 0.9)
+            : hexToRgba(shiftColors.preferWork, 0.9);
+
+        // Устанавливаем CSS переменную на DOM-элементе
+        containerRef.current.style.setProperty('--hover-background-color', hoverColor);
+
+    }, [currentMode, shiftColors]);
 
     useEffect(() => {
         if (submitStatus === 'success') {
@@ -285,7 +305,7 @@ const ConstraintsSchedule = () => {
     }
 
     return (
-        <Container fluid className="employee-constraints-container p-3">
+        <Container fluid ref={containerRef} className="employee-constraints-container p-3 position-relative">
             <PageHeader
                 title={t('constraints.title')}
                 subtitle={t('constraints.subtitle')}
@@ -297,6 +317,7 @@ const ConstraintsSchedule = () => {
                 onCellClick={handleCellClick}
                 getCellClass={getCellClass}
                 shiftColors={shiftColors}
+                getShiftBaseColor={getShiftColor}
                 canEdit={canEdit}
                 isSubmitted={isSubmitted}
             />

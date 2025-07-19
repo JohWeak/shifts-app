@@ -34,20 +34,25 @@ export const isDarkTheme = () => {
 };
 
 /**
- * Добавляет прозрачность к HEX цвету
- * @param {string} color - HEX цвет
- * @param {number} opacity - Прозрачность от 0 до 1
- * @returns {string} - Цвет с прозрачностью
+ * Конвертирует HEX цвет в RGBA формат.
+ * @param {string} hex - Цвет в формате #RRGGBB.
+ * @param {number} alpha - Прозрачность от 0 до 1.
+ * @returns {string} - Цвет в формате rgba(r, g, b, a).
  */
-export const hexToRgba = (color, opacity = 1) => {
-    if (!color) return `rgba(0, 0, 0, ${opacity})`;
+export const hexToRgba = (hex, alpha) => {
+    if (!hex || !/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+        return ''; // Возвращаем пустую строку при некорректном hex
+    }
+    let c = hex.substring(1).split('');
+    if (c.length === 3) {
+        c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+    }
+    c = '0x' + c.join('');
+    const r = (c >> 16) & 255;
+    const g = (c >> 8) & 255;
+    const b = c & 255;
 
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 /**
@@ -133,3 +138,4 @@ export const hslToHex = (h, s, l) => {
     };
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
+

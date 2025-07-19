@@ -25,14 +25,10 @@
 }
 
 .constraint-cell.cannot-work {
-    background-color: rgba(var(--bs-danger-rgb), 0.15);
-    border-color: var(--bs-danger);
     color: var(--bs-emphasis-color);
 }
 
 .constraint-cell.prefer-work {
-    background-color: rgba(var(--bs-success-rgb), 0.15);
-    border-color: var(--bs-success);
     color: var(--bs-emphasis-color);
 }
 
@@ -53,13 +49,13 @@
 
 /* Shift headers */
 .shift-header {
-    background-color: var(--bs-gray-200);
     font-weight: 500;
-    color: var(--bs-emphasis-color);
 }
-
+.constraint-cell.clickable:hover {
+    background-color: var(--hover-background-color) !important;
+}
 [data-theme="dark"] .shift-header {
-    background-color: var(--bs-gray-700);
+    /*background-color: var(--bs-gray-700);*/
 }
 
 /* Loading state */

@@ -2,14 +2,21 @@
 import React from 'react';
 import { Card, Table } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { formatShiftTime, formatHeaderDate, getShiftTypeByTime, getShiftIcon } from 'shared/lib/utils/scheduleUtils';
+import {
+    formatShiftTime,
+    formatHeaderDate,
+    getShiftTypeByTime,
+    getShiftIcon
+} from 'shared/lib/utils/scheduleUtils';
+import { hexToRgba, getContrastTextColor } from 'shared/lib/utils/colorUtils';
 
 const ConstraintGrid = ({
                             template,
                             constraints,
                             onCellClick,
                             getCellClass,
-                            shiftColors = {},
+                            shiftColors,
+                            getShiftBaseColor,
                             canEdit,
                             isSubmitted
                         }) => {
@@ -38,13 +45,59 @@ const ConstraintGrid = ({
         return `${baseClass} ${statusClass} ${clickableClass}`;
     };
 
+    const getSampleShift = (shiftType) => {
+        for (const day of template) {
+            const foundShift = day.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);
+            if (foundShift) {
+                return foundShift;
+            }
+        }
+        return null; // На случай если смен такого типа нет
+    };
+
+    const getCellStyle = (date, shiftType) => {
+        const status = constraints[date]?.shifts[shiftType] || 'neutral';
+        const alpha = 1;
+        const baseAlpha = 0.2;
+
+        let backgroundColor;
+
+        if (status === 'cannot_work') {
+            backgroundColor = hexToRgba(shiftColors.cannotWork, alpha);
+        } else if (status === 'prefer_work') {
+            backgroundColor = hexToRgba(shiftColors.preferWork, alpha);
+        } else {
+            // НЕЙТРАЛЬНОЕ СОСТОЯНИЕ: используем getShiftBaseColor
+            const sampleShift = getSampleShift(shiftType);
+            const baseColor = sampleShift ? getShiftBaseColor(sampleShift) : '#E0E0E0';
+            backgroundColor = hexToRgba(baseColor, baseAlpha);
+        }
+
+        // getContrastTextColor ожидает HEX, поэтому для rgba вернем дефолтный цвет
+        const textColor = backgroundColor.startsWith('rgba')
+            ? getContrastTextColor(shiftColors[status] || '#000000') // Пытаемся угадать
+            : getContrastTextColor(backgroundColor);
+
+        return { backgroundColor, color: textColor };
+    };
+
+    const getShiftHeaderStyle = (shiftType) => {
+        const sampleShift = getSampleShift(shiftType);
+        const baseColor = sampleShift ? getShiftBaseColor(sampleShift) : '#E0E0E0';
+        return {
+            backgroundColor: baseColor,
+            color: getContrastTextColor(baseColor)
+        };
+    };
+
+
     return (
         <>
             {/* Desktop Table */}
             <Card className="shadow desktop-constraints d-none d-md-block">
                 <Card.Body className="p-0">
                     <div className="table-responsive">
-                        <Table bordered hover className="mb-0">
+                        <Table bordered className="mb-0">
                             <thead>
                             <tr>
                                 <th className="text-center shift-header">{t('constraints.shiftTime')}</th>
@@ -70,7 +123,9 @@ const ConstraintGrid = ({
 
                                 return (
                                     <tr key={shiftType}>
-                                        <td className="shift-header align-middle text-center">
+                                        <td className="shift-header align-middle text-center"
+                                            style={getShiftHeaderStyle(shiftType)}
+                                        >
                                             {getShiftIcon(shiftType)}<br/>
                                             {formatShiftTime(sampleShift.start_time, sampleShift.duration)}
                                         </td>
@@ -79,13 +134,7 @@ const ConstraintGrid = ({
                                                 <td key={`${day.date}-${shiftType}`}
                                                     className={getCellClass(day.date, shiftType)}
                                                     onClick={() => onCellClick(day.date, shiftType)}
-                                                    style={{
-                                                        backgroundColor: constraints[day.date]?.shifts[shiftType] === 'cannot_work'
-                                                            ? shiftColors.cannotWork
-                                                            : constraints[day.date]?.shifts[shiftType] === 'prefer_work'
-                                                                ? shiftColors.preferWork
-                                                                : undefined
-                                                    }}
+                                                    style={getCellStyle(day.date, shiftType)}
                                                 >
                                                     {/* Empty cell for user interaction */}
                                                 </td>
@@ -130,16 +179,11 @@ const ConstraintGrid = ({
                                 </td>
                                 {shiftTypes.map(shiftType => {
                                     const shift = day.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);                                    return shift ? (
-                                        <td key={`${day.date}-${shiftType}`}
+                                        <td
+                                            key={`${day.date}-${shiftType}`}
                                             className={getCellClass(day.date, shiftType)}
                                             onClick={() => onCellClick(day.date, shiftType)}
-                                            style={{
-                                                backgroundColor: constraints[day.date]?.shifts[shiftType] === 'cannot_work'
-                                                    ? shiftColors.cannotWork
-                                                    : constraints[day.date]?.shifts[shiftType] === 'prefer_work'
-                                                        ? shiftColors.preferWork
-                                                        : undefined
-                                            }}
+                                            style={getCellStyle(day.date, shiftType)}
                                         >
                                             {/* Empty cell */}
                                         </td>
