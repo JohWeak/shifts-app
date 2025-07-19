@@ -94,6 +94,7 @@
 @media (max-width: 767px) {
     .employee-constraints-container {
         padding: 1rem !important;
+        margin-bottom: 58px!important;
     }
 
     .constraint-cell {

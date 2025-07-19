@@ -15,6 +15,7 @@ export const en = {
         close: 'Close',
         confirm: 'Confirm',
         create: 'Create',
+        day: 'Day',
         date: 'Date',
         delete: 'Delete',
         details: 'Details',
@@ -522,6 +523,9 @@ export const en = {
     shift:{
         editColor: 'Edit shift color',
         colorUpdated: 'Shift color updated',
+        morning: 'Morning',
+        day: 'Day',
+        night: 'Night',
     },
     schedule: {
         actions: 'Actions',
@@ -930,6 +934,7 @@ export const en = {
             fri: 'Fri',
             sat: 'Sat'
         }
-    }
+    },
+
 
 };
