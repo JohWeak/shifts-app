@@ -443,25 +443,48 @@ export const formatToYearMonth = (date) => {
 };
 
 /**
- * Определяет тип смены ('morning', 'day', 'night') по времени начала.
+ * Определяет тип смены ('morning', 'day', 'night') на основе времени начала и длительности.
+ * Правило для ночной смены: если минимум 2 часа смены попадают в интервал [22:00-06:00], это 'night'.
  * @param {string} startTime - Время начала в формате "HH:MM:SS".
- * @returns {string} - Тип смены.
+ * @param {number} duration - Длительность смены в часах.
+ * @returns {string} - Тип смены: 'morning', 'day' или 'night'.
  */
-export const getShiftTypeByTime = (startTime) => {
-    if (!startTime) return 'unknown';
+export const getShiftTypeByTime = (startTime, duration) => {
+    if (!startTime || duration === undefined) return 'unknown';
 
-    // Извлекаем час из строки "HH:MM:SS"
-    const hour = parseInt(startTime.substring(0, 2), 10);
+    const [startHour, startMinute] = startTime.split(':').map(Number);
 
-    if (hour >= 5 && hour < 12) {
+    // Переводим всё в минуты от начала дня для удобства расчетов
+    const totalMinutesInDay = 24 * 60;
+    const startTotalMinutes = startHour * 60 + startMinute;
+
+    // Ночной интервал: с 22:00 (1320 мин) до 06:00 (360 мин)
+    const nightStart = 22 * 60; // 1320
+    const nightEnd = 6 * 60;   // 360
+
+    let minutesInNight = 0;
+    for (let i = 0; i < duration * 60; i++) {
+        const currentMinute = (startTotalMinutes + i) % totalMinutesInDay;
+
+        // Проверяем, попадает ли текущая минута в ночной интервал
+        // Интервал пересекает полночь, поэтому условие состоит из двух частей
+        if (currentMinute >= nightStart || currentMinute < nightEnd) {
+            minutesInNight++;
+        }
+    }
+
+    // Если в ночном интервале набралось 2 часа (120 минут) или больше
+    if (minutesInNight >= 120) {
+        return 'night';
+    }
+
+    // Если это не ночная смена, определяем по времени начала
+    if (startHour >= 5 && startHour < 12) {
         return 'morning';
     }
-    if (hour >= 12 && hour < 19) {
-        // Вы можете использовать 'evening' или 'day'
-        return 'day';
-    }
-    // Все остальное считаем ночью (включая раннее утро до 5)
-    return 'night';
+
+    // Все остальные дневные/вечерние смены
+    return 'day';
 };
 
 /**

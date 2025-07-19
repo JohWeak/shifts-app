@@ -14,11 +14,11 @@ const ConstraintGrid = ({
     const { t } = useI18n();
 
 
-    // Get unique shift types from template
+    // 1. Получаем уникальные типы смен, ВЫЧИСЛЯЯ их для каждой смены из шаблона
     const shiftTypes = [...new Set(
-        template.flatMap(day => day.shifts.map(shift => getShiftTypeByTime(shift.start_time)))
+        template.flatMap(day => day.shifts.map(shift => getShiftTypeByTime(shift.start_time, shift.duration)))
     )].sort((a, b) => {
-        // Добавим кастомную сортировку, чтобы смены шли в правильном порядке
+        // Добавляем кастомную сортировку, чтобы смены всегда шли в порядке Утро -> День -> Ночь
         const order = { morning: 1, day: 2, night: 3 };
         return (order[a] || 99) - (order[b] || 99);
     });
@@ -44,7 +44,7 @@ const ConstraintGrid = ({
                             <tbody>
                             {/* Individual shift rows */}
                             {shiftTypes.map(shiftType => {
-                                const sampleShift = template[0]?.shifts.find(s => s.shift_type === shiftType);
+                                const sampleShift = template[0]?.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);
                                 if (!sampleShift) return null;
 
                                 return (
@@ -54,8 +54,7 @@ const ConstraintGrid = ({
                                             {formatShiftTime(sampleShift.start_time, sampleShift.duration)}
                                         </td>
                                         {template.map(day => {
-                                            const dayShift = day.shifts.find(s => s.shift_type === shiftType);
-                                            return dayShift ? (
+                                            const dayShift = day.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);                                            return dayShift ? (
                                                 <td key={`${day.date}-${shiftType}`}
                                                     className={getCellClass(day.date, shiftType)}
                                                     onClick={() => onCellClick(day.date, shiftType)}
@@ -106,8 +105,7 @@ const ConstraintGrid = ({
                                     <small className="text-muted">{formatHeaderDate(new Date(day.date))}</small>
                                 </td>
                                 {shiftTypes.map(shiftType => {
-                                    const shift = day.shifts.find(s => s.shift_type === shiftType);
-                                    return shift ? (
+                                    const shift = day.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);                                    return shift ? (
                                         <td key={`${day.date}-${shiftType}`}
                                             className={getCellClass(day.date, shiftType)}
                                             onClick={() => onCellClick(day.date, shiftType)}
