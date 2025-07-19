@@ -913,7 +913,11 @@ export const en = {
 
         submit: 'Submit Constraints',
         submitSuccess: 'Constraints submitted successfully!',
-        alreadySubmitted: 'You have already submitted constraints for this week'
+        alreadySubmitted: 'You have already submitted constraints for this week',
+
+        colorSettings: 'Color Settings',
+        cannotWorkColor: 'Cannot Work Color',
+        preferWorkColor: 'Prefer to Work Color',
     },
 
 
