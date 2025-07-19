@@ -2,39 +2,39 @@
 const express = require('express');
 const router = express.Router();
 const constraintController = require('../controllers/scheduling/constraint.controller');
-const { authenticateToken, authorizeRoles } = require('../middlewares/auth.middleware');
+const { verifyToken,  isAdmin } = require('../middlewares/auth.middleware');
 
 // Employee routes
 router.get('/weekly-grid',
-    authenticateToken,
+    verifyToken,
     constraintController.getWeeklyConstraintsGrid
 );
 
 router.post('/submit-weekly',
-    authenticateToken,
+    verifyToken,
     constraintController.submitWeeklyConstraints
 );
 
 router.get('/permanent-requests/:empId',
-    authenticateToken,
+    verifyToken,
     constraintController.getPermanentConstraintRequests
 );
 
 router.post('/permanent-request',
-    authenticateToken,
+    verifyToken,
     constraintController.submitPermanentConstraintRequest
 );
 
 // Admin routes
 router.get('/pending-requests',
-    authenticateToken,
-    authorizeRoles(['admin']),
+    ...[verifyToken,
+    isAdmin],
     constraintController.getPendingRequests
 );
 
 router.put('/review-request/:id',
-    authenticateToken,
-    authorizeRoles(['admin']),
+    ...[verifyToken,
+        isAdmin],
     constraintController.reviewPermanentConstraintRequest
 );
 
