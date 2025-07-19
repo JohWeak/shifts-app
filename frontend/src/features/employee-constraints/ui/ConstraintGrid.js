@@ -112,9 +112,8 @@ const ConstraintGrid = ({
                         <Table bordered className="mb-0">
                             <thead>
                             <tr>
-                                <th className="text-center shift-header">{t('constraints.shiftTime')}</th>
+                                <th className="text-center align-middle shift-header ">{t('constraints.shiftTime')}</th>
                                 {template.map(day => (
-                                    // --- ИЗМЕНЕНИЕ 1: Делаем заголовок дня кликабельным ---
                                     <th
                                         key={day.date}
                                         className={getDayHeaderClass(day.date)}
@@ -138,8 +137,9 @@ const ConstraintGrid = ({
                                         <td className="shift-header align-middle text-center"
                                             style={getShiftHeaderStyle(shiftType)}
                                         >
-                                            {getShiftIcon(shiftType)}<br/>
-                                            {formatShiftTime(sampleShift.start_time, sampleShift.duration)}
+                                            {getShiftIcon(shiftType)}
+                                            <strong className="d-block my-1">{sampleShift.shift_name || t(`shift.${shiftType}`)}</strong>
+                                            <small className="text-muted">{formatShiftTime(sampleShift.start_time, sampleShift.duration)}</small>
                                         </td>
                                         {template.map(day => {
                                             const dayShift = day.shifts.find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);                                            return dayShift ? (
@@ -170,7 +170,7 @@ const ConstraintGrid = ({
                     <Table bordered className="mb-0">
                         <thead>
                         <tr>
-                            <th className="text-center">{t('common.day')}</th>
+                            <th className="text-center align-middle">{t('common.day')}</th>
                             {shiftTypes.map(shiftType => {
                                 // Находим образец смены, чтобы получить время и иконку
                                 const sampleShift = getSampleShift(shiftType);
@@ -184,7 +184,8 @@ const ConstraintGrid = ({
                                     >
                                         {/* Добавляем содержимое как в десктопной версии */}
                                         {getShiftIcon(shiftType)}
-                                        <div className="mt-1 small"> {/* Обертка для стилизации */}
+                                        <strong className="d-block my-1 small">{sampleShift.shift_name || t(`shift.${shiftType}`)}</strong>
+                                        <div className="small text-muted" style={{fontSize: '0.7em'}}>
                                             {formatShiftTime(sampleShift.start_time, sampleShift.duration)}
                                         </div>
                                     </th>

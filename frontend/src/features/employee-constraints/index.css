@@ -111,9 +111,28 @@
     opacity: 0.8;
 }
 
-/* Ensure proper spacing on mobile */
-.mobile-constraints table {
-    table-layout: fixed;
+.desktop-constraints .table,
+.mobile-constraints .table {
+    table-layout: fixed; /* Это ключ к равномерному распределению ширины */
+    width: 100%;
+}
+
+/*
+   Для десктопа: 1 колонка для смен + 7 для дней = 8 колонок.
+   100% / 8 = 12.5% на каждую.
+*/
+.desktop-constraints th,
+.desktop-constraints td {
+    width: 12.5%;
+}
+
+/*
+   Для мобильной версии: 1 колонка для дня + 3 для смен = 4 колонки.
+   100% / 4 = 25% на каждую.
+*/
+.mobile-constraints th,
+.mobile-constraints td {
+    width: 25%;
 }
 
 .mobile-constraints td {
