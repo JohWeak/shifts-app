@@ -17,6 +17,7 @@ const ConstraintGrid = ({
                             getCellClass,
                             shiftColors,
                             getShiftBaseColor,
+                            getHoverPreviewStyle,
                             canEdit,
                             isSubmitted
                         }) => {
@@ -81,6 +82,17 @@ const ConstraintGrid = ({
         return { backgroundColor, color: textColor };
     };
 
+    const getFinalCellStyle = (date, shiftType) => {
+        const baseStyle = getCellStyle(date, shiftType); // Стили для состояния покоя
+        const hoverStyle = getHoverPreviewStyle(date, shiftType); // Стили для ховера (переменная и цвет текста)
+
+        return {
+            ...baseStyle,
+            '--cell-hover-color': hoverStyle['--cell-hover-color']
+            // Цвет текста уже управляется getCellStyle, поэтому hoverStyle.color нам не нужен здесь
+        };
+    };
+
     const getShiftHeaderStyle = (shiftType) => {
         const sampleShift = getSampleShift(shiftType);
         const baseColor = sampleShift ? getShiftBaseColor(sampleShift) : '#E0E0E0';
@@ -134,8 +146,7 @@ const ConstraintGrid = ({
                                                 <td key={`${day.date}-${shiftType}`}
                                                     className={getCellClass(day.date, shiftType)}
                                                     onClick={() => onCellClick(day.date, shiftType)}
-                                                    style={getCellStyle(day.date, shiftType)}
-                                                >
+                                                    style={getFinalCellStyle(day.date, shiftType)}                                                >
                                                     {/* Empty cell for user interaction */}
                                                 </td>
                                             ) : (
@@ -164,7 +175,9 @@ const ConstraintGrid = ({
                                 <th key={shiftType} className="shift-header text-center">
                                     {t(`shift.${shiftType}`)}
                                 </th>
+
                             ))}
+
                         </tr>
                         </thead>
                         <tbody>
@@ -183,7 +196,7 @@ const ConstraintGrid = ({
                                             key={`${day.date}-${shiftType}`}
                                             className={getCellClass(day.date, shiftType)}
                                             onClick={() => onCellClick(day.date, shiftType)}
-                                            style={getCellStyle(day.date, shiftType)}
+                                            style={getFinalCellStyle(day.date, shiftType)}
                                         >
                                             {/* Empty cell */}
                                         </td>

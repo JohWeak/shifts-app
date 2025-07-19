@@ -52,8 +52,10 @@
     font-weight: 500;
 }
 .constraint-cell.clickable:hover {
-    background-color: var(--hover-background-color) !important;
+    /* Теперь это универсальное правило, которое берет цвет из персональной переменной ячейки */
+    background-color: var(--cell-hover-color) !important;
 }
+
 [data-theme="dark"] .shift-header {
     /*background-color: var(--bs-gray-700);*/
 }

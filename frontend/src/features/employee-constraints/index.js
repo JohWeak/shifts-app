@@ -28,7 +28,7 @@ import {
 
 import './index.css';
 import {getShiftTypeByTime} from "../../shared/lib/utils/scheduleUtils";
-import {hexToRgba} from "../../shared/lib/utils/colorUtils";
+import {getContrastTextColor, hexToRgba} from "../../shared/lib/utils/colorUtils";
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
@@ -73,18 +73,6 @@ const ConstraintsSchedule = () => {
         dispatch(fetchWeeklyConstraints({}));
     }, [dispatch]);
 
-    useEffect(() => {
-        if (!containerRef.current) return;
-
-        // Определяем цвет для hover в зависимости от текущего режима
-        const hoverColor = currentMode === 'cannot_work'
-            ? hexToRgba(shiftColors.cannotWork, 0.9)
-            : hexToRgba(shiftColors.preferWork, 0.9);
-
-        // Устанавливаем CSS переменную на DOM-элементе
-        containerRef.current.style.setProperty('--hover-background-color', hoverColor);
-
-    }, [currentMode, shiftColors]);
 
     useEffect(() => {
         if (submitStatus === 'success') {
@@ -126,6 +114,43 @@ const ConstraintsSchedule = () => {
         }
         return null;
     };
+
+    const getHoverPreviewStyle = (date, shiftType) => {
+        const status = weeklyConstraints[date]?.shifts[shiftType] || 'neutral';
+        let nextStatus;
+
+        // 1. Определяем, какой статус будет ПОСЛЕ клика
+        if (status === currentMode) {
+            nextStatus = 'neutral';
+        } else {
+            nextStatus = currentMode;
+        }
+
+        // 2. Определяем цвет для этого "будущего" статуса
+        let backgroundColor;
+        const alpha = 0.6; // Прозрачность для выбранных ячеек
+        const baseAlpha = 0.2; // Прозрачность для нейтральных
+
+        if (nextStatus === 'cannot_work') {
+            backgroundColor = hexToRgba(shiftColors.cannotWork, alpha);
+        } else if (nextStatus === 'prefer_work') {
+            backgroundColor = hexToRgba(shiftColors.preferWork, alpha);
+        } else { // nextStatus === 'neutral'
+            // Для нейтрального нам нужен базовый цвет смены
+            const sampleShift = weeklyTemplate.constraints.template
+                .flatMap(d => d.shifts)
+                .find(s => getShiftTypeByTime(s.start_time, s.duration) === shiftType);
+
+            const baseColor = sampleShift ? getShiftColor(sampleShift) : '#E0E0E0';
+            backgroundColor = hexToRgba(baseColor, baseAlpha);
+        }
+
+        return {
+            '--cell-hover-color': backgroundColor,
+            color: getContrastTextColor(backgroundColor)
+        };
+    };
+
 
     const handleShowInstructions = () => {
         setShowInstructionsToast(true);
@@ -305,7 +330,7 @@ const ConstraintsSchedule = () => {
     }
 
     return (
-        <Container fluid ref={containerRef} className="employee-constraints-container p-3 position-relative">
+        <Container fluid className="employee-constraints-container p-3 position-relative">
             <PageHeader
                 title={t('constraints.title')}
                 subtitle={t('constraints.subtitle')}
@@ -318,6 +343,7 @@ const ConstraintsSchedule = () => {
                 getCellClass={getCellClass}
                 shiftColors={shiftColors}
                 getShiftBaseColor={getShiftColor}
+                getHoverPreviewStyle={getHoverPreviewStyle}
                 canEdit={canEdit}
                 isSubmitted={isSubmitted}
             />
