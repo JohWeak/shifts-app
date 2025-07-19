@@ -7,7 +7,7 @@ export const fetchWeeklyConstraints = createAsyncThunk(
     'constraints/fetchWeeklyConstraints',
     async ({ weekStart }) => {
         const response = await constraintAPI.getWeeklyConstraints({ weekStart });
-        return response.data;
+        return response;
     }
 );
 
@@ -15,7 +15,7 @@ export const submitWeeklyConstraints = createAsyncThunk(
     'constraints/submitWeeklyConstraints',
     async (constraintsData) => {
         const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
-        return response.data;
+        return response;
     }
 );
 
@@ -23,7 +23,7 @@ export const fetchPermanentRequests = createAsyncThunk(
     'constraints/fetchPermanentRequests',
     async (empId) => {
         const response = await constraintAPI.getPermanentRequests(empId);
-        return response.data;
+        return response;
     }
 );
 
