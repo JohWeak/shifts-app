@@ -441,3 +441,44 @@ export const formatToIsoDate = (date) => {
 export const formatToYearMonth = (date) => {
     return format(date, 'yyyy-MM');
 };
+
+/**
+ * Определяет тип смены ('morning', 'day', 'night') по времени начала.
+ * @param {string} startTime - Время начала в формате "HH:MM:SS".
+ * @returns {string} - Тип смены.
+ */
+export const getShiftTypeByTime = (startTime) => {
+    if (!startTime) return 'unknown';
+
+    // Извлекаем час из строки "HH:MM:SS"
+    const hour = parseInt(startTime.substring(0, 2), 10);
+
+    if (hour >= 5 && hour < 12) {
+        return 'morning';
+    }
+    if (hour >= 12 && hour < 19) {
+        // Вы можете использовать 'evening' или 'day'
+        return 'day';
+    }
+    // Все остальное считаем ночью (включая раннее утро до 5)
+    return 'night';
+};
+
+/**
+ * Возвращает иконку для определенного типа смены.
+ * @param {string} shiftType - Тип смены ('morning', 'day', 'night').
+ * @returns {JSX.Element|null} - React-компонент иконки.
+ */
+export const getShiftIcon = (shiftType) => {
+    switch (shiftType) {
+        case 'morning':
+            return <i className="bi bi-sunrise"></i>;
+        case 'evening': // Добавляем оба варианта для надежности
+        case 'day':
+            return <i className="bi bi-sun"></i>;
+        case 'night':
+            return <i className="bi bi-moon-stars"></i>;
+        default:
+            return null;
+    }
+};

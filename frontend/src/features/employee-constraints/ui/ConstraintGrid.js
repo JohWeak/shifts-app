@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, Table } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { formatShiftTime, formatHeaderDate } from 'shared/lib/utils/scheduleUtils';
+import { formatShiftTime, formatHeaderDate, getShiftTypeByTime, getShiftIcon } from 'shared/lib/utils/scheduleUtils';
 
 const ConstraintGrid = ({
                             template,
@@ -13,24 +13,15 @@ const ConstraintGrid = ({
                         }) => {
     const { t } = useI18n();
 
-    const getShiftIcon = (shiftType) => {
-        switch (shiftType) {
-            case 'morning':
-                return <i className="bi bi-sunrise"></i>;
-            case 'evening':
-            case 'day':
-                return <i className="bi bi-sun"></i>;
-            case 'night':
-                return <i className="bi bi-moon-stars"></i>;
-            default:
-                return null;
-        }
-    };
 
     // Get unique shift types from template
     const shiftTypes = [...new Set(
-        template.flatMap(day => day.shifts.map(shift => shift.shift_type))
-    )].sort();
+        template.flatMap(day => day.shifts.map(shift => getShiftTypeByTime(shift.start_time)))
+    )].sort((a, b) => {
+        // Добавим кастомную сортировку, чтобы смены шли в правильном порядке
+        const order = { morning: 1, day: 2, night: 3 };
+        return (order[a] || 99) - (order[b] || 99);
+    });
 
     return (
         <>
