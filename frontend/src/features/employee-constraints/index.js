@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/index.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Button, Spinner } from 'react-bootstrap';
+import { Container, Button, Spinner, Toast, ToastContainer } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { addNotification, removeNotification } from 'app/model/notificationsSlice';
 
@@ -10,7 +10,7 @@ import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
-import ConstraintInstructions from './ui/ConstraintInstructions';
+import ConstraintActions from './ui/ConstraintActions';
 import ConstraintGrid from './ui/ConstraintGrid';
 
 // Redux actions
@@ -53,6 +53,7 @@ const ConstraintsSchedule = () => {
         cannotWork: '#dc3545',
         preferWork: '#28a745'
     });
+    const [showInstructionsToast, setShowInstructionsToast] = useState(false);
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
 
     useEffect(() => {
@@ -107,6 +108,10 @@ const ConstraintsSchedule = () => {
             return t('constraints.errors.maxPreferWork', { max: limits.prefer_work_days });
         }
         return null;
+    };
+
+    const handleShowInstructions = () => {
+        setShowInstructionsToast(true);
     };
 
     const handleEdit = () => {
@@ -289,17 +294,42 @@ const ConstraintsSchedule = () => {
                 isSubmitted={isSubmitted}
             />
 
-            <ConstraintInstructions
+            <ConstraintActions
                 currentMode={currentMode}
                 onModeChange={(mode) => dispatch(setCurrentMode(mode))}
-                limits={weeklyTemplate.constraints.limits}
                 isSubmitted={isSubmitted}
                 onShowColorSettings={() => setColorPickerConfig({ showSettings: true })}
                 onSubmit={handleSubmit}
                 onEdit={handleEdit}
                 onClear={handleClear}
                 submitting={submitting}
+                onShowInstructions={handleShowInstructions}
+
             />
+            <ToastContainer position="bottom-end" className="p-3" style={{ zIndex: 1055 }}>
+                <Toast
+                    onClose={() => setShowInstructionsToast(false)}
+                    show={showInstructionsToast}
+                    delay={10000} // 10 секунд
+                    autohide
+                >
+                    <Toast.Header closeButton={true}>
+                        <strong className="me-auto">{t('constraints.instructions.title')}</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                        <ul className="mb-0 ps-3">
+                            <li>{t('constraints.instructions.selectMode')}</li>
+                            <li>{t('constraints.instructions.clickCells')}</li>
+                            {weeklyTemplate && ( // Проверка на случай, если данные еще не загружены
+                                <li>{t('constraints.instructions.limits', {
+                                    cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
+                                    preferWork: weeklyTemplate.constraints.limits.prefer_work_days
+                                })}</li>
+                            )}
+                        </ul>
+                    </Toast.Body>
+                </Toast>
+            </ToastContainer>
 
 
             {/* Color Picker Modal */}

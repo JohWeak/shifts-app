@@ -93,6 +93,8 @@ const constraintSlice = createSlice({
             state.weeklyConstraints = {};
             state.limitError = '';
             state.isSubmitted = false;
+            state.canEdit = true;
+
         },
         enableEditing: (state) => {
             state.isSubmitted = false;
