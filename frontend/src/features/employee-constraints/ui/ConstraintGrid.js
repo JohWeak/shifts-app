@@ -9,12 +9,14 @@ const ConstraintGrid = ({
                             constraints,
                             onCellClick,
                             getCellClass,
-                            shiftColors = {}
+                            shiftColors = {},
+                            canEdit,
+                            isSubmitted
                         }) => {
     const { t } = useI18n();
 
 
-    // 1. Получаем уникальные типы смен, ВЫЧИСЛЯЯ их для каждой смены из шаблона
+    // Получаем уникальные типы смен, ВЫЧИСЛЯЯ их для каждой смены из шаблона
     const shiftTypes = [...new Set(
         template.flatMap(day => day.shifts.map(shift => getShiftTypeByTime(shift.start_time, shift.duration)))
     )].sort((a, b) => {
@@ -22,6 +24,19 @@ const ConstraintGrid = ({
         const order = { morning: 1, day: 2, night: 3 };
         return (order[a] || 99) - (order[b] || 99);
     });
+
+    // ФУНКЦИЯ для стилизации заголовков/ячеек дней ---
+    const getDayHeaderClass = (date) => {
+        // Берем статус всего дня из weeklyConstraints
+        const status = constraints[date]?.day_status || 'neutral';
+        const baseClass = 'day-header';
+        const statusClass = status === 'cannot_work' ? 'cannot-work' :
+            status === 'prefer_work' ? 'prefer-work' : 'neutral';
+        // Делаем кликабельным, только если можно редактировать
+        const clickableClass = canEdit && !isSubmitted ? 'clickable' : '';
+
+        return `${baseClass} ${statusClass} ${clickableClass}`;
+    };
 
     return (
         <>
@@ -34,7 +49,13 @@ const ConstraintGrid = ({
                             <tr>
                                 <th className="text-center shift-header">{t('constraints.shiftTime')}</th>
                                 {template.map(day => (
-                                    <th key={day.date} className="text-center">
+                                    // --- ИЗМЕНЕНИЕ 1: Делаем заголовок дня кликабельным ---
+                                    <th
+                                        key={day.date}
+                                        className={getDayHeaderClass(day.date)}
+                                        // При клике вызываем onCellClick, передавая null в качестве shiftType
+                                        onClick={() => onCellClick(day.date, null)}
+                                    >
                                         <div>{t(`calendar.weekDays.${day.weekday}`)}</div>
                                         <small className="text-muted">{formatHeaderDate(new Date(day.date))}</small>
                                     </th>
@@ -100,7 +121,10 @@ const ConstraintGrid = ({
                         <tbody>
                         {template.map(day => (
                             <tr key={day.date}>
-                                <td className="text-center">
+                                <td
+                                    className={getDayHeaderClass(day.date)}
+                                    onClick={() => onCellClick(day.date, null)}
+                                >
                                     <div>{t(`calendar.weekDays.${day.weekday}`)}</div>
                                     <small className="text-muted">{formatHeaderDate(new Date(day.date))}</small>
                                 </td>

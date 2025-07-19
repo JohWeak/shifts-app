@@ -12,6 +12,17 @@
     color: var(--bs-secondary);
     text-align: center;
 }
+.day-header {
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 500;
+}
+.day-header.clickable {
+    cursor: pointer;
+}
+.day-header.clickable:hover {
+    opacity: 0.7;
+}
 
 .constraint-cell.cannot-work {
     background-color: rgba(var(--bs-danger-rgb), 0.15);

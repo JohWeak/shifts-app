@@ -1,6 +1,7 @@
 // frontend/src/features/employee-constraints/model/constraintSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
+import { getShiftTypeByTime } from 'shared/lib/utils/scheduleUtils';
 
 // Async thunks
 export const fetchWeeklyConstraints = createAsyncThunk(
@@ -77,7 +78,8 @@ const constraintSlice = createSlice({
                     const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
                     if (dayTemplate) {
                         dayTemplate.shifts.forEach(shift => {
-                            state.weeklyConstraints[date].shifts[shift.shift_type] = status;
+                            const type = getShiftTypeByTime(shift.start_time, shift.duration);
+                            state.weeklyConstraints[date].shifts[type] = status;
                         });
                     }
                 }
@@ -119,8 +121,8 @@ const constraintSlice = createSlice({
                         shifts: {}
                     };
                     day.shifts.forEach(shift => {
-                        initialConstraints[day.date].shifts[shift.shift_type] = shift.status || 'neutral';
-                    });
+                        const type = getShiftTypeByTime(shift.start_time, shift.duration);
+                        initialConstraints[day.date].shifts[type] = shift.status || 'neutral';                    });
                 });
                 state.weeklyConstraints = initialConstraints;
             })

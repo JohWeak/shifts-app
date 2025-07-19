@@ -58,18 +58,6 @@ const ConstraintInstructions = ({
                         </ul>
                     </div>
                 </div>
-
-                {limitError && (
-                    <Alert variant="warning" className={`mt-3 ${shakeEffect ? 'shake' : ''}`}>
-                        {limitError}
-                    </Alert>
-                )}
-
-                {isSubmitted && (
-                    <Alert variant="info" className="mt-3">
-                        {t('constraints.alreadySubmitted')}
-                    </Alert>
-                )}
             </Card.Body>
         </Card>
     );

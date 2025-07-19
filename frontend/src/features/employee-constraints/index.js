@@ -23,6 +23,7 @@ import {
 } from './model/constraintSlice';
 
 import './index.css';
+import {getShiftTypeByTime} from "../../shared/lib/utils/scheduleUtils";
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
@@ -127,38 +128,56 @@ const ConstraintsSchedule = () => {
 
         let newStatus = 'neutral';
 
-        if (currentStatus !== currentMode) {
-            // Check limits before applying
-            const testConstraints = { ...weeklyConstraints };
+        if (shiftType) {
+            // Сценарий 1: Клик по смене
+            const currentStatus = weeklyConstraints[date]?.shifts[shiftType] || 'neutral';
+            newStatus = (currentStatus === currentMode) ? 'neutral' : currentMode;
+        } else {
+            // Сценарий 2: Клик по дню
+            const currentDayStatus = weeklyConstraints[date]?.day_status || 'neutral';
+            newStatus = (currentDayStatus === currentMode) ? 'neutral' : currentMode;
+        }
 
+        // --- Проверка лимитов (общая для обоих случаев) ---
+        // Если мы что-то добавляем (а не сбрасываем в neutral), то проверяем лимиты
+        if (newStatus !== 'neutral') {
+            // Создаем глубокую копию для безопасного "тестирования"
+            const testConstraints = JSON.parse(JSON.stringify(weeklyConstraints));
             if (!testConstraints[date]) {
-                testConstraints[date] = { shifts: {} };
+                testConstraints[date] = { day_status: 'neutral', shifts: {} };
             }
 
-            testConstraints[date] = {
-                ...testConstraints[date],
-                shifts: {
-                    ...testConstraints[date].shifts,
-                    [shiftType]: currentMode
+            // Имитируем изменение
+            if (shiftType) {
+                testConstraints[date].shifts[shiftType] = newStatus;
+            } else { // Для всего дня
+                const dayTemplate = weeklyTemplate.constraints.template.find(d => d.date === date);
+                if (dayTemplate) {
+                    dayTemplate.shifts.forEach(shift => {
+                        const type = getShiftTypeByTime(shift.start_time, shift.duration);
+                        testConstraints[date].shifts[type] = newStatus;
+                    });
                 }
-            };
+            }
 
-            const limitError = checkLimits(testConstraints, currentMode);
+            // Запускаем проверку
+            const limitError = checkLimits(testConstraints, newStatus);
             if (limitError) {
                 dispatch(addNotification({
-                    id: LIMIT_ERROR_NOTIFICATION_ID, // Стабильный ID
+                    id: LIMIT_ERROR_NOTIFICATION_ID,
                     message: limitError,
                     variant: 'warning',
                     duration: 4000
                 }));
-                return;
+                return; // Прерываем выполнение
             }
-
-            newStatus = currentMode;
         }
 
+        // Если все в порядке, диспатчим экшен.
+        // Редьюсер сам разберется, что обновить, благодаря shiftType (или его отсутствию)
         dispatch(updateConstraint({ date, shiftType, status: newStatus }));
     };
+
 
     const getCellClass = (date, shiftType) => {
         if (!weeklyConstraints[date]) return 'constraint-cell neutral';
@@ -263,6 +282,8 @@ const ConstraintsSchedule = () => {
                 onCellClick={handleCellClick}
                 getCellClass={getCellClass}
                 shiftColors={shiftColors}
+                canEdit={canEdit}
+                isSubmitted={isSubmitted}
             />
 
             {/* Submit Button */}
