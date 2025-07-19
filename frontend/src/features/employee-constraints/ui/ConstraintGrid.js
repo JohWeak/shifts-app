@@ -171,12 +171,26 @@ const ConstraintGrid = ({
                         <thead>
                         <tr>
                             <th className="text-center">{t('common.day')}</th>
-                            {shiftTypes.map(shiftType => (
-                                <th key={shiftType} className="shift-header text-center">
-                                    {t(`shift.${shiftType}`)}
-                                </th>
+                            {shiftTypes.map(shiftType => {
+                                // Находим образец смены, чтобы получить время и иконку
+                                const sampleShift = getSampleShift(shiftType);
+                                if (!sampleShift) return null; // Защита, если смены нет
 
-                            ))}
+                                return (
+                                    <th
+                                        key={shiftType}
+                                        className="shift-header text-center align-middle" // Добавляем align-middle для вертикального выравнивания
+                                        style={getShiftHeaderStyle(shiftType)} // Применяем стиль для цвета
+                                    >
+                                        {/* Добавляем содержимое как в десктопной версии */}
+                                        {getShiftIcon(shiftType)}
+                                        <div className="mt-1 small"> {/* Обертка для стилизации */}
+                                            {formatShiftTime(sampleShift.start_time, sampleShift.duration)}
+                                        </div>
+                                    </th>
+                                );
+                            })}
+
 
                         </tr>
                         </thead>
