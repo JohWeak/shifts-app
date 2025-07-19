@@ -19,7 +19,9 @@ import {
     submitWeeklyConstraints,
     updateConstraint,
     setCurrentMode,
-    clearSubmitStatus
+    clearSubmitStatus,
+    enableEditing,
+    resetConstraints
 } from './model/constraintSlice';
 
 import './index.css';
@@ -67,16 +69,6 @@ const ConstraintsSchedule = () => {
             dispatch(clearSubmitStatus());
         }
 
-        // Показываем уведомление, если ограничения уже были отправлены ранее
-        if (!loading && isSubmitted) {
-            dispatch(addNotification({
-                id: 'constraints-already-submitted',
-                message: t('constraints.alreadySubmitted'),
-                variant: 'success', // Используем success для красивой зеленой галочки
-                duration: 5000 // Пусть повисит 5 секунд
-            }));
-        }
-
         // Очищаем уведомление при размонтировании компонента
         return () => {
             dispatch(removeNotification('constraints-already-submitted'));
@@ -91,6 +83,7 @@ const ConstraintsSchedule = () => {
             setShiftColors(JSON.parse(savedColors));
         }
     }, []);
+
 
 
     const checkLimits = (newConstraints, modeToCheck) => {
@@ -114,6 +107,16 @@ const ConstraintsSchedule = () => {
             return t('constraints.errors.maxPreferWork', { max: limits.prefer_work_days });
         }
         return null;
+    };
+
+    const handleEdit = () => {
+        dispatch(enableEditing());
+    };
+
+    const handleClear = () => {
+        dispatch(resetConstraints());
+        // Также убираем возможное уведомление об ошибке
+        dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
     };
 
     const handleCellClick = (date, shiftType) => {
@@ -286,34 +289,16 @@ const ConstraintsSchedule = () => {
                 isSubmitted={isSubmitted}
             />
 
-            {/* Submit Button */}
-            {canEdit && !isSubmitted && (
-                <div className="text-center mt-4">
-                    <Button
-                        variant="primary"
-                        size="lg"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        className="px-2"
-                    >
-                        {submitting ? (
-                            <>
-                                <Spinner size="sm" className="me-2" />
-                                {t('common.saving')}
-                            </>
-                        ) : (
-                            t('constraints.submit')
-                        )}
-                    </Button>
-                </div>
-            )}
-
             <ConstraintInstructions
                 currentMode={currentMode}
                 onModeChange={(mode) => dispatch(setCurrentMode(mode))}
                 limits={weeklyTemplate.constraints.limits}
                 isSubmitted={isSubmitted}
                 onShowColorSettings={() => setColorPickerConfig({ showSettings: true })}
+                onSubmit={handleSubmit}
+                onEdit={handleEdit}
+                onClear={handleClear}
+                submitting={submitting}
             />
 
 

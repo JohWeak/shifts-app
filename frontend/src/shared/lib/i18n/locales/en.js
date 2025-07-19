@@ -57,6 +57,7 @@ export const en = {
         minutes: 'minutes',
         retry: 'Retry',
         total: 'Total',
+        submit: 'Submit',
         deactivate: 'Deactivate',
         restore: 'Restore',
         processing: 'Processing...',

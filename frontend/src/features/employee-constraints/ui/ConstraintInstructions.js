@@ -1,6 +1,6 @@
 // frontend/src/features/employee-constraints/ui/ConstraintInstructions.js
 import React from 'react';
-import { Card, Button, Alert } from 'react-bootstrap';
+import {Card, Button, Alert, Spinner} from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 const ConstraintInstructions = ({
@@ -8,47 +8,22 @@ const ConstraintInstructions = ({
                                     onModeChange,
                                     limits,
                                     isSubmitted,
-                                    limitError,
-                                    shakeEffect,
-                                    onShowColorSettings
+                                    onShowColorSettings,
+                                    onSubmit,
+                                    onEdit,
+                                    onClear,
+                                    submitting
                                 }) => {
     const { t } = useI18n();
 
     return (
-        <Card className="shadow-sm mb-4">
+        <Card className={"shadow-sm mb-4"}>
             <Card.Body>
                 <div className="row align-items-center">
-                    <div className="col-md-4 text-end">
-                        <div className="btn-group mb-2" role="group">
-                            <Button
-                                variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
-                                onClick={() => onModeChange('cannot_work')}
-                                disabled={isSubmitted}
-                            >
-                                {t('constraints.cannotWork')}
-                            </Button>
-                            <Button
-                                variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
-                                onClick={() => onModeChange('prefer_work')}
-                                disabled={isSubmitted}
-                            >
-                                {t('constraints.preferWork')}
-                            </Button>
-                        </div>
-                        <div>
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={onShowColorSettings}
-                            >
-                                <i className="bi bi-palette me-1"></i>
-                                {t('constraints.colorSettings')}
-                            </Button>
-                        </div>
-                    </div>
-                    <div className="col-md-8">
+                    {/* Левая колонка с инструкциями (без изменений) */}
+                    <div className="col-md-7">
                         <h5>{t('constraints.instructions.title')}</h5>
-                        <ul className="mb-0">
+                        <ul className="mb-md-0">
                             <li>{t('constraints.instructions.selectMode')}</li>
                             <li>{t('constraints.instructions.clickCells')}</li>
                             <li>{t('constraints.instructions.limits', {
@@ -56,6 +31,64 @@ const ConstraintInstructions = ({
                                 preferWork: limits.prefer_work_days
                             })}</li>
                         </ul>
+                    </div>
+
+                    {/* --- ПРАВАЯ КОЛОНКА С КНОПКАМИ (полностью переработана) --- */}
+                    <div className="col-md-5 text-end">
+                        {isSubmitted ? (
+                            // --- РЕЖИМ ПРОСМОТРА: Только кнопка "Редактировать" ---
+                            <Button variant="secondary" size="lg" onClick={onEdit} className="w-100">
+                                <i className="bi bi-pencil me-2"></i>
+                                {t('common.edit')}
+                            </Button>
+                        ) : (
+                            // --- РЕЖИМ РЕДАКТИРОВАНИЯ: Все кнопки ---
+                            <div className="d-flex flex-column align-items-stretch gap-2">
+                                {/* Кнопки выбора режима */}
+                                <div className="btn-group" role="group">
+                                    <Button
+                                        variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
+                                        onClick={() => onModeChange('cannot_work')}
+                                    >
+                                        {t('constraints.cannotWork')}
+                                    </Button>
+                                    <Button
+                                        variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
+                                        onClick={() => onModeChange('prefer_work')}
+                                    >
+                                        {t('constraints.preferWork')}
+                                    </Button>
+                                </div>
+
+                                {/* Кнопки действий */}
+                                <div className="btn-group" role="group">
+                                    <Button variant="primary" onClick={onSubmit} disabled={submitting}>
+                                        {submitting ? (
+                                            <>
+                                                <Spinner size="sm" as="span" animation="border" role="status" aria-hidden="true" className="me-2" />
+                                                {t('common.saving')}
+                                            </>
+                                        ) : (
+                                            t('common.submit')
+                                        )}
+                                    </Button>
+                                    <Button variant="outline-secondary" onClick={onClear} disabled={submitting}>
+                                        {t('common.clear')}
+                                    </Button>
+                                </div>
+
+                                {/* Кнопка настроек цвета (можно оставить здесь) */}
+                                <Button
+                                    variant="outline-secondary"
+                                    size="sm"
+                                    onClick={onShowColorSettings}
+                                    className="mt-1"
+                                >
+                                    <i className="bi bi-palette me-1"></i>
+                                    {t('constraints.colorSettings')}
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Card.Body>

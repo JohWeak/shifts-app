@@ -85,11 +85,6 @@ const constraintSlice = createSlice({
                 }
             }
         },
-
-        setLimitError: (state, action) => {
-            state.limitError = action.payload;
-        },
-
         clearSubmitStatus: (state) => {
             state.submitStatus = null;
         },
@@ -98,6 +93,10 @@ const constraintSlice = createSlice({
             state.weeklyConstraints = {};
             state.limitError = '';
             state.isSubmitted = false;
+        },
+        enableEditing: (state) => {
+            state.isSubmitted = false;
+            state.canEdit = true;
         }
     },
     extraReducers: (builder) => {
@@ -154,9 +153,9 @@ const constraintSlice = createSlice({
 export const {
     setCurrentMode,
     updateConstraint,
-    setLimitError,
     clearSubmitStatus,
-    resetConstraints
+    resetConstraints,
+    enableEditing
 } = constraintSlice.actions;
 
 export default constraintSlice.reducer;
