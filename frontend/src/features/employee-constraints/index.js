@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/index.js
 import React, {useState, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Container, Toast, ToastContainer} from 'react-bootstrap';
+import {Container} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
@@ -61,7 +61,6 @@ const ConstraintsSchedule = () => {
     } = useSelector(state => state.constraints);
     const {user} = useSelector(state => state.auth);
 
-    const [showInstructionsToast, setShowInstructionsToast] = useState(false);
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
 
     const constraintPseudoShifts = useMemo(() => ({
@@ -290,7 +289,7 @@ const ConstraintsSchedule = () => {
                     if (!pseudoShift) return;
                     const currentColor = getShiftColor(pseudoShift);
                     // 'local' - режим сохранения, т.к. эти цвета индивидуальны для пользователя
-                    openColorPicker(pseudoShift.shift_id, currentColor, pseudoShift, 'local');
+                    openColorPicker(pseudoShift.shift_id, currentColor, pseudoShift);
                 }}
                 onSubmit={handleSubmit}
                 onEdit={() => dispatch(enableEditing())}
@@ -299,23 +298,9 @@ const ConstraintsSchedule = () => {
                     dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
                 }}
                 submitting={submitting}
-                onShowInstructions={() => setShowInstructionsToast(true)}
+                weeklyTemplate={weeklyTemplate}
+                limitParams={limitParams}
             />
-
-            <ToastContainer position="bottom-start" className="p-3" style={{zIndex: 1055}}>
-                <Toast onClose={() => setShowInstructionsToast(false)} show={showInstructionsToast} delay={10000}
-                       autohide>
-                    <Toast.Header><strong
-                        className="me-auto">{t('constraints.instructions.title')}</strong></Toast.Header>
-                    <Toast.Body>
-                        <ul className="mb-0 ps-3">
-                            <li>{t('constraints.instructions.selectMode')}</li>
-                            <li>{t('constraints.instructions.clickCells')}</li>
-                            {weeklyTemplate && <li>{t('constraints.instructions.limits', limitParams)}</li>}
-                        </ul>
-                    </Toast.Body>
-                </Toast>
-            </ToastContainer>
 
             {colorPickerState.show && (
                 <ColorPickerModal

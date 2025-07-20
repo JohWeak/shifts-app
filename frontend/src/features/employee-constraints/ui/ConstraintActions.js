@@ -1,7 +1,10 @@
 // frontend/src/features/employee-constraints/ui/ConstraintActions.js
-import React from 'react';
-import {Card, Button, Spinner} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useState } from 'react'; // Добавлен useState для примера Toast
+import { Card, Button, Spinner, Toast, ToastContainer } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+
+// Импортируем наш новый файл стилей
+import './ConstraintActions.css';
 
 const ConstraintActions = ({
                                currentMode,
@@ -11,38 +14,44 @@ const ConstraintActions = ({
                                onEdit,
                                onClear,
                                submitting,
-                               onShowInstructions,
-                               onColorButtonClick
+                               onColorButtonClick,
+                               weeklyTemplate,
+                               limitParams
                            }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
+
+    // Локальное состояние для управления видимостью Toast
+    const [showInstructions, setShowInstructions] = useState(false);
+    const toggleShowInstructions = () => setShowInstructions(!showInstructions);
 
     return (
-        <Card className={"shadow-sm mb-4"}>
-            <Card.Body>
-                <div
-                    className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
-                    {/* Левая часть: Помощь */}
-                    <div className="d-flex align-items-center gap-2">
-                        <Button
-                            variant="outline-secondary"
-                            className="rounded-circle"
-                            onClick={onShowInstructions}
-                            title={t('constraints.instructions.title')}
-                        >
-                            <i className="bi bi-question-lg"></i>
-                        </Button>
-                    </div>
-
-                    {/* Правая часть: Основные кнопки действий */}
-                    <div className="d-flex align-items-center gap-2">
-                        {isSubmitted ? (
-                            <Button variant="secondary" size="lg" onClick={onEdit}>
-                                <i className="bi bi-pencil me-2"></i>
-                                {t('common.edit')}
+        <>
+            {/* Используем наш новый класс-обертку .constraint-actions-panel */}
+            <Card className="shadow-sm mb-4 constraint-actions-panel">
+                <Card.Body>
+                    <div className="panel-content">
+                        {/* Левая часть: Помощь */}
+                        <div className="d-flex align-items-center">
+                            <Button
+                                variant="outline-secondary"
+                                className="rounded-circle help-button"
+                                onClick={toggleShowInstructions}
+                                title={t('constraints.instructions.title')}
+                            >
+                                <i className="bi bi-question-lg"></i>
                             </Button>
-                        ) : (
-                            <>
-                                <div className="btn-group" role="group">
+                        </div>
+
+                        {/* Правая часть: Основные кнопки действий */}
+                        <div className="actions-container">
+                            {isSubmitted ? (
+                                <Button variant="secondary" onClick={onEdit}>
+                                    <i className="bi bi-pencil me-2"></i>
+                                    {t('common.edit')}
+                                </Button>
+                            ) : (
+                                <>
+                                    {/* Кнопки выбора режима БЕЗ btn-group */}
                                     <Button
                                         variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
                                         onClick={() => onModeChange('cannot_work')}
@@ -50,7 +59,6 @@ const ConstraintActions = ({
                                     >
                                         {t('constraints.cannotWork')}
                                         <span className="vr mx-2"></span>
-                                        {/* <-- ИЗМЕНЕНИЕ: передаем 'cannot_work' --> */}
                                         <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('cannot_work'); }}></i>
                                     </Button>
                                     <Button
@@ -60,12 +68,10 @@ const ConstraintActions = ({
                                     >
                                         {t('constraints.preferWork')}
                                         <span className="vr mx-2"></span>
-                                        {/* <-- ИЗМЕНЕНИЕ: передаем 'prefer_work' --> */}
                                         <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('prefer_work'); }}></i>
                                     </Button>
-                                </div>
 
-                                <div className="btn-group" role="group">
+                                    {/* Кнопки действий БЕЗ btn-group */}
                                     <Button variant="outline-secondary" onClick={onClear} disabled={submitting}>
                                         <i className="bi bi-arrow-counterclockwise"></i>
                                     </Button>
@@ -73,13 +79,32 @@ const ConstraintActions = ({
                                         {submitting ? <Spinner size="sm" as="span" className="me-2" /> : <i className="bi bi-check-lg me-1"></i>}
                                         {submitting ? t('common.saving') : t('common.submit')}
                                     </Button>
-                                </div>
-                            </>
-                        )}
+                                </>
+                            )}
+                        </div>
                     </div>
-                </div>
-            </Card.Body>
-        </Card>
+                </Card.Body>
+            </Card>
+
+            {/* Контейнер для Toast уведомления остается прежним */}
+            <ToastContainer position="bottom-end" className="p-3" style={{ zIndex: 1056 }}>
+                <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
+                    <Toast.Header closeButton={true}>
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <strong className="me-auto">{t('constraints.instructions.title')}</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                        <ul className="mb-0 ps-3">
+                            <li>{t('constraints.instructions.selectMode')}</li>
+                            <li>{t('constraints.instructions.clickCells')}</li>
+                            {weeklyTemplate && (
+                                <li>{t('constraints.instructions.limits', limitParams)}</li>
+                            )}
+                        </ul>
+                    </Toast.Body>
+                </Toast>
+            </ToastContainer>
+        </>
     );
 };
 

@@ -1,0 +1,79 @@
+/* frontend/src/features/employee-constraints/ui/ConstraintActions.css */
+
+/*
+ * Основной контейнер для панели. Мы используем этот класс,
+ * чтобы все стили были применены только к этому компоненту.
+ */
+.constraint-actions-panel .card-body .panel-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3); /* 12px */
+    flex-wrap: wrap; /* Позволяет элементам переноситься */
+}
+
+/* Контейнер для основной группы кнопок справа */
+.constraint-actions-panel .actions-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2); /* 8px */
+    flex-wrap: wrap; /* Позволяет кнопкам переноситься */
+    justify-content: flex-end; /* Выравнивание по правому краю по умолчанию */
+}
+
+/* Стили для круглой кнопки помощи */
+.constraint-actions-panel .help-button {
+    width: 24px;
+    height: 24px;
+    font-size: var(--text-lg);
+}
+
+/* Вертикальный разделитель в кнопках */
+.constraint-actions-panel .vr {
+    align-self: stretch;
+    background-color: currentColor;
+    opacity: 0.25;
+    width: 1px;
+}
+
+
+/* ============================================
+   АДАПТИВНОСТЬ (Mobile First)
+   ============================================ */
+
+/*
+ * На мобильных экранах (< 768px):
+ * 1. Основной контейнер становится колонкой.
+ * 2. Группа кнопок действий выравнивается по левому краю.
+ */
+@media (max-width: 767.98px) {
+    .constraint-actions-panel .panel-content {
+        flex-direction: column;
+        align-items: stretch !important; /* Растягиваем элементы на всю ширину */
+    }
+
+    .constraint-actions-panel .actions-container {
+        justify-content: flex-start !important; /* Выравнивание по левому краю на мобильных */
+    }
+}
+
+
+/* ============================================
+   RTL ПОДДЕРЖКА
+   ============================================ */
+
+/*
+ * Для RTL-языков, на мобильных устройствах мы хотим, чтобы
+ * кнопки выравнивались по правому краю.
+ */
+@media (max-width: 767.98px) {
+    [dir="rtl"] .constraint-actions-panel .actions-container {
+        justify-content: flex-start !important;
+        /*
+         * Примечание: Bootstrap 5 с логическими свойствами обрабатывает 'flex-start'
+         * корректно для RTL (как 'right'). Если бы использовались старые версии,
+         * могло бы понадобиться 'flex-end'. Но 'flex-start' является более
+         * современным и правильным подходом.
+         */
+    }
+}
