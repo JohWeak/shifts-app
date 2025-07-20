@@ -52,7 +52,7 @@
     font-weight: 500;
 }
 .constraint-cell.clickable:hover {
-    /* Теперь это универсальное правило, которое берет цвет из персональной переменной ячейки */
+    /* Универсальное правило, которое берет цвет из персональной переменной ячейки */
     background-color: var(--cell-hover-color) !important;
 }
 
@@ -141,7 +141,7 @@
 }
 
 /* Mobile specific styles */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
     .employee-constraints-container {
         padding: 1rem !important;
         margin-bottom: 58px!important;

@@ -347,6 +347,17 @@ const ConstraintsSchedule = () => {
                 canEdit={canEdit}
                 isSubmitted={isSubmitted}
             />
+            {weeklyTemplate?.constraints?.limits && (
+                <div className="text-center mt-3">
+                    <p className="text-muted small mb-0">
+                        <i className="bi bi-info-circle me-1"></i>
+                        {t('constraints.instructions.limits', {
+                            cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
+                            preferWork: weeklyTemplate.constraints.limits.prefer_work_days
+                        })}
+                    </p>
+                </div>
+            )}
 
             <ConstraintActions
                 currentMode={currentMode}

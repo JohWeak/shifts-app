@@ -121,7 +121,7 @@ const ConstraintGrid = ({
                                         onClick={() => onCellClick(day.date, null)}
                                     >
                                         <div>{t(`calendar.weekDays.${day.weekday}`)}</div>
-                                        <small className="text-muted">{formatHeaderDate(new Date(day.date))}</small>
+                                        <small className="shift-time">{formatHeaderDate(new Date(day.date))}</small>
                                     </th>
                                 ))}
                             </tr>
