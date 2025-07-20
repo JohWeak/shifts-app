@@ -89,7 +89,7 @@ const ConstraintActions = ({
                     </div>
                 </Card.Body>
             </Card>
-            <ToastContainer position="bottom-end" className="p-3" style={{ zIndex: 1056 }}>
+            <ToastContainer className="p-3 toast-container" style={{ zIndex: 1056 }}>
                 <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
                     <Toast.Header closeButton={true}>
                         <i className="bi bi-info-circle-fill me-2"></i>

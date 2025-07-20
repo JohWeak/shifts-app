@@ -168,7 +168,7 @@ const ScheduleManagement = () => {
     const scheduleExists = !!selectedScheduleId;
 
     return (
-            <Container fluid className="p-1">
+            <Container fluid className="p-1 admin-schedule-management-container">
                 <PageHeader
                     icon="calendar-week"
                     title={t('schedule.title')}
