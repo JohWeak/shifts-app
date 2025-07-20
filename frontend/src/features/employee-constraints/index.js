@@ -47,6 +47,13 @@ const ConstraintsSchedule = () => {
     } = useSelector(state => state.constraints);
     const { user } = useSelector(state => state.auth);
 
+    // --- ЛОГ №2: РЕЗУЛЬТАТ В REDUX ---
+    // Этот хук сработает КАЖДЫЙ РАЗ, когда weeklyConstraints изменится.
+    useEffect(() => {
+        console.log(`%c[LOG 2] Состояние weeklyConstraints было обновлено:`, 'color: blue; font-weight: bold;', JSON.parse(JSON.stringify(weeklyConstraints)));
+    }, [weeklyConstraints]);
+
+
     const [colorPickerConfig, setColorPickerConfig] = useState({ show: false, mode: null, initialColor: '#ffffff' });
     const [shiftColors, setShiftColors] = useState(() => {
         const savedColors = localStorage.getItem('constraintColors');
@@ -74,7 +81,6 @@ const ConstraintsSchedule = () => {
         const shiftsMap = new Map();
         weeklyTemplate.constraints.template.flatMap(day => day.shifts).forEach(shift => {
             if (!shiftsMap.has(shift.shift_id)) {
-                // ВАЖНО: Мы сохраняем весь объект смены, ожидая, что в нем будут shift_name и color
                 shiftsMap.set(shift.shift_id, shift);
             }
         });
@@ -118,8 +124,10 @@ const ConstraintsSchedule = () => {
                 return;
             }
         }
+        // --- ЛОГ №1: НАМЕРЕНИЕ ---
+        console.log(`%c[LOG 1] КЛИК! Отправляю экшен:`, 'color: green; font-weight: bold;', { date, shiftId, status: newStatus });
         dispatch(updateConstraint({ date, shiftId, status: newStatus }));
-    };
+        };
 
     const handleSubmit = () => {
         const formattedConstraints = Object.entries(weeklyConstraints).flatMap(([date, dayData]) =>
@@ -136,8 +144,15 @@ const ConstraintsSchedule = () => {
         dispatch(submitWeeklyConstraints({ constraints: formattedConstraints, week_start: weeklyTemplate.weekStart }));
     };
 
+    // *** ИСПРАВЛЕННАЯ ФУНКЦИЯ ***
     const getCellStyle = (date, shiftId) => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
+        // --- ЛОГ №3: ОТРИСОВКА ---
+        // Логируем только для первой смены первого дня, чтобы не засорять консоль
+        if (weeklyTemplate && date === weeklyTemplate.constraints.template[0].date && shiftId === weeklyTemplate.constraints.template[0].shifts[0].shift_id) {
+            console.log(`%c[LOG 3] getCellStyle для ячейки (${date}, ${shiftId}) использует статус: '${status}'`, 'color: purple; font-weight: bold;');
+        }
+
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
         const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
 
@@ -146,30 +161,32 @@ const ConstraintsSchedule = () => {
         const neutralBaseAlpha = 0.2;
         const neutralHoverAlpha = 0.4;
 
-        let restingBackgroundColor, hoverBackgroundColor;
-
-        // Используем getShiftColor, который ожидает объект смены с полем 'color'.
-        // Если его нет, он вернет цвет по умолчанию.
-        const baseColorForNeutral = shift ? getShiftColor(shift) : '#6c757d';
-
+        // 1. Определяем СПЛОШНОЙ (HEX) цвет для текущего состояния ячейки
+        let solidRestingColor;
         if (status === 'cannot_work' || status === 'prefer_work') {
-            restingBackgroundColor = hexToRgba(shiftColors[status], alpha);
+            solidRestingColor = shiftColors[status];
         } else {
-            restingBackgroundColor = hexToRgba(baseColorForNeutral, neutralBaseAlpha);
+            solidRestingColor = shift ? getShiftColor(shift) : '#6c757d';
         }
 
-        // *** ИСПРАВЛЕНИЕ: Добавлен блок else для корректного ховера на нейтральных ячейках ***
+        // 2. Вычисляем цвет текста, передавая в утилиту СПЛОШНОЙ цвет
+        const textColor = getContrastTextColor(solidRestingColor);
+
+        // 3. Теперь применяем прозрачность для ФОНА
+        const restingBackgroundColor = hexToRgba(solidRestingColor, (status !== 'neutral' ? alpha : neutralBaseAlpha));
+
+        // 4. Повторяем логику для состояния наведения (hover)
+        let solidHoverColor;
         if (nextStatus === 'cannot_work' || nextStatus === 'prefer_work') {
-            hoverBackgroundColor = hexToRgba(shiftColors[nextStatus], hoverAlpha);
+            solidHoverColor = shiftColors[nextStatus];
         } else {
-            hoverBackgroundColor = hexToRgba(baseColorForNeutral, neutralHoverAlpha);
+            solidHoverColor = shift ? getShiftColor(shift) : '#6c757d';
         }
-
-        const textColor = getContrastTextColor(restingBackgroundColor);
+        const hoverBackgroundColor = hexToRgba(solidHoverColor, (nextStatus !== 'neutral' ? hoverAlpha : neutralHoverAlpha));
 
         return {
             backgroundColor: restingBackgroundColor,
-            color: textColor,
+            color: textColor, // Теперь цвет текста будет правильным
             '--cell-hover-color': hoverBackgroundColor,
         };
     };
@@ -178,7 +195,6 @@ const ConstraintsSchedule = () => {
     const getDayHeaderClass = (date) => `day-header ${weeklyConstraints[date]?.day_status || 'neutral'} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
 
     const getShiftHeaderStyle = (shift) => {
-        // Ожидаем, что в 'shift' теперь есть поле 'color'
         const baseColor = getShiftColor(shift);
         return { backgroundColor: baseColor, color: getContrastTextColor(baseColor) };
     };

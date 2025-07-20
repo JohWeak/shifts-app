@@ -62,16 +62,31 @@ const constraintSlice = createSlice({
             }
 
             if (shiftId) {
-                // Update specific shift
+                // Сценарий 1: Клик по конкретной смене
                 state.weeklyConstraints[date].shifts[shiftId] = status;
+
+                // Проверяем, нарушает ли это изменение "статус всего дня".
+                // Если да, сбрасываем статус дня в нейтральный.
+                const allShiftsSame = Object.values(state.weeklyConstraints[date].shifts)
+                    .every(s => s === status);
+                if (!allShiftsSame) {
+                    state.weeklyConstraints[date].day_status = 'neutral';
+                }
+
             } else {
-                // Update whole day
+                // Сценарий 2: Клик по заголовку дня (shiftId is null)
                 state.weeklyConstraints[date].day_status = status;
-                const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
-                if (dayTemplate) {
-                    dayTemplate.shifts.forEach(shift => {
-                        state.weeklyConstraints[date].shifts[shift.shift_id] = status;
-                    });
+
+                // ЯВНО обновляем статус для КАЖДОЙ смены в этот день.
+                // Это ключевое исправление.
+                if (state.weeklyTemplate) {
+                    const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
+                    if (dayTemplate && dayTemplate.shifts) {
+                        dayTemplate.shifts.forEach(shift => {
+                            // Используем shift.shift_id для доступа к правильному ключу
+                            state.weeklyConstraints[date].shifts[shift.shift_id] = status;
+                        });
+                    }
                 }
             }
         },
@@ -111,16 +126,30 @@ const constraintSlice = createSlice({
                 state.isSubmitted = action.payload.constraints.already_submitted;
                 state.canEdit = action.payload.constraints.can_edit;
 
-                // Initialize constraints from template
                 const initialConstraints = {};
                 action.payload.constraints.template.forEach(day => {
                     initialConstraints[day.date] = {
-                        day_status: day.day_status || 'neutral',
+                        day_status: 'neutral', // Всегда начинаем с нейтрального статуса дня
                         shifts: {}
                     };
-                    day.shifts.forEach(shift => {
-                        initialConstraints[day.date].shifts[shift.shift_id] = shift.status || 'neutral';
+                    let firstStatus = null;
+                    let allSame = true;
+
+                    day.shifts.forEach((shift, index) => {
+                        const status = shift.status || 'neutral';
+                        initialConstraints[day.date].shifts[shift.shift_id] = status;
+
+                        if (index === 0) {
+                            firstStatus = status;
+                        } else if (status !== firstStatus) {
+                            allSame = false;
+                        }
                     });
+
+                    // Устанавливаем статус дня, только если все смены имеют одинаковый статус (не нейтральный)
+                    if (allSame && firstStatus !== 'neutral') {
+                        initialConstraints[day.date].day_status = firstStatus;
+                    }
                 });
                 state.weeklyConstraints = initialConstraints;
             })
