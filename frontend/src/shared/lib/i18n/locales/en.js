@@ -76,6 +76,8 @@ export const en = {
         endDate: 'End Date',
         tryAgain: 'Try Again',
         changeColor: 'Change Color',
+        remaining: 'Remaining',
+
 
     },
     auth: {

@@ -21,8 +21,6 @@ const ConstraintGrid = ({
                         }) => {
     const { t } = useI18n();
 
-    // --- LOG 4: Проверяем пропсы, дошедшие до Grid ---
-    console.log('[LOG 4] Props в ConstraintGrid:', { uniqueShifts, template });
 
     const DesktopGrid = () => (
         <Card className="shadow desktop-constraints d-none d-md-block">
@@ -46,8 +44,6 @@ const ConstraintGrid = ({
                         </thead>
                         <tbody>
                         {uniqueShifts.map(shift => {
-                            // --- LOG 5: Проверяем каждую смену в цикле ---
-                            console.log('[LOG 5] Рендеринг строки для смены:', shift);
                             return (
 
                             <tr key={shift.shift_id}>

@@ -1,14 +1,12 @@
 // frontend/src/features/employee-constraints/ui/ConstraintActions.js
 import React from 'react';
-import {Card, Button, Alert, Spinner} from 'react-bootstrap';
+import {Card, Button, Spinner} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 
 const ConstraintActions = ({
                                currentMode,
                                onModeChange,
-                               limits,
                                isSubmitted,
-                               onShowColorSettings,
                                onSubmit,
                                onEdit,
                                onClear,
@@ -38,15 +36,12 @@ const ConstraintActions = ({
                     {/* Правая часть: Основные кнопки действий */}
                     <div className="d-flex align-items-center gap-2">
                         {isSubmitted ? (
-                            // --- РЕЖИМ ПРОСМОТРА: Только кнопка "Редактировать" ---
                             <Button variant="secondary" size="lg" onClick={onEdit}>
                                 <i className="bi bi-pencil me-2"></i>
                                 {t('common.edit')}
                             </Button>
                         ) : (
-                            // --- РЕЖИМ РЕДАКТИРОВАНИЯ: Все кнопки ---
                             <>
-                                {/* Кнопки выбора режима */}
                                 <div className="btn-group" role="group">
                                     <Button
                                         variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
@@ -55,7 +50,8 @@ const ConstraintActions = ({
                                     >
                                         {t('constraints.cannotWork')}
                                         <span className="vr mx-2"></span>
-                                        <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('cannotWork'); }}></i>
+                                        {/* <-- ИЗМЕНЕНИЕ: передаем 'cannot_work' --> */}
+                                        <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('cannot_work'); }}></i>
                                     </Button>
                                     <Button
                                         variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
@@ -64,11 +60,11 @@ const ConstraintActions = ({
                                     >
                                         {t('constraints.preferWork')}
                                         <span className="vr mx-2"></span>
-                                        <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('preferWork'); }}></i>
+                                        {/* <-- ИЗМЕНЕНИЕ: передаем 'prefer_work' --> */}
+                                        <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('prefer_work'); }}></i>
                                     </Button>
                                 </div>
 
-                                {/* Кнопки действий */}
                                 <div className="btn-group" role="group">
                                     <Button variant="outline-secondary" onClick={onClear} disabled={submitting}>
                                         <i className="bi bi-arrow-counterclockwise"></i>
