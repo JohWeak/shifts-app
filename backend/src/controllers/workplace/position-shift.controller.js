@@ -249,9 +249,9 @@ function checkTimeOverlap(start1, end1, start2, end2) {
 // Get default color based on shift name
 function getDefaultShiftColor(shiftName) {
     const name = shiftName.toLowerCase();
-    if (name.includes('morning') || name.includes('day')) return '#ffc107'; // Yellow
-    if (name.includes('evening') || name.includes('afternoon')) return '#fd7e14'; // Orange
-    if (name.includes('night')) return '#6610f2'; // Purple
+    if (name.includes('morning') || name.includes('day')) return '#fddb77'; // Yellow
+    if (name.includes('evening') || name.includes('afternoon')) return '#fdb271'; // Orange
+    if (name.includes('night')) return '#b080ff'; // Purple
     return '#6c757d'; // Default gray
 }
 

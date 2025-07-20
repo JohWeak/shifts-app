@@ -488,20 +488,24 @@ export const getShiftTypeByTime = (startTime, duration) => {
 };
 
 /**
- * Возвращает иконку для определенного типа смены.
- * @param {string} shiftType - Тип смены ('morning', 'day', 'night').
+ * Возвращает иконку для определенного типа/названия смены.
+ * @param {string} shiftNameOrType - Название или тип смены ('morning', 'Утренняя', 'Day Shift').
  * @returns {JSX.Element|null} - React-компонент иконки.
  */
-export const getShiftIcon = (shiftType) => {
-    switch (shiftType) {
-        case 'morning':
-            return <i className="bi bi-sunrise"></i>;
-        case 'evening': // Добавляем оба варианта для надежности
-        case 'day':
-            return <i className="bi bi-sun"></i>;
-        case 'night':
-            return <i className="bi bi-moon-stars"></i>;
-        default:
-            return null;
+export const getShiftIcon = (shiftNameOrType) => {
+    if (!shiftNameOrType) return null;
+
+    const lowerCaseName = shiftNameOrType.toLowerCase();
+
+    if (lowerCaseName.includes('morning') || lowerCaseName.includes('утро') || lowerCaseName.includes('בוקר')) {
+        return <i className="bi bi-sunrise"></i>;
     }
+    if (lowerCaseName.includes('day') || lowerCaseName.includes('день') || lowerCaseName.includes('evening') || lowerCaseName.includes('вечер')) {
+        return <i className="bi bi-sun"></i>;
+    }
+    if (lowerCaseName.includes('night') || lowerCaseName.includes('ночь')) {
+        return <i className="bi bi-moon-stars"></i>;
+    }
+
+    return null; // Если совпадений не найдено
 };

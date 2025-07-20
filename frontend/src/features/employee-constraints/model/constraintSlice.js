@@ -1,7 +1,6 @@
 // frontend/src/features/employee-constraints/model/constraintSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
-import { getShiftTypeByTime } from 'shared/lib/utils/scheduleUtils';
 
 // Async thunks
 export const fetchWeeklyConstraints = createAsyncThunk(
@@ -54,34 +53,25 @@ const constraintSlice = createSlice({
     reducers: {
         setCurrentMode: (state, action) => {
             state.currentMode = action.payload;
-            state.limitError = '';
         },
-
         updateConstraint: (state, action) => {
-            const { date, shiftType, status } = action.payload;
+            const { date, shiftId, status } = action.payload;
 
             if (!state.weeklyConstraints[date]) {
-                state.weeklyConstraints[date] = {
-                    day_status: 'neutral',
-                    shifts: {}
-                };
+                state.weeklyConstraints[date] = { day_status: 'neutral', shifts: {} };
             }
 
-            if (shiftType) {
+            if (shiftId) {
                 // Update specific shift
-                state.weeklyConstraints[date].shifts[shiftType] = status;
+                state.weeklyConstraints[date].shifts[shiftId] = status;
             } else {
                 // Update whole day
                 state.weeklyConstraints[date].day_status = status;
-                // Update all shifts for this day
-                if (state.weeklyTemplate) {
-                    const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
-                    if (dayTemplate) {
-                        dayTemplate.shifts.forEach(shift => {
-                            const type = getShiftTypeByTime(shift.start_time, shift.duration);
-                            state.weeklyConstraints[date].shifts[type] = status;
-                        });
-                    }
+                const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
+                if (dayTemplate) {
+                    dayTemplate.shifts.forEach(shift => {
+                        state.weeklyConstraints[date].shifts[shift.shift_id] = status;
+                    });
                 }
             }
         },
@@ -91,22 +81,16 @@ const constraintSlice = createSlice({
 
         resetConstraints: (state) => {
             const initialConstraints = {};
-            // Проверяем, что у нас есть шаблон, на основе которого можно сбросить состояние
             if (state.weeklyTemplate) {
                 state.weeklyTemplate.constraints.template.forEach(day => {
-                    initialConstraints[day.date] = {
-                        day_status: 'neutral', // Сбрасываем и статус дня
-                        shifts: {}
-                    };
+                    initialConstraints[day.date] = { day_status: 'neutral', shifts: {} };
                     day.shifts.forEach(shift => {
-                        const type = getShiftTypeByTime(shift.start_time, shift.duration);
-                        initialConstraints[day.date].shifts[type] = 'neutral'; // Сбрасываем статус смены
+                        initialConstraints[day.date].shifts[shift.shift_id] = 'neutral';
                     });
                 });
             }
-
             state.weeklyConstraints = initialConstraints;
-            state.isSubmitted = false;
+            state.isSubmitted = false; // Allow re-submitting after clearing
         },
 
         enableEditing: (state) => {
@@ -135,8 +119,8 @@ const constraintSlice = createSlice({
                         shifts: {}
                     };
                     day.shifts.forEach(shift => {
-                        const type = getShiftTypeByTime(shift.start_time, shift.duration);
-                        initialConstraints[day.date].shifts[type] = shift.status || 'neutral';                    });
+                        initialConstraints[day.date].shifts[shift.shift_id] = shift.status || 'neutral';
+                    });
                 });
                 state.weeklyConstraints = initialConstraints;
             })

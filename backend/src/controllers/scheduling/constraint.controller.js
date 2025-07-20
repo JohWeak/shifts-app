@@ -82,7 +82,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
         const empId = req.userId; // From auth middleware
         const { weekStart } = req.query;
 
-        // Calculate week start (default to next Monday)
+        // Calculate week start (default to next Sunday/Monday based on locale, simple startOf('week') is used here)
         const startDate = weekStart ?
             dayjs(weekStart).startOf('week') :
             dayjs().add(1, 'week').startOf('week');
@@ -97,15 +97,16 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: { is_active: true }
-                }]
+                    where: { is_active: true },
+                    // Явно указываем, какие атрибуты нам нужны
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color']                }]
             }]
         });
 
-        if (!employee) {
+        if (!employee || !employee.defaultPosition) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found or has no default position assigned'
             });
         }
 
@@ -120,12 +121,8 @@ const getWeeklyConstraintsGrid = async (req, res) => {
             }
         });
 
-        // Get system settings for limits
         const settings = await ScheduleSettings.findOne();
-
-        // Build week template
         const template = [];
-        const shiftTypes = {};
 
         for (let i = 0; i < 7; i++) {
             const currentDate = startDate.add(i, 'day');
@@ -133,28 +130,19 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 dayjs(c.target_date).isSame(currentDate, 'day')
             );
 
-            // Get all shifts for this day
+            // ИЗМЕНЕНИЕ 1: Обновляем логику маппинга
             const dayShifts = employee.defaultPosition.shifts.map(shift => {
                 const constraint = dayConstraints.find(c => c.shift_id === shift.id);
-
-                // Track shift types
-                if (!shiftTypes[shift.shift_type]) {
-                    shiftTypes[shift.shift_type] = {
-                        start_time: shift.start_time,
-                        duration: shift.duration_hours
-                    };
-                }
-
                 return {
                     shift_id: shift.id,
-                    shift_type: shift.shift_type,
+                    shift_name: shift.shift_name, // Добавлено имя смены
+                    color: shift.color,           // Добавлен цвет (даже если фронт его переопределит, лучше его иметь)
                     start_time: shift.start_time,
                     duration: shift.duration_hours,
                     status: constraint ? constraint.constraint_type : 'neutral'
                 };
             });
 
-            // Check if whole day constraint exists (no shift_id)
             const wholeDayConstraint = dayConstraints.find(c => !c.shift_id);
 
             template.push({
@@ -165,12 +153,10 @@ const getWeeklyConstraintsGrid = async (req, res) => {
             });
         }
 
-        // Check if already submitted
         const alreadySubmitted = existingConstraints.length > 0;
-
-        // Check if can edit (deadline logic can be added here)
         const canEdit = !alreadySubmitted; // Simple logic for now
 
+        // ИЗМЕНЕНИЕ 2: Убираем устаревшие поля из ответа
         res.json({
             success: true,
             weekStart: startDate.format('YYYY-MM-DD'),
@@ -188,12 +174,8 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 },
                 already_submitted: alreadySubmitted,
                 can_edit: canEdit
-            },
-            shiftTypes,
-            colors: {
-                cannotWorkColor: '#dc3545',
-                preferWorkColor: '#28a745'
             }
+            // Поля shiftTypes и colors удалены
         });
 
     } catch (error) {
