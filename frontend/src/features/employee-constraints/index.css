@@ -1,15 +1,14 @@
 /* Employee Constraints - гибридный подход */
 
 .constraint-cell {
-    background-color: var(--bs-body-bg);
-    border: 2px solid var(--bs-gray-300);
-    border-radius: 0.5rem;
+    /*background-color: var(--bs-body-bg);*/
+    /*border: 1px solid var(--bs-gray-300);*/
+    border-radius: 0.25rem;
     padding: 0.9rem 0.3rem;
     margin: 0.2rem;
     transition: all 0.2s ease;
     cursor: pointer;
     font-weight: 500;
-    color: var(--bs-secondary);
     text-align: center;
 }
 .day-header {
@@ -26,19 +25,18 @@
 
 
 
-.constraint-cell.neutral {
-    background-color: var(--bs-gray-100);
-    border-color: var(--bs-gray-300);
-    color: var(--bs-secondary);
-}
+/*.constraint-cell.neutral {*/
+/*    background-color: var(--bs-gray-100);*/
+/*    border-color: var(--bs-gray-300);*/
+/*    color: var(--bs-secondary);*/
+/*}*/
 
-[data-theme="dark"] .constraint-cell.neutral {
-    background-color: var(--bs-gray-800);
-}
+/*[data-theme="dark"] .constraint-cell.neutral {*/
+/*    background-color: var(--bs-gray-800);*/
+/*}*/
 
 .constraint-cell.clickable:hover {
     box-shadow: var(--bs-box-shadow-sm);
-    opacity: 0.8;
 }
 
 /* Shift headers */
@@ -50,8 +48,8 @@
     background-color: var(--cell-hover-color) !important;
 }
 
-[data-theme="dark"] .shift-header {
-    /*background-color: var(--bs-gray-700);*/
+[data-theme="dark"] .day-header {
+    background-color: var(--bs-gray-800);
 }
 
 /* Loading state */
@@ -64,13 +62,6 @@
     color: var(--bs-secondary);
 }
 
-/* Headers */
-.display-4 {
-    font-size: 2.2rem !important;
-    font-weight: 300;
-    margin-bottom: 0.5rem;
-    color: var(--bs-emphasis-color);
-}
 
 /* Disabled state */
 .constraint-cell:not(.clickable) {
@@ -89,9 +80,6 @@
     20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
-.shake {
-    animation: shake 0.5s;
-}
 /* Mobile specific improvements */
 .mobile-constraints .constraint-cell {
     /* Ensure cells are interactive on mobile */
@@ -101,8 +89,8 @@
 }
 
 .mobile-constraints .constraint-cell.clickable:active {
-    transform: scale(0.95);
-    opacity: 0.8;
+    transform: scale(0.99);
+    opacity: 0.9;
 }
 
 .desktop-constraints .table,
@@ -128,7 +116,6 @@
 .mobile-constraints td {
     width: 25%;
 }
-
 .mobile-constraints td {
     vertical-align: middle;
     height: 50px; /* Fixed height for better touch targets */

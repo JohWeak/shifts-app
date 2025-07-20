@@ -41,6 +41,7 @@
 
     /* Bootstrap Theme Colors */
     --bs-body-bg: #f8f9fa;
+    --bs-body-bg-rgb: 248, 249, 250;
     --bs-body-color: #212529;
     --bs-body-tertiary: #6c757d;
     --bs-emphasis-color: #000;
@@ -164,6 +165,7 @@
 [data-theme="dark"] {
     /* Bootstrap Dark Mode Variables */
     --bs-body-bg: #1a1d1e;
+    --bs-body-bg-rgb: 26, 29, 30;
     --bs-body-color: #e0e0e0;
     --bs-body-tertiary: #adb5bd;
     --bs-emphasis-color: #fff;
