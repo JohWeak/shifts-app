@@ -254,7 +254,7 @@ const ConstraintsSchedule = () => {
 
     return (
         <Container fluid className="employee-constraints-container p-3 position-relative">
-            <PageHeader title={t('constraints.title')} subtitle={t('constraints.subtitle')}/>
+            {/*<PageHeader title={t('constraints.title')} subtitle={t('constraints.subtitle')}/>*/}
 
             <ConstraintGrid
                 template={weeklyTemplate.constraints.template}
@@ -266,19 +266,6 @@ const ConstraintsSchedule = () => {
                 getShiftHeaderStyle={getShiftHeaderStyle}
                 isMobile={isMobile}
             />
-
-            {weeklyTemplate?.constraints?.limits && (
-                <div className="text-center mt-3">
-                    <p className="text-muted small mb-0">
-                        <i className="bi bi-info-circle me-1"/>
-                        {t('constraints.instructions.limits', {
-                            cannotWork: (weeklyTemplate.constraints.limits.cannot_work_days - usedCounts.cannot_work),
-                            preferWork: (weeklyTemplate.constraints.limits.prefer_work_days - usedCounts.prefer_work)
-                        })}
-                    </p>
-
-                </div>
-            )}
 
             <ConstraintActions
                 currentMode={currentMode}
@@ -301,6 +288,18 @@ const ConstraintsSchedule = () => {
                 weeklyTemplate={weeklyTemplate}
                 limitParams={limitParams}
             />
+            {weeklyTemplate?.constraints?.limits && (
+                <div className="text-center mt-3">
+                    <p className="text-muted small mb-0">
+                        <i className="bi bi-info-circle me-1"/>
+                        {t('constraints.instructions.limits', {
+                            cannotWork: (weeklyTemplate.constraints.limits.cannot_work_days - usedCounts.cannot_work),
+                            preferWork: (weeklyTemplate.constraints.limits.prefer_work_days - usedCounts.prefer_work)
+                        })}
+                    </p>
+
+                </div>
+            )}
 
             {colorPickerState.show && (
                 <ColorPickerModal
