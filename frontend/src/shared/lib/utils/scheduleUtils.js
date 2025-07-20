@@ -488,24 +488,55 @@ export const getShiftTypeByTime = (startTime, duration) => {
 };
 
 /**
- * Возвращает иконку для определенного типа/названия смены.
- * @param {string} shiftNameOrType - Название или тип смены ('morning', 'Утренняя', 'Day Shift').
- * @returns {JSX.Element|null} - React-компонент иконки.
+ * Карта ключевых слов для определения типа смены на разных языках.
+ * Все слова должны быть в нижнем регистре.
  */
-export const getShiftIcon = (shiftNameOrType) => {
-    if (!shiftNameOrType) return null;
-
-    const lowerCaseName = shiftNameOrType.toLowerCase();
-
-    if (lowerCaseName.includes('morning') || lowerCaseName.includes('утро') || lowerCaseName.includes('בוקר')) {
-        return <i className="bi bi-sunrise"></i>;
+const SHIFT_TYPE_KEYWORDS_MAP = {
+    morning: ['morning', 'утро', 'утренняя', 'בוקר'],
+    day: ['day', 'evening', 'afternoon', 'день', 'дневная', 'вечер', 'вечерняя', 'צהריים','יום','ערב'],
+    night: ['night', 'ночь', 'ночная', 'לילה']
+};
+/**
+ * Определяет канонический тип смены ('morning', 'day', 'night') по ее названию.
+ * Функция универсальна и не зависит от текущего языка интерфейса.
+ * @param {string} shiftName - Название смены (e.g., 'משמרת בוקר', 'Night Shift').
+ * @returns {string|null} - Канонический тип смены или null, если тип не определен.
+ */
+export const getCanonicalShiftType = (shiftName) => {
+    if (!shiftName) {
+        return null;
     }
-    if (lowerCaseName.includes('day') || lowerCaseName.includes('день') || lowerCaseName.includes('evening') || lowerCaseName.includes('вечер')) {
-        return <i className="bi bi-sun"></i>;
-    }
-    if (lowerCaseName.includes('night') || lowerCaseName.includes('ночь')) {
-        return <i className="bi bi-moon-stars"></i>;
+
+    const lowerCaseName = shiftName.toLowerCase();
+
+    // Object.entries превращает { morning: [...] } в [['morning', [...]]]
+    for (const [type, keywords] of Object.entries(SHIFT_TYPE_KEYWORDS_MAP)) {
+        // Проверяем, включает ли название смены хотя бы одно из ключевых слов для данного типа
+        if (keywords.some(keyword => lowerCaseName.includes(keyword))) {
+            return type; // Возвращаем канонический тип: 'morning', 'day' или 'night'
+        }
     }
 
-    return null; // Если совпадений не найдено
+    return null; // Если ни одно совпадение не найдено
+};
+/**
+ * Возвращает React-компонент иконки для канонического типа смены.
+ * @param {string|null} shiftType - Канонический тип ('morning', 'day', 'night') или null.
+ * @returns {JSX.Element|null} - Компонент иконки или null.
+ */
+export const getShiftIcon = (shiftType) => {
+    if (!shiftType) {
+        return null;
+    }
+
+    switch (shiftType) {
+        case 'morning':
+            return <i className="bi bi-sunrise"></i>;
+        case 'day':
+            return <i className="bi bi-sun"></i>;
+        case 'night':
+            return <i className="bi bi-moon-stars"></i>;
+        default:
+            return null;
+    }
 };

@@ -254,7 +254,14 @@ const ConstraintsSchedule = () => {
 
     return (
         <Container fluid className="employee-constraints-container p-3 position-relative">
-            {/*<PageHeader title={t('constraints.title')} subtitle={t('constraints.subtitle')}/>*/}
+            {!isMobile && (
+                <PageHeader
+                    icon="shield-check"
+                    title={t('constraints.title')}
+                    subtitle={t('constraints.subtitle')}
+                />
+            )}
+
 
             <ConstraintGrid
                 template={weeklyTemplate.constraints.template}
