@@ -163,33 +163,38 @@ const ConstraintsSchedule = () => {
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
         const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
 
-        // --- 1. Стили для состояния покоя ---
-        const alpha = 1.0;
-        const neutralBaseAlpha = 0.2;
-
+        // --- 1. Определяем базовый цвет для состояния покоя ---
         let solidRestingColor;
-        if (status === 'cannot_work' || status === 'prefer_work') {
-            solidRestingColor = shiftColors[status];
-        } else {
+        if (status === 'neutral') {
+            // Используем хук, как вы и хотели
             solidRestingColor = shift ? getShiftColor(shift) : '#6c757d';
+        } else {
+            solidRestingColor = shiftColors[status];
         }
 
-        const restingBackgroundColor = hexToRgba(solidRestingColor, (status !== 'neutral' ? alpha : neutralBaseAlpha));
+        // *** САМЫЙ ТОЧНЫЙ ЛОГ ПЕРЕД ВЫЗОВОМ УТИЛИТ ***
+        if (shift) {
+            console.log(
+                `%c[FINAL CHECK] solidRestingColor:`,
+                'background: cyan; color: black;',
+                { value: solidRestingColor, type: typeof solidRestingColor }
+            );
+        }
+
+        // --- 2. Вычисляем итоговый фон и цвет текста ---
+        const restingBackgroundColor = hexToRgba(solidRestingColor, (status !== 'neutral' ? 1.0 : 0.2));
         const textColor = getContrastTextColor(solidRestingColor);
 
-        // --- 2. Стили для состояния наведения ---
-        const hoverAlpha = 0.7;
-        const neutralHoverAlpha = 0.4;
-
+        // --- 3. Вычисляем фон для ховера ---
         let solidHoverColor;
-        if (nextStatus === 'cannot_work' || nextStatus === 'prefer_work') {
-            solidHoverColor = shiftColors[nextStatus];
-        } else {
+        if (nextStatus === 'neutral') {
             solidHoverColor = shift ? getShiftColor(shift) : '#6c757d';
+        } else {
+            solidHoverColor = shiftColors[nextStatus];
         }
-        const hoverBackgroundColor = hexToRgba(solidHoverColor, (nextStatus !== 'neutral' ? hoverAlpha : neutralHoverAlpha));
+        const hoverBackgroundColor = hexToRgba(solidHoverColor, (nextStatus !== 'neutral' ? 0.7 : 0.4));
 
-        // --- 3. Возвращаем ПОЛНЫЙ и ПРАВИЛЬНЫЙ объект стилей ---
+        // --- 4. Возвращаем результат ---
         return {
             backgroundColor: restingBackgroundColor,
             color: textColor,
