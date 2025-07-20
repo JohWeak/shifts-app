@@ -24,13 +24,7 @@
     opacity: 0.7;
 }
 
-.constraint-cell.cannot-work {
-    color: var(--bs-emphasis-color);
-}
 
-.constraint-cell.prefer-work {
-    color: var(--bs-emphasis-color);
-}
 
 .constraint-cell.neutral {
     background-color: var(--bs-gray-100);

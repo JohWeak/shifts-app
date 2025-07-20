@@ -1,11 +1,11 @@
 // frontend/src/features/employee-constraints/index.js
-import React, { useState, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Toast, ToastContainer } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useShiftColor } from 'shared/hooks/useShiftColor';
-import { useMediaQuery } from 'shared/hooks/useMediaQuery';
-import { addNotification, removeNotification } from 'app/model/notificationsSlice';
+import React, {useState, useEffect, useMemo} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Container, Toast, ToastContainer} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useShiftColor} from 'shared/hooks/useShiftColor';
+import {useMediaQuery} from 'shared/hooks/useMediaQuery';
+import {addNotification, removeNotification} from 'app/model/notificationsSlice';
 
 // Components
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -25,13 +25,13 @@ import {
     enableEditing,
     resetConstraints
 } from './model/constraintSlice';
-import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
+import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
 import './index.css';
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
-    const { t } = useI18n();
-    const { getShiftColor } = useShiftColor();
+    const {t} = useI18n();
+    const {getShiftColor} = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     const {
@@ -45,7 +45,7 @@ const ConstraintsSchedule = () => {
         isSubmitted,
         canEdit
     } = useSelector(state => state.constraints);
-    const { user } = useSelector(state => state.auth);
+    const {user} = useSelector(state => state.auth);
 
     // --- ЛОГ №2: РЕЗУЛЬТАТ В REDUX ---
     // Этот хук сработает КАЖДЫЙ РАЗ, когда weeklyConstraints изменится.
@@ -54,10 +54,10 @@ const ConstraintsSchedule = () => {
     }, [weeklyConstraints]);
 
 
-    const [colorPickerConfig, setColorPickerConfig] = useState({ show: false, mode: null, initialColor: '#ffffff' });
+    const [colorPickerConfig, setColorPickerConfig] = useState({show: false, mode: null, initialColor: '#ffffff'});
     const [shiftColors, setShiftColors] = useState(() => {
         const savedColors = localStorage.getItem('constraintColors');
-        return savedColors ? JSON.parse(savedColors) : { cannot_work: '#dc3545', prefer_work: '#28a745' };
+        return savedColors ? JSON.parse(savedColors) : {cannot_work: '#dc3545', prefer_work: '#28a745'};
     });
     const [showInstructionsToast, setShowInstructionsToast] = useState(false);
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
@@ -68,7 +68,11 @@ const ConstraintsSchedule = () => {
 
     useEffect(() => {
         if (submitStatus === 'success') {
-            dispatch(addNotification({ id: 'constraint-submit-success', message: t('constraints.submitSuccess'), variant: 'success' }));
+            dispatch(addNotification({
+                id: 'constraint-submit-success',
+                message: t('constraints.submitSuccess'),
+                variant: 'success'
+            }));
             dispatch(clearSubmitStatus());
         }
         return () => {
@@ -93,10 +97,10 @@ const ConstraintsSchedule = () => {
         ).length;
         const limits = weeklyTemplate?.constraints?.limits;
         if (mode === 'cannot_work' && dayCount > limits?.cannot_work_days) {
-            return t('constraints.errors.maxCannotWork', { max: limits.cannot_work_days });
+            return t('constraints.errors.maxCannotWork', {max: limits.cannot_work_days});
         }
         if (mode === 'prefer_work' && dayCount > limits?.prefer_work_days) {
-            return t('constraints.errors.maxPreferWork', { max: limits.prefer_work_days });
+            return t('constraints.errors.maxPreferWork', {max: limits.prefer_work_days});
         }
         return null;
     };
@@ -108,7 +112,7 @@ const ConstraintsSchedule = () => {
         const newStatus = (currentStatus === currentMode) ? 'neutral' : currentMode;
         const testConstraints = JSON.parse(JSON.stringify(weeklyConstraints));
         if (!testConstraints[date]) {
-            testConstraints[date] = { day_status: 'neutral', shifts: {} };
+            testConstraints[date] = {day_status: 'neutral', shifts: {}};
         }
         if (shiftId) {
             testConstraints[date].shifts[shiftId] = newStatus;
@@ -120,14 +124,23 @@ const ConstraintsSchedule = () => {
         if (newStatus !== 'neutral') {
             const limitError = checkLimits(testConstraints, newStatus);
             if (limitError) {
-                dispatch(addNotification({ id: LIMIT_ERROR_NOTIFICATION_ID, message: limitError, variant: 'warning', duration: 4000 }));
+                dispatch(addNotification({
+                    id: LIMIT_ERROR_NOTIFICATION_ID,
+                    message: limitError,
+                    variant: 'warning',
+                    duration: 4000
+                }));
                 return;
             }
         }
         // --- ЛОГ №1: НАМЕРЕНИЕ ---
-        console.log(`%c[LOG 1] КЛИК! Отправляю экшен:`, 'color: green; font-weight: bold;', { date, shiftId, status: newStatus });
-        dispatch(updateConstraint({ date, shiftId, status: newStatus }));
-        };
+        console.log(`%c[LOG 1] КЛИК! Отправляю экшен:`, 'color: green; font-weight: bold;', {
+            date,
+            shiftId,
+            status: newStatus
+        });
+        dispatch(updateConstraint({date, shiftId, status: newStatus}));
+    };
 
     const handleSubmit = () => {
         const formattedConstraints = Object.entries(weeklyConstraints).flatMap(([date, dayData]) =>
@@ -141,27 +154,19 @@ const ConstraintsSchedule = () => {
                     shift_id: shiftId
                 }))
         );
-        dispatch(submitWeeklyConstraints({ constraints: formattedConstraints, week_start: weeklyTemplate.weekStart }));
+        dispatch(submitWeeklyConstraints({constraints: formattedConstraints, week_start: weeklyTemplate.weekStart}));
     };
 
     // *** ИСПРАВЛЕННАЯ ФУНКЦИЯ ***
     const getCellStyle = (date, shiftId) => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
-        // --- ЛОГ №3: ОТРИСОВКА ---
-        // Логируем только для первой смены первого дня, чтобы не засорять консоль
-        if (weeklyTemplate && date === weeklyTemplate.constraints.template[0].date && shiftId === weeklyTemplate.constraints.template[0].shifts[0].shift_id) {
-            console.log(`%c[LOG 3] getCellStyle для ячейки (${date}, ${shiftId}) использует статус: '${status}'`, 'color: purple; font-weight: bold;');
-        }
-
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
         const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
 
+        // --- 1. Стили для состояния покоя ---
         const alpha = 1.0;
-        const hoverAlpha = 0.6;
         const neutralBaseAlpha = 0.2;
-        const neutralHoverAlpha = 0.4;
 
-        // 1. Определяем СПЛОШНОЙ (HEX) цвет для текущего состояния ячейки
         let solidRestingColor;
         if (status === 'cannot_work' || status === 'prefer_work') {
             solidRestingColor = shiftColors[status];
@@ -169,13 +174,13 @@ const ConstraintsSchedule = () => {
             solidRestingColor = shift ? getShiftColor(shift) : '#6c757d';
         }
 
-        // 2. Вычисляем цвет текста, передавая в утилиту СПЛОШНОЙ цвет
+        const restingBackgroundColor = hexToRgba(solidRestingColor, (status !== 'neutral' ? alpha : neutralBaseAlpha));
         const textColor = getContrastTextColor(solidRestingColor);
 
-        // 3. Теперь применяем прозрачность для ФОНА
-        const restingBackgroundColor = hexToRgba(solidRestingColor, (status !== 'neutral' ? alpha : neutralBaseAlpha));
+        // --- 2. Стили для состояния наведения ---
+        const hoverAlpha = 0.7;
+        const neutralHoverAlpha = 0.4;
 
-        // 4. Повторяем логику для состояния наведения (hover)
         let solidHoverColor;
         if (nextStatus === 'cannot_work' || nextStatus === 'prefer_work') {
             solidHoverColor = shiftColors[nextStatus];
@@ -184,33 +189,44 @@ const ConstraintsSchedule = () => {
         }
         const hoverBackgroundColor = hexToRgba(solidHoverColor, (nextStatus !== 'neutral' ? hoverAlpha : neutralHoverAlpha));
 
+        // --- 3. Возвращаем ПОЛНЫЙ и ПРАВИЛЬНЫЙ объект стилей ---
         return {
             backgroundColor: restingBackgroundColor,
-            color: textColor, // Теперь цвет текста будет правильным
+            color: textColor,
             '--cell-hover-color': hoverBackgroundColor,
         };
     };
 
-    const getCellClass = (date, shiftId) => `constraint-cell ${weeklyConstraints[date]?.shifts[shiftId] || 'neutral'} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
-    const getDayHeaderClass = (date) => `day-header ${weeklyConstraints[date]?.day_status || 'neutral'} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+
+    const getCellClass = (date, shiftId) => {
+        const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
+        return `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+    };
+
+    const getDayHeaderClass = (date) => {
+        const status = weeklyConstraints[date]?.day_status || 'neutral';
+        return `day-header ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+    };
 
     const getShiftHeaderStyle = (shift) => {
         const baseColor = getShiftColor(shift);
-        return { backgroundColor: baseColor, color: getContrastTextColor(baseColor) };
+        return {backgroundColor: baseColor, color: getContrastTextColor(baseColor)};
     };
 
     const handleColorSelect = (newColor) => {
-        const { mode } = colorPickerConfig;
+        const {mode} = colorPickerConfig;
         if (!mode) return;
-        const newColors = { ...shiftColors, [mode]: newColor };
+        const newColors = {...shiftColors, [mode]: newColor};
         setShiftColors(newColors);
         localStorage.setItem('constraintColors', JSON.stringify(newColors));
-        setColorPickerConfig({ show: false, mode: null, initialColor: '#ffffff' });
+        setColorPickerConfig({show: false, mode: null, initialColor: '#ffffff'});
     };
 
-    if (loading) return <LoadingState />;
-    if (error) return <Container className="mt-4"><PageHeader title={t('constraints.title')} /><ErrorMessage error={error} /></Container>;
-    if (!weeklyTemplate) return <Container className="mt-4"><PageHeader title={t('constraints.title')} /><ErrorMessage error={t('constraints.noTemplate')} variant="info" /></Container>;
+    if (loading) return <LoadingState/>;
+    if (error) return <Container className="mt-4"><PageHeader title={t('constraints.title')}/><ErrorMessage
+        error={error}/></Container>;
+    if (!weeklyTemplate) return <Container className="mt-4"><PageHeader title={t('constraints.title')}/><ErrorMessage
+        error={t('constraints.noTemplate')} variant="info"/></Container>;
 
     const limitParams = {
         cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
@@ -219,7 +235,7 @@ const ConstraintsSchedule = () => {
 
     return (
         <Container fluid className="employee-constraints-container p-3 position-relative">
-            <PageHeader title={t('constraints.title')} subtitle={t('constraints.subtitle')} />
+            <PageHeader title={t('constraints.title')} subtitle={t('constraints.subtitle')}/>
 
             <ConstraintGrid
                 template={weeklyTemplate.constraints.template}
@@ -235,7 +251,7 @@ const ConstraintsSchedule = () => {
             {weeklyTemplate?.constraints?.limits && (
                 <div className="text-center mt-3">
                     <p className="text-muted small mb-0">
-                        <i className="bi bi-info-circle me-1" />
+                        <i className="bi bi-info-circle me-1"/>
                         {t('constraints.instructions.limits', limitParams)}
                     </p>
                 </div>
@@ -245,17 +261,22 @@ const ConstraintsSchedule = () => {
                 currentMode={currentMode}
                 onModeChange={(mode) => dispatch(setCurrentMode(mode))}
                 isSubmitted={isSubmitted}
-                onColorButtonClick={(mode) => setColorPickerConfig({ show: true, mode, initialColor: shiftColors[mode] })}
+                onColorButtonClick={(mode) => setColorPickerConfig({show: true, mode, initialColor: shiftColors[mode]})}
                 onSubmit={handleSubmit}
                 onEdit={() => dispatch(enableEditing())}
-                onClear={() => { dispatch(resetConstraints()); dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID)); }}
+                onClear={() => {
+                    dispatch(resetConstraints());
+                    dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
+                }}
                 submitting={submitting}
                 onShowInstructions={() => setShowInstructionsToast(true)}
             />
 
-            <ToastContainer position="bottom-end" className="p-3" style={{ zIndex: 1055 }}>
-                <Toast onClose={() => setShowInstructionsToast(false)} show={showInstructionsToast} delay={10000} autohide>
-                    <Toast.Header><strong className="me-auto">{t('constraints.instructions.title')}</strong></Toast.Header>
+            <ToastContainer position="bottom-end" className="p-3" style={{zIndex: 1055}}>
+                <Toast onClose={() => setShowInstructionsToast(false)} show={showInstructionsToast} delay={10000}
+                       autohide>
+                    <Toast.Header><strong
+                        className="me-auto">{t('constraints.instructions.title')}</strong></Toast.Header>
                     <Toast.Body>
                         <ul className="mb-0 ps-3">
                             <li>{t('constraints.instructions.selectMode')}</li>
@@ -269,7 +290,7 @@ const ConstraintsSchedule = () => {
             {colorPickerConfig.show && (
                 <ColorPickerModal
                     show={colorPickerConfig.show}
-                    onHide={() => setColorPickerConfig({ show: false, mode: null, initialColor: '#ffffff' })}
+                    onHide={() => setColorPickerConfig({show: false, mode: null, initialColor: '#ffffff'})}
                     onColorSelect={handleColorSelect}
                     title={t(`constraints.${colorPickerConfig.mode}_color`)}
                     initialColor={colorPickerConfig.initialColor}
