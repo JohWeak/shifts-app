@@ -168,6 +168,7 @@ export const en = {
         archiveSubtitle: 'View your past and future shifts',
         archive: {
             title: 'Archive',
+            subtitle: 'View your past and future shifts',
             totalShifts: 'Total Shifts',
             totalDays: 'Work Days',
             totalHours: 'Total Hours',

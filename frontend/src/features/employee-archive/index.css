@@ -1,6 +1,7 @@
 /* frontend/src/features/employee-archive/index.css */
 .employee-archive-container {
     padding: 20px;
+    max-width: 1400px;
 }
 
 .archive-content {

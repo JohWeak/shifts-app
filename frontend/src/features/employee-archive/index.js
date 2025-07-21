@@ -11,6 +11,8 @@ import ShiftDetailsPanel from './ui/ShiftDetailsPanel/ShiftDetailsPanel';
 import { scheduleAPI } from 'shared/api/apiService';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './index.css';
+import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
+import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
 
 const EmployeeArchive = () => {
     const { t } = useI18n();
@@ -25,6 +27,7 @@ const EmployeeArchive = () => {
 
     const { getShiftColor } = useShiftColor();
     const monthDataCache = useRef({});
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     useEffect(() => {
         fetchEmployeeArchiveSummary();
@@ -98,6 +101,13 @@ const EmployeeArchive = () => {
 
     return (
         <Container fluid className="employee-archive-container">
+            {!isMobile && (
+                <PageHeader
+                    icon="shield-check"
+                    title={t('employee.archive.title')}
+                    subtitle={t('employee.archive.subtitle')}
+                />
+            )}
             {error && <ErrorMessage message={error} />}
 
             {loading ? (
