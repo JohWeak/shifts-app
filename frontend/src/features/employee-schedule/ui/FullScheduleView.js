@@ -2,14 +2,20 @@
 import React, {useState, useRef} from 'react';
 import {Table, Card, Badge, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatShiftTime, getDayName, formatHeaderDate, formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
+import {
+    formatShiftTime,
+    getDayName,
+    formatHeaderDate,
+    formatEmployeeName,
+    formatWeekRange
+} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './FullScheduleView.css';
 
 const FullScheduleView = ({ user, currentWeekData, nextWeekData, employeeData, getShiftColor, openColorPicker }) => {
-    const {t} = useI18n();
+    const {t, locale} = useI18n();
     const tableRef = useRef(null);
 
     const [showFullName, setShowFullName] = useState(() => {
@@ -60,12 +66,8 @@ const FullScheduleView = ({ user, currentWeekData, nextWeekData, employeeData, g
     };
 
     const renderWeekSchedule = (weekData, weekTitle) => {
-        if (!weekData || !weekData.days || !weekData.shifts) {
-            return (
-                <Card className="text-center py-5">
-                    <Card.Body><p className="text-muted">{weekData?.message || t('employee.schedule.noSchedule')}</p></Card.Body>
-                </Card>
-            );
+        if (!weekData || !weekData.days || weekData.days.length === 0) {
+            return null;
         }
 
         const {week, position, shifts, days} = weekData;

@@ -107,7 +107,16 @@ const EmployeeSchedule = () => {
     };
 
     const hasAssignedPosition = employeeData?.position_id || false;
-    const hasAnyData = !!(currentWeekData?.schedule || currentWeekData?.days);
+
+    // ИЗМЕНЕНО: Более точная проверка наличия данных в любой из недель
+    const hasDataForView = (data) => {
+        if (!data) return false;
+        if (showFullSchedule) {
+            return data.days && data.days.length > 0;
+        }
+        return data.schedule && data.schedule.length > 0;
+    };
+    const hasAnyData = hasDataForView(currentWeekData) || hasDataForView(nextWeekData);
 
 
     // --- Условный рендеринг ---
@@ -138,6 +147,7 @@ const EmployeeSchedule = () => {
             );
         }
 
+        // ИЗМЕНЕНО: Эта проверка теперь корректно работает для обеих недель
         if (!hasAnyData) {
             return (
                 <EmptyState
