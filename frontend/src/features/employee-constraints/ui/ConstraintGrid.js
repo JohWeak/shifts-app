@@ -12,18 +12,15 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 
 // Компонент для отрисовки ячейки данных таблицы
-const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
-    const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
-
-    // Получаем стили для иконок
+const GridCell = ({ day, shift, onCellClick, getCellStyles, setHoveredCell }) => {
     const {
         tdStyle,
         foregroundStyle,
         foregroundClasses,
-        selectedXStyle,
-        selectedCheckStyle,
+        nextStatus
     } = getCellStyles(day.date, shift.shift_id);
 
+    const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
     const isNotClickable = !foregroundClasses.includes('clickable');
     const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
 
@@ -39,10 +36,16 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
                 className={foregroundClasses}
                 style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
+                // <<< ГЛАВНОЕ ИЗМЕНЕНИЕ: Устанавливаем data-атрибут.
+                // CSS будет использовать его для ховер-эффекта.
+                data-next-status={nextStatus}
             >
-                {/* Применяем стили напрямую */}
-                <X className="cell-icon" style={selectedXStyle} />
-                <Check className="cell-icon" style={selectedCheckStyle} />
+                {/* Все 4 иконки всегда в DOM, как и раньше */}
+                <X className="cell-icon selected-icon icon-cannot-work" />
+                <Check className="cell-icon selected-icon icon-prefer-work" />
+
+                <X className="cell-icon hover-icon hover-icon-cannot-work" />
+                <Check className="cell-icon hover-icon hover-icon-prefer-work" />
             </div>
         </td>
     );

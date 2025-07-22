@@ -177,7 +177,6 @@
 
 /* --- СТИЛИ ДЛЯ ИКОНОК --- */
 .employee-constraints-container .constraint-cell > .cell-icon {
-    /* <<< ИЗМЕНЕНИЕ: Отступ, чтобы иконка не касалась краев ячейки */
     padding: 0;
     width: 100%;
     height: 100%;
@@ -186,18 +185,24 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
     transition: opacity 0.2s ease-in-out;
 }
-/* 2. Показываем иконку ПРЕДПРОСМОТРА при наведении. */
-.employee-constraints-container .constraint-cell.hover-as-cannot-work:hover > .hover-icon-cannot-work,
-.employee-constraints-container .constraint-cell.hover-as-prefer-work:hover > .hover-icon-prefer-work {
-    opacity: 0.15;
+/* 2. Показываем ВЫБРАННУЮ иконку. */
+.employee-constraints-container .constraint-cell.prefer_work > .icon-prefer-work,
+.employee-constraints-container .constraint-cell.cannot_work > .icon-cannot-work {
+    opacity: 0.05;
 }
 
-/* 3. СКРЫВАЕМ ВЫБРАННУЮ иконку при наведении.
-   !important здесь НЕОБХОДИМ, чтобы переопределить инлайн-стиль, заданный в JS. */
-.employee-constraints-container .constraint-cell.clickable:hover > .selected-icon {
-    opacity: 0 !important;
+/* 3. Показываем ХОВЕР-иконку, используя data-атрибут. */
+.employee-constraints-container .constraint-cell[data-next-status="cannot_work"]:hover > .hover-icon-cannot-work,
+.employee-constraints-container .constraint-cell[data-next-status="prefer_work"]:hover > .hover-icon-prefer-work {
+    opacity: 0.1;
+}
+
+/* 4. Принудительно СКРЫВАЕМ выбранную иконку при наведении. */
+.employee-constraints-container .constraint-cell:hover > .selected-icon {
+    opacity: 0;
 }
 
 /* ============================================

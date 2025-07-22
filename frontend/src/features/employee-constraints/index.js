@@ -198,51 +198,33 @@ const ConstraintsSchedule = () => {
     const getCellStyles = (date, shiftId) => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
+        const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
 
-        // --- Ваша логика для фонов и цветов (остается без изменений) ---
+        // --- Фоны и цвета (ваша логика) ---
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
-        const hoverBgAlpha = currentTheme === 'dark' ? 0 : 0;
-
-        // Переименовал в tdStyle для консистентности, как мы делали ранее
         const tdStyle = {
             backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };
-
-        const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
-        let hoverClass = '';
-        if (nextStatus !== 'neutral' && canEdit && !isSubmitted) {
-            hoverClass = `hover-as-${nextStatus}`;
-        }
-
-        const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''} ${hoverClass}`;
+        const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
         const foregroundStyle = {};
         if (status !== 'neutral') {
-            const solidStatusColor = getShiftColor(constraintPseudoShifts[status]);
-            foregroundStyle.backgroundColor = solidStatusColor;
-            foregroundStyle.color = getContrastTextColor(solidStatusColor);
+            foregroundStyle.backgroundColor = getShiftColor(constraintPseudoShifts[status]);
+            foregroundStyle.color = getContrastTextColor(foregroundStyle.backgroundColor);
         }
-
         let solidHoverColor;
         if (nextStatus === 'neutral') {
             solidHoverColor = shift ? getShiftColor(shift) : '#6c757d';
         } else {
             solidHoverColor = getShiftColor(constraintPseudoShifts[nextStatus]);
         }
-        const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.7 : hoverBgAlpha);
-        foregroundStyle['--cell-hover-color'] = hoverBackgroundColor;
+        foregroundStyle['--cell-hover-color'] = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.7 : 0.1);
 
-        // --- НОВАЯ ЛОГИКА: Стили для выбранных иконок ---
-        const selectedOpacity = 0.5;
-        const selectedXStyle = { opacity: status === 'cannot_work' ? selectedOpacity : 0 };
-        const selectedCheckStyle = { opacity: status === 'prefer_work' ? selectedOpacity : 0 };
-
-        // Возвращаем ВСЁ: и вашу логику, и новую
+        // Возвращаем всё, что нужно для рендеринга, включая nextStatus
         return {
             tdStyle,
             foregroundStyle,
             foregroundClasses,
-            selectedXStyle,
-            selectedCheckStyle
+            nextStatus, // <<< ВОЗВРАЩАЕМ nextStatus ДЛЯ DATA-АТРИБУТА
         };
     };
 
