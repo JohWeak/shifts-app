@@ -94,7 +94,7 @@ const EmployeeDashboard = () => {
             color: 'primary',
             path: '/employee/schedule',
             stats: dashboardStats?.thisWeekShifts
-                ? t('employee.dashboard.shiftsThisWeek', { count: dashboardStats.thisWeekShifts })
+                ? t('employee.dashboard.shiftsThisWeek', {count: dashboardStats.thisWeekShifts})
                 : t('employee.dashboard.noShifts'), // Добавим сообщение, если смен нет
         },
         {
