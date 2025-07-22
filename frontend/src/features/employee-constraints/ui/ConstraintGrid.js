@@ -11,14 +11,13 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 
 // Компонент для отрисовки ячейки данных таблицы
-const GridCell = ({day, shift, onCellClick, getCellClass, getCellStyle}) => {
+const GridCell = ({day, shift, onCellClick, getCellStyles}) => {
     const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
-    const divClasses = getCellClass(day.date, shift.shift_id);
+    const { backgroundStyle, foregroundStyle, foregroundClasses } = getCellStyles(day.date, shift.shift_id);
 
-
-    // Определяем, является ли ячейка неактивной
-    const isNotClickable = !divClasses.includes('clickable');
+    const isNotClickable = !foregroundClasses.includes('clickable');
     const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
+
 
     if (!dayShift) {
         return (
@@ -31,12 +30,14 @@ const GridCell = ({day, shift, onCellClick, getCellClass, getCellStyle}) => {
     return (
         <td
             key={`${day.date}-${shift.shift_id}`}
-            className={tdClassName} // Применяем классы к <td>
+            className={tdClassName}
         >
+            <div className="constraint-cell-background" style={backgroundStyle} />
+
             <div
-                className={divClasses} // Применяем классы к <div>
+                className={foregroundClasses}
+                style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
-                style={getCellStyle(day.date, shift.shift_id)}
             >
             </div>
         </td>
@@ -83,8 +84,7 @@ const ConstraintGrid = (props) => {
         template,
         uniqueShifts,
         onCellClick,
-        getCellStyle,
-        getCellClass,
+        getCellStyles,
         getDayHeaderClass,
         getShiftHeaderStyle,
         isMobile,
@@ -92,7 +92,7 @@ const ConstraintGrid = (props) => {
 
     const {t} = useI18n();
 
-    const commonCellProps = {onCellClick, getCellClass, getCellStyle};
+    const commonCellProps = { onCellClick, getCellStyles };
 
     const DesktopGrid = () => (
         <Card className="shadow desktop-constraints d-none d-md-block">

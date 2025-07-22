@@ -33,13 +33,7 @@
     background-color: var(--bs-gray-800);
 }
 
-/* Ячейка-обертка <td>, которая создает отступы */
-.employee-constraints-container .constraint-td-wrapper {
-    /*padding: var(--space-1)!important;*/
-    vertical-align: middle;
-    position: relative;
 
-}
 
 
 /* ============================================
@@ -123,32 +117,62 @@
    4. ИНТЕРАКТИВНЫЕ ЯЧЕЙКИ (ЦВЕТНЫЕ DIV'ы)
    ============================================ */
 
+/* ОБЩИЕ стили для всех состояний ячейки */
+
+/* Ячейка-обертка <td>, которая создает отступы */
+.employee-constraints-container .constraint-td-wrapper {
+    vertical-align: middle;
+    position: relative;
+
+}
+.employee-constraints-container .constraint-cell-background {
+    position: absolute;
+    inset: 0;
+    transition: background-color 0.2s ease;
+}
 .employee-constraints-container .constraint-cell {
-    border-radius: 0.3rem; /* Чуть более скругленные углы */
     transition: all 0.2s ease;
+    inset: var(--space-1);
+    border-radius: 0.3rem;
     cursor: pointer;
     position: absolute;
-    inset: var(--space-2);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Состояние при наведении */
+/* --- НАЧАЛО ИЗМЕНЕНИЙ --- */
+
+/* Стили для ВЫБРАННЫХ ячеек (любой статус, кроме 'neutral') */
+.employee-constraints-container .constraint-cell:not(.neutral) {
+    border-radius: 0.3rem; /* Скругленные углы */
+    inset: 4px;            /* Отступы со всех сторон */
+}
+
+.employee-constraints-container .constraint-cell.neutral {
+    background-color: transparent !important;
+}
+
+
+/* Состояние при наведении (работает для обоих состояний) */
 .employee-constraints-container .constraint-cell.clickable:hover {
     /* Цвет берется из CSS переменной, заданной в getCellStyle */
     background-color: var(--cell-hover-color) !important;
     box-shadow: var(--bs-box-shadow-sm);
-    transform: scale(1.03); /* Небольшое увеличение для лучшей обратной связи */
 }
 
-/* Состояние неактивности */
+/* Применяем эффект увеличения только к ячейкам с отступами */
+.employee-constraints-container .constraint-cell.clickable:not(.neutral):hover {
+    transform: scale(1.03);
+}
+
+
+/* Состояние неактивности (без изменений) */
 .employee-constraints-container .constraint-cell:not(.clickable) {
     pointer-events: none;
     opacity: 0.6;
 }
 .employee-constraints-container .constraint-td-wrapper.not-allowed {
-    /* Теперь курсор управляется родителем, и это будет работать! */
     cursor: not-allowed;
 }
 

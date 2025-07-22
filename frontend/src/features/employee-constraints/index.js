@@ -196,36 +196,41 @@ const ConstraintsSchedule = () => {
     };
 
     // *** ИСПРАВЛЕННАЯ ФУНКЦИЯ ***
-    const getCellStyle = (date, shiftId) => {
+    const getCellStyles = (date, shiftId) => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
-        const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
 
-        let solidRestingColor;
-        if (status === 'neutral') {
-            solidRestingColor = shift ? getShiftColor(shift) : '#6c757d';
-        } else {
-            // Используем хук для получения цвета статуса
-            solidRestingColor = getShiftColor(constraintPseudoShifts[status]);
+        // 1. Стили для фона (всегда нейтральный цвет)
+        const neutralSolidColor = shift ? getShiftColor(shift) : '#6c757d';
+        const backgroundStyle = {
+            backgroundColor: hexToRgba(neutralSolidColor, 0.2),
+        };
+
+        // 2. Классы для переднего плана
+        const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+
+        // 3. Стили для переднего плана
+        const foregroundStyle = {};
+        if (status !== 'neutral') {
+            // Если ячейка выбрана - задаем ей сплошной цвет
+            const solidStatusColor = getShiftColor(constraintPseudoShifts[status]);
+            foregroundStyle.backgroundColor = solidStatusColor;
+            foregroundStyle.color = getContrastTextColor(solidStatusColor);
         }
+        // Если статус 'neutral', фон будет прозрачным, и будет виден задний слой.
 
-        const restingBackgroundColor = hexToRgba(solidRestingColor, (status !== 'neutral' ? 1.0 : 0.2));
-        const textColor = getContrastTextColor(solidRestingColor);
-
+        // 4. Логика для ховера (применяется к переднему плану)
+        const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
         let solidHoverColor;
         if (nextStatus === 'neutral') {
             solidHoverColor = shift ? getShiftColor(shift) : '#6c757d';
         } else {
-            // Используем хук для получения цвета ховера
             solidHoverColor = getShiftColor(constraintPseudoShifts[nextStatus]);
         }
-        const hoverBackgroundColor = hexToRgba(solidHoverColor, (nextStatus !== 'neutral' ? 0.7 : 0.4));
+        const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.7 : 0.4);
+        foregroundStyle['--cell-hover-color'] = hoverBackgroundColor;
 
-        return {
-            backgroundColor: restingBackgroundColor,
-            color: textColor,
-            '--cell-hover-color': hoverBackgroundColor,
-        };
+        return { backgroundStyle, foregroundStyle, foregroundClasses };
     };
 
 
@@ -276,8 +281,7 @@ const ConstraintsSchedule = () => {
                     template={weeklyTemplate.constraints.template}
                     uniqueShifts={uniqueShifts}
                     onCellClick={handleCellClick}
-                    getCellStyle={getCellStyle}
-                    getCellClass={getCellClass}
+                    getCellStyles={getCellStyles}
                     getDayHeaderClass={getDayHeaderClass}
                     getShiftHeaderStyle={getShiftHeaderStyle}
                     isMobile={isMobile}
