@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     fetchEmployeeSchedule,
     fetchEmployeeConstraints,
-    fetchEmployeeArchive,
+    fetchEmployeeArchiveSummary,
     checkScheduleUpdates,
     setDashboardStats, // 1. Импортируем создатель действия
 } from '../model/employeeDataSlice';
@@ -26,7 +26,7 @@ export const useEmployeeData = () => {
 
     // Load archive with cache
     const loadArchive = useCallback((month, forceRefresh = false) => {
-        return dispatch(fetchEmployeeArchive({ month, forceRefresh }));
+        return dispatch(fetchEmployeeArchiveSummary({ month, forceRefresh }));
     }, [dispatch]);
 
     // 2. Создаем новую функцию, которая будет диспатчить действие

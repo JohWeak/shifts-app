@@ -5,7 +5,8 @@ import { addNotification } from 'app/model/notificationsSlice';
 import { parseISO, addWeeks, format } from 'date-fns';
 
 // Cache duration in milliseconds
-const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
+const CACHE_DURATION_SHORT = 5 * 60 * 1000; // 5 минут
+const CACHE_DURATION_LONG = 30 * 60 * 1000; // 30 минут
 
 
 // Helper to check cache validity
@@ -46,7 +47,7 @@ export const fetchEmployeeSchedule = createAsyncThunk(
         const state = getState().employeeData;
 
         // КЕШ: 4. Проверяем кеш перед запросом
-        if (!forceRefresh && state.schedule && isCacheValid(state.scheduleLastFetched, CACHE_DURATION.SCHEDULE)) {
+        if (!forceRefresh && state.schedule && isCacheValid(state.scheduleLastFetched, CACHE_DURATION_SHORT)) {
             return { data: state.schedule, fromCache: true };
         }
 
@@ -92,7 +93,7 @@ export const fetchEmployeeConstraints = createAsyncThunk(
 
             // Check cache
             if (!forceRefresh &&
-                isCacheValid(constraintsLastFetched, CACHE_DURATION.CONSTRAINTS) &&
+                isCacheValid(constraintsLastFetched, CACHE_DURATION_SHORT.CONSTRAINTS) &&
                 constraints?.weekStart === weekStart) {
                 return { data: constraints, fromCache: true };
             }
@@ -105,27 +106,37 @@ export const fetchEmployeeConstraints = createAsyncThunk(
     }
 );
 
-export const fetchEmployeeArchive = createAsyncThunk(
-    'employeeData/fetchArchive',
-    async ({ month, forceRefresh = false }, { getState, rejectWithValue }) => {
+export const fetchEmployeeArchiveSummary = createAsyncThunk(
+    'employeeData/fetchArchiveSummary',
+    async (_, { getState, rejectWithValue }) => {
+        const state = getState().employeeData;
+        // Кешируем список месяцев, чтобы не запрашивать его каждый раз
+        if (state.archiveSummary && isCacheValid(state.archiveSummaryLastFetched, CACHE_DURATION_LONG)) {
+            return { data: state.archiveSummary, fromCache: true };
+        }
         try {
-            const state = getState();
-            const archiveKey = `archive_${month}`;
-            const cachedData = state.employeeData.archiveCache[archiveKey];
+            const response = await scheduleAPI.fetchEmployeeArchiveSummary();
+            return { data: response.data || response, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 
-            // Check cache
-            if (!forceRefresh && cachedData &&
-                isCacheValid(cachedData.timestamp, CACHE_DURATION.ARCHIVE)) {
-                return { data: cachedData.data, month, fromCache: true };
-            }
+export const fetchEmployeeArchiveMonth = createAsyncThunk(
+    'employeeData/fetchArchiveMonth',
+    async ({ year, month }, { getState, rejectWithValue }) => {
+        const state = getState().employeeData;
+        const cacheKey = `${year}-${month}`;
+        const cachedData = state.archiveCache[cacheKey];
 
-            // Парсим месяц для API
-            const [year, monthNum] = month.split('-');
-            const response = await scheduleAPI.fetchEmployeeArchiveMonth(
-                parseInt(year),
-                parseInt(monthNum)
-            );
-            return { data: response.data || response, month, fromCache: false };
+        // Проверяем кеш для конкретного месяца
+        if (cachedData && isCacheValid(cachedData.timestamp, CACHE_DURATION_LONG)) {
+            return { data: cachedData.data, month, year, fromCache: true };
+        }
+        try {
+            const response = await scheduleAPI.fetchEmployeeArchiveMonth(year, month);
+            return { data: response.data || response, month, year, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -203,6 +214,10 @@ const employeeDataSlice = createSlice({
         constraintsError: null,
 
         // Archive cache
+        archiveSummary: null, // Для списка доступных месяцев
+        archiveSummaryLastFetched: null,
+        archiveSummaryLoading: false,
+        archiveSummaryError: null,
         archiveCache: {}, // { 'archive_2024-01': { data, timestamp } }
         archiveLoading: false,
         archiveError: null,
@@ -310,21 +325,34 @@ const employeeDataSlice = createSlice({
             })
 
             // Fetch archive
-            .addCase(fetchEmployeeArchive.pending, (state) => {
-                state.archiveLoading = true;
-                state.archiveError = null;
+            .addCase(fetchEmployeeArchiveSummary.pending, (state) => {
+                state.archiveSummaryLoading = true;
             })
-            .addCase(fetchEmployeeArchive.fulfilled, (state, action) => {
+            .addCase(fetchEmployeeArchiveSummary.fulfilled, (state, action) => {
+                state.archiveSummaryLoading = false;
+                if (!action.payload.fromCache) {
+                    state.archiveSummary = action.payload.data;
+                    state.archiveSummaryLastFetched = Date.now();
+                }
+            })
+            .addCase(fetchEmployeeArchiveSummary.rejected, (state, action) => {
+                state.archiveSummaryLoading = false;
+                state.archiveSummaryError = action.payload;
+            })
+            .addCase(fetchEmployeeArchiveMonth.pending, (state) => {
+                state.archiveLoading = true;
+            })
+            .addCase(fetchEmployeeArchiveMonth.fulfilled, (state, action) => {
                 state.archiveLoading = false;
                 if (!action.payload.fromCache) {
-                    const archiveKey = `archive_${action.payload.month}`;
-                    state.archiveCache[archiveKey] = {
+                    const cacheKey = `${action.payload.year}-${action.payload.month}`;
+                    state.archiveCache[cacheKey] = {
                         data: action.payload.data,
                         timestamp: Date.now()
                     };
                 }
             })
-            .addCase(fetchEmployeeArchive.rejected, (state, action) => {
+            .addCase(fetchEmployeeArchiveMonth.rejected, (state, action) => {
                 state.archiveLoading = false;
                 state.archiveError = action.payload;
             })

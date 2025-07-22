@@ -1,88 +1,56 @@
 // frontend/src/features/employee-archive/index.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import CalendarView from './ui/CalendarView/CalendarView';
 import MonthlyStats from './ui/MonthlyStats/MonthlyStats';
 import ShiftDetailsPanel from './ui/ShiftDetailsPanel/ShiftDetailsPanel';
+import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
+import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
+import { fetchEmployeeArchiveSummary, fetchEmployeeArchiveMonth } from 'features/employee-dashboard/model/employeeDataSlice';
 import { scheduleAPI } from 'shared/api/apiService';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './index.css';
-import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
-import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
+
 
 const EmployeeArchive = () => {
     const { t } = useI18n();
     const { user } = useSelector(state => state.auth);
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
+
+
+    // --- Данные получаем из Redux ---
+    const {
+        archiveSummary,
+        archiveSummaryLoading,
+        archiveSummaryError,
+        archiveCache,
+        archiveLoading,
+        archiveError
+    } = useSelector(state => state.employeeData);
+
     const [selectedMonth, setSelectedMonth] = useState(new Date());
-    const [monthData, setMonthData] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
-    const [availableMonths, setAvailableMonths] = useState([]);
 
     const { getShiftColor } = useShiftColor();
-    const monthDataCache = useRef({});
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     useEffect(() => {
-        fetchEmployeeArchiveSummary();
-    }, []);
+        dispatch(fetchEmployeeArchiveSummary());
+    }, [dispatch]);
 
+    // Загружаем данные для выбранного месяца
     useEffect(() => {
         if (selectedMonth) {
-            fetchMonthData(selectedMonth);
+            const year = selectedMonth.getFullYear();
+            const month = selectedMonth.getMonth() + 1;
+            dispatch(fetchEmployeeArchiveMonth({ year, month }));
         }
-    }, [selectedMonth]);
-
-    const fetchEmployeeArchiveSummary = async () => {
-        try {
-            const response = await scheduleAPI.fetchEmployeeArchiveSummary();
-            if (response.data) {
-                setAvailableMonths(response.data.availableMonths);
-                if (!selectedMonth && response.data.availableMonths.length > 0) {
-                    // Set current month as default
-                    const currentMonth = new Date();
-                    setSelectedMonth(currentMonth);
-                }
-            }
-        } catch (err) {
-            console.error('Error fetching archive summary:', err);
-            setError(err.message);
-        }
-    };
-
-    const fetchMonthData = async (date) => {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const cacheKey = `${year}-${month}`;
-
-        // Check cache first
-        if (monthDataCache.current[cacheKey]) {
-            setMonthData(monthDataCache.current[cacheKey]);
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await scheduleAPI.fetchEmployeeArchiveMonth(year, month);
-            if (response.data) {
-                monthDataCache.current[cacheKey] = response.data;
-                setMonthData(response.data);
-            }
-        } catch (err) {
-            console.error('Error fetching month data:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [dispatch, selectedMonth]);
 
     const handleMonthChange = (newMonth) => {
         setSelectedMonth(newMonth);
@@ -93,11 +61,21 @@ const EmployeeArchive = () => {
         setSelectedDate(date);
     };
 
+
+
+    const availableMonths = archiveSummary?.availableMonths || [];
+    const cacheKey = selectedMonth ? `${selectedMonth.getFullYear()}-${selectedMonth.getMonth() + 1}` : null;
+    const monthData = cacheKey ? archiveCache[cacheKey]?.data : null;
+    const error = archiveSummaryError || archiveError;
+    const loading = (archiveSummaryLoading && !archiveSummary) || (archiveLoading && !monthData);
+
     const getSelectedDayShift = () => {
         if (!selectedDate || !monthData?.shifts) return null;
         const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
         return monthData.shifts.find(shift => shift.work_date === dateStr);
     };
+
+
 
     return (
         <Container fluid className="employee-archive-container">
