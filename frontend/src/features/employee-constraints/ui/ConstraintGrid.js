@@ -35,11 +35,11 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, as: Component = 'th', isMobile
 
     return (
         <Component
-            className="shift-header align-middle text-center"
+            className="shift-header-info align-middle text-center"
             style={getShiftHeaderStyle(shift)}
         >
-            <strong className={`d-block my-1 ${isMobile ? 'small' : ''}`}>{icon} {shift.shift_name}</strong>
-            <div className="small">{formatShiftTime(shift.start_time, shift.duration)}</div>
+            <span className="shift-header-name">{icon} {shift.shift_name}</span>
+            <span className="shift-header-time">{formatShiftTime(shift.start_time, shift.duration)}</span>
         </Component>
     );
 };
@@ -50,8 +50,8 @@ const DayHeader = ({day, getDayHeaderClass, onCellClick, t, as: Component = 'th'
         className={getDayHeaderClass(day.date)}
         onClick={() => onCellClick(day.date, null)}
     >
-        <div>{getDayName(new Date(day.date).getDay(), t, isMobile)}</div>
-        <small className={isMobile ? "text-muted" : "shift-time"}>
+        <div className="day-name">{getDayName(new Date(day.date).getDay(), t, isMobile)}</div>
+        <small className="day-date">
             {formatHeaderDate(new Date(day.date))}
         </small>
     </Component>
