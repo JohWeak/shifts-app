@@ -203,7 +203,7 @@ const ConstraintsSchedule = () => {
         // 1. Стили для фона (всегда нейтральный цвет)
         const neutralSolidColor = shift ? getShiftColor(shift) : '#6c757d';
         const backgroundStyle = {
-            backgroundColor: hexToRgba(neutralSolidColor, 0.2),
+            backgroundColor: hexToRgba(neutralSolidColor, 0.5),
         };
 
         // 2. Классы для переднего плана
@@ -227,17 +227,13 @@ const ConstraintsSchedule = () => {
         } else {
             solidHoverColor = getShiftColor(constraintPseudoShifts[nextStatus]);
         }
-        const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.7 : 0.4);
+        const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.8 : 0);
         foregroundStyle['--cell-hover-color'] = hoverBackgroundColor;
 
         return { backgroundStyle, foregroundStyle, foregroundClasses };
     };
 
 
-    const getCellClass = (date, shiftId) => {
-        const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
-        return `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
-    };
 
     const getDayHeaderClass = (date) => {
         const status = weeklyConstraints[date]?.day_status || 'neutral';

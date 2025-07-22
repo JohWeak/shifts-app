@@ -158,7 +158,7 @@
 .employee-constraints-container .constraint-cell.clickable:hover {
     /* Цвет берется из CSS переменной, заданной в getCellStyle */
     background-color: var(--cell-hover-color) !important;
-    box-shadow: var(--bs-box-shadow-sm);
+    /*box-shadow: var(--bs-box-shadow-sm);*/
 }
 
 /* Применяем эффект увеличения только к ячейкам с отступами */
