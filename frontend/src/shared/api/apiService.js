@@ -18,15 +18,12 @@ export const scheduleAPI = {
             const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
                 params: weekStart ? { date: weekStart } : {}
             });
-            console.log('fetchWeeklySchedule raw response:', response);
             return response;
         } catch (error) {
-            console.error('fetchWeeklySchedule error:', error);
             throw error;
         }
     },
     fetchPositionWeeklySchedule: async (positionId, weekStart) => {
-        console.log('fetchPositionWeeklySchedule called with positionId:', positionId, 'weekStart:', weekStart);
         const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY_BY_POSITION(positionId), {
             params: weekStart ? { date: weekStart } : {}
         });

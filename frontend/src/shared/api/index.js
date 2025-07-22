@@ -20,8 +20,6 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log('API Request:', config.method?.toUpperCase(), config.url, config.params);
-
         return config;
     },
     (error) => Promise.reject(error)
@@ -31,7 +29,6 @@ api.interceptors.request.use(
 // Обрабатывает успешные ответы и глобальные ошибки
 api.interceptors.response.use(
     (response) => {
-        console.log('API Response:', response.config.url, response.data);
 
         // Если это запрос на файл (blob), возвращаем весь ответ как есть
         if (response.config.responseType === 'blob') {
@@ -55,18 +52,15 @@ api.interceptors.response.use(
 
 
         if (needsFullResponse) {
-            console.log('Returning full response.data:', response.data);
             return response.data;
         }
 
         // Для остальных используем старую логику
         if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-            console.log('Returning response.data.data:', response.data.data);
             return response.data.data;
 
         }
 
-        console.log('Returning response.data as is:', response.data);
         return response.data;
     },
     (error) => {
