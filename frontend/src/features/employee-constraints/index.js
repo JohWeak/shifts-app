@@ -201,7 +201,7 @@ const ConstraintsSchedule = () => {
         const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
 
         // --- Фоны и цвета (ваша логика) ---
-        const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
+        const neutralBgAlpha = currentTheme === 'dark' ? 0.05 : 0.5;
         const tdStyle = {
             backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };

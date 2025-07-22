@@ -16,10 +16,10 @@
     align-items: center;
     justify-content: flex-end;
     flex-grow: 1; /* Позволяет контейнеру занять оставшееся место */
+    margin-bottom: 20px; /* Добавляем отступ снизу, чтобы было место для палитры */
 }
 
-/* Стили для отдельных групп кнопок */
-.constraint-actions-panel .mode-selector-group,
+/* Стили для группы кнопок "Сбросить/Отправить" */
 .constraint-actions-panel .action-buttons-group {
     display: flex;
     align-items: center;
@@ -39,12 +39,111 @@
     flex-shrink: 0; /* Предотвращает сжатие кнопки */
 }
 
-/* Вертикальный разделитель */
-.constraint-actions-panel .vr {
-    align-self: stretch;
-    background-color: currentColor;
-    opacity: 0.25;
-    width: 1px;
+/* ============================================
+   СЕГМЕНТИРОВАННЫЙ ПЕРЕКЛЮЧАТЕЛЬ
+   ============================================ */
+
+/* Новая обертка, которая будет контекстом для позиционирования палитры */
+.segmented-control-wrapper {
+    position: relative;
+}
+
+.segmented-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--bs-gray-200);
+    border-radius: var(--radius-lg); /* 12px */
+    padding: var(--space-1); /* 4px */
+    height: 40px; /* Фиксированная высота для стабильности */
+    min-width: 260px; /* <<< РЕШЕНИЕ ПРОБЛЕМЫ С ТЕКСТОМ: не дает контролу сжиматься слишком сильно */
+}
+
+/* Стили для каждого сегмента (кнопки) */
+.segmented-control .segment {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 var(--space-2); /* 8px */
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Двигающийся индикатор-фон */
+.segmented-control .indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 48%; /* <<< УПРОЩЕНО: Теперь это честная половина */
+    border-radius: var(--radius-md);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--bs-box-shadow-sm);
+    z-index: 5;
+}
+
+/* Контейнер для иконки палитры */
+.palette-container {
+    position: absolute;
+    bottom: -20px; /* <<< РЕШЕНИЕ ПРОБЛЕМЫ С ПАЛИТРОЙ: Позиционируем снизу */
+    left: 50%; /* Изначально по центру */
+    transform: translateX(-50%); /* Центрируем */
+    width: 32px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    color: var(--bs-body-color);
+    opacity: 0; /* Изначально невидима */
+    pointer-events: none; /* И некликабельна */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* --- Логика состояний --- */
+
+/* Режим "Не могу работать" */
+.segmented-control-wrapper.mode-cannot_work .indicator {
+    background-color: var(--bs-danger);
+    transform: translateX(0);
+}
+/* <<< ИСПРАВЛЕНИЕ ЗДЕСЬ: Выбираем сегмент, который НЕ является последним в своем роде >>> */
+.segmented-control-wrapper.mode-cannot_work .segment:not(:last-of-type) span {
+    color: var(--bs-white);
+    font-weight: var(--font-semibold);
+}
+.segmented-control-wrapper.mode-cannot_work .palette-container {
+    left: 25%;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+/* Режим "Хочу работать" */
+.segmented-control-wrapper.mode-prefer_work .indicator {
+    background-color: var(--bs-success);
+    transform: translateX(100%);
+}
+/* Это правило остается без изменений, т.к. оно работает корректно */
+.segmented-control-wrapper.mode-prefer_work .segment:last-of-type span {
+    color: var(--bs-white);
+    font-weight: var(--font-semibold);
+}
+.segmented-control-wrapper.mode-prefer_work .palette-container {
+    left: 75%;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+[data-theme="dark"] .segmented-control {
+    background-color: var(--bs-gray-800);
+}
+[data-theme="dark"] .palette-container {
+    color: var(--bs-body-color);
 }
 
 
@@ -53,21 +152,19 @@
    ============================================ */
 @media (max-width: 768px) {
     .constraint-actions-panel .panel-content {
-        /* На мобильных выравниваем по-другому */
         justify-content: center;
     }
 
     .constraint-actions-panel .actions-container {
-        /* Группы кнопок теперь выравниваются по центру и имеют меньший отступ */
         justify-content: center;
-        gap: var(--space-3); /* 12px */
+        gap: var(--space-3);
         margin-top: var(--space-3);
     }
-    .constraint-actions-panel .mode-selector-group,
+
     .constraint-actions-panel .action-buttons-group {
-        justify-content: center; /* Центрируем кнопки внутри групп */
+        justify-content: center;
     }
-    /* Ставим кнопку помощи сбоку, если есть место */
+
     .constraint-actions-panel .panel-content {
         position: relative;
     }
@@ -75,11 +172,10 @@
     .constraint-actions-panel .help-container {
         position: absolute;
         bottom: 0;
-        left: 0; /* В LTR слева */
+        left: 0;
     }
     [dir="rtl"] .constraint-actions-panel .help-container {
         left: auto;
-        right: 0; /* В RTL справа */
+        right: 0;
     }
 }
-

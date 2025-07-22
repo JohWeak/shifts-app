@@ -47,26 +47,22 @@ const ConstraintActions = ({
                                 </Button>
                             ) : (
                                 <>
-                                    {/* Группа 1: Выбор режима */}
-                                    <div className="mode-selector-group">
-                                        <Button
-                                            variant={currentMode === 'cannot_work' ? 'danger' : 'outline-danger'}
-                                            onClick={() => onModeChange('cannot_work')}
-                                            className="d-flex align-items-center"
-                                        >
-                                            {t('constraints.cannotWork')}
-                                            <span className="vr mx-2"></span>
-                                            <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('cannot_work'); }}></i>
-                                        </Button>
-                                        <Button
-                                            variant={currentMode === 'prefer_work' ? 'success' : 'outline-success'}
-                                            onClick={() => onModeChange('prefer_work')}
-                                            className="d-flex align-items-center"
-                                        >
-                                            {t('constraints.preferWork')}
-                                            <span className="vr mx-2"></span>
-                                            <i className="bi bi-palette" onClick={(e) => { e.stopPropagation(); onColorButtonClick('prefer_work'); }}></i>
-                                        </Button>
+                                    {/* Группа 1: Сегментированный переключатель */}
+                                    <div className={`segmented-control-wrapper mode-${currentMode}`}>
+                                        {/* Сам переключатель */}
+                                        <div className="segmented-control">
+                                            <div className="indicator"></div>
+                                            <div className="segment" onClick={() => onModeChange('cannot_work')}>
+                                                <span>{t('constraints.cannotWork')}</span>
+                                            </div>
+                                            <div className="segment" onClick={() => onModeChange('prefer_work')}>
+                                                <span>{t('constraints.preferWork')}</span>
+                                            </div>
+                                        </div>
+                                        {/* Палитра теперь является соседом и позиционируется относительно обертки */}
+                                        <div className="palette-container" onClick={() => onColorButtonClick(currentMode)}>
+                                            <i className="bi bi-palette"></i>
+                                        </div>
                                     </div>
 
                                     {/* Группа 2: Управление */}
