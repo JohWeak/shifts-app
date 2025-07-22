@@ -81,8 +81,12 @@ const ConstraintsSchedule = () => {
     }), [t]);
 
     useEffect(() => {
-        dispatch(fetchWeeklyConstraints({}));
-    }, [dispatch]);
+        // Запускаем загрузку, только если шаблона нет в состоянии.
+        // Если он там есть (из кеша), этот dispatch не будет вызван.
+        if (!weeklyTemplate) {
+            dispatch(fetchWeeklyConstraints({}));
+        }
+    }, [dispatch, weeklyTemplate]);
 
     useEffect(() => {
         if (submitStatus === 'success') {

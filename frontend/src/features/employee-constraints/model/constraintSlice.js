@@ -2,28 +2,56 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
 
+const CACHE_DURATION = 5 * 60 * 1000;
+const isCacheValid = (timestamp) => {
+    if (!timestamp) return false;
+    return (Date.now() - timestamp) < CACHE_DURATION;
+};
+
 // Async thunks
 export const fetchWeeklyConstraints = createAsyncThunk(
     'constraints/fetchWeeklyConstraints',
-    async ({ weekStart }) => {
-        const response = await constraintAPI.getWeeklyConstraints({ weekStart });
-        return response;
+    // КЕШ: 3. Принимаем forceRefresh и получаем доступ к состоянию через thunkAPI
+    async ({ weekStart, forceRefresh = false }, { getState, rejectWithValue }) => {
+        const state = getState().constraints; // Получаем текущее состояние этого слайса
+
+        // КЕШ: 4. Проверяем валидность кеша перед выполнением запроса
+        if (!forceRefresh && state.weeklyTemplate && isCacheValid(state.lastFetched)) {
+            // Если кеш валиден, возвращаем данные из него и помечаем, что это из кеша
+            return { data: state.weeklyTemplate, fromCache: true };
+        }
+
+        try {
+            const response = await constraintAPI.getWeeklyConstraints({ weekStart });
+            // Помечаем, что данные пришли из API
+            return { data: response, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch');
+        }
     }
 );
 
 export const submitWeeklyConstraints = createAsyncThunk(
     'constraints/submitWeeklyConstraints',
-    async (constraintsData) => {
-        const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
-        return response;
+    async (constraintsData, { rejectWithValue }) => {
+        try {
+            const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.error.message || 'Submit failed');
+        }
     }
 );
 
 export const fetchPermanentRequests = createAsyncThunk(
     'constraints/fetchPermanentRequests',
-    async (empId) => {
-        const response = await constraintAPI.getPermanentRequests(empId);
-        return response;
+    async (empId, { rejectWithValue }) => {
+        try {
+            const response = await constraintAPI.getPermanentRequests(empId);
+            return response;
+        } catch(error) {
+            return rejectWithValue(error.error.message || 'Failed to fetch permanent requests');
+        }
     }
 );
 
@@ -49,6 +77,7 @@ const constraintSlice = createSlice({
         currentMode: 'cannot_work', // 'cannot_work' | 'prefer_work'
         isSubmitted: false,
         canEdit: true,
+        lastFetched: null,
     },
     reducers: {
         setCurrentMode: (state, action) => {
@@ -122,41 +151,42 @@ const constraintSlice = createSlice({
             })
             .addCase(fetchWeeklyConstraints.fulfilled, (state, action) => {
                 state.loading = false;
-                state.weeklyTemplate = action.payload;
-                state.isSubmitted = action.payload.constraints.already_submitted;
-                state.canEdit = action.payload.constraints.can_edit;
 
-                const initialConstraints = {};
-                action.payload.constraints.template.forEach(day => {
-                    initialConstraints[day.date] = {
-                        day_status: 'neutral', // Всегда начинаем с нейтрального статуса дня
-                        shifts: {}
-                    };
-                    let firstStatus = null;
-                    let allSame = true;
+                // КЕШ: 6. Обновляем состояние, ТОЛЬКО если данные пришли не из кеша
+                if (!action.payload.fromCache) {
+                    const templateData = action.payload.data;
+                    state.weeklyTemplate = templateData;
+                    state.isSubmitted = templateData.constraints.already_submitted;
+                    state.canEdit = templateData.constraints.can_edit;
 
-                    day.shifts.forEach((shift, index) => {
-                        const status = shift.status || 'neutral';
-                        initialConstraints[day.date].shifts[shift.shift_id] = status;
+                    const initialConstraints = {};
+                    templateData.constraints.template.forEach(day => {
+                        initialConstraints[day.date] = { day_status: 'neutral', shifts: {} };
+                        let firstStatus = null;
+                        let allSame = true;
 
-                        if (index === 0) {
-                            firstStatus = status;
-                        } else if (status !== firstStatus) {
-                            allSame = false;
+                        day.shifts.forEach((shift, index) => {
+                            const status = shift.status || 'neutral';
+                            initialConstraints[day.date].shifts[shift.shift_id] = status;
+                            if (index === 0) firstStatus = status;
+                            else if (status !== firstStatus) allSame = false;
+                        });
+
+                        if (allSame && firstStatus !== 'neutral') {
+                            initialConstraints[day.date].day_status = firstStatus;
                         }
                     });
+                    state.weeklyConstraints = initialConstraints;
 
-                    // Устанавливаем статус дня, только если все смены имеют одинаковый статус (не нейтральный)
-                    if (allSame && firstStatus !== 'neutral') {
-                        initialConstraints[day.date].day_status = firstStatus;
-                    }
-                });
-                state.weeklyConstraints = initialConstraints;
+                    // КЕШ: 7. Обновляем метку времени
+                    state.lastFetched = Date.now();
+                }
             })
             .addCase(fetchWeeklyConstraints.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
+                state.error = action.payload; // Используем payload для ошибки из rejectWithValue
             })
+
 
             // Submit constraints
             .addCase(submitWeeklyConstraints.pending, (state) => {
