@@ -3,9 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Form, Alert, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {parseISO, addWeeks, format} from 'date-fns';
-import { fetchPersonalSchedule, fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
+import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
@@ -22,11 +20,6 @@ const EmployeeSchedule = () => {
     const {user} = useSelector(state => state.auth);
     const dispatch = useDispatch();
 
-    // --- Централизованное состояние ---
-    const [loading, setLoading] = useState(true);
-    const [currentWeekData, setCurrentWeekData] = useState(null);
-    const [nextWeekData, setNextWeekData] = useState(null);
-    const [employeeData, setEmployeeData] = useState(null);
 
     // Состояние для переключателя
     const [showFullSchedule, setShowFullSchedule] = useState(() => {
@@ -61,19 +54,15 @@ const EmployeeSchedule = () => {
 
     useEffect(() => {
         localStorage.setItem('employee_showFullSchedule', JSON.stringify(showFullSchedule));
-        if (showFullSchedule) {
-            // Для полного расписания нам нужен position_id
-            // Сначала загрузим персональное, чтобы получить ID, если его нет
-            if (!personalSchedule) {
-                dispatch(fetchPersonalSchedule({}));
-            } else if (personalSchedule.current?.employee?.position_id) {
-                const positionId = personalSchedule.current.employee.position_id;
-                dispatch(fetchPositionSchedule({ positionId }));
-            }
-        } else {
-            // Для персонального расписания
-            dispatch(fetchPersonalSchedule({}));
+
+        // Если пользователь включил полное расписание и у него есть должность
+        if (showFullSchedule && personalSchedule?.current?.employee?.position_id) {
+            const positionId = personalSchedule.current.employee.position_id;
+            // Загружаем данные для должности (они кешируются отдельно)
+            dispatch(fetchPositionSchedule({ positionId }));
         }
+        // Загрузку персонального расписания мы отсюда ПОЛНОСТЬЮ УБРАЛИ
+
     }, [dispatch, showFullSchedule, personalSchedule]);
 
     const isLoading = showFullSchedule ? positionScheduleLoading : personalScheduleLoading;

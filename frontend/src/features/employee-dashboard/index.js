@@ -11,38 +11,30 @@ const EmployeeDashboard = () => {
     const { t } = useI18n();
     const navigate = useNavigate();
     const {
-        schedule,
+        personalSchedule, // Получаем данные напрямую
         constraints,
         dashboardStats,
-        loadSchedule,
-        loadConstraints,
+        loadConstraints, // Оставляем, так как ограничения грузятся отдельно
         setDashboardStats,
     } = useEmployeeData();
 
-    // Эффект для загрузки основного расписания
-    useEffect(() => {
-        if (!schedule) {
-            loadSchedule();
-        }
-    }, [schedule, loadSchedule]);
 
     // Эффект: Загружаем ограничения, как только появляется расписание
     useEffect(() => {
-        if (schedule?.week?.start) {
-            loadConstraints(schedule.week.start);
+        // Запускаем только если есть расписание и дата начала недели
+        if (personalSchedule?.current?.week?.start) {
+            loadConstraints(personalSchedule.current.week.start);
         }
-    }, [schedule, loadConstraints]);
+    }, [personalSchedule, loadConstraints]);
 
     // Эффект для расчета статистики, когда данные (расписание или ограничения) обновляются
     useEffect(() => {
-        // Запускаем расчет только если расписание загружено.
-        // Данные об ограничениях могут быть еще в процессе загрузки,
-        // но функция calculateDashboardStats это обработает.
-        if (schedule) {
-            const stats = calculateDashboardStats(schedule, constraints);
+        // Пересчитываем статистику при обновлении расписания
+        if (personalSchedule) {
+            const stats = calculateDashboardStats(personalSchedule.current, constraints);
             setDashboardStats(stats);
         }
-    }, [schedule, constraints, setDashboardStats]);
+    }, [personalSchedule, constraints, setDashboardStats]);
 
     // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ---
     const calculateDashboardStats = (scheduleData, constraintsResponse) => {
@@ -137,7 +129,7 @@ const EmployeeDashboard = () => {
     };
 
     // Отображаем загрузку, пока не пришли данные И не посчитана статистика
-    if (schedule === null || dashboardStats === null) {
+    if (personalSchedule === null || dashboardStats === null) {
         return <LoadingState size="lg" message={t('common.loading')} />;
     }
 

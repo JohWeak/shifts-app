@@ -9,8 +9,7 @@ import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
 import './EmployeeLayout.css';
-import {checkScheduleUpdates} from "features/employee-dashboard/model/employeeDataSlice";
-
+import { checkScheduleUpdates, fetchPersonalSchedule } from "features/employee-dashboard/model/employeeDataSlice";
 const EmployeeLayout = () => {
     const { isAuthenticated, loading, user } = useSelector(state => state.auth);
     const { t, direction } = useI18n();
@@ -24,13 +23,23 @@ const EmployeeLayout = () => {
     const isDashboard = location.pathname === '/employee/dashboard';
 
     useEffect(() => {
-        // Start checking for updates when component mounts
-        const interval = setInterval(() => {
-            dispatch(checkScheduleUpdates());
-        }, 30000); // Check every 30 seconds
+        // Сначала загружаем данные о расписании, если их нет.
+        // Это нужно, чтобы у нас был ID расписания для проверки.
+        dispatch(fetchPersonalSchedule({}));
 
-        return () => clearInterval(interval);
+        // Запускаем проверку сразу после монтирования компонента
+        dispatch(checkScheduleUpdates());
+
+        // Устанавливаем интервал для последующих проверок (каждые 30 секунд)
+        const intervalId = setInterval(() => {
+            dispatch(checkScheduleUpdates());
+        }, 30000); // 30000 мс = 30 секунд
+
+        // Очищаем интервал при размонтировании компонента, чтобы избежать утечек памяти
+        return () => clearInterval(intervalId);
+
     }, [dispatch]);
+
     const navItems = [
         { path: '/employee/schedule', icon: 'calendar-week', label: t('employee.schedule.title') },
         { path: '/employee/constraints', icon: 'shield-check', label: t('employee.constraints') },

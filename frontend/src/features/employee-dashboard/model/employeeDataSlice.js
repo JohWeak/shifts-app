@@ -5,7 +5,7 @@ import { addNotification } from 'app/model/notificationsSlice';
 import { parseISO, addWeeks, format } from 'date-fns';
 
 // Cache duration in milliseconds
-const CACHE_DURATION_SHORT = 5 * 60 * 1000; // 5 минут
+const CACHE_DURATION_SHORT = 10 * 60 * 1000; // 10 минут
 const CACHE_DURATION_LONG = 30 * 60 * 1000; // 30 минут
 
 
@@ -148,40 +148,50 @@ export const checkScheduleUpdates = createAsyncThunk(
     'employeeData/checkUpdates',
     async (_, { getState, dispatch }) => {
         try {
-            const state = getState();
-            const currentSchedule = state.employeeData.schedule;
+            // Используем personalSchedule, так как он содержит основные данные
+            const currentScheduleData = getState().employeeData.personalSchedule?.current;
 
-            if (!currentSchedule?.schedule?.id) return null;
-
-            // Get latest schedule details
-            const response = await scheduleAPI.fetchScheduleDetails(currentSchedule.schedule.id);
-
-            // Check if status or version changed
-            const newStatus = response.schedule?.status;
-            const newVersion = response.schedule?.updatedAt;
-            const oldStatus = currentSchedule.schedule?.status;
-            const oldVersion = currentSchedule.schedule?.updatedAt;
-
-            if (newStatus !== oldStatus || newVersion !== oldVersion) {
-                // Show notification
-                dispatch(addNotification({
-                    id: 'schedule-update',
-                    message: 'schedule.hasUpdates',
-                    variant: 'info',
-                    action: {
-                        label: 'common.refresh',
-                        handler: () => dispatch(fetchEmployeeSchedule({ forceRefresh: true }))
-                    },
-                    persistent: true
-                }));
-
-                return { status: newStatus, version: newVersion };
+            if (!currentScheduleData?.schedule?.id) {
+                // Если у нас еще нет данных о расписании, проверять нечего
+                return null;
             }
 
-            return null;
+            const scheduleId = currentScheduleData.schedule.id;
+            const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
+
+            const newVersion = response?.schedule?.updatedAt;
+            const oldVersion = currentScheduleData.schedule?.updatedAt;
+
+            // Сравниваем только время последнего обновления, это самый надежный способ
+            if (newVersion && oldVersion && newVersion !== oldVersion) {
+                dispatch(addNotification({
+                    id: 'schedule-update-notification',
+                    message: 'schedule.hasUpdates', // Ключ для перевода
+                    variant: 'info',
+                    action: {
+                        label: 'common.refresh', // Ключ для перевода
+                        // Принудительно перезагружаем оба вида расписаний
+                        handler: () => {
+                            dispatch(fetchPersonalSchedule({ forceRefresh: true }));
+                            // Если у пользователя есть должность, обновляем и полное расписание
+                            if (currentScheduleData?.employee?.position_id) {
+                                dispatch(fetchPositionSchedule({
+                                    positionId: currentScheduleData.employee.position_id,
+                                    forceRefresh: true
+                                }));
+                            }
+                        }
+                    },
+                    persistent: true // Уведомление не будет исчезать само
+                }));
+
+                return { hasUpdates: true };
+            }
+
+            return null; // Обновлений нет
         } catch (error) {
             console.error('Error checking schedule updates:', error);
-            return null;
+            return null; // В случае ошибки ничего не делаем
         }
     }
 );
@@ -359,7 +369,6 @@ const employeeDataSlice = createSlice({
 
             // Check updates
             .addCase(checkScheduleUpdates.fulfilled, (state, action) => {
-                state.lastUpdateCheck = Date.now();
                 if (action.payload) {
                     state.hasUpdates = true;
                 }
