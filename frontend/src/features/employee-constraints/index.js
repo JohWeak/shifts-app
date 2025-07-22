@@ -199,25 +199,22 @@ const ConstraintsSchedule = () => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
 
+        // --- Ваша логика для фонов и цветов (остается без изменений) ---
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
         const hoverBgAlpha = currentTheme === 'dark' ? 0 : 0;
 
-        const backgroundStyle = {
+        // Переименовал в tdStyle для консистентности, как мы делали ранее
+        const tdStyle = {
             backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };
 
-        // --- УЛУЧШЕНИЕ: Добавляем класс для hover-эффекта ---
         const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
         let hoverClass = '';
         if (nextStatus !== 'neutral' && canEdit && !isSubmitted) {
-            // Этот класс скажет CSS, какую иконку показывать при наведении
-            hoverClass = `hover-as-${nextStatus}`; // Результат: 'hover-as-cannot_work' или 'hover-as-prefer_work'
+            hoverClass = `hover-as-${nextStatus}`;
         }
 
-        // Добавляем новый класс к остальным
         const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''} ${hoverClass}`;
-
-        // ... (остальная логика функции без изменений)
         const foregroundStyle = {};
         if (status !== 'neutral') {
             const solidStatusColor = getShiftColor(constraintPseudoShifts[status]);
@@ -234,7 +231,19 @@ const ConstraintsSchedule = () => {
         const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.7 : hoverBgAlpha);
         foregroundStyle['--cell-hover-color'] = hoverBackgroundColor;
 
-        return { backgroundStyle, foregroundStyle, foregroundClasses, status };
+        // --- НОВАЯ ЛОГИКА: Стили для выбранных иконок ---
+        const selectedOpacity = 0.5;
+        const selectedXStyle = { opacity: status === 'cannot_work' ? selectedOpacity : 0 };
+        const selectedCheckStyle = { opacity: status === 'prefer_work' ? selectedOpacity : 0 };
+
+        // Возвращаем ВСЁ: и вашу логику, и новую
+        return {
+            tdStyle,
+            foregroundStyle,
+            foregroundClasses,
+            selectedXStyle,
+            selectedCheckStyle
+        };
     };
 
 
@@ -321,7 +330,7 @@ const ConstraintsSchedule = () => {
                 <div className="text-center mt-3">
                     <p className="text-muted small mb-0">
                         <i className="bi bi-info-circle me-1"/>
-                        {t('constraints.instructions.limits', {
+                        {t('constraints.instructions.remaining', {
                             cannotWork: (weeklyTemplate.constraints.limits.cannot_work_days - usedCounts.cannot_work),
                             preferWork: (weeklyTemplate.constraints.limits.prefer_work_days - usedCounts.prefer_work)
                         })}

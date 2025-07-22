@@ -907,7 +907,8 @@ export const en = {
             title: 'Instructions:',
             selectMode: 'Select a mode (Cannot Work / Prefer to Work)',
             clickCells: 'Click on cells to mark your constraints',
-            limits: 'Limits: {cannotWork} days for "Cannot Work", {preferWork} days for "Prefer to Work"'
+            limits: 'Limits: {cannotWork} days for "Cannot Work", {preferWork} days for "Prefer to Work"',
+            remaining: 'Remaining: {cannotWork} days for "Cannot Work", {preferWork} days for "Prefer to Work"',
         },
 
         errors: {

@@ -14,36 +14,35 @@ import {
 // Компонент для отрисовки ячейки данных таблицы
 const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
     const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
-    const { backgroundStyle, foregroundStyle, foregroundClasses, status } = getCellStyles(day.date, shift.shift_id);
+
+    // Получаем стили для иконок
+    const {
+        tdStyle,
+        foregroundStyle,
+        foregroundClasses,
+        selectedXStyle,
+        selectedCheckStyle,
+    } = getCellStyles(day.date, shift.shift_id);
 
     const isNotClickable = !foregroundClasses.includes('clickable');
     const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
 
-    if (!dayShift) {
-        return (
-            <td key={`${day.date}-${shift.shift_id}-empty`} className={`${tdClassName} text-center text-muted align-middle`}>
-                -
-            </td>
-        );
-    }
+    if (!dayShift) { return <td key={`${day.date}-${shift.shift_id}-empty`} className={`${tdClassName} text-center text-muted align-middle`}>-</td>; }
 
     return (
         <td
             key={`${day.date}-${shift.shift_id}`}
             className={tdClassName}
+            style={tdStyle}
         >
-            <div className="constraint-cell-background" style={backgroundStyle}/>
-
             <div
                 className={foregroundClasses}
                 style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
             >
-                {status === 'cannot_work' && <X className="cell-icon selected-icon" />}
-                {status === 'prefer_work' && <Check className="cell-icon selected-icon" />}
-
-                <X className="cell-icon hover-icon hover-icon-cannot-work" />
-                <Check className="cell-icon hover-icon hover-icon-prefer-work" />
+                {/* Применяем стили напрямую */}
+                <X className="cell-icon" style={selectedXStyle} />
+                <Check className="cell-icon" style={selectedCheckStyle} />
             </div>
         </td>
     );
