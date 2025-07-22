@@ -16,32 +16,32 @@
 }
 
 /* Full Schedule Table */
-.full-schedule-table{
+.week-schedule-section .full-schedule-table{
     margin-bottom: 0!important;
     font-size: 0.875rem;
 
 }
 
 
-.full-schedule-table th {
+.week-schedule-section  .full-schedule-table th {
     background: var(--bs-gray-100);
     font-weight: 600;
     white-space: nowrap;
     /*position: relative;*/
 }
 
-[data-theme="dark"] .full-schedule-table th {
+[data-theme="dark"] .week-schedule-section .full-schedule-table th {
     background: var(--bs-gray-800);
 }
 
 
 
-[data-theme="dark"] .sticky-column {
+[data-theme="dark"] .week-schedule-section .sticky-column {
     background: var(--bs-gray-900);
 }
 
 /* Headers */
-.shift-header-cell {
+.week-schedule-section  .shift-header-cell {
     min-width: 100px;
     text-align: center;
     align-content: center;
@@ -69,7 +69,7 @@
     color: var(--bs-gray-600);
 }
 /* Sticky Column */
-.sticky-column {
+.week-schedule-section .sticky-column {
     position: sticky;
     left: 0;
     border-left: none;
@@ -78,7 +78,7 @@
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
     align-content: center;
 }
-[dir="rtl"] .sticky-column {
+[dir="rtl"] .week-schedule-section .sticky-column {
     border-right: none;
     right: 0;
 }
@@ -265,7 +265,7 @@
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
-    .full-schedule-table {
+    .week-schedule-section  .full-schedule-table {
         font-size: 0.75rem;
     }
 

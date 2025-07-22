@@ -11,13 +11,12 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 
 // Компонент для отрисовки ячейки данных таблицы
-const GridCell = ({day, shift, onCellClick, getCellStyles}) => {
+const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
     const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
-    const { backgroundStyle, foregroundStyle, foregroundClasses } = getCellStyles(day.date, shift.shift_id);
+    const { backgroundStyle, foregroundStyle, foregroundClasses, status } = getCellStyles(day.date, shift.shift_id);
 
     const isNotClickable = !foregroundClasses.includes('clickable');
     const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
-
 
     if (!dayShift) {
         return (
@@ -33,16 +32,23 @@ const GridCell = ({day, shift, onCellClick, getCellStyles}) => {
             className={tdClassName}
         >
             <div className="constraint-cell-background" style={backgroundStyle} />
-
             <div
                 className={foregroundClasses}
                 style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
             >
+                {/* 1. Иконки для УЖЕ ВЫБРАННОГО состояния */}
+                {status === 'cannot_work' && <i className="bi bi-x cell-icon selected-icon" />}
+                {status === 'prefer_work' && <i className="bi bi-check cell-icon selected-icon" />}
+
+                {/* 2. "Скрытые" иконки для СОСТОЯНИЯ НАВЕДЕНИЯ (появляются через CSS) */}
+                <i className="bi bi-x cell-icon hover-icon hover-icon-cannot-work" />
+                <i className="bi bi-check cell-icon hover-icon hover-icon-prefer-work" />
             </div>
         </td>
     );
 };
+
 
 // Компонент для отрисовки заголовка смены (может быть как <th>, так и <td>)
 const ShiftHeader = ({shift, getShiftHeaderStyle, as: Component = 'th', isMobile = false}) => {
@@ -51,7 +57,7 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, as: Component = 'th', isMobile
 
     return (
         <Component
-            className="shift-header-cell sticky-column" // классы из FullScheduleView
+            className="shift-header-cell sticky-column"
         >
             <div
                 className="shift-header-info"

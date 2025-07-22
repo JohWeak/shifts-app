@@ -200,37 +200,42 @@ const ConstraintsSchedule = () => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
 
-        // 1. Стили для фона (всегда нейтральный цвет)
-        const neutralSolidColor = shift ? getShiftColor(shift) : '#6c757d';
+        const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
+        const hoverBgAlpha = currentTheme === 'dark' ? 0 : 0;
+
         const backgroundStyle = {
-            backgroundColor: hexToRgba(neutralSolidColor, 0.5),
+            backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };
 
-        // 2. Классы для переднего плана
-        const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+        // --- УЛУЧШЕНИЕ: Добавляем класс для hover-эффекта ---
+        const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
+        let hoverClass = '';
+        if (nextStatus !== 'neutral' && canEdit && !isSubmitted) {
+            // Этот класс скажет CSS, какую иконку показывать при наведении
+            hoverClass = `hover-as-${nextStatus}`; // Результат: 'hover-as-cannot_work' или 'hover-as-prefer_work'
+        }
 
-        // 3. Стили для переднего плана
+        // Добавляем новый класс к остальным
+        const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''} ${hoverClass}`;
+
+        // ... (остальная логика функции без изменений)
         const foregroundStyle = {};
         if (status !== 'neutral') {
-            // Если ячейка выбрана - задаем ей сплошной цвет
             const solidStatusColor = getShiftColor(constraintPseudoShifts[status]);
             foregroundStyle.backgroundColor = solidStatusColor;
             foregroundStyle.color = getContrastTextColor(solidStatusColor);
         }
-        // Если статус 'neutral', фон будет прозрачным, и будет виден задний слой.
 
-        // 4. Логика для ховера (применяется к переднему плану)
-        const nextStatus = (status === currentMode) ? 'neutral' : currentMode;
         let solidHoverColor;
         if (nextStatus === 'neutral') {
             solidHoverColor = shift ? getShiftColor(shift) : '#6c757d';
         } else {
             solidHoverColor = getShiftColor(constraintPseudoShifts[nextStatus]);
         }
-        const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.8 : 0);
+        const hoverBackgroundColor = hexToRgba(solidHoverColor, nextStatus !== 'neutral' ? 0.7 : hoverBgAlpha);
         foregroundStyle['--cell-hover-color'] = hoverBackgroundColor;
 
-        return { backgroundStyle, foregroundStyle, foregroundClasses };
+        return { backgroundStyle, foregroundStyle, foregroundClasses, status };
     };
 
 
