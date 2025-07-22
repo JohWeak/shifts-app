@@ -51,8 +51,10 @@ export const fetchEmployeeConstraints = createAsyncThunk(
                 constraints?.weekStart === weekStart) {
                 return { data: constraints, fromCache: true };
             }
-
             const response = await constraintAPI.getWeeklyConstraints({ weekStart });
+
+            console.log("ОТВЕТ ОТ API (Ограничения):", JSON.stringify(response, null, 2));
+
             return { data: response, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);

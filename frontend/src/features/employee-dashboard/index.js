@@ -15,75 +15,79 @@ const EmployeeDashboard = () => {
         constraints,
         dashboardStats,
         loadSchedule,
-        setDashboardStats, // Убедимся, что эта функция передается из хука
+        loadConstraints,
+        setDashboardStats,
     } = useEmployeeData();
 
+    // Эффект для загрузки основного расписания
     useEffect(() => {
-        // Загружаем расписание, если его нет в кеше
         if (!schedule) {
             loadSchedule();
         }
     }, [schedule, loadSchedule]);
 
-
+    // Эффект: Загружаем ограничения, как только появляется расписание
     useEffect(() => {
-        // Пересчитываем статистику при обновлении расписания
+        if (schedule?.week?.start) {
+            loadConstraints(schedule.week.start);
+        }
+    }, [schedule, loadConstraints]);
+
+    // Эффект для расчета статистики, когда данные (расписание или ограничения) обновляются
+    useEffect(() => {
+        // Запускаем расчет только если расписание загружено.
+        // Данные об ограничениях могут быть еще в процессе загрузки,
+        // но функция calculateDashboardStats это обработает.
         if (schedule) {
-            const stats = calculateDashboardStats(schedule);
+            const stats = calculateDashboardStats(schedule, constraints);
             setDashboardStats(stats);
         }
-        // Зависимость от schedule гарантирует пересчет при его изменении
-    }, [schedule, setDashboardStats]);
-
+    }, [schedule, constraints, setDashboardStats]);
 
     // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ---
-    const calculateDashboardStats = (scheduleData) => {
-        // 1. Проверяем, что данные от API существуют и содержат массив 'schedule'
+    const calculateDashboardStats = (scheduleData, constraintsResponse) => {
+        // Определяем, были ли отправлены ограничения, используя ПРАВИЛЬНЫЙ ПУТЬ
+        const areConstraintsSubmitted = constraintsResponse?.constraints?.already_submitted || false;
+
         if (!scheduleData || !Array.isArray(scheduleData.schedule)) {
             return {
                 thisWeekShifts: 0,
                 nextShift: null,
                 totalHoursThisWeek: 0,
-                constraintsSubmitted: constraints?.isSubmitted || false,
+                constraintsSubmitted: areConstraintsSubmitted,
             };
         }
 
-        // 2. Преобразуем вложенную структуру API в плоский массив смен ТОЛЬКО для текущего пользователя
         const userAssignments = scheduleData.schedule.flatMap(day =>
             day.shifts
-                // Находим смены, где текущий пользователь назначен
                 .filter(shift => shift.employees.some(emp => emp.is_current_user))
-                // Создаем новый объект смены в нужном нам формате
                 .map(shift => ({
-                    work_date: day.date, // Берем дату из родительского объекта дня
+                    work_date: day.date,
                     shift_name: shift.shift_name,
-                    start_time: shift.start_time.substring(0, 5), // Форматируем время
-                    // Рассчитываем время окончания, если его нет
+                    start_time: shift.start_time.substring(0, 5),
                     end_time: new Date(new Date(`1970-01-01T${shift.start_time}Z`).getTime() + shift.duration * 60 * 60 * 1000).toISOString().substr(11, 5),
                     duration: shift.duration,
                 }))
         );
 
-        // 3. Фильтруем смены, чтобы остались только будущие на ближайшие 7 дней
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня для корректного сравнения
+        today.setHours(0, 0, 0, 0);
 
         const thisWeekShifts = userAssignments.filter(a => {
             const shiftDate = new Date(a.work_date);
             return shiftDate >= today && shiftDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
         });
 
-        // 4. Сортируем смены, чтобы найти ближайшую
         thisWeekShifts.sort((a, b) => new Date(a.work_date) - new Date(b.work_date));
 
-        // 5. Возвращаем рассчитанную статистику
         return {
             thisWeekShifts: thisWeekShifts.length,
-            nextShift: thisWeekShifts[0] || null, // Берем первую смену после сортировки
+            nextShift: thisWeekShifts[0] || null,
             totalHoursThisWeek: thisWeekShifts.reduce((sum, shift) => sum + (shift.duration || 0), 0),
-            constraintsSubmitted: constraints?.isSubmitted || false,
+            constraintsSubmitted: areConstraintsSubmitted, // Используем нашу новую переменную
         };
     };
+
 
     const dashboardCards = [
         {

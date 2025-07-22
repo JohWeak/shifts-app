@@ -376,7 +376,7 @@ export const en = {
             viewHistory: 'View your work history',
             submitted: 'Submitted',
             notSubmitted: 'Not submitted yet',
-            shiftsThisWeek: '{count} shifts this week',
+            shiftsThisWeek: '{count} shifts remaining this week',
             nextShift: 'Your Next Shift',
             weekStats: 'This Week Statistics',
             totalHours: 'Total Hours',
