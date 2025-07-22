@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/index.js
 import React, {useState, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Container} from 'react-bootstrap';
+import {Card, Container} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
@@ -14,6 +14,8 @@ import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import ConstraintActions from './ui/ConstraintActions';
 import ConstraintGrid from './ui/ConstraintGrid';
+import {ScheduleHeaderCard} from 'features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard';
+
 
 // Redux actions & utils
 import {
@@ -25,12 +27,14 @@ import {
     enableEditing,
     resetConstraints
 } from './model/constraintSlice';
+
+import {formatEmployeeName, formatWeekRange} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
 import './index.css';
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
-    const {t} = useI18n();
+    const {t, locale} = useI18n();
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     const {
@@ -251,28 +255,34 @@ const ConstraintsSchedule = () => {
         cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
         preferWork: weeklyTemplate.constraints.limits.prefer_work_days
     };
-
+    const employeeName = formatEmployeeName(weeklyTemplate.employee);
     return (
         <Container fluid className="employee-constraints-container p-3 position-relative">
-            {!isMobile && (
-                <PageHeader
-                    icon="shield-check"
-                    title={t('constraints.title')}
-                    subtitle={t('constraints.subtitle')}
-                />
-            )}
-
-
-            <ConstraintGrid
-                template={weeklyTemplate.constraints.template}
-                uniqueShifts={uniqueShifts}
-                onCellClick={handleCellClick}
-                getCellStyle={getCellStyle}
-                getCellClass={getCellClass}
-                getDayHeaderClass={getDayHeaderClass}
-                getShiftHeaderStyle={getShiftHeaderStyle}
-                isMobile={isMobile}
+            <PageHeader
+                icon="shield-check"
+                title={t('constraints.title')}
+                subtitle={t('constraints.subtitle')}
             />
+
+            <Card className="p-0">
+                <ScheduleHeaderCard
+                    className="mb-1"
+                    title={t('schedule.nextWeek')}
+                    week={weeklyTemplate.weekStart}
+                    position={weeklyTemplate.employee?.position}
+                    empName={employeeName}
+                />
+                <ConstraintGrid
+                    template={weeklyTemplate.constraints.template}
+                    uniqueShifts={uniqueShifts}
+                    onCellClick={handleCellClick}
+                    getCellStyle={getCellStyle}
+                    getCellClass={getCellClass}
+                    getDayHeaderClass={getDayHeaderClass}
+                    getShiftHeaderStyle={getShiftHeaderStyle}
+                    isMobile={isMobile}
+                />
+            </Card>
 
             <ConstraintActions
                 currentMode={currentMode}

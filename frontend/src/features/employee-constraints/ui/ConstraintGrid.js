@@ -13,18 +13,33 @@ import {
 // Компонент для отрисовки ячейки данных таблицы
 const GridCell = ({day, shift, onCellClick, getCellClass, getCellStyle}) => {
     const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
+    const divClasses = getCellClass(day.date, shift.shift_id);
+
+
+    // Определяем, является ли ячейка неактивной
+    const isNotClickable = !divClasses.includes('clickable');
+    const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
 
     if (!dayShift) {
-        return <td key={`${day.date}-${shift.shift_id}-empty`} className="text-center text-muted align-middle">-</td>;
+        return (
+            <td key={`${day.date}-${shift.shift_id}-empty`} className={`${tdClassName} text-center text-muted align-middle`}>
+                -
+            </td>
+        );
     }
 
     return (
         <td
             key={`${day.date}-${shift.shift_id}`}
-            className={getCellClass(day.date, shift.shift_id)}
-            onClick={() => onCellClick(day.date, shift.shift_id)}
-            style={getCellStyle(day.date, shift.shift_id)}
-        />
+            className={tdClassName} // Применяем классы к <td>
+        >
+            <div
+                className={divClasses} // Применяем классы к <div>
+                onClick={() => onCellClick(day.date, shift.shift_id)}
+                style={getCellStyle(day.date, shift.shift_id)}
+            >
+            </div>
+        </td>
     );
 };
 
@@ -35,11 +50,15 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, as: Component = 'th', isMobile
 
     return (
         <Component
-            className="shift-header-info align-middle text-center"
-            style={getShiftHeaderStyle(shift)}
+            className="shift-header-cell sticky-column" // классы из FullScheduleView
         >
-            <span className="shift-header-name">{icon} {shift.shift_name}</span>
-            <span className="shift-header-time">{formatShiftTime(shift.start_time, shift.duration)}</span>
+            <div
+                className="shift-header-info"
+                style={getShiftHeaderStyle(shift)}
+            >
+                <span className="shift-header-name">{icon} {shift.shift_name}</span>
+                <span className="shift-header-time">{formatShiftTime(shift.start_time, shift.duration)}</span>
+            </div>
         </Component>
     );
 };
@@ -47,9 +66,10 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, as: Component = 'th', isMobile
 // Компонент для отрисовки заголовка дня (может быть как <th>, так и <td>)
 const DayHeader = ({day, getDayHeaderClass, onCellClick, t, as: Component = 'th', isMobile = false}) => (
     <Component
-        className={getDayHeaderClass(day.date)}
+        className={`${getDayHeaderClass(day.date)} day-header-cell`} // класс из FullScheduleView
         onClick={() => onCellClick(day.date, null)}
     >
+        {/* Структура теперь соответствует FullScheduleView */}
         <div className="day-name">{getDayName(new Date(day.date).getDay(), t, isMobile)}</div>
         <small className="day-date">
             {formatHeaderDate(new Date(day.date))}
@@ -78,10 +98,10 @@ const ConstraintGrid = (props) => {
         <Card className="shadow desktop-constraints d-none d-md-block">
             <Card.Body className="p-0">
                 <div className="table-responsive">
-                    <Table bordered className="mb-0">
+                    <Table bordered className=" full-schedule-table">
                         <thead>
                         <tr>
-                            <th className="text-center align-middle">{t('common.day')}</th>
+                            <th className="shift-header-cell sticky-column">{t('employee.schedule.shift')}</th>
                             {template.map(day => (
                                 <DayHeader
                                     key={day.date}
@@ -121,10 +141,10 @@ const ConstraintGrid = (props) => {
     const MobileGrid = () => (
         <Card className="shadow mobile-constraints d-md-none">
             <Card.Body className="p-0">
-                <Table bordered className="mb-0">
+                <Table bordered className="mb-0 full-schedule-table">
                     <thead>
                     <tr>
-                        <th className="text-center align-middle">{t('common.day')}</th>
+                        <th className="shift-header-cell sticky-column">{t('common.day')}</th>
                         {uniqueShifts.map(shift => (
                             <ShiftHeader
                                 key={shift.shift_id}

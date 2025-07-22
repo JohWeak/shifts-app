@@ -159,7 +159,7 @@
 }
 
 /* Shift header in table */
-.shift-header-info {
+.week-schedule-section .shift-header-info {
     padding: 0.5rem;
     border-radius: 0.25rem;
     display: flex;
@@ -281,7 +281,7 @@
         min-height: 50px;
         padding: 0.375rem;
     }
-    .shift-header-info {
+    .week-schedule-section .shift-header-info {
         min-width: 100px;
         font-size: 0.75rem;
     }

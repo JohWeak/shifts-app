@@ -1,129 +1,165 @@
-/* Employee Constraints - гибридный подход */
+/* frontend/src/features/employee-constraints/index.css */
+
+/* ============================================
+   1. ОБЩИЙ КОНТЕЙНЕР
+   ============================================ */
+
 .employee-constraints-container {
     max-width: 1400px;
 }
-.constraint-cell {
-    border-radius: 0.25rem;
-    padding: 0.9rem 0.3rem;
-    margin: 0.2rem;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    text-align: center;
-}
 
-.day-header {
-    text-align: center;
-    vertical-align: middle;
-    font-weight: 500;
-}
-.day-header.clickable {
-    cursor: pointer;
-}
-.day-header.clickable:hover {
-    opacity: 0.7;
-}
+/* ============================================
+   2. СТРУКТУРА ТАБЛИЦЫ И СЕТКИ
+   ============================================ */
 
-
-.constraint-cell.clickable:hover {
-    box-shadow: var(--bs-box-shadow-sm);
-}
-
-/* Shift headers */
-.employee-constraints-container .shift-header-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+.employee-constraints-container .full-schedule-table {
+    margin-bottom: 0 !important;
+    font-size: 0.875rem;
+    table-layout: fixed; /* Это ключ к адаптивному поведению колонок */
+    width: 100%;
 
 }
-.constraint-cell.clickable:hover {
-    /* Универсальное правило, которое берет цвет из персональной переменной ячейки */
-    background-color: var(--cell-hover-color) !important;
+.employee-constraints-container .mobile-constraints,
+.employee-constraints-container .desktop-constraints  {
+   border:none!important;
+}
+.employee-constraints-container .full-schedule-table th {
+    background-color: var(--bs-gray-100);
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-[data-theme="dark"] .day-header {
+[data-theme="dark"] .employee-constraints-container .full-schedule-table th {
     background-color: var(--bs-gray-800);
 }
 
-/* Loading state */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-    font-size: 1.125rem;
-    color: var(--bs-secondary);
+/* Ячейка-обертка <td>, которая создает отступы */
+.employee-constraints-container .constraint-td-wrapper {
+    /*padding: var(--space-1)!important;*/
+    vertical-align: middle;
+    position: relative;
+
 }
 
 
-/* Disabled state */
-.constraint-cell:not(.clickable) {
-    cursor: not-allowed;
+/* ============================================
+   3. ЗАГОЛОВКИ (Дни и Смены)
+   ============================================ */
+
+/* Заголовки дней (верхняя строка) */
+.employee-constraints-container .day-header, .employee-constraints-container .day-header-cell {
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 500;
+    min-width: 100px;
+    padding: 0.5rem;
+
+}
+
+.employee-constraints-container .day-header.clickable {
+    cursor: pointer;
+}
+
+.employee-constraints-container .day-header.clickable:hover {
     opacity: 0.7;
 }
 
-.constraint-cell:not(.clickable):hover {
-    transform: none;
-    box-shadow: none;
+.employee-constraints-container .day-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
 }
 
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
+.employee-constraints-container .day-date {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
 }
 
-/* Mobile specific improvements */
-.mobile-constraints .constraint-cell {
-    /* Ensure cells are interactive on mobile */
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    touch-action: manipulation;
-    user-select: none;
-}
-
-.mobile-constraints .constraint-cell.clickable:active {
-    transform: scale(0.99);
-    opacity: 0.9;
-}
-
-.desktop-constraints .table,
-.mobile-constraints .table {
-    table-layout: fixed; /* Это ключ к равномерному распределению ширины */
-    width: 100%;
-}
-
-/*
-   Для десктопа: 1 колонка для смен + 7 для дней = 8 колонок.
-   100% / 8 = 12.5% на каждую.
-*/
-.desktop-constraints th,
-.desktop-constraints td {
-    width: 12.5%;
-}
-
-/*
-   Для мобильной версии: 1 колонка для дня + 3 для смен = 4 колонки.
-   100% / 4 = 25% на каждую.
-*/
-.mobile-constraints th,
-.mobile-constraints td {
-    width: 25%;
-}
-.mobile-constraints td {
+/* Заголовки смен (левая колонка) */
+.employee-constraints-container .shift-header-cell {
     vertical-align: middle;
-    height: 50px; /* Fixed height for better touch targets */
+    text-align: center;
+    width: 120px;
+    min-width: 100px;
 }
 
-/* Mobile specific styles */
+.employee-constraints-container .shift-header-info {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.employee-constraints-container .shift-header-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.employee-constraints-container .shift-header-time {
+    font-size: 0.85rem;
+}
+
+/* "Липкая" колонка для заголовков смен */
+.employee-constraints-container .sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--bs-white);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[dir="rtl"] .employee-constraints-container .sticky-column {
+    left: auto;
+    right: 0;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .employee-constraints-container .sticky-column {
+    background: var(--bs-gray-900);
+}
+
+
+/* ============================================
+   4. ИНТЕРАКТИВНЫЕ ЯЧЕЙКИ (ЦВЕТНЫЕ DIV'ы)
+   ============================================ */
+
+.employee-constraints-container .constraint-cell {
+    border-radius: 0.3rem; /* Чуть более скругленные углы */
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: absolute;
+    inset: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Состояние при наведении */
+.employee-constraints-container .constraint-cell.clickable:hover {
+    /* Цвет берется из CSS переменной, заданной в getCellStyle */
+    background-color: var(--cell-hover-color) !important;
+    box-shadow: var(--bs-box-shadow-sm);
+    transform: scale(1.03); /* Небольшое увеличение для лучшей обратной связи */
+}
+
+/* Состояние неактивности */
+.employee-constraints-container .constraint-cell:not(.clickable) {
+    pointer-events: none;
+    opacity: 0.6;
+}
+.employee-constraints-container .constraint-td-wrapper.not-allowed {
+    /* Теперь курсор управляется родителем, и это будет работать! */
+    cursor: not-allowed;
+}
+
+/* ============================================
+   5. АДАПТИВНОСТЬ (Mobile)
+   ============================================ */
+
 @media (max-width: 768px) {
     .employee-constraints-container {
         padding: 1rem !important;
-        margin-bottom: 58px!important;
-    }
-
-
-    .constraint-cell {
-        padding: 0.5rem 0.2rem;
-        font-size: 0.875rem;
+        margin-bottom: 58px !important;
     }
 
     .mobile-constraints table {
@@ -133,5 +169,36 @@
     .mobile-constraints th,
     .mobile-constraints td {
         padding: 0.5rem 0.25rem;
+    }
+
+    .employee-constraints-container .constraint-cell {
+        font-size: 0.875rem;
+        inset: var(--space-1);
+
+    }
+    .employee-constraints-container .shift-header-cell{
+        padding: var(--space-1);
+    }
+
+    /* Убираем фиксированную ширину колонок для мобильной сетки */
+    .employee-constraints-container .mobile-constraints th,
+    .employee-constraints-container .mobile-constraints td {
+        width: 25%;
+    }
+}
+
+/* --- ДОБАВЛЕНО: Дополнительная точка для очень маленьких экранов --- */
+@media (max-width: 550px) {
+    /* Уменьшаем шрифты в заголовках смен */
+    .mobile-constraints .shift-header-name {
+        font-size: 0.8rem;
+    }
+    .mobile-constraints .shift-header-time {
+        font-size: 0.7rem;
+    }
+
+    /* Уменьшаем отступы в заголовках, чтобы текст влез */
+    .mobile-constraints .shift-header-info {
+        padding: 0.4rem 0.2rem;
     }
 }

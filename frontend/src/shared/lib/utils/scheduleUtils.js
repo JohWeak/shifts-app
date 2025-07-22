@@ -233,27 +233,57 @@ export const formatFullDate = (date, currentLocale ='en') => {
 
 /**
  * Форматирует диапазон дат недели с учетом локализации.
- * @param {object} week - Объект недели с { start, end }.
+ * @param {object|string} weekOrStartDate - Объект недели с { start, end } ИЛИ строка с датой начала недели ('YYYY-MM-DD').
  * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
  * @returns {string} - Отформатированная строка.
  */
-export const formatWeekRange = (week, currentLocale = 'en') => {
-    if (!week || !week.start || !week.end) return '';
+export const formatWeekRange = (weekOrStartDate, currentLocale = 'en') => {
+    // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+    let week;
+
+    if (typeof weekOrStartDate === 'string') {
+        // Если на вход пришла строка, считаем ее датой начала
+        // и вычисляем конец недели (+6 дней)
+        try {
+            const start = parseISO(weekOrStartDate);
+            const end = addDays(start, 6);
+            week = { start, end };
+        } catch {
+            return ''; // Возвращаем пустоту в случае невалидной даты
+        }
+    } else if (weekOrStartDate && weekOrStartDate.start && weekOrStartDate.end) {
+        // Если это объект, используем его как есть
+        week = weekOrStartDate;
+    } else {
+        // Если входные данные некорректны
+        return '';
+    }
+    // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
     const locale = dateFnsLocales[currentLocale] || enUS;
 
     try {
-        const start = parseISO(week.start);
-        const end = parseISO(week.end);
+        // Теперь мы можем быть уверены, что week.start и week.end существуют
+        const start = (week.start instanceof Date) ? week.start : parseISO(week.start);
+        const end = (week.end instanceof Date) ? week.end : parseISO(week.end);
+
+        if (!isValid(start) || !isValid(end)) return '';
+
+        // Логика форматирования остается прежней
         if (start.getFullYear() === end.getFullYear()) {
-            // Форматируем с учетом локали
-            const startFormatted = capitalizeFirstLetter(format(start, 'LLLL d', { locale }));
-            const endFormatted = capitalizeFirstLetter(format(end, 'LLLL d, yyyy', { locale }));
+            const startFormatted = capitalizeFirstLetter(format(start, 'd MMMM', { locale }));
+            const endFormatted = format(end, 'd MMMM, yyyy', { locale });
             return `${startFormatted} - ${endFormatted}`;
         } else {
-            return `${format(start, 'LLLL d, yyyy', { locale })} - ${format(end, 'LLLL d, yyyy', { locale })}`;
+            const startFormatted = format(start, 'd MMMM, yyyy', { locale });
+            const endFormatted = format(end, 'd MMMM, yyyy', { locale });
+            return `${startFormatted} - ${endFormatted}`;
         }
     } catch {
-        return `${week.start} - ${week.end}`;
+        // Безопасный фолбэк
+        const startStr = (week.start instanceof Date) ? format(week.start, 'yyyy-MM-dd') : week.start;
+        const endStr = (week.end instanceof Date) ? format(week.end, 'yyyy-MM-dd') : week.end;
+        return `${startStr} - ${endStr}`;
     }
 };
 
