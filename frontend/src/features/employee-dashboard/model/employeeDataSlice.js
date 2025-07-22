@@ -2,34 +2,56 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { scheduleAPI, constraintAPI } from 'shared/api/apiService';
 import { addNotification } from 'app/model/notificationsSlice';
+import { parseISO, addWeeks, format } from 'date-fns';
 
 // Cache duration in milliseconds
-const CACHE_DURATION = {
-    SCHEDULE: 5 * 60 * 1000, // 5 minutes
-    CONSTRAINTS: 10 * 60 * 1000, // 10 minutes
-    ARCHIVE: 30 * 60 * 1000, // 30 minutes
-};
+const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
+
 
 // Helper to check cache validity
 const isCacheValid = (timestamp, duration) => {
     if (!timestamp) return false;
     return Date.now() - timestamp < duration;
 };
+export const fetchPersonalSchedule = createAsyncThunk(
+    'employeeData/fetchPersonalSchedule',
+    async ({ forceRefresh = false }, { getState, rejectWithValue }) => {
+        const { personalSchedule, personalScheduleLastFetched } = getState().employeeData;
 
+        if (!forceRefresh && personalSchedule && isCacheValid(personalScheduleLastFetched)) {
+            return { data: personalSchedule, fromCache: true };
+        }
+
+        try {
+            const currentResponse = await scheduleAPI.fetchWeeklySchedule();
+            const currentData = currentResponse.data || currentResponse;
+            let nextData = null;
+
+            if (currentData?.week?.start) {
+                const nextWeekStart = format(addWeeks(parseISO(currentData.week.start), 1), 'yyyy-MM-dd');
+                const nextResponse = await scheduleAPI.fetchWeeklySchedule(nextWeekStart);
+                nextData = nextResponse.data || nextResponse;
+            }
+            return { data: { current: currentData, next: nextData }, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 // Async thunks
 export const fetchEmployeeSchedule = createAsyncThunk(
     'employeeData/fetchSchedule',
+    // КЕШ: 3. Добавляем forceRefresh и доступ к состоянию
     async ({ forceRefresh = false }, { getState, rejectWithValue }) => {
+        const state = getState().employeeData;
+
+        // КЕШ: 4. Проверяем кеш перед запросом
+        if (!forceRefresh && state.schedule && isCacheValid(state.scheduleLastFetched, CACHE_DURATION.SCHEDULE)) {
+            return { data: state.schedule, fromCache: true };
+        }
+
         try {
-            const state = getState();
-            const { schedule, scheduleLastFetched } = state.employeeData;
-
-            // Check cache
-            if (!forceRefresh && isCacheValid(scheduleLastFetched, CACHE_DURATION.SCHEDULE) && schedule) {
-                return { data: schedule, fromCache: true };
-            }
-
-            // Используем правильный метод
+            // Используем правильный метод, как и раньше
             const response = await scheduleAPI.fetchWeeklySchedule();
             return { data: response, fromCache: false };
         } catch (error) {
@@ -37,7 +59,30 @@ export const fetchEmployeeSchedule = createAsyncThunk(
         }
     }
 );
+export const fetchPositionSchedule = createAsyncThunk(
+    'employeeData/fetchPositionSchedule',
+    async ({ positionId, forceRefresh = false }, { getState, rejectWithValue }) => {
+        const { positionSchedule, positionScheduleLastFetched } = getState().employeeData;
 
+        if (!forceRefresh && positionSchedule && isCacheValid(positionScheduleLastFetched)) {
+            return { data: positionSchedule, fromCache: true };
+        }
+
+        try {
+            const currentResponse = await scheduleAPI.fetchPositionWeeklySchedule(positionId);
+            const currentData = currentResponse; // .data уже извлечено в apiService
+            let nextData = null;
+
+            if (currentData?.week?.start) {
+                const nextWeekStart = format(addWeeks(parseISO(currentData.week.start), 1), 'yyyy-MM-dd');
+                nextData = await scheduleAPI.fetchPositionWeeklySchedule(positionId, nextWeekStart);
+            }
+            return { data: { current: currentData, next: nextData }, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 export const fetchEmployeeConstraints = createAsyncThunk(
     'employeeData/fetchConstraints',
     async ({ weekStart, forceRefresh = false }, { getState, rejectWithValue }) => {
@@ -52,8 +97,6 @@ export const fetchEmployeeConstraints = createAsyncThunk(
                 return { data: constraints, fromCache: true };
             }
             const response = await constraintAPI.getWeeklyConstraints({ weekStart });
-
-            console.log("ОТВЕТ ОТ API (Ограничения):", JSON.stringify(response, null, 2));
 
             return { data: response, fromCache: false };
         } catch (error) {
@@ -141,6 +184,17 @@ const employeeDataSlice = createSlice({
         scheduleLastFetched: null,
         scheduleLoading: false,
         scheduleError: null,
+        // --- Персональное расписание ---
+        personalSchedule: null,
+        personalScheduleLastFetched: null,
+        personalScheduleLoading: false,
+        personalScheduleError: null,
+
+        // --- Расписание по должности ---
+        positionSchedule: null,
+        positionScheduleLastFetched: null,
+        positionScheduleLoading: false,
+        positionScheduleError: null,
 
         // Constraints data
         constraints: null,
@@ -195,15 +249,47 @@ const employeeDataSlice = createSlice({
             })
             .addCase(fetchEmployeeSchedule.fulfilled, (state, action) => {
                 state.scheduleLoading = false;
+                // КЕШ: 6. Обновляем состояние, только если данные пришли не из кеша
                 if (!action.payload.fromCache) {
                     state.schedule = action.payload.data;
-                    state.scheduleLastFetched = Date.now();
+                    state.scheduleLastFetched = Date.now(); // Обновляем временную метку
                 }
                 state.hasUpdates = false;
             })
             .addCase(fetchEmployeeSchedule.rejected, (state, action) => {
                 state.scheduleLoading = false;
                 state.scheduleError = action.payload;
+            })
+
+            // Personal Schedule
+            .addCase(fetchPersonalSchedule.pending, (state) => {
+                state.personalScheduleLoading = true;
+            })
+            .addCase(fetchPersonalSchedule.fulfilled, (state, action) => {
+                state.personalScheduleLoading = false;
+                if (!action.payload.fromCache) {
+                    state.personalSchedule = action.payload.data;
+                    state.personalScheduleLastFetched = Date.now();
+                }
+            })
+            .addCase(fetchPersonalSchedule.rejected, (state, action) => {
+                state.personalScheduleLoading = false;
+                state.personalScheduleError = action.payload;
+            })
+            // Position Schedule
+            .addCase(fetchPositionSchedule.pending, (state) => {
+                state.positionScheduleLoading = true;
+            })
+            .addCase(fetchPositionSchedule.fulfilled, (state, action) => {
+                state.positionScheduleLoading = false;
+                if (!action.payload.fromCache) {
+                    state.positionSchedule = action.payload.data;
+                    state.positionScheduleLastFetched = Date.now();
+                }
+            })
+            .addCase(fetchPositionSchedule.rejected, (state, action) => {
+                state.positionScheduleLoading = false;
+                state.positionScheduleError = action.payload;
             })
 
             // Fetch constraints

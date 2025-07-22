@@ -1,10 +1,10 @@
 // frontend/src/features/employee-schedule/index.js
 import React, {useState, useEffect} from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {Container, Form, Alert, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {parseISO, addWeeks, format} from 'date-fns';
-
+import { fetchPersonalSchedule, fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
@@ -20,10 +20,10 @@ import './index.css';
 const EmployeeSchedule = () => {
     const {t, direction} = useI18n();
     const {user} = useSelector(state => state.auth);
+    const dispatch = useDispatch();
 
     // --- Централизованное состояние ---
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [currentWeekData, setCurrentWeekData] = useState(null);
     const [nextWeekData, setNextWeekData] = useState(null);
     const [employeeData, setEmployeeData] = useState(null);
@@ -33,6 +33,17 @@ const EmployeeSchedule = () => {
         const saved = localStorage.getItem('employee_showFullSchedule');
         return saved !== null ? JSON.parse(saved) : false;
     });
+
+    // --- Получаем все данные из Redux ---
+    const {
+        personalSchedule,
+        personalScheduleLoading,
+        personalScheduleError,
+        positionSchedule,
+        positionScheduleLoading,
+        positionScheduleError,
+    } = useSelector(state => state.employeeData);
+
 
     // Централизованный хук для управления цветами
     const {
@@ -47,124 +58,62 @@ const EmployeeSchedule = () => {
         resetShiftColor
     } = useShiftColor();
 
+
     useEffect(() => {
         localStorage.setItem('employee_showFullSchedule', JSON.stringify(showFullSchedule));
-        void fetchSchedules(); // void используется, чтобы показать, что мы намеренно не ждем промис
-    }, [showFullSchedule]);
-
-    const fetchSchedules = async () => {
-        setLoading(true);
-        setError(null);
-        setCurrentWeekData(null);
-        setNextWeekData(null);
-
-        try {
-            // Получаем базовые данные о сотруднике
-            const initialResponse = await scheduleAPI.fetchWeeklySchedule();
-            const initialData = initialResponse.data || initialResponse;
-
-            if (initialData?.employee) {
-                setEmployeeData(initialData.employee);
-            }
-
-            if (showFullSchedule && initialData?.employee?.position_id) {
-                // --- Логика для полного расписания
-                const positionId = initialData.employee.position_id;
-
-                // Загрузка текущей недели
-                const currentData = await scheduleAPI.fetchPositionWeeklySchedule(positionId);
-                if (currentData?.success) {
-                    setCurrentWeekData(currentData);
-                }
-
-                // Загрузка следующей недели
-                if (currentData?.week?.start) {
-                    const nextWeekStart = format(addWeeks(parseISO(currentData.week.start), 1), 'yyyy-MM-dd');
-                    const nextData = await scheduleAPI.fetchPositionWeeklySchedule(positionId, nextWeekStart);
-                    if (nextData?.success) {
-                        setNextWeekData(nextData);
-                    }
-                }
-            } else {
-                // --- Логика для персонального расписания ---
-                setCurrentWeekData(initialData);
-                if (initialData?.week?.start) {
-                    const nextWeekStart = format(addWeeks(parseISO(initialData.week.start), 1), 'yyyy-MM-dd');
-                    const nextResponse = await scheduleAPI.fetchWeeklySchedule(nextWeekStart);
-                    const nextData = nextResponse.data || nextResponse;
-                    if (nextData) {
-                        setNextWeekData(nextData);
-                    }
-                }
-            }
-        } catch (err) {
-            console.error('Error fetching schedule data:', err);
-            const errorMessage = err.response?.data?.message || err.message || t('errors.fetchFailed');
-            setError(errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const hasAssignedPosition = employeeData?.position_id || false;
-
-    // ИЗМЕНЕНО: Более точная проверка наличия данных в любой из недель
-    const hasDataForView = (data) => {
-        if (!data) return false;
         if (showFullSchedule) {
-            return data.days && data.days.length > 0;
+            // Для полного расписания нам нужен position_id
+            // Сначала загрузим персональное, чтобы получить ID, если его нет
+            if (!personalSchedule) {
+                dispatch(fetchPersonalSchedule({}));
+            } else if (personalSchedule.current?.employee?.position_id) {
+                const positionId = personalSchedule.current.employee.position_id;
+                dispatch(fetchPositionSchedule({ positionId }));
+            }
+        } else {
+            // Для персонального расписания
+            dispatch(fetchPersonalSchedule({}));
         }
-        return data.schedule && data.schedule.length > 0;
+    }, [dispatch, showFullSchedule, personalSchedule]);
+
+    const isLoading = showFullSchedule ? positionScheduleLoading : personalScheduleLoading;
+    const error = showFullSchedule ? positionScheduleError : personalScheduleError;
+    const scheduleData = showFullSchedule ? positionSchedule : personalSchedule;
+
+    const employeeInfo = personalSchedule?.current?.employee;
+    const hasAssignedPosition = employeeInfo?.position_id || false;
+
+    const hasDataForView = (data) => {
+        if (!data?.current) return false;
+        if (showFullSchedule) {
+            return data.current.days && data.current.days.length > 0;
+        }
+        return data.current.schedule && data.current.schedule.length > 0;
     };
-    const hasAnyData = hasDataForView(currentWeekData) || hasDataForView(nextWeekData);
+    const hasAnyData = hasDataForView(scheduleData);
 
 
     // --- Условный рендеринг ---
     const renderContent = () => {
-        if (loading) {
-            return <LoadingState message={t('common.loading')}/>;
+        if (isLoading && !scheduleData) {
+            return <LoadingState message={t('common.loading')} />;
         }
-
         if (error) {
-            return (
-                <Alert variant="danger" dismissible onClose={() => setError(null)}>
-                    <Alert.Heading>{t('common.error')}</Alert.Heading>
-                    <p>{error}</p>
-                    <Button variant="outline-danger" size="sm" onClick={fetchSchedules}>
-                        {t('common.tryAgain')}
-                    </Button>
-                </Alert>
-            );
+            return <Alert variant="danger">{error}</Alert>;
         }
-
         if (showFullSchedule && !hasAssignedPosition) {
-            return (
-                <EmptyState
-                    icon={<i className="bi bi-person-x display-1"></i>}
-                    title={t('employee.schedule.positionRequired')}
-                    description={t('employee.schedule.positionRequiredDesc')}
-                />
-            );
+            return <EmptyState title={t('employee.schedule.positionRequired')} />;
         }
-
-        // ИЗМЕНЕНО: Эта проверка теперь корректно работает для обеих недель
         if (!hasAnyData) {
-            return (
-                <EmptyState
-                    icon={<i className="bi bi-calendar-x display-1"></i>}
-                    title={t('employee.schedule.noSchedule')}
-                    description={t('employee.schedule.noScheduleDesc')}
-                />
-            );
+            return <EmptyState title={t('employee.schedule.noSchedule')} />;
         }
 
-        if (showFullSchedule && hasAssignedPosition) {
+        if (showFullSchedule) {
             return (
                 <FullScheduleView
                     user={user}
-                    currentWeekData={currentWeekData}
-                    nextWeekData={nextWeekData}
-                    employeeData={employeeData}
+                    scheduleData={scheduleData}
+                    employeeData={employeeInfo}
                     getShiftColor={getShiftColor}
                     openColorPicker={openColorPicker}
                 />
@@ -173,9 +122,8 @@ const EmployeeSchedule = () => {
 
         return (
             <PersonalScheduleView
-                currentWeekData={currentWeekData}
-                nextWeekData={nextWeekData}
-                employeeInfo={employeeData}
+                scheduleData={scheduleData}
+                employeeInfo={employeeInfo}
                 getShiftColor={getShiftColor}
                 openColorPicker={openColorPicker}
             />
@@ -202,7 +150,6 @@ const EmployeeSchedule = () => {
                 subtitle={t('employee.schedule.subtitle')}
                 actions={headerActions}
             />
-
             {renderContent()}
 
             <ColorPickerModal

@@ -14,9 +14,12 @@ import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './FullScheduleView.css';
 
-const FullScheduleView = ({ user, currentWeekData, nextWeekData, employeeData, getShiftColor, openColorPicker }) => {
+const FullScheduleView = ({ user, scheduleData, employeeData, getShiftColor, openColorPicker }) => {
     const {t, locale} = useI18n();
     const tableRef = useRef(null);
+
+    const currentWeekData = scheduleData?.current;
+    const nextWeekData = scheduleData?.next;
 
     const [showFullName, setShowFullName] = useState(() => {
         const saved = localStorage.getItem('employee_showFullName');

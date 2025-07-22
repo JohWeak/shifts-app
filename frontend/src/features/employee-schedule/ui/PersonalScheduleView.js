@@ -8,8 +8,10 @@ import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './PersonalScheduleView.css';
 
-const PersonalScheduleView = ({currentWeekData, nextWeekData, employeeInfo, getShiftColor, openColorPicker}) => {
+const PersonalScheduleView = ({ scheduleData, employeeInfo, getShiftColor, openColorPicker }) => {
     const {t} = useI18n();
+    const currentWeekData = scheduleData?.current;
+    const nextWeekData = scheduleData?.next;
 
     const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData) return null;
