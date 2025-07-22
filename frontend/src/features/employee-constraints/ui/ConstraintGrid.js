@@ -1,6 +1,7 @@
 // frontend/src/features/employee-constraints/ui/ConstraintGrid.js
 import React from 'react';
 import {Card, Table} from 'react-bootstrap';
+import { X, Check } from 'react-bootstrap-icons';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     formatShiftTime,
@@ -38,13 +39,11 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
                 style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
             >
-                {/* 1. Иконки для УЖЕ ВЫБРАННОГО состояния */}
-                {status === 'cannot_work' && <i className="bi bi-x cell-icon selected-icon" />}
-                {status === 'prefer_work' && <i className="bi bi-check cell-icon selected-icon" />}
+                {status === 'cannot_work' && <X className="cell-icon selected-icon" />}
+                {status === 'prefer_work' && <Check className="cell-icon selected-icon" />}
 
-                {/* 2. "Скрытые" иконки для СОСТОЯНИЯ НАВЕДЕНИЯ (появляются через CSS) */}
-                <i className="bi bi-x cell-icon hover-icon hover-icon-cannot-work" />
-                <i className="bi bi-check cell-icon hover-icon hover-icon-prefer-work" />
+                <X className="cell-icon hover-icon hover-icon-cannot-work" />
+                <Check className="cell-icon hover-icon hover-icon-prefer-work" />
             </div>
         </td>
     );
@@ -149,7 +148,7 @@ const ConstraintGrid = (props) => {
     );
 
     const MobileGrid = () => (
-        <Card className="shadow mobile-constraints d-md-none">
+        <Card className="shadow mobile-constraints ">
             <Card.Body className="p-0">
                 <Table bordered className="mb-0 full-schedule-table">
                     <thead>

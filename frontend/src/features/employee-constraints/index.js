@@ -35,7 +35,7 @@ import './index.css';
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
     const {t, locale} = useI18n();
-    const isMobile = useMediaQuery('(max-width: 768px)');
+    const isMobile = useMediaQuery('(max-width: 888px)');
 
     const {
         getShiftColor,
