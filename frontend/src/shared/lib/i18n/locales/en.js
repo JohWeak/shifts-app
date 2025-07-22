@@ -77,6 +77,8 @@ export const en = {
         tryAgain: 'Try Again',
         changeColor: 'Change Color',
         remaining: 'Remaining',
+        refresh: 'Refresh',
+        lastUpdated: 'Last updated',
 
 
     },
@@ -361,6 +363,28 @@ export const en = {
             editDayOffColor: 'Edit Day Off Color',
             toggleNameFormatHint: 'Toggle between full name and first name',
         },
+        dashboard: {
+            welcome: 'Welcome to Your Dashboard',
+            selectOption: 'Select an option below to get started',
+            mySchedule: 'My Schedule',
+            viewWeeklySchedule: 'View your weekly work schedule',
+            constraints: 'Constraints',
+            submitPreferences: 'Submit your work preferences',
+            requests: 'Requests',
+            manageRequests: 'Manage time-off and shift requests',
+            archive: 'Archive',
+            viewHistory: 'View your work history',
+            submitted: 'Submitted',
+            notSubmitted: 'Not submitted yet',
+            shiftsThisWeek: '{{count}} shifts this week',
+            nextShift: 'Your Next Shift',
+            weekStats: 'This Week Statistics',
+            totalHours: 'Total Hours',
+            shiftsCount: 'Shifts Count',
+            quickActions: 'Quick Actions',
+            submitConstraints: 'Submit Constraints',
+            downloadSchedule: 'Download Schedule',
+        }
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.',
@@ -459,6 +483,8 @@ export const en = {
         requestRejected: 'Your request for {requestType} has been rejected.',
         shiftChange: 'Your shift on {date} has been updated.',
         title: 'Notifications',
+        scheduleUpdated: 'Your schedule has been updated',
+        constraintsSaved: 'Constraints saved successfully',
     },
     position: {
         addPosition: 'Add Position',
@@ -617,6 +643,8 @@ export const en = {
         tryAgain: 'Try Again',
         currentWeek: 'Current Week',
         nextWeek: 'Next Week',
+        loading: 'Loading schedule...',
+        hasUpdates: 'Schedule has been updated. Click to refresh.',
 
     },
     settings: {
@@ -897,7 +925,7 @@ export const en = {
         title: 'Weekly Constraints',
         subtitle: 'Mark your availability for the upcoming week',
         noTemplate: 'No schedule template available',
-
+        loading: 'Loading constraints...',
         cannotWork: 'Cannot Work',
         preferWork: 'Prefer to Work',
         wholeDay: 'Whole Day',
@@ -913,7 +941,11 @@ export const en = {
 
         errors: {
             maxCannotWork: 'Maximum {max} days of "Cannot Work"',
-            maxPreferWork: 'Maximum {max} days of "Prefer to Work"'
+            maxPreferWork: 'Maximum {max} days of "Prefer to Work"',
+            loadingSchedule: 'Error loading schedule.',
+            loadingConstraints: 'Error loading constraints.',
+            fetchFailed: 'Failed to fetch data',
+
         },
 
         submit: 'Submit Constraints',

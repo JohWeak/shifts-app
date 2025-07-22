@@ -1,4 +1,4 @@
-// frontend/src/features/auth/weeklySchedule.js
+// frontend/src/features/auth/index.js
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';

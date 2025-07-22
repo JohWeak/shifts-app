@@ -7,6 +7,7 @@ import employeeReducer from 'features/admin-employee-management/model/employeeSl
 import workplaceReducer from 'features/admin-workplace-settings/model/workplaceSlice';
 import notificationsReducer from '../model/notificationsSlice';
 import constraintReducer from 'features/employee-constraints/model/constraintSlice';
+import employeeDataReducer from 'features/employee-dashboard/model/employeeDataSlice'; // NEW
 
 export const rootReducer = combineReducers({
     auth: authReducer,
@@ -17,6 +18,6 @@ export const rootReducer = combineReducers({
     workplace: workplaceReducer,
     notifications: notificationsReducer,
     constraints: constraintReducer,
-
+    employeeData: employeeDataReducer,
 
 });

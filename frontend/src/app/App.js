@@ -28,7 +28,7 @@ import SystemSettings from '../features/admin-system-settings';
 import WorkplaceSettings from '../features/admin-workplace-settings';
 import Reports from '../features/admin-reports';
 import EmployeeManagement from 'features/admin-employee-management'
-
+import EmployeeDashboard from "../features/employee-dashboard";
 import {ProtectedRoute} from '../shared/lib/auth/ProtectedRoute';
 import './App.css';
 /**
@@ -52,13 +52,15 @@ const router = createBrowserRouter([
         path: "/employee",
         element: <ProtectedRoute allowedRole="employee"><EmployeeLayout /></ProtectedRoute>,
         children: [
-            { index: true, element: <Navigate to="/employee/schedule" replace /> },
+            { index: true, element: <Navigate to="/employee/dashboard" replace /> },
+            { path: "dashboard", element: <EmployeeDashboard /> }, // <-- ДОБАВЛЕННАЯ СТРОКА
             { path: "schedule", element: <EmployeeSchedule /> },
             { path: "constraints", element: <EmployeeConstraints /> },
             { path: "requests", element: <EmployeeRequests /> },
             { path: "archive", element: <EmployeeArchive /> },
         ],
     },
+
     {
         path: "/admin",
         element: <ProtectedRoute allowedRole="admin"><AdminLayout /></ProtectedRoute>,

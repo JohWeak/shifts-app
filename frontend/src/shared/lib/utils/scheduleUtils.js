@@ -570,3 +570,12 @@ export const getShiftIcon = (shiftType) => {
             return null;
     }
 };
+
+export const getCurrentWeekStart = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const diff = now.getDate() - dayOfWeek; // Sunday = 0
+    const weekStart = new Date(now.setDate(diff));
+    weekStart.setHours(0, 0, 0, 0);
+    return weekStart.toISOString().split('T')[0];
+};

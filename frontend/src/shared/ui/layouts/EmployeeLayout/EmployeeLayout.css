@@ -5,7 +5,6 @@
     height: 56px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1040!important;
-
 }
 
 .employee-navbar .navbar-brand {
@@ -18,6 +17,36 @@
 .app-name i.bi-calendar-check{
     font-size: 1rem;
 }
+
+/* Dashboard specific styles */
+.employee-main-content.dashboard-view {
+    margin-top: 56px;
+    min-height: calc(100vh - 56px);
+    padding-bottom: 2rem;
+}
+
+/* Logo hover effect */
+.employee-navbar .navbar-brand:hover .app-name {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Update notification badge */
+.employee-navbar .badge {
+    animation: fadeInScale 0.3s ease;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 /* User Menu */
 .employee-navbar .user-menu-toggle, .app-name {
     background: rgba(255, 255, 255, 0.1);

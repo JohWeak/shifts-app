@@ -1,5 +1,5 @@
 // frontend/src/shared/ui/layouts/EmployeeLayout/EmployeeLayout.js
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Container, Navbar, Nav, Spinner, Dropdown } from 'react-bootstrap';
@@ -9,6 +9,7 @@ import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
 import './EmployeeLayout.css';
+import {checkScheduleUpdates} from "features/employee-dashboard/model/employeeDataSlice";
 
 const EmployeeLayout = () => {
     const { isAuthenticated, loading, user } = useSelector(state => state.auth);
@@ -18,25 +19,27 @@ const EmployeeLayout = () => {
     const dispatch = useDispatch();
     const [showNav, setShowNav] = useState(false);
 
-    if (loading === 'pending') {
-        return (
-            <div className="d-flex justify-content-center align-items-center vh-100">
-                <Spinner animation="border" variant="primary" />
-            </div>
-        );
-    }
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+    // Check if we're on dashboard
+    const isDashboard = location.pathname === '/employee/dashboard';
 
+    useEffect(() => {
+        // Start checking for updates when component mounts
+        const interval = setInterval(() => {
+            dispatch(checkScheduleUpdates());
+        }, 30000); // Check every 30 seconds
+
+        return () => clearInterval(interval);
+    }, [dispatch]);
     const navItems = [
         { path: '/employee/schedule', icon: 'calendar-week', label: t('employee.schedule.title') },
         { path: '/employee/constraints', icon: 'shield-check', label: t('employee.constraints') },
         { path: '/employee/requests', icon: 'envelope', label: t('employee.requests.title') },
         { path: '/employee/archive', icon: 'archive', label: t('employee.archive.title') },
     ];
-
+    const handleLogoClick = () => {
+        navigate('/employee/dashboard');
+    };
     const handleLogout = () => {
         dispatch(logout());
         navigate('/login');
@@ -55,14 +58,32 @@ const EmployeeLayout = () => {
         </button>
     ));
 
+    if (loading === 'pending') {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <Spinner animation="border" variant="primary" />
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
     return (
         <>
             {/* Header */}
             <Navbar bg="primary" variant="dark" expand={false} fixed="top" className="employee-navbar">
                 <Container fluid className='mx-1'>
-                    <Navbar.Brand className="d-flex align-items-center app-name">
-                        <i className="bi bi-calendar-check"></i>
-                        <span className="d-none d-sm-inline ms-2">{t('app.name')}</span>
+                    <Navbar.Brand
+                        onClick={handleLogoClick}
+                        style={{ cursor: 'pointer' }}
+                        className="d-flex align-items-center"
+                    >
+                        <div className="app-name">
+                            <i className="bi bi-calendar-check me-2"></i>
+                            <span className="d-none d-sm-inline">{t('app.name')}</span>
+                        </div>
                     </Navbar.Brand>
 
                     <div className="d-flex align-items-center gap-2">
@@ -130,9 +151,11 @@ const EmployeeLayout = () => {
             </Nav>
 
             {/* Main Content */}
-            <main className="employee-main-content">
-                <GlobalAlerts />
-                <Outlet />
+            <main className={`employee-main-content ${isDashboard ? 'dashboard-view' : ''}`}>
+                <Container fluid>
+                    <GlobalAlerts />
+                    <Outlet />
+                </Container>
             </main>
         </>
     );
