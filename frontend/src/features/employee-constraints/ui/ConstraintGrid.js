@@ -31,7 +31,8 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
             key={`${day.date}-${shift.shift_id}`}
             className={tdClassName}
         >
-            <div className="constraint-cell-background" style={backgroundStyle} />
+            <div className="constraint-cell-background" style={backgroundStyle}/>
+
             <div
                 className={foregroundClasses}
                 style={foregroundStyle}
@@ -51,13 +52,14 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
 
 
 // Компонент для отрисовки заголовка смены (может быть как <th>, так и <td>)
-const ShiftHeader = ({shift, getShiftHeaderStyle, as: Component = 'th', isMobile = false}) => {
+const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th', isMobile = false}) => {
     const canonicalType = getCanonicalShiftType(shift.shift_name);
     const icon = getShiftIcon(canonicalType);
 
     return (
         <Component
             className="shift-header-cell sticky-column"
+            style={getShiftHeaderCellStyle(shift)}
         >
             <div
                 className="shift-header-info"
@@ -93,6 +95,7 @@ const ConstraintGrid = (props) => {
         getCellStyles,
         getDayHeaderClass,
         getShiftHeaderStyle,
+        getShiftHeaderCellStyle,
         isMobile,
     } = props;
 
@@ -125,6 +128,7 @@ const ConstraintGrid = (props) => {
                                 <ShiftHeader
                                     shift={shift}
                                     getShiftHeaderStyle={getShiftHeaderStyle}
+                                    getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                                     as="td"
                                 />
                                 {template.map(day => (
@@ -156,6 +160,7 @@ const ConstraintGrid = (props) => {
                                 key={shift.shift_id}
                                 shift={shift}
                                 getShiftHeaderStyle={getShiftHeaderStyle}
+                                getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                                 isMobile
                             />
                         ))}

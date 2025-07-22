@@ -19,10 +19,12 @@
     width: 100%;
 
 }
+
 .employee-constraints-container .mobile-constraints,
-.employee-constraints-container .desktop-constraints  {
-   border:none!important;
+.employee-constraints-container .desktop-constraints {
+    border: none !important;
 }
+
 .employee-constraints-container .full-schedule-table th {
     background-color: var(--bs-gray-100);
     font-weight: 600;
@@ -32,8 +34,6 @@
 [data-theme="dark"] .employee-constraints-container .full-schedule-table th {
     background-color: var(--bs-gray-800);
 }
-
-
 
 
 /* ============================================
@@ -120,11 +120,13 @@
     position: relative;
 
 }
+
 .employee-constraints-container .constraint-cell-background {
     position: absolute;
     inset: 0;
     transition: background-color 0.2s ease;
 }
+
 .employee-constraints-container .constraint-cell {
     transition: all 0.2s ease;
     inset: var(--space-1);
@@ -141,7 +143,7 @@
 /* Стили для ВЫБРАННЫХ ячеек (любой статус, кроме 'neutral') */
 .employee-constraints-container .constraint-cell:not(.neutral) {
     border-radius: 0.3rem; /* Скругленные углы */
-    inset: 4px;            /* Отступы со всех сторон */
+    inset: 4px; /* Отступы со всех сторон */
 }
 
 .employee-constraints-container .constraint-cell.neutral {
@@ -167,13 +169,14 @@
     pointer-events: none;
     opacity: 0.6;
 }
+
 .employee-constraints-container .constraint-td-wrapper.not-allowed {
     cursor: not-allowed;
 }
 
 /* --- СТИЛИ ДЛЯ ИКОНОК --- */
 .employee-constraints-container .constraint-cell > .cell-icon {
-    font-size: 1.5rem;
+    width: 100%;
     pointer-events: none;
     position: absolute;
     display: inline-flex;
@@ -221,7 +224,8 @@
         inset: var(--space-1);
 
     }
-    .employee-constraints-container .shift-header-cell{
+
+    .employee-constraints-container .shift-header-cell {
         padding: var(--space-1);
     }
 
@@ -238,6 +242,7 @@
     .mobile-constraints .shift-header-name {
         font-size: 0.8rem;
     }
+
     .mobile-constraints .shift-header-time {
         font-size: 0.7rem;
     }

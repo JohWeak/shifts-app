@@ -195,7 +195,6 @@ const ConstraintsSchedule = () => {
         dispatch(submitWeeklyConstraints({constraints: formattedConstraints, week_start: weeklyTemplate.weekStart}));
     };
 
-    // *** ИСПРАВЛЕННАЯ ФУНКЦИЯ ***
     const getCellStyles = (date, shiftId) => {
         const status = weeklyConstraints[date]?.shifts[shiftId] || 'neutral';
         const shift = uniqueShifts.find(s => s.shift_id === shiftId);
@@ -249,7 +248,14 @@ const ConstraintsSchedule = () => {
         const baseColor = getShiftColor(shift);
         return {backgroundColor: baseColor, color: getContrastTextColor(baseColor)};
     };
-
+    // Вычисляет стиль для всей ячейки-заголовка (<th> или <td>)
+    const getShiftHeaderCellStyle = (shift) => {
+        const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
+        const baseColor = getShiftColor(shift);
+        return {
+            backgroundColor: hexToRgba(baseColor, neutralBgAlpha),
+        };
+    };
 
     if (loading) return <LoadingState/>;
     if (error) return <Container className="mt-4"><PageHeader title={t('constraints.title')}/><ErrorMessage
@@ -285,6 +291,7 @@ const ConstraintsSchedule = () => {
                     getCellStyles={getCellStyles}
                     getDayHeaderClass={getDayHeaderClass}
                     getShiftHeaderStyle={getShiftHeaderStyle}
+                    getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                     isMobile={isMobile}
                 />
             </Card>
