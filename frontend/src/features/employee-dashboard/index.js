@@ -15,35 +15,73 @@ const EmployeeDashboard = () => {
         constraints,
         dashboardStats,
         loadSchedule,
-        setDashboardStats
+        setDashboardStats, // Убедимся, что эта функция передается из хука
     } = useEmployeeData();
 
     useEffect(() => {
-        // Load initial data if not cached
+        // Загружаем расписание, если его нет в кеше
         if (!schedule) {
             loadSchedule();
         }
+    }, [schedule, loadSchedule]);
 
-        // Calculate dashboard stats
-        if (schedule && !dashboardStats) {
+
+    useEffect(() => {
+        // Пересчитываем статистику при обновлении расписания
+        if (schedule) {
             const stats = calculateDashboardStats(schedule);
             setDashboardStats(stats);
         }
-    }, [schedule, dashboardStats, loadSchedule, setDashboardStats]);
+        // Зависимость от schedule гарантирует пересчет при его изменении
+    }, [schedule, setDashboardStats]);
 
+
+    // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ---
     const calculateDashboardStats = (scheduleData) => {
-        // Calculate various stats from schedule
+        // 1. Проверяем, что данные от API существуют и содержат массив 'schedule'
+        if (!scheduleData || !Array.isArray(scheduleData.schedule)) {
+            return {
+                thisWeekShifts: 0,
+                nextShift: null,
+                totalHoursThisWeek: 0,
+                constraintsSubmitted: constraints?.isSubmitted || false,
+            };
+        }
+
+        // 2. Преобразуем вложенную структуру API в плоский массив смен ТОЛЬКО для текущего пользователя
+        const userAssignments = scheduleData.schedule.flatMap(day =>
+            day.shifts
+                // Находим смены, где текущий пользователь назначен
+                .filter(shift => shift.employees.some(emp => emp.is_current_user))
+                // Создаем новый объект смены в нужном нам формате
+                .map(shift => ({
+                    work_date: day.date, // Берем дату из родительского объекта дня
+                    shift_name: shift.shift_name,
+                    start_time: shift.start_time.substring(0, 5), // Форматируем время
+                    // Рассчитываем время окончания, если его нет
+                    end_time: new Date(new Date(`1970-01-01T${shift.start_time}Z`).getTime() + shift.duration * 60 * 60 * 1000).toISOString().substr(11, 5),
+                    duration: shift.duration,
+                }))
+        );
+
+        // 3. Фильтруем смены, чтобы остались только будущие на ближайшие 7 дней
         const today = new Date();
-        const thisWeekShifts = scheduleData?.assignments?.filter(a => {
+        today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня для корректного сравнения
+
+        const thisWeekShifts = userAssignments.filter(a => {
             const shiftDate = new Date(a.work_date);
             return shiftDate >= today && shiftDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-        }) || [];
+        });
 
+        // 4. Сортируем смены, чтобы найти ближайшую
+        thisWeekShifts.sort((a, b) => new Date(a.work_date) - new Date(b.work_date));
+
+        // 5. Возвращаем рассчитанную статистику
         return {
             thisWeekShifts: thisWeekShifts.length,
-            nextShift: thisWeekShifts[0],
-            totalHoursThisWeek: thisWeekShifts.reduce((sum, shift) => sum + (shift.duration || 8), 0),
-            constraintsSubmitted: constraints?.isSubmitted || false
+            nextShift: thisWeekShifts[0] || null, // Берем первую смену после сортировки
+            totalHoursThisWeek: thisWeekShifts.reduce((sum, shift) => sum + (shift.duration || 0), 0),
+            constraintsSubmitted: constraints?.isSubmitted || false,
         };
     };
 
@@ -57,7 +95,7 @@ const EmployeeDashboard = () => {
             path: '/employee/schedule',
             stats: dashboardStats?.thisWeekShifts
                 ? t('employee.dashboard.shiftsThisWeek', { count: dashboardStats.thisWeekShifts })
-                : null
+                : t('employee.dashboard.noShifts'), // Добавим сообщение, если смен нет
         },
         {
             id: 'constraints',
@@ -94,7 +132,8 @@ const EmployeeDashboard = () => {
         navigate(path);
     };
 
-    if (!dashboardStats && schedule === null) {
+    // Отображаем загрузку, пока не пришли данные И не посчитана статистика
+    if (schedule === null || dashboardStats === null) {
         return <LoadingState size="lg" message={t('common.loading')} />;
     }
 
