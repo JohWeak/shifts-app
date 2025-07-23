@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
 import {login} from './model/authSlice'; // Импортируем наш Thunk
-import {FloatingLabel, Form, Spinner} from 'react-bootstrap';
+import {Button, FloatingLabel, Form, InputGroup, Spinner} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './index.css';
 import {LanguageSwitch} from "../../shared/ui/components/LanguageSwitch/LanguageSwitch";
@@ -76,7 +76,7 @@ const Login = () => {
                         </FloatingLabel>
 
                         {/* Поле Password */}
-                        <div className="password-wrapper mb-3">
+                        <InputGroup className="mb-3">
                             <FloatingLabel
                                 controlId="password"
                                 label={t('auth.password')}
@@ -88,18 +88,17 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     autoComplete="current-password"
-                                    className="password-input-padding"
                                 />
                             </FloatingLabel>
-                            <button
-                                className="btn password-toggle-floating"
-                                type="button"
+                            {/* Используем компонент Button для идеальной интеграции */}
+                            <Button
+                                variant="outline-secondary"
                                 onClick={handlePasswordToggle}
                                 title={showPassword ? "Hide password" : "Show password"}
                             >
                                 <i className={`bi bi-${showPassword ? 'eye' : 'eye-slash'}`}></i>
-                            </button>
-                        </div>
+                            </Button>
+                        </InputGroup>
 
                         <button
                             type="submit"

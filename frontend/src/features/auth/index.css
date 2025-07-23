@@ -155,32 +155,25 @@
     z-index: 100;
     justify-content: space-between;
 }
-.password-wrapper {
-    position: relative;
+.auth-form .form-floating >button{
+    border-color: var(--bs-primary)!important;
 }
-
-/* 2. Стилизуем саму кнопку */
-.password-toggle-floating {
-    position: absolute;
-    top: 50%;
-    right: 0.75rem; /* Отступ справа */
-    transform: translateY(-50%); /* Идеальное выравнивание по вертикали */
-    z-index: 10; /* Убедимся, что кнопка поверх поля ввода */
-    border: none;
-    background: transparent;
-    color: var(--bs-secondary); /* Цвет иконки */
-    padding: 0.25rem;
-    line-height: 1; /* Убираем лишнюю высоту */
+div.auth-body > form > div.mb-3.input-group > button{
+    border-color: var(--bs-gray-400);
 }
-
-.password-toggle-floating:hover {
+div.auth-body > form > div.mb-3.input-group > button:hover {
+    background-color: var(--bs-gray-200);
     color: var(--bs-primary);
 }
-
-/* 3. Добавляем отступ справа в поле ввода, чтобы текст не заезжал под кнопку */
-.password-input-padding {
-    padding-right: 3rem !important;
+[data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button{
+    border-color: var(--bs-gray-700);
 }
+[data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button:hover {
+    background-color: var(--bs-gray-900);
+
+}
+
+
 
 [dir="rtl"] .auth-controls {
     right: auto;
