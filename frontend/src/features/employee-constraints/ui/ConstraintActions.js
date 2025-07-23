@@ -35,21 +35,44 @@ const ConstraintActions = (props) => {
     const { t } = useI18n();
     const { isSubmitted, onEdit, isMobile, ...actionProps } = props;
 
+    // В зависимости от isSubmitted, добавляем класс к главному контейнеру
+    const panelClassName = `mb-2 p-2 constraint-actions-panel ${isSubmitted ? 'view-mode' : 'edit-mode'}`;
+
     return (
-        <div className="mb-2 p-2 constraint-actions-panel">
-            {isSubmitted ? (
-                // 1. РЕЖИМ ОТОБРАЖЕНИЯ: Только кнопка "Редактировать"
-                <div className="panel-content justify-content-center">
-                    <Button variant="primary" onClick={onEdit} className="edit-button">
-                        <i className="bi bi-pencil-square me-2"></i>
-                        {t('common.edit')}
-                    </Button>
-                </div>
-            ) : isMobile ? (
-                // 2. РЕЖИМ РЕДАКТИРОВАНИЯ (МОБИЛЬНЫЙ)
-                <div className="panel-content mobile-layout">
-                    <SegmentedControl t={t} {...actionProps} />
-                    <div className="mobile-actions-container">
+        <div className={panelClassName}>
+            {/* 1. Контейнер для кнопки "Редактировать" (всегда в DOM) */}
+            <div className="edit-button-container">
+                <Button variant="primary" onClick={onEdit} className="edit-button">
+                    <i className="bi bi-pencil-square me-2"></i>
+                    {t('common.edit')}
+                </Button>
+            </div>
+
+            {/* 2. Контейнер для полного набора кнопок (всегда в DOM) */}
+            <div className="action-controls-container">
+                {isMobile ? (
+                    // МОБИЛЬНАЯ ВЕРСТКА
+                    <div className="panel-content mobile-layout">
+                        <SegmentedControl t={t} {...actionProps} />
+                        <div className="mobile-actions-container">
+                            <div className="secondary-actions-group">
+                                <Button variant="outline-secondary" onClick={actionProps.onCancel} disabled={actionProps.submitting} title={t('common.cancel')}>
+                                    {t('common.cancel')}
+                                </Button>
+                                <Button variant="outline-secondary" onClick={actionProps.onClear} disabled={actionProps.submitting} title={t('common.reset')}>
+                                    <i className="bi bi-arrow-counterclockwise"></i>
+                                </Button>
+                                <PaletteButton t={t} {...actionProps} />
+                            </div>
+                            <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting} className="submit-button">
+                                {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2"/> : <i className="bi bi-check-lg me-1"></i>}
+                                {actionProps.submitting ? t('common.saving') : t('common.submit')}
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    // ДЕСКТОПНАЯ ВЕРСТКА
+                    <div className="panel-content desktop-layout">
                         <div className="secondary-actions-group">
                             <Button variant="outline-secondary" onClick={actionProps.onCancel} disabled={actionProps.submitting} title={t('common.cancel')}>
                                 {t('common.cancel')}
@@ -59,31 +82,14 @@ const ConstraintActions = (props) => {
                             </Button>
                             <PaletteButton t={t} {...actionProps} />
                         </div>
+                        <SegmentedControl t={t} {...actionProps} />
                         <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting} className="submit-button">
-                            {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2" /> : <i className="bi bi-check-lg me-1"></i>}
+                            {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2"/> : <i className="bi bi-check-lg me-1"></i>}
                             {actionProps.submitting ? t('common.saving') : t('common.submit')}
                         </Button>
                     </div>
-                </div>
-            ) : (
-                // 3. РЕЖИМ РЕДАКТИРОВАНИЯ (ДЕКСТОП)
-                <div className="panel-content desktop-layout">
-                    <div className="secondary-actions-group">
-                        <Button variant="outline-secondary" onClick={actionProps.onCancel} disabled={actionProps.submitting} title={t('common.cancel')}>
-                            {t('common.cancel')}
-                        </Button>
-                        <Button variant="outline-secondary" onClick={actionProps.onClear} disabled={actionProps.submitting} title={t('common.reset')}>
-                            <i className="bi bi-arrow-counterclockwise"></i>
-                        </Button>
-                        <PaletteButton t={t} {...actionProps} />
-                    </div>
-                    <SegmentedControl t={t} {...actionProps} />
-                    <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting} className="submit-button">
-                        {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2" /> : <i className="bi bi-check-lg me-1"></i>}
-                        {actionProps.submitting ? t('common.saving') : t('common.submit')}
-                    </Button>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
