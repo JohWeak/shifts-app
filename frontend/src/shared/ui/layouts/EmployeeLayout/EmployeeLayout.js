@@ -68,6 +68,7 @@ const EmployeeLayout = () => {
     }, [dispatch]);
 
     const navItems = [
+        { path: '/employee/dashboard', icon: 'house', label: t('dashboard.title') },
         { path: '/employee/schedule', icon: 'calendar-week', label: t('employee.schedule.title') },
         { path: '/employee/constraints', icon: 'shield-check', label: t('employee.constraints') },
         { path: '/employee/requests', icon: 'envelope', label: t('employee.requests.title') },
