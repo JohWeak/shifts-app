@@ -11,7 +11,7 @@ const app = express();
 // --- НАСТРОЙКА CORS ДЛЯ ЛОКАЛЬНОЙ РАЗРАБОТКИ ---
 const allowedOrigins = [
     'http://localhost:3000',
-    `http://192.168.1.111:3000`
+    `http://172.20.10.2:3000`
 ];
 const corsOptions = {
     origin: (origin, callback) => {

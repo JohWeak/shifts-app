@@ -75,7 +75,9 @@ const ConstraintActions = ({
                                         {submitting ? <Spinner size="sm" as="span" className="me-2" /> : <i className="bi bi-check-lg me-1"></i>}
                                         {submitting ? t('common.saving') : t('common.submit')}
                                     </Button>
+
                                 </div>
+
                             </>
                         )}
                     </div>
