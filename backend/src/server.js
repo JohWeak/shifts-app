@@ -4,6 +4,7 @@ const app = require('./app');
 const db = require('./models');
 
 const PORT = process.env.PORT || 5000;
+const HOST = '0.0.0.0';
 
 // Синхронизация базы данных
 db.sequelize.sync({ alter: false })
@@ -12,7 +13,7 @@ db.sequelize.sync({ alter: false })
 
         // Запуск сервера
         app.listen(PORT, () => {
-            console.log(`🚀 Server is running on port ${PORT}`);
+            console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
         });
     })
     .catch(err => {

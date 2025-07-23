@@ -8,6 +8,25 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
+// --- НАСТРОЙКА CORS ДЛЯ ЛОКАЛЬНОЙ РАЗРАБОТКИ ---
+const allowedOrigins = [
+    'http://localhost:3000',
+    `http://192.168.1.111:3000`
+];
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Разрешить запросы без origin (например, мобильные приложения или curl)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+};
+app.use(cors(corsOptions));
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
