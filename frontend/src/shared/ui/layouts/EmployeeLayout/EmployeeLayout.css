@@ -18,12 +18,7 @@
     font-size: 1rem;
 }
 
-/* Dashboard specific styles */
-.employee-main-content.dashboard-view {
-    margin-top: 56px;
-    min-height: calc(100vh - 56px);
-    padding-bottom: 2rem;
-}
+
 
 /* Logo hover effect */
 .employee-navbar .navbar-brand:hover .app-name {
@@ -121,13 +116,21 @@
     backdrop-filter: blur(5px);
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
-
 }
 
 [data-theme="dark"] .employee-nav-tabs:before {
     background: var(--bs-gray-800);
     background: linear-gradient(180deg, rgba(41, 41, 41, 0.4) 0%, rgba(53, 58, 64, 0.95) 5%);
 }
+
+/* --- Скрытие панели навигации --- */
+.employee-nav-tabs.hidden-tabs {
+    transform: translate(-50%, 100%); /* Сдвигаем панель вниз за пределы экрана */
+    opacity: 0;
+    pointer-events: none; /* Отключаем клики по скрытой панели */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
 .nav-tabs-wrapper {
     display: flex;
     height: 58px;
@@ -210,7 +213,25 @@
 [data-theme="dark"] .employee-main-content {
     background: #191d1e;
 }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+.employee-main-content.animating-in .container {
+    /* Анимация появления контента */
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.employee-main-content.animating-out .container {
+    /* Анимация исчезновения контента */
+    animation: fadeOut 0.2s ease-in forwards;
+}
 /* Mobile Responsive */
 @media (max-width: 767px) {
     /* Keep text labels on mobile */

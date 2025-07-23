@@ -134,7 +134,7 @@ const EmployeeDashboard = () => {
     }
 
     return (
-        <Container className="employee-dashboard py-4">
+        <Container className="employee-dashboard py-2">
             <div className="dashboard-header mb-4">
                 <h2 className="mb-1">{t('employee.dashboard.welcome')}</h2>
                 <p className="text-muted">{t('employee.dashboard.selectOption')}</p>
@@ -164,7 +164,7 @@ const EmployeeDashboard = () => {
 
             <Row className="g-4">
                 {dashboardCards.map(card => (
-                    <Col key={card.id} xs={12} sm={6} lg={3}>
+                    <Col key={card.id} xs={6} sm={6} lg={3}>
                         <Card
                             className={`dashboard-card h-100 ${card.highlight ? 'highlight' : ''}`}
                             onClick={() => handleCardClick(card.path)}

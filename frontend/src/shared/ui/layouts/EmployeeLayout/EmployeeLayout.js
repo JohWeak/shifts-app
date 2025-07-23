@@ -22,8 +22,7 @@ const EmployeeLayout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [showNav, setShowNav] = useState(false);
-
+    const [isAnimating, setIsAnimating] = useState(false);
 
     // Check if we're on dashboard
     const isDashboard = location.pathname === '/employee/dashboard';
@@ -75,6 +74,22 @@ const EmployeeLayout = () => {
         { path: '/employee/requests', icon: 'envelope', iconFill: 'envelope-fill', label: t('employee.requests.title') },
         { path: '/employee/archive', icon: 'archive', iconFill: 'archive-fill', label: t('employee.archive.title') },
     ];
+
+    const handleNavigation = (path) => {
+        // Если мы уже на этой странице, ничего не делаем
+        if (location.pathname === path) return;
+
+        // 1. Запускаем анимацию "исчезновения"
+        setIsAnimating(true);
+
+        // 2. Ждем завершения анимации и только потом меняем маршрут
+        setTimeout(() => {
+            navigate(path);
+            // 3. Сбрасываем флаг анимации после перерисовки
+            setIsAnimating(false);
+        }, 200); // Это время должно совпадать с длительностью анимации в CSS
+    };
+
     const handleLogoClick = () => {
         navigate('/employee/dashboard');
     };
@@ -177,7 +192,8 @@ const EmployeeLayout = () => {
                         {navItems.map(item => (
                             <Nav.Link
                                 key={item.path}
-                                className={`nav-tab-item ${location.pathname === item.path ? 'active' : ''}`}                                onClick={() => navigate(item.path)}
+                                className={`nav-tab-item ${location.pathname === item.path ? 'active' : ''}`}
+                                onClick={() => handleNavigation(item.path)}
                             >
                                 <span className="icon-wrapper me-2">
                                     <i className={`bi bi-${item.icon} icon-outline`}></i>
@@ -191,7 +207,7 @@ const EmployeeLayout = () => {
             </Nav>
 
             {/* Main Content */}
-            <main className={`employee-main-content ${isDashboard ? 'dashboard-view' : ''}`}>
+            <main className={`employee-main-content ${isAnimating ? 'animating-out' : 'animating-in'}`}>
                 <Container fluid>
                     <GlobalAlerts />
                     <Outlet />
