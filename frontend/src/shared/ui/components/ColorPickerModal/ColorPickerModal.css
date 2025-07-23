@@ -75,7 +75,7 @@
 }
 
 /* Стили для кнопки-крестика */
-.btn.rounded-circle {
+.color-picker-modal .btn.rounded-circle {
     width: 30px;
     height: 30px;
     padding: 0;

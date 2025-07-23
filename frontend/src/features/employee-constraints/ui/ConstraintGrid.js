@@ -1,6 +1,6 @@
 // frontend/src/features/employee-constraints/ui/ConstraintGrid.js
 import React from 'react';
-import {Card, Table} from 'react-bootstrap';
+import {Button, Card, Table} from 'react-bootstrap';
 import { X, Check } from 'react-bootstrap-icons';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
@@ -99,12 +99,39 @@ const ConstraintGrid = (props) => {
         getShiftHeaderStyle,
         getShiftHeaderCellStyle,
         isMobile,
-        justChangedCell
+        justChangedCell,
+        limitParams,
+        usedCounts,
+        onShowInstructions,
     } = props;
 
     const {t} = useI18n();
-
     const commonCellProps = { onCellClick, getCellStyles };
+
+    const LimitsFooter = ({ colSpan }) => (
+        <tfoot>
+        <tr>
+            <td colSpan={colSpan} className="text-center p-2">
+                <div className="d-flex justify-content-center align-items-center gap-2">
+                    <Button
+                        variant="outline-secondary"
+                        className="rounded-circle help-button-inline"
+                        onClick={onShowInstructions}
+                        title={t('constraints.instructions.title')}
+                    >
+                        <i className="bi bi-question"></i>
+                    </Button>
+                    <p className="text-muted small mb-0">
+                        {t('constraints.instructions.remaining', {
+                            cannotWork: (limitParams.cannotWork - usedCounts.cannot_work),
+                            preferWork: (limitParams.preferWork - usedCounts.prefer_work)
+                        })}
+                    </p>
+                </div>
+            </td>
+        </tr>
+        </tfoot>
+    );
 
     const DesktopGrid = () => (
         <Card className="shadow desktop-constraints d-none d-md-block">
@@ -146,7 +173,7 @@ const ConstraintGrid = (props) => {
                             </tr>
                         ))}
                         </tbody>
-
+                        <LimitsFooter colSpan={template.length + 1} />
                     </Table>
                 </div>
             </Card.Body>
@@ -193,7 +220,9 @@ const ConstraintGrid = (props) => {
                             ))}
                         </tr>
                     ))}
+
                     </tbody>
+                    <LimitsFooter colSpan={uniqueShifts.length + 1} />
                 </Table>
             </Card.Body>
         </Card>

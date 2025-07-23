@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/index.js
 import React, {useState, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Card, Container} from 'react-bootstrap';
+import { Card, Container, Toast, ToastContainer } from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
@@ -38,6 +38,8 @@ const ConstraintsSchedule = () => {
     const {t, locale} = useI18n();
     const isMobile = useMediaQuery('(max-width: 888px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
+    const [showInstructions, setShowInstructions] = useState(false);
+    const toggleShowInstructions = () => setShowInstructions(!showInstructions);
 
     const {
         getShiftColor,
@@ -70,6 +72,11 @@ const ConstraintsSchedule = () => {
     const {user} = useSelector(state => state.auth);
 
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
+    const limitParams = {
+        cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
+        preferWork: weeklyTemplate.constraints.limits.prefer_work_days
+    };
+    const employeeName = formatEmployeeName(weeklyTemplate.employee);
 
     const constraintPseudoShifts = useMemo(() => ({
         'cannot_work': {
@@ -278,11 +285,8 @@ const ConstraintsSchedule = () => {
     if (!weeklyTemplate) return <Container className="mt-4"><PageHeader title={t('constraints.title')}/><ErrorMessage
         error={t('constraints.noTemplate')} variant="info"/></Container>;
 
-    const limitParams = {
-        cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
-        preferWork: weeklyTemplate.constraints.limits.prefer_work_days
-    };
-    const employeeName = formatEmployeeName(weeklyTemplate.employee);
+
+
     return (
         <Container fluid className="employee-constraints-container position-relative">
             <PageHeader
@@ -309,6 +313,9 @@ const ConstraintsSchedule = () => {
                     getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                     isMobile={isMobile}
                     justChangedCell={justChangedCell}
+                    usedCounts={usedCounts}
+                    limitParams={limitParams}
+                    onShowInstructions={toggleShowInstructions}
                 />
             </Card>
 
@@ -330,21 +337,25 @@ const ConstraintsSchedule = () => {
                     dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
                 }}
                 submitting={submitting}
-                weeklyTemplate={weeklyTemplate}
-                limitParams={limitParams}
-            />
-            {weeklyTemplate?.constraints?.limits && (
-                <div className="text-center mt-3">
-                    <p className="text-muted small mb-0">
-                        <i className="bi bi-info-circle me-1"/>
-                        {t('constraints.instructions.remaining', {
-                            cannotWork: (weeklyTemplate.constraints.limits.cannot_work_days - usedCounts.cannot_work),
-                            preferWork: (weeklyTemplate.constraints.limits.prefer_work_days - usedCounts.prefer_work)
-                        })}
-                    </p>
 
-                </div>
-            )}
+            />
+            <ToastContainer className="p-3 toast-container" style={{ zIndex: 1056 }}>
+                <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
+                    <Toast.Header closeButton={true}>
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <strong className="me-auto">{t('constraints.instructions.title')}</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                        <ul className="mb-0 ps-3">
+                            <li>{t('constraints.instructions.selectMode')}</li>
+                            <li>{t('constraints.instructions.clickCells')}</li>
+                            {weeklyTemplate && (
+                                <li>{t('constraints.instructions.limits', limitParams)}</li>
+                            )}
+                        </ul>
+                    </Toast.Body>
+                </Toast>
+            </ToastContainer>
 
             {colorPickerState.show && (
                 <ColorPickerModal
