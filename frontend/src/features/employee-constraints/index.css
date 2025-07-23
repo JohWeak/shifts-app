@@ -15,7 +15,8 @@
    2. СТРУКТУРА ТАБЛИЦЫ И СЕТКИ
    ============================================ */
 #root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card{
-    border-radius: var(--radius-lg)
+    border-radius: var(--radius-lg);
+    overflow: hidden;
 
 }
 .employee-constraints-container .full-schedule-table {

@@ -60,6 +60,7 @@
     transform: translateY(0);
     max-height: 500px; /* Достаточная высота для всех контролов */
     pointer-events: auto;
+    padding: 0;
 }
 
 /* --- Стили для конкретных версток (остаются почти без изменений) --- */
@@ -67,6 +68,10 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+
+
 }
 
 .mobile-layout {
@@ -79,7 +84,8 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 0 var(--space-2);
+    padding: 0;
+
 }
 .mobile-layout .segmented-control-wrapper {
     width: 100%;
@@ -115,7 +121,6 @@
     align-items: center;
     justify-content: center; /* Центрируем, чтобы контрол был главным */
     gap: var(--space-1);
-
 }
 
 /* 2. КОНТРОЛ: остается без изменений */
@@ -129,6 +134,7 @@
     height: 44px;
     flex-shrink: 0;
     min-width: 280px;
+    box-shadow: inset var(--bs-box-shadow-sm);
 
 }
 
@@ -150,7 +156,7 @@
     position: absolute;
     top: 4px;
     bottom: 4px;
-    width: 48.5%;
+    width: 49%;
     border-radius: var(--radius-md);
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: var(--bs-box-shadow-sm);
@@ -168,17 +174,7 @@
     border: none;
 }
 
-/*.palette-button.mode-cannot_work {*/
-/*    background-color: var(--bs-danger);*/
-/*    border-color: var(--bs-danger);*/
-/*    color: var(--bs-white);*/
-/*}*/
 
-/*.palette-button.mode-prefer_work {*/
-/*    background-color: var(--bs-success);*/
-/*    border-color: var(--bs-success);*/
-/*    color: var(--bs-white);*/
-/*}*/
 
 
 /* --- LTR (стандартное направление) --- */
@@ -259,6 +255,7 @@
 
     .constraint-actions-panel .panel-content {
         position: relative;
+        padding: 0;
     }
 
     .toast-container,

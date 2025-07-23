@@ -61,7 +61,7 @@ const ConstraintActions = (props) => {
     const { isSubmitted, onEdit, isMobile, customColors, ...actionProps } = props;
 
     // В зависимости от isSubmitted, добавляем класс к главному контейнеру
-    const panelClassName = `mb-2 p-2 constraint-actions-panel ${isSubmitted ? 'view-mode' : 'edit-mode'}`;
+    const panelClassName = `mb-2 constraint-actions-panel ${isSubmitted ? 'view-mode' : 'edit-mode'}`;
 
     return (
         <div className={panelClassName}>
