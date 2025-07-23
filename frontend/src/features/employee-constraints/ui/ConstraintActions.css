@@ -106,39 +106,31 @@
     color: var(--bs-primary);
 }
 
+/* --- LTR (стандартное направление) --- */
+[dir="ltr"] .segmented-control-wrapper.mode-cannot_work .indicator { transform: translateX(0); }
+[dir="ltr"] .segmented-control-wrapper.mode-prefer_work .indicator { transform: translateX(100%); }
 
-/* --- Логика состояний (универсальная для LTR и RTL) --- */
+/* --- RTL (зеркальное направление) --- */
+/* "Cannot Work" теперь справа, поэтому индикатор должен уехать направо */
+[dir="rtl"] .segmented-control-wrapper.mode-cannot_work .indicator { transform: translateX(0); }
+/* "Prefer to Work" теперь слева, поэтому индикатор остается слева */
+[dir="rtl"] .segmented-control-wrapper.mode-prefer_work .indicator { transform: translateX(-100%); }
 
-/* Показываем нужную палитру в зависимости от режима */
-.segmented-control-wrapper {
-    --indicator-transform-cannot: translateX(0);
-    --indicator-transform-prefer: translateX(100%);
-}
 
-/* 2. В RTL - просто меняем значения переменных местами. Всё. */
-[dir="rtl"] .segmented-control-wrapper {
-    --indicator-transform-cannot: translateX(100%);
-    --indicator-transform-prefer: translateX(0);
-}
+/* --- Общие стили для всех направлений --- */
 
-/* 3. Применяем трансформацию и цвет, используя переменные */
-.segmented-control-wrapper.mode-cannot_work .indicator {
-    transform: var(--indicator-transform-cannot);
-    background-color: var(--bs-danger);
-}
-.segmented-control-wrapper.mode-prefer_work .indicator {
-    transform: var(--indicator-transform-prefer);
-    background-color: var(--bs-success);
-}
-
-/* 4. Подсветка текста (используем исправленную версию с классами) */
+/* Подсветка текста (используем надежные классы) */
 .segmented-control-wrapper.mode-cannot_work .segment-cannot-work span,
 .segmented-control-wrapper.mode-prefer_work .segment-prefer-work span {
     color: var(--bs-white);
     font-weight: var(--font-semibold);
 }
 
-/* 5. Логика для палитры (остается без изменений, она надежна) */
+/* Цвета индикатора */
+.segmented-control-wrapper.mode-cannot_work .indicator { background-color: var(--bs-danger); }
+.segmented-control-wrapper.mode-prefer_work .indicator { background-color: var(--bs-success); }
+
+/* Видимость палитры (эта логика уже надежна и не меняется) */
 .segmented-control-wrapper.mode-cannot_work .palette-cannot-work,
 .segmented-control-wrapper.mode-prefer_work .palette-prefer-work {
     visibility: visible;
