@@ -110,33 +110,40 @@
 /* --- Логика состояний (универсальная для LTR и RTL) --- */
 
 /* Показываем нужную палитру в зависимости от режима */
+.segmented-control-wrapper {
+    --indicator-transform-cannot: translateX(0);
+    --indicator-transform-prefer: translateX(100%);
+}
+
+/* 2. В RTL - просто меняем значения переменных местами. Всё. */
+[dir="rtl"] .segmented-control-wrapper {
+    --indicator-transform-cannot: translateX(100%);
+    --indicator-transform-prefer: translateX(0);
+}
+
+/* 3. Применяем трансформацию и цвет, используя переменные */
+.segmented-control-wrapper.mode-cannot_work .indicator {
+    transform: var(--indicator-transform-cannot);
+    background-color: var(--bs-danger);
+}
+.segmented-control-wrapper.mode-prefer_work .indicator {
+    transform: var(--indicator-transform-prefer);
+    background-color: var(--bs-success);
+}
+
+/* 4. Подсветка текста (используем исправленную версию с классами) */
+.segmented-control-wrapper.mode-cannot_work .segment-cannot-work span,
+.segmented-control-wrapper.mode-prefer_work .segment-prefer-work span {
+    color: var(--bs-white);
+    font-weight: var(--font-semibold);
+}
+
+/* 5. Логика для палитры (остается без изменений, она надежна) */
 .segmented-control-wrapper.mode-cannot_work .palette-cannot-work,
 .segmented-control-wrapper.mode-prefer_work .palette-prefer-work {
     visibility: visible;
     opacity: 1;
 }
-
-/* --- Логика для LTR --- */
-[dir="ltr"] .segmented-control-wrapper.mode-cannot_work .indicator { transform: translateX(0); }
-[dir="ltr"] .segmented-control-wrapper.mode-prefer_work .indicator { transform: translateX(100%); }
-
-/* --- Логика для RTL (ИСПРАВЛЕНА) --- */
-/* В RTL "Cannot Work" справа (это 2-й сегмент), а "Prefer" слева (1-й) */
-[dir="rtl"] .segmented-control-wrapper.mode-cannot_work .indicator { transform: translateX(100%); }
-[dir="rtl"] .segmented-control-wrapper.mode-prefer_work .indicator { transform: translateX(0); }
-
-
-/* Подсветка текста (универсальная) */
-.segmented-control-wrapper.mode-cannot_work .segment:first-of-type span,
-.segmented-control-wrapper.mode-prefer_work .segment:last-of-type span {
-    color: var(--bs-white);
-    font-weight: var(--font-semibold);
-}
-
-/* Цвета индикатора (универсальные) */
-.segmented-control-wrapper.mode-cannot_work .indicator { background-color: var(--bs-danger); }
-.segmented-control-wrapper.mode-prefer_work .indicator { background-color: var(--bs-success); }
-
 
 /* Темная тема */
 [data-theme="dark"] .segmented-control {

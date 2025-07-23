@@ -45,10 +45,10 @@ const ConstraintActions = ({
                                     {/* Сам переключатель (без изменений) */}
                                     <div className="segmented-control">
                                         <div className="indicator"></div>
-                                        <div className="segment" onClick={() => onModeChange('cannot_work')}>
+                                        <div className="segment segment-cannot-work" onClick={() => onModeChange('cannot_work')}>
                                             <span>{t('constraints.cannotWork')}</span>
                                         </div>
-                                        <div className="segment" onClick={() => onModeChange('prefer_work')}>
+                                        <div className="segment segment-prefer-work" onClick={() => onModeChange('prefer_work')}>
                                             <span>{t('constraints.preferWork')}</span>
                                         </div>
                                     </div>
