@@ -962,8 +962,8 @@ export const en = {
         alreadySubmitted: 'You have already submitted constraints for this week',
 
         colorSettings: 'Color Settings',
-        cannotWorkColor: 'Cannot Work Color',
-        preferWorkColor: 'Prefer to Work Color',
+        cannot_work_color: 'Cannot Work Color',
+        prefer_work_color: 'Prefer to Work Color',
     },
 
 

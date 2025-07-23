@@ -109,7 +109,7 @@ const ConstraintGrid = (props) => {
     const commonCellProps = { onCellClick, getCellStyles };
 
     const LimitsFooter = ({ colSpan }) => (
-        <tfoot>
+        <tfoot className="info-footer">
         <tr>
             <td colSpan={colSpan} className="text-center p-2">
                 <div className="d-flex justify-content-center align-items-center gap-2">
