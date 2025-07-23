@@ -8,8 +8,14 @@ import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
+import {
+    fetchPersonalSchedule,
+    fetchEmployeeArchiveSummary,
+    checkScheduleUpdates,
+    fetchEmployeeConstraints
+} from "features/employee-dashboard/model/employeeDataSlice";
 import './EmployeeLayout.css';
-import { checkScheduleUpdates, fetchPersonalSchedule } from "features/employee-dashboard/model/employeeDataSlice";
+
 const EmployeeLayout = () => {
     const { isAuthenticated, loading, user } = useSelector(state => state.auth);
     const { t, direction } = useI18n();
@@ -23,19 +29,40 @@ const EmployeeLayout = () => {
     const isDashboard = location.pathname === '/employee/dashboard';
 
     useEffect(() => {
-        // Сначала загружаем данные о расписании, если их нет.
-        // Это нужно, чтобы у нас был ID расписания для проверки.
-        dispatch(fetchPersonalSchedule({}));
+        const initialLoad = async () => {
+            try {
+                // --- ЭТАП 1: Загружаем критически важные данные ---
+                console.log('[Data Preload] Загрузка персонального расписания...');
+                // .unwrap() позволяет получить результат thunk или поймать ошибку
+                const scheduleAction = await dispatch(fetchPersonalSchedule({})).unwrap();
 
-        // Запускаем проверку сразу после монтирования компонента
-        dispatch(checkScheduleUpdates());
+                // Данные о расписании нужны для загрузки ограничений
+                const weekStart = scheduleAction.data.current?.week?.start;
+                if (weekStart) {
+                    console.log('[Data Preload] Загрузка ограничений...');
+                    dispatch(fetchEmployeeConstraints({ weekStart }));
+                }
 
-        // Устанавливаем интервал для последующих проверок (каждые 30 секунд)
+                // --- ЭТАП 2: В фоне загружаем важные, но не критические данные ---
+                console.log('[Data Preload] Фоновая загрузка сводки по архиву...');
+                dispatch(fetchEmployeeArchiveSummary());
+
+                // Сюда можно добавить загрузку сводки по запросам, если она появится
+                // dispatch(fetchRequestsSummary());
+
+            } catch (error) {
+                console.error("Ошибка при первоначальной загрузке данных:", error);
+            }
+        };
+
+        // Запускаем асинхронную загрузку
+        initialLoad();
+
+        // --- Периодическая проверка обновлений расписания (остается без изменений) ---
         const intervalId = setInterval(() => {
             dispatch(checkScheduleUpdates());
-        }, 30000); // 30000 мс = 30 секунд
+        }, 30000);
 
-        // Очищаем интервал при размонтировании компонента, чтобы избежать утечек памяти
         return () => clearInterval(intervalId);
 
     }, [dispatch]);

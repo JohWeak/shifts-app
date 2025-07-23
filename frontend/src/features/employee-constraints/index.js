@@ -18,6 +18,7 @@ import {ScheduleHeaderCard} from 'features/employee-schedule/ui/ScheduleHeaderCa
 
 
 // Redux actions & utils
+
 import {
     fetchWeeklyConstraints,
     submitWeeklyConstraints,
@@ -52,17 +53,19 @@ const ConstraintsSchedule = () => {
         originalGlobalColor
     } = useShiftColor();
 
+
     const {
         weeklyTemplate,
         weeklyConstraints,
-        loading,
         submitting,
-        error,
         submitStatus,
         currentMode,
+        loading,
+        error,
         isSubmitted,
         canEdit
     } = useSelector(state => state.constraints);
+
     const {user} = useSelector(state => state.auth);
 
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
@@ -81,12 +84,10 @@ const ConstraintsSchedule = () => {
     }), [t]);
 
     useEffect(() => {
-        // Запускаем загрузку, только если шаблона нет в состоянии.
-        // Если он там есть (из кеша), этот dispatch не будет вызван.
-        if (!weeklyTemplate) {
-            dispatch(fetchWeeklyConstraints({}));
-        }
-    }, [dispatch, weeklyTemplate]);
+        // Компонент сам отвечает за загрузку своих данных.
+        // Кеш внутри thunk'а предотвратит лишние запросы.
+        dispatch(fetchWeeklyConstraints());
+    }, [dispatch]);
 
     useEffect(() => {
         if (submitStatus === 'success') {

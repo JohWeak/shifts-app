@@ -85,23 +85,19 @@ export const fetchPositionSchedule = createAsyncThunk(
     }
 );
 export const fetchEmployeeConstraints = createAsyncThunk(
-    'employeeData/fetchConstraints',
-    async ({ weekStart, forceRefresh = false }, { getState, rejectWithValue }) => {
+    'employeeData/fetchConstraints', // Меняем имя для уникальности
+    async ({ forceRefresh = false }, { getState, rejectWithValue }) => {
+        const { constraints, constraintsLastFetched } = getState().employeeData;
+
+        if (!forceRefresh && constraints && isCacheValid(constraintsLastFetched, CACHE_DURATION_LONG)) {
+            return { data: constraints, fromCache: true };
+        }
+
         try {
-            const state = getState();
-            const { constraints, constraintsLastFetched } = state.employeeData;
-
-            // Check cache
-            if (!forceRefresh &&
-                isCacheValid(constraintsLastFetched, CACHE_DURATION_SHORT.CONSTRAINTS) &&
-                constraints?.weekStart === weekStart) {
-                return { data: constraints, fromCache: true };
-            }
-            const response = await constraintAPI.getWeeklyConstraints({ weekStart });
-
+            const response = await constraintAPI.getWeeklyConstraints({});
             return { data: response, fromCache: false };
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.message || 'Failed to fetch constraints');
         }
     }
 );
@@ -325,7 +321,7 @@ const employeeDataSlice = createSlice({
             .addCase(fetchEmployeeConstraints.fulfilled, (state, action) => {
                 state.constraintsLoading = false;
                 if (!action.payload.fromCache) {
-                    state.constraints = action.payload.data;
+                    state.constraints = action.payload.data; // Сохраняем данные сюда
                     state.constraintsLastFetched = Date.now();
                 }
             })
