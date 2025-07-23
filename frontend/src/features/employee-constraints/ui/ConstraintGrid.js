@@ -12,7 +12,7 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 
 // Компонент для отрисовки ячейки данных таблицы
-const GridCell = ({ day, shift, onCellClick, getCellStyles, setHoveredCell }) => {
+const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => {
     const {
         tdStyle,
         foregroundStyle,
@@ -23,6 +23,7 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles, setHoveredCell }) =>
     const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
     const isNotClickable = !foregroundClasses.includes('clickable');
     const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
+    const finalClasses = `${foregroundClasses} ${isJustChanged ? 'is-appearing' : ''}`;
 
     if (!dayShift) { return <td key={`${day.date}-${shift.shift_id}-empty`} className={`${tdClassName} text-center text-muted align-middle`}>-</td>; }
 
@@ -33,7 +34,7 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles, setHoveredCell }) =>
             style={tdStyle}
         >
             <div
-                className={foregroundClasses}
+                className={finalClasses}
                 style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
                 // <<< ГЛАВНОЕ ИЗМЕНЕНИЕ: Устанавливаем data-атрибут.
@@ -98,6 +99,7 @@ const ConstraintGrid = (props) => {
         getShiftHeaderStyle,
         getShiftHeaderCellStyle,
         isMobile,
+        justChangedCell
     } = props;
 
     const {t} = useI18n();
@@ -138,6 +140,7 @@ const ConstraintGrid = (props) => {
                                         day={day}
                                         shift={shift}
                                         {...commonCellProps}
+                                        isJustChanged={`${day.date}-${shift.shift_id}` === justChangedCell}
                                     />
                                 ))}
                             </tr>
@@ -184,6 +187,7 @@ const ConstraintGrid = (props) => {
                                     day={day}
                                     shift={shift}
                                     {...commonCellProps}
+                                    isJustChanged={`${day.date}-${shift.shift_id}` === justChangedCell}
                                 />
                             ))}
                         </tr>

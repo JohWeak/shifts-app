@@ -126,9 +126,20 @@
     inset: 0;
     transition: background-color 0.2s ease;
 }
+/* 1. Определяем анимацию "появления" */
+@keyframes pop-in {
+    from {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
 
 .employee-constraints-container .constraint-cell {
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, inset 0.2s ease, transform 0.2s ease;
     inset: var(--space-1);
     border-radius: 0.3rem;
     cursor: pointer;
@@ -138,16 +149,25 @@
     justify-content: center;
 }
 
-/* --- НАЧАЛО ИЗМЕНЕНИЙ --- */
+.employee-constraints-container .constraint-cell.clickable:active {
+    transform: scale(0.95); /* Немного уменьшаем ячейку */
+    transition-duration: 0.2s; /* Делаем отклик на нажатие почти мгновенным */
+}
+
 
 /* Стили для ВЫБРАННЫХ ячеек (любой статус, кроме 'neutral') */
 .employee-constraints-container .constraint-cell:not(.neutral) {
     border-radius: 0.3rem; /* Скругленные углы */
     inset: 4px; /* Отступы со всех сторон */
+
+}
+.employee-constraints-container .constraint-cell.is-appearing {
+    animation: pop-in 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .employee-constraints-container .constraint-cell.neutral {
     background-color: transparent !important;
+    inset: 0;
 }
 
 
@@ -180,30 +200,29 @@
 .employee-constraints-container .constraint-cell.cannot_work > .icon-cannot-work {
     opacity: 0.05;
 }
-@media (hover: hover) {
 
+
+
+
+@media (hover: hover) {
     .employee-constraints-container .day-header.clickable:hover {
         opacity: 0.7;
     }
-
     /* Применяем эффект увеличения только к ячейкам с отступами */
     .employee-constraints-container .constraint-cell.clickable:not(.neutral):hover {
         transform: scale(1.03);
     }
-
     /* Состояние при наведении (работает для обоих состояний) */
     .employee-constraints-container .constraint-cell.clickable:hover {
         /* Цвет берется из CSS переменной, заданной в getCellStyle */
         background-color: var(--cell-hover-color) !important;
         /*box-shadow: var(--bs-box-shadow-sm);*/
     }
-
     /* 3. Показываем ХОВЕР-иконку, используя data-атрибут. */
     .employee-constraints-container .constraint-cell[data-next-status="cannot_work"]:hover > .hover-icon-cannot-work,
     .employee-constraints-container .constraint-cell[data-next-status="prefer_work"]:hover > .hover-icon-prefer-work {
         opacity: 0.1;
     }
-
     /* 4. Принудительно СКРЫВАЕМ выбранную иконку при наведении. */
     .employee-constraints-container .constraint-cell:hover > .selected-icon {
         opacity: 0;

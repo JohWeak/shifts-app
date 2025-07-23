@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
 import {login} from './model/authSlice'; // Импортируем наш Thunk
-import {Spinner} from 'react-bootstrap';
+import {FloatingLabel, Form, Spinner} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './index.css';
 import {LanguageSwitch} from "../../shared/ui/components/LanguageSwitch/LanguageSwitch";
@@ -36,24 +36,20 @@ const Login = () => {
     // Эффект для редиректа после успешного входа
     useEffect(() => {
         if (isAuthenticated && user) {
-            const redirectPath = user.role === 'admin' ? '/admin' : '/employee/schedule';
+            const redirectPath = user.role === 'admin' ? '/admin' : '/employee/dashboard';
             navigate(redirectPath, {replace: true});
         }
     }, [isAuthenticated, user, navigate]);
 
     return (
         <div className="auth-container">
-
             <div className="auth-card">
-
                 <div className="auth-header">
                     <h2>{t('auth.login')}</h2>
                     <p>{t('auth.welcome')}</p>
-
                 </div>
 
                 <div className="auth-body">
-                    {/* Показываем ошибку из Redux store */}
                     {error && (
                         <div className="alert alert-danger" role="alert">
                             <i className="bi bi-exclamation-triangle me-2"></i>
@@ -61,47 +57,48 @@ const Login = () => {
                         </div>
                     )}
 
-                    <form className="auth-form" onSubmit={handleSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="identifier" className="form-label">
-                                {t('auth.username')}
-                            </label>
-                            <input
+                    {/* --- НАЧАЛО ИЗМЕНЕНИЙ: Обновленная форма --- */}
+                    <Form className="auth-form" onSubmit={handleSubmit}>
+                        {/* Поле Username/Email */}
+                        <FloatingLabel
+                            controlId="identifier"
+                            label={t('auth.username')}
+                            className="mb-3"
+                        >
+                            <Form.Control
                                 type="text"
-                                className="form-control"
-                                id="identifier"
-                                placeholder="Enter username or email"
+                                placeholder={t('auth.username')} // Плейсхолдер важен для работы FloatingLabel
                                 value={identifier}
                                 onChange={(e) => setIdentifier(e.target.value)}
                                 required
                                 autoComplete="username"
                             />
-                        </div>
+                        </FloatingLabel>
 
-                        <div className="mb-3">
-                            <label htmlFor="password" className="form-label">
-                                {t('auth.password')}
-                            </label>
-                            <div className="input-group">
-                                <input
+                        {/* Поле Password */}
+                        <div className="password-wrapper mb-3">
+                            <FloatingLabel
+                                controlId="password"
+                                label={t('auth.password')}
+                            >
+                                <Form.Control
                                     type={showPassword ? 'text' : 'password'}
-                                    className="form-control"
-                                    id="password"
-                                    placeholder="Enter password"
+                                    placeholder={t('auth.password')}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     autoComplete="current-password"
+                                    className="password-input-padding"
                                 />
-                                <button
-                                    className="btn btn-outline-secondary password-toggle"
-                                    type="button"
-                                    onClick={handlePasswordToggle}
-                                    title={showPassword ? "Hide password" : "Show password"}
-                                >
-                                    <i className={`bi bi-${showPassword ? 'eye' : 'eye-slash'}`}></i>
-                                </button>
-                            </div>
+                            </FloatingLabel>
+                            <button
+                                className="btn password-toggle-floating"
+                                type="button"
+                                onClick={handlePasswordToggle}
+                                title={showPassword ? "Hide password" : "Show password"}
+                            >
+                                <i className={`bi bi-${showPassword ? 'eye' : 'eye-slash'}`}></i>
+                            </button>
                         </div>
 
                         <button
@@ -125,7 +122,7 @@ const Login = () => {
                                 t('auth.login')
                             )}
                         </button>
-                    </form>
+                    </Form>
 
                     {/* Loading overlay */}
                     {loading === 'pending' && (
@@ -136,7 +133,6 @@ const Login = () => {
                 </div>
 
                 <div className="auth-footer">
-
                     <div className="biometric-placeholder">
                         <p className="mb-2 text-muted">
                             <i className="bi bi-fingerprint me-2" style={{fontSize: '1.5rem'}}></i>

@@ -37,6 +37,7 @@ const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
     const {t, locale} = useI18n();
     const isMobile = useMediaQuery('(max-width: 888px)');
+    const [justChangedCell, setJustChangedCell] = useState(null);
 
     const {
         getShiftColor,
@@ -153,10 +154,28 @@ const ConstraintsSchedule = () => {
         }
         return null;
     };
-
+    const triggerHapticFeedback = () => {
+        try {
+            // Проверяем наличие API и его тип (вдруг кто-то подменил)
+            if (window.navigator && typeof window.navigator.vibrate === 'function') {
+                window.navigator.vibrate(50);
+            }
+        } catch (e) {
+            // Если что-то пошло не так (например, из-за настроек безопасности),
+            // просто игнорируем ошибку, чтобы не сломать приложение.
+            console.log("Haptic feedback failed, but it's okay.", e);
+        }
+    };
     const handleCellClick = (date, shiftId) => {
+        triggerHapticFeedback();
+
         if (!canEdit || isSubmitted) return;
+
+        const cellIdentifier = `${date}-${shiftId || 'day'}`;
+        setJustChangedCell(cellIdentifier);
+
         dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
+
         const currentStatus = shiftId ? (weeklyConstraints[date]?.shifts[shiftId] || 'neutral') : (weeklyConstraints[date]?.day_status || 'neutral');
         const newStatus = (currentStatus === currentMode) ? 'neutral' : currentMode;
         const testConstraints = JSON.parse(JSON.stringify(weeklyConstraints));
@@ -289,6 +308,7 @@ const ConstraintsSchedule = () => {
                     getShiftHeaderStyle={getShiftHeaderStyle}
                     getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                     isMobile={isMobile}
+                    justChangedCell={justChangedCell}
                 />
             </Card>
 

@@ -155,27 +155,44 @@
     z-index: 100;
     justify-content: space-between;
 }
+.password-wrapper {
+    position: relative;
+}
 
+/* 2. Стилизуем саму кнопку */
+.password-toggle-floating {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem; /* Отступ справа */
+    transform: translateY(-50%); /* Идеальное выравнивание по вертикали */
+    z-index: 10; /* Убедимся, что кнопка поверх поля ввода */
+    border: none;
+    background: transparent;
+    color: var(--bs-secondary); /* Цвет иконки */
+    padding: 0.25rem;
+    line-height: 1; /* Убираем лишнюю высоту */
+}
+
+.password-toggle-floating:hover {
+    color: var(--bs-primary);
+}
+
+/* 3. Добавляем отступ справа в поле ввода, чтобы текст не заезжал под кнопку */
+.password-input-padding {
+    padding-right: 3rem !important;
+}
 
 [dir="rtl"] .auth-controls {
     right: auto;
     left: 1rem;
 }
 
-/* Адаптация для логин страницы */
-.auth-container .language-switch .dropdown-toggle,
-.auth-container .theme-toggle-btn {
-    backdrop-filter: blur(10px);
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: white;
+[data-theme="dark"] .auth-container .form-floating>.form-control:focus~label,
+[data-theme="dark"] .auth-container .form-floating>.form-control:not(:placeholder-shown)~label{
+    color: var(--bs-gray-500);
 }
-
-.auth-container .language-switch .dropdown-toggle:hover,
-.auth-container .theme-toggle-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: white;
+[data-theme="dark"] .form-floating>label {
+    color: var(--bs-gray-300);
 }
 
 .auth-container .theme-toggle-icon {
@@ -201,6 +218,7 @@
 [data-theme="dark"] .auth-container .theme-toggle-icon:hover {
     background-color: rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 255, 255, 0.3);
+    color: white;
 }
 
 [data-theme="dark"] .auth-loading {
