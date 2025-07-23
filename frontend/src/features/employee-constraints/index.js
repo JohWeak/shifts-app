@@ -30,14 +30,14 @@ import {
     cancelEditing
 } from './model/constraintSlice';
 
-import {formatEmployeeName, formatWeekRange} from 'shared/lib/utils/scheduleUtils';
+import {formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
 import './index.css';
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
-    const {t, locale} = useI18n();
-    const isMobile = useMediaQuery('(max-width: 888px)');
+    const {t} = useI18n();
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
     const [showInstructions, setShowInstructions] = useState(false);
     const toggleShowInstructions = () => setShowInstructions(!showInstructions);
@@ -340,6 +340,7 @@ const ConstraintsSchedule = () => {
                 }}
                 submitting={submitting}
                 onCancel={() => dispatch(cancelEditing())}
+                isMobile={isMobile}
 
             />
             <ToastContainer className="p-3 toast-container" style={{ zIndex: 1056 }}>

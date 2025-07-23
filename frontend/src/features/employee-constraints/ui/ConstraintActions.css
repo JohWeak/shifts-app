@@ -1,38 +1,66 @@
 /* frontend/src/features/employee-constraints/ui/ConstraintActions.css */
-
+.constraint-actions-panel{
+    border: none;
+    box-shadow: none;
+}
 .constraint-actions-panel .panel-content {
     display: flex;
-    justify-content: center; /* Центрируем по умолчанию */
     align-items: center;
     gap: var(--space-3);
-    flex-wrap: wrap;
 }
 
-.constraint-actions-panel .actions-container {
+/* --- МОБИЛЬНАЯ ВЕРСТКА (по умолчанию) --- */
+.mobile-layout {
+    flex-direction: column;
+    width: 100%;
+}
+
+.mobile-actions-container {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4); /* 16px - отступ между группами */
+    justify-content: space-between;
     align-items: center;
-    justify-content: center; /* Центрируем группы кнопок */
+    /*width: calc(100% - 32px - 2rem);*/
+    width: 100%;
+    padding: 0 var(--space-2);
+
+}
+/* Скрываем лишнюю кнопку Submit в мобильной верстке */
+.mobile-actions-container .desktop-submit {
+    display: none !important;
+}
+.mobile-layout .segmented-control-wrapper {
+    width: 100%;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bs-gray-300);
+}
+.mobile-layout .segmented-control {
+    flex-grow: 1; /* Ключевое свойство для растягивания */
+    min-width: 0;   /* Сбрасываем минимальную ширину, чтобы она не мешала */
 }
 
-.constraint-actions-panel .action-buttons-group {
+/* --- ДЕСКТОПНАЯ ВЕРСТКА --- */
+.desktop-layout {
+    flex-direction: row;
+    width: 100%;
+}
+.desktop-layout .segmented-control-wrapper {
+    /* Главный трюк: заставляем этот блок занять все доступное место в центре */
+    margin-left: auto;
+    margin-right: auto;
+
+}
+
+
+/* --- ОБЩИЕ СТИЛИ ДЛЯ ГРУПП КНОПОК --- */
+.secondary-actions-group {
     display: flex;
     align-items: center;
     gap: var(--space-2);
 }
-
-.constraint-actions-panel .submit-button {
+.submit-button {
     font-weight: var(--font-semibold);
 }
 
-/* Круглая кнопка помощи */
-.constraint-actions-panel .help-button {
-    width: 24px;
-    height: 24px;
-    font-size: var(--text-sm);
-    flex-shrink: 0; /* Предотвращает сжатие кнопки */
-}
 
 /* ============================================
    СЕГМЕНТИРОВАННЫЙ ПЕРЕКЛЮЧАТЕЛЬ (ФИНАЛЬНАЯ ВЕРСИЯ)
@@ -44,6 +72,7 @@
     align-items: center;
     justify-content: center; /* Центрируем, чтобы контрол был главным */
     gap: var(--space-1);
+
 }
 
 /* 2. КОНТРОЛ: остается без изменений */
@@ -55,8 +84,9 @@
     border-radius: var(--radius-lg);
     padding: var(--space-1);
     height: 44px;
-    min-width: 280px;
     flex-shrink: 0;
+    min-width: 280px;
+
 }
 
 .segmented-control .segment {
@@ -146,6 +176,10 @@
 }
 [data-theme="dark"] .palette-container:hover {
     border-color: var(--bs-primary);
+}
+
+[data-theme="dark"] .mobile-layout .segmented-control-wrapper {
+    border-color: var(--bs-gray-700);
 }
 
 .edit-button {
