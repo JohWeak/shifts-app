@@ -1,7 +1,7 @@
 /* frontend/src/features/employee-dashboard/index.css */
 .employee-dashboard {
-    min-height: calc(100vh - 60px);
-    margin-bottom: 58px;
+    min-height: calc(100vh - 58px);
+    padding-bottom: 58px;
 }
 
 .employee-dashboard .dashboard-header h2 {
@@ -139,13 +139,13 @@
     .employee-dashboard .next-shift-card {
         border: none;
     }
-
     .employee-dashboard .next-shift-card h5 {
         font-size: 1rem;
     }
     .employee-dashboard .next-shift-card p{
         font-size: 0.875rem;
     }
+
     /* 1. Уменьшаем отступы внутри всей карточки */
     .dashboard-card .card-body {
         padding: 0.5rem; /* Уменьшаем внутренние отступы */
@@ -177,15 +177,21 @@
     }
 
     /* 6. Уменьшаем текст со статистикой (если есть) */
-    .dashboard-card .stats small {
-        font-size: 0.7rem;
+    .stats-card .stat-value{
+        font-size: 1.5rem;
     }
-
-
+    .stats-card .stat-label{
+        font-size: 0.75rem;
+    }
+    .stats-card h5{
+        font-size: 1rem;
+        margin-inline-start: 0.25rem;
+    }
     .employee-dashboard .stats-card .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 0.5rem;
     }
+
+
 }
 
 /* RTL Support */

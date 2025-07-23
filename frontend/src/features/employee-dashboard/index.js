@@ -204,8 +204,8 @@ const EmployeeDashboard = () => {
                 ))}
             </Row>
 
-            <Row className="mt-4">
-                <Col md={6}>
+            <Row className="mt-2 mt-md-4 ">
+                <Col md={12} xs={12}>
                     <Card className="stats-card">
                         <Card.Body>
                             <h5 className="mb-3">{t('employee.dashboard.weekStats')}</h5>
@@ -218,29 +218,6 @@ const EmployeeDashboard = () => {
                                     <span className="stat-label">{t('employee.dashboard.shiftsCount')}</span>
                                     <span className="stat-value">{dashboardStats?.thisWeekShifts || 0}</span>
                                 </div>
-                            </div>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={6}>
-                    <Card className="quick-actions-card">
-                        <Card.Body>
-                            <h5 className="mb-3">{t('employee.dashboard.quickActions')}</h5>
-                            <div className="d-grid gap-2">
-                                <button
-                                    className="btn btn-outline-primary"
-                                    onClick={() => navigate('/employee/constraints')}
-                                >
-                                    <i className="bi bi-plus-circle me-2"></i>
-                                    {t('employee.dashboard.submitConstraints')}
-                                </button>
-                                <button
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => navigate('/employee/archive')}
-                                >
-                                    <i className="bi bi-download me-2"></i>
-                                    {t('employee.dashboard.downloadSchedule')}
-                                </button>
                             </div>
                         </Card.Body>
                     </Card>

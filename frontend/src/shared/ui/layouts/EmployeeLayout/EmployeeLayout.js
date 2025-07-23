@@ -24,8 +24,6 @@ const EmployeeLayout = () => {
     const dispatch = useDispatch();
     const [isAnimating, setIsAnimating] = useState(false);
 
-    // Check if we're on dashboard
-    const isDashboard = location.pathname === '/employee/dashboard';
 
     useEffect(() => {
         const initialLoad = async () => {
