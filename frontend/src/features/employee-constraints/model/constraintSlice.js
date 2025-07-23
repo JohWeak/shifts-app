@@ -125,7 +125,9 @@ const constraintSlice = createSlice({
                 });
             }
             state.weeklyConstraints = initialConstraints;
-            state.isSubmitted = false; // Allow re-submitting after clearing
+            state.isSubmitted = false;
+            state.canEdit = true;
+            state.originalConstraintsOnEdit = null;
         },
 
         enableEditing: (state) => {
@@ -193,6 +195,7 @@ const constraintSlice = createSlice({
                 state.submitStatus = 'success';
                 state.isSubmitted = true;
                 state.canEdit = false;
+                state.originalConstraintsOnEdit = null;
             })
             .addCase(submitWeeklyConstraints.rejected, (state, action) => {
                 state.submitting = false;

@@ -933,6 +933,12 @@ export const en = {
         preferWork: 'Prefer to Work',
         wholeDay: 'Whole Day',
         shiftTime: 'Shift/Time',
+        modals: {
+            resetTitle: 'Reset Constraints',
+            resetMessage: 'Are you sure you want to reset your weekly constraints?',
+            submitTitle: 'Submit Constraints',
+            submitMessage: 'Are you sure you want to submit your weekly constraints?',
+        },
 
         instructions: {
             title: 'Instructions:',

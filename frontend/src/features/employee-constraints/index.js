@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/index.js
 import React, {useState, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import { Card, Container, Toast, ToastContainer } from 'react-bootstrap';
+import {Card, Container, Toast, ToastContainer, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
@@ -15,7 +15,7 @@ import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerM
 import ConstraintActions from './ui/ConstraintActions';
 import ConstraintGrid from './ui/ConstraintGrid';
 import {ScheduleHeaderCard} from 'features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard';
-
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 
 // Redux actions & utils
 
@@ -40,7 +40,36 @@ const ConstraintsSchedule = () => {
     const isMobile = useMediaQuery('(max-width: 768px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
     const [showInstructions, setShowInstructions] = useState(false);
+    const [modalState, setModalState] = useState({show: false, action: null});
     const toggleShowInstructions = () => setShowInstructions(!showInstructions);
+
+    const modalConfig = {
+        reset: {
+            title: t('constraints.modals.resetTitle'),
+            message: t('constraints.modals.resetMessage'),
+            confirmText: t('common.reset'),
+            variant: 'warning'
+        },
+        submit: {
+            title: t('constraints.modals.submitTitle'),
+            message: t('constraints.modals.submitMessage'),
+            confirmText: t('common.submit'),
+            variant: 'primary'
+        }
+    };
+
+    const handleShowModal = (action) => setModalState({show: true, action});
+    const handleHideModal = () => setModalState({show: false, action: null});
+
+    const handleConfirmModal = () => {
+        if (modalState.action === 'reset') {
+            dispatch(resetConstraints());
+            dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
+        } else if (modalState.action === 'submit') {
+            handleSubmit();
+        }
+        handleHideModal();
+    };
 
     const {
         getShiftColor,
@@ -257,7 +286,6 @@ const ConstraintsSchedule = () => {
     };
 
 
-
     const getDayHeaderClass = (date) => {
         const status = weeklyConstraints[date]?.day_status || 'neutral';
         return `day-header ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
@@ -332,18 +360,15 @@ const ConstraintsSchedule = () => {
                     // 'local' - режим сохранения, т.к. эти цвета индивидуальны для пользователя
                     openColorPicker(pseudoShift.shift_id, currentColor, pseudoShift);
                 }}
-                onSubmit={handleSubmit}
+
                 onEdit={() => dispatch(enableEditing())}
-                onClear={() => {
-                    dispatch(resetConstraints());
-                    dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
-                }}
-                submitting={submitting}
+                onSubmit={() => handleShowModal('submit')}
+                onClear={() => handleShowModal('reset')}
                 onCancel={() => dispatch(cancelEditing())}
                 isMobile={isMobile}
 
             />
-            <ToastContainer className="p-3 toast-container" style={{ zIndex: 1056 }}>
+            <ToastContainer className="p-3 toast-container" style={{zIndex: 1056}}>
                 <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
                     <Toast.Header closeButton={true}>
                         <i className="bi bi-info-circle-fill me-2"></i>
@@ -380,7 +405,18 @@ const ConstraintsSchedule = () => {
                     userRole={userRole}
                     originalGlobalColor={originalGlobalColor}
                 />
+
             )}
+            <ConfirmationModal
+                show={modalState.show}
+                onHide={handleHideModal}
+                onConfirm={handleConfirmModal}
+                loading={submitting}
+                title={modalConfig[modalState.action]?.title}
+                message={modalConfig[modalState.action]?.message}
+                confirmText={modalConfig[modalState.action]?.confirmText}
+                variant={modalConfig[modalState.action]?.variant}
+            />
         </Container>
     );
 };
