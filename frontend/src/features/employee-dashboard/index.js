@@ -7,10 +7,12 @@ import {useEmployeeData} from './hooks/useEmployeeData';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import './index.css';
 import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
+import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
 
 const EmployeeDashboard = () => {
     const {t} = useI18n();
     const navigate = useNavigate();
+    const isMobile = useMediaQuery('(max-width: 567px)');
     const {
         personalSchedule, // Получаем данные напрямую
         constraints,
@@ -138,7 +140,7 @@ const EmployeeDashboard = () => {
         <Container className="employee-dashboard py-2">
             <PageHeader
                 className="dashboard-header mb-0 mb-md-3"
-                icon="house"
+                icon="house-fill"
                 title={t('employee.dashboard.welcome')}
                 subtitle={t('employee.dashboard.selectOption')}
             />
@@ -184,9 +186,11 @@ const EmployeeDashboard = () => {
                                     <i className={`bi ${card.icon} text-${card.color}`}></i>
                                 </div>
                                 <h5 className="card-title mb-2">{card.title}</h5>
-                                <p className="card-subtitle text-muted small mb-2">
-                                    {card.subtitle}
-                                </p>
+                                {!isMobile && card.subtitle && (
+                                    <p className="card-subtitle text-muted small mb-2">
+                                        {card.subtitle}
+                                    </p>
+                                )}
                                 {card.stats && (
                                     <p className={`stats mb-0 ${card.highlight ? 'text-danger' : 'text-success'}`}>
                                         <small>{card.stats}</small>

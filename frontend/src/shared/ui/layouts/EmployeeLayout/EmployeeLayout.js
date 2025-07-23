@@ -66,8 +66,8 @@ const EmployeeLayout = () => {
 
     const navItems = [
         // Добавляем вторую иконку с суффиксом -fill
-        { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('dashboard.title') },
-        { path: '/employee/schedule', icon: 'calendar-week', iconFill: 'calendar-week-fill', label: t('employee.schedule.title') },
+        { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('navigation.home') },
+        { path: '/employee/schedule', icon: 'calendar-week', iconFill: 'calendar-week-fill', label: t('employee.schedule.tabName') },
         { path: '/employee/constraints', icon: 'shield-check', iconFill: 'shield-fill-check', label: t('employee.constraints') },
         { path: '/employee/requests', icon: 'envelope', iconFill: 'envelope-fill', label: t('employee.requests.title') },
         { path: '/employee/archive', icon: 'archive', iconFill: 'archive-fill', label: t('employee.archive.title') },
@@ -184,7 +184,7 @@ const EmployeeLayout = () => {
             </Navbar>
 
             {/* Navigation Tabs */}
-            <Nav className="employee-nav-tabs">
+            <Nav justify className="employee-nav-tabs">
                 <Container fluid className="px-0">
                     <div className="nav-tabs-wrapper">
                         {navItems.map(item => (

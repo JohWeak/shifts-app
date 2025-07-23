@@ -11,7 +11,10 @@
     padding-left: var(--space-2);
     padding-right: var(--space-2);
 }
-
+.page-header-card {
+    border-color: var(--bs-gray-200)!important;
+    box-shadow: var(--bs-box-shadow-sm);
+}
 .page-header-text {
     min-width: 0; /* Позволяет тексту сжиматься */
     /*align-content: start;*/
@@ -41,17 +44,11 @@
     align-items: center;
     flex-shrink: 0;
 }
-[data-theme="dark"] .page-header-card {
-    background-color: var(--bs-gray-900);
 
-}
- .page-header-card {
-    border-color: var(--bs-gray-200);
-    box-shadow: var(--bs-box-shadow-sm);
-}
+
 [data-theme="dark"] .page-header-card {
     background-color: var(--bs-gray-900);
-    border-color: var(--bs-gray-900);
+    border-color: var(--bs-gray-900)!important;
 
 
 }

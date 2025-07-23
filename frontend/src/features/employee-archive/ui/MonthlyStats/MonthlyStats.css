@@ -2,6 +2,9 @@
 .monthly-stats .card-body {
     padding: 0;
 }
+[data-theme="dark"] .monthly-stats.card{
+    border-color: var(--bs-gray-800)!important;
+}
 .monthly-stats {
     border-bottom-left-radius: 0!important;
     border-bottom-right-radius: 0!important;

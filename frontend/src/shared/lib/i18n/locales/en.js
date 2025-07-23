@@ -335,6 +335,7 @@ export const en = {
         settings: 'Settings',
         schedule: {
             title: 'My Schedule',
+            tabName: 'Schedule',
             subtitle: 'View your weekly work schedule',
             personalSchedule: 'Personal',
             fullSchedule: 'Full Schedule',
@@ -365,6 +366,7 @@ export const en = {
         },
         dashboard: {
             welcome: 'Welcome to Your Dashboard',
+
             selectOption: 'Select an option below to get started',
             mySchedule: 'My Schedule',
             viewWeeklySchedule: 'View your weekly work schedule',
@@ -376,7 +378,7 @@ export const en = {
             viewHistory: 'View your work history',
             submitted: 'Submitted',
             notSubmitted: 'Not submitted yet',
-            shiftsThisWeek: '{count} shifts remaining this week',
+            shiftsThisWeek: '{count} shifts remaining',
             nextShift: 'Your Next Shift',
             weekStats: 'This Week Statistics',
             totalHours: 'Total Hours',
@@ -468,6 +470,7 @@ export const en = {
     navigation: {
         title: 'Navigation',
         dashboard: 'Dashboard',
+        home: 'Home',
         schedules: 'Schedules',
         algorithms: 'Algorithms',
         employees: 'Employees',

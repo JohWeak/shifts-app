@@ -33,7 +33,7 @@ const ShiftDetailsPanel = ({shift, selectedDate, getShiftColor}) => {
 
                         </div>
                     ) : (
-                        <div className="text-muted small">
+                        <div className="text-muted no-shift">
                             <span>{t('employee.archive.noShiftOnDate')}</span>
                         </div>
                     )}

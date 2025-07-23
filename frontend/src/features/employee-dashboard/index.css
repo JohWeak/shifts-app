@@ -1,9 +1,12 @@
 /* frontend/src/features/employee-dashboard/index.css */
 .employee-dashboard {
     min-height: calc(100vh - 58px);
-    padding-bottom: 58px;
+    margin-bottom: 60px;
 }
+.employee-dashboard .page-header-card {
+    border-radius: var(--radius-lg);
 
+}
 .employee-dashboard .dashboard-header h2 {
     color: var(--bs-gray-800);
     font-weight: 600;
@@ -20,6 +23,9 @@
     border: 1px solid var(--bs-gray-200);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    min-height: 130px;
+    border-radius: var(--radius-lg);
 }
 
 [data-theme="dark"] .employee-dashboard .dashboard-card {
@@ -27,11 +33,7 @@
     background: var(--bs-gray-800);
 }
 
-.employee-dashboard .dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-color: var(--bs-primary);
-}
+
 
 .employee-dashboard .dashboard-card:focus {
     outline: 2px solid var(--bs-primary);
@@ -95,6 +97,9 @@
     background:  var(--bs-primary);
     color: white;
     border: none;
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+
 }
 
 .employee-dashboard .next-shift-card h5 {
@@ -103,6 +108,16 @@
 }
 
 /* Stats Card */
+.employee-dashboard .stats-card{
+    box-shadow: var(--shadow-sm);
+    border-color: var(--bs-gray-200);
+    border-radius: var(--radius-lg);
+
+}
+[data-theme="dark"] .employee-dashboard .stats-card{
+    border-color: var(--bs-gray-900);
+}
+
 .employee-dashboard .stats-card .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -148,7 +163,9 @@
     .employee-dashboard .next-shift-card p{
         font-size: 0.875rem;
     }
-
+    .dashboard-card:active{
+        transform: translateY(-3px);
+    }
     /* 1. Уменьшаем отступы внутри всей карточки */
     .dashboard-card .card-body {
         padding: 0.5rem; /* Уменьшаем внутренние отступы */
@@ -180,6 +197,20 @@
     }
 
     /* 6. Уменьшаем текст со статистикой (если есть) */
+    .stats-card .card-body{
+        padding: 0.5rem;
+        padding-bottom: 0;
+        padding-left: 0;
+        padding-right: 0;
+
+    }
+    .stats-card h5{
+        margin-bottom: 0.5rem!important;
+        margin-inline-start: 0.75rem!important;
+    }
+    .stats-card .stat-item{
+        padding: 0;
+    }
     .stats-card .stat-value{
         font-size: 1.5rem;
     }
@@ -206,4 +237,12 @@
 
 [dir="rtl"] .employee-dashboard .bi-download::before {
     transform: scaleX(-1);
+}
+
+@media (hover: hover) {
+    .employee-dashboard .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: var(--bs-primary);
+    }
 }

@@ -11,12 +11,15 @@
     align-items: center;
     gap: 0.25rem;
     margin-bottom: 0.25rem;
+
 }
 .shift-details-header .detail-item{
     margin-bottom: 0;
-    opacity: 0.9;
+    opacity: 0.8;
 }
-
+.shift-details-header .no-shift{
+    font-size: 0.9rem;
+}
 
 .detail-icon {
     color: var(--bs-secondary);
