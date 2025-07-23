@@ -12,7 +12,7 @@ const PageHeader = ({
                         className = ''
                     }) => {
     return (
-        <Card className="page-header-card mb-3">
+        <Card className="page-header-card mb-2 mb-md-4">
             <Card.Body>
                 <div className={`page-header ${className}`}>
                     <div className="page-header-content">

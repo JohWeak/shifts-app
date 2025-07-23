@@ -1,14 +1,15 @@
 // frontend/src/features/employee-dashboard/index.js
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useEmployeeData } from './hooks/useEmployeeData';
+import React, {useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {Container, Row, Col, Card} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useEmployeeData} from './hooks/useEmployeeData';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import './index.css';
+import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 
 const EmployeeDashboard = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const navigate = useNavigate();
     const {
         personalSchedule, // Получаем данные напрямую
@@ -130,18 +131,20 @@ const EmployeeDashboard = () => {
 
     // Отображаем загрузку, пока не пришли данные И не посчитана статистика
     if (personalSchedule === null || dashboardStats === null) {
-        return <LoadingState size="lg" message={t('common.loading')} />;
+        return <LoadingState size="lg" message={t('common.loading')}/>;
     }
 
     return (
         <Container className="employee-dashboard py-2">
-            <div className="dashboard-header mb-4">
-                <h2 className="mb-1">{t('employee.dashboard.welcome')}</h2>
-                <p className="text-muted">{t('employee.dashboard.selectOption')}</p>
-            </div>
+            <PageHeader
+                className="dashboard-header mb-2 mb-md-4"
+                icon = "house"
+                title={t('employee.dashboard.welcome')}
+                subtitle= {t('employee.dashboard.selectOption')}
+            />
 
             {dashboardStats?.nextShift && (
-                <Card className="next-shift-card mb-4">
+                <Card className="next-shift-card mb-2 mb-md-4">
                     <Card.Body>
                         <Row className="align-items-center">
                             <Col>
@@ -190,7 +193,8 @@ const EmployeeDashboard = () => {
                                     </p>
                                 )}
                                 {card.badge && (
-                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <span
+                                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         {card.badge}
                                     </span>
                                 )}
