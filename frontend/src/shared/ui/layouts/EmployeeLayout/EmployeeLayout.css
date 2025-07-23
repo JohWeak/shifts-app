@@ -151,11 +151,34 @@
     position: relative;
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
-
 }
 
 [data-theme="dark"] .employee-nav-tabs .nav-tab-item {
     color: var(--bs-gray-400);
+}
+
+/* --- Стили для иконок --- */
+.nav-tab-item .icon-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* По умолчанию показываем контурную иконку, а заполненную скрываем */
+.nav-tab-item .icon-fill {
+    display: none;
+}
+.nav-tab-item .icon-outline {
+    display: inline-block;
+}
+
+/* Для активной вкладки делаем наоборот */
+.nav-tab-item.active .icon-fill {
+    display: inline-block;
+}
+.nav-tab-item.active .icon-outline {
+    display: none;
 }
 
 .employee-nav-tabs .nav-tab-item:hover {
@@ -204,6 +227,9 @@
 
     .employee-nav-tabs .nav-tab-item i{
         margin: 0!important;
+    }
+    .nav-tab-item .icon-wrapper {
+        margin: 0 !important;
     }
 
     .employee-navbar .user-name {

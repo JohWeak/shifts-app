@@ -68,11 +68,12 @@ const EmployeeLayout = () => {
     }, [dispatch]);
 
     const navItems = [
-        { path: '/employee/dashboard', icon: 'house', label: t('dashboard.title') },
-        { path: '/employee/schedule', icon: 'calendar-week', label: t('employee.schedule.title') },
-        { path: '/employee/constraints', icon: 'shield-check', label: t('employee.constraints') },
-        { path: '/employee/requests', icon: 'envelope', label: t('employee.requests.title') },
-        { path: '/employee/archive', icon: 'archive', label: t('employee.archive.title') },
+        // Добавляем вторую иконку с суффиксом -fill
+        { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('dashboard.title') },
+        { path: '/employee/schedule', icon: 'calendar-week', iconFill: 'calendar-week-fill', label: t('employee.schedule.title') },
+        { path: '/employee/constraints', icon: 'shield-check', iconFill: 'shield-fill-check', label: t('employee.constraints') },
+        { path: '/employee/requests', icon: 'envelope', iconFill: 'envelope-fill', label: t('employee.requests.title') },
+        { path: '/employee/archive', icon: 'archive', iconFill: 'archive-fill', label: t('employee.archive.title') },
     ];
     const handleLogoClick = () => {
         navigate('/employee/dashboard');
@@ -176,10 +177,12 @@ const EmployeeLayout = () => {
                         {navItems.map(item => (
                             <Nav.Link
                                 key={item.path}
-                                className={`nav-tab-item ${location.pathname === item.path ? 'active' : ''}`}
-                                onClick={() => navigate(item.path)}
+                                className={`nav-tab-item ${location.pathname === item.path ? 'active' : ''}`}                                onClick={() => navigate(item.path)}
                             >
-                                <i className={`bi bi-${item.icon} me-2`}></i>
+                                <span className="icon-wrapper me-2">
+                                    <i className={`bi bi-${item.icon} icon-outline`}></i>
+                                    <i className={`bi bi-${item.iconFill} icon-fill`}></i>
+                                </span>
                                 <span>{item.label}</span>
                             </Nav.Link>
                         ))}
