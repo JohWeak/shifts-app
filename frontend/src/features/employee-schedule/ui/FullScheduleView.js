@@ -78,7 +78,7 @@ const FullScheduleView = ({ user, scheduleData, employeeData, getShiftColor, ope
         return (
             <Card className="week-schedule-section mb-4 p-0">
                 <ScheduleHeaderCard
-                    className="position-info-card mb-1"
+                    className="mb-1"
                     title={weekTitle}
                     site={position?.site_name || employeeData?.site_name}
                     position={position?.name || employeeData?.position_name}

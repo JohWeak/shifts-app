@@ -125,7 +125,7 @@ const EmployeeLayout = () => {
         <>
             {/* Header */}
             <Navbar bg="primary" variant="dark" expand={false} fixed="top" className="employee-navbar">
-                <Container fluid className='mx-1'>
+                <Container fluid >
                     <Navbar.Brand
                         onClick={handleLogoClick}
                         style={{ cursor: 'pointer' }}

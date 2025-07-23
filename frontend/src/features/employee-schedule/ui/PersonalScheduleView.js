@@ -26,7 +26,7 @@ const PersonalScheduleView = ({ scheduleData, employeeInfo, getShiftColor, openC
         return (
             <Card className="week-schedule-section mb-4 ">
                 <ScheduleHeaderCard
-                    className="position-info-card mb-2"
+                    className="mb-2"
                     title={weekTitle}
                     empName={employee?.name}
                     site={employee?.site_name}

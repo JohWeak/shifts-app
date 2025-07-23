@@ -1,8 +1,7 @@
 .schedule-info-card {
     border-color: var(--bs-gray-200) !important;
     border-width: 0 0 1px 0!important;
-    border-bottom-left-radius: 0!important;
-    border-bottom-right-radius: 0!important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0!important;
 
 }
 
