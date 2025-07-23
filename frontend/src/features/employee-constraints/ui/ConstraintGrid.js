@@ -137,7 +137,7 @@ const ConstraintGrid = (props) => {
         <Card className="shadow desktop-constraints d-none d-md-block">
             <Card.Body className="p-0">
                 <div className="table-responsive">
-                    <Table bordered className=" full-schedule-table">
+                    <Table bordered className=" full-schedule-table mb-0">
                         <thead>
                         <tr>
                             <th className="shift-header-cell sticky-column">{t('employee.schedule.shift')}</th>
@@ -183,7 +183,7 @@ const ConstraintGrid = (props) => {
     const MobileGrid = () => (
         <Card className="shadow mobile-constraints ">
             <Card.Body className="p-0">
-                <Table bordered className="full-schedule-table">
+                <Table bordered className="full-schedule-table mb-0">
                     <thead>
                     <tr>
                         <th className="shift-header-cell sticky-column">{t('common.day')}</th>

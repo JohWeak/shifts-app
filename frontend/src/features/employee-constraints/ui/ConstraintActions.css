@@ -2,31 +2,26 @@
 
 .constraint-actions-panel .panel-content {
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Центрируем по умолчанию */
     align-items: center;
-    gap: var(--space-3); /* 12px */
-    flex-wrap: wrap; /* Позволяет контейнерам переноситься */
+    gap: var(--space-3);
+    flex-wrap: wrap;
 }
 
-/* Контейнер для всех кнопок справа */
 .constraint-actions-panel .actions-container {
     display: flex;
-    flex-wrap: wrap; /* Позволяет ГРУППАМ кнопок переноситься */
-    gap: var(--space-4); /* 16px - увеличенный отступ между группами */
+    flex-wrap: wrap;
+    gap: var(--space-4); /* 16px - отступ между группами */
     align-items: center;
-    justify-content: flex-end;
-    flex-grow: 1; /* Позволяет контейнеру занять оставшееся место */
-    margin-bottom: 20px; /* Добавляем отступ снизу, чтобы было место для палитры */
+    justify-content: center; /* Центрируем группы кнопок */
 }
 
-/* Стили для группы кнопок "Сбросить/Отправить" */
 .constraint-actions-panel .action-buttons-group {
     display: flex;
     align-items: center;
-    gap: var(--space-2); /* 8px - отступ между кнопками ВНУТРИ группы */
+    gap: var(--space-2);
 }
 
-/* Стили для кнопки "Отправить", чтобы она была чуть заметнее */
 .constraint-actions-panel .submit-button {
     font-weight: var(--font-semibold);
 }
@@ -40,112 +35,132 @@
 }
 
 /* ============================================
-   СЕГМЕНТИРОВАННЫЙ ПЕРЕКЛЮЧАТЕЛЬ
+   СЕГМЕНТИРОВАННЫЙ ПЕРЕКЛЮЧАТЕЛЬ (ФИНАЛЬНАЯ ВЕРСИЯ)
    ============================================ */
 
-/* Новая обертка, которая будет контекстом для позиционирования палитры */
+/* 1. ОБЕРТКА: выстраивает 3 элемента в ряд (палитра, контрол, палитра) */
 .segmented-control-wrapper {
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Центрируем, чтобы контрол был главным */
+    gap: var(--space-2);
 }
 
+/* 2. КОНТРОЛ: остается без изменений */
 .segmented-control {
     position: relative;
     display: flex;
     align-items: center;
     background-color: var(--bs-gray-200);
-    border-radius: var(--radius-lg); /* 12px */
-    padding: var(--space-1); /* 4px */
-    height: 40px; /* Фиксированная высота для стабильности */
-    min-width: 260px; /* <<< РЕШЕНИЕ ПРОБЛЕМЫ С ТЕКСТОМ: не дает контролу сжиматься слишком сильно */
+    border-radius: var(--radius-lg);
+    padding: var(--space-1);
+    height: 44px;
+    min-width: 280px;
+    flex-shrink: 0;
 }
 
-/* Стили для каждого сегмента (кнопки) */
 .segmented-control .segment {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0 var(--space-2); /* 8px */
+    padding: 0 var(--space-2);
     cursor: pointer;
     z-index: 10;
     transition: color 0.3s ease;
     user-select: none;
     white-space: nowrap;
+    font-size: 0.95rem;
 }
 
-/* Двигающийся индикатор-фон */
 .segmented-control .indicator {
     position: absolute;
     top: 4px;
     bottom: 4px;
-    width: 48%; /* <<< УПРОЩЕНО: Теперь это честная половина */
+    width: 48%;
     border-radius: var(--radius-md);
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: var(--bs-box-shadow-sm);
     z-index: 5;
 }
 
-/* Контейнер для иконки палитры */
+/* 3. ПАЛИТРА: стилизуем оба слота */
 .palette-container {
-    position: absolute;
-    bottom: -20px; /* <<< РЕШЕНИЕ ПРОБЛЕМЫ С ПАЛИТРОЙ: Позиционируем снизу */
-    left: 50%; /* Изначально по центру */
-    transform: translateX(-50%); /* Центрируем */
     width: 32px;
-    height: 24px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 20;
     color: var(--bs-body-color);
-    opacity: 0; /* Изначально невидима */
-    pointer-events: none; /* И некликабельна */
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid var(--bs-gray-300);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    /* КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: делаем оба слота невидимыми по умолчанию */
+    visibility: hidden;
+    opacity: 0;
+}
+.palette-container:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
 }
 
-/* --- Логика состояний --- */
 
-/* Режим "Не могу работать" */
-.segmented-control-wrapper.mode-cannot_work .indicator {
-    background-color: var(--bs-danger);
-    transform: translateX(0);
-}
-/* <<< ИСПРАВЛЕНИЕ ЗДЕСЬ: Выбираем сегмент, который НЕ является последним в своем роде >>> */
-.segmented-control-wrapper.mode-cannot_work .segment:not(:last-of-type) span {
-    color: var(--bs-white);
-    font-weight: var(--font-semibold);
-}
-.segmented-control-wrapper.mode-cannot_work .palette-container {
-    left: 25%;
+/* --- Логика состояний (универсальная для LTR и RTL) --- */
+
+/* Показываем нужную палитру в зависимости от режима */
+.segmented-control-wrapper.mode-cannot_work .palette-cannot-work,
+.segmented-control-wrapper.mode-prefer_work .palette-prefer-work {
+    visibility: visible;
     opacity: 1;
-    pointer-events: auto;
 }
 
+/* --- Логика для LTR --- */
+[dir="ltr"] .segmented-control-wrapper.mode-cannot_work .indicator { transform: translateX(0); }
+[dir="ltr"] .segmented-control-wrapper.mode-prefer_work .indicator { transform: translateX(100%); }
 
-/* Режим "Хочу работать" */
-.segmented-control-wrapper.mode-prefer_work .indicator {
-    background-color: var(--bs-success);
-    transform: translateX(100%);
-}
-/* Это правило остается без изменений, т.к. оно работает корректно */
+/* --- Логика для RTL (ИСПРАВЛЕНА) --- */
+/* В RTL "Cannot Work" справа (это 2-й сегмент), а "Prefer" слева (1-й) */
+[dir="rtl"] .segmented-control-wrapper.mode-cannot_work .indicator { transform: translateX(100%); }
+[dir="rtl"] .segmented-control-wrapper.mode-prefer_work .indicator { transform: translateX(0); }
+
+
+/* Подсветка текста (универсальная) */
+.segmented-control-wrapper.mode-cannot_work .segment:first-of-type span,
 .segmented-control-wrapper.mode-prefer_work .segment:last-of-type span {
     color: var(--bs-white);
     font-weight: var(--font-semibold);
 }
-.segmented-control-wrapper.mode-prefer_work .palette-container {
-    left: 75%;
-    opacity: 1;
-    pointer-events: auto;
-}
 
+/* Цвета индикатора (универсальные) */
+.segmented-control-wrapper.mode-cannot_work .indicator { background-color: var(--bs-danger); }
+.segmented-control-wrapper.mode-prefer_work .indicator { background-color: var(--bs-success); }
+
+
+/* Темная тема */
 [data-theme="dark"] .segmented-control {
     background-color: var(--bs-gray-800);
 }
 [data-theme="dark"] .palette-container {
-    color: var(--bs-body-color);
+    border-color: var(--bs-gray-700);
+}
+[data-theme="dark"] .palette-container:hover {
+    border-color: var(--bs-primary);
 }
 
+.edit-button {
+    padding: 0.6rem 1.5rem; /* Делаем ее немного выше и шире стандартной */
+    font-size: 1rem;       /* Стандартный размер шрифта */
+    font-weight: var(--font-semibold);
+    min-width: 200px;      /* Задаем хорошую минимальную ширину, чтобы она не выглядела куцой */
+    transition: all 0.2s ease-in-out;
+}
+
+.edit-button:hover {
+    transform: translateY(-2px); /* Легкий эффект приподнимания при наведении */
+    box-shadow: var(--bs-box-shadow);
+}
 
 /* ============================================
    АДАПТИВНОСТЬ (Mobile)
@@ -158,7 +173,7 @@
     .constraint-actions-panel .actions-container {
         justify-content: center;
         gap: var(--space-3);
-        margin-top: var(--space-3);
+        margin-top: 0;
     }
 
     .constraint-actions-panel .action-buttons-group {

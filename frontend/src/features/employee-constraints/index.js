@@ -26,7 +26,8 @@ import {
     setCurrentMode,
     clearSubmitStatus,
     enableEditing,
-    resetConstraints
+    resetConstraints,
+    cancelEditing
 } from './model/constraintSlice';
 
 import {formatEmployeeName, formatWeekRange} from 'shared/lib/utils/scheduleUtils';
@@ -72,11 +73,7 @@ const ConstraintsSchedule = () => {
     const {user} = useSelector(state => state.auth);
 
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
-    const limitParams = {
-        cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
-        preferWork: weeklyTemplate.constraints.limits.prefer_work_days
-    };
-    const employeeName = formatEmployeeName(weeklyTemplate.employee);
+
 
     const constraintPseudoShifts = useMemo(() => ({
         'cannot_work': {
@@ -286,6 +283,11 @@ const ConstraintsSchedule = () => {
         error={t('constraints.noTemplate')} variant="info"/></Container>;
 
 
+    const limitParams = {
+        cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
+        preferWork: weeklyTemplate.constraints.limits.prefer_work_days
+    };
+    const employeeName = formatEmployeeName(weeklyTemplate.employee);
 
     return (
         <Container fluid className="employee-constraints-container position-relative">
@@ -337,6 +339,7 @@ const ConstraintsSchedule = () => {
                     dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
                 }}
                 submitting={submitting}
+                onCancel={() => dispatch(cancelEditing())}
 
             />
             <ToastContainer className="p-3 toast-container" style={{ zIndex: 1056 }}>

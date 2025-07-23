@@ -68,6 +68,7 @@ const constraintSlice = createSlice({
         currentMode: 'cannot_work', // 'cannot_work' | 'prefer_work'
         isSubmitted: false,
         canEdit: true,
+        originalConstraintsOnEdit: null,
     },
     reducers: {
         setCurrentMode: (state, action) => {
@@ -130,6 +131,17 @@ const constraintSlice = createSlice({
         enableEditing: (state) => {
             state.isSubmitted = false;
             state.canEdit = true;
+            state.originalConstraintsOnEdit = JSON.parse(JSON.stringify(state.weeklyConstraints));
+        },
+        cancelEditing: (state) => {
+            // Если снимок существует, восстанавливаем из него данные
+            if (state.originalConstraintsOnEdit) {
+                state.weeklyConstraints = state.originalConstraintsOnEdit;
+            }
+            // Возвращаем UI в состояние "до редактирования"
+            state.isSubmitted = true;
+            state.canEdit = false; // или true, в зависимости от того, хотите ли вы сразу снова разрешить редактирование
+            state.originalConstraintsOnEdit = null; // Очищаем снимок
         }
     },
     extraReducers: (builder) => {
@@ -195,7 +207,8 @@ export const {
     updateConstraint,
     clearSubmitStatus,
     resetConstraints,
-    enableEditing
+    enableEditing,
+    cancelEditing
 } = constraintSlice.actions;
 
 export default constraintSlice.reducer;
