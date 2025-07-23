@@ -51,7 +51,7 @@
 
 /* Когда активен режим редактирования */
 .constraint-actions-panel.edit-mode {
-    min-height: 120px; /* Высота для мобильной версии */
+    min-height: 160px; /* Высота для мобильной версии */
 }
 
 .constraint-actions-panel.edit-mode .action-controls-container {
@@ -60,7 +60,7 @@
     transform: translateY(0);
     max-height: 500px; /* Достаточная высота для всех контролов */
     pointer-events: auto;
-    padding: 0;
+    padding:0;
 }
 
 /* --- Стили для конкретных версток (остаются почти без изменений) --- */
@@ -70,9 +70,10 @@
     gap: var(--space-3);
     padding-left: var(--space-1);
     padding-right: var(--space-1);
-
+    padding-bottom: 0.25rem;
 
 }
+
 
 .mobile-layout {
     flex-direction: column;
@@ -84,8 +85,10 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 0;
-
+    padding: 0 var(--space-1) var(--space-1);
+}
+.mobile-actions-container button{
+    border-radius: var(--radius-lg);
 }
 .mobile-layout .segmented-control-wrapper {
     width: 100%;
@@ -258,17 +261,6 @@
         padding: 0;
     }
 
-    .toast-container,
-    .constraint-actions-panel .help-container {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-    }
-
-    [dir="rtl"] .constraint-actions-panel .help-container {
-        left: auto;
-        right: 0;
-    }
 }
 
 @media (hover: hover) {
