@@ -146,6 +146,7 @@ const ConstraintGrid = (props) => {
                             </tr>
                         ))}
                         </tbody>
+
                     </Table>
                 </div>
             </Card.Body>
@@ -155,7 +156,7 @@ const ConstraintGrid = (props) => {
     const MobileGrid = () => (
         <Card className="shadow mobile-constraints ">
             <Card.Body className="p-0">
-                <Table bordered className="mb-0 full-schedule-table">
+                <Table bordered className="full-schedule-table">
                     <thead>
                     <tr>
                         <th className="shift-header-cell sticky-column">{t('common.day')}</th>

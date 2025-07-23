@@ -9,17 +9,23 @@
     padding-top: 0.5rem;
     min-height: calc(100vh - 58px);
     margin-bottom: 60px;
+
 }
 
 /* ============================================
    2. СТРУКТУРА ТАБЛИЦЫ И СЕТКИ
    ============================================ */
+#root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card{
+    border-radius: var(--radius-lg)
 
+}
 .employee-constraints-container .full-schedule-table {
     /*margin-bottom: 0 !important;*/
     font-size: 0.875rem;
     table-layout: fixed; /* Это ключ к адаптивному поведению колонок */
     width: 100%;
+    border-radius: var(--radius-lg)!important;
+
 
 }
 

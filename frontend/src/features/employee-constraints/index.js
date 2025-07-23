@@ -291,7 +291,7 @@ const ConstraintsSchedule = () => {
                 subtitle={t('constraints.subtitle')}
             />
 
-            <Card className="p-0">
+            <Card className="p-0 mb-2 mb-md-3">
                 <ScheduleHeaderCard
                     className="mb-1"
                     title={t('schedule.nextWeek')}
