@@ -208,7 +208,7 @@ const EmployeeLayout = () => {
 
             {/* Main Content */}
             <main className={`employee-main-content ${isAnimating ? 'animating-out' : 'animating-in'}`}>
-                <Container fluid>
+                <Container fluid className="px-0">
                     <GlobalAlerts />
                     <Outlet />
                 </Container>

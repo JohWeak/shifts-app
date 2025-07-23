@@ -136,24 +136,42 @@
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
-    .employee-dashboard{
-        margin-left: 0!important;
-        margin-right: 0!important;
-        max-width: 100%!important;
-        padding: 0!important;
-    }
-    .employee-dashboard .dashboard-card {
-        margin-bottom: 1rem;
+
+    /* 1. Уменьшаем отступы внутри всей карточки */
+    .dashboard-card .card-body {
+        padding: 0.75rem; /* Уменьшаем внутренние отступы */
     }
 
-    .employee-dashboard .icon-wrapper {
-        width: 60px;
-        height: 60px;
+    /* 2. Уменьшаем размер круга с иконкой */
+    .dashboard-card .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.75rem !important; /* mb-2 вместо mb-3 */
     }
 
-    .employee-dashboard .icon-wrapper i {
-        font-size: 2rem;
+    /* 3. Уменьшаем саму иконку внутри круга */
+    .dashboard-card .icon-wrapper i.bi {
+        font-size: 1.5rem; /* Делаем иконку меньше */
     }
+
+    /* 4. Уменьшаем размер шрифта заголовка */
+    .dashboard-card .card-title {
+        font-size: 1rem; /* Уменьшаем заголовок (был h5) */
+        margin-bottom: 0.25rem !important; /* mb-1 вместо mb-2 */
+    }
+
+    /* 5. Уменьшаем размер шрифта подзаголовка и убираем лишний отступ */
+    .dashboard-card .card-subtitle {
+        font-size: 0.75rem!important;
+        min-height: 36px; /* Добавляем минимальную высоту для выравнивания карточек */
+        margin-bottom: 0.25rem !important;
+    }
+
+    /* 6. Уменьшаем текст со статистикой (если есть) */
+    .dashboard-card .stats small {
+        font-size: 0.7rem;
+    }
+
 
     .employee-dashboard .stats-card .stats-grid {
         grid-template-columns: 1fr;
