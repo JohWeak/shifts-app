@@ -6,6 +6,8 @@
 
 .employee-constraints-container {
     max-width: 1400px;
+    padding-top: 0.5rem;
+    padding-bottom: 58px !important;
 }
 
 /* ============================================
@@ -13,7 +15,7 @@
    ============================================ */
 
 .employee-constraints-container .full-schedule-table {
-    margin-bottom: 0 !important;
+    /*margin-bottom: 0 !important;*/
     font-size: 0.875rem;
     table-layout: fixed; /* Это ключ к адаптивному поведению колонок */
     width: 100%;
@@ -211,8 +213,8 @@
 
 @media (max-width: 888px) {
     .employee-constraints-container {
-        padding: 1rem !important;
-        margin-bottom: 58px !important;
+        padding-top: 0.5rem;
+
     }
 
     .mobile-constraints table {

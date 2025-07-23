@@ -137,14 +137,14 @@ const EmployeeDashboard = () => {
     return (
         <Container className="employee-dashboard py-2">
             <PageHeader
-                className="dashboard-header mb-2 mb-md-4"
-                icon = "house"
+                className="dashboard-header mb-0 mb-md-3"
+                icon="house"
                 title={t('employee.dashboard.welcome')}
-                subtitle= {t('employee.dashboard.selectOption')}
+                subtitle={t('employee.dashboard.selectOption')}
             />
 
             {dashboardStats?.nextShift && (
-                <Card className="next-shift-card mb-2 mb-md-4">
+                <Card className="next-shift-card mb-2 mb-md-3">
                     <Card.Body>
                         <Row className="align-items-center">
                             <Col>
@@ -165,7 +165,7 @@ const EmployeeDashboard = () => {
                 </Card>
             )}
 
-            <Row className="g-2 g-md-4">
+            <Row className="g-2 g-md-3">
                 {dashboardCards.map(card => (
                     <Col key={card.id} xs={6} sm={6} lg={3}>
                         <Card
@@ -194,7 +194,7 @@ const EmployeeDashboard = () => {
                                 )}
                                 {card.badge && (
                                     <span
-                                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger dashboard-card-badge">
                                         {card.badge}
                                     </span>
                                 )}
@@ -204,7 +204,7 @@ const EmployeeDashboard = () => {
                 ))}
             </Row>
 
-            <Row className="mt-2 mt-md-4 ">
+            <Row className="mt-2 mt-md-3 ">
                 <Col md={12} xs={12}>
                     <Card className="stats-card">
                         <Card.Body>

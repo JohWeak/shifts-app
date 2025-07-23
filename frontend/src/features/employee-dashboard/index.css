@@ -133,7 +133,10 @@
     font-weight: 700;
     color: var(--bs-primary);
 }
+.dashboard-card .dashboard-card-badge {
+    transform: translate(-120%, 20%)!important;
 
+}
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .employee-dashboard .next-shift-card {

@@ -265,7 +265,7 @@ const ConstraintsSchedule = () => {
     };
     const employeeName = formatEmployeeName(weeklyTemplate.employee);
     return (
-        <Container fluid className="employee-constraints-container p-3 position-relative">
+        <Container fluid className="employee-constraints-container position-relative">
             <PageHeader
                 icon="shield-check"
                 title={t('constraints.title')}
