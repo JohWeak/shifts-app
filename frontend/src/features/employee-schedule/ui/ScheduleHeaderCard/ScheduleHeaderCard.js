@@ -19,11 +19,12 @@ export const ScheduleHeaderCard = ({
 
     const {t, direction, locale} = useI18n();
     const showSubtitle = position || site;
+    const shouldRenderFooter = site || position || empName || showNameToggle;
 
     return (
         <Card className={`schedule-info-card ${className}`}>
-            <Card.Body className=" ">
-                <div className="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+            <Card.Body className="pb-1">
+                <div className="d-flex justify-content-between align-items-center">
                     <div>
                         {title && (
                             <h6 className="week-title">
@@ -38,8 +39,8 @@ export const ScheduleHeaderCard = ({
                         )}
                     </div>
                 </div>
-
-                <div className="d-flex justify-content-between align-items-center">
+                {shouldRenderFooter && (
+                <div className="d-flex justify-content-between align-items-center mt-2 pt-1 border-top">
                     {showSubtitle && (
                         <small className="d-flex gap-2 text-muted ">
                             {site && (
@@ -73,6 +74,7 @@ export const ScheduleHeaderCard = ({
                         )}
                     </div>
                 </div>
+                )}
 
             </Card.Body>
         </Card>

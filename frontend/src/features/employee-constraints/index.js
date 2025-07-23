@@ -330,8 +330,8 @@ const ConstraintsSchedule = () => {
                     className="mb-1"
                     title={t('schedule.nextWeek')}
                     week={weeklyTemplate.weekStart}
-                    position={weeklyTemplate.employee?.position}
-                    empName={employeeName}
+                    // position={weeklyTemplate.employee?.position}
+                    // empName={employeeName}
                 />
                 <ConstraintGrid
                     template={weeklyTemplate.constraints.template}
