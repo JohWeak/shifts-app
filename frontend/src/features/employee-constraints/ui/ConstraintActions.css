@@ -168,17 +168,17 @@
     border: none;
 }
 
-.palette-button.mode-cannot_work {
-    background-color: var(--bs-danger);
-    border-color: var(--bs-danger);
-    color: var(--bs-white);
-}
+/*.palette-button.mode-cannot_work {*/
+/*    background-color: var(--bs-danger);*/
+/*    border-color: var(--bs-danger);*/
+/*    color: var(--bs-white);*/
+/*}*/
 
-.palette-button.mode-prefer_work {
-    background-color: var(--bs-success);
-    border-color: var(--bs-success);
-    color: var(--bs-white);
-}
+/*.palette-button.mode-prefer_work {*/
+/*    background-color: var(--bs-success);*/
+/*    border-color: var(--bs-success);*/
+/*    color: var(--bs-white);*/
+/*}*/
 
 
 /* --- LTR (стандартное направление) --- */
@@ -207,18 +207,11 @@
 /* Подсветка текста (используем надежные классы) */
 .segmented-control-wrapper.mode-cannot_work .segment-cannot-work span,
 .segmented-control-wrapper.mode-prefer_work .segment-prefer-work span {
-    color: var(--bs-white);
     font-weight: var(--font-semibold);
+
 }
 
-/* Цвета индикатора */
-.segmented-control-wrapper.mode-cannot_work .indicator {
-    background-color: var(--bs-danger);
-}
 
-.segmented-control-wrapper.mode-prefer_work .indicator {
-    background-color: var(--bs-success);
-}
 
 /* Видимость палитры (эта логика уже надежна и не меняется) */
 .segmented-control-wrapper.mode-cannot_work .palette-cannot-work,

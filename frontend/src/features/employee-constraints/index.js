@@ -116,6 +116,21 @@ const ConstraintsSchedule = () => {
             color: '#28a745' // Цвет по умолчанию
         }
     }), [t]);
+    const customColors = useMemo(() => {
+        const cannotWorkBg = getShiftColor(constraintPseudoShifts.cannot_work);
+        const preferWorkBg = getShiftColor(constraintPseudoShifts.prefer_work);
+
+        return {
+            cannot_work: {
+                background: cannotWorkBg,
+                text: getContrastTextColor(cannotWorkBg)
+            },
+            prefer_work: {
+                background: preferWorkBg,
+                text: getContrastTextColor(preferWorkBg)
+            }
+        };
+    }, [getShiftColor, constraintPseudoShifts.cannot_work, constraintPseudoShifts.prefer_work]);
 
     useEffect(() => {
         // Компонент сам отвечает за загрузку своих данных.
@@ -365,6 +380,7 @@ const ConstraintsSchedule = () => {
                 onSubmit={() => handleShowModal('submit')}
                 onClear={() => handleShowModal('reset')}
                 onCancel={() => dispatch(cancelEditing())}
+                customColors={customColors}
                 isMobile={isMobile}
 
             />
