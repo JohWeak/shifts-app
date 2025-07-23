@@ -92,7 +92,7 @@
 
 /* Next Shift Card */
 .employee-dashboard .next-shift-card {
-    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-dark) 100%);
+    background:  var(--bs-primary);
     color: white;
     border: none;
 }
@@ -136,10 +136,19 @@
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
+    .employee-dashboard .next-shift-card {
+        border: none;
+    }
 
+    .employee-dashboard .next-shift-card h5 {
+        font-size: 1rem;
+    }
+    .employee-dashboard .next-shift-card p{
+        font-size: 0.875rem;
+    }
     /* 1. Уменьшаем отступы внутри всей карточки */
     .dashboard-card .card-body {
-        padding: 0.75rem; /* Уменьшаем внутренние отступы */
+        padding: 0.5rem; /* Уменьшаем внутренние отступы */
     }
 
     /* 2. Уменьшаем размер круга с иконкой */

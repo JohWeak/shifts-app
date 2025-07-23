@@ -162,7 +162,7 @@ const EmployeeDashboard = () => {
                 </Card>
             )}
 
-            <Row className="g-4">
+            <Row className="g-2 g-md-4">
                 {dashboardCards.map(card => (
                     <Col key={card.id} xs={6} sm={6} lg={3}>
                         <Card
