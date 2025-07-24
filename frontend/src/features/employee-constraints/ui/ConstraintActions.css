@@ -20,6 +20,8 @@
     left: 0;
     width: 100%;
     padding: var(--space-2);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 /* --- ОБЩАЯ ЛОГИКА АНИМАЦИИ --- */
@@ -85,7 +87,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 0 var(--space-1) var(--space-1);
+    padding: 0 var(--space-1) var(--space-2);
 }
 .mobile-actions-container button{
     border-radius: var(--radius-lg);

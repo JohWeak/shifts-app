@@ -37,7 +37,7 @@ import './index.css';
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
     const {t} = useI18n();
-    const isMobile = useMediaQuery('(max-width: 768px)');
+    const isMobile = useMediaQuery('(max-width: 888px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
     const [showInstructions, setShowInstructions] = useState(false);
     const [modalState, setModalState] = useState({show: false, action: null});
