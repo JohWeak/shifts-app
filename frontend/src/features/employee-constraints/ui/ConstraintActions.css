@@ -170,7 +170,7 @@
 .constraint-actions-panel .palette-button {
     width: 38px;
     height: 38px;
-    border-radius: var(--radius-md);
+    /*border-radius: var(--radius-md);*/
     padding: 0;
     line-height: 1;
     transition: all 0.2s ease-in-out !important;
@@ -229,12 +229,13 @@
     border-color: var(--bs-gray-700);
 }
 
-.edit-button {
-    padding: 0.6rem 1.5rem; /* Делаем ее немного выше и шире стандартной */
+.constraint-actions-panel .edit-button {
+    padding: 0.35rem 1.25rem; /* Делаем ее немного выше и шире стандартной */
     font-size: 1rem; /* Стандартный размер шрифта */
     font-weight: var(--font-semibold);
-    min-width: 200px; /* Задаем хорошую минимальную ширину, чтобы она не выглядела куцой */
+    min-width: 220px; /* Задаем хорошую минимальную ширину, чтобы она не выглядела куцой */
     transition: all 0.2s ease-in-out !important;
+    border-radius: var(--radius-lg);
 }
 
 

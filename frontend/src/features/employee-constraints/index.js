@@ -340,7 +340,7 @@ const ConstraintsSchedule = () => {
                 subtitle={t('constraints.subtitle')}
             />
 
-            <Card className="p-0 mb-2 mb-md-3">
+            <Card className="p-0 mb-2 mb-md-3 constrains-card">
                 <ScheduleHeaderCard
                     className="mb-1"
                     title={t('schedule.nextWeek')}
@@ -363,7 +363,23 @@ const ConstraintsSchedule = () => {
                     onShowInstructions={toggleShowInstructions}
                 />
             </Card>
-
+            <ToastContainer className="p-3 toast-container" style={{zIndex: 1056}}>
+                <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
+                    <Toast.Header closeButton={true}>
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <strong className="me-auto">{t('constraints.instructions.title')}</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                        <ul className="mb-0 ps-3">
+                            <li>{t('constraints.instructions.selectMode')}</li>
+                            <li>{t('constraints.instructions.clickCells')}</li>
+                            {weeklyTemplate && (
+                                <li>{t('constraints.instructions.limits', limitParams)}</li>
+                            )}
+                        </ul>
+                    </Toast.Body>
+                </Toast>
+            </ToastContainer>
             <ConstraintActions
                 currentMode={currentMode}
                 onModeChange={(mode) => dispatch(setCurrentMode(mode))}
@@ -384,23 +400,7 @@ const ConstraintsSchedule = () => {
                 isMobile={isMobile}
 
             />
-            <ToastContainer className="p-3 toast-container" style={{zIndex: 1056}}>
-                <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
-                    <Toast.Header closeButton={true}>
-                        <i className="bi bi-info-circle-fill me-2"></i>
-                        <strong className="me-auto">{t('constraints.instructions.title')}</strong>
-                    </Toast.Header>
-                    <Toast.Body>
-                        <ul className="mb-0 ps-3">
-                            <li>{t('constraints.instructions.selectMode')}</li>
-                            <li>{t('constraints.instructions.clickCells')}</li>
-                            {weeklyTemplate && (
-                                <li>{t('constraints.instructions.limits', limitParams)}</li>
-                            )}
-                        </ul>
-                    </Toast.Body>
-                </Toast>
-            </ToastContainer>
+
 
             {colorPickerState.show && (
                 <ColorPickerModal

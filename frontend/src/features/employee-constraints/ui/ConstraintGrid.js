@@ -134,7 +134,7 @@ const ConstraintGrid = (props) => {
     );
 
     const DesktopGrid = () => (
-        <Card className="shadow desktop-constraints d-none d-md-block">
+        <Card className="desktop-constraints d-none d-md-block">
             <Card.Body className="p-0">
                 <div className="table-responsive">
                     <Table bordered className=" full-schedule-table mb-0">
@@ -181,7 +181,7 @@ const ConstraintGrid = (props) => {
     );
 
     const MobileGrid = () => (
-        <Card className="shadow mobile-constraints ">
+        <Card className=" mobile-constraints ">
             <Card.Body className="p-0">
                 <Table bordered className="full-schedule-table mb-0">
                     <thead>

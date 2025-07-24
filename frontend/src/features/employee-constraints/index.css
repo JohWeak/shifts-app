@@ -14,17 +14,28 @@
 /* ============================================
    2. СТРУКТУРА ТАБЛИЦЫ И СЕТКИ
    ============================================ */
-#root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card{
+#root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card {
     border-radius: var(--radius-lg);
     overflow: hidden;
-
+    border-color: var(--bs-gray-200);
+    box-shadow: var(--shadow-base);
 }
+.employee-constraints-container .desktop-constraints .table-responsive::-webkit-scrollbar{
+    display: none;
+}
+[data-theme="dark"] #root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card {
+
+    border-color: var(--bs-gray-800);
+}
+
 .employee-constraints-container .full-schedule-table {
-    /*margin-bottom: 0 !important;*/
     font-size: 0.875rem;
     table-layout: fixed; /* Это ключ к адаптивному поведению колонок */
-    width: 100%;
-    border-radius: var(--radius-lg)!important;
+    width: calc(100% + 2px);
+    margin-right: -1px;
+    margin-left: -1px;
+
+
 }
 
 .employee-constraints-container .mobile-constraints,
@@ -42,10 +53,19 @@
     background-color: var(--bs-gray-800);
 }
 
+.employee-constraints-container .info-footer {
+    border-color: var(--bs-gray-200);
+    border-bottom-color: var(--bs-gray-100);
+}
+[data-theme="dark"] .employee-constraints-container .info-footer {
+    border-color: var(--bs-gray-800);
+    border-bottom-color: var(--bs-gray-900);
+}
 
-/* ============================================
-   3. ЗАГОЛОВКИ (Дни и Смены)
-   ============================================ */
+
+    /* ============================================
+       3. ЗАГОЛОВКИ (Дни и Смены)
+       ============================================ */
 
 /* Заголовки дней (верхняя строка) */
 .employee-constraints-container .day-header, .employee-constraints-container .day-header-cell {
@@ -67,7 +87,7 @@
     font-size: var(--text-sm);
     flex-shrink: 0;
     line-height: 1;
-    padding: 0!important;
+    padding: 0 !important;
 }
 
 .employee-constraints-container .day-name {
@@ -108,14 +128,14 @@
 /* "Липкая" колонка для заголовков смен */
 .employee-constraints-container .sticky-column {
     position: sticky;
-    left: 0;
+    left: -1px;
     z-index: 10;
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
 [dir="rtl"] .employee-constraints-container .sticky-column {
     left: auto;
-    right: 0;
+    right: -1px;
     box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -138,6 +158,7 @@
     inset: 0;
     transition: background-color 0.2s ease;
 }
+
 /* 1. Определяем анимацию "появления" */
 @keyframes pop-in {
     from {
@@ -174,6 +195,7 @@
     inset: 4px; /* Отступы со всех сторон */
 
 }
+
 .employee-constraints-container .constraint-cell.is-appearing {
     animation: pop-in 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -181,7 +203,6 @@
 .employee-constraints-container .constraint-cell.neutral {
     background-color: transparent !important;
 }
-
 
 
 /* Состояние неактивности (без изменений) */
@@ -207,6 +228,7 @@
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
 }
+
 /* 2. Показываем ВЫБРАННУЮ иконку. */
 .employee-constraints-container .constraint-cell.prefer_work > .icon-prefer-work,
 .employee-constraints-container .constraint-cell.cannot_work > .icon-cannot-work {
@@ -214,32 +236,34 @@
 }
 
 
-
-
 @media (hover: hover) {
     .employee-constraints-container .day-header.clickable:hover {
         opacity: 0.7;
     }
+
     /* Применяем эффект увеличения только к ячейкам с отступами */
     .employee-constraints-container .constraint-cell.clickable:not(.neutral):hover {
         transform: scale(1.03);
     }
+
     /* Состояние при наведении (работает для обоих состояний) */
     .employee-constraints-container .constraint-cell.clickable:hover {
         /* Цвет берется из CSS переменной, заданной в getCellStyle */
         background-color: var(--cell-hover-color) !important;
-        /*box-shadow: var(--bs-box-shadow-sm);*/
     }
+
     /* 3. Показываем ХОВЕР-иконку, используя data-атрибут. */
     .employee-constraints-container .constraint-cell[data-next-status="cannot_work"]:hover > .hover-icon-cannot-work,
     .employee-constraints-container .constraint-cell[data-next-status="prefer_work"]:hover > .hover-icon-prefer-work {
         opacity: 0.1;
     }
+
     /* 4. Принудительно СКРЫВАЕМ выбранную иконку при наведении. */
     .employee-constraints-container .constraint-cell:hover > .selected-icon {
         opacity: 0;
     }
 }
+
 /* ============================================
    5. АДАПТИВНОСТЬ (Mobile)
    ============================================ */
