@@ -39,6 +39,22 @@ const ConstraintsSchedule = () => {
     const {t} = useI18n();
     const isMobile = useMediaQuery('(max-width: 888px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
+    useEffect(() => {
+        // Если есть ячейка для анимации...
+        if (justChangedCell) {
+            // ...устанавливаем таймер, чтобы очистить состояние через 300мс
+            // (немного дольше, чем длительность нашей CSS-анимации)
+            const timer = setTimeout(() => {
+                setJustChangedCell(null);
+            }, 500);
+
+            // Это "функция очистки". Она сработает, если вы кликнете
+            // на другую ячейку до того, как таймер завершится,
+            // предотвращая гонку состояний.
+            return () => clearTimeout(timer);
+        }
+    }, [justChangedCell]);
+
     const [showInstructions, setShowInstructions] = useState(false);
     const [modalState, setModalState] = useState({show: false, action: null});
     const toggleShowInstructions = () => setShowInstructions(!showInstructions);
