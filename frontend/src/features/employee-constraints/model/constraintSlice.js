@@ -144,7 +144,11 @@ const constraintSlice = createSlice({
             state.isSubmitted = true;
             state.canEdit = false; // или true, в зависимости от того, хотите ли вы сразу снова разрешить редактирование
             state.originalConstraintsOnEdit = null; // Очищаем снимок
-        }
+        },
+        submissionInitiated: (state) => {
+            state.isSubmitted = true;  // Оптимистично переключаем UI
+            state.submitting = true;   // Включаем спиннер
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -192,15 +196,15 @@ const constraintSlice = createSlice({
             })
             .addCase(submitWeeklyConstraints.fulfilled, (state) => {
                 state.submitting = false;
-                state.submitStatus = 'success';
-                state.isSubmitted = true;
-                state.canEdit = false;
+                state.canEdit = false; // или true, если хотите разрешить сразу редактировать
                 state.originalConstraintsOnEdit = null;
             })
+            // Rejected теперь должен "откатить" наш оптимистичный UI
             .addCase(submitWeeklyConstraints.rejected, (state, action) => {
                 state.submitting = false;
-                state.submitStatus = 'error';
+                state.isSubmitted = false; // Возвращаем UI в режим редактирования
                 state.error = action.error.message;
+                // Здесь же можно отправить уведомление об ошибке
             });
     }
 });
@@ -211,7 +215,8 @@ export const {
     clearSubmitStatus,
     resetConstraints,
     enableEditing,
-    cancelEditing
+    cancelEditing,
+    submissionInitiated
 } = constraintSlice.actions;
 
 export default constraintSlice.reducer;

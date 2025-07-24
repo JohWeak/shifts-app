@@ -27,7 +27,8 @@ import {
     clearSubmitStatus,
     enableEditing,
     resetConstraints,
-    cancelEditing
+    cancelEditing,
+    submissionInitiated
 } from './model/constraintSlice';
 
 import {formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
@@ -82,6 +83,7 @@ const ConstraintsSchedule = () => {
             dispatch(resetConstraints());
             dispatch(removeNotification(LIMIT_ERROR_NOTIFICATION_ID));
         } else if (modalState.action === 'submit') {
+            dispatch(submissionInitiated());
             handleSubmit();
         }
         handleHideModal();
