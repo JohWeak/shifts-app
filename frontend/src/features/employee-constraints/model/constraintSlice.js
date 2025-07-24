@@ -1,6 +1,7 @@
 // frontend/src/features/employee-constraints/model/constraintSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
+import { addNotification } from 'app/model/notificationsSlice';
 
 const CACHE_DURATION = 10 * 60 * 1000; // 10 минут
 
@@ -28,9 +29,21 @@ export const fetchWeeklyConstraints = createAsyncThunk(
 // Async thunks
 export const submitWeeklyConstraints = createAsyncThunk(
     'constraints/submitWeeklyConstraints',
-    async (constraintsData) => {
-        const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
-        return response;
+    async (constraintsData, { dispatch }) => {
+        try {
+            const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
+
+            // После успешной отправки диспатчим уведомление
+            dispatch(addNotification({
+                id: 'constraint-submit-success',
+                message: 'constraints.submitSuccess',
+                variant: 'success'
+            }));
+
+            return response;
+        } catch (error) {
+            throw error;
+        }
     }
 );
 export const fetchPermanentRequests = createAsyncThunk(

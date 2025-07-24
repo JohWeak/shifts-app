@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Alert, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { removeNotification } from 'app/model/notificationsSlice';
 import './GlobalAlerts.css';
 
@@ -25,6 +26,7 @@ const AlertItem = ({ notification }) => {
     const dispatch = useDispatch();
     const [isClosing, setIsClosing] = useState(false);
     const animationDuration = 300;
+    const { t } = useI18n();
     const isManuallyClosable = notification.variant !== 'info' && notification.variant !== 'success';
 
     useEffect(() => {
@@ -69,7 +71,7 @@ const AlertItem = ({ notification }) => {
                     className="me-2"
                 />
             )}
-            {notification.message}
+            {t(notification.message)}
         </Alert>
     );
 }

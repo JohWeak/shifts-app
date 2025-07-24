@@ -156,19 +156,7 @@ const ConstraintsSchedule = () => {
         dispatch(fetchWeeklyConstraints());
     }, [dispatch]);
 
-    useEffect(() => {
-        if (submitStatus === 'success') {
-            dispatch(addNotification({
-                id: 'constraint-submit-success',
-                message: t('constraints.submitSuccess'),
-                variant: 'success'
-            }));
-            dispatch(clearSubmitStatus());
-        }
-        return () => {
-            dispatch(removeNotification('constraints-already-submitted'));
-        };
-    }, [submitStatus, dispatch, t]);
+
     console.log('[LOG 4] weeklyTemplate:', {weeklyTemplate});
 
     const usedCounts = useMemo(() => {
