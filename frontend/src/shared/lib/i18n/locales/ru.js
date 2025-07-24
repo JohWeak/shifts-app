@@ -137,7 +137,7 @@ export const ru = {
     },
     constraints: {
         alreadySubmitted: 'Вы уже отправили ограничения на эту неделю',
-        cannotWork: 'Не могу работать',
+        cannotWork: 'Не могу',
         cannot_work_color: 'Цвет "Не могу работать"',
         colorSettings: 'Настройки цвета',
         errors: {
@@ -162,7 +162,7 @@ export const ru = {
             submitTitle: 'Отправка ограничений',
         },
         noTemplate: 'Шаблон расписания недоступен',
-        preferWork: 'Предпочитаю работать',
+        preferWork: 'Предпочитаю',
         prefer_work_color: 'Цвет "Предпочитаю работать"',
         shiftTime: 'Смена/Время',
         submit: 'Отправить ограничения',

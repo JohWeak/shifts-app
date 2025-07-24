@@ -151,6 +151,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    margin-inline-end: 0.5rem;
 }
 
 /* По умолчанию показываем контурную иконку, а заполненную скрываем */
@@ -226,13 +227,20 @@
         flex-direction: column;
         font-size: 0.675rem;
         padding: 0.5rem 0.75rem 1rem;
+        align-items: center;
+
+
     }
 
     .employee-nav-tabs .nav-tab-item i{
         margin: 0!important;
+        align-items: center;
+
     }
     .nav-tab-item .icon-wrapper {
         margin: 0 !important;
+        align-items: center;
+
     }
 
     .employee-navbar .user-name {
@@ -252,13 +260,7 @@
     }
 }
 
-/* RTL Support */
 
-
-[dir="rtl"] .nav-tab-item i {
-    margin-left: 0.5rem;
-    margin-right: 0;
-}
 
 [dir="rtl"] .user-menu-toggle i.bi-chevron-down {
     margin-right: 0.25rem;

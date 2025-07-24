@@ -193,7 +193,7 @@ const EmployeeLayout = () => {
                                 className={`nav-tab-item ${location.pathname === item.path ? 'active' : ''}`}
                                 onClick={() => handleNavigation(item.path)}
                             >
-                                <span className="icon-wrapper me-2">
+                                <span className="icon-wrapper">
                                     <i className={`bi bi-${item.icon} icon-outline`}></i>
                                     <i className={`bi bi-${item.iconFill} icon-fill`}></i>
                                 </span>
