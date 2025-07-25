@@ -587,7 +587,7 @@ export const en = {
         permanent_constraints: {
             title: 'Permanent Schedule Constraints'
         },
-        no_requests: 'No Requests',
+        noRequests: 'No Requests',
         no_requests_message: 'You haven\'t submitted any requests yet',
         pending: 'Pending',
         pending_requests: 'Pending Requests',
@@ -615,7 +615,11 @@ export const en = {
             pending: 'Pending',
             approved: 'Approved',
             rejected: 'Rejected'
-        }
+        },
+        includeMessage: 'Include Message',
+        includeMessageLabel: 'Include message in email',
+        constraintsCount: 'Constraints count',
+
     },
     reports: {
         analyticsAndReports: 'Analytics & Reports',

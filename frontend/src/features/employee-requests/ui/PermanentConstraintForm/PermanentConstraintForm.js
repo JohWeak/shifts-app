@@ -3,19 +3,21 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Card, Button, Form, Alert } from 'react-bootstrap';
 import { X } from 'react-bootstrap-icons';
-import { constraintAPI } from '../../../../shared/api/apiService';
-import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
-import { useShiftColor } from '../../../../shared/hooks/useShiftColor';
-import ConfirmationModal from '../../../../shared/ui/components/ConfirmationModal/ConfirmationModal';
-import LoadingState from '../../../../shared/ui/components/LoadingState/LoadingState';
-import ErrorMessage from '../../../../shared/ui/components/ErrorMessage/ErrorMessage';
-import { getContrastTextColor } from '../../../../shared/lib/utils/colorUtils';
+import { constraintAPI } from 'shared/api/apiService';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
+import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import './PermanentConstraintForm.css';
+import {getDayNames} from "shared/lib/utils/scheduleUtils";
 
-const DAYS_OF_WEEK = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
 
 const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const { t } = useI18n();
+    const DAYS_OF_WEEK = getDayNames(t);
     const dispatch = useDispatch();
     const { getShiftColor } = useShiftColor();
 
@@ -233,14 +235,14 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                                 {shift.shift_name}
                                             </th>
                                         ))}
-                                        <th className="action-header">{t('requests.all_shifts')}</th>
+                                        <th className="action-header">{t('requests.block_day')}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {DAYS_OF_WEEK.map(day => (
                                         <tr key={day}>
                                             <td className="day-cell">
-                                                {t(`common.days.${day}`)}
+                                                {day}
                                             </td>
                                             {shifts.map(shift => {
                                                 const styles = getCellStyles(day, shift.id);
@@ -267,7 +269,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                                     variant="outline-danger"
                                                     size="sm"
                                                     onClick={() => handleDayClick(day)}
-                                                    className="w-100"
                                                 >
                                                     {t('requests.block_day')}
                                                 </Button>
@@ -280,7 +281,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
 
                             <div className="constraint-info mt-3">
                                 <small className="text-muted">
-                                    {t('requests.constraints_count', { count: usedCount })}
+                                    {t('requests.constraintsCount', { count: usedCount })}
                                 </small>
                             </div>
 
@@ -288,7 +289,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                 <Form.Check
                                     type="checkbox"
                                     id="include-message"
-                                    label={t('requests.include_message')}
+                                    label={t('requests.includeMessage')}
                                     checked={showMessage}
                                     onChange={(e) => setShowMessage(e.target.checked)}
                                 />
@@ -296,7 +297,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
 
                             {showMessage && (
                                 <Form.Group className="mt-3">
-                                    <Form.Label>{t('requests.message_label')}</Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={3}
