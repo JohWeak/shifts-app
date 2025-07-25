@@ -17,7 +17,7 @@
 }
 
 .permanent-constraint-form-container .day-header-cell {
-    width: 120px;
+    max-width: 120px;
     min-width: 100px;
     font-weight: 600;
 }
@@ -80,7 +80,40 @@
     font-size: 1.5rem;
     color: white;
 }
+.permanent-constraint-form-container .day-name {
+    font-weight: 600;
+}
 
+/* "Липкая" колонка для заголовков смен/дней */
+.permanent-constraint-form-container .sticky-column {
+    position: sticky;
+    z-index: 10;
+}
+/* Для десктопной версии (заголовки смен слева) */
+.permanent-constraint-form-container .desktop-layout .sticky-column, [dir="ltr"] .full-schedule-table .sticky-column {
+    left: 0;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+[dir="rtl"] .permanent-constraint-form-container .full-schedule-table .sticky-column {
+    right: 0;
+    left: auto;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+
+/* Добавляем фон к заголовкам смен/дней в десктопной версии для "липкости" */
+.permanent-constraint-form-container > th.shift-header-cell.sticky-column {
+    background-color: var(--bs-body-bg);
+}
+.permanent-constraint-form-container > td.day-header-cell.sticky-column {
+    background-color: var(--bs-body-bg);
+}
+
+/* Убираем лишние бордеры для красоты */
+.permanent-constraint-form-container .table-responsive {
+    border-radius: var(--bs-card-inner-border-radius);
+    overflow: hidden; /* Обрезаем углы таблицы по углам карточки */
+}
 /* Анимация появления */
 @keyframes pop-in {
     from {

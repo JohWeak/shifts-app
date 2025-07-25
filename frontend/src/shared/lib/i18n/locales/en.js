@@ -114,6 +114,7 @@ export const en = {
         search: 'Search',
         select: 'Select',
         settings: 'Settings',
+        shift: 'Shift',
         show: 'Show',
         showing: 'Showing',
         startDate: 'Start Date',

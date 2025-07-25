@@ -15,13 +15,13 @@ import ConfirmationModal from 'shared/ui/components/ConfirmationModal/Confirmati
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import PermanentConstraintGrid from './PermanentConstraintGrid';
-import './PermanentConstraintForm.css'; // Новые стили
+import './PermanentConstraintForm.css';
 
 const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const { t } = useI18n();
     const DAYS_OF_WEEK = useMemo(() => getDayNames(t, 'long'), [t]);
     const { getShiftColor, currentTheme } = useShiftColor();
-    const isMobile = useMediaQuery('(max-width: 888px)');
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -47,6 +47,19 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         };
         loadData();
     }, [t]);
+
+    const fullyBlockedDays = useMemo(() => {
+        const blocked = new Set();
+        if (!shifts.length) return blocked;
+
+        DAYS_OF_WEEK.forEach(day => {
+            const allShiftsForDayBlocked = shifts.every(shift => constraints[`${day}-${shift.id}`] === 'cannot_work');
+            if (allShiftsForDayBlocked) {
+                blocked.add(day);
+            }
+        });
+        return blocked;
+    }, [constraints, shifts, DAYS_OF_WEEK]);
 
     // Эффект для анимации
     useEffect(() => {
@@ -109,9 +122,20 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         return { tdStyle, foregroundStyle, foregroundClasses, status };
     };
 
+    const getDayHeaderStyle = (day) => {
+        if (fullyBlockedDays.has(day)) {
+            return {
+                backgroundColor: '#dc3545', // Тот же цвет, что и у ячеек
+                color: getContrastTextColor('#dc3545')
+            };
+        }
+        return {}; // Возвращаем пустой объект, если день не заблокирован
+    };
+
     const getShiftHeaderStyle = (shift) => {
-        const baseColor = getShiftColor(shift);
-        return { backgroundColor: baseColor, color: getContrastTextColor(baseColor) };
+        const baseColor = getShiftColor(shift); // Используем getShiftColor(shift), а не shift.id
+        const textColor = getContrastTextColor(baseColor);
+        return { backgroundColor: baseColor, color: textColor };
     };
 
     // --- ОТПРАВКА ФОРМЫ ---
@@ -152,7 +176,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                     </div>
                 </Card.Header>
 
-                <Card.Body>
+                <Card.Body className="p-0">
                     {shifts.length === 0 ? (
                         <Alert variant="info">{t('requests.no_position_assigned')}</Alert>
                     ) : (
@@ -163,6 +187,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                             onDayClick={handleDayClick}
                             getCellStyles={getCellStyles}
                             getShiftHeaderStyle={getShiftHeaderStyle}
+                            getDayHeaderStyle={getDayHeaderStyle}
                             isMobile={isMobile}
                             justChangedCell={justChangedCell}
                         />
@@ -170,7 +195,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                 </Card.Body>
 
                 {/* Футер с сообщением и кнопками */}
-                <Card.Footer className="bg-transparent border-top-0 pt-0">
+                <Card.Footer className="bg-transparent border-top-1 mt-1">
                     <Form.Group className="mt-3">
                         <Form.Check
                             type="checkbox"
