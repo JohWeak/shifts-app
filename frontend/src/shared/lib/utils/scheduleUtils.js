@@ -198,7 +198,6 @@ export const getDayName = (dayIndex, t, short = false) => {
     return dayNames[dayIndex] || '';
 };
 
-// Оставляем эти функции, так как они используются
 export const getStatusBadgeVariant = (status) => {
     const variants = {
         published: 'success',

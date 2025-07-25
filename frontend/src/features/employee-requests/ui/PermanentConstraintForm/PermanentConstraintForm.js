@@ -8,8 +8,7 @@ import { useShiftColor } from 'shared/hooks/useShiftColor';
 import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import { addNotification } from 'app/model/notificationsSlice'; // Для будущих уведомлений
 import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
-import { getDayNames } from "shared/lib/utils/scheduleUtils";
-
+import { getDayName } from "shared/lib/utils/scheduleUtils";
 // Наши новые компоненты
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -17,9 +16,10 @@ import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import PermanentConstraintGrid from './PermanentConstraintGrid';
 import './PermanentConstraintForm.css';
 
+const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const { t } = useI18n();
-    const DAYS_OF_WEEK = useMemo(() => getDayNames(t, false), [t]); // false для полных имен
     const { getShiftColor, currentTheme } = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -30,7 +30,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const [message, setMessage] = useState('');
     const [showMessage, setShowMessage] = useState(false);
     const [shifts, setShifts] = useState([]);
-    const [justChangedCell, setJustChangedCell] = useState(null);
 
     // Загрузка данных
     useEffect(() => {
@@ -52,27 +51,19 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         const blocked = new Set();
         if (!shifts.length) return blocked;
 
-        DAYS_OF_WEEK.forEach(day => {
+        DAYS_OF_WEEK_CANONICAL.forEach(day => {
             const allShiftsForDayBlocked = shifts.every(shift => constraints[`${day}-${shift.id}`] === 'cannot_work');
             if (allShiftsForDayBlocked) {
                 blocked.add(day);
             }
         });
         return blocked;
-    }, [constraints, shifts, DAYS_OF_WEEK]);
+    }, [constraints, shifts]);
 
-    // Эффект для анимации
-    useEffect(() => {
-        if (justChangedCell) {
-            const timer = setTimeout(() => setJustChangedCell(null), 300);
-            return () => clearTimeout(timer);
-        }
-    }, [justChangedCell]);
 
     // --- ОБРАБОТЧИКИ КЛИКОВ ---
     const handleCellClick = (day, shiftId) => {
         const key = `${day}-${shiftId}`;
-        setJustChangedCell(key);
         setConstraints(prev => {
             const newConstraints = { ...prev };
             if (newConstraints[key] === 'cannot_work') {
@@ -87,9 +78,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const handleDayClick = (day) => {
         const dayKeys = shifts.map(s => `${day}-${s.id}`);
         const allSelected = dayKeys.every(key => constraints[key] === 'cannot_work');
-
-        // Анимируем все ячейки дня
-        dayKeys.forEach(key => setJustChangedCell(key));
 
         setConstraints(prev => {
             const newConstraints = { ...prev };
@@ -106,17 +94,38 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const getCellStyles = (day, shiftId) => {
         const status = constraints[`${day}-${shiftId}`] || 'neutral';
         const shift = shifts.find(s => s.id === shiftId);
-        const neutralBgAlpha = currentTheme === 'dark' ? 0.05 : 0.5;
-        const tdStyle = {
-            backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
-        };
-        const foregroundClasses = `constraint-cell ${status} clickable`;
-        const foregroundStyle = {};
+
+        // 1. Определяем цвет фона. Это будет ЛИБО красный, ЛИБО полупрозрачный цвет смены.
+        let backgroundColor;
         if (status === 'cannot_work') {
-            foregroundStyle.backgroundColor = '#dc3545';
-            foregroundStyle.color = getContrastTextColor(foregroundStyle.backgroundColor);
+            backgroundColor = '#dc3545'; // Красный цвет для блокировки
+        } else {
+            // Полупрозрачный фон для пустой ячейки. Тема учитывается.
+            const neutralBgAlpha = currentTheme === 'dark' ? 0.5 : 0.5;
+            // ВАЖНО: getShiftColor(shift) вернет серый, если цвет не задан.
+            // Ваша ручная проверка с '#0f5faf' была правильной.
+            backgroundColor = hexToRgba(shift ? getShiftColor(shift) : '#afceea', neutralBgAlpha);
         }
-        return { tdStyle, foregroundStyle, foregroundClasses, status };
+        console.log("[Shift and colors]",
+            "Shift: ", shift,
+            "BGColor: ", backgroundColor || "НЕТ ЦВЕТА",
+
+        );
+
+        // 2. Определяем цвет текста
+        const textColor = status === 'cannot_work' ? getContrastTextColor(backgroundColor) : 'inherit';
+
+        // 3. Собираем стили ТОЛЬКО для внутреннего div'а
+        const foregroundStyle = {
+            backgroundColor: backgroundColor,
+            color: textColor
+        };
+
+        const foregroundClasses = `constraint-cell ${status} clickable`;
+
+
+        // 4. tdStyle больше не нужен!
+        return { tdStyle: {}, foregroundStyle, foregroundClasses, status };
     };
 
     const getDayHeaderStyle = (day) => {
@@ -125,6 +134,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         }
         return {};
     };
+
 
     const getShiftHeaderCellStyle = (shift) => {
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
@@ -177,7 +187,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                         <Alert variant="info">{t('requests.no_position_assigned')}</Alert>
                     ) : (
                         <PermanentConstraintGrid
-                            daysOfWeek={DAYS_OF_WEEK}
+                            daysOfWeek={DAYS_OF_WEEK_CANONICAL}
                             shifts={shifts}
                             onCellClick={handleCellClick}
                             onDayClick={handleDayClick}
@@ -186,7 +196,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                             getDayHeaderStyle={getDayHeaderStyle}
                             getShiftColor={getShiftColor}
                             isMobile={isMobile}
-                            justChangedCell={justChangedCell}
                         />
                     )}
                 </Card.Body>

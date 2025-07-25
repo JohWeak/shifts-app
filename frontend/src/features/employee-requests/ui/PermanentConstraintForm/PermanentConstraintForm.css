@@ -64,7 +64,7 @@
 .permanent-constraint-form-container .sticky-column {
     position: sticky;
     z-index: 10;
-    background-color: var(--bs-body-bg);
+    /*background-color: var(--bs-body-bg);*/
 }
 [dir="ltr"] .permanent-constraint-form-container .sticky-column {
     left: 0;
@@ -84,7 +84,7 @@
 .permanent-constraint-form-container .constraint-cell {
     position: absolute;
     inset: 0;
-    transition: all 0.2s ease, transform 0.1s ease;
+    transition: background-color 0.2s ease, inset 0.2s ease, transform 0.1s ease;
 }
 .permanent-constraint-form-container .constraint-cell.clickable {
     cursor: pointer;
@@ -94,7 +94,6 @@
     transition-duration: 0.05s;
 }
 .permanent-constraint-form-container .constraint-cell.neutral {
-    background-color: transparent !important;
     inset: 0;
 }
 .permanent-constraint-form-container .constraint-cell.cannot_work {
@@ -106,9 +105,19 @@
 }
 .permanent-constraint-form-container .constraint-cell .cell-icon {
     font-size: 1.5rem;
-    color: white;
+    color: inherit;
 }
-@keyframes pop-in { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1); opacity: 1; } }
-.permanent-constraint-form-container .constraint-cell.is-appearing:not(.neutral) {
-    animation: pop-in 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
+/*@keyframes pop-in {*/
+/*    from*/
+/*    {*/
+/*        transform: scale(0.9);*/
+/*        opacity: 0.7;*/
+/*    }*/
+/*    to {*/
+/*        transform: scale(1);*/
+/*        opacity: 1;*/
+/*    }*/
+/*}*/
+/*.permanent-constraint-form-container .constraint-cell.is-appearing:not(.neutral) {*/
+/*    animation: pop-in 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);*/
+/*}*/
