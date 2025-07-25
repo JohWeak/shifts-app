@@ -18,7 +18,7 @@
 
 .permanent-constraint-form-container .day-header-cell {
     max-width: 120px;
-    min-width: 100px;
+    min-width: 120px;
     font-weight: 600;
 }
 .permanent-constraint-form-container .day-header-cell.clickable:hover {
