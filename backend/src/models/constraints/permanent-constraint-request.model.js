@@ -54,16 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         updatedAt: 'updated_at'
     });
 
-    PermanentConstraintRequest.associate = function(models) {
-        PermanentConstraintRequest.belongsTo(models.Employee, {
-            foreignKey: 'emp_id',
-            as: 'employee'
-        });
-        PermanentConstraintRequest.belongsTo(models.Employee, {
-            foreignKey: 'reviewed_by',
-            as: 'reviewer'
-        });
-    };
+
 
     return PermanentConstraintRequest;
 };

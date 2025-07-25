@@ -351,6 +351,7 @@ const defineAssociations = () => {
                 foreignKey: 'approved_by',
                 as: 'approver'
             });
+
         }
 
         // PermanentConstraint -> PositionShift
@@ -361,7 +362,6 @@ const defineAssociations = () => {
             });
         }
     }
-
 
     // =============================
     // LEGAL CONSTRAINT ASSOCIATIONS
