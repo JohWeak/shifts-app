@@ -235,9 +235,11 @@
     padding: 0.5rem 1.25rem; /* Делаем ее немного выше и шире стандартной */
     font-size: 1rem; /* Стандартный размер шрифта */
     font-weight: var(--font-semibold);
-    /*width: 120px; !* Задаем хорошую минимальную ширину, чтобы она не выглядела куцой *!*/
+    width: calc(12.5% - 8px);
     transition: all 0.2s ease-in-out !important;
     border-radius: var(--radius-md);
+    margin-inline-end: 2px;
+
 }
 
 
@@ -246,7 +248,8 @@
    ============================================ */
 @media (max-width: 888px) {
     .constraint-actions-panel .edit-button {
-        width: 160px;
+        width: calc(25% - 8px);
+
     }
 }
 @media (max-width: 768px) {
@@ -272,15 +275,14 @@
         padding-top: 0.5rem;
 
     }
-    .constraint-actions-panel .edit-button{
-        width: 160px;
-    }
+
 }
 
 @media (max-width: 568px) {
     .constraint-actions-panel .edit-button{
         width: 100%;
         border-radius: var(--radius-lg);
+        margin-inline-end: 0;
 
     }
     .constraint-actions-panel.view-mode .edit-button-container{
