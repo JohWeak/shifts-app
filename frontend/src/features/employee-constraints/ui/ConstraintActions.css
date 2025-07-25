@@ -8,7 +8,7 @@
 /* 2. Контейнер для кнопки "Edit" */
 .edit-button-container {
     display: flex;
-    justify-content: center;
+    justify-content: end;
     align-items: center;
 }
 
@@ -41,7 +41,7 @@
 
 /* Когда активен режим просмотра (НЕ редактирование) */
 .constraint-actions-panel.view-mode {
-    min-height: 70px; /* Задаем высоту, чтобы не было прыжка */
+    min-height: 110px; /* Задаем высоту, чтобы не было прыжка */
 }
 
 .constraint-actions-panel.view-mode .edit-button-container {
@@ -53,14 +53,14 @@
 
 /* Когда активен режим редактирования */
 .constraint-actions-panel.edit-mode {
-    min-height: 160px; /* Высота для мобильной версии */
+    min-height: 110px; /* Высота для мобильной версии */
 }
 
 .constraint-actions-panel.edit-mode .action-controls-container {
     position: static; /* Возвращаем в поток документа */
     opacity: 1;
     transform: translateY(0);
-    max-height: 500px; /* Достаточная высота для всех контролов */
+    max-height: 300px;    /* Достаточная высота для всех контролов */
     pointer-events: auto;
     padding:0;
 }
@@ -72,7 +72,7 @@
     gap: var(--space-3);
     padding-left: var(--space-1);
     padding-right: var(--space-1);
-    padding-bottom: 0.25rem;
+    padding-bottom: var(--space-1);
 
 }
 
@@ -232,18 +232,23 @@
 }
 
 .constraint-actions-panel .edit-button {
-    padding: 0.35rem 1.25rem; /* Делаем ее немного выше и шире стандартной */
+    padding: 0.5rem 1.25rem; /* Делаем ее немного выше и шире стандартной */
     font-size: 1rem; /* Стандартный размер шрифта */
     font-weight: var(--font-semibold);
-    min-width: 220px; /* Задаем хорошую минимальную ширину, чтобы она не выглядела куцой */
+    /*width: 120px; !* Задаем хорошую минимальную ширину, чтобы она не выглядела куцой *!*/
     transition: all 0.2s ease-in-out !important;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
 }
 
 
 /* ============================================
    АДАПТИВНОСТЬ (Mobile)
    ============================================ */
+@media (max-width: 888px) {
+    .constraint-actions-panel .edit-button {
+        width: 160px;
+    }
+}
 @media (max-width: 768px) {
     .constraint-actions-panel .panel-content {
         justify-content: center;
@@ -263,6 +268,25 @@
         position: relative;
         padding: 0;
     }
+    .constraint-actions-panel.view-mode .edit-button-container{
+        padding-top: 0.5rem;
+
+    }
+    .constraint-actions-panel .edit-button{
+        width: 160px;
+    }
+}
+
+@media (max-width: 568px) {
+    .constraint-actions-panel .edit-button{
+        width: 100%;
+        border-radius: var(--radius-lg);
+
+    }
+    .constraint-actions-panel.view-mode .edit-button-container{
+        justify-content: center;
+    }
+
 
 }
 
