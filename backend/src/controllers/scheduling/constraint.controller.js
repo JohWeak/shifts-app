@@ -285,61 +285,61 @@ const getPermanentConstraintRequests = async (req, res) => {
 };
 
 // Submit permanent constraint request
-const submitPermanentConstraintRequest = async (req, res) => {
-    try {
-        const empId = req.userId;
-        const { day_of_week, shift_id, constraint_type, reason } = req.body;
-
-        // Validate input
-        if (!day_of_week || !constraint_type) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required fields'
-            });
-        }
-
-        // Check if similar request already pending
-        const existingRequest = await PermanentConstraintRequest.findOne({
-            where: {
-                emp_id: empId,
-                day_of_week,
-                shift_id: shift_id || null,
-                status: 'pending'
-            }
-        });
-
-        if (existingRequest) {
-            return res.status(400).json({
-                success: false,
-                message: 'Similar request already pending'
-            });
-        }
-
-        // Create request
-        const request = await PermanentConstraintRequest.create({
-            emp_id: empId,
-            day_of_week,
-            shift_id,
-            constraint_type,
-            reason,
-            status: 'pending',
-            requested_at: new Date()
-        });
-
-        res.json({
-            success: true,
-            message: 'Request submitted successfully',
-            data: request
-        });
-
-    } catch (error) {
-        console.error('Error in submitPermanentConstraintRequest:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
+// const submitPermanentConstraintRequest = async (req, res) => {
+//     try {
+//         const empId = req.userId;
+//         const { day_of_week, shift_id, constraint_type, reason } = req.body;
+//
+//         // Validate input
+//         if (!day_of_week || !constraint_type) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Missing required fields'
+//             });
+//         }
+//
+//         // Check if similar request already pending
+//         const existingRequest = await PermanentConstraintRequest.findOne({
+//             where: {
+//                 emp_id: empId,
+//                 day_of_week,
+//                 shift_id: shift_id || null,
+//                 status: 'pending'
+//             }
+//         });
+//
+//         if (existingRequest) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Similar request already pending'
+//             });
+//         }
+//
+//         // Create request
+//         const request = await PermanentConstraintRequest.create({
+//             emp_id: empId,
+//             day_of_week,
+//             shift_id,
+//             constraint_type,
+//             reason,
+//             status: 'pending',
+//             requested_at: new Date()
+//         });
+//
+//         res.json({
+//             success: true,
+//             message: 'Request submitted successfully',
+//             data: request
+//         });
+//
+//     } catch (error) {
+//         console.error('Error in submitPermanentConstraintRequest:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: error.message
+//         });
+//     }
+// };
 
 // Get all pending permanent constraint requests (Admin)
 const getPendingRequests = async (req, res) => {
@@ -367,6 +367,180 @@ const getPendingRequests = async (req, res) => {
 
     } catch (error) {
         console.error('Error in getPendingRequests:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// // Review permanent constraint request (Admin)
+// const reviewPermanentConstraintRequest = async (req, res) => {
+//     const transaction = await db.sequelize.transaction();
+//
+//     try {
+//         const { id } = req.params;
+//         const { status, admin_response } = req.body;
+//         const adminId = req.userId;
+//
+//         if (!['approved', 'rejected'].includes(status)) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Invalid status'
+//             });
+//         }
+//
+//         // Get request
+//         const request = await PermanentConstraintRequest.findByPk(id);
+//         if (!request || request.status !== 'pending') {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'Request not found or already processed'
+//             });
+//         }
+//
+//         // Update request
+//         await request.update({
+//             status,
+//             admin_response,
+//             reviewed_at: new Date(),
+//             reviewed_by: adminId
+//         }, { transaction });
+//
+//         // If approved, create permanent constraint
+//         if (status === 'approved') {
+//             await PermanentConstraint.create({
+//                 emp_id: request.emp_id,
+//                 day_of_week: request.day_of_week,
+//                 shift_id: request.shift_id,
+//                 constraint_type: request.constraint_type,
+//                 approved_by: adminId,
+//                 approved_at: new Date(),
+//                 is_active: true
+//             }, { transaction });
+//         }
+//
+//         await transaction.commit();
+//
+//         // TODO: Send notification to employee
+//
+//         res.json({
+//             success: true,
+//             message: `Request ${status} successfully`
+//         });
+//
+//     } catch (error) {
+//         await transaction.rollback();
+//         console.error('Error in reviewPermanentConstraintRequest:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: error.message
+//         });
+//     }
+// };
+
+// Get all permanent constraint requests with filters
+const getAllPermanentRequests = async (req, res) => {
+    try {
+        const { status } = req.query;
+        const whereClause = status ? { status } : {};
+
+        const requests = await PermanentConstraintRequest.findAll({
+            where: whereClause,
+            include: [
+                {
+                    model: Employee,
+                    as: 'employee',
+                    attributes: ['emp_id', 'full_name', 'email'],
+                    include: [{
+                        model: Position,
+                        attributes: ['pos_id', 'position_name']
+                    }, {
+                        model: Worksite,
+                        attributes: ['worksite_id', 'worksite_name']
+                    }]
+                },
+                {
+                    model: Employee,
+                    as: 'reviewer',
+                    attributes: ['emp_id', 'full_name']
+                }
+            ],
+            order: [
+                ['status', 'ASC'], // pending first
+                ['requested_at', status === 'pending' ? 'ASC' : 'DESC']
+            ]
+        });
+
+        res.json({
+            success: true,
+            data: requests
+        });
+
+    } catch (error) {
+        console.error('Error in getAllPermanentRequests:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Submit batch permanent constraint request
+const submitPermanentConstraintRequest = async (req, res) => {
+    try {
+        const empId = req.userId;
+        const { constraints, message } = req.body;
+
+        // Validate input
+        if (!constraints || !Array.isArray(constraints) || constraints.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No constraints provided'
+            });
+        }
+
+        // Check daily request limit (future implementation)
+        // const todayRequestCount = await checkDailyRequestLimit(empId);
+
+        // Create request
+        const request = await PermanentConstraintRequest.create({
+            emp_id: empId,
+            constraints,
+            message,
+            status: 'pending',
+            requested_at: new Date()
+        });
+
+        res.json({
+            success: true,
+            message: 'Request submitted successfully',
+            data: request
+        });
+
+    } catch (error) {
+        console.error('Error in submitPermanentConstraintRequest:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Get unprocessed requests count (for admin badge)
+const getUnprocessedRequestsCount = async (req, res) => {
+    try {
+        const count = await PermanentConstraintRequest.count({
+            where: { status: 'pending' }
+        });
+
+        res.json({
+            success: true,
+            count
+        });
+
+    } catch (error) {
+        console.error('Error in getUnprocessedRequestsCount:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -407,22 +581,22 @@ const reviewPermanentConstraintRequest = async (req, res) => {
             reviewed_by: adminId
         }, { transaction });
 
-        // If approved, create permanent constraint
+        // If approved, create permanent constraints
         if (status === 'approved') {
-            await PermanentConstraint.create({
-                emp_id: request.emp_id,
-                day_of_week: request.day_of_week,
-                shift_id: request.shift_id,
-                constraint_type: request.constraint_type,
-                approved_by: adminId,
-                approved_at: new Date(),
-                is_active: true
-            }, { transaction });
+            for (const constraint of request.constraints) {
+                await PermanentConstraint.create({
+                    emp_id: request.emp_id,
+                    day_of_week: constraint.day_of_week,
+                    shift_id: constraint.shift_id,
+                    constraint_type: constraint.constraint_type,
+                    approved_by: adminId,
+                    approved_at: new Date(),
+                    is_active: true
+                }, { transaction });
+            }
         }
 
         await transaction.commit();
-
-        // TODO: Send notification to employee
 
         res.json({
             success: true,
@@ -441,13 +615,16 @@ const reviewPermanentConstraintRequest = async (req, res) => {
 
 module.exports = {
     getEmployeeConstraints,
+    getUnprocessedRequestsCount,
+    getAllPermanentRequests,
+    getWeeklyConstraintsGrid,
+    getPendingRequests,
+    getPermanentConstraintRequests,
+    submitWeeklyConstraints,
+    submitPermanentConstraintRequest,
+    reviewPermanentConstraintRequest,
     createConstraint,
     updateConstraint,
     deleteConstraint,
-    getWeeklyConstraintsGrid,
-    submitWeeklyConstraints,
-    getPermanentConstraintRequests,
-    submitPermanentConstraintRequest,
-    getPendingRequests,
-    reviewPermanentConstraintRequest
+
 };

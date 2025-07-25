@@ -15,7 +15,8 @@ router.post('/submit-weekly',
     constraintController.submitWeeklyConstraints
 );
 
-router.get('/permanent-requests/:empId',
+// Permanent constraint requests
+router.get('/permanent-requests/my',
     verifyToken,
     constraintController.getPermanentConstraintRequests
 );
@@ -26,15 +27,26 @@ router.post('/permanent-request',
 );
 
 // Admin routes
-router.get('/pending-requests',
-    ...[verifyToken,
-    isAdmin],
-    constraintController.getPendingRequests
+// router.get('/pending-requests',
+//     ...[verifyToken,
+//     isAdmin],
+//     constraintController.getPendingRequests
+// );
+router.get('/permanent-requests',
+    verifyToken,
+    isAdmin,
+    constraintController.getAllPermanentRequests
 );
 
-router.put('/review-request/:id',
-    ...[verifyToken,
-        isAdmin],
+router.get('/permanent-requests/count',
+    verifyToken,
+    isAdmin,
+    constraintController.getUnprocessedRequestsCount
+);
+
+router.put('/permanent-request/:id/review',
+    verifyToken,
+    isAdmin,
     constraintController.reviewPermanentConstraintRequest
 );
 

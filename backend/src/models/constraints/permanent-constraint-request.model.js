@@ -14,34 +14,28 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'emp_id'
             }
         },
-        day_of_week: {
-            type: DataTypes.ENUM('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'),
-            allowNull: false
+        // Store constraints as JSON array
+        constraints: {
+            type: DataTypes.JSON,
+            allowNull: false,
+            comment: 'Array of {day_of_week, shift_id, constraint_type}'
         },
-        shift_id: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'position_shifts',
-                key: 'id'
-            }
-        },
-        constraint_type: {
-            type: DataTypes.ENUM('cannot_work', 'prefer_work'),
-            allowNull: false
-        },
-        reason: {
-            type: DataTypes.TEXT
+        message: {
+            type: DataTypes.TEXT,
+            allowNull: true
         },
         status: {
             type: DataTypes.ENUM('pending', 'approved', 'rejected'),
             defaultValue: 'pending'
         },
         admin_response: {
-            type: DataTypes.TEXT
+            type: DataTypes.TEXT,
+            allowNull: true
         },
         requested_at: {
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: false,
+            defaultValue: DataTypes.NOW
         },
         reviewed_at: {
             type: DataTypes.DATE
@@ -59,6 +53,17 @@ module.exports = (sequelize, DataTypes) => {
         createdAt: 'created_at',
         updatedAt: 'updated_at'
     });
+
+    PermanentConstraintRequest.associate = function(models) {
+        PermanentConstraintRequest.belongsTo(models.Employee, {
+            foreignKey: 'emp_id',
+            as: 'employee'
+        });
+        PermanentConstraintRequest.belongsTo(models.Employee, {
+            foreignKey: 'reviewed_by',
+            as: 'reviewer'
+        });
+    };
 
     return PermanentConstraintRequest;
 };
