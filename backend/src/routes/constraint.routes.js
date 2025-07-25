@@ -15,10 +15,10 @@ router.post('/submit-weekly',
     constraintController.submitWeeklyConstraints
 );
 
-// Permanent constraint requests
+// Permanent constraint requests - Employee
 router.get('/permanent-requests/my',
     verifyToken,
-    constraintController.getPermanentConstraintRequests
+    constraintController.getMyPermanentConstraintRequests
 );
 
 router.post('/permanent-request',

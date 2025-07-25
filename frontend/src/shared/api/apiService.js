@@ -98,21 +98,29 @@ export const constraintAPI = {
     submitWeeklyConstraints: (data) =>
         api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT, data),
 
-    // Get permanent constraint requests
-    getPermanentRequests: (empId) =>
-        api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS(empId)),
+    // Get my permanent constraint requests (for employee)
+    getMyPermanentRequests: () =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS_MY),
 
     // Submit permanent constraint request
     submitPermanentRequest: (data) =>
         api.post(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUEST, data),
 
-    // Admin: get all pending requests
-    getPendingRequests: () =>
-        api.get(API_ENDPOINTS.CONSTRAINTS.PENDING_REQUESTS),
+    // Admin: get all permanent requests (with optional status filter)
+    getAllPermanentRequests: (params = {}) =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS_ALL, { params }),
+
+    // Admin: get pending requests count
+    getPendingRequestsCount: () =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.PENDING_COUNT),
 
     // Admin: approve/reject request
     reviewRequest: (requestId, data) =>
         api.put(API_ENDPOINTS.CONSTRAINTS.REVIEW_REQUEST(requestId), data),
+
+    // Get employee shifts for constraint form
+    getEmployeeShifts: () =>
+        api.get('/api/employees/my-shifts')
 };
 
 export const positionAPI = {

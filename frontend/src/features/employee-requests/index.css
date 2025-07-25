@@ -1,0 +1,38 @@
+/* frontend/src/features/employee-requests/index.css */
+.employee-requests-container {
+    min-height: calc(100vh - 120px);
+    position: relative;
+}
+
+/* Floating Action Button */
+.employee-requests-container .fab-button {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.employee-requests-container .fab-button:hover {
+    transform: scale(1.1);
+}
+
+.employee-requests-container .fab-button:active {
+    transform: scale(0.95);
+}
+
+/* Adjust for mobile navbar */
+@media (max-width: 768px) {
+    .employee-requests-container .fab-button {
+        bottom: 70px;
+        right: 15px;
+    }
+}

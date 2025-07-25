@@ -1,152 +1,132 @@
 // frontend/src/features/employee-requests/index.js
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Nav, Tab, Badge, Alert } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import { constraintAPI } from 'shared/api/apiService';
-// import './index.css';
+import { useNavigate } from 'react-router-dom';
+import { Container, Card, Button, Badge, Spinner } from 'react-bootstrap';
+import { constraintAPI } from '../../shared/api/apiService';
+import { useI18n } from '../../shared/lib/i18n/i18nProvider';
+import EmptyState from '../../shared/ui/components/EmptyState/EmptyState';
+import LoadingState from '../../shared/ui/components/LoadingState/LoadingState';
+import PermanentConstraintForm from './ui/PermanentConstraintForm/PermanentConstraintForm';
+import RequestsList from './ui/RequestsList/RequestsList';
+import RequestDetails from './ui/RequestDetails/RequestDetails';
+import './index.css';
 
 const EmployeeRequests = () => {
     const { t } = useI18n();
-    const [activeTab, setActiveTab] = useState('pending');
-    const [requests, setRequests] = useState({
-        pending: [],
-        approved: [],
-        rejected: []
-    });
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [requests, setRequests] = useState([]);
+    const [showForm, setShowForm] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchRequests();
+        loadRequests();
     }, []);
 
-    const fetchRequests = async () => {
+    const loadRequests = async () => {
         try {
             setLoading(true);
-            const response = await constraintAPI.getPermanentRequests();
-
-            // Group requests by status
-            const grouped = {
-                pending: [],
-                approved: [],
-                rejected: []
-            };
-
-            response.forEach(request => {
-                if (grouped[request.status]) {
-                    grouped[request.status].push(request);
-                }
-            });
-
-            setRequests(grouped);
-        } catch (err) {
-            setError(err.message);
+            setError(null);
+            const response = await constraintAPI.getMyPermanentRequests('my');
+            setRequests(response.data || []);
+        } catch (error) {
+            console.error('Error loading requests:', error);
+            setError(t('requests.load_error'));
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) {
-        return <LoadingState message={t('requests.loading')} />;
+    const handleSubmitSuccess = () => {
+        setShowForm(false);
+        loadRequests();
+        // Show success notification
+        window.dispatchEvent(new CustomEvent('show-notification', {
+            detail: {
+                type: 'success',
+                message: t('requests.submit_success')
+            }
+        }));
+    };
+
+    const handleRequestClick = (request) => {
+        setSelectedRequest(request);
+    };
+
+    const handleBackFromDetails = () => {
+        setSelectedRequest(null);
+    };
+
+    // Show request details if selected
+    if (selectedRequest) {
+        return (
+            <RequestDetails
+                request={selectedRequest}
+                onBack={handleBackFromDetails}
+            />
+        );
     }
 
-    if (error) {
+    // Show form if creating new request
+    if (showForm) {
         return (
-            <Container className="mt-4">
-                <PageHeader title={t('requests.title')} />
-                <Alert variant="danger">{error}</Alert>
+            <Container className="employee-requests-container py-3">
+                <PermanentConstraintForm
+                    onSubmitSuccess={handleSubmitSuccess}
+                    onCancel={() => setShowForm(false)}
+                />
             </Container>
         );
     }
 
+    // Show requests list
     return (
-        <Container fluid className="employee-requests-container">
-            <PageHeader
-                icon="envelope"
-                title={t('requests.title')}
-                subtitle={t('requests.subtitle')}
-            />
-
+        <Container className="employee-requests-container py-3">
             <Card>
-                <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-                    <Card.Header>
-                        <Nav variant="tabs">
-                            <Nav.Item>
-                                <Nav.Link eventKey="pending">
-                                    {t('requests.pending')}
-                                    {requests.pending.length > 0 && (
-                                        <Badge bg="warning" className="ms-2">
-                                            {requests.pending.length}
-                                        </Badge>
-                                    )}
-                                </Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="approved">
-                                    {t('requests.approved')}
-                                    {requests.approved.length > 0 && (
-                                        <Badge bg="success" className="ms-2">
-                                            {requests.approved.length}
-                                        </Badge>
-                                    )}
-                                </Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="rejected">
-                                    {t('requests.rejected')}
-                                    {requests.rejected.length > 0 && (
-                                        <Badge bg="danger" className="ms-2">
-                                            {requests.rejected.length}
-                                        </Badge>
-                                    )}
-                                </Nav.Link>
-                            </Nav.Item>
-                        </Nav>
-                    </Card.Header>
-
-                    <Card.Body>
-                        <Tab.Content>
-                            <Tab.Pane eventKey="pending">
-                                {requests.pending.length === 0 ? (
-                                    <Alert variant="info">
-                                        {t('requests.noPending')}
-                                    </Alert>
-                                ) : (
-                                    <div className="requests-list">
-                                        {/* Render pending requests */}
-                                    </div>
-                                )}
-                            </Tab.Pane>
-
-                            <Tab.Pane eventKey="approved">
-                                {requests.approved.length === 0 ? (
-                                    <Alert variant="info">
-                                        {t('requests.noApproved')}
-                                    </Alert>
-                                ) : (
-                                    <div className="requests-list">
-                                        {/* Render approved requests */}
-                                    </div>
-                                )}
-                            </Tab.Pane>
-
-                            <Tab.Pane eventKey="rejected">
-                                {requests.rejected.length === 0 ? (
-                                    <Alert variant="info">
-                                        {t('requests.noRejected')}
-                                    </Alert>
-                                ) : (
-                                    <div className="requests-list">
-                                        {/* Render rejected requests */}
-                                    </div>
-                                )}
-                            </Tab.Pane>
-                        </Tab.Content>
-                    </Card.Body>
-                </Tab.Container>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                    <h4 className="mb-0">{t('requests.title')}</h4>
+                    <Badge bg="info">
+                        {requests.filter(r => r.status === 'pending').length} {t('requests.pending')}
+                    </Badge>
+                </Card.Header>
+                <Card.Body>
+                    {loading ? (
+                        <LoadingState />
+                    ) : error ? (
+                        <EmptyState
+                            icon={<i className="bi bi-exclamation-triangle"></i>}
+                            title={t('common.error')}
+                            message={error}
+                            action={{
+                                label: t('common.retry'),
+                                onClick: loadRequests
+                            }}
+                        />
+                    ) : requests.length === 0 ? (
+                        <EmptyState
+                            icon="bi-inbox"
+                            title={t('requests.no_requests')}
+                            message={t('requests.no_requests_message')}
+                        />
+                    ) : (
+                        <RequestsList
+                            requests={requests}
+                            onRequestClick={handleRequestClick}
+                        />
+                    )}
+                </Card.Body>
             </Card>
+
+            {/* Floating Action Button */}
+            <Button
+                className="fab-button"
+                variant="primary"
+                onClick={() => setShowForm(true)}
+                title={t('requests.create_new')}
+            >
+                <i className="bi bi-plus-lg"></i>
+            </Button>
         </Container>
     );
 };

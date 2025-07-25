@@ -1,0 +1,50 @@
+/* frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.css */
+.request-details-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.request-details-container .request-metadata {
+    background-color: var(--bs-gray-100);
+    padding: 1rem;
+    border-radius: 0.375rem;
+}
+
+.request-details-container .constraints-details {
+    background-color: var(--bs-light);
+    padding: 1rem;
+    border-radius: 0.375rem;
+}
+
+.request-details-container .day-constraints {
+    border-bottom: 1px solid var(--bs-gray-300);
+    padding-bottom: 0.5rem;
+}
+
+.request-details-container .day-constraints:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.request-details-container .constraint-type {
+    font-weight: 500;
+}
+
+.request-details-container .constraint-type.cannot_work {
+    color: var(--bs-danger);
+}
+
+.request-details-container .constraint-type.prefer_work {
+    color: var(--bs-success);
+}
+
+@media (max-width: 576px) {
+    .request-details-container .request-details-container {
+        padding: 0.5rem;
+    }
+
+    .request-details-container .request-metadata,
+    .request-details-container .constraints-details {
+        padding: 0.75rem;
+    }
+}

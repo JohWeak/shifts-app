@@ -1,0 +1,49 @@
+/* frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.css */
+.permanent-constraint-grid {
+    overflow-x: auto;
+}
+
+.permanent-constraint-grid table {
+    min-width: 600px;
+}
+
+.permanent-constraint-grid .constraint-cell {
+    cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+    position: relative;
+    height: 50px;
+}
+
+.permanent-constraint-grid .constraint-cell:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.permanent-constraint-grid .constraint-cell.cannot-work {
+    background-color: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger);
+}
+
+.permanent-constraint-grid .constraint-cell.prefer-work {
+    background-color: var(--bs-success-bg-subtle);
+    color: var(--bs-success);
+}
+
+.permanent-constraint-grid .constraint-cell i {
+    font-size: 1.2rem;
+}
+
+.permanent-constraint-grid .all-day-cell {
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    .permanent-constraint-grid .permanent-constraint-grid {
+        font-size: 0.875rem;
+    }
+
+    .permanent-constraint-grid .constraint-cell {
+        height: 40px;
+    }
+}

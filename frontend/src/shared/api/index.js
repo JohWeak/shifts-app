@@ -1,4 +1,4 @@
-// frontend/src/shared/api/weeklySchedule.js
+// frontend/src/shared/api/index.js
 import axios from 'axios';
 
 
@@ -41,14 +41,15 @@ api.interceptors.response.use(
             '/api/schedules/weekly',      // Добавляем для employee schedule
             '/api/schedules/position',    // Добавляем для full schedule
             '/api/schedules/employee',    // Добавляем для archive
-            // Добавьте другие endpoints, которым нужен полный ответ
+            '/api/constraints/permanent-requests/my',  // Добавляем новый endpoint
+            '/api/constraints/permanent-requests',     // И админский endpoint
         ];
 
         // Проверяем, нужен ли полный ответ для этого endpoint
+        const requestUrl = response.config.url || '';  // Защита от undefined
         const needsFullResponse = fullResponseEndpoints.some(endpoint =>
-            response.config.url.includes(endpoint) && !response.config.url.includes('/recommendations')
+            requestUrl.includes(endpoint) && !requestUrl.includes('/recommendations')
         );
-
 
 
         if (needsFullResponse) {
@@ -64,7 +65,6 @@ api.interceptors.response.use(
         return response.data;
     },
     (error) => {
-        // ... (обработка ошибок остается без изменений)
         console.error('API Error Interceptor:', error.response || error);
         if (error.response?.status === 401) {
             localStorage.removeItem('token');

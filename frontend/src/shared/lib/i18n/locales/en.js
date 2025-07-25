@@ -581,6 +581,42 @@ export const en = {
         'unknown_shift': 'Unknown shift',
         'weeklyHours': 'Current weekly hours: {hours}h',
     },
+    requests: {
+        title: 'My Requests',
+        create_new: 'New Request',
+        permanent_constraints: {
+            title: 'Permanent Schedule Constraints'
+        },
+        no_requests: 'No Requests',
+        no_requests_message: 'You haven\'t submitted any requests yet',
+        pending: 'Pending',
+        pending_requests: 'Pending Requests',
+        processed_requests: 'Processed Requests',
+        sent: 'Sent',
+        reviewed: 'Reviewed',
+        reviewed_by: 'Reviewed by',
+        constraints: 'constraints',
+        request_details: 'Request Details',
+        your_message: 'Your Message',
+        admin_response: 'Administrator Response',
+        whole_day: 'Whole Day',
+        all_day: 'All Day',
+        block_day: 'Block Day',
+        message_optional: 'Message (Optional)',
+        message_placeholder: 'Add any additional information about your constraints...',
+        confirm_submit: {
+            title: 'Submit Request',
+            message: 'Are you sure you want to submit this permanent constraint request?'
+        },
+        submit_success: 'Request submitted successfully',
+        submit_error: 'Failed to submit request',
+        load_error: 'Failed to load requests',
+        status: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+        }
+    },
     reports: {
         analyticsAndReports: 'Analytics & Reports',
         analyticsDesc: 'View detailed analytics and generate reports',

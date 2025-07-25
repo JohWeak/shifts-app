@@ -1,0 +1,41 @@
+/* frontend/src/features/employee-requests/ui/RequestsList/RequestsList.css */
+.requests-list {
+    max-width: 100%;
+}
+
+.requests-list .request-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.requests-list .request-item:hover {
+    background-color: var(--bs-gray-100);
+    border-left-color: var(--bs-primary);
+}
+
+.requests-list .request-info {
+    flex: 1;
+}
+
+.requests-list .request-date,
+.requests-list .request-reviewed {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.requests-list .request-reviewer,
+.requests-list .request-constraints-count {
+    font-size: 0.813rem;
+}
+
+@media (max-width: 576px) {
+    .requests-list .request-item {
+        font-size: 0.875rem;
+    }
+
+    .requests-list .request-date i,
+    .requests-list .request-reviewed i {
+        display: none;
+    }
+}

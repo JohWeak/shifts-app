@@ -249,40 +249,40 @@ const submitWeeklyConstraints = async (req, res) => {
 };
 
 // Get employee's permanent constraint requests
-const getPermanentConstraintRequests = async (req, res) => {
-    try {
-        const { empId } = req.params;
-
-        // Verify employee access
-        if (req.role !== 'admin' && req.userId !== parseInt(empId)) {
-            return res.status(403).json({
-                success: false,
-                message: 'Unauthorized'
-            });
-        }
-
-        const requests = await PermanentConstraintRequest.findAll({
-            where: { emp_id: empId },
-            include: [{
-                model: PositionShift,
-                as: 'shift'
-            }],
-            order: [['requested_at', 'DESC']]
-        });
-
-        res.json({
-            success: true,
-            data: requests
-        });
-
-    } catch (error) {
-        console.error('Error in getPermanentConstraintRequests:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
+// const getPermanentConstraintRequests = async (req, res) => {
+//     try {
+//         const { empId } = req.params;
+//
+//         // Verify employee access
+//         if (req.role !== 'admin' && req.userId !== parseInt(empId)) {
+//             return res.status(403).json({
+//                 success: false,
+//                 message: 'Unauthorized'
+//             });
+//         }
+//
+//         const requests = await PermanentConstraintRequest.findAll({
+//             where: { emp_id: empId },
+//             include: [{
+//                 model: PositionShift,
+//                 as: 'shift'
+//             }],
+//             order: [['requested_at', 'DESC']]
+//         });
+//
+//         res.json({
+//             success: true,
+//             data: requests
+//         });
+//
+//     } catch (error) {
+//         console.error('Error in getPermanentConstraintRequests:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: error.message
+//         });
+//     }
+// };
 
 // Submit permanent constraint request
 // const submitPermanentConstraintRequest = async (req, res) => {
@@ -612,14 +612,82 @@ const reviewPermanentConstraintRequest = async (req, res) => {
         });
     }
 };
+const getMyPermanentConstraintRequests = async (req, res) => {
+    try {
+        const empId = req.userId; // Из токена авторизации
 
+        const requests = await PermanentConstraintRequest.findAll({
+            where: { emp_id: empId },
+            include: [
+                {
+                    model: Employee,
+                    as: 'reviewer',
+                    attributes: ['emp_id', 'full_name']
+                }
+            ],
+            order: [['requested_at', 'DESC']]
+        });
+
+        res.json({
+            success: true,
+            data: requests
+        });
+
+    } catch (error) {
+        console.error('Error in getMyPermanentConstraintRequests:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Добавим метод для получения смен сотрудника
+const getEmployeeShifts = async (req, res) => {
+    try {
+        const empId = req.userId;
+
+        const employee = await Employee.findByPk(empId, {
+            include: [{
+                model: Position,
+                include: [{
+                    model: PositionShift,
+                    as: 'shifts'
+                }]
+            }]
+        });
+
+        if (!employee || !employee.Position) {
+            return res.json({
+                success: true,
+                data: { shifts: [] }
+            });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                position: employee.Position,
+                shifts: employee.Position.shifts || []
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in getEmployeeShifts:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 module.exports = {
     getEmployeeConstraints,
     getUnprocessedRequestsCount,
     getAllPermanentRequests,
     getWeeklyConstraintsGrid,
     getPendingRequests,
-    getPermanentConstraintRequests,
+    getMyPermanentConstraintRequests,
+    getEmployeeShifts,
     submitWeeklyConstraints,
     submitPermanentConstraintRequest,
     reviewPermanentConstraintRequest,

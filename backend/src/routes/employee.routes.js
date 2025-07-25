@@ -3,6 +3,7 @@ const express = require('express');
 const employeeController = require('../controllers/core/employee.controller');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 const EmployeeRecommendationController = require('../controllers/scheduling/employee-recommendation.controller');
+const { getEmployeeShifts } = require("../controllers/scheduling/constraint.controller");
 
 const router = express.Router();
 
@@ -22,5 +23,8 @@ router.get('/:id/constraints', verifyToken, employeeController.getConstraints);
 // Employee qualifications routes
 router.get('/:id/qualifications', verifyToken, employeeController.getQualifications);
 router.post('/:id/qualifications', ...[verifyToken, isAdmin], employeeController.addQualification);
+
+router.get('/my-shifts', verifyToken, getEmployeeShifts
+);
 
 module.exports = router;
