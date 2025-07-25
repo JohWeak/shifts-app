@@ -19,7 +19,7 @@ import './PermanentConstraintForm.css';
 
 const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const { t } = useI18n();
-    const DAYS_OF_WEEK = useMemo(() => getDayNames(t, 'long'), [t]);
+    const DAYS_OF_WEEK = useMemo(() => getDayNames(t, false), [t]); // false для полных имен
     const { getShiftColor, currentTheme } = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -106,37 +106,33 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const getCellStyles = (day, shiftId) => {
         const status = constraints[`${day}-${shiftId}`] || 'neutral';
         const shift = shifts.find(s => s.id === shiftId);
-
         const neutralBgAlpha = currentTheme === 'dark' ? 0.05 : 0.5;
         const tdStyle = {
             backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };
-
         const foregroundClasses = `constraint-cell ${status} clickable`;
         const foregroundStyle = {};
         if (status === 'cannot_work') {
-            foregroundStyle.backgroundColor = '#dc3545'; // Цвет можно сделать кастомным позже
+            foregroundStyle.backgroundColor = '#dc3545';
             foregroundStyle.color = getContrastTextColor(foregroundStyle.backgroundColor);
         }
-
         return { tdStyle, foregroundStyle, foregroundClasses, status };
     };
 
     const getDayHeaderStyle = (day) => {
         if (fullyBlockedDays.has(day)) {
-            return {
-                backgroundColor: '#dc3545', // Тот же цвет, что и у ячеек
-                color: getContrastTextColor('#dc3545')
-            };
+            return { backgroundColor: '#dc3545', color: getContrastTextColor('#dc3545') };
         }
-        return {}; // Возвращаем пустой объект, если день не заблокирован
+        return {};
     };
 
-    const getShiftHeaderStyle = (shift) => {
-        const baseColor = getShiftColor(shift); // Используем getShiftColor(shift), а не shift.id
-        const textColor = getContrastTextColor(baseColor);
-        return { backgroundColor: baseColor, color: textColor };
+    const getShiftHeaderCellStyle = (shift) => {
+        const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
+        const baseColor = getShiftColor(shift);
+        return { backgroundColor: hexToRgba(baseColor, neutralBgAlpha) };
     };
+
+
 
     // --- ОТПРАВКА ФОРМЫ ---
     const handleSubmit = async () => {
@@ -186,8 +182,9 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                             onCellClick={handleCellClick}
                             onDayClick={handleDayClick}
                             getCellStyles={getCellStyles}
-                            getShiftHeaderStyle={getShiftHeaderStyle}
+                            getShiftHeaderStyle={getShiftHeaderCellStyle}
                             getDayHeaderStyle={getDayHeaderStyle}
+                            getShiftColor={getShiftColor}
                             isMobile={isMobile}
                             justChangedCell={justChangedCell}
                         />

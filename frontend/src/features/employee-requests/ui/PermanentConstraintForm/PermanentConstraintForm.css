@@ -1,36 +1,54 @@
+/* 1. ОБЩИЙ КОНТЕЙНЕР (для специфичности) */
+.permanent-constraint-form-container {
+    /* Сюда можно добавить уникальные отступы, если нужно */
+}
+
+/* 2. СТИЛИ, СКОПИРОВАННЫЕ ИЗ employee-constraints/index.css */
+/* Мы используем .permanent-constraint-form-container как родительский селектор */
+
 .permanent-constraint-form-container .full-schedule-table {
     font-size: 0.875rem;
     table-layout: fixed;
     width: 100%;
     margin-bottom: 0;
 }
+.permanent-constraint-form-container .table-responsive {
+    border-radius: var(--bs-card-inner-border-radius);
+    overflow: hidden;
+}
 
-.permanent-constraint-form-container .full-schedule-table th, .full-schedule-table td {
+.permanent-constraint-form-container .full-schedule-table th,
+.permanent-constraint-form-container .full-schedule-table td {
     vertical-align: middle;
     text-align: center;
+    padding: 0;
 }
 
 /* ЗАГОЛОВКИ */
-.permanent-constraint-form-container .day-header-cell, .shift-header-cell {
-    padding: 0;
-    vertical-align: middle;
-}
-
+.permanent-constraint-form-container .day-header,
+.permanent-constraint-form-container .shift-header-cell,
 .permanent-constraint-form-container .day-header-cell {
-    max-width: 120px;
-    min-width: 120px;
-    font-weight: 600;
+    padding: 0.5rem;
+    min-width: 100px;
 }
+.permanent-constraint-form-container .day-header.clickable:hover,
 .permanent-constraint-form-container .day-header-cell.clickable:hover {
     background-color: var(--bs-light-bg-subtle);
     cursor: pointer;
 }
+[data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
 [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover {
     background-color: var(--bs-dark-bg-subtle);
 }
-
+.permanent-constraint-form-container .day-name {
+    font-weight: 600;
+}
+.permanent-constraint-form-container .shift-header-cell {
+    width: 120px;
+}
 .permanent-constraint-form-container .shift-header-info {
     padding: 0.5rem;
+    border-radius: 0.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -42,19 +60,32 @@
     font-size: 0.85rem;
 }
 
+/* "ЛИПКАЯ" КОЛОНКА */
+.permanent-constraint-form-container .sticky-column {
+    position: sticky;
+    z-index: 10;
+    background-color: var(--bs-body-bg);
+}
+[dir="ltr"] .permanent-constraint-form-container .sticky-column {
+    left: 0;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+}
+[dir="rtl"] .permanent-constraint-form-container .sticky-column {
+    right: 0;
+    box-shadow: -2px 0 4px rgba(0,0,0,0.05);
+}
+
 /* ЯЧЕЙКИ */
 .permanent-constraint-form-container .constraint-td-wrapper {
     position: relative;
     padding: var(--space-1);
-    height: 60px; /* Фиксированная высота для единообразия */
+    height: 60px;
 }
-
 .permanent-constraint-form-container .constraint-cell {
     position: absolute;
     inset: 0;
     transition: all 0.2s ease, transform 0.1s ease;
 }
-
 .permanent-constraint-form-container .constraint-cell.clickable {
     cursor: pointer;
 }
@@ -62,12 +93,10 @@
     transform: scale(0.95);
     transition-duration: 0.05s;
 }
-
 .permanent-constraint-form-container .constraint-cell.neutral {
     background-color: transparent !important;
     inset: 0;
 }
-
 .permanent-constraint-form-container .constraint-cell.cannot_work {
     border-radius: 0.3rem;
     inset: 4px;
@@ -75,56 +104,11 @@
     align-items: center;
     justify-content: center;
 }
-
 .permanent-constraint-form-container .constraint-cell .cell-icon {
     font-size: 1.5rem;
     color: white;
 }
-.permanent-constraint-form-container .day-name {
-    font-weight: 600;
-}
-
-/* "Липкая" колонка для заголовков смен/дней */
-.permanent-constraint-form-container .sticky-column {
-    position: sticky;
-    z-index: 10;
-}
-/* Для десктопной версии (заголовки смен слева) */
-.permanent-constraint-form-container .desktop-layout .sticky-column, [dir="ltr"] .full-schedule-table .sticky-column {
-    left: 0;
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
-}
-[dir="rtl"] .permanent-constraint-form-container .full-schedule-table .sticky-column {
-    right: 0;
-    left: auto;
-    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
-}
-
-
-/* Добавляем фон к заголовкам смен/дней в десктопной версии для "липкости" */
-.permanent-constraint-form-container > th.shift-header-cell.sticky-column {
-    background-color: var(--bs-body-bg);
-}
-.permanent-constraint-form-container > td.day-header-cell.sticky-column {
-    background-color: var(--bs-body-bg);
-}
-
-/* Убираем лишние бордеры для красоты */
-.permanent-constraint-form-container .table-responsive {
-    border-radius: var(--bs-card-inner-border-radius);
-    overflow: hidden; /* Обрезаем углы таблицы по углам карточки */
-}
-/* Анимация появления */
-@keyframes pop-in {
-    from {
-        transform: scale(0.9);
-        opacity: 0.7;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
+@keyframes pop-in { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1); opacity: 1; } }
 .permanent-constraint-form-container .constraint-cell.is-appearing:not(.neutral) {
     animation: pop-in 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
