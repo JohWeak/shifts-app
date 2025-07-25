@@ -406,11 +406,11 @@ const getMyShifts = async (req, res) => {
         const employee = await Employee.findByPk(empId, {
             include: [{
                 model: Position,
-                as: 'defaultPosition',  // Используем правильный alias
+                as: 'defaultPosition',
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'shift_type']
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time']
                 }]
             }]
         });
