@@ -28,7 +28,8 @@ export const API_ENDPOINTS = {
     EMPLOYEES: {
         BASE: '/api/employees',
         DETAILS: (id) => `/api/employees/${id}`,
-        RECOMMENDATIONS: '/api/employees/recommendations'
+        RECOMMENDATIONS: '/api/employees/recommendations',
+        MY_SHIFTS: '/api/employees/my-shifts',
     },
 
     // Work Sites
@@ -42,9 +43,9 @@ export const API_ENDPOINTS = {
         EMPLOYEE: (empId) => `/api/constraints/employee/${empId}`,
         WEEKLY: '/api/constraints/weekly-grid',
         SUBMIT: '/api/constraints/submit-weekly',
-        PERMANENT_REQUESTS: '/api/constraints/permanent-requests/my',
+        PERMANENT_REQUESTS_MY: '/api/constraints/permanent-requests/my',
         PERMANENT_REQUEST: '/api/constraints/permanent-request',
-        PENDING_REQUESTS: '/api/constraints/permanent-requests',
+        PERMANENT_REQUESTS_ALL: '/api/constraints/permanent-requests',
         PENDING_COUNT: '/api/constraints/permanent-requests/count',
         REVIEW_REQUEST: (id) => `/api/constraints/permanent-request/${id}/review`
     },

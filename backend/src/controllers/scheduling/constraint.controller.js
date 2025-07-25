@@ -642,7 +642,7 @@ const getMyPermanentConstraintRequests = async (req, res) => {
     }
 };
 
-// Добавим метод для получения смен сотрудника
+// Метод для получения смен сотрудника
 const getEmployeeShifts = async (req, res) => {
     try {
         const empId = req.userId;

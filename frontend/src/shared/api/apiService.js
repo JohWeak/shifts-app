@@ -120,7 +120,7 @@ export const constraintAPI = {
 
     // Get employee shifts for constraint form
     getEmployeeShifts: () =>
-        api.get('/api/employees/my-shifts')
+        api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS)
 };
 
 export const positionAPI = {

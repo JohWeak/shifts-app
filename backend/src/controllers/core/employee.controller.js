@@ -1,6 +1,6 @@
 // backend/src/controllers/employee.controller.js
 const db = require('../../models');
-const {Employee, Position, EmployeeConstraint, WorkSite} = db;
+const {Employee, Position, EmployeeConstraint, WorkSite, PositionShift} = db;
 const bcrypt = require('bcryptjs');
 const {Op} = require("sequelize");
 
@@ -399,6 +399,58 @@ const addQualification = async (req, res) => {
         });
     }
 };
+const getMyShifts = async (req, res) => {
+    try {
+        const empId = req.userId; // Из токена авторизации
+
+        const employee = await Employee.findByPk(empId, {
+            include: [{
+                model: Position,
+                as: 'defaultPosition',  // Используем правильный alias
+                include: [{
+                    model: PositionShift,
+                    as: 'shifts',
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'shift_type']
+                }]
+            }]
+        });
+
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found'
+            });
+        }
+
+        if (!employee.defaultPosition) {
+            return res.json({
+                success: true,
+                data: {
+                    position: null,
+                    shifts: []
+                }
+            });
+        }
+
+        res.json({
+            success: true,
+            data: {
+                position: {
+                    pos_id: employee.defaultPosition.pos_id,
+                    position_name: employee.defaultPosition.pos_name
+                },
+                shifts: employee.defaultPosition.shifts || []
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in getMyShifts:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 module.exports = {
     create,
@@ -408,5 +460,6 @@ module.exports = {
     delete: deleteEmployee,
     getConstraints,
     getQualifications,
-    addQualification
+    addQualification,
+    getMyShifts
 };
