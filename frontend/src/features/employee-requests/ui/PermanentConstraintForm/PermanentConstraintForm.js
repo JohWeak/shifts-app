@@ -251,6 +251,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                     type="checkbox"
                                     id="include-message-mobile"
                                     label={t('requests.includeMessage')}
+                                    className="include-message-checkbox mobile"
                                     checked={showMessage}
                                     onChange={(e) => setShowMessage(e.target.checked)}
                                 />
@@ -260,7 +261,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                 <Form.Group className="my-3">
                                     <TextareaAutosize
                                         minRows={2}
-                                        className="form-control" // Важно для стилей Bootstrap
+                                        className="form-control"
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         placeholder={t('requests.messagePlaceholder')}
@@ -271,12 +272,13 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                     ) : (
                         // --- ДЕСКТОПНАЯ ВЕРСТКА  ---
                         <>
-                            <div className="d-flex justify-content-between align-items-center">
+                            <div className="d-flex justify-content-between align-items-center" >
                                 <Form.Group>
                                     <Form.Check
                                         type="checkbox"
                                         id="include-message-desktop"
                                         label={t('requests.includeMessage')}
+                                        className="include-message-checkbox desktop"
                                         checked={showMessage}
                                         onChange={(e) => setShowMessage(e.target.checked)}
                                     />

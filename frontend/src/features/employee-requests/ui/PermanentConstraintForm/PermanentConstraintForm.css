@@ -96,6 +96,10 @@
     /* Когда день выбран, применяем отступы, как у .constraint-cell.cannot_work */
     inset: 4px;
 }
+.cursor-pointer-checkbox label{
+    font-weight: 500;
+}
+
 
 /* --- 2. ДЕСКТОПНАЯ ВЕРСТКА (.desktop-constraints) --- */
 
@@ -114,7 +118,10 @@
     /* Фон нужен, чтобы при скролле контент не просвечивал */
     background-color: var(--bs-body-bg);
 }
-
+.permanent-constraint-form-container .include-message-checkbox.desktop .form-check-label,
+.permanent-constraint-form-container .include-message-checkbox.desktop .form-check-input {
+    /*cursor: pointer;*/
+}
 [dir="ltr"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
     left: 0;
     box-shadow: 2px 0 4px rgba(0,0,0,0.05);
@@ -147,6 +154,14 @@
     z-index: 10;
     background-color: var(--bs-body-bg);
 }
+.permanent-constraint-form-container .include-message-checkbox.mobile .form-check-label {
+    font-weight: 500;
+    opacity: 0.7;
+}
+.permanent-constraint-form-container .include-message-checkbox.mobile .form-check-input {
+    border-radius: var(--radius-full);
+}
+
 [dir="ltr"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
     left: 0;
 }
@@ -165,6 +180,7 @@
     .permanent-constraint-form-container .mobile-constraints .shift-header-info {
         padding: 0.4rem 0.2rem;
     }
+
 }
 
 
@@ -175,6 +191,7 @@
         background-color: var(--bs-gray-200);
         cursor: pointer;
     }
+
 
     [data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
     [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover {
@@ -192,6 +209,11 @@
     [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover,
     [data-theme="dark"] .permanent-constraint-form-container .shift-header-cell.clickable:hover {
         background-color: var(--bs-dark-bg-subtle);
+    }
+
+    .permanent-constraint-form-container .include-message-checkbox .form-check-label,
+    .permanent-constraint-form-container .include-message-checkbox .form-check-input {
+        cursor: pointer;
     }
 
 }
