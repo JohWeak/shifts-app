@@ -20,7 +20,7 @@ const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thu
 const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const { t } = useI18n();
     const { getShiftColor, currentTheme } = useShiftColor();
-    const isMobile = useMediaQuery('(max-width: 768px)');
+    const isMobile = useMediaQuery('(max-width: 888px)');
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -161,7 +161,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">{t('requests.permanentConstraints.title')}</h5>
                         <Button variant="link" onClick={onCancel} className="p-0 text-body">
-                            <X size={24} />
+                            <X size={28} />
                         </Button>
                     </div>
                 </Card.Header>

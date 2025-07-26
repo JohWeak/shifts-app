@@ -5,7 +5,6 @@ import {Table} from 'react-bootstrap';
 import {X} from 'react-bootstrap-icons';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {formatShiftTime, getCanonicalShiftType, getDayName, getShiftIcon} from 'shared/lib/utils/scheduleUtils';
-import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 
 
 const GridCell = ({day, shift, onCellClick, getCellStyles}) => {

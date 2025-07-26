@@ -2,6 +2,8 @@
 .employee-requests-container {
     min-height: calc(100vh - 120px);
     position: relative;
+    max-width: 1000px;
+    justify-self: center;
 }
 
 /* Floating Action Button */

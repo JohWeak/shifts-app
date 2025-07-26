@@ -71,12 +71,12 @@ const EmployeeRequests = () => {
     // Show form if creating new request
     if (showForm) {
         return (
-            <Container className="employee-requests-container py-3">
+            <div className="employee-requests-container py-3">
                 <PermanentConstraintForm
                     onSubmitSuccess={handleSubmitSuccess}
                     onCancel={() => setShowForm(false)}
                 />
-            </Container>
+            </div>
         );
     }
 
@@ -105,7 +105,7 @@ const EmployeeRequests = () => {
                         />
                     ) : requests.length === 0 ? (
                         <EmptyState
-                            icon="bi-inbox"
+                            icon={<i className="bi bi-inbox"></i>}
                             title={t('requests.no_requests')}
                             message={t('requests.no_requests_message')}
                         />

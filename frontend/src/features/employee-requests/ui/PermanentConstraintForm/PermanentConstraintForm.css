@@ -1,10 +1,6 @@
-/* 1. ОБЩИЙ КОНТЕЙНЕР (для специфичности) */
-.permanent-constraint-form-container {
-    /* Сюда можно добавить уникальные отступы, если нужно */
-}
+/* frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.css */
 
-/* 2. СТИЛИ, СКОПИРОВАННЫЕ ИЗ employee-constraints/index.css */
-/* Мы используем .permanent-constraint-form-container как родительский селектор */
+/* --- 1. ОБЩИЕ СТИЛИ (Для обеих версий) --- */
 
 .permanent-constraint-form-container .full-schedule-table {
     font-size: 0.875rem;
@@ -24,27 +20,13 @@
     padding: 0;
 }
 
-/* ЗАГОЛОВКИ */
-.permanent-constraint-form-container .day-header,
-.permanent-constraint-form-container .shift-header-cell,
-.permanent-constraint-form-container .day-header-cell {
-    padding: 0.5rem;
-    min-width: 100px;
-}
-.permanent-constraint-form-container .day-header.clickable:hover,
-.permanent-constraint-form-container .day-header-cell.clickable:hover {
-    background-color: var(--bs-light-bg-subtle);
-    cursor: pointer;
-}
-[data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
-[data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover {
-    background-color: var(--bs-dark-bg-subtle);
-}
-.permanent-constraint-form-container .day-name {
+/* ЗАГОЛОВКИ (Общие стили) */
+.permanent-constraint-form-container .day-name,
+.permanent-constraint-form-container .shift-header-name {
     font-weight: 600;
 }
-.permanent-constraint-form-container .shift-header-cell {
-    width: 120px;
+.permanent-constraint-form-container .shift-header-time {
+    font-size: 0.85rem;
 }
 .permanent-constraint-form-container .shift-header-info {
     padding: 0.5rem;
@@ -53,29 +35,8 @@
     flex-direction: column;
     gap: 0.25rem;
 }
-.permanent-constraint-form-container .shift-header-name {
-    font-weight: 600;
-}
-.permanent-constraint-form-container .shift-header-time {
-    font-size: 0.85rem;
-}
 
-/* "ЛИПКАЯ" КОЛОНКА */
-.permanent-constraint-form-container .sticky-column {
-    position: sticky;
-    z-index: 10;
-    /*background-color: var(--bs-body-bg);*/
-}
-[dir="ltr"] .permanent-constraint-form-container .sticky-column {
-    left: 0;
-    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
-}
-[dir="rtl"] .permanent-constraint-form-container .sticky-column {
-    right: 0;
-    box-shadow: -2px 0 4px rgba(0,0,0,0.05);
-}
-
-/* ЯЧЕЙКИ */
+/* ЯЧЕЙКИ (Общие стили) */
 .permanent-constraint-form-container .constraint-td-wrapper {
     position: relative;
     padding: var(--space-1);
@@ -85,20 +46,18 @@
     position: absolute;
     inset: 0;
     transition: background-color 0.2s ease, inset 0.2s ease, transform 0.1s ease;
-}
-.permanent-constraint-form-container .constraint-cell.clickable {
     cursor: pointer;
 }
-.permanent-constraint-form-container .constraint-cell.clickable:active {
+.permanent-constraint-form-container .constraint-cell:active {
     transform: scale(0.95);
     transition-duration: 0.05s;
 }
 .permanent-constraint-form-container .constraint-cell.neutral {
-    inset: 0;
+    inset: 0; /* Фон занимает всю ячейку */
 }
 .permanent-constraint-form-container .constraint-cell.cannot_work {
     border-radius: 0.3rem;
-    inset: 4px;
+    inset: 4px; /* Красный "чип" имеет отступы */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,17 +66,81 @@
     font-size: 1.5rem;
     color: inherit;
 }
-/*@keyframes pop-in {*/
-/*    from*/
-/*    {*/
-/*        transform: scale(0.9);*/
-/*        opacity: 0.7;*/
-/*    }*/
-/*    to {*/
-/*        transform: scale(1);*/
-/*        opacity: 1;*/
-/*    }*/
-/*}*/
-/*.permanent-constraint-form-container .constraint-cell.is-appearing:not(.neutral) {*/
-/*    animation: pop-in 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);*/
-/*}*/
+
+
+/* --- 2. ДЕСКТОПНАЯ ВЕРСТКА (.desktop-constraints) --- */
+
+.permanent-constraint-form-container .desktop-constraints .day-header,
+.permanent-constraint-form-container .desktop-constraints .day-header-cell,
+.permanent-constraint-form-container .desktop-constraints .shift-header-cell {
+    padding: 0.5rem;
+    min-width: 100px;
+}
+.permanent-constraint-form-container .desktop-constraints .shift-header-cell {
+    width: 120px;
+}
+.permanent-constraint-form-container .desktop-constraints .sticky-column {
+    position: sticky;
+    z-index: 10;
+    /* Фон нужен, чтобы при скролле контент не просвечивал */
+    background-color: var(--bs-body-bg);
+}
+[dir="ltr"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
+    left: 0;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+}
+[dir="rtl"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
+    right: 0;
+    box-shadow: -2px 0 4px rgba(0,0,0,0.05);
+}
+
+
+/* --- 3. МОБИЛЬНАЯ ВЕРСТКА (.mobile-constraints) --- */
+
+.permanent-constraint-form-container .mobile-constraints {
+    max-width: 500px; /* Ограничиваем ширину для лучшей читаемости */
+    margin: 0 auto;
+}
+.permanent-constraint-form-container .mobile-constraints .shift-header-cell,
+.permanent-constraint-form-container .mobile-constraints .day-header-cell {
+    padding: var(--space-1);
+}
+.permanent-constraint-form-container .mobile-constraints .sticky-column {
+    position: sticky;
+    z-index: 10;
+    background-color: var(--bs-body-bg);
+}
+[dir="ltr"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
+    left: 0;
+}
+[dir="rtl"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
+    right: 0;
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 550px) {
+    .permanent-constraint-form-container .mobile-constraints .shift-header-name {
+        font-size: 0.8rem;
+    }
+    .permanent-constraint-form-container .mobile-constraints .shift-header-time {
+        font-size: 0.7rem;
+    }
+    .permanent-constraint-form-container .mobile-constraints .shift-header-info {
+        padding: 0.4rem 0.2rem;
+    }
+}
+
+
+
+@media (hover: hover) {
+    .permanent-constraint-form-container .day-header.clickable:hover,
+    .permanent-constraint-form-container .day-header-cell.clickable:hover {
+        background-color: var(--bs-gray-200);
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
+    [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover {
+        background-color: var(--bs-gray-800);
+    }
+}
