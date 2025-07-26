@@ -228,29 +228,8 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                 {/* Футер с сообщением и кнопками */}
                 <Card.Footer className="bg-transparent border-top-0 mt-0">
                     <Form.Group className="mt-3">
-                        <Form.Check
-                            type="checkbox"
-                            id="include-message"
-                            label={t('requests.includeMessage')}
-                            checked={showMessage}
-                            onChange={(e) => setShowMessage(e.target.checked)}
-                        />
-                    </Form.Group>
-
-                    {showMessage && (
-                        <Form.Group className="mt-2">
-                            <Form.Control
-                                as="textarea"
-                                rows={2}
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder={t('requests.messagePlaceholder')}
-                            />
-                        </Form.Group>
-                    )}
-
-                    <div className="mt-3 d-flex justify-content-end gap-2">
-                        <Button variant="secondary" onClick={onCancel}>
+                    <div className={`action-buttons-group mt-2 d-flex gap-2 justify-content-${isMobile ? 'between' : 'end'}`}>
+                        <Button variant="outline-secondary" onClick={onCancel}>
                             {t('common.cancel')}
                         </Button>
                         <Button
@@ -261,6 +240,28 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                             {t('common.submit')}
                         </Button>
                     </div>
+                    <Form.Group className="mt-3">
+                        <Form.Check
+                            type="checkbox"
+                            id="include-message"
+                            label={t('requests.includeMessage')}
+                            checked={showMessage}
+                            onChange={(e) => setShowMessage(e.target.checked)}
+                        />
+                    </Form.Group>
+                    {showMessage && (
+                        <Form.Group className="my-2">
+                            <Form.Control
+                                as="textarea"
+                                rows={2}
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder={t('requests.messagePlaceholder')}
+                            />
+                        </Form.Group>
+                    )}
+                    </Form.Group>
+
                 </Card.Footer>
             </Card>
 

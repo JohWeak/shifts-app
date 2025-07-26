@@ -106,7 +106,7 @@ const EmployeeRequests = () => {
     // Show form if creating a new request
     if (showForm) {
         return (
-            <div className="employee-requests-container py-3 px-1">
+            <div className="employee-requests-container p-2">
                 <PermanentConstraintForm
                     onSubmitSuccess={handleSubmitSuccess}
                     onCancel={() => setShowForm(false)}

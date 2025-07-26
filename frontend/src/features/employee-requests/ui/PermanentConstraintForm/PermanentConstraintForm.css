@@ -19,7 +19,9 @@
     text-align: center;
     padding: 0;
 }
-
+.permanent-constraint-form-container .action-buttons-group > button{
+    border-radius: var(--radius-lg);
+}
 /* ЗАГОЛОВКИ (Общие стили) */
 .permanent-constraint-form-container .day-name,
 .permanent-constraint-form-container .shift-header-name {
@@ -108,6 +110,7 @@
     /* Фон нужен, чтобы при скролле контент не просвечивал */
     background-color: var(--bs-body-bg);
 }
+
 [dir="ltr"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
     left: 0;
     box-shadow: 2px 0 4px rgba(0,0,0,0.05);
@@ -127,6 +130,13 @@
 .permanent-constraint-form-container .mobile-constraints .shift-header-cell,
 .permanent-constraint-form-container .mobile-constraints .day-header-cell {
     padding: var(--space-1);
+}
+
+.permanent-constraint-form-container .mobile-constraints .constraint-td-wrapper {
+    height: 50px;
+}
+.permanent-constraint-form-container .mobile-constraints .day-header {
+    height: 50px;
 }
 .permanent-constraint-form-container .mobile-constraints .sticky-column {
     position: sticky;
