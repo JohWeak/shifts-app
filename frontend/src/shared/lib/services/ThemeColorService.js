@@ -30,39 +30,49 @@ class ThemeColorService {
     // Получить цвет смены с учетом всех источников
     static getShiftColor(shift, theme, userRole = 'employee') {
 
+        if (!shift) {
+            return '#6c757d';
+        }
+
+        // Пытаемся взять shift.id, если его нет, берем shift.shift_id.
+        // Это делает функцию устойчивой к разным форматам данных.
+        const shiftId = shift.id || shift.shift_id;
         const isAdmin = userRole === 'admin';
 
         // 1. Если я НЕ админ, то сначала проверяю свои локальные настройки
         if (!isAdmin) {
             const userColors = this.getColors(theme, false);
-            if (userColors[shift.shift_id]) {
-                return userColors[shift.shift_id];
+            if (userColors[shiftId]) {
+                return userColors[shiftId];
             }
         }
 
         // 2. Для темной темы (и для админа, и для работника) проверяем админские настройки
         if (theme === 'dark') {
             const adminDarkColors = this.getColors('dark', true);
-            if (adminDarkColors[shift.shift_id]) {
-                return adminDarkColors[shift.shift_id];
+            if (adminDarkColors[shiftId]) {
+                return adminDarkColors[shiftId];
             }
         }
 
         // Логика для выходного дня остается
-        if (shift.shift_id === 'day_off') {
+        if (shiftId === 'day_off') {
             return theme === 'dark' ? '#343a40' : '#f8f9fa';
         }
 
         // 3. Если ничего не найдено, возвращаем глобальный цвет из БД
         //    Для админа в светлой теме это будет первый же шаг после проверки 'day_off'.
-        const dbColor = shift.color || '#6c757d';
+        const dbColor = shift.color;
+        if (dbColor) {
+            return dbColor;
+        }
 
-        // И возвращаем дефолтный для темной темы, если нет глобального
-        if (theme === 'dark' && !shift.color) {
+        if (theme === 'dark') {
             return '#495057';
         }
 
-        return dbColor;
+        // 5. Самый последний запасной вариант
+        return '#6c757d';
     }
 
     // Проверить наличие кастомных цветов

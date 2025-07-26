@@ -116,6 +116,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const getShiftHeaderCellStyle = (shift) => {
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
         const baseColor = getShiftColor(shift);
+
         return { backgroundColor: hexToRgba(baseColor, neutralBgAlpha) };
     };
 
