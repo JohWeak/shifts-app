@@ -533,6 +533,45 @@ const getEmployeeShifts = async (req, res) => {
         });
     }
 };
+
+const deletePermanentRequest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const empId = req.userId;
+
+        // Находим запрос
+        const request = await PermanentConstraintRequest.findOne({
+            where: {
+                id,
+                emp_id: empId,
+                status: 'pending' // Можно удалять только pending запросы
+            }
+        });
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: 'Request not found or cannot be deleted'
+            });
+        }
+
+        await request.destroy();
+
+        res.json({
+            success: true,
+            message: 'Request deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error in deletePermanentRequest:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
 module.exports = {
     getEmployeeConstraints,
     getUnprocessedRequestsCount,
@@ -544,6 +583,7 @@ module.exports = {
     submitWeeklyConstraints,
     submitPermanentConstraintRequest,
     reviewPermanentConstraintRequest,
+    deletePermanentRequest,
     createConstraint,
     updateConstraint,
     deleteConstraint,

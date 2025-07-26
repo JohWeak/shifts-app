@@ -625,7 +625,8 @@ export const en = {
         helpToastBody:
             'Click on cells to mark them as unavailable, ' +
             'or click a day/shift header to block the entire row/column. ' +
-            'You can also add an optional message for the administrator.'
+            'You can also add an optional message for the administrator.',
+        waitForPendingRequest: 'Please wait for your request to be reviewed',
 
     },
     reports: {

@@ -1,15 +1,15 @@
 // frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.js
-import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Alert } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { constraintAPI } from 'shared/api/apiService';
+import React, {useState, useEffect} from 'react';
+import {Container, Card, Button, Alert} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {constraintAPI} from 'shared/api/apiService';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
+import {formatDateTime, getDayName} from 'shared/lib/utils/scheduleUtils';
 import './RequestDetails.css';
 
-const RequestDetails = ({ request, onBack }) => {
-    const { t, locale } = useI18n();
+const RequestDetails = ({request, onBack}) => {
+    const {t, locale} = useI18n();
     const [shiftsData, setShiftsData] = useState({});
     const [loading, setLoading] = useState(true);
 
@@ -82,7 +82,7 @@ const RequestDetails = ({ request, onBack }) => {
     };
 
     if (loading) {
-        return <LoadingState />;
+        return <LoadingState/>;
     }
 
     const constraintsByDay = groupConstraintsByDay();
@@ -154,12 +154,14 @@ const RequestDetails = ({ request, onBack }) => {
                                                             <>
                                                                 {shiftsData[constraint.shift_id].shift_name}
                                                                 {' - '}
-                                                                <span className={`constraint-type ${constraint.constraint_type}`}>
+                                                                <span
+                                                                    className={`constraint-type ${constraint.constraint_type}`}>
                                                 {t(`constraints.types.${constraint.constraint_type}`)}
                                             </span>
                                                             </>
                                                         ) : (
-                                                            <span className={`constraint-type ${constraint.constraint_type}`}>
+                                                            <span
+                                                                className={`constraint-type ${constraint.constraint_type}`}>
                                             {t('requests.wholeDay')} - {t(`constraints.types.${constraint.constraint_type}`)}
                                         </span>
                                                         )}
