@@ -621,8 +621,11 @@ export const en = {
         includeMessage: 'Include Message',
         includeMessageLabel: 'Include message in email',
         constraintsCount: 'Constraints count',
-        helpToastTitle: '',
-        helpToastBody: '',
+        helpToastTitle: 'How does it work?',
+        helpToastBody:
+            'Click on cells to mark them as unavailable, ' +
+            'or click a day/shift header to block the entire row/column. ' +
+            'You can also add an optional message for the administrator.'
 
     },
     reports: {

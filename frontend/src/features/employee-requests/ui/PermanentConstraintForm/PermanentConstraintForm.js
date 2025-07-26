@@ -1,6 +1,6 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.js
 import React, {useState, useEffect, useMemo} from 'react';
-import {Card, Button, Form, Alert} from 'react-bootstrap';
+import {Card, Button, Form, Alert, Toast, ToastContainer} from 'react-bootstrap';
 import {X} from 'react-bootstrap-icons';
 import TextareaAutosize from 'react-textarea-autosize';
 import {constraintAPI} from 'shared/api/apiService';
@@ -30,6 +30,8 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
     const [message, setMessage] = useState('');
     const [showMessage, setShowMessage] = useState(false);
     const [shifts, setShifts] = useState([]);
+    const [showHelpToast, setShowHelpToast] = useState(false);
+    const toggleHelpToast = () => setShowHelpToast(!showHelpToast);
 
     // Загрузка данных
     useEffect(() => {
@@ -190,9 +192,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
             setShowConfirm(false);
         }
     };
-    const showHelpTost = () => {
 
-    }
 
     if (loading) return <LoadingState/>;
     if (error) return <ErrorMessage message={error}/>;
@@ -234,7 +234,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                     {isMobile ? (
                         // --- МОБИЛЬНАЯ ВЕРСТКА  ---
                         <>
-                            <Form.Group className="mb-2 ms-1 pb-1 border-bottom">
+                            <div className="d-flex justify-content-between align-items-center mb-1">
                                 <Form.Check
                                     type="checkbox"
                                     id="include-message-mobile"
@@ -245,22 +245,25 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                                 />
                                 <Button
                                     variant="outline-secondary"
-                                    onClick={showHelpTost}
-                                    className="p-0"
+                                    onClick={toggleHelpToast}
+                                    className="help-button mobile"
                                 >
                                     <i className="bi bi-question"></i>
                                 </Button>
-                                {showMessage && (
+                            </div>
+                            {showMessage && (
+                                <Form.Group className="mb-1">
                                     <TextareaAutosize
                                         minRows={2}
-                                        className="form-control my-2"
+                                        className="form-control"
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         placeholder={t('requests.messagePlaceholder')}
                                     />
-                                )}
-                            </Form.Group>
-                            <div className="d-flex action-buttons-group justify-content-between gap-2">
+                                </Form.Group>
+                            )}
+                            <div
+                                className="d-flex action-buttons-group justify-content-between gap-2 border-top pt-2 mb-2">
                                 <Button
                                     variant="outline-secondary"
                                     onClick={onCancel}
@@ -275,11 +278,6 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                                     {t('common.submit')}
                                 </Button>
                             </div>
-                            <Form.Group className="mt-2">
-
-                            </Form.Group>
-
-
                         </>
                     ) : (
                         // --- ДЕСКТОПНАЯ ВЕРСТКА  ---
@@ -297,6 +295,13 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                                 </Form.Group>
 
                                 <div className="d-flex gap-2">
+                                    <Button
+                                        variant="outline-secondary"
+                                        onClick={toggleHelpToast}
+                                        className="help-button desktop"
+                                    >
+                                        <i className="bi bi-question"></i>
+                                    </Button>
                                     <Button
                                         variant="outline-secondary"
                                         onClick={onCancel}
@@ -328,6 +333,16 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                     )}
                 </Card.Footer>
             </Card>
+
+            <ToastContainer position="bottom-center" className="p-3">
+                <Toast show={showHelpToast} onClose={toggleHelpToast} autohide delay={10000}>
+                    <Toast.Header closeButton={true}>
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <strong className="me-auto">{t('requests.helpToastTitle')}</strong>
+                    </Toast.Header>
+                    <Toast.Body>{t('requests.helpToastBody')}</Toast.Body>
+                </Toast>
+            </ToastContainer>
 
             <ConfirmationModal
                 show={showConfirm}

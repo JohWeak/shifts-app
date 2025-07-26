@@ -96,8 +96,13 @@
     /* Когда день выбран, применяем отступы, как у .constraint-cell.cannot_work */
     inset: 4px;
 }
-.cursor-pointer-checkbox label{
-    font-weight: 500;
+.permanent-constraint-form-container .help-button {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
 }
 
 
@@ -122,6 +127,14 @@
 .permanent-constraint-form-container .include-message-checkbox.desktop .form-check-input {
     /*cursor: pointer;*/
 }
+.permanent-constraint-form-container .help-button.desktop {
+    align-self: center;
+    border-radius: 30%;
+    margin-inline-end: 0.5rem;
+    opacity: 0.3;
+
+}
+
 [dir="ltr"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
     left: 0;
     box-shadow: 2px 0 4px rgba(0,0,0,0.05);
@@ -159,8 +172,13 @@
     opacity: 0.8;
 }
 .permanent-constraint-form-container .include-message-checkbox.mobile .form-check-input {
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     border-color: var(--bs-border-color-translucent);
+}
+.permanent-constraint-form-container .help-button.mobile {
+    align-self: center;
+    border-radius: 50%;
+    opacity: 0.9;
 }
 
 [dir="ltr"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
