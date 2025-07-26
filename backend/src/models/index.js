@@ -7,7 +7,7 @@ const {Sequelize} = require("sequelize");
 const db = {};
 
 function loadModelsRecursive(directory) {
-    const entries = fs.readdirSync(directory, { withFileTypes: true });
+    const entries = fs.readdirSync(directory, {withFileTypes: true});
 
     for (const entry of entries) {
         const fullPath = path.join(directory, entry.name);
@@ -103,6 +103,12 @@ const defineAssociations = () => {
             Employee.hasMany(EmployeeQualification, {
                 foreignKey: 'emp_id',
                 as: 'qualifications'
+            });
+        }
+        if (PermanentConstraintRequest) {
+            Employee.hasMany(PermanentConstraintRequest, {
+                foreignKey: 'emp_id',
+                as: 'permanentRequests'
             });
         }
     }
@@ -326,6 +332,8 @@ const defineAssociations = () => {
                 foreignKey: 'reviewed_by',
                 as: 'reviewer'
             });
+
+
         }
 
         // PermanentConstraintRequest -> PositionShift
