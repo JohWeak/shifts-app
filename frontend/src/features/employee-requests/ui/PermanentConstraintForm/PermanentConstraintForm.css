@@ -67,6 +67,28 @@
     color: inherit;
 }
 
+.permanent-constraint-form-container .day-header {
+    /* Внешняя ячейка <th>/<td> теперь тоже имеет padding */
+    padding: var(--space-1);
+    position: relative;
+    height: 60px; /* Та же высота, что и у ячеек данных */
+}
+
+.permanent-constraint-form-container .day-header-inner {
+    /* Внутренний div, который будет нашим "чипом" */
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 0.3rem;
+}
+
+.permanent-constraint-form-container .day-header-inner.selected {
+    /* Когда день выбран, применяем отступы, как у .constraint-cell.cannot_work */
+    inset: 4px;
+}
 
 /* --- 2. ДЕСКТОПНАЯ ВЕРСТКА (.desktop-constraints) --- */
 

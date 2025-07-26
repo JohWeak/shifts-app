@@ -31,12 +31,23 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: C
     );
 };
 
-const DayHeader = ({day, dayIndex, onDayClick, getDayHeaderStyle, as: Component = 'th', isMobile = false}) => {
-    const {t} = useI18n();
+const DayHeader = ({ day, dayIndex, onDayClick, getDayHeaderStyle, as: Component = 'th', isMobile = false, fullyBlockedDays }) => {
+    const { t } = useI18n();
     const translatedDayName = getDayName(dayIndex, t, isMobile);
+    // 1. Проверяем, заблокирован ли этот день
+    const isSelected = fullyBlockedDays.has(day);
+    // 2. Получаем стили (красный фон) от родителя
+    const innerDivStyle = getDayHeaderStyle(day);
+    // 3. Формируем классы для внутреннего div'а
+    const innerDivClassName = `day-header-inner ${isSelected ? 'selected' : ''}`;
+
     return (
-        <Component className="day-header clickable" style={getDayHeaderStyle(day)} onClick={() => onDayClick(day)}>
-            <div className="day-name">{translatedDayName}</div>
+        // Внешняя ячейка теперь не имеет стилей, она просто контейнер
+        <Component className="day-header clickable" onClick={() => onDayClick(day)}>
+            {/* Вся стилизация и логика теперь во внутреннем div'е */}
+            <div className={innerDivClassName} style={innerDivStyle}>
+                <div className="day-name">{translatedDayName}</div>
+            </div>
         </Component>
     );
 };
@@ -52,6 +63,7 @@ const PermanentConstraintGrid = ({
                                      getShiftHeaderStyle,
                                      getShiftHeaderCellStyle,
                                      getDayHeaderStyle,
+                                     fullyBlockedDays,
                                  }) => {
     const {t} = useI18n();
 
@@ -68,6 +80,7 @@ const PermanentConstraintGrid = ({
                             dayIndex={index}
                             onDayClick={onDayClick}
                             getDayHeaderStyle={getDayHeaderStyle}
+                            fullyBlockedDays={fullyBlockedDays}
                         />
                     ))}
                 </tr>
@@ -121,6 +134,7 @@ const PermanentConstraintGrid = ({
                             dayIndex={index}
                             onDayClick={onDayClick}
                             getDayHeaderStyle={getDayHeaderStyle}
+                            fullyBlockedDays={fullyBlockedDays}
                             isMobile={true}
                             as="td"
                         />

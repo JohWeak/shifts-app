@@ -180,6 +180,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                             getShiftHeaderStyle={getShiftHeaderStyle}
                             getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                             getDayHeaderStyle={getDayHeaderStyle}
+                            fullyBlockedDays={fullyBlockedDays}
                         />
                     )}
                 </Card.Body>
