@@ -264,6 +264,7 @@ export const he = {
             manageRequests: 'נהל בקשות חופשה והחלפת משמרות',
             mySchedule: 'הסידור שלי',
             nextShift: 'המשמרת הבאה שלך',
+            noShifts: 'אין משמרות השבוע',
             notSubmitted: 'עדיין לא הוגש',
             quickActions: 'פעולות מהירות',
             requests: 'בקשות',
@@ -580,6 +581,45 @@ export const he = {
         'same_work_site': 'אותו אתר עבודה',
         'unknown_shift': 'משמרת לא ידועה',
         'weeklyHours': 'שעות שבועיות נוכחיות: {hours}ש',
+    },
+    requests: {
+        title: 'הבקשות שלי',
+        createNew: 'בקשה חדשה',
+        permanentConstraints: {
+            title: 'הגבלות סידור קבועות'
+        },
+        noRequests: 'אין בקשות',
+        noRequestsMessage: 'עדיין לא הגשתם בקשות',
+        pending: 'בהמתנה',
+        pendingRequests: 'בקשות ממתינות',
+        processedRequests: 'בקשות שטופלו',
+        sent: 'נשלח',
+        reviewed: 'נבדק',
+        reviewedBy: 'נבדק על ידי:',
+        constraints: 'הגבלות',
+        requestDetails: 'פרטי הבקשה',
+        yourMessage: 'ההודעה שלך',
+        adminResponse: 'תגובת המנהל',
+        wholeDay: 'יום שלם',
+        allDay: 'כל היום',
+        blockDay: 'חסימת יום',
+        messageOptional: 'הודעה (אופציונלי)',
+        messagePlaceholder: 'הוסף מידע נוסף לגבי ההגבלות שלך...',
+        confirmSubmit: {
+            title: 'שליחת בקשה',
+            message: 'האם לשלוח את הבקשה להגבלות קבועות?'
+        },
+        submitSuccess: 'הבקשה נשלחה בהצלחה',
+        submitError: 'שליחת הבקשה נכשלה',
+        loadError: 'טעינת הבקשות נכשלה',
+        status: {
+            pending: 'בהמתנה',
+            approved: 'אושר',
+            rejected: 'נדחה'
+        },
+        includeMessage: 'צירוף הודעה',
+        includeMessageLabel: 'כלול את ההודעה באימייל',
+        constraintsCount: 'מספר הגבלות'
     },
     reports: {
         analyticsAndReports: 'אנליטיקה ודוחות',

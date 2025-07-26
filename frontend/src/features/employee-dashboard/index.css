@@ -1,6 +1,6 @@
 /* frontend/src/features/employee-dashboard/index.css */
 .employee-dashboard {
-    min-height: calc(100vh - 58px);
+    min-height: calc(100vh - 120px);
     margin-bottom: 60px;
 }
 .employee-dashboard .page-header-card {

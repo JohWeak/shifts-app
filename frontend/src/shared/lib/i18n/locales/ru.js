@@ -264,6 +264,7 @@ export const ru = {
             manageRequests: 'Управление запросами на отгул и обмен сменами',
             mySchedule: 'Мое расписание',
             nextShift: 'Ваша следующая смена',
+            noShifts: 'Нет смен на неделе',
             notSubmitted: 'Еще не отправлено',
             quickActions: 'Быстрые действия',
             requests: 'Запросы',
@@ -580,6 +581,45 @@ export const ru = {
         'same_work_site': 'Тот же рабочий объект',
         'unknown_shift': 'Неизвестная смена',
         'weeklyHours': 'Текущие часы за неделю: {hours}ч',
+    },
+    requests: {
+        title: 'Мои запросы',
+        createNew: 'Новый запрос',
+        permanentConstraints: {
+            title: 'Постоянные ограничения графика'
+        },
+        noRequests: 'Нет запросов',
+        noRequestsMessage: 'Вы еще не отправляли никаких запросов',
+        pending: 'В ожидании',
+        pendingRequests: 'Запросы в ожидании',
+        processedRequests: 'Обработанные запросы',
+        sent: 'Отправлено',
+        reviewed: 'Рассмотрено',
+        reviewedBy: 'Проверил(а):',
+        constraints: 'ограничения',
+        requestDetails: 'Детали запроса',
+        yourMessage: 'Ваше сообщение',
+        adminResponse: 'Ответ администратора',
+        wholeDay: 'Весь день',
+        allDay: 'Весь день',
+        blockDay: 'Заблокировать день',
+        messageOptional: 'Сообщение (необязательно)',
+        messagePlaceholder: 'Добавьте любую дополнительную информацию о ваших ограничениях...',
+        confirmSubmit: {
+            title: 'Отправить запрос',
+            message: 'Вы уверены, что хотите отправить этот запрос на постоянные ограничения?'
+        },
+        submitSuccess: 'Запрос успешно отправлен',
+        submitError: 'Не удалось отправить запрос',
+        loadError: 'Не удалось загрузить запросы',
+        status: {
+            pending: 'В ожидании',
+            approved: 'Одобрено',
+            rejected: 'Отклонено'
+        },
+        includeMessage: 'Добавить сообщение',
+        includeMessageLabel: 'Включить сообщение в письмо',
+        constraintsCount: 'Количество ограничений'
     },
     reports: {
         analyticsAndReports: 'Аналитика и Отчеты',

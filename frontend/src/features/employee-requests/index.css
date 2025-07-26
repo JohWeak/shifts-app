@@ -1,6 +1,6 @@
 /* frontend/src/features/employee-requests/index.css */
 .employee-requests-container {
-    min-height: calc(100vh - 120px);
+    /*min-height: calc(100vh - 120px);*/
     position: relative;
     max-width: 1000px;
     justify-self: center;
@@ -32,9 +32,9 @@
 }
 
 /* Adjust for mobile navbar */
-@media (max-width: 768px) {
-    .employee-requests-container .fab-button {
-        bottom: 70px;
-        right: 15px;
-    }
-}
+/*@media (max-width: 768px) {*/
+/*    .employee-requests-container .fab-button {*/
+/*        bottom: 70px;*/
+/*        right: 15px;*/
+/*    }*/
+/*}*/

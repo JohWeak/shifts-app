@@ -196,11 +196,11 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
 
     return (
         <div className="permanent-constraint-form-container">
-            <Card className="rounded-4">
+            <Card className="permanent-constraint-card rounded-4">
                 <Card.Header>
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">{t('requests.permanentConstraints.title')}</h5>
-                        <Button variant="link" onClick={onCancel} className="p-0 text-body">
+                        <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
                             <X size={28} />
                         </Button>
                     </div>
@@ -233,7 +233,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                         <>
                             <div className="d-flex action-buttons-group justify-content-between gap-2">
                                 <Button
-                                    variant="secondary"
+                                    variant="outline-secondary"
                                     onClick={onCancel}
                                 >
                                     {t('common.cancel')}
@@ -246,7 +246,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                     {t('common.submit')}
                                 </Button>
                             </div>
-                            <Form.Group className="mt-3">
+                            <Form.Group className="mt-2">
                                 <Form.Check
                                     type="checkbox"
                                     id="include-message-mobile"
@@ -284,7 +284,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
 
                                 <div className="d-flex gap-2">
                                     <Button
-                                        variant="secondary"
+                                        variant="outline-secondary"
                                         onClick={onCancel}
                                     >
                                         {t('common.cancel')}

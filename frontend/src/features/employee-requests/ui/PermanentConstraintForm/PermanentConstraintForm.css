@@ -8,9 +8,13 @@
     width: 100%;
     margin-bottom: 0;
 }
+
 .permanent-constraint-form-container .table-responsive {
     border-radius: var(--bs-card-inner-border-radius);
     overflow: hidden;
+}
+.permanent-constraint-form-container .permanent-constraint-card{
+    border-color: var(--bs-border-color);
 }
 
 .permanent-constraint-form-container .full-schedule-table th,

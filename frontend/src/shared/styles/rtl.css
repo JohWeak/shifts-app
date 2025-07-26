@@ -190,13 +190,14 @@
 
 /* Forms */
 [dir="rtl"] .form-check {
-    padding-right: 0.5em;
-    padding-left: 0;
+    /*padding-right: 0.5em;*/
+    /*padding-left: 0;*/
 }
 
 [dir="rtl"] .form-check-input {
-    margin-right: 0.5em;
-    margin-left: 0;
+    margin-right: 0;
+    margin-left: 0.5rem;
+    float: right;
 }
 
 /* Lists */
