@@ -5,14 +5,22 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './StatusBadge.css';
 
 // Добавляем новый проп `mode` со значением по умолчанию 'text'
-const StatusBadge = ({ status, size = 'md', mode = 'text' }) => {
+const StatusBadge = ({
+                         status,
+                         size = 'md',
+                         mode = 'text',
+                         variant,  //  для кастомного варианта
+                         text,     // для кастомного текста
+                         statusText // Для обратной совместимости
+                     }) => {
     const { t } = useI18n();
 
     // Определяем, какой цвет соответствует какому статусу
-    const variants = {
+    const defaultVariants = {
         published: 'success',
         draft: 'warning',
         archived: 'secondary',
+
         active: 'primary',
         inactive: 'danger',
 
@@ -21,13 +29,17 @@ const StatusBadge = ({ status, size = 'md', mode = 'text' }) => {
         rejected: 'danger'
     };
 
-    // НОВОЕ: Определяем, какая иконка соответствует какому статусу
     const icons = {
         published: 'bi bi-check-lg',
         draft: 'bi bi-pencil-fill',
         archived: 'bi bi-archive-fill',
+
         active: 'bi bi-play-circle-fill',
-        inactive: 'bi bi-x-circle-fill'
+        inactive: 'bi bi-x-circle-fill',
+
+        pending: 'bi bi-clock-fill',
+        approved: 'bi bi-check-circle-fill',
+        rejected: 'bi bi-x-circle-fill'
     };
 
     const sizeClasses = {
@@ -36,20 +48,19 @@ const StatusBadge = ({ status, size = 'md', mode = 'text' }) => {
         lg: 'badge-lg'
     };
 
-    const statusText = t(`schedule.${status}`, { defaultValue: status });
+    const displayText = text || statusText || t(`schedule.${status}`, { defaultValue: status });
+    const badgeVariant = variant || defaultVariants[status] || 'secondary';
 
     return (
         <Badge
-            bg={variants[status] || 'secondary'}
+            bg={badgeVariant}
             className={`${sizeClasses[size]} status-badge`}
-            // Для доступности добавляем title, который покажет текст статуса при наведении
-            title={statusText}
+            title={displayText}
         >
-            {/* Условный рендеринг: показываем иконку или текст */}
             {mode === 'icon' ? (
                 <i className={`${icons[status] || 'bi bi-question-circle-fill'}`}></i>
             ) : (
-                statusText
+                displayText
             )}
         </Badge>
     );
