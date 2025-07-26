@@ -596,7 +596,7 @@ export const ru = {
         sent: 'Отправлено',
         reviewed: 'Рассмотрено',
         reviewedBy: 'Проверил(а):',
-        constraints: 'ограничения',
+        constraints: 'Ограничения',
         requestDetails: 'Детали запроса',
         yourMessage: 'Ваше сообщение',
         adminResponse: 'Ответ администратора',

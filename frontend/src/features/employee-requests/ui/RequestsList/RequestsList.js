@@ -46,8 +46,9 @@ const RequestsList = ({ requests, onRequestClick }) => {
                     </div>
                     <StatusBadge
                         status={request.status}
-                        text={t(`requests.status.${request.status}`)}
+                        statusText={t(`requests.status.${request.status}`)}
                     />
+
                 </div>
             </ListGroup.Item>
         );
@@ -57,7 +58,7 @@ const RequestsList = ({ requests, onRequestClick }) => {
         <div className="requests-list">
             {pendingRequests.length > 0 && (
                 <div className="mb-4">
-                    <h6 className="text-muted mb-3">{t('requests.pending_requests')}</h6>
+                    <h6 className="text-muted mb-3">{t('requests.pendingRequests')}</h6>
                     <ListGroup>
                         {pendingRequests.map(request => (
                             <RequestItem key={request.id} request={request} />

@@ -93,7 +93,7 @@ const RequestDetails = ({ request, onBack }) => {
             <Card>
                 <Card.Header>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="mb-0">{t('requests.request_details')}</h5>
+                        <h5 className="mb-0">{t('requests.requestDetails')}</h5>
                         <StatusBadge
                             status={request.status}
                             variant={getStatusVariant(request.status)}
@@ -114,7 +114,7 @@ const RequestDetails = ({ request, onBack }) => {
                                 </div>
                                 {request.reviewer && (
                                     <div className="mb-2">
-                                        <strong>{t('requests.reviewed_by')}:</strong> {`${request.reviewer.first_name} ${request.reviewer.last_name}`}
+                                        <strong>{t('requests.reviewedBy')}:</strong> {`${request.reviewer.first_name} ${request.reviewer.last_name}`}
                                     </div>
                                 )}
                             </>
@@ -139,7 +139,7 @@ const RequestDetails = ({ request, onBack }) => {
                                                 </>
                                             ) : (
                                                 <span className={`constraint-type ${constraint.constraint_type}`}>
-                                                    {t('requests.whole_day')} - {t(`constraints.types.${constraint.constraint_type}`)}
+                                                    {t('requests.wholeDay')} - {t(`constraints.types.${constraint.constraint_type}`)}
                                                 </span>
                                             )}
                                         </li>
@@ -151,7 +151,7 @@ const RequestDetails = ({ request, onBack }) => {
 
                     {request.message && (
                         <div className="mt-4">
-                            <h6>{t('requests.your_message')}:</h6>
+                            <h6>{t('requests.yourMessage')}:</h6>
                             <Alert variant="info" className="mt-2">
                                 {request.message}
                             </Alert>
@@ -160,7 +160,7 @@ const RequestDetails = ({ request, onBack }) => {
 
                     {request.admin_response && (
                         <div className="mt-4">
-                            <h6>{t('requests.admin_response')}:</h6>
+                            <h6>{t('requests.adminResponse')}:</h6>
                             <Alert
                                 variant={request.status === 'approved' ? 'success' : 'warning'}
                                 className="mt-2"

@@ -597,7 +597,7 @@ export const en = {
         sent: 'Sent',
         reviewed: 'Reviewed',
         reviewedBy: 'Reviewed by',
-        constraints: 'constraints',
+        constraints: 'Constraints',
         requestDetails: 'Request Details',
         yourMessage: 'Your Message',
         adminResponse: 'Administrator Response',

@@ -168,6 +168,7 @@
     --bs-body-bg-rgb: 26, 29, 30;
     --bs-body-color: #e0e0e0;
     --bs-body-tertiary: #adb5bd;
+    --bs-tertiary-bg: var(--bs-gray-800);
     --bs-emphasis-color: #fff;
     --bs-placeholder-color: #adb5bd;
     --bs-primary: #4da3ff;
@@ -175,6 +176,7 @@
 
     --bs-secondary: #6c757d;
     --bs-secondary-rgb: 108, 117, 125;
+    --bs-secondary-color: #adb5bd;
 
     --bs-border-color: var(--bs-gray-800);
     --bs-border-color-translucent: rgba(255, 255, 255, .15);

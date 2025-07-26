@@ -10,7 +10,7 @@
 }
 
 .requests-list .request-item:hover {
-    background-color: var(--bs-gray-100);
+    background-color: var(--bs-btn-outline-secondary-hover-color);
     border-left-color: var(--bs-primary);
 }
 
