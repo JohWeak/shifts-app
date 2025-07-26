@@ -8,8 +8,7 @@ import { useShiftColor } from 'shared/hooks/useShiftColor';
 import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import { addNotification } from 'app/model/notificationsSlice'; // Для будущих уведомлений
 import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
-import { getDayName } from "shared/lib/utils/scheduleUtils";
-// Наши новые компоненты
+
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
@@ -95,37 +94,29 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         const status = constraints[`${day}-${shiftId}`] || 'neutral';
         const shift = shifts.find(s => s.id === shiftId);
 
-        // 1. Определяем цвет фона. Это будет ЛИБО красный, ЛИБО полупрозрачный цвет смены.
-        let backgroundColor;
-        if (status === 'cannot_work') {
-            backgroundColor = '#dc3545'; // Красный цвет для блокировки
-        } else {
-            // Полупрозрачный фон для пустой ячейки. Тема учитывается.
-            const neutralBgAlpha = currentTheme === 'dark' ? 0.5 : 0.5;
-            // ВАЖНО: getShiftColor(shift) вернет серый, если цвет не задан.
-            // Ваша ручная проверка с '#0f5faf' была правильной.
-            backgroundColor = hexToRgba(shift ? getShiftColor(shift) : '#afceea', neutralBgAlpha);
-        }
-
-        console.log("[Shift and colors]",
-            "Shift: ", shift,
-            "BGColor: ", backgroundColor,
-        );
-
-        // 2. Определяем цвет текста
-        const textColor = status === 'cannot_work' ? getContrastTextColor(backgroundColor) : 'inherit';
-
-        // 3. Собираем стили ТОЛЬКО для внутреннего div'а
-        const foregroundStyle = {
-            backgroundColor: backgroundColor,
-            color: textColor
+        const neutralBgAlpha = currentTheme === 'dark' ? 0.05 : 0.5;
+        const tdStyle = {
+            backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };
 
         const foregroundClasses = `constraint-cell ${status} clickable`;
+        const foregroundStyle = {};
+        if (status === 'cannot_work') {
+            foregroundStyle.backgroundColor = '#dc3545';
+            foregroundStyle.color = getContrastTextColor(foregroundStyle.backgroundColor);
+        }
 
+        return { tdStyle, foregroundStyle, foregroundClasses, status };
+    };
 
-        // 4. tdStyle больше не нужен!
-        return { tdStyle: {}, foregroundStyle, foregroundClasses, status };
+    const getShiftHeaderStyle = (shift) => {
+        const baseColor = getShiftColor(shift);
+        return { backgroundColor: baseColor, color: getContrastTextColor(baseColor) };
+    };
+    const getShiftHeaderCellStyle = (shift) => {
+        const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
+        const baseColor = getShiftColor(shift);
+        return { backgroundColor: hexToRgba(baseColor, neutralBgAlpha) };
     };
 
     const getDayHeaderStyle = (day) => {
@@ -134,14 +125,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         }
         return {};
     };
-
-
-    const getShiftHeaderCellStyle = (shift) => {
-        const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
-        const baseColor = getShiftColor(shift);
-        return { backgroundColor: hexToRgba(baseColor, neutralBgAlpha) };
-    };
-
 
 
     // --- ОТПРАВКА ФОРМЫ ---
@@ -189,13 +172,13 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                         <PermanentConstraintGrid
                             daysOfWeek={DAYS_OF_WEEK_CANONICAL}
                             shifts={shifts}
+                            isMobile={isMobile}
                             onCellClick={handleCellClick}
                             onDayClick={handleDayClick}
                             getCellStyles={getCellStyles}
-                            getShiftHeaderStyle={getShiftHeaderCellStyle}
+                            getShiftHeaderStyle={getShiftHeaderStyle}
+                            getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                             getDayHeaderStyle={getDayHeaderStyle}
-                            getShiftColor={getShiftColor}
-                            isMobile={isMobile}
                         />
                     )}
                 </Card.Body>

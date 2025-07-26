@@ -1,36 +1,30 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintGrid.js
 
 import React from 'react';
-import { Table } from 'react-bootstrap';
-import { X } from 'react-bootstrap-icons';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {Table} from 'react-bootstrap';
+import {X} from 'react-bootstrap-icons';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {formatShiftTime, getCanonicalShiftType, getDayName, getShiftIcon} from 'shared/lib/utils/scheduleUtils';
-import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
+import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 
 
-const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => {
+const GridCell = ({day, shift, onCellClick, getCellStyles}) => {
     const styles = getCellStyles(day, shift.id);
     return (
-        <td className="constraint-td-wrapper">
-            <div className={styles.foregroundClasses} style={styles.foregroundStyle} onClick={() => onCellClick(day, shift.id)}>
-                {styles.status === 'cannot_work' && <X className="cell-icon" />}
+        <td className="constraint-td-wrapper" style={styles.tdStyle}>
+            <div className={styles.foregroundClasses} style={styles.foregroundStyle}
+                 onClick={() => onCellClick(day, shift.id)}>
+                {styles.status === 'cannot_work' && <X className="cell-icon"/>}
             </div>
         </td>
     );
 };
 
-const ShiftHeader = ({ shift, getShiftHeaderStyle, getShiftColor, as: Component = 'th' }) => {
+const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th'}) => {
     const icon = getShiftIcon(getCanonicalShiftType(shift.shift_name));
-
-    // Внутренний div сам вычисляет свой стиль, используя getShiftColor
-    const innerDivStyle = {
-        backgroundColor: getShiftColor(shift),
-        color: getContrastTextColor(getShiftColor(shift))
-    };
-
     return (
-        <Component className="shift-header-cell sticky-column" style={getShiftHeaderStyle(shift)}>
-            <div className="shift-header-info" style={innerDivStyle}>
+        <Component className="shift-header-cell sticky-column" style={getShiftHeaderCellStyle(shift)}>
+            <div className="shift-header-info" style={getShiftHeaderStyle(shift)}>
                 <span className="shift-header-name">{icon} {shift.shift_name}</span>
                 <span className="shift-header-time">{formatShiftTime(shift.start_time, shift.end_time)}</span>
             </div>
@@ -38,10 +32,9 @@ const ShiftHeader = ({ shift, getShiftHeaderStyle, getShiftColor, as: Component 
     );
 };
 
-const DayHeader = ({ day, dayIndex, onDayClick, getDayHeaderStyle, as: Component = 'th', isMobile = false }) => {
-    const { t } = useI18n();
+const DayHeader = ({day, dayIndex, onDayClick, getDayHeaderStyle, as: Component = 'th', isMobile = false}) => {
+    const {t} = useI18n();
     const translatedDayName = getDayName(dayIndex, t, isMobile);
-
     return (
         <Component className="day-header clickable" style={getDayHeaderStyle(day)} onClick={() => onDayClick(day)}>
             <div className="day-name">{translatedDayName}</div>
@@ -58,10 +51,10 @@ const PermanentConstraintGrid = ({
                                      onDayClick,
                                      getCellStyles,
                                      getShiftHeaderStyle,
+                                     getShiftHeaderCellStyle,
                                      getDayHeaderStyle,
-                                     getShiftColor,
                                  }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
 
     const DesktopGrid = () => (
         <div className="table-responsive desktop-constraints">
@@ -76,7 +69,6 @@ const PermanentConstraintGrid = ({
                             dayIndex={index}
                             onDayClick={onDayClick}
                             getDayHeaderStyle={getDayHeaderStyle}
-                            isMobile={false}
                         />
                     ))}
                 </tr>
@@ -87,14 +79,13 @@ const PermanentConstraintGrid = ({
                         <ShiftHeader
                             shift={shift}
                             getShiftHeaderStyle={getShiftHeaderStyle}
-                            getShiftColor={getShiftColor}
+                            getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                             as="td"
                         />
                         {daysOfWeek.map(day => (
                             <GridCell
                                 key={`${day}-${shift.id}`}
-                                day={day}
-                                shift={shift}
+                                day={day} shift={shift}
                                 onCellClick={onCellClick}
                                 getCellStyles={getCellStyles}
                             />
@@ -117,7 +108,7 @@ const PermanentConstraintGrid = ({
                             key={shift.id}
                             shift={shift}
                             getShiftHeaderStyle={getShiftHeaderStyle}
-                            getShiftColor={getShiftColor}
+                            getShiftHeaderCellStyle={getShiftHeaderCellStyle}
                             as="th"
                         />
                     ))}
@@ -150,7 +141,7 @@ const PermanentConstraintGrid = ({
         </div>
     );
 
-    return isMobile ? <MobileGrid /> : <DesktopGrid />;
+    return isMobile ? <MobileGrid/> : <DesktopGrid/>;
 };
 
 export default PermanentConstraintGrid;
