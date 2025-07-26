@@ -9,24 +9,30 @@ import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import './RequestDetails.css';
 
 const RequestDetails = ({ request, onBack }) => {
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
     const [shiftsData, setShiftsData] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log('Request data:', request);
+        console.log('Request constraints:', request.constraints);
         loadShiftDetails();
-    }, []);
+    }, [request]);
 
     const loadShiftDetails = async () => {
         try {
             const response = await constraintAPI.getEmployeeShifts();
             const shifts = response.data?.shifts || [];
 
+            console.log('Loaded shifts:', shifts);
+
             // Create a map for quick lookup
             const shiftsMap = {};
             shifts.forEach(shift => {
                 shiftsMap[shift.id] = shift;
             });
+
+            console.log('Shifts map:', shiftsMap);
 
             setShiftsData(shiftsMap);
         } catch (error) {
@@ -51,12 +57,17 @@ const RequestDetails = ({ request, onBack }) => {
 
         if (request.constraints && Array.isArray(request.constraints)) {
             request.constraints.forEach(constraint => {
-                if (!grouped[constraint.day_of_week]) {
-                    grouped[constraint.day_of_week] = [];
+                const dayLower = constraint.day_of_week.toLowerCase();
+                console.log('Processing constraint:', constraint);
+
+                if (!grouped[dayLower]) {
+                    grouped[dayLower] = [];
                 }
-                grouped[constraint.day_of_week].push(constraint);
+                grouped[dayLower].push(constraint);
             });
         }
+
+        console.log('Grouped constraints:', grouped);
 
         // Sort by day order
         const sortedGrouped = {};
@@ -66,6 +77,7 @@ const RequestDetails = ({ request, onBack }) => {
             }
         });
 
+        console.log('Sorted grouped constraints:', sortedGrouped);
         return sortedGrouped;
     };
 
@@ -123,30 +135,43 @@ const RequestDetails = ({ request, onBack }) => {
 
                     <h6 className="mb-3">{t('requests.constraints')}:</h6>
                     <div className="constraints-details">
-                        {Object.entries(constraintsByDay).map(([day, constraints]) => (
-                            <div key={day} className="day-constraints mb-3">
-                                <strong>{getDayName(dayIndices[day], t)}:</strong>
-                                <ul className="mt-1">
-                                    {constraints.map((constraint, index) => (
-                                        <li key={index}>
-                                            {constraint.shift_id && shiftsData[constraint.shift_id] ? (
-                                                <>
-                                                    {shiftsData[constraint.shift_id].shift_name}
-                                                    {' - '}
-                                                    <span className={`constraint-type ${constraint.constraint_type}`}>
-                                                        {t(`constraints.types.${constraint.constraint_type}`)}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <span className={`constraint-type ${constraint.constraint_type}`}>
-                                                    {t('requests.wholeDay')} - {t(`constraints.types.${constraint.constraint_type}`)}
-                                                </span>
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
+                        {Object.entries(constraintsByDay).length === 0 ? (
+                            <div className="text-muted">{t('requests.noConstraints')}</div>
+                        ) : (
+                            Object.entries(constraintsByDay).map(([day, constraints]) => {
+                                console.log(`Rendering day ${day} with constraints:`, constraints);
+                                return (
+                                    <div key={day} className="day-constraints mb-3">
+                                        <strong>{getDayName(dayIndices[day], t)}:</strong>
+                                        <ul className="mt-1">
+                                            {constraints.map((constraint, index) => {
+                                                console.log('Rendering constraint:', constraint);
+                                                console.log('Shift data for id', constraint.shift_id, ':', shiftsData[constraint.shift_id]);
+
+                                                return (
+                                                    <li key={index}>
+                                                        {constraint.shift_id && shiftsData[constraint.shift_id] ? (
+                                                            <>
+                                                                {shiftsData[constraint.shift_id].shift_name}
+                                                                {' - '}
+                                                                <span className={`constraint-type ${constraint.constraint_type}`}>
+                                                {t(`constraints.types.${constraint.constraint_type}`)}
+                                            </span>
+                                                            </>
+                                                        ) : (
+                                                            <span className={`constraint-type ${constraint.constraint_type}`}>
+                                            {t('requests.wholeDay')} - {t(`constraints.types.${constraint.constraint_type}`)}
+                                        </span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                );
+                            })
+                        )}
+
                     </div>
 
                     {request.message && (
