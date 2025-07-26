@@ -1,33 +1,54 @@
 // frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.js
-import React from 'react';
-import { Container, Card, Button, Badge, Alert } from 'react-bootstrap';
-import { useI18n } from '../../../../shared/lib/i18n/i18nProvider';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Button, Alert } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { constraintAPI } from 'shared/api/apiService';
+import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
+import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import './RequestDetails.css';
 
 const RequestDetails = ({ request, onBack }) => {
     const { t } = useI18n();
+    const [shiftsData, setShiftsData] = useState({});
+    const [loading, setLoading] = useState(true);
 
-    const getStatusBadge = (status) => {
+    useEffect(() => {
+        loadShiftDetails();
+    }, []);
+
+    const loadShiftDetails = async () => {
+        try {
+            const response = await constraintAPI.getEmployeeShifts();
+            const shifts = response.data?.shifts || [];
+
+            // Create a map for quick lookup
+            const shiftsMap = {};
+            shifts.forEach(shift => {
+                shiftsMap[shift.id] = shift;
+            });
+
+            setShiftsData(shiftsMap);
+        } catch (error) {
+            console.error('Error loading shifts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getStatusVariant = (status) => {
         const variants = {
             pending: 'warning',
             approved: 'success',
             rejected: 'danger'
         };
-
-        return (
-            <Badge bg={variants[status]} className="fs-6">
-                {t(`requests.status.${status}`)}
-            </Badge>
-        );
-    };
-
-    const formatDate = (date) => {
-        return new Date(date).toLocaleString();
+        return variants[status] || 'secondary';
     };
 
     const groupConstraintsByDay = () => {
         const grouped = {};
-        // Теперь constraints это массив из JSON поля
+        const daysOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
         if (request.constraints && Array.isArray(request.constraints)) {
             request.constraints.forEach(constraint => {
                 if (!grouped[constraint.day_of_week]) {
@@ -36,10 +57,27 @@ const RequestDetails = ({ request, onBack }) => {
                 grouped[constraint.day_of_week].push(constraint);
             });
         }
-        return grouped;
+
+        // Sort by day order
+        const sortedGrouped = {};
+        daysOrder.forEach(day => {
+            if (grouped[day]) {
+                sortedGrouped[day] = grouped[day];
+            }
+        });
+
+        return sortedGrouped;
     };
 
+    if (loading) {
+        return <LoadingState />;
+    }
+
     const constraintsByDay = groupConstraintsByDay();
+    const dayIndices = {
+        sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
+        thursday: 4, friday: 5, saturday: 6
+    };
 
     return (
         <Container className="request-details-container py-3">
@@ -56,22 +94,27 @@ const RequestDetails = ({ request, onBack }) => {
                 <Card.Header>
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">{t('requests.request_details')}</h5>
-                        {getStatusBadge(request.status)}
+                        <StatusBadge
+                            status={request.status}
+                            variant={getStatusVariant(request.status)}
+                            text={t(`requests.status.${request.status}`)}
+                            size="lg"
+                        />
                     </div>
                 </Card.Header>
                 <Card.Body>
                     <div className="request-metadata mb-4">
                         <div className="mb-2">
-                            <strong>{t('requests.sent')}:</strong> {formatDate(request.requested_at)}
+                            <strong>{t('requests.sent')}:</strong> {formatDateTime(request.requested_at)}
                         </div>
                         {request.reviewed_at && (
                             <>
                                 <div className="mb-2">
-                                    <strong>{t('requests.reviewed')}:</strong> {formatDate(request.reviewed_at)}
+                                    <strong>{t('requests.reviewed')}:</strong> {formatDateTime(request.reviewed_at)}
                                 </div>
                                 {request.reviewer && (
                                     <div className="mb-2">
-                                        <strong>{t('requests.reviewed_by')}:</strong> {request.reviewer.full_name}
+                                        <strong>{t('requests.reviewed_by')}:</strong> {`${request.reviewer.first_name} ${request.reviewer.last_name}`}
                                     </div>
                                 )}
                             </>
@@ -82,13 +125,13 @@ const RequestDetails = ({ request, onBack }) => {
                     <div className="constraints-details">
                         {Object.entries(constraintsByDay).map(([day, constraints]) => (
                             <div key={day} className="day-constraints mb-3">
-                                <strong>{t(`common.days.${day}`)}:</strong>
+                                <strong>{getDayName(dayIndices[day], t)}:</strong>
                                 <ul className="mt-1">
                                     {constraints.map((constraint, index) => (
                                         <li key={index}>
-                                            {constraint.shift_id ? (
+                                            {constraint.shift_id && shiftsData[constraint.shift_id] ? (
                                                 <>
-                                                    {constraint.shift?.shift_name || `Shift ${constraint.shift_id}`}
+                                                    {shiftsData[constraint.shift_id].shift_name}
                                                     {' - '}
                                                     <span className={`constraint-type ${constraint.constraint_type}`}>
                                                         {t(`constraints.types.${constraint.constraint_type}`)}

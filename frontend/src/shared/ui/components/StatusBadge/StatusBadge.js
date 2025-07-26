@@ -14,7 +14,11 @@ const StatusBadge = ({ status, size = 'md', mode = 'text' }) => {
         draft: 'warning',
         archived: 'secondary',
         active: 'primary',
-        inactive: 'danger'
+        inactive: 'danger',
+
+        pending: 'warning',
+        approved: 'success',
+        rejected: 'danger'
     };
 
     // НОВОЕ: Определяем, какая иконка соответствует какому статусу

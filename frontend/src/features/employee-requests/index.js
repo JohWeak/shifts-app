@@ -1,11 +1,13 @@
 // frontend/src/features/employee-requests/index.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Card, Button, Badge, Spinner } from 'react-bootstrap';
-import { constraintAPI } from '../../shared/api/apiService';
-import { useI18n } from '../../shared/lib/i18n/i18nProvider';
-import EmptyState from '../../shared/ui/components/EmptyState/EmptyState';
-import LoadingState from '../../shared/ui/components/LoadingState/LoadingState';
+import { Container, Card, Button, Badge } from 'react-bootstrap';
+import { constraintAPI } from 'shared/api/apiService';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { addNotification } from 'app/model/notificationsSlice';
+import { useDispatch } from 'react-redux';
+import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
+import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import PermanentConstraintForm from './ui/PermanentConstraintForm/PermanentConstraintForm';
 import RequestsList from './ui/RequestsList/RequestsList';
 import RequestDetails from './ui/RequestDetails/RequestDetails';
@@ -13,7 +15,7 @@ import './index.css';
 
 const EmployeeRequests = () => {
     const { t } = useI18n();
-    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState([]);
     const [showForm, setShowForm] = useState(false);
@@ -28,11 +30,11 @@ const EmployeeRequests = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await constraintAPI.getMyPermanentRequests('my');
+            const response = await constraintAPI.getMyPermanentRequests();
             setRequests(response.data || []);
         } catch (error) {
             console.error('Error loading requests:', error);
-            setError(t('requests.load_error'));
+            setError(t('requests.loadError'));
         } finally {
             setLoading(false);
         }
@@ -41,12 +43,9 @@ const EmployeeRequests = () => {
     const handleSubmitSuccess = () => {
         setShowForm(false);
         loadRequests();
-        // Show success notification
-        window.dispatchEvent(new CustomEvent('show-notification', {
-            detail: {
-                type: 'success',
-                message: t('requests.submit_success')
-            }
+        dispatch(addNotification({
+            type: 'success',
+            message: t('requests.submitSuccess')
         }));
     };
 
@@ -80,22 +79,27 @@ const EmployeeRequests = () => {
         );
     }
 
+    // Calculate pending count
+    const pendingCount = requests.filter(r => r.status === 'pending').length;
+
     // Show requests list
     return (
         <Container className="employee-requests-container py-3">
+            <PageHeader
+                title={t('requests.title')}
+                badge={pendingCount > 0 ? {
+                    text: `${pendingCount} ${t('requests.pending')}`,
+                    variant: 'info'
+                } : null}
+            />
+
             <Card>
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                    <h4 className="mb-0">{t('requests.title')}</h4>
-                    <Badge bg="info">
-                        {requests.filter(r => r.status === 'pending').length} {t('requests.pending')}
-                    </Badge>
-                </Card.Header>
                 <Card.Body>
                     {loading ? (
                         <LoadingState />
                     ) : error ? (
                         <EmptyState
-                            icon={<i className="bi bi-exclamation-triangle"></i>}
+                            icon="bi-exclamation-triangle"
                             title={t('common.error')}
                             message={error}
                             action={{
@@ -106,8 +110,8 @@ const EmployeeRequests = () => {
                     ) : requests.length === 0 ? (
                         <EmptyState
                             icon={<i className="bi bi-inbox"></i>}
-                            title={t('requests.no_requests')}
-                            message={t('requests.no_requests_message')}
+                            title={t('requests.noRequests')}
+                            message={t('requests.noRequestsMessage')}
                         />
                     ) : (
                         <RequestsList

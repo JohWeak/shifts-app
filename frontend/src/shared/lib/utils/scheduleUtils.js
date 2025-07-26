@@ -426,7 +426,43 @@ export const formatDayNumber = (date) => {
     return format(date, 'd');
 };
 
+/**
+ * Форматирует дату и время с учетом локализации.
+ * Возвращает строку вида "Month Day, Year, HH:MM".
+ * @param {Date | string | number} dateInput - Входящая дата (объект Date, строка ISO, или timestamp).
+ * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
+ * @returns {string} - Отформатированная строка или пустая строка в случае ошибки.
+ */
+export const formatDateTime = (dateInput, currentLocale = 'en') => {
+    // 1. Безопасная валидация входных данных
+    if (!dateInput) return '';
 
+    try {
+        // Превращаем любой входной формат в надежный объект Date
+        const date = (dateInput instanceof Date) ? dateInput : parseISO(dateInput);
+
+        // Проверяем, что дата валидна после парсинга
+        if (!isValid(date)) {
+            console.warn('Invalid date passed to formatDateTime:', dateInput);
+            return '';
+        }
+
+        // 2. Получаем объект локали из нашего существующего хранилища
+        const locale = dateFnsLocales[currentLocale] || enUS;
+
+        // 3. Собираем строку формата
+        // 'PP' - это специальный токен в date-fns, который дает локализованную дату (напр., "Jul 28, 2025")
+        // 'HH:mm' - это универсальный формат для времени
+        const formatString = 'PP, HH:mm';
+
+        // 4. Форматируем и возвращаем результат
+        return format(date, formatString, { locale });
+
+    } catch (error) {
+        console.error('Error formatting date/time:', error);
+        return ''; // Возвращаем пустую строку в случае любой ошибки
+    }
+};
 
 /**
  * Проверяет, является ли дата сегодняшним днем
