@@ -46,7 +46,7 @@
     --bs-body-tertiary: #6c757d;
     --bs-emphasis-color: #000;
 
-    --bs-border-color: #dee2e6;
+    --bs-border-color: #e9ecef;
     --bs-border-color-translucent: rgba(0, 0, 0, .175);
 
     /* Light theme outline button variables */
@@ -176,7 +176,7 @@
     --bs-secondary: #6c757d;
     --bs-secondary-rgb: 108, 117, 125;
 
-    --bs-border-color: #495057;
+    --bs-border-color: var(--bs-gray-800);
     --bs-border-color-translucent: rgba(255, 255, 255, .15);
 
     /* Component specific */

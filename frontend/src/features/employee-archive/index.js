@@ -78,7 +78,7 @@ const EmployeeArchive = () => {
         <Container fluid className="employee-archive-container">
             {!isMobile && (
                 <PageHeader
-                    icon="shield-check"
+                    icon="archive-fill"
                     title={t('employee.archive.title')}
                     subtitle={t('employee.archive.subtitle')}
                 />

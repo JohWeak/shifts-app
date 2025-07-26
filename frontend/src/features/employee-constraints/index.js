@@ -341,7 +341,7 @@ const ConstraintsSchedule = () => {
     return (
         <Container fluid className="employee-constraints-container position-relative">
             <PageHeader
-                icon="shield-check"
+                icon="shield-fill-check"
                 title={t('constraints.title')}
                 subtitle={t('constraints.subtitle')}
             />

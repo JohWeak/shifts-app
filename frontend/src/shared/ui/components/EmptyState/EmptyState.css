@@ -1,31 +1,67 @@
-/* Empty State - гибридный подход */
+/* frontend/src/shared/ui/components/EmptyState.css */
 
-.empty-state {
+/* Анимация плавного появления */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Главный контейнер - замена Bootstrap Card */
+.empty-state-card {
+    background-color: var(--bs-form-select-bg);
+    border-radius: var(--radius-lg); /* Более скругленные углы */
+    border: 1px solid transparent;
+    box-shadow: var(--bs-box-shadow-sm);
+    animation: fade-in-up 0.5s ease-out;
+}
+
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    padding: 3rem 2rem;
-    color: var(--bs-secondary);
+    padding: 3rem 1.5rem; /* Больше вертикальных отступов */
 }
 
-.empty-state-icon {
-    font-size: 4rem;
-    opacity: 0.3;
-    margin-bottom: 1rem;
-    color: var(--bs-secondary);
-}
-
-.empty-state-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: var(--bs-emphasis-color);
-}
-
-.empty-state-description {
-    font-size: 0.875rem;
-    color: var(--bs-secondary);
+/* Круглый фон для иконки */
+.empty-state-icon-background {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 1.5rem;
+    color: var(--bs-primary); /* Цвет иконки по умолчанию */
+    background-color: rgba(var(--bs-primary-rgb), 0.1); /* Полупрозрачный фон */
+    font-size: 2rem; /* Размер иконки */
+    transition: all 0.2s ease-in-out;
 }
 
-.empty-state-action {
-    margin-top: 1.5rem;
+/* Заголовок */
+.empty-state-title {
+    font-weight: 600;
+    color: var(--bs-heading-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Описание */
+.empty-state-description {
+    max-width: 450px; /* Ограничиваем ширину для читаемости */
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* --- ВАРИАНТЫ ЦВЕТОВ --- */
+
+/* Вторичный (более нейтральный) вариант */
+.empty-state-card.variant-secondary .empty-state-icon-background {
+    color: var(--bs-emphasis-color);
+    background-color: var(--bs-secondary-bg-subtle);
 }

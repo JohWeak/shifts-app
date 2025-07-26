@@ -1,10 +1,11 @@
 // frontend/src/features/employee-requests/index.js
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Badge } from 'react-bootstrap';
+import { Container, Card, Button } from 'react-bootstrap';
+import { useDispatch } from 'react-redux';
+import { Inbox, ExclamationTriangle } from 'react-bootstrap-icons';
 import { constraintAPI } from 'shared/api/apiService';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { addNotification } from 'app/model/notificationsSlice';
-import { useDispatch } from 'react-redux';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -44,17 +45,52 @@ const EmployeeRequests = () => {
         setShowForm(false);
         loadRequests();
         dispatch(addNotification({
-            type: 'success',
+            variant: 'success', // Убедимся, что variant передается правильно
             message: t('requests.submitSuccess')
         }));
     };
 
-    const handleRequestClick = (request) => {
-        setSelectedRequest(request);
-    };
+    const handleRequestClick = (request) => setSelectedRequest(request);
+    const handleBackFromDetails = () => setSelectedRequest(null);
 
-    const handleBackFromDetails = () => {
-        setSelectedRequest(null);
+    const renderContent = () => {
+        if (loading) {
+            return <LoadingState />;
+        }
+
+        if (error) {
+            return (
+                <EmptyState
+                    icon={<ExclamationTriangle />} // Передаем компонент иконки
+                    title={t('common.error')}
+                    description={error}
+                    actionLabel={t('common.retry')}
+                    onAction={loadRequests}
+                />
+            );
+        }
+
+        if (requests.length === 0) {
+            return (
+                <EmptyState
+                    icon={<Inbox />} // Передаем компонент иконки
+                    title={t('requests.noRequests')}
+                    description={t('requests.noRequestsMessage')}
+                />
+            );
+        }
+
+        // Только если все проверки пройдены, рендерим карточку со списком
+        return (
+            <Card>
+                <Card.Body>
+                    <RequestsList
+                        requests={requests}
+                        onRequestClick={handleRequestClick}
+                    />
+                </Card.Body>
+            </Card>
+        );
     };
 
     // Show request details if selected
@@ -67,10 +103,10 @@ const EmployeeRequests = () => {
         );
     }
 
-    // Show form if creating new request
+    // Show form if creating a new request
     if (showForm) {
         return (
-            <div className="employee-requests-container py-3">
+            <div className="employee-requests-container py-3 px-1">
                 <PermanentConstraintForm
                     onSubmitSuccess={handleSubmitSuccess}
                     onCancel={() => setShowForm(false)}
@@ -79,55 +115,29 @@ const EmployeeRequests = () => {
         );
     }
 
-    // Calculate pending count
     const pendingCount = requests.filter(r => r.status === 'pending').length;
 
-    // Show requests list
+    // Show the requests list
     return (
-        <Container className="employee-requests-container py-3">
+        <Container className="employee-requests-container py-3 ">
             <PageHeader
                 title={t('requests.title')}
+                icon="envelope-fill"
                 badge={pendingCount > 0 ? {
                     text: `${pendingCount} ${t('requests.pending')}`,
                     variant: 'info'
                 } : null}
             />
-
-            <Card>
-                <Card.Body>
-                    {loading ? (
-                        <LoadingState />
-                    ) : error ? (
-                        <EmptyState
-                            icon="bi-exclamation-triangle"
-                            title={t('common.error')}
-                            message={error}
-                            action={{
-                                label: t('common.retry'),
-                                onClick: loadRequests
-                            }}
-                        />
-                    ) : requests.length === 0 ? (
-                        <EmptyState
-                            icon={<i className="bi bi-inbox"></i>}
-                            title={t('requests.noRequests')}
-                            message={t('requests.noRequestsMessage')}
-                        />
-                    ) : (
-                        <RequestsList
-                            requests={requests}
-                            onRequestClick={handleRequestClick}
-                        />
-                    )}
-                </Card.Body>
-            </Card>
+            <div className="mt-3">
+                {renderContent()}
+            </div>
 
             {/* Floating Action Button */}
             <Button
                 className="fab-button"
                 variant="primary"
                 onClick={() => setShowForm(true)}
-                title={t('requests.create_new')}
+                title={t('requests.createNew')}
             >
                 <i className="bi bi-plus-lg"></i>
             </Button>

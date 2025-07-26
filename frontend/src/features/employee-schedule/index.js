@@ -134,7 +134,7 @@ const EmployeeSchedule = () => {
     return (
         <Container fluid className="employee-schedule-container">
             <PageHeader
-                icon="calendar-week"
+                icon="calendar-week-fill"
                 title={t('employee.schedule.title')}
                 subtitle={t('employee.schedule.subtitle')}
                 actions={headerActions}
