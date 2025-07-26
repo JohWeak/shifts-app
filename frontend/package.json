@@ -22,6 +22,7 @@
     "react-router-dom": "^7.6.0",
     "react-scripts": "5.0.1",
     "react-swipeable": "^7.0.2",
+    "react-textarea-autosize": "^8.5.9",
     "react-window": "^1.8.11",
     "react-window-infinite-loader": "^1.0.10",
     "redux": "^5.0.1",

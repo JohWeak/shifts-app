@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Form, Alert } from 'react-bootstrap';
 import { X } from 'react-bootstrap-icons';
+import TextareaAutosize from 'react-textarea-autosize';
 import { constraintAPI } from 'shared/api/apiService';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
@@ -226,42 +227,91 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                 </Card.Body>
 
                 {/* Футер с сообщением и кнопками */}
-                <Card.Footer className="bg-transparent border-top-0 mt-0">
-                    <Form.Group className="mt-3">
-                    <div className={`action-buttons-group mt-2 d-flex gap-2 justify-content-${isMobile ? 'between' : 'end'}`}>
-                        <Button variant="outline-secondary" onClick={onCancel}>
-                            {t('common.cancel')}
-                        </Button>
-                        <Button
-                            variant="primary"
-                            onClick={() => setShowConfirm(true)}
-                            disabled={Object.keys(constraints).length === 0}
-                        >
-                            {t('common.submit')}
-                        </Button>
-                    </div>
-                    <Form.Group className="mt-3">
-                        <Form.Check
-                            type="checkbox"
-                            id="include-message"
-                            label={t('requests.includeMessage')}
-                            checked={showMessage}
-                            onChange={(e) => setShowMessage(e.target.checked)}
-                        />
-                    </Form.Group>
-                    {showMessage && (
-                        <Form.Group className="my-2">
-                            <Form.Control
-                                as="textarea"
-                                rows={2}
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder={t('requests.messagePlaceholder')}
-                            />
-                        </Form.Group>
-                    )}
-                    </Form.Group>
+                <Card.Footer className="bg-transparent border-top pt-3">
+                    {isMobile ? (
+                        // --- МОБИЛЬНАЯ ВЕРСТКА  ---
+                        <>
+                            <div className="d-flex action-buttons-group justify-content-between gap-2">
+                                <Button
+                                    variant="secondary"
+                                    onClick={onCancel}
+                                >
+                                    {t('common.cancel')}
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => setShowConfirm(true)}
+                                    disabled={Object.keys(constraints).length === 0}
+                                >
+                                    {t('common.submit')}
+                                </Button>
+                            </div>
+                            <Form.Group className="mt-3">
+                                <Form.Check
+                                    type="checkbox"
+                                    id="include-message-mobile"
+                                    label={t('requests.includeMessage')}
+                                    checked={showMessage}
+                                    onChange={(e) => setShowMessage(e.target.checked)}
+                                />
+                            </Form.Group>
 
+                            {showMessage && (
+                                <Form.Group className="my-3">
+                                    <TextareaAutosize
+                                        minRows={2}
+                                        className="form-control" // Важно для стилей Bootstrap
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder={t('requests.messagePlaceholder')}
+                                    />
+                                </Form.Group>
+                            )}
+                        </>
+                    ) : (
+                        // --- ДЕСКТОПНАЯ ВЕРСТКА  ---
+                        <>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <Form.Group>
+                                    <Form.Check
+                                        type="checkbox"
+                                        id="include-message-desktop"
+                                        label={t('requests.includeMessage')}
+                                        checked={showMessage}
+                                        onChange={(e) => setShowMessage(e.target.checked)}
+                                    />
+                                </Form.Group>
+
+                                <div className="d-flex gap-2">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={onCancel}
+                                    >
+                                        {t('common.cancel')}
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        onClick={() => setShowConfirm(true)}
+                                        disabled={Object.keys(constraints).length === 0}
+                                    >
+                                        {t('common.submit')}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {showMessage && (
+                                <Form.Group className="my-2">
+                                    <TextareaAutosize
+                                        minRows={2}
+                                        className="form-control"
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder={t('requests.messagePlaceholder')}
+                                    />
+                                </Form.Group>
+                            )}
+                        </>
+                    )}
                 </Card.Footer>
             </Card>
 
