@@ -176,7 +176,11 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
         try {
             const constraintsArray = Object.entries(constraints).map(([key, constraint_type]) => {
                 const [day_of_week, shift_id_str] = key.split('-');
-                return {day_of_week, shift_id: parseInt(shift_id_str, 10), constraint_type};
+                return {
+                    day_of_week: day_of_week.toLowerCase(), // Приводим к lowercase
+                    shift_id: parseInt(shift_id_str, 10),
+                    constraint_type
+                };
             });
 
             await constraintAPI.submitPermanentRequest({
@@ -186,16 +190,52 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
 
             if (onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
-            setError(t('requests.submitError'));
-        } finally {
+            console.error('Submit error:', err);
+
+            // Показываем ошибку пользователю
+            const errorMessage = err.response?.data?.message || t('requests.submitError');
+
+            // Если это ошибка о существующем запросе, показываем её
+            if (errorMessage.includes('pending request')) {
+                setError(t('requests.pendingRequestExists'));
+            } else {
+                setError(errorMessage);
+            }
+
+            // Не закрываем форму при ошибке
             setLoading(false);
             setShowConfirm(false);
+            return;
         }
     };
 
 
     if (loading) return <LoadingState/>;
-    if (error) return <ErrorMessage message={error}/>;
+    if (error) {
+        return (
+            <div className="permanent-constraint-form-container">
+                <Card className="permanent-constraint-card rounded-4">
+                    <Card.Header>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <h5 className="mb-0">{t('requests.permanentConstraints.title')}</h5>
+                            <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
+                                <X size={28}/>
+                            </Button>
+                        </div>
+                    </Card.Header>
+                    <Card.Body>
+                        <ErrorMessage
+                            message={error}
+                            onRetry={() => {
+                                setError(null);
+                                setLoading(false);
+                            }}
+                        />
+                    </Card.Body>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="permanent-constraint-form-container">
