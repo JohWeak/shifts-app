@@ -23,6 +23,9 @@ const EmployeeRequests = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [error, setError] = useState(null);
 
+    const hasPendingRequest = requests.some(r => r.status === 'pending');
+    const pendingCount = requests.filter(r => r.status === 'pending').length;
+
     useEffect(() => {
         loadRequests();
     }, []);
@@ -115,8 +118,6 @@ const EmployeeRequests = () => {
         );
     }
 
-    const pendingCount = requests.filter(r => r.status === 'pending').length;
-
     // Show the requests list
     return (
         <Container className="employee-requests-container py-3 ">
@@ -132,15 +133,26 @@ const EmployeeRequests = () => {
                 {renderContent()}
             </div>
 
-            {/* Floating Action Button */}
+            {/* Floating Action Button с блокировкой */}
             <Button
                 className="fab-button"
-                variant="primary"
+                variant={hasPendingRequest ? "secondary" : "primary"}
                 onClick={() => setShowForm(true)}
-                title={t('requests.createNew')}
+                disabled={hasPendingRequest}
+                title={hasPendingRequest
+                    ? t('requests.pendingRequestExists')
+                    : t('requests.createNew')
+                }
             >
                 <i className="bi bi-plus-lg"></i>
             </Button>
+
+            {/* Tooltip для заблокированной кнопки */}
+            {hasPendingRequest && (
+                <div className="fab-tooltip">
+                    {t('requests.waitForPendingRequest')}
+                </div>
+            )}
         </Container>
     );
 };
