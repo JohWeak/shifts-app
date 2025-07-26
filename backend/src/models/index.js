@@ -105,10 +105,20 @@ const defineAssociations = () => {
                 as: 'qualifications'
             });
         }
+
+        // Employee -> PermanentConstraintRequest[]
         if (PermanentConstraintRequest) {
             Employee.hasMany(PermanentConstraintRequest, {
                 foreignKey: 'emp_id',
                 as: 'permanentRequests'
+            });
+        }
+
+        // Employee -> PermanentConstraint[]
+        if (PermanentConstraint) {
+            Employee.hasMany(PermanentConstraint, {
+                foreignKey: 'emp_id',
+                as: 'permanentConstraints'
             });
         }
     }
@@ -332,37 +342,26 @@ const defineAssociations = () => {
                 foreignKey: 'reviewed_by',
                 as: 'reviewer'
             });
-
-
-        }
-
-        // PermanentConstraintRequest -> PositionShift
-        if (PositionShift) {
-            PermanentConstraintRequest.belongsTo(PositionShift, {
-                foreignKey: 'shift_id',
-                as: 'shift'
-            });
         }
     }
     // =============================
     // PERMANENT CONSTRAINT ASSOCIATIONS
     // =============================
     if (PermanentConstraint) {
-        // PermanentConstraint -> Employee
         if (Employee) {
+            // Constraint owner
             PermanentConstraint.belongsTo(Employee, {
                 foreignKey: 'emp_id',
                 as: 'employee'
             });
 
+            // Constraint approver
             PermanentConstraint.belongsTo(Employee, {
                 foreignKey: 'approved_by',
                 as: 'approver'
             });
-
         }
 
-        // PermanentConstraint -> PositionShift
         if (PositionShift) {
             PermanentConstraint.belongsTo(PositionShift, {
                 foreignKey: 'shift_id',
@@ -370,8 +369,6 @@ const defineAssociations = () => {
             });
         }
     }
-
-
 };
 
 // Вызываем функцию определения ассоциаций
