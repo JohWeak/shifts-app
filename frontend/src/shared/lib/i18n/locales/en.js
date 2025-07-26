@@ -621,6 +621,8 @@ export const en = {
         includeMessage: 'Include Message',
         includeMessageLabel: 'Include message in email',
         constraintsCount: 'Constraints count',
+        helpToastTitle: '',
+        helpToastBody: '',
 
     },
     reports: {

@@ -619,7 +619,9 @@ export const he = {
         },
         includeMessage: 'צירוף הודעה',
         includeMessageLabel: 'כלול את ההודעה באימייל',
-        constraintsCount: 'מספר הגבלות'
+        constraintsCount: 'מספר הגבלות',
+        helpToastTitle: 'איך זה עובד?',
+        helpToastBody: 'בחר תאים ברשת כדי לסמן אותם כלא זמינים. לחץ על כותרת יום או משמרת כדי לחסום את כל השורה/העמודה. ניתן גם להוסיף הודעה אופציונלית למנהל.'
     },
     reports: {
         analyticsAndReports: 'אנליטיקה ודוחות',
