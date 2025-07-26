@@ -46,17 +46,7 @@ export const submitWeeklyConstraints = createAsyncThunk(
         }
     }
 );
-export const fetchPermanentRequests = createAsyncThunk(
-    'constraints/fetchPermanentRequests',
-    async (empId, { rejectWithValue }) => {
-        try {
-            const response = await constraintAPI.getPermanentRequests(empId);
-            return response;
-        } catch(error) {
-            return rejectWithValue(error.error.message || 'Failed to fetch permanent requests');
-        }
-    }
-);
+
 
 const constraintSlice = createSlice({
     name: 'constraints',
@@ -67,9 +57,6 @@ const constraintSlice = createSlice({
         loading: false,
         error: null,
         lastFetched: null,
-
-        // Permanent requests
-        permanentRequests: [],
 
         // UI states
         submitting: false,
