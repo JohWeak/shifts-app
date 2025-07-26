@@ -27,12 +27,15 @@ const RequestDetails = ({ request, onBack }) => {
 
     const groupConstraintsByDay = () => {
         const grouped = {};
-        request.constraints.forEach(constraint => {
-            if (!grouped[constraint.day_of_week]) {
-                grouped[constraint.day_of_week] = [];
-            }
-            grouped[constraint.day_of_week].push(constraint);
-        });
+        // Теперь constraints это массив из JSON поля
+        if (request.constraints && Array.isArray(request.constraints)) {
+            request.constraints.forEach(constraint => {
+                if (!grouped[constraint.day_of_week]) {
+                    grouped[constraint.day_of_week] = [];
+                }
+                grouped[constraint.day_of_week].push(constraint);
+            });
+        }
         return grouped;
     };
 

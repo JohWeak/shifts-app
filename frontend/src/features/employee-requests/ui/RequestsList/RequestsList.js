@@ -49,7 +49,7 @@ const RequestsList = ({ requests, onRequestClick }) => {
                                             {t('requests.sent')}: {formatDate(request.requested_at)}
                                         </div>
                                         <div className="request-constraints-count text-muted">
-                                            {request.constraints.length} {t('requests.constraints')}
+                                            {request.constraints ? request.constraints.length : 0} {t('requests.constraints')}
                                         </div>
                                     </div>
                                     {getStatusBadge(request.status)}

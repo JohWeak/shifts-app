@@ -248,98 +248,6 @@ const submitWeeklyConstraints = async (req, res) => {
     }
 };
 
-// Get employee's permanent constraint requests
-// const getPermanentConstraintRequests = async (req, res) => {
-//     try {
-//         const { empId } = req.params;
-//
-//         // Verify employee access
-//         if (req.role !== 'admin' && req.userId !== parseInt(empId)) {
-//             return res.status(403).json({
-//                 success: false,
-//                 message: 'Unauthorized'
-//             });
-//         }
-//
-//         const requests = await PermanentConstraintRequest.findAll({
-//             where: { emp_id: empId },
-//             include: [{
-//                 model: PositionShift,
-//                 as: 'shift'
-//             }],
-//             order: [['requested_at', 'DESC']]
-//         });
-//
-//         res.json({
-//             success: true,
-//             data: requests
-//         });
-//
-//     } catch (error) {
-//         console.error('Error in getPermanentConstraintRequests:', error);
-//         res.status(500).json({
-//             success: false,
-//             message: error.message
-//         });
-//     }
-// };
-
-// Submit permanent constraint request
-// const submitPermanentConstraintRequest = async (req, res) => {
-//     try {
-//         const empId = req.userId;
-//         const { day_of_week, shift_id, constraint_type, reason } = req.body;
-//
-//         // Validate input
-//         if (!day_of_week || !constraint_type) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: 'Missing required fields'
-//             });
-//         }
-//
-//         // Check if similar request already pending
-//         const existingRequest = await PermanentConstraintRequest.findOne({
-//             where: {
-//                 emp_id: empId,
-//                 day_of_week,
-//                 shift_id: shift_id || null,
-//                 status: 'pending'
-//             }
-//         });
-//
-//         if (existingRequest) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: 'Similar request already pending'
-//             });
-//         }
-//
-//         // Create request
-//         const request = await PermanentConstraintRequest.create({
-//             emp_id: empId,
-//             day_of_week,
-//             shift_id,
-//             constraint_type,
-//             reason,
-//             status: 'pending',
-//             requested_at: new Date()
-//         });
-//
-//         res.json({
-//             success: true,
-//             message: 'Request submitted successfully',
-//             data: request
-//         });
-//
-//     } catch (error) {
-//         console.error('Error in submitPermanentConstraintRequest:', error);
-//         res.status(500).json({
-//             success: false,
-//             message: error.message
-//         });
-//     }
-// };
 
 // Get all pending permanent constraint requests (Admin)
 const getPendingRequests = async (req, res) => {
@@ -374,70 +282,6 @@ const getPendingRequests = async (req, res) => {
     }
 };
 
-// // Review permanent constraint request (Admin)
-// const reviewPermanentConstraintRequest = async (req, res) => {
-//     const transaction = await db.sequelize.transaction();
-//
-//     try {
-//         const { id } = req.params;
-//         const { status, admin_response } = req.body;
-//         const adminId = req.userId;
-//
-//         if (!['approved', 'rejected'].includes(status)) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: 'Invalid status'
-//             });
-//         }
-//
-//         // Get request
-//         const request = await PermanentConstraintRequest.findByPk(id);
-//         if (!request || request.status !== 'pending') {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: 'Request not found or already processed'
-//             });
-//         }
-//
-//         // Update request
-//         await request.update({
-//             status,
-//             admin_response,
-//             reviewed_at: new Date(),
-//             reviewed_by: adminId
-//         }, { transaction });
-//
-//         // If approved, create permanent constraint
-//         if (status === 'approved') {
-//             await PermanentConstraint.create({
-//                 emp_id: request.emp_id,
-//                 day_of_week: request.day_of_week,
-//                 shift_id: request.shift_id,
-//                 constraint_type: request.constraint_type,
-//                 approved_by: adminId,
-//                 approved_at: new Date(),
-//                 is_active: true
-//             }, { transaction });
-//         }
-//
-//         await transaction.commit();
-//
-//         // TODO: Send notification to employee
-//
-//         res.json({
-//             success: true,
-//             message: `Request ${status} successfully`
-//         });
-//
-//     } catch (error) {
-//         await transaction.rollback();
-//         console.error('Error in reviewPermanentConstraintRequest:', error);
-//         res.status(500).json({
-//             success: false,
-//             message: error.message
-//         });
-//     }
-// };
 
 // Get all permanent constraint requests with filters
 const getAllPermanentRequests = async (req, res) => {
@@ -445,7 +289,6 @@ const getAllPermanentRequests = async (req, res) => {
         const { status } = req.query;
         const whereClause = status ? { status } : {};
 
-        // Получаем все запросы
         const requests = await PermanentConstraintRequest.findAll({
             where: whereClause,
             include: [
@@ -467,72 +310,17 @@ const getAllPermanentRequests = async (req, res) => {
                     model: Employee,
                     as: 'reviewer',
                     attributes: ['emp_id', 'first_name', 'last_name']
-                },
-                {
-                    model: PositionShift,
-                    as: 'shift',
-                    attributes: ['id', 'shift_name']
                 }
             ],
             order: [
-                ['status', 'ASC'], // pending first
+                ['status', 'ASC'],
                 ['requested_at', status === 'pending' ? 'ASC' : 'DESC']
             ]
         });
 
-        // Группируем запросы по сотруднику и дате создания
-        const groupedRequests = {};
-
-        requests.forEach(request => {
-            // Создаем уникальный ключ для группировки
-            // Группируем по emp_id, requested_at и status для объединения связанных запросов
-            const requestDate = new Date(request.requested_at).toISOString();
-            const key = `${request.emp_id}_${requestDate}_${request.status}`;
-
-            if (!groupedRequests[key]) {
-                groupedRequests[key] = {
-                    id: request.id, // ID первого запроса в группе
-                    emp_id: request.emp_id,
-                    employee: request.employee,
-                    status: request.status,
-                    message: request.reason,
-                    admin_response: request.admin_response,
-                    requested_at: request.requested_at,
-                    reviewed_at: request.reviewed_at,
-                    reviewer: request.reviewer,
-                    reviewed_by: request.reviewed_by,
-                    constraints: []
-                };
-            }
-
-            // Добавляем ограничение в массив
-            groupedRequests[key].constraints.push({
-                id: request.id,
-                day_of_week: request.day_of_week,
-                shift_id: request.shift_id,
-                shift: request.shift,
-                constraint_type: request.constraint_type
-            });
-        });
-
-        // Преобразуем объект обратно в массив и сортируем
-        const formattedRequests = Object.values(groupedRequests)
-            .sort((a, b) => {
-                // Сначала по статусу (pending первые)
-                if (a.status !== b.status) {
-                    return a.status === 'pending' ? -1 : 1;
-                }
-                // Затем по дате
-                if (a.status === 'pending') {
-                    return new Date(a.requested_at) - new Date(b.requested_at); // Старые первые
-                } else {
-                    return new Date(b.requested_at) - new Date(a.requested_at); // Новые первые
-                }
-            });
-
         res.json({
             success: true,
-            data: formattedRequests
+            data: requests
         });
 
     } catch (error) {
@@ -544,19 +332,12 @@ const getAllPermanentRequests = async (req, res) => {
     }
 };
 
-
-
-
-
 // Submit batch permanent constraint request
 const submitPermanentConstraintRequest = async (req, res) => {
-    const transaction = await db.sequelize.transaction();
-
     try {
         const empId = req.userId;
         const { constraints, message } = req.body;
 
-        // Validate input
         if (!constraints || !Array.isArray(constraints) || constraints.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -564,71 +345,35 @@ const submitPermanentConstraintRequest = async (req, res) => {
             });
         }
 
-        // Check daily request limit (future implementation)
-        // const todayRequestCount = await checkDailyRequestLimit(empId);
-
-        const createdRequests = [];
-        const requestedAt = new Date();
-
-        // Создаем отдельную запись для каждого ограничения
-        for (const constraint of constraints) {
-            // Проверяем, нет ли уже pending запроса для этого дня и смены
-            const existingRequest = await PermanentConstraintRequest.findOne({
-                where: {
-                    emp_id: empId,
-                    day_of_week: constraint.day_of_week,
-                    shift_id: constraint.shift_id || null,
-                    status: 'pending'
-                },
-                transaction
-            });
-
-            if (existingRequest) {
-                await transaction.rollback();
-                return res.status(400).json({
-                    success: false,
-                    message: `You already have a pending request for ${constraint.day_of_week}${constraint.shift_id ? ' for this shift' : ''}`
-                });
-            }
-
-            // Создаем запрос
-            const request = await PermanentConstraintRequest.create({
+        // Проверяем существующие pending запросы
+        const existingPending = await PermanentConstraintRequest.findOne({
+            where: {
                 emp_id: empId,
-                day_of_week: constraint.day_of_week,
-                shift_id: constraint.shift_id,
-                constraint_type: constraint.constraint_type,
-                reason: message || null,
-                status: 'pending',
-                requested_at: requestedAt
-            }, { transaction });
+                status: 'pending'
+            }
+        });
 
-            createdRequests.push(request);
+        if (existingPending) {
+            return res.status(400).json({
+                success: false,
+                message: 'You already have a pending request. Please wait for it to be processed.'
+            });
         }
 
-        await transaction.commit();
-
-        // Форматируем ответ как групповой запрос
-        const response = {
-            id: createdRequests[0].id,
+        const request = await PermanentConstraintRequest.create({
             emp_id: empId,
-            status: 'pending',
+            constraints,
             message: message || null,
-            requested_at: requestedAt,
-            constraints: createdRequests.map(req => ({
-                day_of_week: req.day_of_week,
-                shift_id: req.shift_id,
-                constraint_type: req.constraint_type
-            }))
-        };
+            requested_at: new Date()
+        });
 
         res.json({
             success: true,
             message: 'Request submitted successfully',
-            data: response
+            data: request
         });
 
     } catch (error) {
-        await transaction.rollback();
         console.error('Error in submitPermanentConstraintRequest:', error);
         res.status(500).json({
             success: false,
@@ -724,63 +469,21 @@ const reviewPermanentConstraintRequest = async (req, res) => {
 };
 const getMyPermanentConstraintRequests = async (req, res) => {
     try {
-        const empId = req.userId; // Из токена авторизации
+        const empId = req.userId;
 
-        // Получаем все запросы пользователя
         const requests = await PermanentConstraintRequest.findAll({
             where: { emp_id: empId },
-            include: [
-                {
-                    model: Employee,
-                    as: 'reviewer',
-                    attributes: ['emp_id', 'first_name', 'last_name']
-                },
-                {
-                    model: PositionShift,
-                    as: 'shift',
-                    attributes: ['id', 'shift_name']
-                }
-            ],
+            include: [{
+                model: Employee,
+                as: 'reviewer',
+                attributes: ['emp_id', 'first_name', 'last_name']
+            }],
             order: [['requested_at', 'DESC']]
         });
 
-        // Группируем запросы по дате создания и статусу
-        // Так как в текущей структуре БД каждое ограничение - отдельная запись
-        const groupedRequests = {};
-
-        requests.forEach(request => {
-            // Создаем уникальный ключ для группировки
-            const key = `${request.requested_at}_${request.status}_${request.reason || 'no_reason'}`;
-
-            if (!groupedRequests[key]) {
-                groupedRequests[key] = {
-                    id: request.id,
-                    emp_id: request.emp_id,
-                    status: request.status,
-                    message: request.reason,
-                    admin_response: request.admin_response,
-                    requested_at: request.requested_at,
-                    reviewed_at: request.reviewed_at,
-                    reviewer: request.reviewer,
-                    constraints: []
-                };
-            }
-
-            // Добавляем ограничение в массив
-            groupedRequests[key].constraints.push({
-                day_of_week: request.day_of_week,
-                shift_id: request.shift_id,
-                shift: request.shift,
-                constraint_type: request.constraint_type
-            });
-        });
-
-        // Преобразуем объект обратно в массив
-        const formattedRequests = Object.values(groupedRequests);
-
         res.json({
             success: true,
-            data: formattedRequests
+            data: requests
         });
 
     } catch (error) {
