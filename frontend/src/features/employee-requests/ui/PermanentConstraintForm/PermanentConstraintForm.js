@@ -1,14 +1,14 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.js
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, Button, Form, Alert } from 'react-bootstrap';
-import { X } from 'react-bootstrap-icons';
+import React, {useState, useEffect, useMemo} from 'react';
+import {Card, Button, Form, Alert} from 'react-bootstrap';
+import {X} from 'react-bootstrap-icons';
 import TextareaAutosize from 'react-textarea-autosize';
-import { constraintAPI } from 'shared/api/apiService';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useShiftColor } from 'shared/hooks/useShiftColor';
-import { useMediaQuery } from 'shared/hooks/useMediaQuery';
-import { addNotification } from 'app/model/notificationsSlice'; // Для будущих уведомлений
-import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
+import {constraintAPI} from 'shared/api/apiService';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useShiftColor} from 'shared/hooks/useShiftColor';
+import {useMediaQuery} from 'shared/hooks/useMediaQuery';
+import {addNotification} from 'app/model/notificationsSlice'; // Для будущих уведомлений
+import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
 
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -18,9 +18,9 @@ import './PermanentConstraintForm.css';
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
-    const { t } = useI18n();
-    const { getShiftColor, currentTheme } = useShiftColor();
+const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
+    const {t} = useI18n();
+    const {getShiftColor, currentTheme} = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 888px)');
 
     const [loading, setLoading] = useState(true);
@@ -79,7 +79,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
     const handleCellClick = (day, shiftId) => {
         const key = `${day}-${shiftId}`;
         setConstraints(prev => {
-            const newConstraints = { ...prev };
+            const newConstraints = {...prev};
             if (newConstraints[key] === 'cannot_work') {
                 delete newConstraints[key];
             } else {
@@ -94,7 +94,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         const allSelected = dayKeys.every(key => constraints[key] === 'cannot_work');
 
         setConstraints(prev => {
-            const newConstraints = { ...prev };
+            const newConstraints = {...prev};
             if (allSelected) {
                 dayKeys.forEach(key => delete newConstraints[key]);
             } else {
@@ -108,7 +108,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         setConstraints(prev => {
             const shiftKeys = DAYS_OF_WEEK_CANONICAL.map(day => `${day}-${shiftId}`);
             const allSelected = shiftKeys.every(key => prev[key] === 'cannot_work');
-            const newConstraints = { ...prev };
+            const newConstraints = {...prev};
             if (allSelected) {
                 shiftKeys.forEach(key => delete newConstraints[key]);
             } else {
@@ -134,7 +134,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
             foregroundStyle.color = getContrastTextColor(foregroundStyle.backgroundColor);
         }
 
-        return { tdStyle, foregroundStyle, foregroundClasses, status };
+        return {tdStyle, foregroundStyle, foregroundClasses, status};
     };
 
     const getShiftHeaderStyle = (shift) => {
@@ -157,12 +157,12 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
         const baseColor = getShiftColor(shift);
 
-        return { backgroundColor: hexToRgba(baseColor, neutralBgAlpha) };
+        return {backgroundColor: hexToRgba(baseColor, neutralBgAlpha)};
     };
 
     const getDayHeaderStyle = (day) => {
         if (fullyBlockedDays.has(day)) {
-            return { backgroundColor: '#dc3545', color: getContrastTextColor('#dc3545') };
+            return {backgroundColor: '#dc3545', color: getContrastTextColor('#dc3545')};
         }
         return {};
     };
@@ -174,7 +174,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         try {
             const constraintsArray = Object.entries(constraints).map(([key, constraint_type]) => {
                 const [day_of_week, shift_id_str] = key.split('-');
-                return { day_of_week, shift_id: parseInt(shift_id_str, 10), constraint_type };
+                return {day_of_week, shift_id: parseInt(shift_id_str, 10), constraint_type};
             });
 
             await constraintAPI.submitPermanentRequest({
@@ -190,9 +190,12 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
             setShowConfirm(false);
         }
     };
+    const showHelpTost = () => {
 
-    if (loading) return <LoadingState />;
-    if (error) return <ErrorMessage message={error} />;
+    }
+
+    if (loading) return <LoadingState/>;
+    if (error) return <ErrorMessage message={error}/>;
 
     return (
         <div className="permanent-constraint-form-container">
@@ -201,7 +204,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">{t('requests.permanentConstraints.title')}</h5>
                         <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
-                            <X size={28} />
+                            <X size={28}/>
                         </Button>
                     </div>
                 </Card.Header>
@@ -227,10 +230,36 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                 </Card.Body>
 
                 {/* Футер с сообщением и кнопками */}
-                <Card.Footer className="bg-transparent border-top pt-3">
+                <Card.Footer className="bg-transparent border-top ">
                     {isMobile ? (
                         // --- МОБИЛЬНАЯ ВЕРСТКА  ---
                         <>
+                            <Form.Group className="mb-2 ms-1 pb-1 border-bottom">
+                                <Form.Check
+                                    type="checkbox"
+                                    id="include-message-mobile"
+                                    label={t('requests.includeMessage')}
+                                    className="include-message-checkbox mobile"
+                                    checked={showMessage}
+                                    onChange={(e) => setShowMessage(e.target.checked)}
+                                />
+                                <Button
+                                    variant="outline-secondary"
+                                    onClick={showHelpTost}
+                                    className="p-0"
+                                >
+                                    <i className="bi bi-question"></i>
+                                </Button>
+                                {showMessage && (
+                                    <TextareaAutosize
+                                        minRows={2}
+                                        className="form-control my-2"
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder={t('requests.messagePlaceholder')}
+                                    />
+                                )}
+                            </Form.Group>
                             <div className="d-flex action-buttons-group justify-content-between gap-2">
                                 <Button
                                     variant="outline-secondary"
@@ -247,32 +276,15 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                                 </Button>
                             </div>
                             <Form.Group className="mt-2">
-                                <Form.Check
-                                    type="checkbox"
-                                    id="include-message-mobile"
-                                    label={t('requests.includeMessage')}
-                                    className="include-message-checkbox mobile"
-                                    checked={showMessage}
-                                    onChange={(e) => setShowMessage(e.target.checked)}
-                                />
+
                             </Form.Group>
 
-                            {showMessage && (
-                                <Form.Group className="my-3">
-                                    <TextareaAutosize
-                                        minRows={2}
-                                        className="form-control"
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        placeholder={t('requests.messagePlaceholder')}
-                                    />
-                                </Form.Group>
-                            )}
+
                         </>
                     ) : (
                         // --- ДЕСКТОПНАЯ ВЕРСТКА  ---
                         <>
-                            <div className="d-flex justify-content-between align-items-center" >
+                            <div className="d-flex justify-content-between align-items-center">
                                 <Form.Group>
                                     <Form.Check
                                         type="checkbox"

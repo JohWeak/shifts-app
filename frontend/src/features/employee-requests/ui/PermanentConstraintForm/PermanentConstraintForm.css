@@ -155,11 +155,12 @@
     background-color: var(--bs-body-bg);
 }
 .permanent-constraint-form-container .include-message-checkbox.mobile .form-check-label {
-    font-weight: 500;
-    opacity: 0.7;
+    font-weight: 400;
+    opacity: 0.8;
 }
 .permanent-constraint-form-container .include-message-checkbox.mobile .form-check-input {
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
+    border-color: var(--bs-border-color-translucent);
 }
 
 [dir="ltr"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
