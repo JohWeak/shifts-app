@@ -26,12 +26,12 @@ router.post('/permanent-request',
     constraintController.submitPermanentConstraintRequest
 );
 
+router.delete('/permanent-request/:id',
+    verifyToken,
+    constraintController.deletePermanentRequest
+);
+
 // Admin routes
-// router.get('/pending-requests',
-//     ...[verifyToken,
-//     isAdmin],
-//     constraintController.getPendingRequests
-// );
 router.get('/permanent-requests',
     verifyToken,
     isAdmin,

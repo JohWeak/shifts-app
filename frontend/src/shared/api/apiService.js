@@ -120,7 +120,10 @@ export const constraintAPI = {
 
     // Get employee shifts for constraint form
     getEmployeeShifts: () =>
-        api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS)
+        api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS),
+
+    deletePermanentRequest: (requestId) =>
+        api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_REQUEST(requestId)),
 };
 
 export const positionAPI = {

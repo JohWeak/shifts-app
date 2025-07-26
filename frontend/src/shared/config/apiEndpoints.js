@@ -47,7 +47,8 @@ export const API_ENDPOINTS = {
         PERMANENT_REQUEST: '/api/constraints/permanent-request',
         PERMANENT_REQUESTS_ALL: '/api/constraints/permanent-requests',
         PENDING_COUNT: '/api/constraints/permanent-requests/count',
-        REVIEW_REQUEST: (id) => `/api/constraints/permanent-request/${id}/review`
+        REVIEW_REQUEST: (id) => `/api/constraints/permanent-request/${id}/review`,
+        DELETE_REQUEST: (id) => `/api/constraints/permanent-request/${id}`,
     },
     SETTINGS: {
         SYSTEM: '/api/settings/system',

@@ -1,38 +1,36 @@
 // frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.js
-import React, {useState, useEffect} from 'react';
-import {Container, Card, Button, Alert} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {constraintAPI} from 'shared/api/apiService';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Button, Alert } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useDispatch } from 'react-redux';
+import { constraintAPI } from 'shared/api/apiService';
+import { deleteRequest } from '../../model/requestsSlice';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import {formatDateTime, getDayName} from 'shared/lib/utils/scheduleUtils';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import './RequestDetails.css';
 
-const RequestDetails = ({request, onBack}) => {
-    const {t, locale} = useI18n();
+const RequestDetails = ({ request, onBack }) => {
+    const { t, locale } = useI18n();
+    const dispatch = useDispatch();
     const [shiftsData, setShiftsData] = useState({});
     const [loading, setLoading] = useState(true);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
-        console.log('Request data:', request);
-        console.log('Request constraints:', request.constraints);
         loadShiftDetails();
-    }, [request]);
+    }, []);
 
     const loadShiftDetails = async () => {
         try {
             const response = await constraintAPI.getEmployeeShifts();
             const shifts = response.data?.shifts || [];
 
-            console.log('Loaded shifts:', shifts);
-
-            // Create a map for quick lookup
             const shiftsMap = {};
             shifts.forEach(shift => {
                 shiftsMap[shift.id] = shift;
             });
-
-            console.log('Shifts map:', shiftsMap);
 
             setShiftsData(shiftsMap);
         } catch (error) {
@@ -42,13 +40,14 @@ const RequestDetails = ({request, onBack}) => {
         }
     };
 
-    const getStatusVariant = (status) => {
-        const variants = {
-            pending: 'warning',
-            approved: 'success',
-            rejected: 'danger'
-        };
-        return variants[status] || 'secondary';
+    const handleDelete = async () => {
+        try {
+            await dispatch(deleteRequest(request.id)).unwrap();
+            onBack();
+        } catch (error) {
+            console.error('Error deleting request:', error);
+        }
+        setShowDeleteConfirm(false);
     };
 
     const groupConstraintsByDay = () => {
@@ -58,8 +57,6 @@ const RequestDetails = ({request, onBack}) => {
         if (request.constraints && Array.isArray(request.constraints)) {
             request.constraints.forEach(constraint => {
                 const dayLower = constraint.day_of_week.toLowerCase();
-                console.log('Processing constraint:', constraint);
-
                 if (!grouped[dayLower]) {
                     grouped[dayLower] = [];
                 }
@@ -67,9 +64,6 @@ const RequestDetails = ({request, onBack}) => {
             });
         }
 
-        console.log('Grouped constraints:', grouped);
-
-        // Sort by day order
         const sortedGrouped = {};
         daysOrder.forEach(day => {
             if (grouped[day]) {
@@ -77,12 +71,11 @@ const RequestDetails = ({request, onBack}) => {
             }
         });
 
-        console.log('Sorted grouped constraints:', sortedGrouped);
         return sortedGrouped;
     };
 
     if (loading) {
-        return <LoadingState/>;
+        return <LoadingState />;
     }
 
     const constraintsByDay = groupConstraintsByDay();
@@ -91,106 +84,131 @@ const RequestDetails = ({request, onBack}) => {
         thursday: 4, friday: 5, saturday: 6
     };
 
+    const canDelete = request.status === 'pending';
+
     return (
         <Container className="request-details-container py-3">
-            <Button
-                variant="link"
-                onClick={onBack}
-                className="mb-3 p-0"
-            >
-                <i className="bi bi-arrow-left me-2"></i>
-                {t('common.back')}
-            </Button>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <Button
+                    variant="link"
+                    onClick={onBack}
+                    className="p-0 text-body"
+                >
+                    <i className="bi bi-arrow-left me-2"></i>
+                    {t('common.back')}
+                </Button>
 
-            <Card>
-                <Card.Header>
+                {canDelete && (
+                    <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => setShowDeleteConfirm(true)}
+                    >
+                        <i className="bi bi-trash me-1"></i>
+                        {t('common.delete')}
+                    </Button>
+                )}
+            </div>
+
+            <Card className="request-details-card">
+                <Card.Header className="bg-transparent">
                     <div className="d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">{t('requests.requestDetails')}</h5>
                         <StatusBadge
                             status={request.status}
-                            variant={getStatusVariant(request.status)}
                             text={t(`requests.status.${request.status}`)}
                             size="lg"
                         />
                     </div>
                 </Card.Header>
                 <Card.Body>
-                    <div className="request-metadata mb-4">
-                        <div className="mb-2">
-                            <strong>{t('requests.sent')}:</strong> {formatDateTime(request.requested_at)}
+                    <div className="request-metadata">
+                        <div className="metadata-item">
+                            <i className="bi bi-calendar-event me-2"></i>
+                            <span className="metadata-label">{t('requests.sent')}:</span>
+                            <span className="metadata-value">{formatDateTime(request.requested_at, locale)}</span>
                         </div>
                         {request.reviewed_at && (
                             <>
-                                <div className="mb-2">
-                                    <strong>{t('requests.reviewed')}:</strong> {formatDateTime(request.reviewed_at)}
+                                <div className="metadata-item">
+                                    <i className="bi bi-calendar-check me-2"></i>
+                                    <span className="metadata-label">{t('requests.reviewed')}:</span>
+                                    <span className="metadata-value">{formatDateTime(request.reviewed_at, locale)}</span>
                                 </div>
                                 {request.reviewer && (
-                                    <div className="mb-2">
-                                        <strong>{t('requests.reviewedBy')}:</strong> {`${request.reviewer.first_name} ${request.reviewer.last_name}`}
+                                    <div className="metadata-item">
+                                        <i className="bi bi-person-check me-2"></i>
+                                        <span className="metadata-label">{t('requests.reviewedBy')}:</span>
+                                        <span className="metadata-value">
+                                            {`${request.reviewer.first_name} ${request.reviewer.last_name}`}
+                                        </span>
                                     </div>
                                 )}
                             </>
                         )}
                     </div>
 
-                    <h6 className="mb-3">{t('requests.constraints')}:</h6>
-                    <div className="constraints-details">
-                        {Object.entries(constraintsByDay).length === 0 ? (
-                            <div className="text-muted">{t('requests.noConstraints')}</div>
-                        ) : (
-                            Object.entries(constraintsByDay).map(([day, constraints]) => {
-                                console.log(`Rendering day ${day} with constraints:`, constraints);
-                                return (
-                                    <div key={day} className="day-constraints mb-3">
-                                        <strong>{getDayName(dayIndices[day], t)}:</strong>
-                                        <ul className="mt-1">
-                                            {constraints.map((constraint, index) => {
-                                                console.log('Rendering constraint:', constraint);
-                                                console.log('Shift data for id', constraint.shift_id, ':', shiftsData[constraint.shift_id]);
-
-                                                return (
-                                                    <li key={index}>
-                                                        {constraint.shift_id && shiftsData[constraint.shift_id] ? (
-                                                            <>
+                    <div className="constraints-section">
+                        <h6 className="section-title">
+                            <i className="bi bi-clock-history me-2"></i>
+                            {t('requests.constraints')}
+                        </h6>
+                        <div className="constraints-details">
+                            {Object.entries(constraintsByDay).length === 0 ? (
+                                <div className="text-muted">{t('requests.noConstraints')}</div>
+                            ) : (
+                                Object.entries(constraintsByDay).map(([day, constraints]) => (
+                                    <div key={day} className="day-constraints">
+                                        <div className="day-name">
+                                            {getDayName(dayIndices[day], t)}
+                                        </div>
+                                        <div className="constraints-list">
+                                            {constraints.map((constraint, index) => (
+                                                <div key={index} className="constraint-item">
+                                                    {constraint.shift_id && shiftsData[constraint.shift_id] ? (
+                                                        <>
+                                                            <span className="shift-name">
                                                                 {shiftsData[constraint.shift_id].shift_name}
-                                                                {' - '}
-                                                                <span
-                                                                    className={`constraint-type ${constraint.constraint_type}`}>
-                                                {t(`constraints.types.${constraint.constraint_type}`)}
-                                            </span>
-                                                            </>
-                                                        ) : (
-                                                            <span
-                                                                className={`constraint-type ${constraint.constraint_type}`}>
-                                            {t('requests.wholeDay')} - {t(`constraints.types.${constraint.constraint_type}`)}
-                                        </span>
-                                                        )}
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
+                                                            </span>
+                                                            <span className="constraint-type cannot-work">
+                                                                {t('constraints.cannotWork')}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="constraint-type cannot-work full-day">
+                                                            {t('requests.wholeDay')}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                );
-                            })
-                        )}
-
+                                ))
+                            )}
+                        </div>
                     </div>
 
                     {request.message && (
-                        <div className="mt-4">
-                            <h6>{t('requests.yourMessage')}:</h6>
-                            <Alert variant="info" className="mt-2">
+                        <div className="message-section">
+                            <h6 className="section-title">
+                                <i className="bi bi-chat-left-text me-2"></i>
+                                {t('requests.yourMessage')}
+                            </h6>
+                            <Alert variant="info" className="message-content">
                                 {request.message}
                             </Alert>
                         </div>
                     )}
 
                     {request.admin_response && (
-                        <div className="mt-4">
-                            <h6>{t('requests.adminResponse')}:</h6>
+                        <div className="response-section">
+                            <h6 className="section-title">
+                                <i className="bi bi-reply me-2"></i>
+                                {t('requests.adminResponse')}
+                            </h6>
                             <Alert
                                 variant={request.status === 'approved' ? 'success' : 'warning'}
-                                className="mt-2"
+                                className="response-content"
                             >
                                 {request.admin_response}
                             </Alert>
@@ -198,6 +216,16 @@ const RequestDetails = ({request, onBack}) => {
                     )}
                 </Card.Body>
             </Card>
+
+            <ConfirmationModal
+                show={showDeleteConfirm}
+                onHide={() => setShowDeleteConfirm(false)}
+                onConfirm={handleDelete}
+                title={t('requests.deleteRequest')}
+                message={t('requests.confirmDelete')}
+                confirmText={t('common.delete')}
+                confirmVariant="danger"
+            />
         </Container>
     );
 };
