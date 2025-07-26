@@ -59,6 +59,20 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         return blocked;
     }, [constraints, shifts]);
 
+    const fullyBlockedShifts = useMemo(() => {
+        const blocked = new Set();
+        if (DAYS_OF_WEEK_CANONICAL.length === 0) return blocked;
+
+        shifts.forEach(shift => {
+            const allDaysForShiftBlocked = DAYS_OF_WEEK_CANONICAL.every(day =>
+                constraints[`${day}-${shift.id}`] === 'cannot_work'
+            );
+            if (allDaysForShiftBlocked) {
+                blocked.add(shift.id);
+            }
+        });
+        return blocked;
+    }, [constraints, shifts]);
 
     // --- ОБРАБОТЧИКИ КЛИКОВ ---
     const handleCellClick = (day, shiftId) => {
@@ -89,6 +103,19 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
         });
     };
 
+    const handleShiftClick = (shiftId) => {
+        setConstraints(prev => {
+            const shiftKeys = DAYS_OF_WEEK_CANONICAL.map(day => `${day}-${shiftId}`);
+            const allSelected = shiftKeys.every(key => prev[key] === 'cannot_work');
+            const newConstraints = { ...prev };
+            if (allSelected) {
+                shiftKeys.forEach(key => delete newConstraints[key]);
+            } else {
+                shiftKeys.forEach(key => newConstraints[key] = 'cannot_work');
+            }
+            return newConstraints;
+        });
+    };
     // --- ФУНКЦИИ СТИЛИЗАЦИИ ---
     const getCellStyles = (day, shiftId) => {
         const status = constraints[`${day}-${shiftId}`] || 'neutral';
@@ -111,8 +138,20 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
 
     const getShiftHeaderStyle = (shift) => {
         const baseColor = getShiftColor(shift);
-        return { backgroundColor: baseColor, color: getContrastTextColor(baseColor) };
+        const style = {
+            backgroundColor: baseColor,
+            color: getContrastTextColor(baseColor)
+        };
+
+        // Если смена полностью заблокирована, добавляем внутреннюю тень
+        if (fullyBlockedShifts.has(shift.id)) {
+            // Красная рамка/тень внутри элемента
+            style.boxShadow = 'inset 0 0 0 4px rgba(220, 53, 69, 0.7)';
+        }
+
+        return style;
     };
+
     const getShiftHeaderCellStyle = (shift) => {
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
         const baseColor = getShiftColor(shift);
@@ -176,6 +215,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                             isMobile={isMobile}
                             onCellClick={handleCellClick}
                             onDayClick={handleDayClick}
+                            onShiftClick={handleShiftClick}
                             getCellStyles={getCellStyles}
                             getShiftHeaderStyle={getShiftHeaderStyle}
                             getShiftHeaderCellStyle={getShiftHeaderCellStyle}

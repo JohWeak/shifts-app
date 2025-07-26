@@ -19,11 +19,18 @@ const GridCell = ({day, shift, onCellClick, getCellStyles}) => {
     );
 };
 
-const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th'}) => {
+const ShiftHeader = ({ shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th', onShiftClick }) => {
     const icon = getShiftIcon(getCanonicalShiftType(shift.shift_name));
     return (
-        <Component className="shift-header-cell sticky-column" style={getShiftHeaderCellStyle(shift)}>
-            <div className="shift-header-info" style={getShiftHeaderStyle(shift)}>
+        <Component
+            className="shift-header-cell sticky-column clickable"
+            style={getShiftHeaderCellStyle(shift)}
+            onClick={() => onShiftClick(shift.id)}
+        >
+            <div
+                className="shift-header-info"
+                style={getShiftHeaderStyle(shift)}
+            >
                 <span className="shift-header-name">{icon} {shift.shift_name}</span>
                 <span className="shift-header-time">{formatShiftTime(shift.start_time, shift.end_time)}</span>
             </div>
@@ -59,6 +66,7 @@ const PermanentConstraintGrid = ({
                                      isMobile,
                                      onCellClick,
                                      onDayClick,
+                                     onShiftClick,
                                      getCellStyles,
                                      getShiftHeaderStyle,
                                      getShiftHeaderCellStyle,
@@ -92,6 +100,7 @@ const PermanentConstraintGrid = ({
                             shift={shift}
                             getShiftHeaderStyle={getShiftHeaderStyle}
                             getShiftHeaderCellStyle={getShiftHeaderCellStyle}
+                            onShiftClick={onShiftClick}
                             as="td"
                         />
                         {daysOfWeek.map(day => (
@@ -121,6 +130,7 @@ const PermanentConstraintGrid = ({
                             shift={shift}
                             getShiftHeaderStyle={getShiftHeaderStyle}
                             getShiftHeaderCellStyle={getShiftHeaderCellStyle}
+                            onShiftClick={onShiftClick}
                             as="th"
                         />
                     ))}

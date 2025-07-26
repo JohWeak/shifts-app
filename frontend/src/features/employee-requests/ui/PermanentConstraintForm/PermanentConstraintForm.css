@@ -23,10 +23,10 @@
 /* ЗАГОЛОВКИ (Общие стили) */
 .permanent-constraint-form-container .day-name,
 .permanent-constraint-form-container .shift-header-name {
-    font-weight: 600;
 }
 .permanent-constraint-form-container .shift-header-time {
     font-size: 0.85rem;
+    font-weight: 500;
 }
 .permanent-constraint-form-container .shift-header-info {
     padding: 0.5rem;
@@ -34,6 +34,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    transition: box-shadow 0.2s ease-in-out;
 }
 
 /* ЯЧЕЙКИ (Общие стили) */
@@ -165,4 +166,18 @@
     [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover {
         background-color: var(--bs-gray-800);
     }
+
+    .permanent-constraint-form-container .day-header.clickable:hover,
+    .permanent-constraint-form-container .day-header-cell.clickable:hover,
+    .permanent-constraint-form-container .shift-header-cell.clickable:hover {
+        background-color: var(--bs-light-bg-subtle);
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
+    [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover,
+    [data-theme="dark"] .permanent-constraint-form-container .shift-header-cell.clickable:hover {
+        background-color: var(--bs-dark-bg-subtle);
+    }
+
 }
