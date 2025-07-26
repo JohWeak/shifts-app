@@ -106,10 +106,10 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
             // Ваша ручная проверка с '#0f5faf' была правильной.
             backgroundColor = hexToRgba(shift ? getShiftColor(shift) : '#afceea', neutralBgAlpha);
         }
+
         console.log("[Shift and colors]",
             "Shift: ", shift,
-            "BGColor: ", backgroundColor || "НЕТ ЦВЕТА",
-
+            "BGColor: ", backgroundColor,
         );
 
         // 2. Определяем цвет текста
@@ -201,7 +201,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel }) => {
                 </Card.Body>
 
                 {/* Футер с сообщением и кнопками */}
-                <Card.Footer className="bg-transparent border-top-1 mt-1">
+                <Card.Footer className="bg-transparent border-top-0 mt-0">
                     <Form.Group className="mt-3">
                         <Form.Check
                             type="checkbox"

@@ -410,7 +410,7 @@ const getMyShifts = async (req, res) => {
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    attributes: ['id', 'shift_name', 'start_time', 'end_time']
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color']
                 }]
             }]
         });
