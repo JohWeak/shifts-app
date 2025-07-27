@@ -160,7 +160,7 @@ const EmployeeRequests = () => {
                 } : null}
             />
 
-            <Card>
+            <Card className="employee-requests-card">
                 <Card.Body>
                     {loading && !loaded ? (
                         <LoadingState />

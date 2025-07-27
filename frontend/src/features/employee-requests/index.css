@@ -6,6 +6,10 @@
     justify-self: center;
 }
 
+.employee-requests-container .employee-requests-card {
+    border-radius: var(--radius-lg);
+}
+
 /* Floating Action Button */
 .employee-requests-container .fab-button {
     position: fixed;
@@ -22,6 +26,7 @@
     font-size: 1.5rem;
     transition: transform 0.2s ease;
 }
+
 .employee-requests-container .fab-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -61,6 +66,7 @@
 .employee-requests-container .fab-button:active {
     transform: scale(0.95);
 }
+
 
 /* Adjust for mobile navbar */
 /*@media (max-width: 768px) {*/

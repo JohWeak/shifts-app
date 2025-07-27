@@ -629,6 +629,7 @@ export const en = {
         waitForPendingRequest: 'Please wait for your request to be reviewed',
         deleteRequest: 'Delete Request',
         confirmDelete: 'Are you sure you want to delete this request?',
+        editRequest: 'Edit Request',
 
     },
     reports: {
