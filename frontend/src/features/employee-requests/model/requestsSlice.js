@@ -2,7 +2,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
 
-// Async thunks
 export const fetchMyRequests = createAsyncThunk(
     'requests/fetchMy',
     async (_, { rejectWithValue }) => {
@@ -38,11 +37,20 @@ const requestsSlice = createSlice({
     reducers: {
         addNewRequest: (state, action) => {
             state.items.unshift(action.payload);
+        },
+        updateRequest: (state, action) => {
+            const { tempId, realRequest } = action.payload;
+            const index = state.items.findIndex(item => item.id === tempId);
+            if (index !== -1) {
+                state.items[index] = realRequest;
+            }
+        },
+        removeRequest: (state, action) => {
+            state.items = state.items.filter(item => item.id !== action.payload);
         }
     },
     extraReducers: (builder) => {
         builder
-            // Fetch requests
             .addCase(fetchMyRequests.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -56,12 +64,11 @@ const requestsSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            // Delete request
             .addCase(deleteRequest.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload);
             });
     }
 });
 
-export const { addNewRequest } = requestsSlice.actions;
+export const { addNewRequest, updateRequest, removeRequest } = requestsSlice.actions;
 export default requestsSlice.reducer;

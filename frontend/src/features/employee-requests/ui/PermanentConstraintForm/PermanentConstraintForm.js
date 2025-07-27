@@ -18,7 +18,7 @@ import './PermanentConstraintForm.css';
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
+const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null }) => {
     const {t} = useI18n();
     const {getShiftColor, currentTheme} = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 888px)');
@@ -35,19 +35,21 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
 
     // Загрузка данных
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                const shiftsResponse = await constraintAPI.getEmployeeShifts();
-                setShifts(shiftsResponse.data?.shifts || []);
-            } catch (err) {
-                setError(t('requests.load_shifts_error'));
-            } finally {
-                setLoading(false);
+        if (initialData && initialData.constraints) {
+            // Преобразуем constraints обратно в формат для формы
+            const constraintsMap = {};
+            initialData.constraints.forEach(constraint => {
+                const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
+                constraintsMap[key] = constraint.constraint_type;
+            });
+            setConstraints(constraintsMap);
+
+            if (initialData.message) {
+                setMessage(initialData.message);
+                setShowMessage(true);
             }
-        };
-        loadData();
-    }, [t]);
+        }
+    }, [initialData]);
 
     const fullyBlockedDays = useMemo(() => {
         const blocked = new Set();
@@ -172,7 +174,6 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
 
     // --- ОТПРАВКА ФОРМЫ ---
     const handleSubmit = async () => {
-        setLoading(true);
         try {
             const constraintsArray = Object.entries(constraints).map(([key, constraint_type]) => {
                 const [day_of_week, shift_id_str] = key.split('-');
@@ -183,29 +184,34 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                 };
             });
 
-            const response = await constraintAPI.submitPermanentRequest({
+            const requestData = {
                 constraints: constraintsArray,
                 message: showMessage ? message.trim() : null
-            });
+            };
 
-            // Передаем полный объект запроса
-            if (onSubmitSuccess) {
-                onSubmitSuccess(response.data);
-            }
-        } catch (err) {
-            console.error('Submit error:', err);
+            // Создаем оптимистичный объект запроса
+            const optimisticRequest = {
+                id: `temp_${Date.now()}`, // Временный ID
+                emp_id: null, // Будет заполнен на сервере
+                constraints: constraintsArray,
+                message: requestData.message,
+                status: 'pending',
+                requested_at: new Date().toISOString(),
+                reviewed_at: null,
+                reviewer: null,
+                admin_response: null
+            };
 
-            const errorMessage = err.response?.data?.message || t('requests.submitError');
-
-            if (errorMessage.includes('pending request')) {
-                setError(t('requests.pendingRequestExists'));
-            } else {
-                setError(errorMessage);
-            }
-
-            setLoading(false);
+            // Немедленно закрываем форму и передаем оптимистичный объект
             setShowConfirm(false);
-            return;
+            if (onSubmitSuccess) {
+                onSubmitSuccess(optimisticRequest, requestData);
+            }
+
+        } catch (err) {
+            console.error('Submit preparation error:', err);
+            setError(t('requests.submitError'));
+            setShowConfirm(false);
         }
     };
 
@@ -217,8 +223,12 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
                 <Card className="permanent-constraint-card rounded-4">
                     <Card.Header>
                         <div className="d-flex justify-content-between align-items-center">
-                            <h5 className="mb-0">{t('requests.permanentConstraints.title')}</h5>
-                            <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
+                            <h5 className="mb-0">
+                                {initialData
+                                    ? t('requests.editRequest')
+                                    : t('requests.permanentConstraints.title')
+                                }
+                            </h5>                            <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
                                 <X size={28}/>
                             </Button>
                         </div>

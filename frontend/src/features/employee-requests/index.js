@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Container, Card, Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { addNotification } from 'app/model/notificationsSlice';
-import { fetchMyRequests, addNewRequest } from './model/requestsSlice';
+import {fetchMyRequests, addNewRequest, updateRequest, deleteRequest, removeRequest} from './model/requestsSlice';
+import { constraintAPI } from 'shared/api/apiService';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -21,6 +22,7 @@ const EmployeeRequests = () => {
     const [showForm, setShowForm] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [showTooltip, setShowTooltip] = useState(false);
+    const [editingRequest, setEditingRequest] = useState(null);
 
     useEffect(() => {
         // Загружаем только если еще не загружено
@@ -31,21 +33,74 @@ const EmployeeRequests = () => {
 
     const validRequests = requests.filter(r => r && r.status);
     const hasPendingRequest = validRequests.some(r => r.status === 'pending');
+    const pendingRequest = validRequests.find(r => r.status === 'pending');
     const pendingCount = validRequests.filter(r => r.status === 'pending').length;
 
-    const handleSubmitSuccess = (newRequest) => {
+    const handleSubmitSuccess = async (optimisticRequest, requestData) => {
         setShowForm(false);
-        // Проверяем что newRequest существует
-        if (newRequest && newRequest.id) {
-            dispatch(addNewRequest(newRequest));
-        }
-        // В любом случае перезагружаем список
-        dispatch(fetchMyRequests());
+        setEditingRequest(null);
 
-        dispatch(addNotification({
-            type: 'success',
-            message: t('requests.submitSuccess')
-        }));
+        // Добавляем оптимистичный запрос в store
+        dispatch(addNewRequest(optimisticRequest));
+
+        try {
+            // Отправляем реальный запрос
+            const response = await constraintAPI.submitPermanentRequest(requestData);
+
+            // Заменяем оптимистичный запрос реальным
+            dispatch(updateRequest({
+                tempId: optimisticRequest.id,
+                realRequest: response.data
+            }));
+
+            dispatch(addNotification({
+                type: 'success',
+                message: t('requests.submitSuccess')
+            }));
+        } catch (error) {
+            // Удаляем оптимистичный запрос при ошибке
+            dispatch(removeRequest(optimisticRequest.id));
+
+            const errorMessage = error.response?.data?.message || t('requests.submitError');
+            dispatch(addNotification({
+                type: 'error',
+                message: errorMessage
+            }));
+
+            // Перезагружаем список
+            dispatch(fetchMyRequests());
+        }
+    };
+
+    const handleEditRequest = async (request) => {
+        if (request.status !== 'pending') return;
+
+        // Сначала удаляем существующий запрос
+        try {
+            await dispatch(deleteRequest(request.id)).unwrap();
+            setEditingRequest(request);
+            setShowForm(true);
+        } catch (error) {
+            dispatch(addNotification({
+                type: 'error',
+                message: t('requests.deleteError')
+            }));
+        }
+    };
+
+    const handleDeleteRequest = async (request) => {
+        try {
+            await dispatch(deleteRequest(request.id)).unwrap();
+            dispatch(addNotification({
+                type: 'success',
+                message: t('requests.deleteSuccess')
+            }));
+        } catch (error) {
+            dispatch(addNotification({
+                type: 'error',
+                message: t('requests.deleteError')
+            }));
+        }
     };
 
     const handleRequestClick = (request) => {
@@ -72,6 +127,8 @@ const EmployeeRequests = () => {
             <RequestDetails
                 request={selectedRequest}
                 onBack={handleBackFromDetails}
+                onEdit={handleEditRequest}
+                onDelete={handleDeleteRequest}
             />
         );
     }
@@ -82,7 +139,11 @@ const EmployeeRequests = () => {
             <div className="employee-requests-container py-3">
                 <PermanentConstraintForm
                     onSubmitSuccess={handleSubmitSuccess}
-                    onCancel={() => setShowForm(false)}
+                    onCancel={() => {
+                        setShowForm(false);
+                        setEditingRequest(null);
+                    }}
+                    initialData={editingRequest}
                 />
             </div>
         );
@@ -113,7 +174,7 @@ const EmployeeRequests = () => {
                                 onClick: () => dispatch(fetchMyRequests())
                             }}
                         />
-                    ) : requests.length === 0 ? (
+                    ) : validRequests.length === 0 ? (
                         <EmptyState
                             icon="bi-inbox"
                             title={t('requests.noRequests')}
@@ -121,8 +182,10 @@ const EmployeeRequests = () => {
                         />
                     ) : (
                         <RequestsList
-                            requests={requests}
+                            requests={validRequests}
                             onRequestClick={handleRequestClick}
+                            onEditRequest={handleEditRequest}
+                            onDeleteRequest={handleDeleteRequest}
                         />
                     )}
                 </Card.Body>
@@ -144,10 +207,19 @@ const EmployeeRequests = () => {
                 <i className="bi bi-plus-lg"></i>
             </Button>
 
-            {/* Tooltip для заблокированной кнопки */}
             {showTooltip && hasPendingRequest && (
                 <div className="fab-tooltip">
                     {t('requests.waitForPendingRequest')}
+                    {pendingRequest && (
+                        <Button
+                            size="sm"
+                            variant="link"
+                            className="text-white p-0 mt-1"
+                            onClick={() => handleEditRequest(pendingRequest)}
+                        >
+                            {t('requests.editRequest')}
+                        </Button>
+                    )}
                 </div>
             )}
         </Container>

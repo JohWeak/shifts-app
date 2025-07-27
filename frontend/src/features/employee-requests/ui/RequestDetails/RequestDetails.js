@@ -11,7 +11,7 @@ import ConfirmationModal from 'shared/ui/components/ConfirmationModal/Confirmati
 import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import './RequestDetails.css';
 
-const RequestDetails = ({ request, onBack }) => {
+const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
     const { t, locale } = useI18n();
     const dispatch = useDispatch();
     const [shiftsData, setShiftsData] = useState({});
@@ -19,7 +19,7 @@ const RequestDetails = ({ request, onBack }) => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
-        loadShiftDetails();
+        void loadShiftDetails();
     }, []);
 
     const loadShiftDetails = async () => {
@@ -42,12 +42,22 @@ const RequestDetails = ({ request, onBack }) => {
 
     const handleDelete = async () => {
         try {
-            await dispatch(deleteRequest(request.id)).unwrap();
+            if (onDelete) {
+                await onDelete(request);
+            } else {
+                await dispatch(deleteRequest(request.id)).unwrap();
+            }
             onBack();
         } catch (error) {
             console.error('Error deleting request:', error);
         }
         setShowDeleteConfirm(false);
+    };
+
+    const handleEdit = () => {
+        if (onEdit) {
+            onEdit(request);
+        }
     };
 
     const groupConstraintsByDay = () => {
@@ -84,6 +94,7 @@ const RequestDetails = ({ request, onBack }) => {
         thursday: 4, friday: 5, saturday: 6
     };
 
+    const canEdit = request.status === 'pending' && !request.id.toString().startsWith('temp_');
     const canDelete = request.status === 'pending';
 
     return (
@@ -98,15 +109,29 @@ const RequestDetails = ({ request, onBack }) => {
                     {t('common.back')}
                 </Button>
 
-                {canDelete && (
-                    <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(true)}
-                    >
-                        <i className="bi bi-trash me-1"></i>
-                        {t('common.delete')}
-                    </Button>
+                {(canEdit || canDelete) && (
+                    <div className="d-flex gap-2">
+                        {canEdit && (
+                            <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={handleEdit}
+                            >
+                                <i className="bi bi-pencil me-1"></i>
+                                {t('common.edit')}
+                            </Button>
+                        )}
+                        {canDelete && (
+                            <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => setShowDeleteConfirm(true)}
+                            >
+                                <i className="bi bi-trash me-1"></i>
+                                {t('common.delete')}
+                            </Button>
+                        )}
+                    </div>
                 )}
             </div>
 

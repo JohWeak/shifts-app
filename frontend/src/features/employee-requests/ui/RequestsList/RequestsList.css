@@ -4,14 +4,28 @@
 }
 
 .requests-list .request-item {
-    cursor: pointer;
-    transition: all 0.2s ease;
     border-left: 3px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .requests-list .request-item:hover {
-    background-color: var(--bs-btn-outline-secondary-hover-color);
     border-left-color: var(--bs-primary);
+}
+
+.requests-list .request-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.requests-list .request-clickable-area {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    cursor: pointer;
 }
 
 .requests-list .request-info {
@@ -29,9 +43,29 @@
     font-size: 0.813rem;
 }
 
+.requests-list .request-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
 @media (max-width: 576px) {
-    .requests-list .request-item {
-        font-size: 0.875rem;
+    .requests-list .request-item-content {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+    }
+
+    .requests-list .request-clickable-area {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .requests-list .request-actions {
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--bs-gray-200);
     }
 
     .requests-list .request-date i,
