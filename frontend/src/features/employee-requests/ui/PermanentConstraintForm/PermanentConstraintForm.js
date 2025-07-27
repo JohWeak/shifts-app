@@ -177,32 +177,32 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel}) => {
             const constraintsArray = Object.entries(constraints).map(([key, constraint_type]) => {
                 const [day_of_week, shift_id_str] = key.split('-');
                 return {
-                    day_of_week: day_of_week.toLowerCase(), // Приводим к lowercase
+                    day_of_week: day_of_week.toLowerCase(),
                     shift_id: parseInt(shift_id_str, 10),
                     constraint_type
                 };
             });
 
-            await constraintAPI.submitPermanentRequest({
+            const response = await constraintAPI.submitPermanentRequest({
                 constraints: constraintsArray,
                 message: showMessage ? message.trim() : null
             });
 
-            if (onSubmitSuccess) onSubmitSuccess();
+            // Передаем полный объект запроса
+            if (onSubmitSuccess) {
+                onSubmitSuccess(response.data);
+            }
         } catch (err) {
             console.error('Submit error:', err);
 
-            // Показываем ошибку пользователю
             const errorMessage = err.response?.data?.message || t('requests.submitError');
 
-            // Если это ошибка о существующем запросе, показываем её
             if (errorMessage.includes('pending request')) {
                 setError(t('requests.pendingRequestExists'));
             } else {
                 setError(errorMessage);
             }
 
-            // Не закрываем форму при ошибке
             setLoading(false);
             setShowConfirm(false);
             return;

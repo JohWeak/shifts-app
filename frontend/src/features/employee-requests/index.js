@@ -29,13 +29,19 @@ const EmployeeRequests = () => {
         }
     }, [dispatch, loaded, loading]);
 
-    const hasPendingRequest = requests.some(r => r.status === 'pending');
-    const pendingCount = requests.filter(r => r.status === 'pending').length;
+    const validRequests = requests.filter(r => r && r.status);
+    const hasPendingRequest = validRequests.some(r => r.status === 'pending');
+    const pendingCount = validRequests.filter(r => r.status === 'pending').length;
 
     const handleSubmitSuccess = (newRequest) => {
         setShowForm(false);
-        // Добавляем новый запрос в Redux store
-        dispatch(addNewRequest(newRequest));
+        // Проверяем что newRequest существует
+        if (newRequest && newRequest.id) {
+            dispatch(addNewRequest(newRequest));
+        }
+        // В любом случае перезагружаем список
+        dispatch(fetchMyRequests());
+
         dispatch(addNotification({
             type: 'success',
             message: t('requests.submitSuccess')

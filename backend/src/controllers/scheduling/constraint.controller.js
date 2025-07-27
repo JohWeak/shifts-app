@@ -334,6 +334,8 @@ const getAllPermanentRequests = async (req, res) => {
 
 // Submit batch permanent constraint request
 const submitPermanentConstraintRequest = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
+
     try {
         const empId = req.userId;
         const { constraints, message } = req.body;
@@ -345,7 +347,7 @@ const submitPermanentConstraintRequest = async (req, res) => {
             });
         }
 
-        // Проверяем существующие pending запросы
+        // Check existing pending request
         const existingPending = await PermanentConstraintRequest.findOne({
             where: {
                 emp_id: empId,
@@ -360,20 +362,33 @@ const submitPermanentConstraintRequest = async (req, res) => {
             });
         }
 
+        // Create request
         const request = await PermanentConstraintRequest.create({
             emp_id: empId,
             constraints,
             message: message || null,
             requested_at: new Date()
+        }, { transaction });
+
+        await transaction.commit();
+
+        // Загружаем созданный запрос с ассоциациями для возврата
+        const createdRequest = await PermanentConstraintRequest.findByPk(request.id, {
+            include: [{
+                model: Employee,
+                as: 'reviewer',
+                attributes: ['emp_id', 'first_name', 'last_name']
+            }]
         });
 
         res.json({
             success: true,
             message: 'Request submitted successfully',
-            data: request
+            data: createdRequest
         });
 
     } catch (error) {
+        await transaction.rollback();
         console.error('Error in submitPermanentConstraintRequest:', error);
         res.status(500).json({
             success: false,

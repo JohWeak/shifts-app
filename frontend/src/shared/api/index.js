@@ -43,6 +43,7 @@ api.interceptors.response.use(
             '/api/schedules/employee',    // Добавляем для archive
             '/api/constraints/permanent-requests/my',  // Добавляем новый endpoint
             '/api/constraints/permanent-requests',     // И админский endpoint
+            '/api/constraints/permanent-request',
         ];
 
         // Проверяем, нужен ли полный ответ для этого endpoint
