@@ -14,6 +14,7 @@ import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import PermanentConstraintGrid from './PermanentConstraintGrid';
 import './PermanentConstraintForm.css';
+import {constraintAPI} from "../../../../shared/api/apiService";
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -50,6 +51,39 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
         }
         console.log('initialData', initialData);
     }, [initialData]);
+
+    useEffect(() => {
+        const savedMessage = localStorage.getItem('permanent_constraint_message');
+        if (savedMessage) {
+            setMessage(savedMessage);
+            setShowMessage(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (showMessage) {
+            localStorage.setItem('permanent_constraint_message', message);
+        }
+    }, [message, showMessage]);
+
+    // Load employee shifts
+    useEffect(() => {
+        loadEmployeeShifts();
+    }, []);
+
+    const loadEmployeeShifts = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await constraintAPI.getEmployeeShifts();
+            setShifts(response.data?.shifts || []);
+        } catch (error) {
+            console.error('Error loading shifts:', error);
+            setError(t('requests.load_shifts_error'));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fullyBlockedDays = useMemo(() => {
         const blocked = new Set();
