@@ -152,6 +152,7 @@ const EmployeeRequests = () => {
     return (
         <Container className="employee-requests-container py-3">
             <PageHeader
+                icon="bi bi-envelope-fill"
                 title={t('requests.title')}
                 badge={pendingCount > 0 ? {
                     text: `${pendingCount} ${t('requests.pending')}`,
