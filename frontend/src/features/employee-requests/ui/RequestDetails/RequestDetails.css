@@ -4,46 +4,46 @@
     margin: 0 auto;
 }
 
-.request-details-card {
+.request-details-container .request-details-card {
     border: 1px solid var(--bs-border-color);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.request-metadata {
+.request-details-container .request-metadata {
     background-color: var(--bs-gray-100);
     padding: 1rem;
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
 }
 
-.metadata-item {
+.request-details-container .metadata-item {
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
     font-size: 0.875rem;
 }
 
-.metadata-item:last-child {
+.request-details-container .metadata-item:last-child {
     margin-bottom: 0;
 }
 
-.metadata-label {
+.request-details-container .metadata-label {
     font-weight: 500;
     margin-right: 0.5rem;
     color: var(--bs-gray-700);
 }
 
-.metadata-value {
+.request-details-container .metadata-value {
     color: var(--bs-gray-900);
 }
 
-.constraints-section,
-.message-section,
-.response-section {
+.request-details-container .constraints-section,
+.request-details-container .message-section,
+.request-details-container .response-section {
     margin-bottom: 1.5rem;
 }
 
-.section-title {
+.request-details-container .section-title {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
@@ -52,13 +52,13 @@
     align-items: center;
 }
 
-.constraints-details {
+.request-details-container .constraints-details {
     background-color: var(--bs-light);
     padding: 1rem;
     border-radius: 0.5rem;
 }
 
-.day-constraints {
+.request-details-container .day-constraints {
     display: flex;
     align-items: flex-start;
     margin-bottom: 1rem;
@@ -66,32 +66,32 @@
     border-bottom: 1px solid var(--bs-gray-300);
 }
 
-.day-constraints:last-child {
+.request-details-container .day-constraints:last-child {
     margin-bottom: 0;
     padding-bottom: 0;
     border-bottom: none;
 }
 
-.day-name {
+.request-details-container .day-name {
     font-weight: 600;
     min-width: 100px;
     color: var(--bs-gray-800);
 }
 
-.constraints-list {
+.request-details-container .constraints-list {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.constraint-item {
+.request-details-container .constraint-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.shift-name {
+.request-details-container .shift-name {
     background-color: var(--bs-gray-200);
     padding: 0.25rem 0.75rem;
     border-radius: 1rem;
@@ -99,38 +99,38 @@
     font-weight: 500;
 }
 
-.constraint-type {
+.request-details-container .constraint-type {
     font-size: 0.813rem;
     font-weight: 500;
 }
 
-.constraint-type.cannot-work {
+.request-details-container .constraint-type.cannot-work {
     color: var(--bs-danger);
 }
 
-.constraint-type.full-day {
+.request-details-container .constraint-type.full-day {
     background-color: var(--bs-danger);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 1rem;
 }
 
-.message-content,
-.response-content {
+.request-details-container .message-content,
+.request-details-container .response-content {
     margin-bottom: 0;
     font-size: 0.875rem;
 }
 
 /* Dark mode support */
-[data-theme="dark"] .request-metadata {
+[data-theme="dark"] .request-details-container .request-metadata {
     background-color: var(--bs-dark-bg-subtle);
 }
 
-[data-theme="dark"] .constraints-details {
+[data-theme="dark"] .request-details-container .constraints-details {
     background-color: var(--bs-dark-bg-subtle);
 }
 
-[data-theme="dark"] .shift-name {
+[data-theme="dark"] .request-details-container .shift-name {
     background-color: var(--bs-gray-700);
     color: var(--bs-gray-100);
 }
@@ -141,49 +141,49 @@
         padding: 0.5rem;
     }
 
-    .request-details-card {
+    .request-details-container .request-details-card {
         border-radius: 0.5rem;
     }
 
-    .request-details-card .card-header,
-    .request-details-card .card-body {
+    .request-details-container .request-details-card .card-header,
+    .request-details-container .request-details-card .card-body {
         padding: 1rem;
     }
 
-    .request-metadata,
-    .constraints-details {
+    .request-details-container .request-metadata,
+    .request-details-container .constraints-details {
         padding: 0.75rem;
     }
 
-    .metadata-item {
+    .request-details-container .metadata-item {
         font-size: 0.813rem;
     }
 
-    .metadata-item i {
+    .request-details-container .metadata-item i {
         font-size: 0.875rem;
     }
 
-    .section-title {
+    .request-details-container .section-title {
         font-size: 0.938rem;
     }
 
-    .day-constraints {
+    .request-details-container .day-constraints {
         flex-direction: column;
         gap: 0.5rem;
     }
 
-    .day-name {
+    .request-details-container .day-name {
         min-width: auto;
         font-size: 0.875rem;
     }
 
-    .shift-name,
-    .constraint-type {
+    .request-details-container .shift-name,
+    .request-details-container .constraint-type {
         font-size: 0.75rem;
     }
 
-    .message-content,
-    .response-content {
+    .request-details-container .message-content,
+    .request-details-container .response-content {
         font-size: 0.813rem;
     }
 }
