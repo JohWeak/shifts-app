@@ -3,9 +3,10 @@
 /* 1. Импортируем  дизайн-систему. */
 @import './app/design-system.css';
 
-html {
-    scrollbar-gutter: stable both-edges;
-}
+/*html {*/
+/*    scrollbar-gutter: stable both-edges;*/
+/*}*/
+
 body.modal-open {
     /*
      * Заставляем overflow наследоваться от <html>, где работает

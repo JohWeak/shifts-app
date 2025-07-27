@@ -209,7 +209,7 @@
         top: 56px; /* Position below the top navbar */
         bottom: 0;
         left: 0;
-        width: 80px; /* Set a fixed width for the sidebar */
+        width: 90px; /* Set a fixed width for the sidebar */
         transform: none; /* Reset the bottom bar centering */
         max-width: none;
         box-shadow: 1px 0 14px 1px rgba(0,0,0,0.1);
@@ -252,7 +252,7 @@
 
     /* Adjust Main Content to make space for the sidebar */
     .employee-main-content {
-        margin-left: 80px; /* Width of the sidebar */
+        margin-left: 90px; /* Width of the sidebar */
         margin-bottom: 0; /* Reset margin from the bottom bar */
     }
     [data-theme="dark"] .nav-tabs-wrapper{
@@ -267,6 +267,6 @@
     }
     [dir="rtl"] .employee-main-content {
         margin-left: 0;
-        margin-right: 80px;
+        margin-right: 90px;
     }
 }
