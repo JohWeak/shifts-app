@@ -225,8 +225,8 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
             // Создаем оптимистичный объект запроса
             const optimisticRequest = {
-                id: `temp_${Date.now()}`, // Временный ID
-                emp_id: null, // Будет заполнен на сервере
+                id: `temp_${Date.now()}`,
+                emp_id: null,
                 constraints: constraintsArray,
                 message: requestData.message,
                 status: 'pending',
@@ -236,10 +236,16 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 admin_response: null
             };
 
-            // Немедленно закрываем форму и передаем оптимистичный объект
+            // Закрываем модальное окно
             setShowConfirm(false);
+
+            // Передаем ID редактируемого запроса, если есть
             if (onSubmitSuccess) {
-                onSubmitSuccess(optimisticRequest, requestData);
+                onSubmitSuccess(
+                    optimisticRequest,
+                    requestData,
+                    initialData?.id || null
+                );
             }
 
         } catch (err) {
@@ -442,8 +448,14 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 show={showConfirm}
                 onHide={() => setShowConfirm(false)}
                 onConfirm={handleSubmit}
-                title={t('requests.confirmSubmit.title')}
-                message={t('requests.confirmSubmit.message')}
+                title={initialData
+                    ? t('requests.confirmUpdate.title')
+                    : t('requests.confirmSubmit.title')
+                }
+                message={initialData
+                    ? t('requests.confirmUpdate.message')
+                    : t('requests.confirmSubmit.message')
+                }
                 confirmText={t('common.submit')}
                 loading={loading}
             />

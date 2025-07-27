@@ -630,6 +630,11 @@ export const en = {
         deleteRequest: 'Delete Request',
         confirmDelete: 'Are you sure you want to delete this request?',
         editRequest: 'Edit Request',
+        updateSuccess: 'Request updated successfully',
+        confirmUpdate: {
+            title: 'Update Request',
+            message: 'Are you sure you want to update this request? The previous request will be replaced.'
+        }
 
     },
     reports: {

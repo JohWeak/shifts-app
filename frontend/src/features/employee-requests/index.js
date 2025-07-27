@@ -35,56 +35,62 @@ const EmployeeRequests = () => {
     const pendingRequest = validRequests.find(r => r.status === 'pending');
     const pendingCount = validRequests.filter(r => r.status === 'pending').length;
 
-    const handleSubmitSuccess = async (optimisticRequest, requestData) => {
+    const handleSubmitSuccess = async (optimisticRequest, requestData, editingRequestId = null) => {
         setShowForm(false);
         setEditingRequest(null);
 
-        // Добавляем оптимистичный запрос в store
-        dispatch(addNewRequest(optimisticRequest));
+        // Если это редактирование, не добавляем оптимистичный запрос
+        if (!editingRequestId) {
+            dispatch(addNewRequest(optimisticRequest));
+        }
 
         try {
-            // Отправляем реальный запрос
+            // Если редактируем, сначала удаляем старый запрос
+            if (editingRequestId) {
+                await dispatch(deleteRequest(editingRequestId)).unwrap();
+            }
+
+            // Отправляем новый запрос
             const response = await constraintAPI.submitPermanentRequest(requestData);
 
-            // Заменяем оптимистичный запрос реальным
-            dispatch(updateRequest({
-                tempId: optimisticRequest.id,
-                realRequest: response.data
-            }));
+            if (editingRequestId) {
+                // При редактировании просто добавляем новый запрос
+                dispatch(addNewRequest(response.data));
+            } else {
+                // При создании заменяем оптимистичный запрос реальным
+                dispatch(updateRequest({
+                    tempId: optimisticRequest.id,
+                    realRequest: response.data
+                }));
+            }
 
             dispatch(addNotification({
                 type: 'success',
-                message: t('requests.submitSuccess')
+                message: editingRequestId
+                    ? t('requests.updateSuccess')
+                    : t('requests.submitSuccess')
             }));
         } catch (error) {
-            // Удаляем оптимистичный запрос при ошибке
-            dispatch(removeRequest(optimisticRequest.id));
+            // Если это было редактирование и произошла ошибка, перезагружаем список
+            if (editingRequestId) {
+                dispatch(fetchMyRequests());
+            } else {
+                // Удаляем оптимистичный запрос при ошибке
+                dispatch(removeRequest(optimisticRequest.id));
+            }
 
             const errorMessage = error.response?.data?.message || t('requests.submitError');
             dispatch(addNotification({
                 type: 'error',
                 message: errorMessage
             }));
-
-            // Перезагружаем список
-            dispatch(fetchMyRequests());
         }
     };
 
-    const handleEditRequest = async (request) => {
+    const handleEditRequest = (request) => {
         if (request.status !== 'pending') return;
-
-        // Сначала удаляем существующий запрос
-        try {
-            await dispatch(deleteRequest(request.id)).unwrap();
-            setEditingRequest(request);
-            setShowForm(true);
-        } catch (error) {
-            dispatch(addNotification({
-                type: 'error',
-                message: t('requests.deleteError')
-            }));
-        }
+        setEditingRequest(request);
+        setShowForm(true);
     };
 
     const handleDeleteRequest = async (request) => {

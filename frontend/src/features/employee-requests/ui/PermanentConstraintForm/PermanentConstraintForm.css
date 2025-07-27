@@ -1,7 +1,10 @@
 /* frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.css */
 
 /* --- 1. ОБЩИЕ СТИЛИ (Для обеих версий) --- */
-
+.permanent-constraint-form-container{
+    margin-inline-start: 1rem;
+    margin-inline-end: 1rem;
+}
 .permanent-constraint-form-container .full-schedule-table {
     font-size: 0.875rem;
     table-layout: fixed;
