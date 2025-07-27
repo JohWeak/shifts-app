@@ -1,6 +1,6 @@
 // frontend/src/features/employee-requests/ui/RequestsList/RequestsList.js
 import React from 'react';
-import {Button, ListGroup} from 'react-bootstrap';
+import { ListGroup, Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import { formatDateTime } from 'shared/lib/utils/scheduleUtils';

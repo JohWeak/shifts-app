@@ -25,7 +25,6 @@ const EmployeeRequests = () => {
     const [editingRequest, setEditingRequest] = useState(null);
 
     useEffect(() => {
-        // Загружаем только если еще не загружено
         if (!loaded && !loading) {
             dispatch(fetchMyRequests());
         }

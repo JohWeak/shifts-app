@@ -19,7 +19,7 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
-        void loadShiftDetails();
+        loadShiftDetails();
     }, []);
 
     const loadShiftDetails = async () => {

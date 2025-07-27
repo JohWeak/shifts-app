@@ -3,7 +3,6 @@ import React, {useState, useEffect, useMemo} from 'react';
 import {Card, Button, Form, Alert, Toast, ToastContainer} from 'react-bootstrap';
 import {X} from 'react-bootstrap-icons';
 import TextareaAutosize from 'react-textarea-autosize';
-import {constraintAPI} from 'shared/api/apiService';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
@@ -49,6 +48,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 setShowMessage(true);
             }
         }
+        console.log('initialData', initialData);
     }, [initialData]);
 
     const fullyBlockedDays = useMemo(() => {
@@ -217,6 +217,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
 
     if (loading) return <LoadingState/>;
+
     if (error) {
         return (
             <div className="permanent-constraint-form-container">
@@ -228,7 +229,8 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                                     ? t('requests.editRequest')
                                     : t('requests.permanentConstraints.title')
                                 }
-                            </h5>                            <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
+                            </h5>
+                            <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
                                 <X size={28}/>
                             </Button>
                         </div>
@@ -252,8 +254,16 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
             <Card className="permanent-constraint-card rounded-4">
                 <Card.Header>
                     <div className="d-flex justify-content-between align-items-center">
-                        <h5 className="mb-0">{t('requests.permanentConstraints.title')}</h5>
-                        <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
+                        <h5 className="mb-0">
+                            {initialData
+                                ? t('requests.editRequest')
+                                : t('requests.permanentConstraints.title')
+                            }
+                        </h5>
+                        <Button variant="link"
+                                onClick={onCancel}
+                                className="p-0 text-secondary"
+                        >
                             <X size={28}/>
                         </Button>
                     </div>
