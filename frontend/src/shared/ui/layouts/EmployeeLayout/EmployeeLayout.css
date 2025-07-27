@@ -1,12 +1,13 @@
 /* frontend/src/shared/ui/layouts/EmployeeLayout/EmployeeLayout.css */
 
+/* --- 1. COMMON & MOBILE STYLES (Mostly Unchanged) --- */
+
 /* Navbar */
 .employee-navbar {
     height: 56px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1040!important;
 }
-
 .employee-navbar .navbar-brand {
     font-weight: 600;
     font-size: 1.25rem;
@@ -16,25 +17,6 @@
 }
 .app-name i.bi-calendar-check{
     font-size: 1rem;
-}
-
-
-
-
-/* Update notification badge */
-.employee-navbar .badge {
-    animation: fadeInScale 0.3s ease;
-}
-
-@keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
 }
 
 /* User Menu */
@@ -49,22 +31,17 @@
     transition: all 0.2s ease;
     height: 31px;
 }
-
-
-
 .employee-navbar .user-avatar {
     font-size: 0.85rem;
     display: inline-flex;
     align-items: center;
 }
-
 .employee-navbar .user-name {
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 .employee-navbar .user-dropdown-menu {
     min-width: 200px;
     border: none;
@@ -72,27 +49,26 @@
     margin-top: 0.5rem;
 }
 .employee-navbar .user-menu-toggle i.bi-chevron-down {
-   font-size: 0.75rem;
+    font-size: 0.75rem;
 }
 [data-theme="dark"] .employee-navbar .user-dropdown-menu {
     background: var(--bs-gray-800);
     color: var(--bs-gray-100);
 }
-
 .employee-navbar .user-info {
     line-height: 1.3;
 }
 
-/* Navigation Tabs */
+/* Navigation Tabs (Bottom bar by default) */
 .employee-nav-tabs {
     position: fixed;
-    bottom: 0; /* Height of navbar */
-    border-top: none;
-    z-index: 1030;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: 1376px;
+    border-top: none;
+    z-index: 1030;
 }
 .employee-nav-tabs:before {
     content: '';
@@ -103,33 +79,26 @@
     box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
     height: 57px;
     z-index: -1;
-    background: #f2f2f2;
     background: linear-gradient(180deg,rgba(242, 242, 242, 0.2) 0%, rgba(255, 255, 255, 0.76) 5%);
     backdrop-filter: blur(5px);
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
+    /*border-top-left-radius: var(--radius-md);*/
+    /*border-top-right-radius: var(--radius-md);*/
 }
-
 [data-theme="dark"] .employee-nav-tabs:before {
-    background: var(--bs-gray-800);
     background: linear-gradient(180deg, rgba(41, 41, 41, 0.4) 0%, rgba(53, 58, 64, 0.95) 5%);
 }
-
 
 .nav-tabs-wrapper {
     display: flex;
     height: 58px;
-
 }
-
 .employee-nav-tabs .nav-tab-item {
     flex: 1;
     padding: 0 1rem;
     color: var(--bs-gray-700);
     text-decoration: none;
     border-top: 3px solid transparent;
-    background: transparent;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -137,150 +106,86 @@
     white-space: nowrap;
     font-weight: 500;
     position: relative;
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
+    border-top-left-radius: var(--radius-sm);
+    border-top-right-radius: var(--radius-sm);
 }
-
 [data-theme="dark"] .employee-nav-tabs .nav-tab-item {
     color: var(--bs-gray-400);
 }
 
-/* --- Стили для иконок --- */
+/* Icon Styles (Common) */
 .nav-tab-item .icon-wrapper {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-inline-end: 0.5rem;
 }
-
-/* По умолчанию показываем контурную иконку, а заполненную скрываем */
-.nav-tab-item .icon-fill {
-    display: none;
-}
-.nav-tab-item .icon-outline {
-    display: inline-block;
-}
-
-/* Для активной вкладки делаем наоборот */
-.nav-tab-item.active .icon-fill {
-    display: inline-block;
-}
-.nav-tab-item.active .icon-outline {
-    display: none;
-}
-
-
-
+.nav-tab-item .icon-fill { display: none; }
+.nav-tab-item .icon-outline { display: inline-block; }
+.nav-tab-item.active .icon-fill { display: inline-block; }
+.nav-tab-item.active .icon-outline { display: none; }
 .employee-nav-tabs .nav-tab-item.active {
     color: var(--bs-primary);
     border-top-color: rgba(var(--bs-primary-rgb), 0.8);
     background: rgba(var(--bs-primary-rgb), 0.03);
     font-weight: 700;
-    border-radius: 3px;
-
 }
-
 .employee-nav-tabs .nav-tab-item i {
     font-size: 1.125rem;
 }
 
-/* Main Content */
+/* Main Content (Base styles) */
 .employee-main-content {
     margin-top: 56px;
     margin-bottom: 58px;
     min-height: calc(100vh - 58px - 56px);
     background: var(--bs-gray-50);
 }
-
 [data-theme="dark"] .employee-main-content {
     background: #191d1e;
 }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+.employee-main-content.animating-in .container-fluid { animation: fadeIn 0.3s ease-out forwards; }
+.employee-main-content.animating-out .container-fluid { animation: fadeOut 0.2s ease-in forwards; }
 
-@keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-10px); }
-}
 
-.employee-main-content.animating-in .container {
-    /* Анимация появления контента */
-    animation: fadeIn 0.3s ease-out forwards;
-}
-
-.employee-main-content.animating-out .container {
-    /* Анимация исчезновения контента */
-    animation: fadeOut 0.2s ease-in forwards;
-}
-/* Mobile Responsive */
 @media (max-width: 767px) {
-    /* Keep text labels on mobile */
-
     .employee-nav-tabs:before {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
+        border-top-left-radius: var(--radius-sm);
+        border-top-right-radius: var(--radius-sm);
     }
     .employee-nav-tabs .nav-tab-item {
         flex-direction: column;
         font-size: 0.675rem;
-        padding: 0.5rem 0.75rem 1rem;
+        padding: 0.75rem 0.75rem 1rem;
         align-items: center;
-
-
     }
-
-    .employee-nav-tabs .nav-tab-item i{
-        margin: 0!important;
-        align-items: center;
-
-    }
-    .nav-tab-item .icon-wrapper {
+    .employee-nav-tabs .nav-tab-item i, .nav-tab-item .icon-wrapper {
         margin: 0 !important;
         align-items: center;
-
     }
-
     .employee-navbar .user-name {
         display: none !important;
     }
-
-    /* Full width tabs on mobile */
     .nav-tabs-wrapper {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-
     }
-
     .nav-tabs-wrapper::-webkit-scrollbar {
         display: none;
     }
 }
 
 
-
-[dir="rtl"] .user-menu-toggle i.bi-chevron-down {
-    margin-right: 0.25rem;
-    margin-left: 0;
-}
-
-[dir="rtl"] .dropdown-item i {
-    margin-left: 0.5rem;
-    margin-right: 0;
-}
-
-/* Theme Toggle and Language Switch in navbar */
-
+[dir="rtl"] .user-menu-toggle i.bi-chevron-down { margin-right: 0.25rem; margin-left: 0; }
+[dir="rtl"] .dropdown-item i { margin-left: 0.5rem; margin-right: 0; }
 .employee-navbar .language-switch .dropdown-toggle{
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
 }
-
-
 .employee-navbar .theme-toggle-icon{
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -289,31 +194,79 @@
     height: 31px;
     width: 31px;
 }
-.employee-navbar .theme-toggle-icon .bi-moon-stars{
-    color: #4800a5;
-}
-/* Smooth transitions */
-* {
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+* { transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+@media (hover: hover) {
+    .employee-navbar .language-switch .dropdown-toggle:hover { background: rgba(255, 255, 255, 0.2); }
+    .employee-nav-tabs .nav-tab-item:hover { color: var(--bs-primary); }
+    .employee-navbar .navbar-brand:hover .app-name { background: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
+    .employee-navbar .user-menu-toggle:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.5); }
 }
 
-@media (hover: hover) {
-    .employee-navbar .language-switch .dropdown-toggle:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
+/* --- 2. NEW DESKTOP STYLES (min-width: 768px) --- */
+@media (min-width: 768px) {
+    /* Reposition the Nav Container to be a Sidebar */
+    .employee-nav-tabs {
+        top: 56px; /* Position below the top navbar */
+        bottom: 0;
+        left: 0;
+        width: 80px; /* Set a fixed width for the sidebar */
+        transform: none; /* Reset the bottom bar centering */
+        max-width: none;
+        box-shadow: 1px 0 14px 1px rgba(0,0,0,0.1);
     }
-    .employee-nav-tabs .nav-tab-item:hover {
-        color: var(--bs-primary);
-        background: rgba(var(--bs-primary-rgb), 0.05);
-        text-decoration: none;
+    .employee-nav-tabs:before {
+        /* Disable the bottom bar background effect */
+        display: none;
     }
-    /* Logo hover effect */
-    .employee-navbar .navbar-brand:hover .app-name {
-        background: rgba(255, 255, 255, 0.2);
-        transform: scale(1.05);
+
+    /* Change the Nav Items to a vertical layout */
+    .nav-tabs-wrapper {
+        flex-direction: column;
+        height: 100%;
+        justify-content: flex-start;
+        padding-top: 1rem;
     }
-    .employee-navbar .user-menu-toggle:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.5);
+    .employee-nav-tabs .nav-tab-item {
+        flex: 0 0 auto; /* Stop items from growing */
+        flex-direction: column;
+        width: calc(100% - 0.5rem); /* Full width minus margin */
+        height: 70px;
+        margin: 0.25rem;
+        border-radius: var(--radius-md); /* Rounded corners for the "pill" effect */
+        border-top: none; /* IMPORTANT: Remove the top border from mobile */
+        font-size: 0.75rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+
+    }
+    .employee-nav-tabs .nav-tab-item i, .nav-tab-item .icon-wrapper {
+        margin-right: 0; /* Reset margin for vertical layout */
+        margin-bottom: 0.25rem;
+    }
+
+    /* Create the new "Modern" Active State */
+    .employee-nav-tabs .nav-tab-item.active {
+        border-top-color: transparent; /* Ensure top border is gone */
+        /*background-color: rgba(var(--bs-primary-rgb), 0.1); !* Soft background color *!*/
+    }
+
+    /* Adjust Main Content to make space for the sidebar */
+    .employee-main-content {
+        margin-left: 80px; /* Width of the sidebar */
+        margin-bottom: 0; /* Reset margin from the bottom bar */
+    }
+    [data-theme="dark"] .nav-tabs-wrapper{
+        background-color: var(--bs-gray-900);
+    }
+    /* --- RTL Support for Desktop Sidebar --- */
+    [dir="rtl"] .employee-nav-tabs {
+        left: auto;
+        right: 0;
+        border-right: none;
+        box-shadow: -1px 0 14px 1px rgba(0,0,0,0.1);
+    }
+    [dir="rtl"] .employee-main-content {
+        margin-left: 0;
+        margin-right: 80px;
     }
 }
