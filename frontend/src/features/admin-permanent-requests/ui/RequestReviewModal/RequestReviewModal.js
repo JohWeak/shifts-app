@@ -32,9 +32,9 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
             setLoadingShifts(true);
             // Загружаем смены для позиции сотрудника
             const response = await constraintAPI.getPositionShifts(
-                request.employee?.default_position_id
+                request.employee?.defaultPosition?.pos_id
             );
-
+            console.log('loadShiftDetails response:', response);
             const shifts = response.data?.shifts || [];
             const shiftsMap = {};
             shifts.forEach(shift => {
