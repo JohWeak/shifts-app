@@ -286,19 +286,6 @@ const getPendingRequests = async (req, res) => {
 // Get all permanent constraint requests with filters
 const getAllPermanentRequests = async (req, res) => {
 
-    // --- НАЧАЛО БЛОКА ОТЛАДКИ ---
-    console.log('--- Debugging getAllPermanentRequests ---');
-    console.log('Inspecting model: PermanentConstraintRequest', !!PermanentConstraintRequest);
-    console.log('Inspecting model: Employee', !!Employee);
-    console.log('Inspecting model: Position', !!Position); // <--- Самый важный лог
-    console.log('Inspecting model: Worksite', !!WorkSite); // <--- И этот тоже
-
-    // Более детальный лог, чтобы увидеть, что это за объект
-    console.log('Type of Position:', typeof Position, Position);
-    console.log('Type of Worksite:', typeof WorkSite, WorkSite);
-    console.log('--- End of Debugging Block ---');
-    // --- КОНЕЦ БЛОКА ОТЛАДКИ ---
-
     try {
         const { status } = req.query;
         const whereClause = status ? { status } : {};
