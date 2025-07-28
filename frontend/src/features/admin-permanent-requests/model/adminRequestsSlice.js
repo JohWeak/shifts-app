@@ -1,6 +1,6 @@
 // frontend/src/features/admin-permanent-requests/model/adminRequestsSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { constraintAPI } from 'shared/api/apiService';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {constraintAPI} from 'shared/api/apiService';
 
 export const fetchAllRequests = createAsyncThunk(
     'adminRequests/fetchAll',
@@ -49,6 +49,7 @@ const adminRequestsSlice = createSlice({
                 state.loading = false;
                 state.items = action.payload;
                 state.pendingCount = action.payload.filter(r => r.status === 'pending').length;
+
             })
             .addCase(fetchAllRequests.rejected, (state, action) => {
                 state.loading = false;

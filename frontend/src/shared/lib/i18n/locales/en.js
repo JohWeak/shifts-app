@@ -1,5 +1,21 @@
 // frontend/src/shared/lib/i18n/locales/en.js
 export const en = {
+    admin: {
+        requests: {
+            title: "Permanent Requests",
+            employee: "Employee",
+            position: "Position",
+            worksite: "Work Site",
+            status: "Status",
+            sentAt: "Sent At",
+            reviewedAt: "Reviewed At",
+            pending: "Pending",
+            pendingRequests: "Pending Requests",
+            processedRequests: "Processed Requests",
+            noRequests: "No Requests Found",
+            noRequestsMessage: "When employees submit permanent constraint requests, they will appear here for review."
+        }
+    },
     app: {
         name: 'Schedule System',
     },

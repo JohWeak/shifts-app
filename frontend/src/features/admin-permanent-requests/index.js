@@ -17,7 +17,10 @@ import './index.css';
 const AdminPermanentRequests = () => {
     const { t, locale } = useI18n();
     const dispatch = useDispatch();
-    const { items: requests, loading, error } = useSelector(state => state.adminRequests);
+
+    const { items: requests, loading, error } = useSelector(state => {
+        return state.adminRequests;
+    });
 
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [showReviewModal, setShowReviewModal] = useState(false);
@@ -32,17 +35,17 @@ const AdminPermanentRequests = () => {
 
     // Сортировка для pending запросов (старые первые)
     const {
-        items: sortedPendingRequests,
+        sortedItems: sortedPendingRequests, // <-- ИСПРАВЛЕНО: используем правильное имя свойства
         requestSort: requestPendingSort,
         sortConfig: pendingSortConfig
-    } = useSortableData(pendingRequests, { key: 'requested_at', direction: 'asc' });
+    } = useSortableData(pendingRequests, { field: 'requested_at', order: 'ASC' }); // field/order
 
-    // Сортировка для обработанных запросов (новые первые)
+// Сортировка для обработанных запросов
     const {
-        items: sortedProcessedRequests,
+        sortedItems: sortedProcessedRequests, // <-- ИСПРАВЛЕНО: используем правильное имя свойства
         requestSort: requestProcessedSort,
         sortConfig: processedSortConfig
-    } = useSortableData(processedRequests, { key: 'reviewed_at', direction: 'desc' });
+    } = useSortableData(processedRequests, { field: 'reviewed_at', order: 'DESC' });
 
     const handleRequestClick = (request) => {
         setSelectedRequest(request);
@@ -86,7 +89,7 @@ const AdminPermanentRequests = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {requests.map(request => (
+                {requests && requests.map(request => (
                     <tr
                         key={request.id}
                         onClick={() => handleRequestClick(request)}
