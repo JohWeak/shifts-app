@@ -521,6 +521,7 @@ export const en = {
         settings: 'Settings',
         title: 'Navigation',
         workplace: 'Workplace',
+        requests: 'Requests',
     },
     notifications: {
         constraintsSaved: 'Constraints saved successfully',
@@ -634,7 +635,8 @@ export const en = {
         confirmUpdate: {
             title: 'Update Request',
             message: 'Are you sure you want to update this request? The previous request will be replaced.'
-        }
+        },
+        deleteSuccess: 'Request deleted successfully',
 
     },
     reports: {

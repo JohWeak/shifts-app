@@ -32,7 +32,8 @@ const requestsSlice = createSlice({
         items: [],
         loading: false,
         loaded: false,
-        error: null
+        error: null,
+        loadingRequestId: null
     },
     reducers: {
         addNewRequest: (state, action) => {
@@ -47,6 +48,9 @@ const requestsSlice = createSlice({
         },
         removeRequest: (state, action) => {
             state.items = state.items.filter(item => item.id !== action.payload);
+        },
+        setRequestLoading: (state, action) => {
+            state.loadingRequestId = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -70,5 +74,5 @@ const requestsSlice = createSlice({
     }
 });
 
-export const { addNewRequest, updateRequest, removeRequest } = requestsSlice.actions;
+export const { addNewRequest, updateRequest, removeRequest, setRequestLoading } = requestsSlice.actions;
 export default requestsSlice.reducer;

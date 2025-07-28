@@ -1,0 +1,79 @@
+/* frontend/src/features/admin-permanent-requests/index.css */
+.admin-permanent-requests .requests-table {
+    font-size: 0.875rem;
+}
+
+.admin-permanent-requests .request-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.admin-permanent-requests .request-row:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .admin-permanent-requests .request-row:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.css */
+.admin-permanent-requests .request-employee-info .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: var(--bs-gray-100);
+    border-radius: 0.5rem;
+}
+
+.admin-permanent-requests .constraints-review-box {
+    padding: 1rem;
+    background-color: var(--bs-light);
+    border-radius: 0.5rem;
+}
+
+.admin-permanent-requests .day-constraints-review {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--bs-gray-300);
+}
+
+.admin-permanent-requests .day-constraints-review:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.admin-permanent-requests .day-constraints-review .day-name {
+    min-width: 100px;
+    color: var(--bs-gray-800);
+}
+
+.admin-permanent-requests .constraints-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-permanent-requests .constraint-badge {
+    background-color: var(--bs-danger);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.813rem;
+    font-weight: 500;
+}
+
+@media (max-width: 576px) {
+    .admin-permanent-requests .request-employee-info .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-permanent-requests .day-constraints-review {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

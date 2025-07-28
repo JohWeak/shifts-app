@@ -19,6 +19,8 @@ import EmployeeSchedule from '../features/employee-schedule';
 import EmployeeConstraints from '../features/employee-constraints';
 import EmployeeRequests from '../features/employee-requests';
 import EmployeeArchive from '../features/employee-archive';
+import EmployeeManagement from 'features/admin-employee-management'
+import EmployeeDashboard from "../features/employee-dashboard";
 
 import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import AdminDashboard from '../features/admin-dashboard';
@@ -27,8 +29,8 @@ import AlgorithmSettings from '../features/admin-algorithm-settings';
 import SystemSettings from '../features/admin-system-settings';
 import WorkplaceSettings from '../features/admin-workplace-settings';
 import Reports from '../features/admin-reports';
-import EmployeeManagement from 'features/admin-employee-management'
-import EmployeeDashboard from "../features/employee-dashboard";
+import AdminPermanentRequests from '../features/admin-permanent-requests';
+
 import {ProtectedRoute} from '../shared/lib/auth/ProtectedRoute';
 import './App.css';
 /**
@@ -71,6 +73,8 @@ const router = createBrowserRouter([
             { path: "employees", element: <EmployeeManagement /> },
             { path: "workplace", element: <WorkplaceSettings /> },
             { path: "reports", element: <Reports /> },
+            { path: "permanent-requests", element:<AdminPermanentRequests /> },
+
             { path: "my-employee-profile", element: <EmployeeLayout /> }, // Админ как работник
 
         ],

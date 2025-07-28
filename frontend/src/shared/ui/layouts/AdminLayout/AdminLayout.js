@@ -10,7 +10,7 @@ import {
     Badge
 } from 'react-bootstrap';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import { logout } from 'features/auth/model/authSlice';
 import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
@@ -29,6 +29,8 @@ const AdminLayout = () => {
     const [isClosing, setIsClosing] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1592);
     const dispatch = useDispatch();
+    const { pendingCount } = useSelector(state => state.adminRequests);
+
 
     const handleLogout = () => {
         dispatch(logout()); // Диспатчим экшен
@@ -104,7 +106,14 @@ const AdminLayout = () => {
             icon: 'graph-up-arrow',
             path: '/admin/reports',
             badge: null
-        }
+        },
+        {
+            key: 'requests',
+            label: t('navigation.requests'),
+            icon: 'clipboard-check',
+            path: '/admin/permanent-requests',
+            badge: pendingCount > 0 ? pendingCount : null
+        },
     ];
 
     const currentPath = location.pathname;

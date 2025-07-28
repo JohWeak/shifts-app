@@ -124,6 +124,9 @@ export const constraintAPI = {
 
     deletePermanentRequest: (requestId) =>
         api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_REQUEST(requestId)),
+
+    getPositionShifts: (positionId) =>
+        api.get(`/api/positions/${positionId}/shifts`),
 };
 
 export const positionAPI = {
@@ -150,6 +153,7 @@ export const updatePositionShiftColor = async (shiftId, color) => {
     });
     return response.data;
 };
+
 
 // Добавляем объединенный экспорт в конце файла
 export const apiService = {

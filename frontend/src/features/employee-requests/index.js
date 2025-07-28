@@ -4,7 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Container, Card, Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { addNotification } from 'app/model/notificationsSlice';
-import {fetchMyRequests, addNewRequest, updateRequest, deleteRequest, removeRequest} from './model/requestsSlice';
+import {
+    fetchMyRequests,
+    addNewRequest,
+    updateRequest,
+    deleteRequest,
+    removeRequest,
+    setRequestLoading
+} from './model/requestsSlice';
 import { constraintAPI } from 'shared/api/apiService';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -37,45 +44,47 @@ const EmployeeRequests = () => {
 
     const handleSubmitSuccess = async (optimisticRequest, requestData, editingRequestId = null) => {
         setShowForm(false);
-        setEditingRequest(null);
-
-        // Если это редактирование, не добавляем оптимистичный запрос
-        if (!editingRequestId) {
-            dispatch(addNewRequest(optimisticRequest));
-        }
 
         try {
-            // Если редактируем, сначала удаляем старый запрос
             if (editingRequestId) {
+                // При редактировании показываем загрузку для существующего запроса
+                dispatch(setRequestLoading(editingRequestId));
+
+                // Удаляем старый запрос
                 await dispatch(deleteRequest(editingRequestId)).unwrap();
-            }
 
-            // Отправляем новый запрос
-            const response = await constraintAPI.submitPermanentRequest(requestData);
+                // Отправляем новый запрос
+                const response = await constraintAPI.submitPermanentRequest(requestData);
 
-            if (editingRequestId) {
-                // При редактировании просто добавляем новый запрос
+                // Добавляем новый запрос
                 dispatch(addNewRequest(response.data));
+
+                dispatch(addNotification({
+                    type: 'success',
+                    message: t('requests.updateSuccess')
+                }));
             } else {
-                // При создании заменяем оптимистичный запрос реальным
+                // Для нового запроса - существующая логика
+                dispatch(addNewRequest(optimisticRequest));
+
+                const response = await constraintAPI.submitPermanentRequest(requestData);
+
                 dispatch(updateRequest({
                     tempId: optimisticRequest.id,
                     realRequest: response.data
                 }));
-            }
 
-            dispatch(addNotification({
-                type: 'success',
-                message: editingRequestId
-                    ? t('requests.updateSuccess')
-                    : t('requests.submitSuccess')
-            }));
+                dispatch(addNotification({
+                    type: 'success',
+                    message: t('requests.submitSuccess')
+                }));
+            }
         } catch (error) {
-            // Если это было редактирование и произошла ошибка, перезагружаем список
             if (editingRequestId) {
+                // При ошибке редактирования убираем индикатор загрузки
+                dispatch(setRequestLoading(null));
                 dispatch(fetchMyRequests());
             } else {
-                // Удаляем оптимистичный запрос при ошибке
                 dispatch(removeRequest(optimisticRequest.id));
             }
 
@@ -84,11 +93,18 @@ const EmployeeRequests = () => {
                 type: 'error',
                 message: errorMessage
             }));
+        } finally {
+            setEditingRequest(null);
         }
     };
 
     const handleEditRequest = (request) => {
         if (request.status !== 'pending') return;
+
+        // Закрываем детали запроса, если они открыты
+        setSelectedRequest(null);
+
+        // Устанавливаем редактируемый запрос и открываем форму
         setEditingRequest(request);
         setShowForm(true);
     };
@@ -96,6 +112,12 @@ const EmployeeRequests = () => {
     const handleDeleteRequest = async (request) => {
         try {
             await dispatch(deleteRequest(request.id)).unwrap();
+
+            // Если удаляем из деталей, закрываем их
+            if (selectedRequest && selectedRequest.id === request.id) {
+                setSelectedRequest(null);
+            }
+
             dispatch(addNotification({
                 type: 'success',
                 message: t('requests.deleteSuccess')
