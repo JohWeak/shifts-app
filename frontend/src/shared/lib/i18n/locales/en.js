@@ -13,7 +13,23 @@ export const en = {
             pendingRequests: "Pending Requests",
             processedRequests: "Processed Requests",
             noRequests: "No Requests Found",
-            noRequestsMessage: "When employees submit permanent constraint requests, they will appear here for review."
+            noRequestsMessage: "When employees submit permanent constraint requests, they will appear here for review.",
+            includeResponse: 'Include Response',
+            responsePlaceholder: 'Response',
+            reject: 'Reject',
+            approve: 'Approve',
+            rejectMessage: 'Are you sure you want to reject this request?',
+            approveMessage: 'Are you sure you want to approve this request?',
+            rejectSuccess: 'Request rejected successfully!',
+            approveSuccess: 'Request approved successfully!',
+            rejectError: 'Failed to reject request',
+            approveError: 'Failed to approve request',
+            requestedConstraints: 'Requested Constraints',
+            employeeInfo: 'Employee Info',
+            employeeMessage: 'Employee Message',
+            name: 'Name',
+            reviewRequest: 'Review request',
+
         }
     },
     app: {

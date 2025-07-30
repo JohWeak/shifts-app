@@ -1,6 +1,6 @@
 // frontend/src/shared/ui/components/SortableHeader/SortableHeader.js
 import React from 'react';
-import './SortableHeader.css'; // Создадим этот файл для стилей
+import './SortableHeader.css';
 
 const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) => {
     const getSortIcon = () => {
