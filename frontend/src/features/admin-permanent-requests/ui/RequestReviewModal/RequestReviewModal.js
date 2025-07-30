@@ -23,7 +23,7 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
     const [showResponseField, setShowResponseField] = useState(false);
 
     const weekStartsOn = useSelector(state =>
-        state.settings?.scheduleSettings?.week_starts_on || 0
+        state.settings?.systemSettings?.weekStartDay || 0
     );
 
     useEffect(() => {

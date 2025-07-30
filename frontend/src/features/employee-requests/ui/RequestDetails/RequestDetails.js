@@ -20,7 +20,7 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const weekStartsOn = useSelector(state =>
-        state.settings?.scheduleSettings?.week_starts_on || 0
+        state.settings?.systemSettings?.weekStartDay || 0
     );
 
     useEffect(() => {
