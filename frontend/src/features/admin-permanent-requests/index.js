@@ -33,19 +33,22 @@ const AdminPermanentRequests = () => {
     const pendingRequests = requests.filter(r => r.status === 'pending');
     const processedRequests = requests.filter(r => r.status !== 'pending');
 
-    // Сортировка для pending запросов (старые первые)
+    const sortAccessors = {
+        'employee.first_name': (item) => item.employee?.first_name || '',
+        'employee.defaultPosition.pos_name': (item) => item.employee?.defaultPosition?.pos_name || '',
+        'employee.workSite.site_name': (item) => item.employee?.workSite?.site_name || ''
+    };
     const {
-        sortedItems: sortedPendingRequests, // <-- ИСПРАВЛЕНО: используем правильное имя свойства
+        sortedItems: sortedPendingRequests,
         requestSort: requestPendingSort,
         sortConfig: pendingSortConfig
-    } = useSortableData(pendingRequests, { field: 'requested_at', order: 'ASC' }); // field/order
+    } = useSortableData(pendingRequests, { field: 'requested_at', order: 'ASC' }, sortAccessors);
 
-// Сортировка для обработанных запросов
     const {
-        sortedItems: sortedProcessedRequests, // <-- ИСПРАВЛЕНО: используем правильное имя свойства
+        sortedItems: sortedProcessedRequests,
         requestSort: requestProcessedSort,
         sortConfig: processedSortConfig
-    } = useSortableData(processedRequests, { field: 'reviewed_at', order: 'DESC' });
+    } = useSortableData(processedRequests, { field: 'reviewed_at', order: 'DESC' }, sortAccessors);
 
     const handleRequestClick = (request) => {
         setSelectedRequest(request);
@@ -64,27 +67,48 @@ const AdminPermanentRequests = () => {
                 <thead>
                 <tr>
                     <SortableHeader
-                        label={t('admin.requests.employee')}
                         sortKey="employee.first_name"
                         sortConfig={sortConfig}
                         onSort={requestSort}
-                    />
-                    <th>{t('admin.requests.position')}</th>
-                    <th>{t('admin.requests.worksite')}</th>
-                    <th>{t('admin.requests.status')}</th>
+                    >
+                        {t('admin.requests.employee')}
+                    </SortableHeader>
                     <SortableHeader
-                        label={t('admin.requests.sentAt')}
+                        sortKey="employee.defaultPosition.pos_name"
+                        sortConfig={sortConfig}
+                        onSort={requestSort}
+                    >
+                        {t('admin.requests.position')}
+                    </SortableHeader>
+                    <SortableHeader
+                        sortKey="employee.workSite.site_name"
+                        sortConfig={sortConfig}
+                        onSort={requestSort}
+                    >
+                        {t('admin.requests.worksite')}
+                    </SortableHeader>
+                    <SortableHeader
+                        sortKey="status"
+                        sortConfig={sortConfig}
+                        onSort={requestSort}
+                    >
+                        {t('admin.requests.status')}
+                    </SortableHeader>
+                    <SortableHeader
                         sortKey="requested_at"
                         sortConfig={sortConfig}
                         onSort={requestSort}
-                    />
+                    >
+                        {t('admin.requests.sentAt')}
+                    </SortableHeader>
                     {!isPending && (
                         <SortableHeader
-                            label={t('admin.requests.reviewedAt')}
                             sortKey="reviewed_at"
                             sortConfig={sortConfig}
                             onSort={requestSort}
-                        />
+                        >
+                            {t('admin.requests.reviewedAt')}
+                        </SortableHeader>
                     )}
                 </tr>
                 </thead>

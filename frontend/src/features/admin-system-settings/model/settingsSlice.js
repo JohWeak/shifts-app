@@ -1,3 +1,5 @@
+//frontend/src/features/admin-system-settings/model/settingsSlice.js
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { settingsAPI } from 'shared/api/apiService';
 import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
@@ -49,7 +51,7 @@ const settingsSlice = createSlice({
             minRestBetweenShifts: 8,
             // Constraint settings
             maxCannotWorkDays: 2,
-            maxPreferWorkDays: 3,
+            maxPreferWorkDays: 5,
             defaultEmployeesPerShift: 1,
             algorithmMaxTime: 120,
             strictLegalCompliance: true,
