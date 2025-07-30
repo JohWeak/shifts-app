@@ -1,6 +1,6 @@
-// backend/src/models/constraints/permanent-constraint-request.model.js
+// backend/src/models/constraints/permanent-constraint.model.js
 module.exports = (sequelize, DataTypes) => {
-    const PermanentConstraintRequest = sequelize.define('PermanentConstraintRequest', {
+    const PermanentConstraint = sequelize.define('PermanentConstraint', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -14,44 +14,44 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'emp_id'
             }
         },
-        constraints: {
-            type: DataTypes.JSON,
-            allowNull: false,
-            comment: 'Array of {day_of_week, shift_id, constraint_type}'
+        day_of_week: {
+            type: DataTypes.ENUM('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'),
+            allowNull: false
         },
-        message: {
-            type: DataTypes.TEXT,
-            allowNull: true
+        shift_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'position_shifts',
+                key: 'id'
+            }
         },
-        status: {
-            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
-            defaultValue: 'pending'
+        constraint_type: {
+            type: DataTypes.ENUM('cannot_work', 'prefer_work'),
+            allowNull: false
         },
-        admin_response: {
-            type: DataTypes.TEXT,
-            allowNull: true
-        },
-        requested_at: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
-        },
-        reviewed_at: {
-            type: DataTypes.DATE
-        },
-        reviewed_by: {
+        approved_by: {
             type: DataTypes.INTEGER,
             references: {
                 model: 'employees',
                 key: 'emp_id'
             }
+        },
+        approved_at: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        is_active: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
         }
     }, {
-        tableName: 'permanent_constraint_requests',
+        tableName: 'permanent_constraints',
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at'
     });
 
-    return PermanentConstraintRequest;
+
+    return PermanentConstraint;
 };

@@ -368,6 +368,7 @@ const defineAssociations = () => {
                 as: 'shift'
             });
         }
+
     }
 };
 

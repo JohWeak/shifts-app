@@ -9,7 +9,8 @@ const {
     ShiftRequirement,
     WorkSite,
     PermanentConstraintRequest,
-    PermanentConstraint
+    PermanentConstraint,
+    Workday,
 } = db;
 
 const { Op } = require('sequelize');
@@ -436,8 +437,15 @@ const reviewPermanentConstraintRequest = async (req, res) => {
         }
 
         // Get request
-        const request = await PermanentConstraintRequest.findByPk(id);
+        const request = await PermanentConstraintRequest.findByPk(id, {
+            include: [{
+                model: Employee,
+                as: 'employee'
+            }]
+        });
+
         if (!request || request.status !== 'pending') {
+            await transaction.rollback();
             return res.status(404).json({
                 success: false,
                 message: 'Request not found or already processed'
@@ -453,17 +461,36 @@ const reviewPermanentConstraintRequest = async (req, res) => {
         }, { transaction });
 
         // If approved, create permanent constraints
-        if (status === 'approved') {
+        if (status === 'approved' && request.constraints && Array.isArray(request.constraints)) {
+            // Проверяем, что модель PermanentConstraint существует
+            if (!PermanentConstraint) {
+                console.error('PermanentConstraint model not found in db object');
+                await transaction.rollback();
+                return res.status(500).json({
+                    success: false,
+                    message: 'PermanentConstraint model not found'
+                });
+            }
+
             for (const constraint of request.constraints) {
-                await PermanentConstraint.create({
-                    emp_id: request.emp_id,
-                    day_of_week: constraint.day_of_week,
-                    shift_id: constraint.shift_id,
-                    constraint_type: constraint.constraint_type,
-                    approved_by: adminId,
-                    approved_at: new Date(),
-                    is_active: true
-                }, { transaction });
+                try {
+                    await PermanentConstraint.create({
+                        emp_id: request.emp_id,
+                        day_of_week: constraint.day_of_week,
+                        shift_id: constraint.shift_id || null,
+                        constraint_type: constraint.constraint_type,
+                        approved_by: adminId,
+                        approved_at: new Date(),
+                        is_active: true
+                    }, { transaction });
+                } catch (createError) {
+                    console.error('Error creating permanent constraint:', createError);
+                    await transaction.rollback();
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Error creating permanent constraint: ' + createError.message
+                    });
+                }
             }
         }
 
@@ -483,6 +510,8 @@ const reviewPermanentConstraintRequest = async (req, res) => {
         });
     }
 };
+
+
 const getMyPermanentConstraintRequests = async (req, res) => {
     try {
         const empId = req.userId;
