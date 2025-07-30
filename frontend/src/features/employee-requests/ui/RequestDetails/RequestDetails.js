@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Alert } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { constraintAPI } from 'shared/api/apiService';
 import { deleteRequest } from '../../model/requestsSlice';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
+import {getDayIndex, groupConstraintsByDay} from "shared/lib/utils/constraintUtils";
 import './RequestDetails.css';
 
 const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
@@ -17,6 +18,10 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
     const [shiftsData, setShiftsData] = useState({});
     const [loading, setLoading] = useState(true);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const weekStartsOn = useSelector(state =>
+        state.settings?.scheduleSettings?.week_starts_on || 0
+    );
 
     useEffect(() => {
         loadShiftDetails();
@@ -60,35 +65,14 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
         }
     };
 
-    const groupConstraintsByDay = () => {
-        const grouped = {};
-        const daysOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-        if (request.constraints && Array.isArray(request.constraints)) {
-            request.constraints.forEach(constraint => {
-                const dayLower = constraint.day_of_week.toLowerCase();
-                if (!grouped[dayLower]) {
-                    grouped[dayLower] = [];
-                }
-                grouped[dayLower].push(constraint);
-            });
-        }
-
-        const sortedGrouped = {};
-        daysOrder.forEach(day => {
-            if (grouped[day]) {
-                sortedGrouped[day] = grouped[day];
-            }
-        });
-
-        return sortedGrouped;
-    };
 
     if (loading) {
         return <LoadingState />;
     }
 
-    const constraintsByDay = groupConstraintsByDay();
+    const constraintsByDay = groupConstraintsByDay(request.constraints, weekStartsOn);
+
+
     const dayIndices = {
         sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
         thursday: 4, friday: 5, saturday: 6
@@ -182,33 +166,36 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
                             {Object.entries(constraintsByDay).length === 0 ? (
                                 <div className="text-muted">{t('requests.noConstraints')}</div>
                             ) : (
-                                Object.entries(constraintsByDay).map(([day, constraints]) => (
-                                    <div key={day} className="day-constraints">
-                                        <div className="day-name">
-                                            {getDayName(dayIndices[day], t)}
-                                        </div>
-                                        <div className="constraints-list">
-                                            {constraints.map((constraint, index) => (
-                                                <div key={index} className="constraint-item">
-                                                    {constraint.shift_id && shiftsData[constraint.shift_id] ? (
-                                                        <>
-                                                            <span className="shift-name">
-                                                                {shiftsData[constraint.shift_id].shift_name}
-                                                            </span>
-                                                            <span className="constraint-type cannot-work">
-                                                                {t('constraints.cannotWork')}
-                                                            </span>
-                                                        </>
-                                                    ) : (
-                                                        <span className="constraint-type cannot-work full-day">
-                                                            {t('requests.wholeDay')}
+                                Object.entries(constraintsByDay).map(([day, constraints]) => {
+                                    const dayIndex = getDayIndex(day, weekStartsOn);
+                                    return (
+                                        <div key={day} className="day-constraints">
+                                            <div className="day-name">
+                                                {getDayName(dayIndex, t)}
+                                            </div>
+                                            <div className="constraints-list">
+                                                {constraints.map((constraint, index) => (
+                                                    <div key={index} className="constraint-item">
+                                                        {constraint.shift_id && shiftsData[constraint.shift_id] ? (
+                                                            <>
+                                                        <span className="shift-name">
+                                                            {shiftsData[constraint.shift_id].shift_name}
                                                         </span>
-                                                    )}
-                                                </div>
-                                            ))}
+                                                                <span className="constraint-type cannot-work">
+                                                            {t('constraints.cannotWork')}
+                                                        </span>
+                                                            </>
+                                                        ) : (
+                                                            <span className="constraint-type cannot-work full-day">
+                                                        {t('requests.wholeDay')}
+                                                    </span>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                     </div>
