@@ -126,7 +126,7 @@ export const constraintAPI = {
         api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_REQUEST(requestId)),
 
     getPositionShifts: (positionId) =>
-        api.get(`/api/positions/${positionId}/shifts`),
+        api.get(API_ENDPOINTS.POSITIONS.SHIFTS(positionId)),
 };
 
 export const positionAPI = {

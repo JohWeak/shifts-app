@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
         PENDING_COUNT: '/api/constraints/permanent-requests/count',
         REVIEW_REQUEST: (id) => `/api/constraints/permanent-request/${id}/review`,
         DELETE_REQUEST: (id) => `/api/constraints/permanent-request/${id}`,
+
     },
     SETTINGS: {
         SYSTEM: '/api/settings/system',
@@ -62,6 +63,7 @@ export const API_ENDPOINTS = {
     },
     POSITIONS: {
         BY_SITE: (siteId) => `/api/sites/${siteId}/positions`,
-        DETAILS: (positionId) => `/api/positions/${positionId}`
+        DETAILS: (positionId) => `/api/positions/${positionId}`,
+        SHIFTS: (positionId) => `/api/positions/${positionId}/shifts`,
     },
 };

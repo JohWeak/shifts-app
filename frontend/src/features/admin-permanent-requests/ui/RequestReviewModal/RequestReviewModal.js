@@ -34,6 +34,7 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
             const response = await constraintAPI.getPositionShifts(
                 request.employee?.defaultPosition?.pos_id
             );
+            console.log('request:', request)
             console.log('loadShiftDetails response:', response);
             const shifts = response.data?.shifts || [];
             const shiftsMap = {};
