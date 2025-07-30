@@ -29,6 +29,8 @@ export const en = {
             employeeMessage: 'Employee Message',
             name: 'Name',
             reviewRequest: 'Review request',
+            reviewedBy: 'Reviewed By',
+            response: 'Response',
 
         }
     },
@@ -913,6 +915,7 @@ export const en = {
             timeExample: 'Time Example',
             timeFormat: 'Time Format',
             timeFormatHint: 'Choose between 24-hour or 12-hour time format',
+            title: 'Display Settings',
         },
         positions: {
             active: 'Active',
