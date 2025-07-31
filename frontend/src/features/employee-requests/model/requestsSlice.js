@@ -33,7 +33,8 @@ const requestsSlice = createSlice({
         loading: false,
         loaded: false,
         error: null,
-        loadingRequestId: null
+        loadingRequestId: null,
+        lastViewedAt: localStorage.getItem('requests_last_viewed') || null
     },
     reducers: {
         addNewRequest: (state, action) => {
@@ -51,6 +52,11 @@ const requestsSlice = createSlice({
         },
         setRequestLoading: (state, action) => {
             state.loadingRequestId = action.payload;
+        },
+        markAsViewed: (state) => {
+            const now = new Date().toISOString();
+            state.lastViewedAt = now;
+            localStorage.setItem('requests_last_viewed', now);
         }
     },
     extraReducers: (builder) => {
@@ -73,6 +79,23 @@ const requestsSlice = createSlice({
             });
     }
 });
+// Селектор для подсчета новых изменений
+export const selectNewUpdatesCount = (state) => {
+    const { items, lastViewedAt } = state.requests;
+    if (!lastViewedAt) return items.filter(r => r.status !== 'pending').length;
 
-export const { addNewRequest, updateRequest, removeRequest, setRequestLoading } = requestsSlice.actions;
+    return items.filter(r =>
+        r.status !== 'pending' &&
+        r.reviewed_at &&
+        new Date(r.reviewed_at) > new Date(lastViewedAt)
+    ).length;
+};
+export const {
+    addNewRequest,
+    updateRequest,
+    removeRequest,
+    setRequestLoading,
+    markAsViewed
+} = requestsSlice.actions;
+
 export default requestsSlice.reducer;

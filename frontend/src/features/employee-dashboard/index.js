@@ -1,23 +1,26 @@
 // frontend/src/features/employee-dashboard/index.js
 import React, {useEffect} from 'react';
+import {useSelector} from "react-redux";
 import {useNavigate} from 'react-router-dom';
 import {Container, Row, Col, Card} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useEmployeeData} from './hooks/useEmployeeData';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import './index.css';
 import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
+import {selectNewUpdatesCount} from "../employee-requests/model/requestsSlice";
+import './index.css';
+
 
 const EmployeeDashboard = () => {
     const {t} = useI18n();
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 567px)');
     const {
-        personalSchedule, // Получаем данные напрямую
+        personalSchedule,
         constraints,
         dashboardStats,
-        loadConstraints, // Оставляем, так как ограничения грузятся отдельно
+        loadConstraints,
         setDashboardStats,
     } = useEmployeeData();
 
@@ -79,10 +82,12 @@ const EmployeeDashboard = () => {
             thisWeekShifts: thisWeekShifts.length,
             nextShift: thisWeekShifts[0] || null,
             totalHoursThisWeek: thisWeekShifts.reduce((sum, shift) => sum + (shift.duration || 0), 0),
-            constraintsSubmitted: areConstraintsSubmitted, // Используем нашу новую переменную
+            constraintsSubmitted: areConstraintsSubmitted,
         };
     };
 
+    const newRequestUpdates = useSelector(selectNewUpdatesCount);
+    console.log('newRequestUpdates',newRequestUpdates);
 
     const dashboardCards = [
         {
@@ -94,7 +99,7 @@ const EmployeeDashboard = () => {
             path: '/employee/schedule',
             stats: dashboardStats?.thisWeekShifts
                 ? t('employee.dashboard.shiftsThisWeek', {count: dashboardStats.thisWeekShifts})
-                : t('employee.dashboard.noShifts'), // Добавим сообщение, если смен нет
+                : t('employee.dashboard.noShifts'),
         },
         {
             id: 'constraints',
@@ -115,7 +120,8 @@ const EmployeeDashboard = () => {
             icon: 'bi-envelope',
             color: 'warning',
             path: '/employee/requests',
-            badge: 2 // TODO: Get from actual data
+            badge: newRequestUpdates>0? newRequestUpdates : '',
+            highlight: newRequestUpdates>0
         },
         {
             id: 'archive',
@@ -151,13 +157,15 @@ const EmployeeDashboard = () => {
                         <Row className="align-items-center">
                             <Col>
                                 <h5 className="mb-1">{t('employee.dashboard.nextShift')}</h5>
-                                <p className="mb-0">
+                                <div className="mb-0 ">
                                     <strong>{dashboardStats.nextShift.shift_name}</strong>
                                     {' - '}
                                     {new Date(dashboardStats.nextShift.work_date).toLocaleDateString()}
                                     {' '}
+                                    <p className="d-inline-block">
                                     ({dashboardStats.nextShift.start_time} - {dashboardStats.nextShift.end_time})
-                                </p>
+                                    </p>
+                                </div>
                             </Col>
                             <Col xs="auto">
                                 <i className="bi bi-clock-history fs-1 text-primary"></i>
