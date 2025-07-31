@@ -10,6 +10,7 @@ import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import { groupConstraintsByDay, getDayIndex } from 'shared/lib/utils/constraintUtils';
+import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
 import './RequestReviewModal.css';
 
 const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
@@ -21,6 +22,10 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
     const [shiftsData, setShiftsData] = useState({});
     const [adminResponse, setAdminResponse] = useState('');
     const [showResponseField, setShowResponseField] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState(null);
+    const [showRevertModal, setShowRevertModal] = useState(false);
+    const [revertReason, setRevertReason] = useState('');
 
     const weekStartsOn = useSelector(state =>
         state.settings?.systemSettings?.weekStartDay || 0
@@ -53,6 +58,51 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
             console.error('Error loading shifts:', error);
         } finally {
             setLoadingShifts(false);
+        }
+    };
+
+    const handleReviewClick = (status) => {
+        setConfirmAction(status);
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmReview = async () => {
+        setShowConfirmModal(false);
+        await handleReview(confirmAction);
+    };
+
+    const handleRevertToPending = async () => {
+        if (!revertReason.trim()) {
+            dispatch(addNotification({
+                type: 'error',
+                message: t('admin.requests.revertReasonRequired')
+            }));
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            await dispatch(reviewRequest({
+                requestId: request.id,
+                status: 'pending',
+                adminResponse: `Returned for review: ${revertReason.trim()}`
+            })).unwrap();
+
+            dispatch(addNotification({
+                type: 'success',
+                message: t('admin.requests.revertedSuccess')
+            }));
+
+            setShowRevertModal(false);
+            onReviewComplete();
+        } catch (error) {
+            dispatch(addNotification({
+                type: 'error',
+                message: error || t('admin.requests.revertError')
+            }));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -249,7 +299,56 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                         </Button>
                     </>
                 )}
+                {request.status !== 'pending' && (
+                    <Button
+                        variant="warning"
+                        onClick={() => setShowRevertModal(true)}
+                        disabled={loading}
+                    >
+                        {t('admin.requests.revertToPending')}
+                    </Button>
+                )}
             </Modal.Footer>
+            <ConfirmationModal
+                show={showConfirmModal}
+                onHide={() => setShowConfirmModal(false)}
+                onConfirm={handleConfirmReview}
+                title={t(`admin.requests.confirm${confirmAction === 'approved' ? 'Approve' : 'Reject'}`)}
+                message={t(`admin.requests.confirm${confirmAction === 'approved' ? 'Approve' : 'Reject'}Message`)}
+                confirmText={t(`admin.requests.${confirmAction === 'approved' ? 'approve' : 'reject'}`)}
+                confirmVariant={confirmAction === 'approved' ? 'success' : 'danger'}
+            />
+
+            <Modal show={showRevertModal} onHide={() => setShowRevertModal(false)} backdrop="static">
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('admin.requests.revertToPending')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group>
+                        <Form.Label>{t('admin.requests.revertReason')}</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={revertReason}
+                            onChange={(e) => setRevertReason(e.target.value)}
+                            placeholder={t('admin.requests.revertReasonPlaceholder')}
+                            required
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowRevertModal(false)}>
+                        {t('common.cancel')}
+                    </Button>
+                    <Button
+                        variant="warning"
+                        onClick={handleRevertToPending}
+                        disabled={!revertReason.trim() || loading}
+                    >
+                        {loading ? <Spinner size="sm" /> : t('admin.requests.revert')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Modal>
     );
 };
