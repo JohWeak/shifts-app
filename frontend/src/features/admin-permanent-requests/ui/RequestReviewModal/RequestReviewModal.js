@@ -309,6 +309,7 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                     </Button>
                 )}
             </Modal.Footer>
+
             <ConfirmationModal
                 show={showConfirmModal}
                 onHide={() => setShowConfirmModal(false)}

@@ -462,18 +462,28 @@ const reviewPermanentConstraintRequest = async (req, res) => {
 
         // If approved, create permanent constraints
         if (status === 'approved' && request.constraints && Array.isArray(request.constraints)) {
-            // Проверяем, что модель PermanentConstraint существует
-            if (!PermanentConstraint) {
-                console.error('PermanentConstraint model not found in db object');
-                await transaction.rollback();
-                return res.status(500).json({
-                    success: false,
-                    message: 'PermanentConstraint model not found'
-                });
-            }
+            // Деактивируем все существующие permanent constraints для этого сотрудника
+            await PermanentConstraint.update(
+                { is_active: false },
+                {
+                    where: { emp_id: request.emp_id },
+                    transaction
+                }
+            );
 
             for (const constraint of request.constraints) {
-                try {
+                // Проверяем существование такого же ограничения
+                const existing = await PermanentConstraint.findOne({
+                    where: {
+                        emp_id: request.emp_id,
+                        day_of_week: constraint.day_of_week,
+                        shift_id: constraint.shift_id || null,
+                        is_active: true
+                    },
+                    transaction
+                });
+
+                if (!existing) {
                     await PermanentConstraint.create({
                         emp_id: request.emp_id,
                         day_of_week: constraint.day_of_week,
@@ -483,13 +493,6 @@ const reviewPermanentConstraintRequest = async (req, res) => {
                         approved_at: new Date(),
                         is_active: true
                     }, { transaction });
-                } catch (createError) {
-                    console.error('Error creating permanent constraint:', createError);
-                    await transaction.rollback();
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Error creating permanent constraint: ' + createError.message
-                    });
                 }
             }
         }
