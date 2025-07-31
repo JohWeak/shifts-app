@@ -543,6 +543,37 @@ const getMyPermanentConstraintRequests = async (req, res) => {
     }
 };
 
+const getMyPermanentConstraints = async (req, res) => {
+    try {
+        const empId = req.userId;
+
+        const constraints = await PermanentConstraint.findAll({
+            where: {
+                emp_id: empId,
+                is_active: true
+            },
+            include: [{
+                model: PositionShift,
+                as: 'shift',
+                attributes: ['id', 'shift_name']
+            }],
+            order: [['day_of_week', 'ASC'], ['shift_id', 'ASC']]
+        });
+
+        res.json({
+            success: true,
+            data: constraints
+        });
+
+    } catch (error) {
+        console.error('Error in getMyPermanentConstraints:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 // Метод для получения смен сотрудника
 const getEmployeeShifts = async (req, res) => {
     try {
@@ -627,6 +658,7 @@ module.exports = {
     getWeeklyConstraintsGrid,
     getPendingRequests,
     getMyPermanentConstraintRequests,
+    getMyPermanentConstraints,
     getEmployeeShifts,
     submitWeeklyConstraints,
     submitPermanentConstraintRequest,

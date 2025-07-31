@@ -14,6 +14,18 @@ export const fetchMyRequests = createAsyncThunk(
     }
 );
 
+export const fetchMyPermanentConstraints = createAsyncThunk(
+    'requests/fetchMyPermanentConstraints',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await constraintAPI.getMyPermanentConstraints();
+            return response.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to load permanent constraints');
+        }
+    }
+);
+
 export const deleteRequest = createAsyncThunk(
     'requests/delete',
     async (requestId, { rejectWithValue }) => {
@@ -30,6 +42,7 @@ const requestsSlice = createSlice({
     name: 'requests',
     initialState: {
         items: [],
+        permanentConstraints: [],
         loading: false,
         loaded: false,
         error: null,
@@ -76,6 +89,9 @@ const requestsSlice = createSlice({
             })
             .addCase(deleteRequest.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload);
+            })
+            .addCase(fetchMyPermanentConstraints.fulfilled, (state, action) => {
+                state.permanentConstraints = action.payload;
             });
     }
 });

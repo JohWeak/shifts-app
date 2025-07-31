@@ -31,6 +31,11 @@ router.delete('/permanent-request/:id',
     constraintController.deletePermanentRequest
 );
 
+router.get('/permanent-constraints/my',
+    verifyToken,
+    constraintController.getMyPermanentConstraints
+);
+
 // Admin routes
 router.get('/permanent-requests',
     verifyToken,

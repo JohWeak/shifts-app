@@ -10,7 +10,7 @@ import {
     updateRequest,
     deleteRequest,
     removeRequest,
-    setRequestLoading
+    setRequestLoading, markAsViewed
 } from './model/requestsSlice';
 import { constraintAPI } from 'shared/api/apiService';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
@@ -35,6 +35,11 @@ const EmployeeRequests = () => {
         if (!loaded && !loading) {
             dispatch(fetchMyRequests());
         }
+
+        // Отмечаем как просмотренные при открытии страницы
+        return () => {
+            dispatch(markAsViewed());
+        };
     }, [dispatch, loaded, loading]);
 
     const validRequests = requests.filter(r => r && r.status);

@@ -2,7 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Container, Navbar, Nav, Spinner, Dropdown } from 'react-bootstrap';
+import {Container, Navbar, Nav, Spinner, Dropdown, Badge} from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
@@ -206,6 +206,20 @@ const EmployeeLayout = () => {
                                 <span className="icon-wrapper">
                                     <i className={`bi bi-${item.icon} icon-outline`}></i>
                                     <i className={`bi bi-${item.iconFill} icon-fill`}></i>
+                                    {item.badge && (
+                                        <Badge
+                                            pill
+                                            bg="danger"
+                                            className="position-absolute"
+                                            style={{
+                                                top: '-5px',
+                                                right: '-10px',
+                                                fontSize: '0.65rem'
+                                            }}
+                                        >
+                                            {item.badge}
+                                        </Badge>
+                                    )}
                                 </span>
                                 <span>{item.label}</span>
                             </Nav.Link>

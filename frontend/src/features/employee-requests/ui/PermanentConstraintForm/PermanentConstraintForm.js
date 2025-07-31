@@ -1,5 +1,6 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.js
 import React, {useState, useEffect, useMemo} from 'react';
+import {useDispatch, useSelector} from "react-redux";
 import {Card, Button, Form, Alert, Toast, ToastContainer} from 'react-bootstrap';
 import {X} from 'react-bootstrap-icons';
 import TextareaAutosize from 'react-textarea-autosize';
@@ -8,20 +9,25 @@ import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
 import {addNotification} from 'app/model/notificationsSlice'; // Для будущих уведомлений
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
-
+import {constraintAPI} from "shared/api/apiService";
+import { fetchMyPermanentConstraints } from '../../model/requestsSlice';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import PermanentConstraintGrid from './PermanentConstraintGrid';
 import './PermanentConstraintForm.css';
-import {constraintAPI} from "../../../../shared/api/apiService";
+
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null }) => {
     const {t} = useI18n();
+    const dispatch = useDispatch();
+
     const {getShiftColor, currentTheme} = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 888px)');
+
+    const permanentConstraints = useSelector(state => state.requests.permanentConstraints);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,8 +41,43 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
     // Загрузка данных
     useEffect(() => {
+        const loadData = async () => {
+            try {
+                setLoading(true);
+
+                // Загружаем смены
+                const shiftsResponse = await constraintAPI.getEmployeeShifts();
+                setShifts(shiftsResponse.data?.shifts || []);
+
+                // Загружаем permanent constraints через Redux
+                await dispatch(fetchMyPermanentConstraints()).unwrap();
+
+            } catch (err) {
+                setError(t('requests.loadError'));
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, [dispatch, t]);
+
+    // Инициализация constraints из permanent constraints
+    useEffect(() => {
+        if (!initialData && permanentConstraints.length > 0) {
+            const constraintsMap = {};
+            permanentConstraints.forEach(constraint => {
+                if (constraint.is_active) {
+                    const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
+                    constraintsMap[key] = constraint.constraint_type;
+                }
+            });
+            setConstraints(constraintsMap);
+        }
+    }, [permanentConstraints, initialData]);
+
+    // Инициализация из initialData для редактирования
+    useEffect(() => {
         if (initialData && initialData.constraints) {
-            // Преобразуем constraints обратно в формат для формы
             const constraintsMap = {};
             initialData.constraints.forEach(constraint => {
                 const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
@@ -49,7 +90,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 setShowMessage(true);
             }
         }
-        console.log('initialData', initialData);
     }, [initialData]);
 
     useEffect(() => {

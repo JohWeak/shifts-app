@@ -106,6 +106,9 @@ export const constraintAPI = {
     submitPermanentRequest: (data) =>
         api.post(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUEST, data),
 
+    getMyPermanentConstraints: () =>
+        api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_CONSTRAINTS_MY),
+
     // Admin: get all permanent requests (with optional status filter)
     getAllPermanentRequests: (params = {}) =>
         api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS_ALL, { params }),
