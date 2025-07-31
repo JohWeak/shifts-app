@@ -32,14 +32,19 @@ module.exports = (sequelize, DataTypes) => {
         },
         approved_by: {
             type: DataTypes.INTEGER,
+            allowNull: true,
             references: {
                 model: 'employees',
                 key: 'emp_id'
             }
         },
+        approved_by_name: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         approved_at: {
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: true
         },
         is_active: {
             type: DataTypes.BOOLEAN,

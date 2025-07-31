@@ -10,7 +10,8 @@ import {
     updateRequest,
     deleteRequest,
     removeRequest,
-    setRequestLoading, markAsViewed
+    setRequestLoading,
+    markAsViewed
 } from './model/requestsSlice';
 import { constraintAPI } from 'shared/api/apiService';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';

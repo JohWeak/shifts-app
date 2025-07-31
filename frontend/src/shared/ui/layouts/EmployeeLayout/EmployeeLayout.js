@@ -8,13 +8,14 @@ import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
-import { selectNewUpdatesCount } from 'features/employee-requests/model/requestsSlice';
 import {
     fetchPersonalSchedule,
     fetchEmployeeArchiveSummary,
     checkScheduleUpdates,
-    fetchEmployeeConstraints
+    fetchEmployeeConstraints,
 } from "features/employee-dashboard/model/employeeDataSlice";
+import { selectNewUpdatesCount, fetchMyRequests } from 'features/employee-requests/model/requestsSlice';
+import DebugReduxState from "../../components/DebugReduxState";
 
 import './EmployeeLayout.css';
 
@@ -26,16 +27,13 @@ const EmployeeLayout = () => {
     const dispatch = useDispatch();
     const [isAnimating, setIsAnimating] = useState(false);
 
-
     useEffect(() => {
         const initialLoad = async () => {
             try {
                 // --- ЭТАП 1: Загружаем критически важные данные ---
                 console.log('[Data Preload] Загрузка персонального расписания...');
-                // .unwrap() позволяет получить результат thunk или поймать ошибку
                 const scheduleAction = await dispatch(fetchPersonalSchedule({})).unwrap();
 
-                // Данные о расписании нужны для загрузки ограничений
                 const weekStart = scheduleAction.data.current?.week?.start;
                 if (weekStart) {
                     console.log('[Data Preload] Загрузка ограничений...');
@@ -46,27 +44,29 @@ const EmployeeLayout = () => {
                 console.log('[Data Preload] Фоновая загрузка сводки по архиву...');
                 dispatch(fetchEmployeeArchiveSummary());
 
-                // Сюда можно добавить загрузку сводки по запросам, если она появится
-                // dispatch(fetchRequestsSummary());
+                // Загружаем запросы для подсчета новых обновлений
+                console.log('[Data Preload] Загрузка запросов...');
+                dispatch(fetchMyRequests());
 
             } catch (error) {
                 console.error("Ошибка при первоначальной загрузке данных:", error);
             }
         };
 
-        // Запускаем асинхронную загрузку
         initialLoad();
 
-        // --- Периодическая проверка обновлений расписания (остается без изменений) ---
         const intervalId = setInterval(() => {
             dispatch(checkScheduleUpdates());
         }, 30000);
 
         return () => clearInterval(intervalId);
-
     }, [dispatch]);
 
+    const requests = useSelector(state => state.requests);
     const newRequestUpdates = useSelector(selectNewUpdatesCount);
+    console.log('Dashboard - Requests state:', requests);
+    console.log('Dashboard - newRequestUpdates:', newRequestUpdates);
+
 
     const navItems = [
         // Добавляем вторую иконку с суффиксом -fill
@@ -207,18 +207,11 @@ const EmployeeLayout = () => {
                                     <i className={`bi bi-${item.icon} icon-outline`}></i>
                                     <i className={`bi bi-${item.iconFill} icon-fill`}></i>
                                     {item.badge && (
-                                        <Badge
-                                            pill
-                                            bg="danger"
-                                            className="position-absolute"
-                                            style={{
-                                                top: '-5px',
-                                                right: '-10px',
-                                                fontSize: '0.65rem'
-                                            }}
-                                        >
+                                        <span className="position-absolute top-5 start-100 translate-middle badge rounded-pill bg-danger"
+                                              style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem' }}>
                                             {item.badge}
-                                        </Badge>
+                                            <span className="visually-hidden">new updates</span>
+                                        </span>
                                     )}
                                 </span>
                                 <span>{item.label}</span>
@@ -233,6 +226,7 @@ const EmployeeLayout = () => {
                 <Container fluid className="px-0">
                     <GlobalAlerts />
                     <Outlet />
+                    {process.env.NODE_ENV === 'development' && <DebugReduxState />}
                 </Container>
             </main>
         </>

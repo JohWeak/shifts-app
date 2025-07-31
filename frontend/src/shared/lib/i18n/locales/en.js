@@ -28,9 +28,16 @@ export const en = {
             employeeInfo: 'Employee Info',
             employeeMessage: 'Employee Message',
             name: 'Name',
-            reviewRequest: 'Review request',
+            reviewRequest: 'Review Request',
             reviewedBy: 'Reviewed By',
-            response: 'Response',
+            response: 'Admin Response',
+            revertToPending: 'Return to Pending',
+            revertReason: 'Reason for Return',
+            revertReasonPlaceholder: 'Please explain why this request is being returned for review...',
+            revertReasonRequired: 'Reason is required when returning request to pending status',
+            revertedSuccess: 'Request returned to pending status successfully',
+            revertError: 'Failed to return request to pending status',
+            revert: 'Return',
 
         }
     },

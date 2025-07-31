@@ -18,8 +18,9 @@ import {useI18n} from "shared/lib/i18n/i18nProvider";
 
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
-import './AdminLayout.css';
 import { setActiveTab, setSelectedScheduleId } from 'features/admin-schedule-management/model/scheduleSlice';
+import { fetchAllRequests } from 'features/admin-permanent-requests/model/adminRequestsSlice';
+import './AdminLayout.css';
 
 const AdminLayout = () => {
     const { t } = useI18n();
@@ -31,6 +32,11 @@ const AdminLayout = () => {
     const dispatch = useDispatch();
     const { pendingCount } = useSelector(state => state.adminRequests);
 
+
+    useEffect(() => {
+        // Загружаем счетчик запросов для админа
+        dispatch(fetchAllRequests());
+    }, [dispatch]);
 
     const handleLogout = () => {
         dispatch(logout()); // Диспатчим экшен

@@ -6,7 +6,8 @@ import {
     fetchEmployeeConstraints,
     fetchEmployeeArchiveSummary,
     checkScheduleUpdates,
-    setDashboardStats, // 1. Импортируем создатель действия
+    selectNewUpdatesCount,
+    setDashboardStats,
 } from '../model/employeeDataSlice';
 
 export const useEmployeeData = () => {

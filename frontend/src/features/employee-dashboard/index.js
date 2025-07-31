@@ -8,7 +8,7 @@ import {useEmployeeData} from './hooks/useEmployeeData';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
-import {selectNewUpdatesCount} from "../employee-requests/model/requestsSlice";
+import { selectNewUpdatesCount } from '../employee-requests/model/requestsSlice';
 import './index.css';
 
 

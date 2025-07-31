@@ -371,7 +371,20 @@ const employeeDataSlice = createSlice({
             });
     }
 });
+export const selectNewUpdatesCount = (state) => {
+    const { items, lastViewedAt } = state.requests;
+    if (!items || items.length === 0) return 0;
 
+    if (!lastViewedAt) {
+        return items.filter(r => r.status !== 'pending').length;
+    }
+
+    return items.filter(r =>
+        r.status !== 'pending' &&
+        r.reviewed_at &&
+        new Date(r.reviewed_at) > new Date(lastViewedAt)
+    ).length;
+};
 export const {
     clearAllCache,
     clearScheduleCache,
