@@ -120,7 +120,7 @@ const EmployeeDashboard = () => {
             icon: 'bi-envelope',
             color: 'warning',
             path: '/employee/requests',
-            badge: newRequestUpdates>0? newRequestUpdates : '',
+            badge: newRequestUpdates>0? newRequestUpdates : null,
             highlight: newRequestUpdates>0
         },
         {

@@ -8,12 +8,14 @@ import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
+import { selectNewUpdatesCount } from 'features/employee-requests/model/requestsSlice';
 import {
     fetchPersonalSchedule,
     fetchEmployeeArchiveSummary,
     checkScheduleUpdates,
     fetchEmployeeConstraints
 } from "features/employee-dashboard/model/employeeDataSlice";
+
 import './EmployeeLayout.css';
 
 const EmployeeLayout = () => {
@@ -64,12 +66,20 @@ const EmployeeLayout = () => {
 
     }, [dispatch]);
 
+    const newRequestUpdates = useSelector(selectNewUpdatesCount);
+
     const navItems = [
         // Добавляем вторую иконку с суффиксом -fill
         { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('navigation.home') },
         { path: '/employee/schedule', icon: 'calendar-week', iconFill: 'calendar-week-fill', label: t('employee.schedule.tabName') },
         { path: '/employee/constraints', icon: 'shield-check', iconFill: 'shield-fill-check', label: t('employee.constraints') },
-        { path: '/employee/requests', icon: 'envelope', iconFill: 'envelope-fill', label: t('employee.requests.title') },
+        {
+            path: '/employee/requests',
+            icon: 'envelope',
+            iconFill: 'envelope-fill',
+            label: t('employee.requests.title'),
+            badge: newRequestUpdates > 0 ? newRequestUpdates : null
+        },
         { path: '/employee/archive', icon: 'archive', iconFill: 'archive-fill', label: t('employee.archive.title') },
     ];
 
