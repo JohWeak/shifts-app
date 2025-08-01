@@ -200,6 +200,21 @@
     float: right;
 }
 
+[dir="rtl"] .form-floating > label {
+    right: 0;
+    left: auto;
+    padding-right: 0.25rem;
+}
+[dir="rtl"] .input-group:not(.has-validation)>.form-floating:not(:last-child)>.form-control{
+    border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+
+}
+
+[dir="rtl"] .input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+    border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+}
+
+
 /* Lists */
 [dir="rtl"] ul,
 [dir="rtl"] ol {

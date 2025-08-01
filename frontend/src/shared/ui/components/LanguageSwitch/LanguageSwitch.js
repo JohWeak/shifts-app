@@ -15,7 +15,7 @@ export const LanguageSwitch = () => {
     const currentLang = languages.find(lang => lang.code === locale);
 
     return (
-        <Dropdown className="language-switch" align="end">
+        <Dropdown className="language-switch" align="start">
             <Dropdown.Toggle variant="outline-secondary" size="sm">
                 <span>{currentLang?.code.toString().toLocaleUpperCase()}</span>
             </Dropdown.Toggle>

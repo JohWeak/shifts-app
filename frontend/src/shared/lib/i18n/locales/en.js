@@ -60,7 +60,7 @@ export const en = {
         signUp: 'Sign Up',
         signedInAs: 'Signed in as',
         username: 'Username',
-        welcome: 'Welcome',
+        welcome: 'Welcome to',
     },
     calendar: {
         weekDays: {

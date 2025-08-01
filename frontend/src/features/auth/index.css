@@ -156,17 +156,26 @@
     justify-content: space-between;
 }
 .auth-form .form-floating >button{
-    border-color: var(--bs-primary)!important;
+    border-color: var(--bs-primary);
 }
 div.auth-body > form > div.mb-3.input-group > button{
-    border-color: var(--bs-gray-400);
+    border-color: var(--bs-gray-200);
+    background-color: var(--bs-gray-50);
+    border-left: none;
 }
 div.auth-body > form > div.mb-3.input-group > button:hover {
-    background-color: var(--bs-gray-200);
     color: var(--bs-primary);
 }
+.auth-container .language-switch .dropdown-toggle:hover {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-gray-400);
+}
+
+
 [data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button{
-    border-color: var(--bs-gray-700);
+    border-color: var(--bs-gray-800);
+    background-color: var(--bs-gray-900);
 }
 [data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button:hover {
     background-color: var(--bs-gray-900);
@@ -188,28 +197,12 @@ div.auth-body > form > div.mb-3.input-group > button:hover {
     color: var(--bs-gray-300);
 }
 
-.auth-container .theme-toggle-icon {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-}
 
-.auth-container .theme-toggle-icon:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-[data-theme="dark"] .auth-container .language-switch .dropdown-toggle,
-[data-theme="dark"] .auth-container .theme-toggle-btn,
-[data-theme="dark"] .auth-container .theme-toggle-icon {
-    background-color: rgba(0, 0, 0, 0.3);
+[data-theme="dark"] .auth-container .language-switch .dropdown-toggle {
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-[data-theme="dark"] .auth-container .language-switch .dropdown-toggle:hover,
-[data-theme="dark"] .auth-container .theme-toggle-btn:hover,
-[data-theme="dark"] .auth-container .theme-toggle-icon:hover {
-    background-color: rgba(0, 0, 0, 0.5);
+[data-theme="dark"] .auth-container .language-switch .dropdown-toggle:hover {
     border-color: rgba(255, 255, 255, 0.3);
     color: white;
 }
