@@ -7,7 +7,7 @@ import {formatDateTime} from 'shared/lib/utils/scheduleUtils';
 import './RequestsList.css';
 
 const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}) => {
-    const {t, locale, direction} = useI18n();
+    const {t, locale} = useI18n();
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
     const processedRequests = requests.filter(r => r.status !== 'pending');

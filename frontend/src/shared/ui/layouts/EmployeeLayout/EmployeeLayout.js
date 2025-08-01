@@ -69,7 +69,6 @@ const EmployeeLayout = () => {
 
 
     const navItems = [
-        // Добавляем вторую иконку с суффиксом -fill
         { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('navigation.home') },
         { path: '/employee/schedule', icon: 'calendar-week', iconFill: 'calendar-week-fill', label: t('employee.schedule.tabName') },
         { path: '/employee/constraints', icon: 'shield-check', iconFill: 'shield-fill-check', label: t('employee.constraints') },
@@ -155,7 +154,7 @@ const EmployeeLayout = () => {
                         <LanguageSwitch />
 
                         {/* User Menu */}
-                        <Dropdown >
+                        <Dropdown align={direction === 'rtl' ? 'start' : 'end'}>
                             <Dropdown.Toggle as={CustomToggle}>
                                 <div className="user-avatar">
                                     <i className="bi bi-person-circle"></i>
