@@ -562,13 +562,38 @@ const getMyPermanentConstraintRequests = async (req, res) => {
             order: [['requested_at', 'DESC']]
         });
 
+        const activeConstraints = await PermanentConstraint.findAll({
+            where: {
+                emp_id: empId,
+                is_active: true
+            }
+        });
+
+        const activeRequestIds = new Set();
+        if (activeConstraints.length > 0) {
+            // Находим какой запрос создал эти активные ограничения
+            const approvedAt = activeConstraints[0].approved_at;
+            requests.forEach(request => {
+                if (request.status === 'approved' &&
+                    request.reviewed_at &&
+                    new Date(request.reviewed_at).getTime() === new Date(approvedAt).getTime()) {
+                    activeRequestIds.add(request.id);
+                }
+            });
+        }
+
+        const requestsWithActiveFlag = requests.map(request => ({
+            ...request.toJSON(),
+            is_active: request.status === 'approved' && activeRequestIds.has(request.id)
+        }));
+
         res.json({
             success: true,
-            data: requests
+            data: requestsWithActiveFlag
         });
 
     } catch (error) {
-        console.error('Error in getMyPermanentConstraintRequests:', error);
+        console.error('Error in getMyPermanentRequests:', error);
         res.status(500).json({
             success: false,
             message: error.message
