@@ -41,6 +41,9 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
     useEffect(() => {
         console.log('[PermanentConstraintForm] Current permanentConstraints from Redux:', permanentConstraints);
+
+
+
     }, [permanentConstraints]);
 
     // Загрузка данных
@@ -268,10 +271,10 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
         const hasActiveConstraints = permanentConstraints && permanentConstraints.some(c => c.is_active);
 
         if (hasActiveConstraints) {
-            return `${t('requests.confirmMessage')} ${t('requests.previousConstraintsWarning')}`;
+            return `${t('requests.confirmSubmit.message')} ${t('requests.previousConstraintsWarning')}`;
         }
 
-        return t('requests.confirmMessage');
+        return t('requests.confirmSubmit.message');
     };
 
     // --- ОТПРАВКА ФОРМЫ ---
@@ -306,7 +309,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
             // Закрываем модальное окно
             setShowConfirm(false);
-            localStorage.removeItem('constraintFormMessage');
+            localStorage.removeItem('permanent_constraint_message');
 
             // Передаем ID редактируемого запроса, если есть
             if (onSubmitSuccess) {
@@ -517,7 +520,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 show={showConfirm}
                 onHide={() => setShowConfirm(false)}
                 onConfirm={handleConfirmSubmit}
-                title={t('requests.confirmSubmit')}
+                title={t('requests.confirmSubmit.title')}
                 message={getConfirmMessage()}
                 confirmText={t('common.submit')}
                 confirmVariant="primary"

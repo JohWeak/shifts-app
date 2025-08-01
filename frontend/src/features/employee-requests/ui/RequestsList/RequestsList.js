@@ -64,15 +64,18 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                             )}
 
                         </div>
+                        <div className="d-flex flex-column gap-2">
                         <StatusBadge
                             status={request.status}
                             text={t(`requests.status.${request.status}`)}
                         />
                         {isInactive && (
-                            <Badge bg="secondary" pill size="sm">
-                                {t('requests.inactive')}
-                            </Badge>
+                            <StatusBadge
+                                status={t('requests.inactive')}
+                                text={t('requests.inactive')}
+                            />
                         )}
+                        </div>
 
                     </div>
 
