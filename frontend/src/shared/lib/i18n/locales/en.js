@@ -683,6 +683,7 @@ export const en = {
         activeProcessedRequests: 'Active Processed Requests',
         inactiveRequests: 'Inactive Requests',
         previousConstraintsWarning: 'Note: Upon approval, your previous constraints will become inactive and will be replaced with the new ones.',
+        confirmMessage: 'Are you sure you want to send this request?',
 
 
     },

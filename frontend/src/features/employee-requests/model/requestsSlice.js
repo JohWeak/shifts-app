@@ -90,8 +90,15 @@ const requestsSlice = createSlice({
             .addCase(deleteRequest.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload);
             })
+            .addCase(fetchMyPermanentConstraints.pending, (state) => {
+                console.log('[requestsSlice] Fetching permanent constraints...');
+            })
             .addCase(fetchMyPermanentConstraints.fulfilled, (state, action) => {
+                console.log('[requestsSlice] Permanent constraints loaded:', action.payload);
                 state.permanentConstraints = action.payload;
+            })
+            .addCase(fetchMyPermanentConstraints.rejected, (state, action) => {
+                console.error('[requestsSlice] Failed to load permanent constraints:', action.payload);
             });
     }
 });

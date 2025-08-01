@@ -19,9 +19,28 @@ export const ConfirmationModal = ({
                                       confirmVariant,
                                   }) => {
     const { t } = useI18n();
+
+    // Добавим отладочное логирование
+    React.useEffect(() => {
+        if (show && message && typeof message === 'object') {
+            console.error('ConfirmationModal received object as message:', message);
+            console.trace('Stack trace:');
+        }
+    }, [show, message]);
+
     const finalConfirmText = confirmText || t('common.confirm');
     const finalCancelText = cancelText || t('common.cancel');
     const finalConfirmVariant = confirmVariant || variant;
+
+    // Безопасное отображение message
+    const safeMessage = React.useMemo(() => {
+        if (!message) return null;
+        if (typeof message === 'string') return message;
+        if (typeof message === 'object' && message.message) return message.message;
+        console.warn('ConfirmationModal: Invalid message type', typeof message, message);
+        return String(message);
+    }, [message]);
+
     return (
         <Modal
             show={show}
@@ -29,17 +48,17 @@ export const ConfirmationModal = ({
             centered
             size={size}
             backdrop={loading ? 'static' : true}
-            className="confirmation-modal" // <-- Шаг 2: Добавляем класс для стилизации
+            className="confirmation-modal"
         >
             <Modal.Header closeButton={!loading}>
                 <Modal.Title className={`text-${variant}`}>
-                    <i className={`bi bi-exclamation-triangle me-2`}></i> {/* Убрали дублирование text-variant */}
+                    <i className={`bi bi-exclamation-triangle me-2`}></i>
                     {title}
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
-                {message && <p className="mb-3">{message}</p>}
+                {safeMessage && <p className="mb-3">{safeMessage}</p>}
                 {children}
             </Modal.Body>
 
@@ -65,7 +84,8 @@ export const ConfirmationModal = ({
                                 size="sm"
                                 role="status"
                                 aria-hidden="true"
-                                className="me-2" />
+                                className="me-2"
+                            />
                             {t('common.loading')}
                         </>
                     ) : (

@@ -39,19 +39,24 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
     const [showHelpToast, setShowHelpToast] = useState(false);
     const toggleHelpToast = () => setShowHelpToast(!showHelpToast);
 
+    useEffect(() => {
+        console.log('[PermanentConstraintForm] Current permanentConstraints from Redux:', permanentConstraints);
+    }, [permanentConstraints]);
+
     // Загрузка данных
     useEffect(() => {
         const loadData = async () => {
             try {
                 setLoading(true);
 
-                // Загружаем смены
-                const shiftsResponse = await constraintAPI.getEmployeeShifts();
-                setShifts(shiftsResponse.data?.shifts || []);
+                // Параллельная загрузка смен и permanent constraints
+                const [shiftsResponse, constraintsResult] = await Promise.all([
+                    constraintAPI.getEmployeeShifts(),
+                    dispatch(fetchMyPermanentConstraints()).unwrap()
+                ]);
 
-                // Загружаем permanent constraints через Redux
-                const constraintsData = await dispatch(fetchMyPermanentConstraints()).unwrap();
-                console.log('[PermanentConstraintForm] Loaded permanent constraints:', constraintsData);
+                setShifts(shiftsResponse.data?.shifts || []);
+                console.log('[PermanentConstraintForm] Data loaded successfully');
 
             } catch (err) {
                 console.error('[PermanentConstraintForm] Error loading data:', err);
@@ -60,26 +65,28 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 setLoading(false);
             }
         };
+
         loadData();
     }, [dispatch, t]);
 
     // Инициализация constraints из permanent constraints
-    useEffect(() => {
-        if (!initialData && permanentConstraints.length > 0) {
-            const constraintsMap = {};
-            permanentConstraints.forEach(constraint => {
-                if (constraint.is_active) {
-                    const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
-                    constraintsMap[key] = constraint.constraint_type;
-                }
-            });
-            setConstraints(constraintsMap);
-        }
-    }, [permanentConstraints, initialData]);
+    // useEffect(() => {
+    //     if (!initialData && permanentConstraints.length > 0) {
+    //         const constraintsMap = {};
+    //         permanentConstraints.forEach(constraint => {
+    //             if (constraint.is_active) {
+    //                 const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
+    //                 constraintsMap[key] = constraint.constraint_type;
+    //             }
+    //         });
+    //         setConstraints(constraintsMap);
+    //     }
+    // }, [permanentConstraints, initialData]);
 
     // Инициализация из initialData для редактирования
     useEffect(() => {
         if (!initialData && permanentConstraints && permanentConstraints.length > 0) {
+            console.log('[PermanentConstraintForm] Initializing from permanent constraints');
             const constraintsMap = {};
 
             // Фильтруем только активные ограничения
@@ -90,11 +97,16 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 // Формируем ключ с правильным форматом дня недели
                 const dayCapitalized = constraint.day_of_week.charAt(0).toUpperCase() +
                     constraint.day_of_week.slice(1).toLowerCase();
-                const key = `${dayCapitalized}-${constraint.shift_id || 'all'}`;
+
+                // Если shift_id есть, используем его, иначе используем 'all' для "весь день"
+                const shiftKey = constraint.shift_id ? constraint.shift_id : 'all';
+                const key = `${dayCapitalized}-${shiftKey}`;
+
+                console.log(`[PermanentConstraintForm] Adding constraint: ${key} = ${constraint.constraint_type}`);
                 constraintsMap[key] = constraint.constraint_type;
             });
 
-            console.log('[PermanentConstraintForm] Initialized constraints map:', constraintsMap);
+            console.log('[PermanentConstraintForm] Final constraints map:', constraintsMap);
             setConstraints(constraintsMap);
         }
     }, [permanentConstraints, initialData]);
@@ -252,9 +264,18 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
         return {};
     };
 
+    const getConfirmMessage = () => {
+        const hasActiveConstraints = permanentConstraints && permanentConstraints.some(c => c.is_active);
+
+        if (hasActiveConstraints) {
+            return `${t('requests.confirmMessage')} ${t('requests.previousConstraintsWarning')}`;
+        }
+
+        return t('requests.confirmMessage');
+    };
 
     // --- ОТПРАВКА ФОРМЫ ---
-    const handleSubmit = async () => {
+    const handleConfirmSubmit = async () => {
         try {
             const constraintsArray = Object.entries(constraints).map(([key, constraint_type]) => {
                 const [day_of_week, shift_id_str] = key.split('-');
@@ -495,19 +516,9 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
             <ConfirmationModal
                 show={showConfirm}
                 onHide={() => setShowConfirm(false)}
-                onConfirm={handleSubmit}
+                onConfirm={handleConfirmSubmit}
                 title={t('requests.confirmSubmit')}
-                message={
-                    <>
-                        {t('requests.confirmMessage')}
-                        {permanentConstraints.some(c => c.is_active) && (
-                            <div className="mt-3 alert alert-warning mb-0">
-                                <i className="bi bi-exclamation-triangle me-2"></i>
-                                {t('requests.previousConstraintsWarning')}
-                            </div>
-                        )}
-                    </>
-                }
+                message={getConfirmMessage()}
                 confirmText={t('common.submit')}
                 confirmVariant="primary"
             />

@@ -18,12 +18,12 @@ router.post('/submit-weekly',
 // Permanent constraint requests - Employee
 router.get('/permanent-requests/my',
     verifyToken,
-    constraintController.getMyPermanentConstraintRequests
+    constraintController.getMyPermanentRequests
 );
 
 router.post('/permanent-request',
     verifyToken,
-    constraintController.submitPermanentConstraintRequest
+    constraintController.submitPermanentRequest
 );
 
 router.delete('/permanent-request/:id',
@@ -52,7 +52,7 @@ router.get('/permanent-requests/count',
 router.put('/permanent-request/:id/review',
     verifyToken,
     isAdmin,
-    constraintController.reviewPermanentConstraintRequest
+    constraintController.reviewPermanentRequest
 );
 
 module.exports = router;

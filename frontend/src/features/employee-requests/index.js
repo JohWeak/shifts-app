@@ -11,7 +11,8 @@ import {
     deleteRequest,
     removeRequest,
     setRequestLoading,
-    markAsViewed
+    markAsViewed,
+    fetchMyPermanentConstraints
 } from './model/requestsSlice';
 import { constraintAPI } from 'shared/api/apiService';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
@@ -33,12 +34,18 @@ const EmployeeRequests = () => {
     const [editingRequest, setEditingRequest] = useState(null);
 
     useEffect(() => {
-        if (!loaded && !loading) {
-            dispatch(fetchMyRequests());
-        }
-        return () => {
-            dispatch(markAsViewed());
+        const loadRequests = async () => {
+            if (!loaded && !loading) {
+                await dispatch(fetchMyRequests());
+                // Также загружаем permanent constraints
+                await dispatch(fetchMyPermanentConstraints());
+            }
         };
+
+        loadRequests();
+
+        // Отмечаем как просмотренные при открытии страницы
+        dispatch(markAsViewed());
     }, [dispatch, loaded, loading]);
 
     const validRequests = requests.filter(r => r && r.status);

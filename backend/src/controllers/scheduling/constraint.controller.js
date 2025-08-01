@@ -336,7 +336,7 @@ const getAllPermanentRequests = async (req, res) => {
 };
 
 // Submit batch permanent constraint request
-const submitPermanentConstraintRequest = async (req, res) => {
+const submitPermanentRequest = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
@@ -392,7 +392,7 @@ const submitPermanentConstraintRequest = async (req, res) => {
 
     } catch (error) {
         await transaction.rollback();
-        console.error('Error in submitPermanentConstraintRequest:', error);
+        console.error('Error in submitPermanentRequest:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -422,7 +422,7 @@ const getUnprocessedRequestsCount = async (req, res) => {
 };
 
 // Review permanent constraint request (Admin)
-const reviewPermanentConstraintRequest = async (req, res) => {
+const reviewPermanentRequest = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
@@ -539,7 +539,7 @@ const reviewPermanentConstraintRequest = async (req, res) => {
 
     } catch (error) {
         await transaction.rollback();
-        console.error('Error in reviewPermanentConstraintRequest:', error);
+        console.error('Error in reviewPermanentRequest:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -548,12 +548,12 @@ const reviewPermanentConstraintRequest = async (req, res) => {
 };
 
 
-const getMyPermanentConstraintRequests = async (req, res) => {
+const getMyPermanentRequests = async (req, res) => {
     try {
         const empId = req.userId;
 
         const requests = await PermanentConstraintRequest.findAll({
-            where: {emp_id: empId},
+            where: { emp_id: empId },
             include: [{
                 model: Employee,
                 as: 'reviewer',
@@ -562,30 +562,53 @@ const getMyPermanentConstraintRequests = async (req, res) => {
             order: [['requested_at', 'DESC']]
         });
 
+        // Получаем все активные ограничения
         const activeConstraints = await PermanentConstraint.findAll({
             where: {
                 emp_id: empId,
                 is_active: true
-            }
+            },
+            attributes: ['day_of_week', 'shift_id', 'approved_at'],
+            order: [['approved_at', 'DESC']]
         });
 
-        const activeRequestIds = new Set();
-        if (activeConstraints.length > 0) {
-            // Находим какой запрос создал эти активные ограничения
-            const approvedAt = activeConstraints[0].approved_at;
-            requests.forEach(request => {
-                if (request.status === 'approved' &&
-                    request.reviewed_at &&
-                    new Date(request.reviewed_at).getTime() === new Date(approvedAt).getTime()) {
-                    activeRequestIds.add(request.id);
-                }
-            });
-        }
+        // Создаем карту активных ограничений для быстрого поиска
+        const activeConstraintsMap = new Map();
+        activeConstraints.forEach(constraint => {
+            const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
+            activeConstraintsMap.set(key, constraint.approved_at);
+        });
 
-        const requestsWithActiveFlag = requests.map(request => ({
-            ...request.toJSON(),
-            is_active: request.status === 'approved' && activeRequestIds.has(request.id)
-        }));
+        // Помечаем запросы как активные или неактивные
+        const requestsWithActiveFlag = requests.map(request => {
+            const requestData = request.toJSON();
+
+            // Проверяем, есть ли все ограничения из этого запроса среди активных
+            let isActive = false;
+
+            if (requestData.status === 'approved' && requestData.constraints) {
+                isActive = requestData.constraints.every(constraint => {
+                    const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
+                    const activeApprovedAt = activeConstraintsMap.get(key);
+
+                    // Проверяем, что ограничение активно и было создано примерно в то же время
+                    if (activeApprovedAt) {
+                        const requestReviewedAt = new Date(requestData.reviewed_at);
+                        const constraintApprovedAt = new Date(activeApprovedAt);
+
+                        // Разница во времени менее 5 секунд (для учета времени транзакции)
+                        const timeDiff = Math.abs(requestReviewedAt - constraintApprovedAt);
+                        return timeDiff < 5000;
+                    }
+                    return false;
+                });
+            }
+
+            return {
+                ...requestData,
+                is_active: isActive
+            };
+        });
 
         res.json({
             success: true,
@@ -744,12 +767,12 @@ module.exports = {
     getAllPermanentRequests,
     getWeeklyConstraintsGrid,
     getPendingRequests,
-    getMyPermanentConstraintRequests,
+    getMyPermanentRequests,
     getMyPermanentConstraints,
     getEmployeeShifts,
     submitWeeklyConstraints,
-    submitPermanentConstraintRequest,
-    reviewPermanentConstraintRequest,
+    submitPermanentRequest,
+    reviewPermanentRequest,
     deletePermanentRequest,
     createConstraint,
     updateConstraint,
