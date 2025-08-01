@@ -1,18 +1,32 @@
 // frontend/src/features/employee-requests/ui/RequestsList/RequestsList.js
 import React from 'react';
-import { ListGroup, Button } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {ListGroup, Button, Dropdown} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import { formatDateTime } from 'shared/lib/utils/scheduleUtils';
+import {formatDateTime} from 'shared/lib/utils/scheduleUtils';
 import './RequestsList.css';
 
-const RequestsList = ({ requests, onRequestClick, onEditRequest, onDeleteRequest }) => {
-    const { t, locale } = useI18n();
+const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}) => {
+    const {t, locale, direction} = useI18n();
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
     const processedRequests = requests.filter(r => r.status !== 'pending');
 
-    const RequestItem = ({ request }) => {
+    const CustomToggle = React.forwardRef(({children, onClick}, ref) => (
+        <button
+            ref={ref}
+            onClick={(e) => {
+                e.preventDefault(); // Prevent default button behavior
+                onClick(e);       // Open the dropdown
+            }}
+            className="actions-dropdown-toggle"
+            aria-label="Actions"
+        >
+            <i className="bi bi-three-dots-vertical"></i>
+        </button>
+    ));
+
+    const RequestItem = ({request}) => {
         const constraintsCount = request.constraints?.length || 0;
         const canEdit = request.status === 'pending' && !request.id.toString().startsWith('temp_');
 
@@ -42,33 +56,35 @@ const RequestsList = ({ requests, onRequestClick, onEditRequest, onDeleteRequest
                                     {t('requests.reviewedBy')}: {`${request.reviewer.first_name} ${request.reviewer.last_name}`}
                                 </div>
                             )}
+
                         </div>
                         <StatusBadge
                             status={request.status}
                             text={t(`requests.status.${request.status}`)}
                         />
+
                     </div>
-                    {canEdit && (
-                        <div className="request-actions">
-                            <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() => onEditRequest(request)}
-                                title={t('common.edit')}
-                            >
-                                <i className="bi bi-pencil"></i>
-                            </Button>
-                            <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={() => onDeleteRequest(request)}
-                                title={t('common.delete')}
-                            >
-                                <i className="bi bi-trash"></i>
-                            </Button>
-                        </div>
-                    )}
+
                 </div>
+                {canEdit && (
+                    <Dropdown >
+                        <Dropdown.Toggle as={CustomToggle} id={`request-actions-${request.id}`} />
+
+                        <Dropdown.Menu >
+                            {/* Edit Button */}
+                            <Dropdown.Item onClick={() => onEditRequest(request)}>
+                                <i className="bi bi-pencil me-2"></i>
+                                {t('common.edit')}
+                            </Dropdown.Item>
+
+                            {/* Delete Button */}
+                            <Dropdown.Item onClick={() => onDeleteRequest(request)} className="text-danger">
+                                <i className="bi bi-trash me-2"></i>
+                                {t('common.delete')}
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                )}
             </ListGroup.Item>
         );
     };
@@ -80,7 +96,7 @@ const RequestsList = ({ requests, onRequestClick, onEditRequest, onDeleteRequest
                     <h6 className="text-muted mb-3">{t('requests.pendingRequests')}</h6>
                     <ListGroup>
                         {pendingRequests.map(request => (
-                            <RequestItem key={request.id} request={request} />
+                            <RequestItem key={request.id} request={request}/>
                         ))}
                     </ListGroup>
                 </div>
@@ -91,7 +107,7 @@ const RequestsList = ({ requests, onRequestClick, onEditRequest, onDeleteRequest
                     <h6 className="text-muted mb-3">{t('requests.processedRequests')}</h6>
                     <ListGroup>
                         {processedRequests.map(request => (
-                            <RequestItem key={request.id} request={request} />
+                            <RequestItem key={request.id} request={request}/>
                         ))}
                     </ListGroup>
                 </div>

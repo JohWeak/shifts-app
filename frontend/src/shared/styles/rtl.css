@@ -122,8 +122,8 @@
         position: absolute !important;
         transform: none !important;
         top: 100% !important;
-        right: 0 !important;
-        left: auto !important;
+        /*right: 0 !important;*/
+        /*left: auto !important;*/
         margin-top: 0.5rem;
     }
 
@@ -157,7 +157,7 @@
 [dir="rtl"] .dropdown-menu.show {
     display: block;
     opacity: 1;
-    transform: translate(0, 0) !important;
+    /*transform: translate(0, 0) !important;*/
 }
 
 /* Ensure dropdown stays within viewport */
