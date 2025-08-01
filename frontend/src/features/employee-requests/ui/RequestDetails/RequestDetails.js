@@ -152,23 +152,25 @@ const RequestDetails = ({request, onBack, onEdit, onDelete}) => {
                     <div className="constraints-details">
                         {Object.entries(constraintsByDay).length === 0 ? (
                             <div className="text-muted">{t('requests.noConstraints')}</div>) : (
-                            <div className="constraints-box">
+                            <div className="constraints-box px-3">
                                 {Object.entries(constraintsByDay).map(([day, constraints]) => {
                                     const dayIndex = getDayIndex(day, weekStartsOn);
-                                    return (<div key={day} className="day-constraints">
-                                        <strong className="day-name">
-                                            {getDayName(dayIndex, t)}:
-                                        </strong>
-                                        <div className="constraints-list">
-                                            {constraints.map((constraint, index) => (
-                                                <span key={index} className="constraint-badge">
+                                    return (
+                                        <div key={day} className="day-constraints">
+                                            <strong className="day-name">
+                                                {getDayName(dayIndex, t)}:
+                                            </strong>
+                                            <div className="constraints-list">
+                                                {constraints.map((constraint, index) => (
+                                                    <span key={index} className="constraint-badge">
                                                     {constraint.shift_id && shiftsData[constraint.shift_id] ?
                                                         shiftsData[constraint.shift_id].shift_name :
                                                         t('requests.wholeDay')}
-                                                </span>
-                                            ))}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>);
+                                            );
                                 })}
                             </div>)}
                     </div>

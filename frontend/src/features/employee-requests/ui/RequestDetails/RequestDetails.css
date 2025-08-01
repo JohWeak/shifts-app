@@ -30,11 +30,11 @@
 .request-details-container .metadata-label {
     font-weight: 500;
     margin-right: 0.5rem;
-    color: var(--bs-gray-700);
+    color: var(--bs-body-color);
 }
 
 .request-details-container .metadata-value {
-    color: var(--bs-gray-900);
+    color: var(--bs-body-color);
 }
 
 .request-details-container .constraints-section,
@@ -47,21 +47,22 @@
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: var(--bs-gray-800);
+    margin-inline-start: 0.25rem;
+
+    color: var(--bs-body-color);
     display: flex;
     align-items: center;
 }
 
 .request-details-container .constraints-details {
     background-color: var(--bs-light);
-    padding: 1rem;
+    padding: 0;
     border-radius: 0.5rem;
 }
 .request-details-container .constraints-box {
-    padding: 1rem;
-    background-color: var(--bs-light);
+    background-color: var(--bs-form-select-bg);
     border-radius: 0.5rem;
-    border: 1px solid var(--bs-gray-200);
+    /*border: 1px solid var(--bs-border-color);*/
 }
 
 .request-details-container .day-constraints {
@@ -70,17 +71,16 @@
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid var(--bs-gray-200);
+    border-bottom: 1px solid var(--bs-border-color);
 }
 
 .request-details-container .day-constraints:last-child {
     border-bottom: none;
-    padding-bottom: 0;
 }
 
 .request-details-container .day-constraints .day-name {
     font-weight: 600;
-    color: var(--bs-gray-800);
+    color: var(--bs-btn-outline-dark-color);
     text-align: start;
 }
 
@@ -105,18 +105,7 @@
     font-weight: 500;
     white-space: nowrap;
 }
-.request-details-container .shift-name {
-    background-color: var(--bs-gray-200);
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.813rem;
-    font-weight: 500;
-}
 
-.request-details-container .constraint-type {
-    font-size: 0.813rem;
-    font-weight: 500;
-}
 
 .request-details-container .constraint-type.cannot-work {
     color: var(--bs-danger);
@@ -137,11 +126,11 @@
 
 /* Dark mode support */
 [data-theme="dark"] .request-details-container .request-metadata {
-    background-color: var(--bs-dark-bg-subtle);
+    background-color: var(--bs-gray-900);
 }
 
 [data-theme="dark"] .request-details-container .constraints-details {
-    background-color: var(--bs-dark-bg-subtle);
+    background-color: var(--bs-gray-900);
 }
 
 [data-theme="dark"] .request-details-container .shift-name {
@@ -173,7 +162,7 @@
 
     .request-details-container .request-metadata,
     .request-details-container .constraints-details {
-        padding: 0.75rem;
+        /*padding: 0.75rem;*/
     }
 
     .request-details-container .metadata-item {
