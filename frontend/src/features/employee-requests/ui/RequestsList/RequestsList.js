@@ -1,6 +1,6 @@
 // frontend/src/features/employee-requests/ui/RequestsList/RequestsList.js
 import React from 'react';
-import {ListGroup, Button, Dropdown} from 'react-bootstrap';
+import {ListGroup, Button, Dropdown, Badge} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {formatDateTime} from 'shared/lib/utils/scheduleUtils';
@@ -10,7 +10,12 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
     const {t, locale} = useI18n();
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
-    const processedRequests = requests.filter(r => r.status !== 'pending');
+    const activeProcessedRequests = requests.filter(r =>
+        r.status !== 'pending' && r.is_active !== false
+    );
+    const inactiveRequests = requests.filter(r =>
+        r.status !== 'pending' && r.is_active === false
+    );
 
     const CustomToggle = React.forwardRef(({children, onClick}, ref) => (
         <button
@@ -29,9 +34,10 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
     const RequestItem = ({request}) => {
         const constraintsCount = request.constraints?.length || 0;
         const canEdit = request.status === 'pending' && !request.id.toString().startsWith('temp_');
+        const isInactive = request.is_active === false;
 
         return (
-            <ListGroup.Item className="request-item p-0">
+            <ListGroup.Item className={`request-item p-0 ${isInactive ? 'inactive' : ''}`}>
                 <div className="request-item-content">
                     <div
                         className="request-clickable-area"
@@ -62,6 +68,11 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                             status={request.status}
                             text={t(`requests.status.${request.status}`)}
                         />
+                        {isInactive && (
+                            <Badge bg="secondary" pill size="sm">
+                                {t('requests.inactive')}
+                            </Badge>
+                        )}
 
                     </div>
 
@@ -102,11 +113,22 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                 </div>
             )}
 
-            {processedRequests.length > 0 && (
-                <div>
-                    <h6 className="text-muted mb-3">{t('requests.processedRequests')}</h6>
+            {activeProcessedRequests.length > 0 && (
+                <div className="mb-4">
+                    <h6 className="text-muted mb-3">{t('requests.activeProcessedRequests')}</h6>
                     <ListGroup>
-                        {processedRequests.map(request => (
+                        {activeProcessedRequests.map(request => (
+                            <RequestItem key={request.id} request={request}/>
+                        ))}
+                    </ListGroup>
+                </div>
+            )}
+
+            {inactiveRequests.length > 0 && (
+                <div>
+                    <h6 className="text-muted mb-3">{t('requests.inactiveRequests')}</h6>
+                    <ListGroup>
+                        {inactiveRequests.map(request => (
                             <RequestItem key={request.id} request={request}/>
                         ))}
                     </ListGroup>

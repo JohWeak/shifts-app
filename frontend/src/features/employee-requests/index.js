@@ -36,8 +36,6 @@ const EmployeeRequests = () => {
         if (!loaded && !loading) {
             dispatch(fetchMyRequests());
         }
-
-        // Отмечаем как просмотренные при открытии страницы
         return () => {
             dispatch(markAsViewed());
         };

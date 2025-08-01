@@ -50,9 +50,11 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 setShifts(shiftsResponse.data?.shifts || []);
 
                 // Загружаем permanent constraints через Redux
-                await dispatch(fetchMyPermanentConstraints()).unwrap();
+                const constraintsData = await dispatch(fetchMyPermanentConstraints()).unwrap();
+                console.log('[PermanentConstraintForm] Loaded permanent constraints:', constraintsData);
 
             } catch (err) {
+                console.error('[PermanentConstraintForm] Error loading data:', err);
                 setError(t('requests.loadError'));
             } finally {
                 setLoading(false);
@@ -77,20 +79,25 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
     // Инициализация из initialData для редактирования
     useEffect(() => {
-        if (initialData && initialData.constraints) {
+        if (!initialData && permanentConstraints && permanentConstraints.length > 0) {
             const constraintsMap = {};
-            initialData.constraints.forEach(constraint => {
-                const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
+
+            // Фильтруем только активные ограничения
+            const activeConstraints = permanentConstraints.filter(c => c.is_active);
+            console.log('[PermanentConstraintForm] Active constraints:', activeConstraints);
+
+            activeConstraints.forEach(constraint => {
+                // Формируем ключ с правильным форматом дня недели
+                const dayCapitalized = constraint.day_of_week.charAt(0).toUpperCase() +
+                    constraint.day_of_week.slice(1).toLowerCase();
+                const key = `${dayCapitalized}-${constraint.shift_id || 'all'}`;
                 constraintsMap[key] = constraint.constraint_type;
             });
-            setConstraints(constraintsMap);
 
-            if (initialData.message) {
-                setMessage(initialData.message);
-                setShowMessage(true);
-            }
+            console.log('[PermanentConstraintForm] Initialized constraints map:', constraintsMap);
+            setConstraints(constraintsMap);
         }
-    }, [initialData]);
+    }, [permanentConstraints, initialData]);
 
     useEffect(() => {
         const savedMessage = localStorage.getItem('permanent_constraint_message');
@@ -278,6 +285,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
             // Закрываем модальное окно
             setShowConfirm(false);
+            localStorage.removeItem('constraintFormMessage');
 
             // Передаем ID редактируемого запроса, если есть
             if (onSubmitSuccess) {
@@ -488,16 +496,20 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 show={showConfirm}
                 onHide={() => setShowConfirm(false)}
                 onConfirm={handleSubmit}
-                title={initialData
-                    ? t('requests.confirmUpdate.title')
-                    : t('requests.confirmSubmit.title')
-                }
-                message={initialData
-                    ? t('requests.confirmUpdate.message')
-                    : t('requests.confirmSubmit.message')
+                title={t('requests.confirmSubmit')}
+                message={
+                    <>
+                        {t('requests.confirmMessage')}
+                        {permanentConstraints.some(c => c.is_active) && (
+                            <div className="mt-3 alert alert-warning mb-0">
+                                <i className="bi bi-exclamation-triangle me-2"></i>
+                                {t('requests.previousConstraintsWarning')}
+                            </div>
+                        )}
+                    </>
                 }
                 confirmText={t('common.submit')}
-                loading={loading}
+                confirmVariant="primary"
             />
         </div>
     );

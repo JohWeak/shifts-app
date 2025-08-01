@@ -1,6 +1,6 @@
 // frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.js
 import React, {useState, useEffect} from 'react';
-import {Container, Card, Button, Alert} from 'react-bootstrap';
+import {Container, Card, Button, Alert, Badge} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useDispatch, useSelector} from 'react-redux';
 import {constraintAPI} from 'shared/api/apiService';
@@ -85,8 +85,12 @@ const RequestDetails = ({request, onBack, onEdit, onDelete}) => {
                         <StatusBadge
                             status={request.status}
                             text={t(`requests.status.${request.status}`)}
-                            size="lg"
                         />
+                        {request.status === 'approved' && !request.is_active && (
+                            <Badge bg="secondary" pill>
+                                {t('requests.inactive')}
+                            </Badge>
+                        )}
                     </div>
                 </Card.Header>
                 <Card.Body>

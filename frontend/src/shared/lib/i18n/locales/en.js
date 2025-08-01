@@ -38,6 +38,7 @@ export const en = {
             revertedSuccess: 'Request returned to pending status successfully',
             revertError: 'Failed to return request to pending status',
             revert: 'Return',
+            inactiveRequests: 'Inactive Requests',
 
         }
     },
@@ -678,6 +679,11 @@ export const en = {
             message: 'Are you sure you want to update this request? The previous request will be replaced.'
         },
         deleteSuccess: 'Request deleted successfully',
+        inactive: 'Inactive',
+        activeProcessedRequests: 'Active Processed Requests',
+        inactiveRequests: 'Inactive Requests',
+        previousConstraintsWarning: 'Note: Upon approval, your previous constraints will become inactive and will be replaced with the new ones.',
+
 
     },
     reports: {

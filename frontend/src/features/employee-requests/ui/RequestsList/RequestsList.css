@@ -11,7 +11,18 @@
 .requests-list .request-item:hover {
     border-left-color: var(--bs-primary);
 }
+.requests-list .request-item.inactive {
+    opacity: 0.7;
+    background-color: var(--bs-gray-100);
+}
 
+.requests-list .request-item.inactive .request-clickable-area {
+    background-color: transparent;
+}
+
+[data-theme="dark"] .requests-list .request-item.inactive {
+    background-color: var(--bs-gray-800);
+}
 .requests-list .request-item-content {
     display: flex;
     justify-content: space-between;

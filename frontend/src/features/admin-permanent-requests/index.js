@@ -31,13 +31,19 @@ const AdminPermanentRequests = () => {
 
     // Разделяем запросы на pending и processed
     const pendingRequests = requests.filter(r => r.status === 'pending');
-    const processedRequests = requests.filter(r => r.status !== 'pending');
+    const activeProcessedRequests = requests.filter(r =>
+        r.status !== 'pending' && r.is_active !== false
+    );
+    const inactiveRequests = requests.filter(r =>
+        r.status !== 'pending' && r.is_active === false
+    );
 
     const sortAccessors = {
         'employee.first_name': (item) => item.employee?.first_name || '',
         'employee.defaultPosition.pos_name': (item) => item.employee?.defaultPosition?.pos_name || '',
         'employee.workSite.site_name': (item) => item.employee?.workSite?.site_name || ''
     };
+    // Сортировка для каждой группы
     const {
         sortedItems: sortedPendingRequests,
         requestSort: requestPendingSort,
@@ -45,10 +51,16 @@ const AdminPermanentRequests = () => {
     } = useSortableData(pendingRequests, { field: 'requested_at', order: 'ASC' }, sortAccessors);
 
     const {
-        sortedItems: sortedProcessedRequests,
-        requestSort: requestProcessedSort,
-        sortConfig: processedSortConfig
-    } = useSortableData(processedRequests, { field: 'reviewed_at', order: 'DESC' }, sortAccessors);
+        sortedItems: sortedActiveRequests,
+        requestSort: requestActiveSort,
+        sortConfig: activeSortConfig
+    } = useSortableData(activeProcessedRequests, { field: 'reviewed_at', order: 'DESC' }, sortAccessors);
+
+    const {
+        sortedItems: sortedInactiveRequests,
+        requestSort: requestInactiveSort,
+        sortConfig: inactiveSortConfig
+    } = useSortableData(inactiveRequests, { field: 'reviewed_at', order: 'DESC' }, sortAccessors);
 
     const handleRequestClick = (request) => {
         setSelectedRequest(request);
@@ -61,7 +73,7 @@ const AdminPermanentRequests = () => {
         dispatch(fetchAllRequests());
     };
 
-    const RequestsTable = ({ requests, sortConfig, requestSort, isPending }) => (
+    const RequestsTable = ({ requests, sortConfig, requestSort, isPending, isInactive }) => (
         <div className="table-responsive">
             <Table hover className="requests-table mb-0">
                 <thead>
@@ -117,7 +129,7 @@ const AdminPermanentRequests = () => {
                     <tr
                         key={request.id}
                         onClick={() => handleRequestClick(request)}
-                        className="request-row"
+                        className={`request-row ${isInactive ? 'inactive' : ''}`}
                     >
                         <td>
                             {request.employee
@@ -199,19 +211,38 @@ const AdminPermanentRequests = () => {
                 </Card>
             )}
 
-            {processedRequests.length > 0 && (
+            {activeProcessedRequests.length > 0 && (
                 <Card>
                     <Card.Header>
                         <h5 className="mb-0">
-                            {t('admin.requests.processedRequests')} ({processedRequests.length})
+                            {t('admin.requests.processedRequests')} ({activeProcessedRequests.length})
                         </h5>
                     </Card.Header>
                     <Card.Body className="p-0">
                         <RequestsTable
-                            requests={sortedProcessedRequests}
-                            sortConfig={processedSortConfig}
-                            requestSort={requestProcessedSort}
+                            requests={sortedActiveRequests}
+                            sortConfig={activeSortConfig}
+                            requestSort={requestActiveSort}
                             isPending={false}
+                        />
+                    </Card.Body>
+                </Card>
+            )}
+
+            {inactiveRequests.length > 0 && (
+                <Card className="mt-3">
+                    <Card.Header className="bg-secondary bg-opacity-10">
+                        <h5 className="mb-0">
+                            {t('admin.requests.inactiveRequests')} ({inactiveRequests.length})
+                        </h5>
+                    </Card.Header>
+                    <Card.Body className="p-0">
+                        <RequestsTable
+                            requests={sortedInactiveRequests}
+                            sortConfig={inactiveSortConfig}
+                            requestSort={requestInactiveSort}
+                            isPending={false}
+                            isInactive={true}
                         />
                     </Card.Body>
                 </Card>

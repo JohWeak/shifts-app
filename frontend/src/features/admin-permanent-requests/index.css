@@ -16,6 +16,23 @@
     background-color: var(--bs-gray-800);
 }
 
+.admin-permanent-requests .request-row.inactive {
+    opacity: 0.6;
+    background-color: var(--bs-gray-100);
+}
+
+.admin-permanent-requests .request-row.inactive:hover {
+    background-color: var(--bs-gray-200);
+}
+
+[data-theme="dark"] .admin-permanent-requests .request-row.inactive {
+    background-color: var(--bs-gray-900);
+}
+
+[data-theme="dark"] .admin-permanent-requests .request-row.inactive:hover {
+    background-color: var(--bs-gray-800);
+}
+
 /* frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.css */
 .admin-permanent-requests .request-employee-info .info-grid {
     display: grid;
