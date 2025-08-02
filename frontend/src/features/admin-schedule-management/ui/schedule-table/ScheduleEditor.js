@@ -232,7 +232,7 @@ const ScheduleEditor = ({
 
 
     return (
-        <div className="position-schedule-editor mb-4">
+        <div className="position-schedule-editor">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -397,7 +397,7 @@ const ScheduleEditor = ({
             {/* Edit Mode Message */}
             {
                 isEditing && (
-                    <div className="alert alert-info mt-3">
+                    <div className="alert alert-info mt-3 mb-0">
                         <i className="bi bi-pencil me-2"></i>
                         <strong>{t('position.editPosition')}: {position.pos_name}.</strong> {t('employee.clickToAssignEmployee')}
                     </div>

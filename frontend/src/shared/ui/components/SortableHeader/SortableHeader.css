@@ -1,13 +1,54 @@
 /* frontend/src/shared/ui/components/SortableHeader/SortableHeader.css */
+
+
 .sortable-header {
-    cursor: pointer;
-    user-select: none; /* Предотвращает выделение текста при клике */
+    --icon-color-default: var(--bs-secondary-color); /* Цвет иконки для неактивных колонок */
+    --icon-color-active: var(--bs-body-color);      /* Цвет иконки для активной колонки */
+    --bg-hover: var(--bs-gray-100);              /* Фон при наведении */
+
+    position: relative; /* Необходимо для позиционирования псевдо-элементов, если понадобятся */
+    transition: background-color 0.2s ease-in-out;
+    background-color: transparent !important;
 }
 
+/* При наведении подсвечиваем фон цветом, который адаптируется под тему */
 .sortable-header:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    /*background-color: var(--bg-hover) !important;*/
 }
 
-[data-bs-theme="dark"] .sortable-header:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+/* Контейнер для выравнивания текста и иконки */
+.header-content {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+.header-content span{
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--bs-body-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sort-icon {
+    font-size: 0.75rem!important;
+    /* По умолчанию иконка полупрозрачная и имеет вторичный цвет текста */
+    opacity: 0.4;
+    color: var(--icon-color-default);
+    /* Анимируем только прозрачность для плавного появления */
+    transition: opacity 0.2s ease-in-out, color 0.2s ease-out;
+}
+
+/* При наведении на заголовок иконка плавно проявляется */
+.sortable-header:hover .sort-icon {
+    opacity: 0.9;
+}
+
+/* Для отсортированной колонки иконка всегда видна и имеет основной цвет текста */
+.sortable-header.sorted .sort-icon {
+    opacity: 1;
+    color: var(--icon-color-active);
 }

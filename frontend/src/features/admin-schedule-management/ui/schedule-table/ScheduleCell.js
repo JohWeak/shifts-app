@@ -25,7 +25,7 @@ const ScheduleCell = ({
                       }) => {
     const {t} = useI18n();
 
-    // ПРОСТАЯ логика: удаленные работники не показываются вообще
+    // ПРОСТАЯ логика: удаленные работники не показываются вообще - исправить!
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
     );
@@ -83,7 +83,7 @@ const ScheduleCell = ({
 
         if (shiftColor && !isEmpty) {
             // Только лёгкий фон, без границ
-            styles.backgroundColor = `${shiftColor}20`;
+            styles.backgroundColor = `${shiftColor}`;
         }
 
         return styles;

@@ -172,7 +172,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
         <>
             <Card>
                 <Card.Body>
-                    <Table responsive hover className="schedule-overview-table">
+                    <Table responsive className="schedule-overview-table">
                         <thead>
                         <tr>
                             <th>{t('schedule.weekPeriod')}</th>

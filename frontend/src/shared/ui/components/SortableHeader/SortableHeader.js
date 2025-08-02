@@ -3,23 +3,28 @@ import React from 'react';
 import './SortableHeader.css';
 
 const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) => {
-    const getSortIcon = () => {
-        if (sortConfig.field !== sortKey) {
-            return <i className="bi bi-arrow-down-up text-muted ms-1"></i>;
+    // Определяем, активна ли сортировка для этой колонки
+    const isSorted = sortConfig.field === sortKey;
+
+    // Упрощаем логику выбора иконки
+    const getIconClass = () => {
+        if (!isSorted) {
+            return 'bi-arrow-down-up'; // Иконка для несортированных колонок
         }
-        return sortConfig.order === 'ASC'
-            ? <i className="bi bi-arrow-up ms-1"></i>
-            : <i className="bi bi-arrow-down ms-1"></i>;
+        return sortConfig.order === 'ASC' ? 'bi-arrow-up' : 'bi-arrow-down';
     };
 
     return (
         <th
-            className="sortable-header"
+            // Добавляем класс 'sorted', если колонка отсортирована
+            className={`sortable-header ${isSorted ? 'sorted' : ''}`}
             onClick={() => onSort(sortKey)}
             {...thProps}
         >
-            {children}
-            {getSortIcon()}
+            <div className="header-content">
+                <span>{children}</span>
+                <i className={`bi ${getIconClass()} sort-icon`}></i>
+            </div>
         </th>
     );
 };

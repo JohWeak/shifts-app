@@ -1,6 +1,6 @@
 /* frontend/src/features/admin-permanent-requests/index.css */
 .admin-permanent-requests .requests-table {
-    font-size: 0.875rem;
+    /*font-size: 0.875rem;*/
 }
 .admin-permanent-requests .card{
     border: none;
@@ -39,10 +39,18 @@
 .admin-permanent-requests .request-row {
     cursor: pointer;
     transition: background-color 0.2s ease;
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+    background-color: transparent;
 }
 
 .admin-permanent-requests .request-row:hover {
-    background-color: var(--bs-gray-100);
+    background-color: var(--bs-gray-100)!important;
+    border-left-color: var(--bs-primary);
+}
+[dir="rtl"] .admin-permanent-requests .request-row:hover {
+    border-left-color: transparent;
+    border-right-color: var(--bs-primary);
 }
 
 [data-theme="dark"] .admin-permanent-requests .request-row:hover {
