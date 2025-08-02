@@ -210,10 +210,8 @@ const AdminLayout = () => {
                             }}
                         >
                             <i className="bi bi-calendar-check-fill text-primary me-2"></i>
-                            <div className="d-flex flex-column align-items-start">
                                 <span className="brand-text">{t('common.appName')}</span>
-                                <Badge bg="secondary" className="brand-badge">{t('common.admin')}</Badge>
-                            </div>
+                                <Badge bg="secondary" className=" ms-2 brand-badge">{t('common.admin')}</Badge>
                         </Navbar>
 
                     </div>
