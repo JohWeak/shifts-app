@@ -2,24 +2,49 @@
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 
+// Score constants
+const SCORE_CONSTANTS = {
+    // Base score
+    BASE_SCORE: 50,
+
+    // Position matching
+    PRIMARY_POSITION_MATCH: 100,
+    NO_POSITION_FLEXIBLE: 25,
+    CROSS_POSITION_PENALTY: -20,
+
+    // Work site matching
+    SAME_WORK_SITE: 20,
+    CAN_WORK_ANY_SITE: 10,
+    DIFFERENT_WORK_SITE: -30,
+
+    // Preferences
+    PREFERS_THIS_SHIFT: 30,
+    PREFERS_DIFFERENT_TIME: -10,
+
+    // Workload balance
+    LOW_WEEKLY_WORKLOAD_BONUS: 20,
+    HIGH_WEEKLY_WORKLOAD_PENALTY_PER_SHIFT: -10,
+    WORKLOAD_THRESHOLD_LOW: 3,
+    WORKLOAD_THRESHOLD_HIGH: 5
+};
 
 class EmployeeRecommendationService {
     constructor(db) {
         this.db = db;
     }
-     async getRecommendedEmployees(positionId, shiftId, date, excludeEmployeeIds = [], scheduleId = null) {
 
-         const {
-             Employee,
-             WorkSite,
-             Position,
-             PositionShift,
-             EmployeeConstraint,
-             PermanentConstraint,
-             ScheduleAssignment,
-             Schedule
-         } = this.db;
-         const { Op } = this.db.Sequelize;
+    async getRecommendedEmployees(positionId, shiftId, date, excludeEmployeeIds = [], scheduleId = null) {
+        const {
+            Employee,
+            WorkSite,
+            Position,
+            PositionShift,
+            EmployeeConstraint,
+            PermanentConstraint,
+            ScheduleAssignment,
+            Schedule
+        } = this.db;
+        const { Op } = this.db.Sequelize;
 
         try {
             console.log(`[EmployeeRecommendation] Getting recommendations for:`, {
@@ -33,7 +58,7 @@ class EmployeeRecommendationService {
             // Load target position and shift
             const [targetPosition, targetShift] = await Promise.all([
                 Position.findByPk(positionId),
-                PositionShift.findByPk(shiftId) // Изменено с Shift на PositionShift
+                PositionShift.findByPk(shiftId)
             ]);
 
             if (!targetPosition || !targetShift) {
@@ -85,7 +110,7 @@ class EmployeeRecommendationService {
                         required: false
                     },
                     {
-                        model: PermanentConstraint, // Include permanent constraints
+                        model: PermanentConstraint,
                         as: 'permanentConstraints',
                         where: {
                             is_active: true,
@@ -105,7 +130,6 @@ class EmployeeRecommendationService {
                 ]
             });
 
-            // Get ALL assignments for the week (not just this date)
             let weekAssignments = [];
             if (scheduleId) {
                 const schedule = await Schedule.findByPk(scheduleId);
@@ -144,13 +168,11 @@ class EmployeeRecommendationService {
             const assignmentsByDate = {};
 
             weekAssignments.forEach(assignment => {
-                // By employee
                 if (!assignmentsByEmployee[assignment.emp_id]) {
                     assignmentsByEmployee[assignment.emp_id] = [];
                 }
                 assignmentsByEmployee[assignment.emp_id].push(assignment);
 
-                // By date
                 const dateKey = dayjs(assignment.work_date).format('YYYY-MM-DD');
                 if (!assignmentsByDate[dateKey]) {
                     assignmentsByDate[dateKey] = [];
@@ -158,7 +180,6 @@ class EmployeeRecommendationService {
                 assignmentsByDate[dateKey].push(assignment);
             });
 
-            // Get assignments for this specific date
             const todayAssignments = assignmentsByDate[date] || [];
             console.log(`[EmployeeRecommendation] ${todayAssignments.length} assignments on ${date}`);
 
@@ -204,7 +225,6 @@ class EmployeeRecommendationService {
                         assigned_shift: evaluation.assignedShiftToday
                     });
                 } else if (evaluation.hasPermanentConstraint) {
-                    // New category for permanent constraints
                     recommendations.unavailable_permanent.push({
                         ...employeeData,
                         unavailable_reason: 'permanent_constraint',
@@ -282,7 +302,7 @@ class EmployeeRecommendationService {
     _evaluateEmployee(employee, targetPosition, targetShift, dayOfWeek, date, employeeWeekAssignments, todayAssignments, allWeekAssignments) {
         const evaluation = {
             canWork: true,
-            score: 50,
+            score: SCORE_CONSTANTS.BASE_SCORE,
             reasons: [],
             warnings: [],
             isCorrectPosition: false,
@@ -299,7 +319,7 @@ class EmployeeRecommendationService {
             restViolationDetails: null
         };
 
-        // Check if already assigned TODAY (any shift)
+        // Check if already assigned TODAY
         const todayAssignment = todayAssignments.find(a => a.emp_id === employee.emp_id);
         if (todayAssignment) {
             evaluation.isAlreadyAssignedToday = true;
@@ -327,7 +347,7 @@ class EmployeeRecommendationService {
                         message: `Permanent constraint: Cannot work ${targetShift.shift_name} on ${dayOfWeek}`
                     });
 
-                    return evaluation; // Return early - no need to check other constraints
+                    return evaluation;
                 }
             }
         }
@@ -335,31 +355,29 @@ class EmployeeRecommendationService {
         // Check position match
         if (!employee.default_position_id) {
             evaluation.hasNoPosition = true;
-            evaluation.score += 25;
+            evaluation.score += SCORE_CONSTANTS.NO_POSITION_FLEXIBLE;
             evaluation.reasons.push('flexible_no_position');
         } else if (employee.default_position_id === targetPosition.pos_id) {
             evaluation.isCorrectPosition = true;
-            evaluation.score += 100;
+            evaluation.score += SCORE_CONSTANTS.PRIMARY_POSITION_MATCH;
             evaluation.reasons.push('primary_position_match');
         } else {
-            evaluation.score -= 20;
+            evaluation.score += SCORE_CONSTANTS.CROSS_POSITION_PENALTY;
             evaluation.warnings.push('cross_position_assignment');
         }
 
-         // Check work site match
-         if (employee.work_site_id && employee.work_site_id !== targetPosition.site_id) {
-             evaluation.isOtherSite = true;
-             evaluation.score -= 30;  // Снижаем приоритет для сотрудников с других сайтов
-             evaluation.warnings.push('different_work_site');
-         } else if (!employee.work_site_id) {
-             // Сотрудник может работать на любом сайте
-             evaluation.score += 10;
-             evaluation.reasons.push('can_work_any_site');
-         } else {
-             // Тот же сайт
-             evaluation.score += 20;
-             evaluation.reasons.push('same_work_site');
-         }
+        // Check work site match
+        if (employee.work_site_id && employee.work_site_id !== targetPosition.site_id) {
+            evaluation.isOtherSite = true;
+            evaluation.score += SCORE_CONSTANTS.DIFFERENT_WORK_SITE;
+            evaluation.warnings.push('different_work_site');
+        } else if (!employee.work_site_id) {
+            evaluation.score += SCORE_CONSTANTS.CAN_WORK_ANY_SITE;
+            evaluation.reasons.push('can_work_any_site');
+        } else {
+            evaluation.score += SCORE_CONSTANTS.SAME_WORK_SITE;
+            evaluation.reasons.push('same_work_site');
+        }
 
         // Check temporary constraints
         if (employee.constraints && employee.constraints.length > 0) {
@@ -378,7 +396,7 @@ class EmployeeRecommendationService {
                     });
                 } else if (constraint.constraint_type === 'prefer_not_work') {
                     evaluation.hasSoftConstraint = true;
-                    evaluation.score -= 30;
+                    evaluation.score += SCORE_CONSTANTS.PREFERS_DIFFERENT_TIME;
                     evaluation.constraintDetails.push({
                         type: 'prefer_not_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
@@ -402,76 +420,33 @@ class EmployeeRecommendationService {
             evaluation.canWork = false;
             evaluation.restViolationDetails = restViolation;
             evaluation.warnings.push(restViolation.message);
-            return evaluation; // Return early - rest violation
+            return evaluation;
         }
 
-        // Check constraints
-        // if (employee.constraints && employee.constraints.length > 0) {
-        //     for (const constraint of employee.constraints) {
-        //         const constraintApplies = this._constraintApplies(constraint, dayOfWeek, targetShift.shift_id, date);
-        //
-        //         if (constraintApplies) {
-        //             const constraintDetail = {
-        //                 type: constraint.constraint_type,
-        //                 applies_to: constraint.applies_to,
-        //                 reason: constraint.reason || 'no_reason_provided',  // Изменено
-        //                 day_of_week: constraint.day_of_week,
-        //                 shift_id: constraint.shift_id
-        //             };
-        //
-        //             if (constraint.constraint_type === 'cannot_work') {
-        //                 evaluation.hasHardConstraint = true;
-        //                 evaluation.canWork = false;
-        //                 evaluation.warnings.push(`cannot_work_constraint:${constraint.reason || 'hard_constraint'}`);
-        //                 constraintDetail.impact = 'blocking';
-        //             } else if (constraint.constraint_type === 'prefer_work') {
-        //                 if (constraintApplies && constraint.shift_id === targetShift.shift_id) {
-        //                     evaluation.score += 30;
-        //                     evaluation.reasons.push('prefers_this_shift');  // Изменено
-        //                 } else {
-        //                     evaluation.hasSoftConstraint = true;
-        //                     evaluation.score -= 10;
-        //                     evaluation.warnings.push('prefers_different_time_shift');  // Изменено
-        //                 }
-        //             }
-        //
-        //             evaluation.constraintDetails.push(constraintDetail);
-        //         }
-        //     }
-        // }
 
         // Add workload balance scoring
         const weeklyAssignments = employeeWeekAssignments.length;
-        if (weeklyAssignments > 5) {
-            evaluation.score -= (weeklyAssignments - 5) * 10;
+        if (weeklyAssignments > SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) {
+            const penalty = (weeklyAssignments - SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) *
+                SCORE_CONSTANTS.HIGH_WEEKLY_WORKLOAD_PENALTY_PER_SHIFT;
+            evaluation.score += penalty;
             evaluation.warnings.push(`high_weekly_workload: ${weeklyAssignments}`);
-        } else if (weeklyAssignments < 3) {
-            evaluation.score += 20;
+        } else if (weeklyAssignments < SCORE_CONSTANTS.WORKLOAD_THRESHOLD_LOW) {
+            evaluation.score += SCORE_CONSTANTS.LOW_WEEKLY_WORKLOAD_BONUS;
             evaluation.reasons.push(`low_weekly_workload:${weeklyAssignments}`);
         }
 
         return evaluation;
     }
 
-     _constraintApplies(constraint, dayOfWeek, shiftId, date) {
-        if (constraint.applies_to === 'specific_date') {
-            return constraint.target_date === date &&
-                (!constraint.shift_id || constraint.shift_id === shiftId);
-        } else if (constraint.applies_to === 'day_of_week') {
-            const dayMatches = !constraint.day_of_week || constraint.day_of_week === dayOfWeek;
-            const shiftMatches = !constraint.shift_id || constraint.shift_id === shiftId;
-            return dayMatches && shiftMatches;
-        }
-        return false;
-    }
 
-     _checkRestViolations(empId, employeeAssignments, targetShift, date) {
-         const constraints = require('../config/scheduling-constraints');
-         const targetDate = dayjs(date);
-         const relevantAssignments = employeeAssignments.filter(a =>
-             a.emp_id === empId &&
-             Math.abs(dayjs(a.work_date).diff(targetDate, 'day')) <= 1
-         );
+    _checkRestViolations(empId, employeeAssignments, targetShift, date) {
+        const constraints = require('../config/scheduling-constraints');
+        const targetDate = dayjs(date);
+        const relevantAssignments = employeeAssignments.filter(a =>
+            a.emp_id === empId &&
+            Math.abs(dayjs(a.work_date).diff(targetDate, 'day')) <= 1
+        );
 
         for (const assignment of relevantAssignments) {
             if (!assignment.shift) continue;
@@ -479,7 +454,6 @@ class EmployeeRecommendationService {
             let restHours;
             let requiredRest;
             let violationType;
-
 
             if (assignmentDate.isBefore(targetDate)) {
                 // Previous day assignment
