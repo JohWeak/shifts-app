@@ -51,6 +51,7 @@ class ScheduleGeneratorService {
             ShiftRequirement,
             ScheduleSettings,
             EmployeeConstraint,
+            PermanentConstraint, // Add permanent constraints
             WorkSite
         } = this.db;
 
@@ -77,52 +78,56 @@ class ScheduleGeneratorService {
                 transaction
             });
 
-            // Create maps for easier access
+            // Flatten shifts and create maps
             const shifts = [];
-            const shiftsMap = new Map();
-            const shiftRequirementsMap = new Map();
+            const shiftsMap = {};
+            const shiftRequirementsMap = {};
 
-            for (const position of positions) {
+            positions.forEach(position => {
                 if (position.shifts) {
-                    for (const shift of position.shifts) {
-                        shifts.push({
-                            shift_id: shift.id,
-                            shift_name: shift.shift_name,
-                            position_id: position.pos_id,
-                            position_name: position.pos_name,
-                            start_time: shift.start_time,
-                            end_time: shift.end_time,
-                            duration_hours: this.calculateDuration(shift.start_time, shift.end_time)
-                        });
+                    position.shifts.forEach(shift => {
+                        shifts.push(shift);
+                        shiftsMap[shift.id] = shift;
 
-                        shiftsMap.set(shift.id, shift);
-
-                        // Map requirements
-                        if (shift.requirements && shift.requirements.length > 0) {
-                            for (const req of shift.requirements) {
-                                const key = `${shift.id}_${req.day_of_week}`;
-                                shiftRequirementsMap.set(key, req.required_count);
-                            }
-                        }
-                    }
+                        // Map requirements by position-shift
+                        const key = `${position.pos_id}-${shift.id}`;
+                        shiftRequirementsMap[key] = shift.requirements || [];
+                    });
                 }
-            }
+            });
 
-            console.log(`[ScheduleGeneratorService] Found ${shifts.length} shifts across ${positions.length} positions`);
+            console.log(`[ScheduleGeneratorService] Found ${positions.length} positions with ${shifts.length} shifts`);
 
-            // Load employees
+            // Load employees with constraints
             const employees = await Employee.findAll({
                 where: {
                     work_site_id: siteId,
                     status: 'active',
                     role: 'employee'
                 },
-                include: [{
-                    model: EmployeeConstraint,
-                    as: 'constraints',
-                    where: { status: 'active' },
-                    required: false
-                }],
+                include: [
+                    {
+                        model: Position,
+                        as: 'defaultPosition'
+                    },
+                    {
+                        model: EmployeeConstraint,
+                        as: 'constraints',
+                        where: { status: 'active' },
+                        required: false
+                    },
+                    {
+                        model: PermanentConstraint, // Include permanent constraints
+                        as: 'permanentConstraints',
+                        where: { is_active: true },
+                        required: false,
+                        include: [{
+                            model: Employee,
+                            as: 'approver',
+                            attributes: ['emp_id', 'first_name', 'last_name']
+                        }]
+                    }
+                ],
                 transaction
             });
 
@@ -142,7 +147,7 @@ class ScheduleGeneratorService {
                 transaction
             });
 
-            // Process constraints
+            // Process constraints (updated to include permanent)
             const constraints = await this.processConstraints(employees, days);
 
             return {
@@ -181,48 +186,79 @@ class ScheduleGeneratorService {
     async processConstraints(employees, days) {
         const cannotWork = [];
         const preferWork = [];
+        const permanentCannotWork = []; // New array for permanent constraints
 
         for (const emp of employees) {
-            if (!emp.constraints) continue;
+            // Process temporary constraints
+            if (emp.constraints) {
+                for (const constraint of emp.constraints) {
+                    // Find applicable days
+                    const applicableDays = [];
 
-            for (const constraint of emp.constraints) {
-                // Find applicable days
-                const applicableDays = [];
-
-                if (constraint.target_date) {
-                    // Specific date
-                    const targetDate = dayjs(constraint.target_date).format('YYYY-MM-DD');
-                    const dayIndex = days.indexOf(targetDate);
-                    if (dayIndex !== -1) {
-                        applicableDays.push(dayIndex);
+                    if (constraint.target_date) {
+                        // Specific date
+                        const targetDate = dayjs(constraint.target_date).format('YYYY-MM-DD');
+                        const dayIndex = days.indexOf(targetDate);
+                        if (dayIndex !== -1) {
+                            applicableDays.push(dayIndex);
+                        }
+                    } else if (constraint.day_of_week !== null) {
+                        // Weekly recurring
+                        days.forEach((day, index) => {
+                            if (dayjs(day).day() === constraint.day_of_week) {
+                                applicableDays.push(index);
+                            }
+                        });
                     }
-                } else if (constraint.day_of_week !== null) {
-                    // Weekly recurring
+
+                    // Add constraints
+                    for (const dayIndex of applicableDays) {
+                        const constraintData = {
+                            emp_id: emp.emp_id,
+                            day_index: dayIndex,
+                            constraint_type: constraint.constraint_type,
+                            shift_id: constraint.shift_id
+                        };
+
+                        if (constraint.constraint_type === 'cannot_work') {
+                            cannotWork.push(constraintData);
+                        } else if (constraint.constraint_type === 'prefer_work') {
+                            preferWork.push(constraintData);
+                        }
+                    }
+                }
+            }
+
+            // Process permanent constraints
+            if (emp.permanentConstraints) {
+                for (const permConstraint of emp.permanentConstraints) {
+                    // Find which days match the permanent constraint day_of_week
                     days.forEach((day, index) => {
-                        if (dayjs(day).day() === constraint.day_of_week) {
-                            applicableDays.push(index);
+                        const dayName = dayjs(day).format('dddd').toLowerCase();
+                        if (dayName === permConstraint.day_of_week) {
+                            const constraintData = {
+                                emp_id: emp.emp_id,
+                                day_index: index,
+                                constraint_type: permConstraint.constraint_type,
+                                shift_id: permConstraint.shift_id,
+                                is_permanent: true,
+                                approved_by: permConstraint.approver ?
+                                    `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
+                                    'Unknown',
+                                approved_at: permConstraint.approved_at
+                            };
+
+                            if (permConstraint.constraint_type === 'cannot_work') {
+                                permanentCannotWork.push(constraintData);
+                            }
+                            // Note: We might also want to handle 'prefer_work' permanent constraints
                         }
                     });
-                }
-
-                // Add constraints
-                for (const dayIndex of applicableDays) {
-                    const constraintData = {
-                        emp_id: emp.emp_id,
-                        day_index: dayIndex,
-                        constraint_type: constraint.constraint_type
-                    };
-
-                    if (constraint.constraint_type === 'cannot_work') {
-                        cannotWork.push(constraintData);
-                    } else if (constraint.constraint_type === 'prefer_work') {
-                        preferWork.push(constraintData);
-                    }
                 }
             }
         }
 
-        return { cannotWork, preferWork };
+        return { cannotWork, preferWork, permanentCannotWork };
     }
 
     async generateOptimalSchedule(data) {
@@ -242,6 +278,7 @@ class ScheduleGeneratorService {
         const existingSchedule = [];
 
         console.log(`[ScheduleGenerator] Starting generation for ${positions.length} positions, ${shifts.length} shifts`);
+        console.log(`[ScheduleGenerator] Permanent constraints: ${constraints.permanentCannotWork.length}`);
 
         // For each day of the week
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
@@ -254,49 +291,50 @@ class ScheduleGeneratorService {
             for (const position of positions) {
                 // For each shift of this position
                 for (const positionShift of position.shifts || []) {
-                    const shift = shiftsMap.get(positionShift.id);
+                    const shift = shiftsMap[positionShift.id];
                     if (!shift) continue;
 
-                    // Get requirements for this position, shift and day of week
-                    const requirements = shiftRequirementsMap.get(`${position.pos_id}-${shift.shift_id}`);
+                    // Check if shift is on this day
+                    const shiftDays = shift.days_of_week || [];
+                    if (!shiftDays.includes(dayOfWeek)) continue;
 
-                    // Find requirement for current day of week
-                    let requiredCount = position.num_of_emp || 1; // Default from position
-                    let isWorkingDay = true;
+                    // Get requirements
+                    const key = `${position.pos_id}-${shift.id}`;
+                    const requirements = shiftRequirementsMap[key] || [];
+                    const requirement = requirements.find(r => r.day_of_week === dayOfWeek);
+                    const requiredCount = requirement ? requirement.required_count : 0;
 
-                    if (requirements && requirements.length > 0) {
-                        const dayRequirement = requirements.find(req => {
-                            if (req.is_recurring) {
-                                return req.day_of_week === null || req.day_of_week === dayOfWeek;
-                            } else {
-                                return dayjs(req.specific_date).format('YYYY-MM-DD') === date;
-                            }
-                        });
+                    if (requiredCount === 0) continue;
 
-                        if (dayRequirement) {
-                            requiredCount = dayRequirement.required_staff_count;
-                            isWorkingDay = dayRequirement.is_working_day;
-                        }
-                    }
+                    console.log(`[ScheduleGenerator] Need ${requiredCount} employees for ${position.pos_name} - ${shift.shift_name}`);
 
-                    if (!isWorkingDay) {
-                        console.log(`[ScheduleGenerator] Skipping non-working day: ${date}, shift: ${shift.shift_name}`);
-                        continue;
-                    }
+                    // Find qualified available employees
+                    const qualifiedEmployees = employees.filter(emp => {
+                        return emp.default_position_id === position.pos_id;
+                    });
 
-                    // Find available employees for this position
-                    const availableEmployees = employees.filter(emp => {
-                        // Check if employee has the right position
-                        if (emp.default_position_id !== position.pos_id) {
+                    // Filter out employees who cannot work
+                    const availableEmployees = qualifiedEmployees.filter(emp => {
+                        // Check permanent constraints FIRST (highest priority)
+                        const hasPermanentConstraint = constraints.permanentCannotWork.some(c =>
+                            c.emp_id === emp.emp_id &&
+                            c.day_index === dayIndex &&
+                            (!c.shift_id || c.shift_id === shift.id)
+                        );
+
+                        if (hasPermanentConstraint) {
+                            console.log(`[ScheduleGenerator] ${emp.first_name} ${emp.last_name} has permanent constraint for this shift`);
                             return false;
                         }
 
-                        // Check constraints
-                        const hasCannotWork = constraints.cannotWork.some(c =>
-                            c.emp_id === emp.emp_id && c.day_index === dayIndex
+                        // Check temporary constraints
+                        const hasConstraint = constraints.cannotWork.some(c =>
+                            c.emp_id === emp.emp_id &&
+                            c.day_index === dayIndex &&
+                            (!c.shift_id || c.shift_id === shift.id)
                         );
 
-                        if (hasCannotWork) {
+                        if (hasConstraint) {
                             return false;
                         }
 
@@ -331,7 +369,7 @@ class ScheduleGeneratorService {
                         const assignment = {
                             emp_id: employee.emp_id,
                             date: date,
-                            shift_id: shift.shift_id,
+                            shift_id: shift.id,
                             position_id: position.pos_id
                         };
 

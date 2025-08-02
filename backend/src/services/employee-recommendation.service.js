@@ -15,6 +15,7 @@ class EmployeeRecommendationService {
              Position,
              PositionShift,
              EmployeeConstraint,
+             PermanentConstraint,
              ScheduleAssignment,
              Schedule
          } = this.db;
@@ -53,7 +54,7 @@ class EmployeeRecommendationService {
                 },
                 include: [
                     {
-                        model: WorkSite,  // Добавляем загрузку WorkSite
+                        model: WorkSite,
                         as: 'workSite'
                     },
                     {
@@ -82,6 +83,24 @@ class EmployeeRecommendationService {
                             ]
                         },
                         required: false
+                    },
+                    {
+                        model: PermanentConstraint, // Include permanent constraints
+                        as: 'permanentConstraints',
+                        where: {
+                            is_active: true,
+                            day_of_week: dayOfWeek,
+                            [Op.or]: [
+                                { shift_id: shiftId },
+                                { shift_id: null }
+                            ]
+                        },
+                        required: false,
+                        include: [{
+                            model: Employee,
+                            as: 'approver',
+                            attributes: ['emp_id', 'first_name', 'last_name']
+                        }]
                     }
                 ]
             });
@@ -89,7 +108,6 @@ class EmployeeRecommendationService {
             // Get ALL assignments for the week (not just this date)
             let weekAssignments = [];
             if (scheduleId) {
-                // If we have scheduleId, get assignments from that schedule
                 const schedule = await Schedule.findByPk(scheduleId);
                 if (schedule) {
                     weekAssignments = await ScheduleAssignment.findAll({
@@ -103,7 +121,6 @@ class EmployeeRecommendationService {
                     });
                 }
             } else {
-                // Otherwise, get assignments for the week around this date
                 const weekStart = dayjs(date).startOf('week').format('YYYY-MM-DD');
                 const weekEnd = dayjs(date).endOf('week').format('YYYY-MM-DD');
 
@@ -152,7 +169,8 @@ class EmployeeRecommendationService {
                 other_site: [],
                 unavailable_busy: [],
                 unavailable_hard: [],
-                unavailable_soft: []
+                unavailable_soft: [],
+                unavailable_permanent: []
             };
 
             for (const employee of employees) {
@@ -174,7 +192,7 @@ class EmployeeRecommendationService {
                     default_position_id: employee.default_position_id,
                     default_position_name: employee.defaultPosition?.pos_name || null,
                     work_site_id: employee.work_site_id,
-                    work_site_name: employee.workSite?.site_name || null,  // Добавляем название сайта
+                    work_site_name: employee.workSite?.site_name || null,
                     recommendation: evaluation
                 };
 
@@ -184,6 +202,13 @@ class EmployeeRecommendationService {
                         ...employeeData,
                         unavailable_reason: 'already_assigned',
                         assigned_shift: evaluation.assignedShiftToday
+                    });
+                } else if (evaluation.hasPermanentConstraint) {
+                    // New category for permanent constraints
+                    recommendations.unavailable_permanent.push({
+                        ...employeeData,
+                        unavailable_reason: 'permanent_constraint',
+                        constraint_details: evaluation.permanentConstraintDetails
                     });
                 } else if (evaluation.hasRestViolation) {
                     recommendations.unavailable_hard.push({
@@ -206,13 +231,11 @@ class EmployeeRecommendationService {
                         note: 'prefer_different_time'
                     });
                 } else if (evaluation.isOtherSite && evaluation.isCorrectPosition) {
-                    // Правильная позиция, но другой сайт
                     recommendations.other_site.push({
                         ...employeeData,
                         match_type: 'other_site_same_position'
                     });
                 } else if (evaluation.isOtherSite) {
-                    // Другой сайт и другая позиция
                     recommendations.other_site.push({
                         ...employeeData,
                         match_type: 'other_site_cross_position'
@@ -244,7 +267,8 @@ class EmployeeRecommendationService {
                 cross_position: recommendations.cross_position.length,
                 unavailable_busy: recommendations.unavailable_busy.length,
                 unavailable_hard: recommendations.unavailable_hard.length,
-                unavailable_soft: recommendations.unavailable_soft.length
+                unavailable_soft: recommendations.unavailable_soft.length,
+                unavailable_permanent: recommendations.unavailable_permanent.length
             });
 
             return recommendations;
@@ -255,7 +279,7 @@ class EmployeeRecommendationService {
         }
     }
 
-     _evaluateEmployee(employee, targetPosition, targetShift, dayOfWeek, date, employeeWeekAssignments, todayAssignments, allWeekAssignments) {
+    _evaluateEmployee(employee, targetPosition, targetShift, dayOfWeek, date, employeeWeekAssignments, todayAssignments, allWeekAssignments) {
         const evaluation = {
             canWork: true,
             score: 50,
@@ -266,9 +290,11 @@ class EmployeeRecommendationService {
             isOtherSite: false,
             hasHardConstraint: false,
             hasSoftConstraint: false,
+            hasPermanentConstraint: false,
             isAlreadyAssignedToday: false,
             hasRestViolation: false,
             constraintDetails: [],
+            permanentConstraintDetails: [],
             assignedShiftToday: null,
             restViolationDetails: null
         };
@@ -279,8 +305,31 @@ class EmployeeRecommendationService {
             evaluation.isAlreadyAssignedToday = true;
             evaluation.canWork = false;
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
-            evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);  // Изменено
-            return evaluation; // Return early - can't work two shifts same day
+            evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);
+            return evaluation;
+        }
+
+        // Check permanent constraints FIRST (highest priority)
+        if (employee.permanentConstraints && employee.permanentConstraints.length > 0) {
+            for (const permConstraint of employee.permanentConstraints) {
+                if (permConstraint.constraint_type === 'cannot_work' &&
+                    (!permConstraint.shift_id || permConstraint.shift_id === targetShift.id)) {
+
+                    evaluation.hasPermanentConstraint = true;
+                    evaluation.canWork = false;
+                    evaluation.permanentConstraintDetails.push({
+                        type: 'permanent_cannot_work',
+                        shift_name: targetShift.shift_name,
+                        approved_by: permConstraint.approver ?
+                            `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
+                            'Unknown',
+                        approved_at: permConstraint.approved_at,
+                        message: `Permanent constraint: Cannot work ${targetShift.shift_name} on ${dayOfWeek}`
+                    });
+
+                    return evaluation; // Return early - no need to check other constraints
+                }
+            }
         }
 
         // Check position match
