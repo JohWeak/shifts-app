@@ -1,6 +1,6 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
-import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {Outlet} from 'react-router-dom';
 import {
     Container,
     Navbar,
@@ -9,28 +9,28 @@ import {
     Button,
     Badge
 } from 'react-bootstrap';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import {useNavigate, useLocation, Link} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
-import { useMediaQuery } from 'shared/hooks/useMediaQuery';
-import { logout } from 'features/auth/model/authSlice';
-import { LanguageSwitch } from '../../components/LanguageSwitch/LanguageSwitch';
+import {useMediaQuery} from 'shared/hooks/useMediaQuery';
+import {logout} from 'features/auth/model/authSlice';
+import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
-import { setActiveTab, setSelectedScheduleId } from 'features/admin-schedule-management/model/scheduleSlice';
-import { fetchAllRequests } from 'features/admin-permanent-requests/model/adminRequestsSlice';
+import {setActiveTab, setSelectedScheduleId} from 'features/admin-schedule-management/model/scheduleSlice';
+import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const navigate = useNavigate();
     const location = useLocation();
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1592);
     const dispatch = useDispatch();
-    const { pendingCount } = useSelector(state => state.adminRequests);
+    const {pendingCount} = useSelector(state => state.adminRequests);
 
 
     useEffect(() => {
@@ -169,7 +169,8 @@ const AdminLayout = () => {
                         }}
                     >
                         <i className={`bi bi-${item.icon} nav-icon `}></i>
-                        <span className="flex-grow-1">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
+                        <span
+                            className="flex-grow-1">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
                         {item.badge && <Badge bg="primary">{item.badge}</Badge>}
                     </Nav.Link>
                 </Nav.Item>
@@ -209,19 +210,21 @@ const AdminLayout = () => {
                             }}
                         >
                             <i className="bi bi-calendar-check-fill text-primary me-2"></i>
-                            <span className="brand-text">{t('common.appName')}</span>
-                            <Badge bg="secondary" className="ms-2 brand-badge">{t('common.admin')}</Badge>
+                            <div className="d-flex flex-column align-items-start">
+                                <span className="brand-text">{t('common.appName')}</span>
+                                <Badge bg="secondary" className="brand-badge">{t('common.admin')}</Badge>
+                            </div>
                         </Navbar>
 
                     </div>
 
 
                     {/* Right side - User menu */}
-                    <div className="d-flex align-items-center">
-                            <ThemeToggle variant="icon" />
-                            <LanguageSwitch />
+                    <div className="d-flex align-items-center gap-2">
+                        <ThemeToggle variant="icon"/>
+                        <LanguageSwitch/>
 
-                        <Dropdown align="end" className='ms-3'>
+                        <Dropdown align="end" className='ms-1'>
                             <Dropdown.Toggle
                                 className="user-dropdown-btn border-0 shadow-sm"
                                 id="user-dropdown"
@@ -238,7 +241,7 @@ const AdminLayout = () => {
                                     <div className="text-muted small">{t('auth.signedInAs')}</div>
                                     <div className="fw-semibold">{t('common.admin')}</div>
                                 </Dropdown.Header>
-                                <Dropdown.Divider />
+                                <Dropdown.Divider/>
                                 <Dropdown.Item>
                                     <i className="bi bi-person me-2"></i>
                                     {t('common.profile')}
@@ -247,7 +250,7 @@ const AdminLayout = () => {
                                     <i className="bi bi-gear me-2"></i>
                                     {t('common.settings')}
                                 </Dropdown.Item>
-                                <Dropdown.Divider />
+                                <Dropdown.Divider/>
                                 <Dropdown.Item onClick={handleLogout} className="text-danger">
                                     <i className="bi bi-box-arrow-right me-2"></i>
                                     {t('auth.logout')}
@@ -269,7 +272,7 @@ const AdminLayout = () => {
                                     {t('navigation.title')}
                                 </h6>
                             </div>
-                            <SidebarContent />
+                            <SidebarContent/>
                         </div>
                     </div>
                 )}
@@ -277,7 +280,7 @@ const AdminLayout = () => {
                 {/* Main Content Area */}
                 <div className="admin-content-area">
                     <main className="admin-main-content">
-                        <Outlet />
+                        <Outlet/>
                     </main>
                 </div>
             </div>
@@ -299,12 +302,12 @@ const AdminLayout = () => {
                                     {t('navigation.title')}
                                 </h6>
                             </div>
-                            <SidebarContent />
+                            <SidebarContent/>
                         </div>
                     </div>
                 </>
             )}
-            <GlobalAlerts />
+            <GlobalAlerts/>
         </div>
     );
 };

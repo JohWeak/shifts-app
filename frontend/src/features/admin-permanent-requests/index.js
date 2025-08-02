@@ -110,13 +110,7 @@ const AdminPermanentRequests = () => {
                     >
                         {t('admin.requests.worksite')}
                     </SortableHeader>
-                    <SortableHeader
-                        sortKey="status"
-                        sortConfig={sortConfig}
-                        onSort={requestSort}
-                    >
-                        {t('admin.requests.status')}
-                    </SortableHeader>
+
                     <SortableHeader
                         sortKey="requested_at"
                         sortConfig={sortConfig}
@@ -133,6 +127,13 @@ const AdminPermanentRequests = () => {
                             {t('admin.requests.reviewedAt')}
                         </SortableHeader>
                     )}
+                    <SortableHeader
+                        sortKey="status"
+                        sortConfig={sortConfig}
+                        onSort={requestSort}
+                    >
+                        {t('admin.requests.status')}
+                    </SortableHeader>
                 </tr>
                 </thead>
                 <tbody>
@@ -154,12 +155,7 @@ const AdminPermanentRequests = () => {
                         <td>
                             {request.employee?.workSite?.site_name || '-'}
                         </td>
-                        <td>
-                            <StatusBadge
-                                status={request.status}
-                                text={t(`requests.status.${request.status}`)}
-                            />
-                        </td>
+
                         <td>{formatDateTime(request.requested_at, locale)}</td>
                         {!isPending && (
                             <td>
@@ -169,6 +165,12 @@ const AdminPermanentRequests = () => {
                                 }
                             </td>
                         )}
+                        <td>
+                            <StatusBadge
+                                status={request.status}
+                                text={t(`requests.status.${request.status}`)}
+                            />
+                        </td>
                     </tr>
                 ))}
                 </tbody>
@@ -208,8 +210,15 @@ const AdminPermanentRequests = () => {
             {pendingRequests.length > 0 && (
                 <Card className="mb-3">
                     <Card.Header className="bg-warning bg-opacity-10">
-                        <h5 className="mb-0">
-                            {t('admin.requests.pendingRequests')} ({pendingRequests.length})
+                        <h5 className="mb-0 justify-content-between d-flex align-items-center">
+                            {t('admin.requests.pendingRequests')}
+                            <Badge
+                                bg="warning"
+                                className="ms-2 rounded-pill"
+
+                            >
+                                {pendingRequests.length}
+                            </Badge>
                         </h5>
                     </Card.Header>
                     <Card.Body className="p-0">
@@ -226,8 +235,15 @@ const AdminPermanentRequests = () => {
             {activeProcessedRequests.length > 0 && (
                 <Card className="mb-3">
                     <Card.Header className="bg-success bg-opacity-10">
-                        <h5 className="mb-0">
-                            {t('admin.requests.activeRequests')} ({activeProcessedRequests.length})
+                        <h5 className="mb-0 justify-content-between d-flex align-items-center">
+                            {t('admin.requests.activeRequests')}
+                            <Badge
+                                bg="success"
+                                className="ms-2 rounded-pill bg-opacity-50"
+
+                            >
+                                {activeProcessedRequests.length}
+                            </Badge>
                         </h5>
                     </Card.Header>
                     <Card.Body className="p-0">
@@ -244,8 +260,16 @@ const AdminPermanentRequests = () => {
             {inactiveRequests.length > 0 && (
                 <Card className="mt-3">
                     <Card.Header className="bg-secondary bg-opacity-10">
-                        <h5 className="mb-0">
-                            {t('admin.requests.inactiveRequests')} ({inactiveRequests.length})
+                        <h5 className="mb-0 justify-content-between d-flex align-items-center">
+                            {t('admin.requests.inactiveRequests')}
+                            <Badge
+                                bg="secondary"
+                                className="ms-2 rounded-pill bg-opacity-50"
+
+                            >
+                                {inactiveRequests.length}
+                            </Badge>
+
                         </h5>
                     </Card.Header>
                     <Card.Body className="p-0">

@@ -273,6 +273,7 @@
 }
 .admin-layout .admin-navbar .badge{
     font-size: 0.8rem;
+    transform: translateY(0.1rem);
 }
 
 
