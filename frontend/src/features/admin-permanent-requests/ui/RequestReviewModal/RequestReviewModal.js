@@ -285,14 +285,14 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                     <>
                         <Button
                             variant="danger"
-                            onClick={() => handleReview('rejected')}
+                            onClick={() => handleReviewClick('rejected')}
                             disabled={loading}
                         >
                             {loading ? <Spinner size="sm" /> : t('admin.requests.reject')}
                         </Button>
                         <Button
                             variant="success"
-                            onClick={() => handleReview('approved')}
+                            onClick={() => handleReviewClick('approved')}
                             disabled={loading}
                         >
                             {loading ? <Spinner size="sm" /> : t('admin.requests.approve')}
