@@ -426,8 +426,8 @@ const reviewPermanentRequest = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const {id} = req.params;
-        const {status, admin_response} = req.body;
+        const { id } = req.params;
+        const { status, admin_response } = req.body;
         const adminId = req.userId;
 
         // Разрешаем pending статус для возврата на рассмотрение
@@ -649,7 +649,6 @@ const getMyPermanentConstraints = async (req, res) => {
             order: [['day_of_week', 'ASC'], ['shift_id', 'ASC']]
         });
 
-
         // Обрабатываем данные для фронтенда
         const processedConstraints = constraints.map(constraint => {
             const constraintData = constraint.toJSON();
@@ -669,10 +668,11 @@ const getMyPermanentConstraints = async (req, res) => {
             return constraintData;
         });
 
+        console.log(`[getMyPermanentConstraints] Found ${processedConstraints.length} active constraints for employee ${empId}`);
 
         res.json({
             success: true,
-            data: constraints
+            data: processedConstraints
         });
 
     } catch (error) {

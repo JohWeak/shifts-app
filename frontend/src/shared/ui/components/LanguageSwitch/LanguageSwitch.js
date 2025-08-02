@@ -4,7 +4,7 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './LanguageSwitch.css';
 
 export const LanguageSwitch = () => {
-    const { locale, changeLanguage } = useI18n();
+    const { locale, changeLanguage, direction } = useI18n();
 
     const languages = [
         { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -15,7 +15,7 @@ export const LanguageSwitch = () => {
     const currentLang = languages.find(lang => lang.code === locale);
 
     return (
-        <Dropdown className="language-switch" align="start">
+        <Dropdown className="language-switch" align={direction === 'rtl' ? 'start' : 'end'}>
             <Dropdown.Toggle variant="outline-secondary" size="sm">
                 <span>{currentLang?.code.toString().toLocaleUpperCase()}</span>
             </Dropdown.Toggle>

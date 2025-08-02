@@ -16,6 +16,7 @@ import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
 import PermanentConstraintGrid from './PermanentConstraintGrid';
 import './PermanentConstraintForm.css';
+import store from "../../../../app/store/store";
 
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -52,14 +53,17 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
             try {
                 setLoading(true);
 
-                // Параллельная загрузка смен и permanent constraints
-                const [shiftsResponse, constraintsResult] = await Promise.all([
-                    constraintAPI.getEmployeeShifts(),
-                    dispatch(fetchMyPermanentConstraints()).unwrap()
-                ]);
-
+                // Загружаем смены
+                const shiftsResponse = await constraintAPI.getEmployeeShifts();
                 setShifts(shiftsResponse.data?.shifts || []);
-                console.log('[PermanentConstraintForm] Data loaded successfully');
+
+                // Загружаем permanent constraints через Redux
+                const constraintsData = await dispatch(fetchMyPermanentConstraints()).unwrap();
+                console.log('[PermanentConstraintForm] Loaded constraints data:', constraintsData);
+
+                // Временно: проверим что в Redux
+                const state = store.getState();
+                console.log('[PermanentConstraintForm] Redux state permanentConstraints:', state.requests.permanentConstraints);
 
             } catch (err) {
                 console.error('[PermanentConstraintForm] Error loading data:', err);
@@ -68,7 +72,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 setLoading(false);
             }
         };
-
         loadData();
     }, [dispatch, t]);
 
@@ -90,23 +93,26 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
     useEffect(() => {
         if (!initialData && permanentConstraints && permanentConstraints.length > 0) {
             console.log('[PermanentConstraintForm] Initializing from permanent constraints');
+            console.log('[PermanentConstraintForm] permanentConstraints:', permanentConstraints);
+
             const constraintsMap = {};
 
-            // Фильтруем только активные ограничения
-            const activeConstraints = permanentConstraints.filter(c => c.is_active);
-            console.log('[PermanentConstraintForm] Active constraints:', activeConstraints);
+            // Проверяем структуру данных
+            permanentConstraints.forEach((constraint, index) => {
+                console.log(`[PermanentConstraintForm] Constraint ${index}:`, constraint);
 
-            activeConstraints.forEach(constraint => {
-                // Формируем ключ с правильным форматом дня недели
-                const dayCapitalized = constraint.day_of_week.charAt(0).toUpperCase() +
-                    constraint.day_of_week.slice(1).toLowerCase();
+                // Проверяем, что is_active это boolean true, а не 1
+                if (constraint.is_active === true || constraint.is_active === 1) {
+                    const dayCapitalized = constraint.day_of_week.charAt(0).toUpperCase() +
+                        constraint.day_of_week.slice(1).toLowerCase();
 
-                // Если shift_id есть, используем его, иначе используем 'all' для "весь день"
-                const shiftKey = constraint.shift_id ? constraint.shift_id : 'all';
-                const key = `${dayCapitalized}-${shiftKey}`;
+                    // Для "весь день" используем 'all'
+                    const shiftKey = constraint.shift_id ? String(constraint.shift_id) : 'all';
+                    const key = `${dayCapitalized}-${shiftKey}`;
 
-                console.log(`[PermanentConstraintForm] Adding constraint: ${key} = ${constraint.constraint_type}`);
-                constraintsMap[key] = constraint.constraint_type;
+                    console.log(`[PermanentConstraintForm] Creating key: ${key} = ${constraint.constraint_type}`);
+                    constraintsMap[key] = constraint.constraint_type;
+                }
             });
 
             console.log('[PermanentConstraintForm] Final constraints map:', constraintsMap);
@@ -267,15 +273,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
         return {};
     };
 
-    const getConfirmMessage = () => {
-        const hasActiveConstraints = permanentConstraints && permanentConstraints.some(c => c.is_active);
-
-        if (hasActiveConstraints) {
-            return `${t('requests.confirmSubmit.message')} ${t('requests.previousConstraintsWarning')}`;
-        }
-
-        return t('requests.confirmSubmit.message');
-    };
+    const hasActiveConstraints = permanentConstraints && permanentConstraints.some(c => c.is_active);
 
     // --- ОТПРАВКА ФОРМЫ ---
     const handleConfirmSubmit = async () => {
@@ -521,10 +519,19 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 onHide={() => setShowConfirm(false)}
                 onConfirm={handleConfirmSubmit}
                 title={t('requests.confirmSubmit.title')}
-                message={getConfirmMessage()}
                 confirmText={t('common.submit')}
                 confirmVariant="primary"
-            />
+            >
+                <p>
+                    {t('requests.confirmSubmit.message')}
+                </p>
+
+                {hasActiveConstraints && (
+                    <p className="mb-0 mt-2  text-danger">
+                        {t('requests.previousConstraintsWarning')}
+                    </p>
+                )}
+            </ConfirmationModal>
         </div>
     );
 };

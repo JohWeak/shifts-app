@@ -18,9 +18,14 @@ export const fetchMyPermanentConstraints = createAsyncThunk(
     'requests/fetchMyPermanentConstraints',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await constraintAPI.getMyPermanentConstraints();
-            return response.data || [];
+            console.log('[fetchMyPermanentConstraints] Fetching...');
+            const data = await constraintAPI.getMyPermanentConstraints();
+            console.log('[fetchMyPermanentConstraints] Response data:', data);
+
+            // data уже содержит массив constraints
+            return data || [];
         } catch (error) {
+            console.error('[fetchMyPermanentConstraints] Error:', error);
             return rejectWithValue(error.response?.data?.message || 'Failed to load permanent constraints');
         }
     }
@@ -94,7 +99,7 @@ const requestsSlice = createSlice({
                 console.log('[requestsSlice] Fetching permanent constraints...');
             })
             .addCase(fetchMyPermanentConstraints.fulfilled, (state, action) => {
-                console.log('[requestsSlice] Permanent constraints loaded:', action.payload);
+                console.log('[requestsSlice] Setting permanent constraints:', action.payload);
                 state.permanentConstraints = action.payload;
             })
             .addCase(fetchMyPermanentConstraints.rejected, (state, action) => {
