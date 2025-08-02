@@ -40,6 +40,26 @@ export const en = {
             revert: 'Return',
             activeRequests: 'Active Requests',
             inactiveRequests: 'Inactive Requests',
+            schedule: {
+                recommendations: {
+                    tabs: {
+                        available: 'Available',
+                        crossPosition: 'Cross Position',
+                        otherSite: 'Other Site',
+                        busy: 'Busy',
+                        constraints: 'Constraints',
+                        permanent: 'Permanent',
+                        preferences: 'Preferences'
+                    },
+                    alreadyAssigned: 'Already assigned to {{shift}}',
+                    permanentConstraint: 'Permanent constraint',
+                    approvedBy: 'Approved by {{approver}} on {{date}}',
+                    cannotWork: 'Cannot work',
+                    prefersNotToWork: 'Prefers not to work',
+                    restViolation: 'Rest violation',
+                    noEmployees: 'No employees in this category'
+                }
+            },
 
         }
     },

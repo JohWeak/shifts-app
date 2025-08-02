@@ -1,4 +1,5 @@
 // backend/src/services/cp-sat-bridge.service.js
+// backend/src/services/cp-sat-bridge.service.js
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
@@ -18,10 +19,8 @@ class CPSATBridge {
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
 
-            // Передаём транзакцию в prepareScheduleData
             const data = await bridge.prepareScheduleData(siteId, weekStart, transaction);
 
-            // 2. Call Python optimizer (не меняется)
             const pythonResult = await bridge.callPythonOptimizer(data);
 
             if (!pythonResult.success) {
@@ -32,7 +31,6 @@ class CPSATBridge {
                 };
             }
 
-            // Передаём транзакцию в saveSchedule
             const savedSchedule = await bridge.saveSchedule(siteId, weekStart, pythonResult.schedule, transaction);
 
             return {
@@ -56,9 +54,6 @@ class CPSATBridge {
         }
     }
 
-    /**
-     * Prepare data for Python optimizer with new position_shifts structure
-     */
     async prepareScheduleData(siteId, weekStart, transaction = null) {
         console.log(`[CP-SAT Bridge] Preparing data for site ${siteId}, week ${weekStart}`);
 
@@ -68,23 +63,52 @@ class CPSATBridge {
             PositionShift,
             ShiftRequirement,
             EmployeeConstraint,
+            PermanentConstraint, // Add permanent constraints
+            LegalConstraint, // Add legal constraints
             ScheduleAssignment
         } = this.db;
 
         try {
-            // Get employees with default positions and constraints
+            // Get employees with all constraint types
             const employees = await Employee.findAll({
                 where: {
                     status: 'active',
                     role: 'employee',
                     work_site_id: siteId
                 },
-                include: [/* ... */],
+                include: [
+                    {
+                        model: Position,
+                        as: 'defaultPosition'
+                    },
+                    {
+                        model: EmployeeConstraint,
+                        as: 'constraints',
+                        where: { status: 'active' },
+                        required: false
+                    },
+                    {
+                        model: PermanentConstraint,
+                        as: 'permanentConstraints',
+                        where: { is_active: true },
+                        required: false,
+                        include: [{
+                            model: Employee,
+                            as: 'approver',
+                            attributes: ['emp_id', 'first_name', 'last_name']
+                        }]
+                    }
+                ],
                 transaction
             });
 
-
             console.log(`[CP-SAT Bridge] Found ${employees.length} active employees for site ${siteId}`);
+
+            // Get legal constraints
+            const legalConstraints = await LegalConstraint.findAll({
+                where: { is_active: true },
+                transaction
+            });
 
             // Get positions with shifts and requirements
             const positions = await Position.findAll({
@@ -109,25 +133,22 @@ class CPSATBridge {
 
             console.log(`[CP-SAT Bridge] Found ${positions.length} active positions`);
 
-            // ВАЖНО: Создаем маппинг для обратной совместимости
-            // Временное решение пока не обновим Python optimizer
+            // Create shift mapping for backward compatibility
             const shiftIdMapping = {};
             let temporaryShiftId = 1;
 
-            // Build unique shifts array from position shifts
             const shiftsMap = new Map();
             const shiftsArray = [];
 
             positions.forEach(position => {
                 position.shifts?.forEach(posShift => {
                     if (!shiftsMap.has(posShift.id)) {
-                        // Создаем временный ID для совместимости с Python
                         const tempId = temporaryShiftId++;
-                        shiftIdMapping[tempId] = posShift.id; // Сохраняем маппинг
+                        shiftIdMapping[tempId] = posShift.id;
 
                         const shiftData = {
-                            shift_id: tempId, // Используем временный ID для Python
-                            real_shift_id: posShift.id, // Сохраняем реальный ID
+                            shift_id: tempId,
+                            real_shift_id: posShift.id,
                             shift_name: posShift.shift_name,
                             start_time: posShift.start_time,
                             duration: posShift.duration_hours,
@@ -140,11 +161,7 @@ class CPSATBridge {
                 });
             });
 
-            // Сохраняем маппинг для использования при сохранении результатов
             this.shiftIdMapping = shiftIdMapping;
-
-            console.log(`[CP-SAT Bridge] Created shift mapping:`, shiftIdMapping);
-            console.log(`[CP-SAT Bridge] Collected ${shiftsArray.length} unique shifts from position_shifts`);
 
             // Format employee data
             const employeesData = employees
@@ -155,14 +172,6 @@ class CPSATBridge {
                     default_position_id: emp.default_position_id,
                     status: emp.status
                 }));
-
-            console.log(`[CP-SAT Bridge] Employees with default positions: ${JSON.stringify(
-                employeesData.map(e => ({
-                    id: e.emp_id,
-                    name: e.name,
-                    default_position_id: e.default_position_id
-                }))
-                , null, 2)}`);
 
             // Format position data
             const positionsData = positions.map(position => ({
@@ -184,21 +193,19 @@ class CPSATBridge {
                     date: currentDate.toISOString().split('T')[0],
                     day_name: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
                     day_index: i,
-                    weekday: currentDate.getDay() // 0 = Sunday, 1 = Monday, etc.
+                    weekday: currentDate.getDay()
                 });
             }
 
-            // Process constraints
-            const constraintsData = await this.processConstraints(employees, days, shiftsArray);
+            // Process all constraint types
+            const constraintsData = await this.processConstraints(employees, days, shiftsArray, legalConstraints);
 
-            // Get existing assignments
             const existingAssignments = await this.getExistingAssignments(
                 employees.map(e => e.emp_id),
                 weekStart,
                 transaction
             );
 
-            // Settings for algorithm
             const settings = {
                 week_start: weekStart,
                 site_id: siteId,
@@ -221,19 +228,15 @@ class CPSATBridge {
                 settings: settings
             };
 
-            console.log('[CP-SAT Bridge] Sample employee data:', employeesData.slice(0, 2));
-            console.log('[CP-SAT Bridge] Constraints data:', {
-                cannot_work: constraintsData.cannot_work.length,
-                prefer_work: constraintsData.prefer_work.length
-            });
-
             console.log('[CP-SAT Bridge] Data prepared:', {
                 employees: employeesData.length,
                 shifts: shiftsArray.length,
                 positions: positionsData.length,
                 days: days.length,
                 cannot_work_constraints: constraintsData.cannot_work.length,
-                prefer_work_constraints: constraintsData.prefer_work.length
+                prefer_work_constraints: constraintsData.prefer_work.length,
+                permanent_cannot_work: constraintsData.permanent_cannot_work.length,
+                legal_constraints: constraintsData.legal_constraints.length
             });
 
             return preparedData;
@@ -244,9 +247,6 @@ class CPSATBridge {
         }
     }
 
-    /**
-     * Determine shift type based on start time
-     */
     determineShiftType(startTime) {
         const hour = parseInt(startTime.split(':')[0]);
 
@@ -259,56 +259,92 @@ class CPSATBridge {
         }
     }
 
-    /**
-     * Process employee constraints
-     */
-    async processConstraints(employees, days, shifts) {
+    async processConstraints(employees, days, shifts, legalConstraints) {
         const cannotWork = [];
         const preferWork = [];
+        const permanentCannotWork = [];
+        const legalConstraintData = [];
 
+        // Process employee constraints
         for (const emp of employees) {
-            if (!emp.constraints) continue;
+            // Process temporary constraints
+            if (emp.constraints) {
+                for (const constraint of emp.constraints) {
+                    const constraintDays = [];
 
-            for (const constraint of emp.constraints) {
-                const constraintDays = [];
-
-                if (constraint.target_date) {
-                    // Specific date constraint
-                    const targetDate = dayjs(constraint.target_date).format('YYYY-MM-DD');
-                    const dayIndex = days.findIndex(d => d.date === targetDate);
-                    if (dayIndex !== -1) {
-                        constraintDays.push(dayIndex);
+                    if (constraint.target_date) {
+                        const targetDate = dayjs(constraint.target_date).format('YYYY-MM-DD');
+                        const dayIndex = days.findIndex(d => d.date === targetDate);
+                        if (dayIndex !== -1) {
+                            constraintDays.push(dayIndex);
+                        }
+                    } else if (constraint.day_of_week !== null) {
+                        const dayIndex = days.findIndex(d => d.weekday === constraint.day_of_week);
+                        if (dayIndex !== -1) {
+                            constraintDays.push(dayIndex);
+                        }
                     }
-                } else if (constraint.day_of_week !== null) {
-                    // Weekly recurring constraint
-                    const dayIndex = days.findIndex(d => d.weekday === constraint.day_of_week);
-                    if (dayIndex !== -1) {
-                        constraintDays.push(dayIndex);
+
+                    for (const dayIndex of constraintDays) {
+                        const constraintData = {
+                            emp_id: emp.emp_id,
+                            day_index: dayIndex,
+                            shift_id: constraint.shift_id,
+                            constraint_type: constraint.constraint_type,
+                            reason: constraint.reason
+                        };
+
+                        if (constraint.constraint_type === 'cannot_work') {
+                            cannotWork.push(constraintData);
+                        } else if (constraint.constraint_type === 'prefer_work') {
+                            preferWork.push(constraintData);
+                        }
                     }
                 }
+            }
 
-                // Add constraint for each applicable day
-                for (const dayIndex of constraintDays) {
-                    const constraintData = {
-                        emp_id: emp.emp_id,
-                        day_index: dayIndex,
-                        shift_id: constraint.shift_id,
-                        constraint_type: constraint.constraint_type,
-                        reason: constraint.reason
-                    };
+            // Process permanent constraints
+            if (emp.permanentConstraints) {
+                for (const permConstraint of emp.permanentConstraints) {
+                    days.forEach((day, index) => {
+                        const dayName = day.day_name.toLowerCase();
+                        if (dayName === permConstraint.day_of_week) {
+                            const constraintData = {
+                                emp_id: emp.emp_id,
+                                day_index: index,
+                                shift_id: permConstraint.shift_id,
+                                constraint_type: permConstraint.constraint_type,
+                                is_permanent: true,
+                                approved_by: permConstraint.approver ?
+                                    `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
+                                    'Unknown',
+                                approved_at: permConstraint.approved_at
+                            };
 
-                    if (constraint.constraint_type === 'cannot_work') {
-                        cannotWork.push(constraintData);
-                    } else if (constraint.constraint_type === 'prefer_work') {
-                        preferWork.push(constraintData);
-                    }
+                            if (permConstraint.constraint_type === 'cannot_work') {
+                                permanentCannotWork.push(constraintData);
+                            }
+                        }
+                    });
                 }
             }
         }
 
+        // Process legal constraints
+        for (const legal of legalConstraints) {
+            legalConstraintData.push({
+                constraint_type: legal.constraint_type,
+                scope: legal.scope,
+                value: legal.value,
+                description: legal.description
+            });
+        }
+
         return {
             cannot_work: cannotWork,
-            prefer_work: preferWork
+            prefer_work: preferWork,
+            permanent_cannot_work: permanentCannotWork,
+            legal_constraints: legalConstraintData
         };
     }
 

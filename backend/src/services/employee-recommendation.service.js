@@ -361,6 +361,34 @@ class EmployeeRecommendationService {
              evaluation.reasons.push('same_work_site');
          }
 
+        // Check temporary constraints
+        if (employee.constraints && employee.constraints.length > 0) {
+            for (const constraint of employee.constraints) {
+                if (constraint.shift_id && constraint.shift_id !== targetShift.id) {
+                    continue;
+                }
+
+                if (constraint.constraint_type === 'cannot_work') {
+                    evaluation.hasHardConstraint = true;
+                    evaluation.canWork = false;
+                    evaluation.constraintDetails.push({
+                        type: 'cannot_work',
+                        target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
+                        date: constraint.target_date || dayOfWeek
+                    });
+                } else if (constraint.constraint_type === 'prefer_not_work') {
+                    evaluation.hasSoftConstraint = true;
+                    evaluation.score -= 30;
+                    evaluation.constraintDetails.push({
+                        type: 'prefer_not_work',
+                        target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
+                        date: constraint.target_date || dayOfWeek
+                    });
+                }
+            }
+        }
+
+
         // Check rest periods with adjacent days
         const restViolation = this._checkRestViolations(
             employee.emp_id,
@@ -378,39 +406,39 @@ class EmployeeRecommendationService {
         }
 
         // Check constraints
-        if (employee.constraints && employee.constraints.length > 0) {
-            for (const constraint of employee.constraints) {
-                const constraintApplies = this._constraintApplies(constraint, dayOfWeek, targetShift.shift_id, date);
-
-                if (constraintApplies) {
-                    const constraintDetail = {
-                        type: constraint.constraint_type,
-                        applies_to: constraint.applies_to,
-                        reason: constraint.reason || 'no_reason_provided',  // Изменено
-                        day_of_week: constraint.day_of_week,
-                        shift_id: constraint.shift_id
-                    };
-
-                    if (constraint.constraint_type === 'cannot_work') {
-                        evaluation.hasHardConstraint = true;
-                        evaluation.canWork = false;
-                        evaluation.warnings.push(`cannot_work_constraint:${constraint.reason || 'hard_constraint'}`);
-                        constraintDetail.impact = 'blocking';
-                    } else if (constraint.constraint_type === 'prefer_work') {
-                        if (constraintApplies && constraint.shift_id === targetShift.shift_id) {
-                            evaluation.score += 30;
-                            evaluation.reasons.push('prefers_this_shift');  // Изменено
-                        } else {
-                            evaluation.hasSoftConstraint = true;
-                            evaluation.score -= 10;
-                            evaluation.warnings.push('prefers_different_time_shift');  // Изменено
-                        }
-                    }
-
-                    evaluation.constraintDetails.push(constraintDetail);
-                }
-            }
-        }
+        // if (employee.constraints && employee.constraints.length > 0) {
+        //     for (const constraint of employee.constraints) {
+        //         const constraintApplies = this._constraintApplies(constraint, dayOfWeek, targetShift.shift_id, date);
+        //
+        //         if (constraintApplies) {
+        //             const constraintDetail = {
+        //                 type: constraint.constraint_type,
+        //                 applies_to: constraint.applies_to,
+        //                 reason: constraint.reason || 'no_reason_provided',  // Изменено
+        //                 day_of_week: constraint.day_of_week,
+        //                 shift_id: constraint.shift_id
+        //             };
+        //
+        //             if (constraint.constraint_type === 'cannot_work') {
+        //                 evaluation.hasHardConstraint = true;
+        //                 evaluation.canWork = false;
+        //                 evaluation.warnings.push(`cannot_work_constraint:${constraint.reason || 'hard_constraint'}`);
+        //                 constraintDetail.impact = 'blocking';
+        //             } else if (constraint.constraint_type === 'prefer_work') {
+        //                 if (constraintApplies && constraint.shift_id === targetShift.shift_id) {
+        //                     evaluation.score += 30;
+        //                     evaluation.reasons.push('prefers_this_shift');  // Изменено
+        //                 } else {
+        //                     evaluation.hasSoftConstraint = true;
+        //                     evaluation.score -= 10;
+        //                     evaluation.warnings.push('prefers_different_time_shift');  // Изменено
+        //                 }
+        //             }
+        //
+        //             evaluation.constraintDetails.push(constraintDetail);
+        //         }
+        //     }
+        // }
 
         // Add workload balance scoring
         const weeklyAssignments = employeeWeekAssignments.length;
