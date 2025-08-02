@@ -111,7 +111,7 @@ const EmployeeRequests = () => {
 
     const handleEditRequest = (request) => {
         if (request.status !== 'pending') return;
-
+        console.log('[EmployeeRequests] Editing request:', request);
         // Закрываем детали запроса, если они открыты
         setSelectedRequest(null);
 

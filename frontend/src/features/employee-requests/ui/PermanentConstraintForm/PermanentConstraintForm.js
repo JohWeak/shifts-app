@@ -75,47 +75,50 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
         loadData();
     }, [dispatch, t]);
 
-    // Инициализация constraints из permanent constraints
-    // useEffect(() => {
-    //     if (!initialData && permanentConstraints.length > 0) {
-    //         const constraintsMap = {};
-    //         permanentConstraints.forEach(constraint => {
-    //             if (constraint.is_active) {
-    //                 const key = `${constraint.day_of_week.charAt(0).toUpperCase() + constraint.day_of_week.slice(1)}-${constraint.shift_id}`;
-    //                 constraintsMap[key] = constraint.constraint_type;
-    //             }
-    //         });
-    //         setConstraints(constraintsMap);
-    //     }
-    // }, [permanentConstraints, initialData]);
-
-    // Инициализация из initialData для редактирования
+    // Обновим эффект для инициализации из initialData (при редактировании)
     useEffect(() => {
-        if (!initialData && permanentConstraints && permanentConstraints.length > 0) {
-            console.log('[PermanentConstraintForm] Initializing from permanent constraints');
-            console.log('[PermanentConstraintForm] permanentConstraints:', permanentConstraints);
+        if (initialData && initialData.constraints) {
+            console.log('[PermanentConstraintForm] Initializing from initialData:', initialData);
 
             const constraintsMap = {};
+            initialData.constraints.forEach(constraint => {
+                // Формируем ключ с правильным форматом
+                const dayCapitalized = constraint.day_of_week.charAt(0).toUpperCase() +
+                    constraint.day_of_week.slice(1).toLowerCase();
+                const shiftKey = constraint.shift_id ? String(constraint.shift_id) : 'all';
+                const key = `${dayCapitalized}-${shiftKey}`;
 
-            // Проверяем структуру данных
-            permanentConstraints.forEach((constraint, index) => {
-                console.log(`[PermanentConstraintForm] Constraint ${index}:`, constraint);
+                console.log(`[PermanentConstraintForm] Loading constraint: ${key} = ${constraint.constraint_type}`);
+                constraintsMap[key] = constraint.constraint_type;
+            });
 
-                // Проверяем, что is_active это boolean true, а не 1
+            setConstraints(constraintsMap);
+
+            if (initialData.message) {
+                setMessage(initialData.message);
+                setShowMessage(true);
+            }
+        }
+    }, [initialData]);
+
+// Убедимся, что при редактировании не загружаем permanent constraints
+    useEffect(() => {
+        // Загружаем permanent constraints только если НЕ редактируем существующий запрос
+        if (!initialData && permanentConstraints && permanentConstraints.length > 0) {
+            console.log('[PermanentConstraintForm] Initializing from permanent constraints');
+            const constraintsMap = {};
+
+            permanentConstraints.forEach(constraint => {
                 if (constraint.is_active === true || constraint.is_active === 1) {
                     const dayCapitalized = constraint.day_of_week.charAt(0).toUpperCase() +
                         constraint.day_of_week.slice(1).toLowerCase();
-
-                    // Для "весь день" используем 'all'
                     const shiftKey = constraint.shift_id ? String(constraint.shift_id) : 'all';
                     const key = `${dayCapitalized}-${shiftKey}`;
 
-                    console.log(`[PermanentConstraintForm] Creating key: ${key} = ${constraint.constraint_type}`);
                     constraintsMap[key] = constraint.constraint_type;
                 }
             });
 
-            console.log('[PermanentConstraintForm] Final constraints map:', constraintsMap);
             setConstraints(constraintsMap);
         }
     }, [permanentConstraints, initialData]);

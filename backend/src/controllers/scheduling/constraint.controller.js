@@ -579,36 +579,54 @@ const getMyPermanentRequests = async (req, res) => {
             order: [['approved_at', 'DESC']]
         });
 
-        // Создаем карту активных ограничений для быстрого поиска
+        // Создаем карту активных ограничений
         const activeConstraintsMap = new Map();
         activeConstraints.forEach(constraint => {
             const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
-            activeConstraintsMap.set(key, constraint.approved_at);
+            if (!activeConstraintsMap.has(key)) {
+                activeConstraintsMap.set(key, constraint.approved_at);
+            }
         });
 
         // Помечаем запросы как активные или неактивные
         const requestsWithActiveFlag = requests.map(request => {
             const requestData = request.toJSON();
 
-            // Проверяем, есть ли все ограничения из этого запроса среди активных
+            // Pending запросы не могут быть активными или неактивными
+            if (requestData.status === 'pending') {
+                return {
+                    ...requestData,
+                    is_active: null // null для pending запросов
+                };
+            }
+
+            // Rejected запросы всегда неактивны
+            if (requestData.status === 'rejected') {
+                return {
+                    ...requestData,
+                    is_active: false
+                };
+            }
+
+            // Для approved запросов проверяем активность
             let isActive = false;
-
             if (requestData.status === 'approved' && requestData.constraints) {
-                isActive = requestData.constraints.every(constraint => {
-                    const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
-                    const activeApprovedAt = activeConstraintsMap.get(key);
+                // Проверяем, все ли ограничения из этого запроса активны
+                isActive = requestData.constraints.length > 0 &&
+                    requestData.constraints.every(constraint => {
+                        const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
+                        const activeApprovedAt = activeConstraintsMap.get(key);
 
-                    // Проверяем, что ограничение активно и было создано примерно в то же время
-                    if (activeApprovedAt) {
-                        const requestReviewedAt = new Date(requestData.reviewed_at);
-                        const constraintApprovedAt = new Date(activeApprovedAt);
+                        if (activeApprovedAt && requestData.reviewed_at) {
+                            const requestReviewedAt = new Date(requestData.reviewed_at);
+                            const constraintApprovedAt = new Date(activeApprovedAt);
 
-                        // Разница во времени менее 5 секунд (для учета времени транзакции)
-                        const timeDiff = Math.abs(requestReviewedAt - constraintApprovedAt);
-                        return timeDiff < 5000;
-                    }
-                    return false;
-                });
+                            // Проверяем, что время одобрения совпадает (с точностью до 5 секунд)
+                            const timeDiff = Math.abs(requestReviewedAt - constraintApprovedAt);
+                            return timeDiff < 5000;
+                        }
+                        return false;
+                    });
             }
 
             return {
