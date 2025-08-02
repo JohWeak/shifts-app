@@ -314,13 +314,11 @@ export const en = {
         clickToCall: 'Click to call',
         commonWorkSite: 'Flexible',
         confirmCall: 'Call {name} at {phone}?',
-        confirmOverride: 'Are you sure you want to assign {name}?\n\nReason unavailable: {reason}\nNote: {note}',
         constraints: 'Constraints',
         contactInfo: 'Contact Info',
         contractType: 'Contract Type',
         country: 'Country',
         createdAt: 'Created',
-        crossPosition: 'Cross-Position',
         customFields: 'Custom Fields',
         dashboard: {
             constraints: 'Constraints',
@@ -495,6 +493,16 @@ export const en = {
         workInfo: 'Work Information',
         workSchedule: 'Work Schedule',
         workSiteHelp: 'Select work site or "Flexible" for any assignment',
+        crossPosition: 'Cross Position',
+        permanentConstraint: 'Permanent constraint',
+        approvedBy: 'Approved by {{approver}} on {{date}}',
+        confirmOverride: 'Employee {{name}} is unavailable ({{reason}}). {{note}}\n\nAre you sure you want to assign them anyway?',
+
+        temporaryConstraints: 'Temporary Constraints',
+        permanentConstraints: 'Permanent Constraints',
+        legalConstraints: 'Legal Constraints',
+
+
     },
     errors: {
         dateRangeInvalid: 'The start date cannot be after the end date.',
@@ -646,6 +654,8 @@ export const en = {
         'same_work_site': 'Same work site',
         'unknown_shift': 'Unknown shift',
         'weeklyHours': 'Current weekly hours: {hours}h',
+
+
     },
     requests: {
         title: 'My Requests',

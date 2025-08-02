@@ -348,6 +348,61 @@
     background-color: var(--bs-primary);
     border-radius: var(--radius-sm);
 }
+/*-------------------------------------------*/
+.employee-selection-modal .unavailable-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.employee-selection-modal .unavailable-group {
+    border-left: 3px solid var(--bs-gray-400);
+    padding-left: 1rem;
+}
+
+.employee-selection-modal .unavailable-group .group-title {
+    color: var(--bs-gray-700);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.employee-selection-modal .permanent-constraint-info {
+    background-color: var(--bs-light);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+    border-left: 3px solid var(--bs-danger);
+}
+
+.employee-selection-modal .permanent-constraint-info .bi-lock-fill {
+    font-size: 0.875rem;
+}
+
+.employee-selection-modal .score-badge {
+    background-color: var(--bs-gray-200);
+    color: var(--bs-gray-700);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .employee-selection-modal .unavailable-group .group-title {
+    color: var(--bs-gray-300);
+}
+
+[data-theme="dark"] .employee-selection-modal .permanent-constraint-info {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .employee-selection-modal .score-badge {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--bs-gray-300);
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {

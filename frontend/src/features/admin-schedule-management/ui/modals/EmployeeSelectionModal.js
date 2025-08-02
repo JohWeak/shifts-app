@@ -1,24 +1,19 @@
-// frontend/src/features/admin-schedule-management/components/EmployeeSelectionModal.js
+// frontend/src/features/admin-schedule-management/ui/modals/EmployeeSelectionModal.js
 import React, {useState, useEffect} from 'react';
 import {Modal, Button, ListGroup, Badge, Alert, Form, Tab, Tabs} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchRecommendations} from '../../model/scheduleSlice'; // Импортируем наш thunk
+import {fetchRecommendations} from '../../model/scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import './EmployeeSelectionModal.css';
 
-
 const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails}) => {
     const {t} = useI18n();
-
     const dispatch = useDispatch();
-
-    // Получаем данные из Redux store
     const {recommendations, recommendationsLoading, error} = useSelector(state => state.schedule);
-
-    // Локальное состояние для UI
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('available');
+
     const getModalTitle = () => {
         if (!selectedPosition) return t('employee.selectEmployee');
         const date = new Date(selectedPosition.date).toLocaleDateString();
@@ -26,7 +21,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
         const position = scheduleDetails?.positions?.find(p => p.pos_id === selectedPosition.positionId);
         return `${t('employee.selectEmployee')} - ${position?.pos_name} (${shift?.shift_name}, ${date})`;
     };
-    // Эффект для загрузки данных при открытии модального окна
+
     useEffect(() => {
         if (show && selectedPosition && scheduleDetails?.schedule?.id) {
             dispatch(fetchRecommendations({
@@ -35,7 +30,6 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                 date: selectedPosition.date,
                 scheduleId: scheduleDetails.schedule.id,
             })).then(action => {
-                // После успешной загрузки, автоматически переключаем вкладку, если нет доступных сотрудников
                 if (fetchRecommendations.fulfilled.match(action)) {
                     const data = action.payload;
                     if (data.available.length === 0 && data.cross_position.length > 0) {
@@ -50,14 +44,12 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
         }
     }, [show, selectedPosition, scheduleDetails, dispatch]);
 
-
     const filterEmployees = (employees) => {
         if (!searchTerm) return employees;
         return employees.filter(employee =>
             `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
         );
     };
-
 
     const renderEmployeeList = (employees, type) => {
         const filtered = filterEmployees(employees);
@@ -66,9 +58,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
             return (
                 <Alert variant="info" className="mt-3">
                     <i className="bi bi-info-circle me-2"></i>
-                    {searchTerm
-                        ? t('employee.noMatchingEmployees')
-                        : t('employee.noEmployeesInCategory')}
+                    {searchTerm ? t('employee.noMatchingEmployees') : t('employee.noEmployeesInCategory')}
                 </Alert>
             );
         }
@@ -93,21 +83,35 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                         {employee.first_name} {employee.last_name}
                                     </div>
 
-                                    {/* Work site info */}
                                     <div className="employee-site">
                                         <i className="bi bi-building me-1"></i>
                                         {employee.work_site_name || t('employee.noWorkSite')}
                                     </div>
 
-                                    {/* Position info */}
                                     <div className="employee-position">
                                         <i className="bi bi-person-badge me-1"></i>
                                         {employee.default_position_name || t('employee.flexiblePosition')}
                                     </div>
 
+                                    {/* Display permanent constraint info */}
+                                    {employee.unavailable_reason === 'permanent_constraint' &&
+                                        employee.constraint_details?.[0] && (
+                                            <div className="permanent-constraint-info mt-2">
+                                                <small className="text-danger">
+                                                    <i className="bi bi-lock-fill me-1"></i>
+                                                    {t('employee.permanentConstraint')}
+                                                </small>
+                                                <small className="text-muted d-block ms-3">
+                                                    {t('employee.approvedBy', {
+                                                        approver: employee.constraint_details[0].approved_by,
+                                                        date: new Date(employee.constraint_details[0].approved_at).toLocaleDateString()
+                                                    })}
+                                                </small>
+                                            </div>
+                                        )}
+
                                     {/* Recommendations */}
                                     {employee.recommendation?.reasons?.map((reason, idx) => {
-                                        // Разбираем reason с параметрами через двоеточие
                                         const parts = reason.split(':');
                                         const key = parts[0];
                                         const params = parts.slice(1);
@@ -119,22 +123,8 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                         );
                                     })}
 
-                                    {/* Warnings with parameters */}
+                                    {/* Warnings */}
                                     {employee.recommendation?.warnings?.map((warning, idx) => {
-                                        if (warning.startsWith('rest_violation_')) {
-                                            const parts = warning.split(':');
-                                            const key = parts[0];
-                                            const params = parts.slice(1);
-
-                                            return (
-                                                <small key={idx} className="d-block text-danger">
-                                                    <i className="bi bi-exclamation-circle me-1"></i>
-                                                    {t(`recommendation.${key}`, params)}
-                                                </small>
-                                            );
-                                        }
-
-                                        // Общая обработка остальных warnings
                                         const parts = warning.split(':');
                                         const key = parts[0];
                                         const params = parts.slice(1);
@@ -193,6 +183,43 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
         } else {
             onEmployeeSelect(employee.emp_id, `${employee.first_name} ${employee.last_name}`);
         }
+    };
+
+    // Group unavailable employees by type
+    const groupUnavailableEmployees = () => {
+        const groups = {
+            temporary: [],
+            permanent: [],
+            legal: []
+        };
+
+        // Temporary constraints
+        if (recommendations?.unavailable_soft) {
+            groups.temporary.push(...recommendations.unavailable_soft);
+        }
+        if (recommendations?.unavailable_hard) {
+            groups.temporary.push(...recommendations.unavailable_hard.filter(
+                emp => emp.unavailable_reason !== 'permanent_constraint' &&
+                    emp.unavailable_reason !== 'rest_violation'
+            ));
+        }
+
+        // Permanent constraints
+        if (recommendations?.unavailable_permanent) {
+            groups.permanent.push(...recommendations.unavailable_permanent);
+        }
+
+        // Legal constraints (rest violations, already assigned)
+        if (recommendations?.unavailable_busy) {
+            groups.legal.push(...recommendations.unavailable_busy);
+        }
+        if (recommendations?.unavailable_hard) {
+            groups.legal.push(...recommendations.unavailable_hard.filter(
+                emp => emp.unavailable_reason === 'rest_violation'
+            ));
+        }
+
+        return groups;
     };
 
     return (
@@ -276,41 +303,49 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                     <Badge bg="secondary" pill className="ms-2">
                                         {(recommendations?.unavailable_soft?.length || 0) +
                                             (recommendations?.unavailable_hard?.length || 0) +
-                                            (recommendations?.unavailable_busy?.length || 0)}
+                                            (recommendations?.unavailable_busy?.length || 0) +
+                                            (recommendations?.unavailable_permanent?.length || 0)}
                                     </Badge>
                                 </span>
                             }
                         >
                             <div className="unavailable-groups">
-                                {/* Prefer Different Time - первая группа */}
-                                {recommendations?.unavailable_soft?.length > 0 && (
-                                    <div className="unavailable-group">
-                                        <h6 className="group-title">
-                                            {t('employee.preferDifferentTime')}
-                                        </h6>
-                                        {renderEmployeeList(recommendations.unavailable_soft, 'unavailable_soft')}
-                                    </div>
-                                )}
+                                {(() => {
+                                    const groups = groupUnavailableEmployees();
 
-                                {/* Cannot Work - вторая группа */}
-                                {recommendations?.unavailable_hard?.length > 0 && (
-                                    <div className="unavailable-group">
-                                        <h6 className="group-title">
-                                            {t('employee.cannotWork')}
-                                        </h6>
-                                        {renderEmployeeList(recommendations.unavailable_hard, 'unavailable_hard')}
-                                    </div>
-                                )}
+                                    return (
+                                        <>
+                                            {/* Temporary constraints */}
+                                            {groups.temporary.length > 0 && (
+                                                <div className="unavailable-group">
+                                                    <h6 className="group-title">
+                                                        {t('employee.temporaryConstraints')}
+                                                    </h6>
+                                                    {renderEmployeeList(groups.temporary, 'unavailable_temporary')}
+                                                </div>
+                                            )}
 
-                                {/* Already Working - последняя группа */}
-                                {recommendations?.unavailable_busy?.length > 0 && (
-                                    <div className="unavailable-group muted">
-                                        <h6 className="group-title">
-                                            {t('employee.alreadyWorking')}
-                                        </h6>
-                                        {renderEmployeeList(recommendations.unavailable_busy, 'unavailable_busy')}
-                                    </div>
-                                )}
+                                            {/* Permanent constraints */}
+                                            {groups.permanent.length > 0 && (
+                                                <div className="unavailable-group">
+                                                    <h6 className="group-title">
+                                                        {t('employee.permanentConstraints')}
+                                                    </h6>
+                                                    {renderEmployeeList(groups.permanent, 'unavailable_permanent')}
+                                                </div>
+                                            )}
+
+                                            {/* Legal constraints */}
+                                            {groups.legal.length > 0 && (<div className="unavailable-group">
+                                                    <h6 className="group-title">
+                                                        {t('employee.legalConstraints')}
+                                                    </h6>
+                                                    {renderEmployeeList(groups.legal, 'unavailable_legal')}
+                                                </div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </Tab>
                     </Tabs>
