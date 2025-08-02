@@ -2,6 +2,17 @@
 .admin-permanent-requests .requests-table {
     font-size: 0.875rem;
 }
+.admin-permanent-requests .card-header.bg-warning {
+    border-left: 4px solid var(--bs-warning);
+}
+
+.admin-permanent-requests .card-header.bg-success {
+    border-left: 4px solid var(--bs-success);
+}
+
+.admin-permanent-requests .card-header.bg-secondary {
+    border-left: 4px solid var(--bs-secondary);
+}
 
 .admin-permanent-requests .request-row {
     cursor: pointer;

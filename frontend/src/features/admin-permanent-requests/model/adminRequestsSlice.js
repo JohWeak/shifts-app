@@ -7,7 +7,15 @@ export const fetchAllRequests = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await constraintAPI.getAllPermanentRequests();
-            return response.data || [];
+            console.log('[fetchAllRequests] Response:', response);
+
+            // Обрабатываем разные форматы ответа
+            if (Array.isArray(response)) {
+                return response;
+            } else if (response && response.data) {
+                return response.data;
+            }
+            return [];
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to load requests');
         }

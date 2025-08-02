@@ -41,17 +41,17 @@ const PageHeader = ({
                             <h1 className="h3 mb-2 ">
                                 {renderIcon()}
                                 {title}
-                                {badge && (
-                                    <Badge
-                                        bg={badge.variant || 'secondary'}
-                                        className="ms-2 align-middle page-header-badge"
-                                    >
-                                        {badge.text}
-                                    </Badge>
-                                )}
                             </h1>
                             {subtitle && <p className="text-muted mb-0">{subtitle}</p>}
                         </div>
+                        {badge && (
+                            <Badge
+                                bg={badge.variant || 'secondary'}
+                                className="ms-2 align-middle page-header-badge "
+                            >
+                                {badge.text}
+                            </Badge>
+                        )}
                         {(actions || children) && (
                             <div className="page-header-actions">
                                 {actions || children}

@@ -287,43 +287,102 @@ const getPendingRequests = async (req, res) => {
 
 // Get all permanent constraint requests with filters
 const getAllPermanentRequests = async (req, res) => {
-
     try {
-        const {status} = req.query;
-        const whereClause = status ? {status} : {};
-
         const requests = await PermanentConstraintRequest.findAll({
-            where: whereClause,
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['emp_id', 'first_name', 'last_name', 'email'],
-                    include: [{
+            include: [{
+                model: Employee,
+                as: 'employee',
+                include: [
+                    {
                         model: Position,
                         as: 'defaultPosition',
                         attributes: ['pos_id', 'pos_name']
-                    }, {
+                    },
+                    {
                         model: WorkSite,
                         as: 'workSite',
                         attributes: ['site_id', 'site_name']
-                    }]
-                },
-                {
-                    model: Employee,
-                    as: 'reviewer',
-                    attributes: ['emp_id', 'first_name', 'last_name']
+                    }
+                ]
+            }, {
+                model: Employee,
+                as: 'reviewer',
+                attributes: ['emp_id', 'first_name', 'last_name']
+            }],
+            order: [['requested_at', 'DESC']]
+        });
+
+        // Получаем все активные ограничения для всех сотрудников
+        const activeConstraints = await PermanentConstraint.findAll({
+            where: {
+                is_active: true
+            },
+            attributes: ['emp_id', 'day_of_week', 'shift_id', 'approved_at']
+        });
+
+        // Группируем активные ограничения по сотрудникам
+        const activeConstraintsByEmployee = {};
+        activeConstraints.forEach(constraint => {
+            if (!activeConstraintsByEmployee[constraint.emp_id]) {
+                activeConstraintsByEmployee[constraint.emp_id] = new Map();
+            }
+            const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
+            activeConstraintsByEmployee[constraint.emp_id].set(key, constraint.approved_at);
+        });
+
+        // Помечаем запросы как активные или неактивные
+        const requestsWithActiveFlag = requests.map(request => {
+            const requestData = request.toJSON();
+
+            // Pending запросы не имеют статуса активности
+            if (requestData.status === 'pending') {
+                return {
+                    ...requestData,
+                    is_active: null
+                };
+            }
+
+            // Rejected запросы всегда неактивны
+            if (requestData.status === 'rejected') {
+                return {
+                    ...requestData,
+                    is_active: false
+                };
+            }
+
+            // Для approved запросов проверяем активность
+            let isActive = false;
+            if (requestData.status === 'approved' && requestData.constraints) {
+                const employeeActiveConstraints = activeConstraintsByEmployee[requestData.emp_id];
+
+                if (employeeActiveConstraints && requestData.constraints.length > 0) {
+                    // Проверяем, все ли ограничения из этого запроса активны
+                    isActive = requestData.constraints.every(constraint => {
+                        const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
+                        const activeApprovedAt = employeeActiveConstraints.get(key);
+
+                        if (activeApprovedAt && requestData.reviewed_at) {
+                            const requestReviewedAt = new Date(requestData.reviewed_at);
+                            const constraintApprovedAt = new Date(activeApprovedAt);
+
+                            // Проверяем, что время одобрения совпадает (с точностью до 5 секунд)
+                            const timeDiff = Math.abs(requestReviewedAt - constraintApprovedAt);
+                            return timeDiff < 5000;
+                        }
+                        return false;
+                    });
                 }
-            ],
-            order: [
-                ['status', 'ASC'],
-                ['requested_at', status === 'pending' ? 'ASC' : 'DESC']
-            ]
+            }
+
+            return {
+                ...requestData,
+                is_active: isActive
+            };
         });
 
         res.json({
             success: true,
-            data: requests
+            data: requestsWithActiveFlag
         });
 
     } catch (error) {

@@ -20,7 +20,9 @@
     min-width: 0; /* Позволяет тексту сжиматься */
     /*align-content: start;*/
 }
-
+.page-header-badge{
+    font-size: 1rem!important;
+}
 .page-header h1 {
     display: flex;
     align-items: center;
@@ -77,7 +79,9 @@
     .page-header-card {
         margin-bottom: 0.5rem!important;
     }
-
+    .page-header-badge{
+        font-size: 0.75rem!important;
+    }
 
     .page-header .page-header-text .h3 {
         font-weight: 600;

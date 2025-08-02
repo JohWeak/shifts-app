@@ -29,13 +29,24 @@ const AdminPermanentRequests = () => {
         dispatch(fetchAllRequests());
     }, [dispatch]);
 
+    useEffect(() => {
+        console.log('[AdminPermanentRequests] All requests:', requests);
+        console.log('[AdminPermanentRequests] Pending:', pendingRequests.length);
+        console.log('[AdminPermanentRequests] Active processed:', activeProcessedRequests.length);
+        console.log('[AdminPermanentRequests] Inactive:', inactiveRequests.length);
+    }, [requests]);
+
     // Разделяем запросы на pending и processed
     const pendingRequests = requests.filter(r => r.status === 'pending');
+
+    // Активные обработанные - это approved с is_active === true
     const activeProcessedRequests = requests.filter(r =>
-        r.status !== 'pending' && r.is_active !== false
+        r.status === 'approved' && r.is_active === true
     );
+
+    // Неактивные - это rejected ИЛИ approved с is_active === false
     const inactiveRequests = requests.filter(r =>
-        r.status !== 'pending' && r.is_active === false
+        r.status === 'rejected' || (r.status === 'approved' && r.is_active === false)
     );
 
     const sortAccessors = {
@@ -186,6 +197,7 @@ const AdminPermanentRequests = () => {
     return (
         <Container className="admin-permanent-requests py-3">
             <PageHeader
+                icon='clipboard-check'
                 title={t('admin.requests.title')}
                 badge={pendingRequests.length > 0 ? {
                     text: `${pendingRequests.length} ${t('admin.requests.pending')}`,
@@ -212,10 +224,10 @@ const AdminPermanentRequests = () => {
             )}
 
             {activeProcessedRequests.length > 0 && (
-                <Card>
-                    <Card.Header>
+                <Card className="mb-3">
+                    <Card.Header className="bg-success bg-opacity-10">
                         <h5 className="mb-0">
-                            {t('admin.requests.processedRequests')} ({activeProcessedRequests.length})
+                            {t('admin.requests.activeRequests')} ({activeProcessedRequests.length})
                         </h5>
                     </Card.Header>
                     <Card.Body className="p-0">

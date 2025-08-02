@@ -38,6 +38,7 @@ export const en = {
             revertedSuccess: 'Request returned to pending status successfully',
             revertError: 'Failed to return request to pending status',
             revert: 'Return',
+            activeRequests: 'Active Requests',
             inactiveRequests: 'Inactive Requests',
 
         }
