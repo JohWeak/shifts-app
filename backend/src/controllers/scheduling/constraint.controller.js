@@ -491,9 +491,15 @@ const reviewPermanentRequest = async (req, res) => {
         if (status === 'approved' && request.constraints && Array.isArray(request.constraints)) {
             // Деактивируем все существующие permanent constraints для этого сотрудника
             await PermanentConstraint.update(
-                {is_active: false},
                 {
-                    where: {emp_id: request.emp_id},
+                    is_active: false,
+                    deactivated_at: new Date()
+                },
+                {
+                    where: {
+                        emp_id: request.emp_id,
+                        is_active: true
+                    },
                     transaction
                 }
             );
@@ -502,6 +508,7 @@ const reviewPermanentRequest = async (req, res) => {
             const adminFullName = `${admin.first_name} ${admin.last_name}`.trim();
 
             // Создаем новые ограничения
+            const approvedAt = new Date();
             for (const constraint of request.constraints) {
                 await PermanentConstraint.create({
                     emp_id: request.emp_id,
@@ -510,9 +517,9 @@ const reviewPermanentRequest = async (req, res) => {
                     constraint_type: constraint.constraint_type,
                     approved_by: adminId,
                     approved_by_name: adminFullName,
-                    approved_at: new Date(),
+                    approved_at: approvedAt,
                     is_active: true
-                }, {transaction});
+                }, { transaction });
             }
         }
 
