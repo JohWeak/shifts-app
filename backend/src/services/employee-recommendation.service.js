@@ -1,5 +1,5 @@
 // backend/src/services/employee-recommendation.service.js
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 const dayjs = require('dayjs');
 
 // Score constants
@@ -27,7 +27,7 @@ const SCORE_CONSTANTS = {
     WORKLOAD_THRESHOLD_LOW: 3,
     WORKLOAD_THRESHOLD_HIGH: 5
 };
-const { EmployeeScorer, SCORING_CONFIG } = require('./employee-recommendation-scoring');
+const {EmployeeScorer, SCORING_CONFIG} = require('./employee-recommendation-scoring');
 
 class EmployeeRecommendationService {
     constructor(db) {
@@ -45,7 +45,7 @@ class EmployeeRecommendationService {
             ScheduleAssignment,
             Schedule
         } = this.db;
-        const { Op } = this.db.Sequelize;
+        const {Op} = this.db.Sequelize;
 
         try {
             console.log(`[EmployeeRecommendation] Getting recommendations for:`, {
@@ -117,8 +117,8 @@ class EmployeeRecommendationService {
                             is_active: true,
                             day_of_week: dayOfWeek,
                             [Op.or]: [
-                                { shift_id: shiftId },
-                                { shift_id: null }
+                                {shift_id: shiftId},
+                                {shift_id: null}
                             ]
                         },
                         required: false,
@@ -141,7 +141,8 @@ class EmployeeRecommendationService {
                         },
                         include: [{
                             model: PositionShift,
-                            as: 'shift'
+                            as: 'shift',
+                            attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
                         }]
                     });
                 }
@@ -158,10 +159,23 @@ class EmployeeRecommendationService {
                             [Op.in]: employees.map(e => e.emp_id)
                         }
                     },
-                    include: [{ model: PositionShift, as: 'shift' }]
+                    include: [{
+                        model: PositionShift,
+                        as: 'shift',
+                        attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
+                    }]
                 });
             }
-
+            if (weekAssignments.length > 0) {
+                console.log(`[EmployeeRecommendation] Sample assignments:`,
+                    weekAssignments.slice(0, 3).map(a => ({
+                        emp_id: a.emp_id,
+                        date: a.work_date,
+                        shift: a.shift?.shift_name,
+                        shift_start: a.shift?.start_time
+                    }))
+                );
+            }
             console.log(`[EmployeeRecommendation] Found ${weekAssignments.length} assignments for the week`);
 
             // Group assignments by employee and date
@@ -495,62 +509,120 @@ class EmployeeRecommendationService {
     _checkRestViolations(empId, employeeAssignments, targetShift, date) {
         const constraints = require('../config/scheduling-constraints');
         const targetDate = dayjs(date);
-        const relevantAssignments = employeeAssignments.filter(a =>
-            a.emp_id === empId &&
-            Math.abs(dayjs(a.work_date).diff(targetDate, 'day')) <= 1
-        );
+
+        // Фильтруем назначения работника на соседние дни
+        const relevantAssignments = employeeAssignments.filter(a => {
+            const assignmentDate = dayjs(a.work_date);
+            const dayDiff = Math.abs(assignmentDate.diff(targetDate, 'day'));
+            return dayDiff === 1; // Только вчера или завтра
+        });
+
+        console.log(`[RestViolation] Checking for emp ${empId} on ${date}:`, {
+            targetShift: targetShift.shift_name,
+            relevantAssignments: relevantAssignments.length,
+            assignments: relevantAssignments.map(a => ({
+                date: a.work_date,
+                shift: a.shift?.shift_name
+            }))
+        });
 
         for (const assignment of relevantAssignments) {
-            if (!assignment.shift) continue;
+            if (!assignment.shift) {
+                console.warn(`[RestViolation] Assignment without shift data:`, assignment);
+                continue;
+            }
+
             const assignmentDate = dayjs(assignment.work_date);
             let restHours;
             let requiredRest;
             let violationType;
 
             if (assignmentDate.isBefore(targetDate)) {
-                // Previous day assignment
-                const prevShiftEnd = assignmentDate
-                    .hour(parseInt(assignment.shift.start_time.split(':')[0]))
-                    .add(assignment.shift.duration_hours, 'hour');
+                // Previous day assignment (вчерашняя смена)
+                const prevShiftStart = parseInt(assignment.shift.start_time.split(':')[0]);
+                const prevShiftDuration = assignment.shift.duration_hours || 8;
 
-                const targetShiftStart = targetDate
-                    .hour(parseInt(targetShift.start_time.split(':')[0]));
+                // Рассчитываем когда закончилась вчерашняя смена
+                let prevShiftEndHour = prevShiftStart + prevShiftDuration;
 
-                restHours = targetShiftStart.diff(prevShiftEnd, 'hour');
+                // Если смена заканчивается после полуночи
+                if (prevShiftEndHour >= 24) {
+                    prevShiftEndHour = prevShiftEndHour - 24;
+                    // Смена перешла на сегодня
+                    const targetShiftStartHour = parseInt(targetShift.start_time.split(':')[0]);
+                    restHours = targetShiftStartHour - prevShiftEndHour;
+                } else {
+                    // Смена закончилась вчера
+                    const targetShiftStartHour = parseInt(targetShift.start_time.split(':')[0]);
+                    restHours = (24 - prevShiftEndHour) + targetShiftStartHour;
+                }
+
                 requiredRest = assignment.shift.is_night_shift
                     ? constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_NIGHT_SHIFT
                     : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'after';
 
+                console.log(`[RestViolation] Previous day check:`, {
+                    prevShift: assignment.shift.shift_name,
+                    prevStart: assignment.shift.start_time,
+                    prevDuration: prevShiftDuration,
+                    prevEndHour: prevShiftStart + prevShiftDuration,
+                    targetStart: targetShift.start_time,
+                    restHours,
+                    requiredRest,
+                    isViolation: restHours < requiredRest
+                });
+
                 if (restHours < requiredRest) {
                     return {
-                        message: `rest_violation_after:${restHours}:${assignment.shift.shift_name}:${requiredRest}`,
+                        message: `rest_violation_after:${Math.floor(restHours)}:${assignment.shift.shift_name}:${requiredRest}`,
                         previousShift: assignment.shift.shift_name,
-                        restHours,
+                        restHours: Math.floor(restHours),
                         requiredRest,
                         type: violationType
                     };
                 }
             } else {
-                // Next day assignment
-                const targetShiftEnd = targetDate
-                    .hour(parseInt(targetShift.start_time.split(':')[0]))
-                    .add(targetShift.duration_hours, 'hour');
+                // Next day assignment (завтрашняя смена)
+                const targetShiftStart = parseInt(targetShift.start_time.split(':')[0]);
+                const targetShiftDuration = targetShift.duration_hours || 8;
 
-                const nextShiftStart = assignmentDate
-                    .hour(parseInt(assignment.shift.start_time.split(':')[0]));
+                // Рассчитываем когда закончится сегодняшняя смена
+                let targetShiftEndHour = targetShiftStart + targetShiftDuration;
 
-                restHours = nextShiftStart.diff(targetShiftEnd, 'hour');
+                const nextShiftStartHour = parseInt(assignment.shift.start_time.split(':')[0]);
+
+                if (targetShiftEndHour >= 24) {
+                    // Сегодняшняя смена заканчивается завтра
+                    targetShiftEndHour = targetShiftEndHour - 24;
+                    restHours = nextShiftStartHour - targetShiftEndHour;
+                } else {
+                    // Сегодняшняя смена заканчивается сегодня
+                    restHours = (24 - targetShiftEndHour) + nextShiftStartHour;
+                }
+
                 requiredRest = targetShift.is_night_shift
                     ? constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_NIGHT_SHIFT
                     : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'before';
 
+                console.log(`[RestViolation] Next day check:`, {
+                    targetShift: targetShift.shift_name,
+                    targetStart: targetShift.start_time,
+                    targetDuration: targetShiftDuration,
+                    targetEndHour: targetShiftStart + targetShiftDuration,
+                    nextShift: assignment.shift.shift_name,
+                    nextStart: assignment.shift.start_time,
+                    restHours,
+                    requiredRest,
+                    isViolation: restHours < requiredRest
+                });
+
                 if (restHours < requiredRest) {
                     return {
-                        message: `rest_violation_before:${restHours}:${assignment.shift.shift_name}:${requiredRest}`,
+                        message: `rest_violation_before:${Math.floor(restHours)}:${assignment.shift.shift_name}:${requiredRest}`,
                         nextShift: assignment.shift.shift_name,
-                        restHours,
+                        restHours: Math.floor(restHours),
                         requiredRest,
                         type: violationType
                     };
