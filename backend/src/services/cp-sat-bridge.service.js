@@ -423,22 +423,26 @@ class CPSATBridge {
     async callPythonOptimizer(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                // Correct temp directory path
-                const tempDir = path.join(process.cwd(), 'temp');
+                // Use backend/temp directory, not src/temp
+                const tempDir = path.join(__dirname, '..', '..', 'temp');
                 await fs.mkdir(tempDir, { recursive: true });
 
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
                 const tempFilePath = path.join(tempDir, tempFileName);
                 const resultFilePath = tempFilePath.replace('.json', '_result.json');
 
+                console.log(`[CP-SAT Bridge] Temp directory: ${tempDir}`);
+                console.log(`[CP-SAT Bridge] Temp file: ${tempFilePath}`);
+
                 // Write data to file
-                await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2));
-                console.log(`[CP-SAT Bridge] Created temp file: ${tempFilePath}`);
+                await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2), 'utf8');
 
                 // Verify file exists
-                const fileExists = await fs.access(tempFilePath).then(() => true).catch(() => false);
-                if (!fileExists) {
-                    throw new Error('Failed to create temp file');
+                try {
+                    await fs.access(tempFilePath);
+                    console.log(`[CP-SAT Bridge] File created successfully`);
+                } catch (err) {
+                    throw new Error(`Failed to create temp file: ${err.message}`);
                 }
 
                 // Path to Python script
