@@ -99,7 +99,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                         <>
                                             {/* Already assigned */}
                                             {employee.unavailable_reason === 'already_assigned' && (
-                                                <div className="mt-2 text-muted">
+                                                <div className="mt-2 text-danger">
                                                     <i className="bi bi-calendar-check me-1"></i>
                                                     {t('recommendation.already_assigned_to', [employee.assigned_shift || t('recommendation.unknown_shift')])}
                                                 </div>
@@ -109,7 +109,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                             {employee.unavailable_reason === 'permanent_constraint' &&
                                                 employee.constraint_details?.[0] && (
                                                     <div className="permanent-constraint-info mt-2">
-                                                        <div className="text-muted">
+                                                        <div className="text-danger">
                                                             <i className="bi bi-lock-fill me-1"></i>
                                                             {t('employee.permanentConstraint')}
                                                         </div>
@@ -124,7 +124,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
 
                                             {/* Rest violation */}
                                             {employee.unavailable_reason === 'rest_violation' && employee.rest_details && (
-                                                <div className="mt-2 text-muted">
+                                                <div className="mt-2 text-danger">
                                                     <i className="bi bi-moon me-1"></i>
                                                     {employee.rest_details.type === 'after'
                                                         ? t('recommendation.rest_violation_after', [
@@ -143,7 +143,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
 
                                             {/* Hard constraint */}
                                             {employee.unavailable_reason === 'hard_constraint' && (
-                                                <div className="mt-2 text-muted">
+                                                <div className="mt-2 text-danger">
                                                     <i className="bi bi-x-circle me-1"></i>
                                                     {t('recommendation.Cannot work')}
                                                 </div>
@@ -151,7 +151,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
 
                                             {/* Soft constraint */}
                                             {employee.unavailable_reason === 'soft_constraint' && (
-                                                <div className="mt-2 text-muted">
+                                                <div className="mt-2 text-danger">
                                                     <i className="bi bi-dash-circle me-1"></i>
                                                     {t('recommendation.prefer_different_time')}
                                                 </div>
@@ -209,6 +209,15 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                 </div>
                             </div>
                             <div className="employee-badges">
+                                {employee.recommendation?.score ? (
+                                    <small className="score-badge">
+                                        {t('employee.score')}: {employee.recommendation.score}
+                                    </small>
+                                ) : (
+                                    <small className="score-badge">
+                                        {t('employee.score')}: 0
+                                    </small>
+                                )}
                                 {type === 'available' && (
                                     <Badge bg="success">{t('employee.available')}</Badge>
                                 )}
@@ -224,15 +233,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                 {showWarning && (
                                     <Badge bg="danger">{t('employee.unavailable')}</Badge>
                                 )}
-                                {employee.recommendation?.score ? (
-                                    <small className="score-badge">
-                                        {t('employee.score')}: {employee.recommendation.score}
-                                    </small>
-                                ) : (
-                                    <small className="score-badge">
-                                        {t('employee.score')}: 0
-                                    </small>
-                                )}
+
                             </div>
                         </ListGroup.Item>
                     );

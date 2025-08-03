@@ -309,12 +309,14 @@ class EmployeeRecommendationService {
             restViolationDetails: null
         };
 
+        // 1. Check BLOCKING factors first (score = 0)
+
         // Already assigned today - BLOCKING
         const todayAssignment = todayAssignments.find(a => a.emp_id === employee.emp_id);
         if (todayAssignment) {
             evaluation.isAlreadyAssignedToday = true;
             evaluation.canWork = false;
-            evaluation.score = 0; // No score for unavailable
+            evaluation.score = 0;
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
             evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);
             return evaluation;
@@ -328,7 +330,7 @@ class EmployeeRecommendationService {
 
                     evaluation.hasPermanentConstraint = true;
                     evaluation.canWork = false;
-                    evaluation.score = 0; // No score for unavailable
+                    evaluation.score = 0;
                     evaluation.permanentConstraintDetails.push({
                         type: 'permanent_cannot_work',
                         shift_name: targetShift.shift_name,
@@ -355,61 +357,13 @@ class EmployeeRecommendationService {
         if (restViolation) {
             evaluation.hasRestViolation = true;
             evaluation.canWork = false;
-            evaluation.score = 0; // No score for unavailable
+            evaluation.score = 0;
             evaluation.restViolationDetails = restViolation;
             evaluation.warnings.push(restViolation.message);
             return evaluation;
         }
 
-        const addedReasons = new Set();
-
-        // Position matching
-        if (!employee.default_position_id) {
-            if (!addedReasons.has('flexible_no_position')) {
-                evaluation.hasNoPosition = true;
-                evaluation.score += SCORING_CONFIG.POSITION_MATCH.FLEXIBLE;
-                evaluation.reasons.push('flexible_no_position');
-                addedReasons.add('flexible_no_position');
-            }
-        } else if (employee.default_position_id === targetPosition.pos_id) {
-            if (!addedReasons.has('primary_position_match')) {
-                evaluation.isCorrectPosition = true;
-                evaluation.score += SCORING_CONFIG.POSITION_MATCH.PRIMARY;
-                evaluation.reasons.push('primary_position_match');
-                addedReasons.add('primary_position_match');
-            }
-        } else {
-            if (!addedReasons.has('cross_position_assignment')) {
-                evaluation.score += SCORING_CONFIG.POSITION_MATCH.CROSS;
-                evaluation.warnings.push('cross_position_assignment');
-                addedReasons.add('cross_position_assignment');
-            }
-        }
-
-        // Site matching
-        if (!employee.work_site_id) {
-            if (!addedReasons.has('can_work_any_site')) {
-                evaluation.score += SCORING_CONFIG.SITE_MATCH.ANY;
-                evaluation.reasons.push('can_work_any_site');
-                addedReasons.add('can_work_any_site');
-            }
-        } else if (employee.work_site_id === targetPosition.site_id) {
-            if (!addedReasons.has('same_work_site')) {
-                evaluation.score += SCORING_CONFIG.SITE_MATCH.SAME;
-                evaluation.reasons.push('same_work_site');
-                addedReasons.add('same_work_site');
-            }
-        } else {
-            if (!addedReasons.has('different_work_site')) {
-                evaluation.isOtherSite = true;
-                evaluation.score += SCORING_CONFIG.SITE_MATCH.DIFFERENT;
-                evaluation.warnings.push('different_work_site');
-                addedReasons.add('different_work_site');
-            }
-        }
-
-
-        // Temporary constraints
+        // Temporary constraints - check for BLOCKING
         let hasPreferWork = false;
         if (employee.constraints && employee.constraints.length > 0) {
             for (const constraint of employee.constraints) {
@@ -420,7 +374,7 @@ class EmployeeRecommendationService {
                 if (constraint.constraint_type === 'cannot_work') {
                     evaluation.hasHardConstraint = true;
                     evaluation.canWork = false;
-                    evaluation.score = 0; // No score for unavailable
+                    evaluation.score = 0;
                     evaluation.constraintDetails.push({
                         type: 'cannot_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
@@ -445,46 +399,100 @@ class EmployeeRecommendationService {
             }
         }
 
-        // 2. Calculate score for available employees
-        const scoring = EmployeeScorer.calculateScore(
+        // 2. Employee is AVAILABLE - calculate score using EmployeeScorer
+        const scoringResult = EmployeeScorer.calculateScore(
             employee,
             targetPosition,
             targetShift,
             employeeWeekAssignments
         );
 
-        evaluation.score = scoring.score;
-        evaluation.scoreBreakdown = scoring.breakdown;
+        evaluation.score = scoringResult.score;
+        evaluation.scoreBreakdown = scoringResult.breakdown;
 
-        // Add preference bonus/penalty
+        // Add preference modifiers
         if (hasPreferWork) {
             evaluation.score += SCORING_CONFIG.PREFERENCES.PREFERS_WORK;
-            evaluation.reasons.push('prefers_this_shift');
+            scoringResult.reasons.push({
+                type: 'prefers_work',
+                points: SCORING_CONFIG.PREFERENCES.PREFERS_WORK
+            });
         } else if (evaluation.hasSoftConstraint) {
             evaluation.score += SCORING_CONFIG.PREFERENCES.PREFERS_NOT_WORK;
-            evaluation.warnings.push('prefers_not_work');
+            scoringResult.penalties.push({
+                type: 'prefers_not_work',
+                points: SCORING_CONFIG.PREFERENCES.PREFERS_NOT_WORK
+            });
         }
 
-        // Set evaluation flags based on scoring
+        // Ensure score doesn't go below 0
+        evaluation.score = Math.max(0, evaluation.score);
+
+        // Set evaluation flags
         evaluation.isCorrectPosition = employee.default_position_id === targetPosition.pos_id;
         evaluation.hasNoPosition = !employee.default_position_id;
         evaluation.isOtherSite = employee.work_site_id && employee.work_site_id !== targetPosition.site_id;
 
-        // Convert scoring reasons to evaluation format
-        scoring.reasons.forEach(reason => {
-            if (reason.type === 'primary_position') evaluation.reasons.push('primary_position_match');
-            if (reason.type === 'same_site') evaluation.reasons.push('same_work_site');
-            if (reason.type === 'flexible') evaluation.reasons.push('flexible_no_position');
-            if (reason.type === 'any_site') evaluation.reasons.push('can_work_any_site');
-            if (reason.type === 'low_workload') evaluation.reasons.push(`low_weekly_workload:${reason.shifts}`);
+        // Convert scoring reasons/penalties to evaluation format (NO DUPLICATES)
+        const processedReasons = new Set();
+
+        scoringResult.reasons.forEach(reason => {
+            let reasonKey = '';
+            switch(reason.type) {
+                case 'primary_position':
+                    reasonKey = 'primary_position_match';
+                    break;
+                case 'flexible':
+                    reasonKey = 'flexible_no_position';
+                    break;
+                case 'same_site':
+                    reasonKey = 'same_work_site';
+                    break;
+                case 'any_site':
+                    reasonKey = 'can_work_any_site';
+                    break;
+                case 'low_workload':
+                    reasonKey = `low_weekly_workload:${reason.shifts}`;
+                    break;
+                case 'prefers_work':
+                    reasonKey = 'prefers_this_shift';
+                    break;
+                default:
+                    reasonKey = reason.type;
+            }
+
+            if (!processedReasons.has(reasonKey)) {
+                evaluation.reasons.push(reasonKey);
+                processedReasons.add(reasonKey);
+            }
         });
 
-        scoring.penalties.forEach(penalty => {
-            if (penalty.type === 'cross_position') evaluation.warnings.push('cross_position_assignment');
-            if (penalty.type === 'different_site') evaluation.warnings.push('different_work_site');
-            if (penalty.type === 'high_workload') evaluation.warnings.push(`high_weekly_workload:${penalty.shifts}`);
-        });
+        const processedWarnings = new Set();
 
+        scoringResult.penalties.forEach(penalty => {
+            let warningKey = '';
+            switch(penalty.type) {
+                case 'cross_position':
+                    warningKey = 'cross_position_assignment';
+                    break;
+                case 'different_site':
+                    warningKey = 'different_work_site';
+                    break;
+                case 'high_workload':
+                    warningKey = `high_weekly_workload:${penalty.shifts}`;
+                    break;
+                case 'prefers_not_work':
+                    warningKey = 'prefers_not_work';
+                    break;
+                default:
+                    warningKey = penalty.type;
+            }
+
+            if (!processedWarnings.has(warningKey)) {
+                evaluation.warnings.push(warningKey);
+                processedWarnings.add(warningKey);
+            }
+        });
 
         return evaluation;
     }

@@ -173,7 +173,7 @@
     background-color: var(--bs-gray-900);
 
 }
-[data-theme="dark"] .list-group-item-warning:hover {
+.employee-selection-modal .list-group-item-warning:hover {
     border-color: var(--bs-danger);
 }
 
@@ -396,13 +396,6 @@
     font-size: 0.875rem;
 }
 
-.employee-selection-modal .score-badge {
-    background-color: var(--bs-gray-200);
-    color: var(--bs-gray-700);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-weight: 500;
-}
 /*--------------------------------------------*/
 /* Unavailable items */
 .employee-selection-modal .unavailable-item {
@@ -415,10 +408,10 @@
 
 /* Score badge */
 .employee-selection-modal .score-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #037df6 0%, #4a91d9 100%);
     color: white;
     padding: 0.35rem 0.75rem;
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     font-weight: 600;
     font-size: 0.9rem;
     min-width: 3rem;
@@ -426,17 +419,10 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Permanent constraint info */
-.employee-selection-modal .permanent-constraint-info {
-    background-color: rgba(220, 53, 69, 0.05);
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    border-left: 3px solid var(--bs-danger);
-}
 
 /* Success/warning/danger text in warnings */
 .employee-selection-modal .text-warning {
-    color: #ff6b35 !important; /* Orange instead of yellow for better visibility */
+    color: #ff6b35 !important;
 }
 
 /* Employee info section */
@@ -448,16 +434,11 @@
     gap: 1rem;
 }
 
-.employee-selection-modal .employee-info > div:first-child {
-    flex: 1;
-}
 
 .employee-selection-modal .employee-badges {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    align-items: flex-end;
-    min-width: fit-content;
 }
 
 /* Dark theme */

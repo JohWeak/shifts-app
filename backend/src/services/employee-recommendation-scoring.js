@@ -116,12 +116,21 @@ class EmployeeScorer {
             penalties,
             breakdown: {
                 base: SCORING_CONFIG.BASE_SCORE,
-                position: reasons.find(r => r.type.includes('position'))?.points ||
-                    penalties.find(p => p.type.includes('position'))?.points || 0,
-                site: reasons.find(r => r.type.includes('site'))?.points ||
-                    penalties.find(p => p.type.includes('site'))?.points || 0,
-                workload: reasons.find(r => r.type.includes('workload'))?.points ||
-                    penalties.find(p => p.type.includes('workload'))?.points || 0
+                position: (() => {
+                    const posReason = reasons.find(r => r.type === 'primary_position' || r.type === 'flexible');
+                    const posPenalty = penalties.find(p => p.type === 'cross_position');
+                    return posReason?.points || posPenalty?.points || 0;
+                })(),
+                site: (() => {
+                    const siteReason = reasons.find(r => r.type === 'same_site' || r.type === 'any_site');
+                    const sitePenalty = penalties.find(p => p.type === 'different_site');
+                    return siteReason?.points || sitePenalty?.points || 0;
+                })(),
+                workload: (() => {
+                    const workReason = reasons.find(r => r.type === 'low_workload');
+                    const workPenalty = penalties.find(p => p.type === 'high_workload');
+                    return workReason?.points || workPenalty?.points || 0;
+                })()
             }
         };
     }
