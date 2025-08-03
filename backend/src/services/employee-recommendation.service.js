@@ -361,32 +361,53 @@ class EmployeeRecommendationService {
             return evaluation;
         }
 
-        // Check position match
+        const addedReasons = new Set();
+
+        // Position matching
         if (!employee.default_position_id) {
-            evaluation.hasNoPosition = true;
-            evaluation.score += SCORING_CONFIG.POSITION_MATCH.FLEXIBLE;
-            evaluation.reasons.push('flexible_no_position');
+            if (!addedReasons.has('flexible_no_position')) {
+                evaluation.hasNoPosition = true;
+                evaluation.score += SCORING_CONFIG.POSITION_MATCH.FLEXIBLE;
+                evaluation.reasons.push('flexible_no_position');
+                addedReasons.add('flexible_no_position');
+            }
         } else if (employee.default_position_id === targetPosition.pos_id) {
-            evaluation.isCorrectPosition = true;
-            evaluation.score += SCORING_CONFIG.POSITION_MATCH.PRIMARY;
-            evaluation.reasons.push('primary_position_match');
+            if (!addedReasons.has('primary_position_match')) {
+                evaluation.isCorrectPosition = true;
+                evaluation.score += SCORING_CONFIG.POSITION_MATCH.PRIMARY;
+                evaluation.reasons.push('primary_position_match');
+                addedReasons.add('primary_position_match');
+            }
         } else {
-            evaluation.score += SCORING_CONFIG.POSITION_MATCH.CROSS;
-            evaluation.warnings.push('cross_position_assignment');
+            if (!addedReasons.has('cross_position_assignment')) {
+                evaluation.score += SCORING_CONFIG.POSITION_MATCH.CROSS;
+                evaluation.warnings.push('cross_position_assignment');
+                addedReasons.add('cross_position_assignment');
+            }
         }
 
-        // Check work site match
-        if (employee.work_site_id && employee.work_site_id !== targetPosition.site_id) {
-            evaluation.isOtherSite = true;
-            evaluation.score += SCORING_CONFIG.SITE_MATCH.DIFFERENT;
-            evaluation.warnings.push('different_work_site');
-        } else if (!employee.work_site_id) {
-            evaluation.score += SCORING_CONFIG.SITE_MATCH.ANY;
-            evaluation.reasons.push('can_work_any_site');
+        // Site matching
+        if (!employee.work_site_id) {
+            if (!addedReasons.has('can_work_any_site')) {
+                evaluation.score += SCORING_CONFIG.SITE_MATCH.ANY;
+                evaluation.reasons.push('can_work_any_site');
+                addedReasons.add('can_work_any_site');
+            }
+        } else if (employee.work_site_id === targetPosition.site_id) {
+            if (!addedReasons.has('same_work_site')) {
+                evaluation.score += SCORING_CONFIG.SITE_MATCH.SAME;
+                evaluation.reasons.push('same_work_site');
+                addedReasons.add('same_work_site');
+            }
         } else {
-            evaluation.score += SCORING_CONFIG.SITE_MATCH.SAME;
-            evaluation.reasons.push('same_work_site');
+            if (!addedReasons.has('different_work_site')) {
+                evaluation.isOtherSite = true;
+                evaluation.score += SCORING_CONFIG.SITE_MATCH.DIFFERENT;
+                evaluation.warnings.push('different_work_site');
+                addedReasons.add('different_work_site');
+            }
         }
+
 
         // Temporary constraints
         let hasPreferWork = false;

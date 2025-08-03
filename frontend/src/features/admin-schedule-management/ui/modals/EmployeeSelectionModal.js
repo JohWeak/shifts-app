@@ -93,49 +93,119 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                         {employee.default_position_name || t('employee.flexiblePosition')}
                                     </div>
 
-                                    {/* Display permanent constraint info */}
-                                    {employee.unavailable_reason === 'permanent_constraint' &&
-                                        employee.constraint_details?.[0] && (
-                                            <div className="permanent-constraint-info mt-2">
-                                                <small className="text-danger">
-                                                    <i className="bi bi-lock-fill me-1"></i>
-                                                    {t('employee.permanentConstraint')}
-                                                </small>
-                                                <small className="text-muted d-block ms-3">
-                                                    {t('employee.approvedBy', {
-                                                        approver: employee.constraint_details[0].approved_by,
-                                                        date: new Date(employee.constraint_details[0].approved_at).toLocaleDateString()
-                                                    })}
-                                                </small>
-                                            </div>
-                                        )}
 
-                                    {/* Recommendations */}
-                                    {employee.recommendation?.reasons?.map((reason, idx) => {
-                                        const parts = reason.split(':');
-                                        const key = parts[0];
-                                        const params = parts.slice(1);
-                                        return (
-                                            <small key={idx} className="d-block text-success">
-                                                <i className="bi bi-check-circle me-1"></i>
-                                                {t(`recommendation.${key}`, params) || reason}
-                                            </small>
-                                        );
-                                    })}
+                                    {/* For UNAVAILABLE employees - show specific reason */}
+                                    {showWarning && (
+                                        <>
+                                            {/* Already assigned */}
+                                            {employee.unavailable_reason === 'already_assigned' && (
+                                                <div className="mt-2 text-muted">
+                                                    <i className="bi bi-calendar-check me-1"></i>
+                                                    {t('recommendation.already_assigned_to', [employee.assigned_shift || t('recommendation.unknown_shift')])}
+                                                </div>
+                                            )}
 
-                                    {/* Warnings */}
-                                    {employee.recommendation?.warnings?.map((warning, idx) => {
-                                        const parts = warning.split(':');
-                                        const key = parts[0];
-                                        const params = parts.slice(1);
+                                            {/* Permanent constraint */}
+                                            {employee.unavailable_reason === 'permanent_constraint' &&
+                                                employee.constraint_details?.[0] && (
+                                                    <div className="permanent-constraint-info mt-2">
+                                                        <div className="text-muted">
+                                                            <i className="bi bi-lock-fill me-1"></i>
+                                                            {t('employee.permanentConstraint')}
+                                                        </div>
+                                                        <small className="text-muted d-block ms-3">
+                                                            {t('employee.approvedBy', {
+                                                                approver: employee.constraint_details[0].approved_by,
+                                                                date: new Date(employee.constraint_details[0].approved_at).toLocaleDateString()
+                                                            })}
+                                                        </small>
+                                                    </div>
+                                                )}
 
-                                        return (
-                                            <small key={idx} className="d-block text-danger">
-                                                <i className="bi bi-exclamation-circle me-1"></i>
-                                                {t(`recommendation.${key}`, params) || warning}
-                                            </small>
-                                        );
-                                    })}
+                                            {/* Rest violation */}
+                                            {employee.unavailable_reason === 'rest_violation' && employee.rest_details && (
+                                                <div className="mt-2 text-muted">
+                                                    <i className="bi bi-moon me-1"></i>
+                                                    {employee.rest_details.type === 'after'
+                                                        ? t('recommendation.rest_violation_after', [
+                                                            employee.rest_details.restHours,
+                                                            employee.rest_details.previousShift,
+                                                            employee.rest_details.requiredRest
+                                                        ])
+                                                        : t('recommendation.rest_violation_before', [
+                                                            employee.rest_details.restHours,
+                                                            employee.rest_details.nextShift,
+                                                            employee.rest_details.requiredRest
+                                                        ])
+                                                    }
+                                                </div>
+                                            )}
+
+                                            {/* Hard constraint */}
+                                            {employee.unavailable_reason === 'hard_constraint' && (
+                                                <div className="mt-2 text-muted">
+                                                    <i className="bi bi-x-circle me-1"></i>
+                                                    {t('recommendation.Cannot work')}
+                                                </div>
+                                            )}
+
+                                            {/* Soft constraint */}
+                                            {employee.unavailable_reason === 'soft_constraint' && (
+                                                <div className="mt-2 text-muted">
+                                                    <i className="bi bi-dash-circle me-1"></i>
+                                                    {t('recommendation.prefer_different_time')}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* For AVAILABLE employees - show reasons and warnings */}
+                                    {isAvailable && (
+                                        <>
+                                            {/* Positive reasons (green) */}
+                                            {employee.recommendation?.reasons?.map((reason, idx) => {
+                                                const parts = reason.split(':');
+                                                const key = parts[0];
+                                                const params = parts.slice(1);
+
+                                                // Skip duplicates
+                                                const translationKey = `recommendation.${key}`;
+                                                const translation = t(translationKey, params);
+
+                                                // Only show if we have a valid translation
+                                                if (translation && translation !== translationKey) {
+                                                    return (
+                                                        <small key={idx} className="d-block text-success">
+                                                            <i className="bi bi-check-circle me-1"></i>
+                                                            {translation}
+                                                        </small>
+                                                    );
+                                                }
+                                                return null;
+                                            })}
+
+                                            {/* Warnings (orange/red) */}
+                                            {employee.recommendation?.warnings?.map((warning, idx) => {
+                                                const parts = warning.split(':');
+                                                const key = parts[0];
+                                                const params = parts.slice(1);
+
+                                                const translationKey = `recommendation.${key}`;
+                                                const translation = t(translationKey, params);
+
+                                                // Only show if we have a valid translation
+                                                if (translation && translation !== translationKey) {
+                                                    return (
+                                                        <small key={idx} className="d-block text-warning">
+                                                            <i className="bi bi-exclamation-triangle me-1"></i>
+                                                            {translation}
+                                                        </small>
+                                                    );
+                                                }
+                                                return null;
+                                            })}
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             <div className="employee-badges">
@@ -154,7 +224,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                 {showWarning && (
                                     <Badge bg="danger">{t('employee.unavailable')}</Badge>
                                 )}
-                                {employee.recommendation?.score  ?(
+                                {employee.recommendation?.score ? (
                                     <small className="score-badge">
                                         {t('employee.score')}: {employee.recommendation.score}
                                     </small>
@@ -162,7 +232,7 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                     <small className="score-badge">
                                         {t('employee.score')}: 0
                                     </small>
-                                    )}
+                                )}
                             </div>
                         </ListGroup.Item>
                     );
