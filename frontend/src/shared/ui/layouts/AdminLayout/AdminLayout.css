@@ -8,7 +8,7 @@
 
 
 /* TOP NAVBAR */
-.admin-navbar {
+.admin-layout .admin-navbar {
     background-color: var(--bs-body-bg);
     border-bottom: 1px solid var(--bs-border-color);
     height: var(--app-navbar-height);
@@ -18,7 +18,7 @@
     z-index: 1030;
 }
 
-.brand-logo {
+.admin-layout .brand-logo {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--bs-emphasis-color);
@@ -26,11 +26,11 @@
     transition: color 0.2s ease-in-out;
 }
 
-.brand-logo:hover {
+.admin-layout .brand-logo:hover {
     color: var(--bs-primary);
 }
 
-.mobile-menu-btn,
+
 .admin-layout .user-dropdown-btn {
     background: var(--bs-primary);
     border: 1px solid var(--bs-border-color);
@@ -38,6 +38,51 @@
     padding: 0.5rem 1rem;
     transition: all 0.2s ease-in-out;
 }
+.admin-layout .sidebar-menu-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-primary);
+    font-size: 1rem;
+    background-color: transparent;
+}
+
+.admin-layout .sidebar-menu-btn.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.admin-layout .sidebar-menu-btn:hover {
+    background-color: var(--bs-primary-hover);
+    border-color: var(--bs-primary-hover);
+    color: var(--bs-white);
+}
+
+
+/* USER DROPDOWN */
+.admin-layout .user-dropdown .dropdown-menu {
+    color: var(--bs-primary);
+    box-shadow: var(--bs-box-shadow);
+}
+
+.admin-layout .admin-navbar .dropdown .dropdown-toggle::after {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+
+.admin-layout .user-avatar {
+    width: 52px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
 
 
 /* MAIN CONTAINER */
@@ -51,43 +96,56 @@
 /* ======================================================== */
 
 /* 1. Общие стили для самого сайдбара. */
-.admin-sidebar-desktop {
-    min-width: var(--app-sidebar-width);
+/* Compact Sidebar (Default) */
+.admin-layout .admin-sidebar-desktop {
+    width: 80px;
+    min-width: 80px;
     background-color: var(--bs-body-bg);
     border-right: 1px solid var(--bs-border-color);
     height: calc(100vh - var(--app-navbar-height));
     position: sticky;
     top: var(--app-navbar-height);
     overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.3s ease;
+    z-index: 100;
 }
 
-.sidebar-content {
+[dir="rtl"] .admin-layout .admin-sidebar-desktop {
+    border-right: none;
+    border-left: 1px solid var(--bs-border-color);
+}
+/* Expanded Sidebar (On Hover/Click) */
+.admin-layout .admin-sidebar-desktop.expanded {
+    width: var(--app-sidebar-width);
+    position: fixed;
+    z-index: 1040;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    left: 0;
+    top: var(--app-navbar-height);
+}
+
+[dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded {
+    left: auto;
+    right: 0;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+}
+
+
+.admin-layout .sidebar-content {
     padding: 1.5rem 0;
 }
 
-.sidebar-header {
-    padding: 0 1rem;
-    margin-bottom: 1rem;
-}
-
-.sidebar-title {
-    color: var(--bs-secondary);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.admin-nav {
+.admin-layout .admin-nav {
     padding: 0 1rem;
 }
-[dir="rtl"] .admin-nav {
+[dir="rtl"] .admin-layout .admin-nav {
     padding-left: 1rem;
     padding-right: 0;
 }
 
 /* 2. Общий стиль для ссылок с ПОВЫШЕННОЙ СПЕЦИФИЧНОСТЬЮ. */
-.admin-nav .admin-nav-link {
+.admin-layout .admin-nav .admin-nav-link {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -98,133 +156,46 @@
     margin-bottom: 0.25rem;
     transition: all 0.2s ease-in-out;
 }
-
-/* 3. Стили при наведении (HOVER) - также с повышенной специфичностью */
-
-/* Общий эффект сдвига */
-.admin-nav .admin-nav-link:hover {
-    transform: translateX(4px);
-    color: var(--bs-primary);
-}
-
-/* Фон при наведении в СВЕТЛОЙ теме */
-[data-theme="light"] .admin-nav .admin-nav-link:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
-    background-color: var(--bs-gray-200);
-}
-
-/* Фон при наведении в ТЕМНОЙ теме */
-[data-theme="dark"] .admin-nav .admin-nav-link:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
-    background-color: var(--bs-gray-800);
-}
-
-/* 4. Стили для активной ссылки. */
-.admin-nav .admin-nav-link.active,
-.admin-nav .admin-nav-link.active:hover { /* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
-    transform: none;
-}
-
-.admin-layout .nav-icon {
-    margin-inline-end: 0.75rem;
-    width: 20px;
-    text-align: center;
-
-}
-
-
-/* ======================================================== */
-/*                  COMPACT SIDEBAR ADDITIONS              */
-/* ======================================================== */
-
-/* Compact mode styles */
-.admin-sidebar-desktop.compact {
-    min-width: 80px;
-    width: 80px;
-    transition: width 0.3s ease, min-width 0.3s ease;
-}
-
-/* Expanded mode overlay */
-.admin-sidebar-desktop.expanded {
-    width: var(--app-sidebar-width);
-    position: fixed;
-    z-index: 1040;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-    animation: expandSidebar 0.3s ease;
-}
-
-[dir="rtl"] .admin-sidebar-desktop.expanded {
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Toggle button */
-.sidebar-toggle-wrapper {
-    padding: 0.5rem;
-    text-align: center;
-    border-bottom: 1px solid var(--bs-border-color);
-    margin-bottom: 1rem;
-}
-
-.sidebar-toggle-btn {
-    background: none;
-    border: 1px solid var(--bs-border-color);
-    color: var(--bs-body-color);
-    width: 40px;
-    height: 40px;
-    border-radius: 0.375rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.sidebar-toggle-btn:hover {
-    background-color: var(--bs-primary);
-    color: white;
-    border-color: var(--bs-primary);
-}
-
-/* Compact navigation items */
-.admin-sidebar-desktop.compact .admin-nav-link {
+/* Compact Mode Navigation Items */
+.admin-layout .admin-sidebar-desktop.compact .admin-nav .admin-nav-link {
     flex-direction: column;
-    text-align: center;
     padding: 0.75rem 0.5rem;
+    position: relative;
+    margin-bottom: 0.25rem;
 }
 
-.admin-sidebar-desktop.expanded .admin-nav-link {
-    flex-direction: row;
-    text-align: left;
-    padding: 0.75rem 1rem;
-}
 
-/* Icon styles in compact mode */
-.admin-sidebar-desktop.compact .nav-icon {
-    margin: 0 0 0.25rem 0;
+/* Icon Styles */
+.admin-layout .admin-sidebar-desktop.compact .nav-icon {
     font-size: 1.25rem;
+    margin: 0 0 0.25rem 0;
     width: auto;
+    text-align: center;
 }
 
-.admin-sidebar-desktop.expanded .nav-icon {
-    margin-inline-end: 0.75rem;
+.admin-layout .admin-sidebar-desktop.expanded .nav-icon {
     font-size: 1rem;
+    margin: 0;
+    margin-inline-end: 0.75rem;
     width: 20px;
 }
 
-/* Label styles */
-.admin-sidebar-desktop.compact .nav-label.compact-label {
+/* Label Styles */
+.admin-layout .admin-sidebar-desktop.compact .nav-label {
     font-size: 0.65rem;
     line-height: 1;
-    margin-top: 0.25rem;
+    text-align: center;
 }
 
-.admin-sidebar-desktop.expanded .nav-label {
+.admin-layout .admin-sidebar-desktop.expanded .nav-label {
     font-size: 0.875rem;
     flex-grow: 1;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
 }
 
-/* Badge positioning */
-.admin-sidebar-desktop.compact .compact-badge {
+/* Badge Positioning */
+.admin-layout .admin-sidebar-desktop.compact .compact-badge {
     position: absolute;
     top: 5px;
     right: 5px;
@@ -237,61 +208,73 @@
     justify-content: center;
 }
 
-[dir="rtl"] .admin-sidebar-desktop.compact .compact-badge {
+[dir="rtl"] .admin-layout .admin-sidebar-desktop.compact .compact-badge {
     right: auto;
     left: 5px;
 }
 
-.admin-sidebar-desktop.expanded .badge {
+.admin-layout .admin-sidebar-desktop.expanded .badge {
     position: static;
     margin-inline-start: auto;
+    font-size: 0.8rem;
 }
 
-/* Adjust main content area */
-.admin-content-area.sidebar-compact {
-    margin-left: 80px;
-    transition: margin-left 0.3s ease;
+/* Стили при наведении с повышенной специфичностью */
+
+/* Общий эффект сдвига */
+/*.admin-layout .admin-nav .admin-nav-link:hover {*/
+/*    transform: translateX(4px);*/
+/*    color: var(--bs-primary);*/
+/*}*/
+
+/*!* Фон при наведении в СВЕТЛОЙ теме *!*/
+/*[data-theme="light"] .admin-layout .admin-nav .admin-nav-link:hover {*/
+/*    background-color: var(--bs-gray-200);*/
+/*}*/
+
+/*!* Фон при наведении в ТЕМНОЙ теме *!*/
+/*[data-theme="dark"] .admin-layout .admin-nav .admin-nav-link:hover {*/
+/*    background-color: var(--bs-gray-800);*/
+/*}*/
+
+/*!* 4. Стили для активной ссылки. *!*/
+/*.admin-layout .admin-nav .admin-nav-link.active,*/
+/*.admin-layout .admin-nav .admin-nav-link.active:hover {*/
+/*    background-color: var(--bs-primary);*/
+/*    color: var(--bs-white);*/
+/*    transform: none;*/
+/*}*/
+/* Hover Effects */
+.admin-layout .admin-sidebar-desktop.compact .admin-nav-link:hover {
+    transform: translate(-1px); /* No transform in compact mode */
 }
 
-.admin-content-area.sidebar-expanded {
-    margin-left: 80px; /* Keep same margin since sidebar overlays */
+.admin-layout .admin-sidebar-desktop.expanded .admin-nav-link:hover {
+    transform: translateX(4px);
 }
 
-[dir="rtl"] .admin-content-area.sidebar-compact {
-    margin-left: 0;
-    margin-right: 80px;
+[dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded .admin-nav-link:hover {
+    transform: translateX(-4px);
 }
 
-[dir="rtl"] .admin-content-area.sidebar-expanded {
-    margin-left: 0;
-    margin-right: 80px;
+/* Light Theme Hover */
+[data-theme="light"] .admin-layout .admin-nav-link:hover {
+    background-color: var(--bs-gray-200);
 }
 
-/* Hide header in compact mode */
-.sidebar-header.compact {
-    min-height: 0;
-    padding: 0;
-    margin: 0;
+/* Dark Theme Hover */
+[data-theme="dark"] .admin-layout .admin-nav-link:hover {
+    background-color: var(--bs-gray-800);
 }
 
-/* Animation for expansion */
-@keyframes expandSidebar {
-    from {
-        width: 80px;
-        box-shadow: none;
-    }
-    to {
-        width: var(--app-sidebar-width);
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-    }
+/* Active State */
+.admin-layout .admin-nav-link.active,
+.admin-layout .admin-nav-link.active:hover {
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
 }
 
-/* Active state adjustments */
-.admin-sidebar-desktop.compact .admin-nav-link.active {
-    position: relative;
-}
-
-.admin-sidebar-desktop.compact .admin-nav-link.active::before {
+.admin-layout .admin-sidebar-desktop.compact .admin-nav-link.active::before {
     content: '';
     position: absolute;
     left: 0;
@@ -303,27 +286,11 @@
     border-radius: 0 3px 3px 0;
 }
 
-[dir="rtl"] .admin-sidebar-desktop.compact .admin-nav-link.active::before {
+[dir="rtl"] .admin-layout .admin-sidebar-desktop.compact .admin-nav-link.active::before {
     left: auto;
     right: 0;
     border-radius: 3px 0 0 3px;
 }
-
-/* Hover effect disabled in compact mode to prevent interference */
-.admin-sidebar-desktop.compact .admin-nav-link:hover {
-    transform: none;
-}
-
-.admin-sidebar-desktop.expanded .admin-nav-link:hover {
-    transform: translateX(4px);
-}
-
-[dir="rtl"] .admin-sidebar-desktop.expanded .admin-nav-link:hover {
-    transform: translateX(-4px);
-}
-
-
-
 
 
 
@@ -331,96 +298,32 @@
 
 
 /* CONTENT AREA */
-.admin-content-area {
+.admin-layout .admin-content-area {
     flex: 1;
     background-color: var(--bs-gray-100);
+    margin-left: 80px; /* Always account for compact sidebar */
+    transition: none; /* No transition since sidebar overlays */
 }
 
-[data-theme="dark"] .admin-content-area {
+[dir="rtl"] .admin-layout .admin-content-area {
+    margin-left: 0;
+    margin-right: 80px;
+}
+
+[data-theme="dark"] .admin-layout .admin-content-area {
     background-color: var(--bs-black);
 }
 
-.admin-main-content {
+.admin-layout .admin-main-content {
     padding: 1rem;
 }
-.admin-main-content .card {
+
+.admin-layout .admin-main-content .card {
     border-radius: calc(var(--radius-lg) - 0px);
 }
 
-/* Mobile Sidebar - Кастомная реализация */
-.mobile-sidebar-overlay {
-    position: fixed;
-    top: var(--app-navbar-height);
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1015;
-    opacity: 0;
-    animation: fadeIn 0.3s ease-out forwards;
-}
 
-.admin-layout .mobile-sidebar-overlay.closing {
-    animation: fadeOut 0.3s ease-out forwards;
-}
 
-.admin-layout .mobile-sidebar {
-    position: fixed;
-    top: var(--app-navbar-height);
-    bottom: 0;
-    width: var(--app-sidebar-width);
-    max-width: 80vw;
-    background-color: var(--bs-body-bg);
-    box-shadow: var(--bs-box-shadow-lg);
-    z-index: 1045;
-    overflow-y: auto;
-}
-[dir="ltr"] .mobile-sidebar,
-:not([dir="rtl"]) .mobile-sidebar {
-    left: 0;
-    right: auto;
-    transform: translateX(-100%);
-    animation: sideBarSlideIn 0.3s ease-out forwards;
-}
-
-[dir="rtl"] .mobile-sidebar {
-    left: auto;
-    right: 0;
-    transform: translateX(100%);
-    animation-name: slideInRTL;
-}
-
-[dir="ltr"] .mobile-sidebar.closing,
-:not([dir="rtl"]) .mobile-sidebar.closing {
-    animation: slideOut 0.3s ease-out forwards;
-}
-
-[dir="rtl"] .mobile-sidebar.closing {
-    animation: slideOutRTL 0.3s ease-out forwards;
-}
-
-.admin-layout .mobile-sidebar-content {
-    padding: 1rem 0;
-
-}
-
-/* Обновленная кнопка меню */
-.admin-layout .mobile-menu-btn {
-    position: relative;
-    overflow: hidden;
-}
-
-.admin-layout .mobile-menu-btn.active {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
-    color: var(--bs-white);
-}
-
-.admin-layout .mobile-menu-btn.active:hover {
-    background-color: var(--bs-primary-hover);
-    border-color: var(--bs-primary-hover);
-    color: var(--bs-white);
-}
 
 /* Анимации */
 @keyframes fadeIn {
@@ -453,49 +356,22 @@
     to { transform: translateX(100%); }
 }
 
-/* USER DROPDOWN - Bootstrap уже стилизует, добавляем только кастомное */
-.user-dropdown .dropdown-menu {
-    color: var(--bs-primary);
-    box-shadow: var(--bs-box-shadow);
-}
 
-
-.admin-layout .admin-navbar .dropdown .dropdown-toggle::after {
-    margin-left: 0;
-    margin-right: 0;
-}
-/* BADGES - дополнения к Bootstrap */
-.admin-nav-link .badge {
-    margin-inline-start: auto;
-    font-size: 0.8rem;
-}
-.admin-layout .admin-navbar .badge{
-    font-size: 0.75rem;
-    transform: translateY(0.25rem);
-    padding: 0.25rem 0.5rem;
-}
-
-
-.admin-layout .user-avatar {
-    width: 52px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-}
 
 /* RESPONSIVE */
 @media (max-width: 991.98px) {
-    .admin-main-content {
+    .admin-layout .admin-main-content {
         padding: 1rem;
     }
 
 }
 
 @media (max-width: 767.98px) {
-    .admin-main-content {
+    .admin-layout .admin-main-content {
         padding: 0.75rem;
+    }
+    .admin-layout .admin-sidebar-desktop.expanded {
+        width: 250px;
     }
 
 }
@@ -506,9 +382,7 @@
     }
 }
 
-
-
-/* Убираем лишние hover эффекты на мобильных устройствах */
+/* Remove hover effects on touch devices */
 @media (hover: none) {
     .admin-nav-link:hover {
         transform: none;

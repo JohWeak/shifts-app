@@ -176,8 +176,6 @@ const AdminLayout = () => {
                     <div className="d-flex align-items-center">
                         {/* Sidebar Toggle Button - Now always visible */}
                         <Button
-                            variant="outline-secondary"
-                            size="sm"
                             className={`me-3 sidebar-menu-btn ${isSidebarExpanded ? 'active' : ''}`}
                             onClick={handleToggleClick}
                             onMouseEnter={handleButtonMouseEnter}
@@ -250,13 +248,6 @@ const AdminLayout = () => {
                     onMouseLeave={handleSidebarMouseLeave}
                 >
                     <div className="sidebar-content">
-                        <div className={`sidebar-header ${!isSidebarExpanded ? 'compact' : ''}`}>
-                            {isSidebarExpanded && (
-                                <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
-                                    {t('navigation.title')}
-                                </h6>
-                            )}
-                        </div>
                         <SidebarContent isCompact={true} />
                     </div>
                 </div>
