@@ -1,32 +1,6 @@
 // backend/src/services/employee-recommendation.service.js
 const {Op} = require('sequelize');
 const dayjs = require('dayjs');
-
-// Score constants
-const SCORE_CONSTANTS = {
-    // Base score
-    BASE_SCORE: 50,
-
-    // Position matching
-    PRIMARY_POSITION_MATCH: 100,
-    NO_POSITION_FLEXIBLE: 25,
-    CROSS_POSITION_PENALTY: -20,
-
-    // Work site matching
-    SAME_WORK_SITE: 20,
-    CAN_WORK_ANY_SITE: 10,
-    DIFFERENT_WORK_SITE: -30,
-
-    // Preferences
-    PREFERS_THIS_SHIFT: 30,
-    PREFERS_DIFFERENT_TIME: -10,
-
-    // Workload balance
-    LOW_WEEKLY_WORKLOAD_BONUS: 20,
-    HIGH_WEEKLY_WORKLOAD_PENALTY_PER_SHIFT: -10,
-    WORKLOAD_THRESHOLD_LOW: 3,
-    WORKLOAD_THRESHOLD_HIGH: 5
-};
 const {EmployeeScorer, SCORING_CONFIG} = require('./employee-recommendation-scoring');
 
 class EmployeeRecommendationService {
@@ -390,27 +364,27 @@ class EmployeeRecommendationService {
         // Check position match
         if (!employee.default_position_id) {
             evaluation.hasNoPosition = true;
-            evaluation.score += SCORE_CONSTANTS.NO_POSITION_FLEXIBLE;
+            evaluation.score += SCORING_CONFIG.POSITION_MATCH.FLEXIBLE;
             evaluation.reasons.push('flexible_no_position');
         } else if (employee.default_position_id === targetPosition.pos_id) {
             evaluation.isCorrectPosition = true;
-            evaluation.score += SCORE_CONSTANTS.PRIMARY_POSITION_MATCH;
+            evaluation.score += SCORING_CONFIG.POSITION_MATCH.PRIMARY;
             evaluation.reasons.push('primary_position_match');
         } else {
-            evaluation.score += SCORE_CONSTANTS.CROSS_POSITION_PENALTY;
+            evaluation.score += SCORING_CONFIG.POSITION_MATCH.CROSS;
             evaluation.warnings.push('cross_position_assignment');
         }
 
         // Check work site match
         if (employee.work_site_id && employee.work_site_id !== targetPosition.site_id) {
             evaluation.isOtherSite = true;
-            evaluation.score += SCORE_CONSTANTS.DIFFERENT_WORK_SITE;
+            evaluation.score += SCORING_CONFIG.SITE_MATCH.DIFFERENT;
             evaluation.warnings.push('different_work_site');
         } else if (!employee.work_site_id) {
-            evaluation.score += SCORE_CONSTANTS.CAN_WORK_ANY_SITE;
+            evaluation.score += SCORING_CONFIG.SITE_MATCH.ANY;
             evaluation.reasons.push('can_work_any_site');
         } else {
-            evaluation.score += SCORE_CONSTANTS.SAME_WORK_SITE;
+            evaluation.score += SCORING_CONFIG.SITE_MATCH.SAME;
             evaluation.reasons.push('same_work_site');
         }
 
@@ -450,17 +424,6 @@ class EmployeeRecommendationService {
             }
         }
 
-        // Add workload balance scoring
-        // const weeklyAssignments = employeeWeekAssignments.length;
-        // if (weeklyAssignments > SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) {
-        //     const penalty = (weeklyAssignments - SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) *
-        //         SCORE_CONSTANTS.HIGH_WEEKLY_WORKLOAD_PENALTY_PER_SHIFT;
-        //     evaluation.score += penalty;
-        //     evaluation.warnings.push(`high_weekly_workload: ${weeklyAssignments}`);
-        // } else if (weeklyAssignments < SCORE_CONSTANTS.WORKLOAD_THRESHOLD_LOW) {
-        //     evaluation.score += SCORE_CONSTANTS.LOW_WEEKLY_WORKLOAD_BONUS;
-        //     evaluation.reasons.push(`low_weekly_workload:${weeklyAssignments}`);
-        // }
         // 2. Calculate score for available employees
         const scoring = EmployeeScorer.calculateScore(
             employee,
