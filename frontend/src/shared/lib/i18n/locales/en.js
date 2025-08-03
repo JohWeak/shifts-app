@@ -495,8 +495,8 @@ export const en = {
         workSiteHelp: 'Select work site or "Flexible" for any assignment',
         crossPosition: 'Cross Position',
         permanentConstraint: 'Permanent constraint',
-        approvedBy: 'Approved by {{approver}} on {{date}}',
-        confirmOverride: 'Employee {{name}} is unavailable ({{reason}}). {{note}}\n\nAre you sure you want to assign them anyway?',
+        approvedBy: 'Approved by {approver} on {date}',
+        confirmOverride: 'Employee {name} is unavailable ({reason}). {note}\n\nAre you sure you want to assign them anyway?',
 
         temporaryConstraints: 'Temporary Constraints',
         permanentConstraints: 'Permanent Constraints',

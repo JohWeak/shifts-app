@@ -166,7 +166,15 @@
 }
 
 [data-theme="dark"] .employee-selection-modal .employee-list-item:hover {
-    background-color: var(--bs-gray-800);
+    background-color: var(--bs-gray-900);
+}
+
+[data-theme="dark"] .list-group-item-warning {
+    background-color: var(--bs-gray-900);
+
+}
+[data-theme="dark"] .list-group-item-warning:hover {
+    border-color: var(--bs-danger);
 }
 
 .employee-selection-modal .employee-info {
@@ -234,6 +242,12 @@
 
 .employee-selection-modal .availability-busy {
     background-color: var(--bs-warning);
+}
+[data-theme="dark"] .employee-selection-modal .availability-busy {
+    background-color: rgba(var(--bs-warning-rgb), 0.5);
+}
+[data-theme="dark"] .employee-list-item-list-group-item-warning .employee-name{
+    color: var(--bs-gray-600)!important;
 }
 
 .employee-selection-modal .availability-unavailable {
