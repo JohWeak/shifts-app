@@ -154,11 +154,15 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                 {showWarning && (
                                     <Badge bg="danger">{t('employee.unavailable')}</Badge>
                                 )}
-                                {employee.recommendation?.score && (
+                                {employee.recommendation?.score  ?(
                                     <small className="score-badge">
                                         {t('employee.score')}: {employee.recommendation.score}
                                     </small>
-                                )}
+                                ) : (
+                                    <small className="score-badge">
+                                        {t('employee.score')}: 0
+                                    </small>
+                                    )}
                             </div>
                         </ListGroup.Item>
                     );
