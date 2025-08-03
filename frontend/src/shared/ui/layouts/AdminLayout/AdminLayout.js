@@ -11,7 +11,6 @@ import {
 } from 'react-bootstrap';
 import {useNavigate, useLocation, Link} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
-import {useMediaQuery} from 'shared/hooks/useMediaQuery';
 import {logout} from 'features/auth/model/authSlice';
 import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
@@ -26,14 +25,11 @@ const AdminLayout = () => {
     const {t} = useI18n();
     const navigate = useNavigate();
     const location = useLocation();
-    const [showMobileMenu, setShowMobileMenu] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1592);
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const dispatch = useDispatch();
     const {pendingCount} = useSelector(state => state.adminRequests);
     const sidebarRef = useRef(null);
-    const expandTimeoutRef = useRef(null)
+    const expandTimeoutRef = useRef(null);
 
     useEffect(() => {
         // Загружаем счетчик запросов для админа
@@ -41,50 +37,26 @@ const AdminLayout = () => {
     }, [dispatch]);
 
     const handleLogout = () => {
-        dispatch(logout()); // Диспатчим экшен
-        navigate('/login'); // Перенаправляем на логин
+        dispatch(logout());
+        navigate('/login');
     };
-    // Отслеживание размера экрана
-    useEffect(() => {
-        const handleResize = () => {
-            const mobile = window.innerWidth < 1592;
-            setIsMobile(mobile);
-            if (!mobile) {
-                setShowMobileMenu(false);
-            }
-        };
 
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    useEffect(() => {
-        if (showMobileMenu) {
-            document.body.classList.add('mobile-sidebar-open');
-        } else {
-            document.body.classList.remove('mobile-sidebar-open');
-        }
-
-        // Cleanup
-        return () => {
-            document.body.classList.remove('mobile-sidebar-open');
-        };
-    }, [showMobileMenu]);
-
-    // Handle mouse enter/leave for desktop sidebar expansion
-    const handleMouseEnter = () => {
-        if (!isMobile) {
-            clearTimeout(expandTimeoutRef.current);
-            expandTimeoutRef.current = setTimeout(() => {
-                setIsSidebarExpanded(true);
-            }, 100); // Small delay to prevent accidental expansion
-        }
+    // Handle mouse enter/leave for sidebar expansion (only on button)
+    const handleButtonMouseEnter = () => {
+        clearTimeout(expandTimeoutRef.current);
+        expandTimeoutRef.current = setTimeout(() => {
+            setIsSidebarExpanded(true);
+        }, 100);
     };
-    const handleMouseLeave = () => {
-        if (!isMobile) {
-            clearTimeout(expandTimeoutRef.current);
-            setIsSidebarExpanded(false);
-        }
+
+    const handleSidebarMouseLeave = () => {
+        clearTimeout(expandTimeoutRef.current);
+        setIsSidebarExpanded(false);
+    };
+
+    // Toggle sidebar on button click
+    const handleToggleClick = () => {
+        setIsSidebarExpanded(prev => !prev);
     };
 
     // Clean up timeout on unmount
@@ -150,35 +122,19 @@ const AdminLayout = () => {
 
     const currentPath = location.pathname;
     const isActive = (path) => {
-        // Для дашборда '/admin' требуется точное совпадение
         if (path === '/admin') {
             return currentPath === '/admin';
         }
-        // Для всех остальных страниц - проверка на startsWith
         return currentPath.startsWith(path);
     };
 
-    // Обновленная функция закрытия
-    const handleCloseMobileMenu = () => {
-        setIsClosing(true);
-        setTimeout(() => {
-            setShowMobileMenu(false);
-            setIsClosing(false);
-        }, 300); // Время анимации
-    };
-
-// Обновленная функция навигации
     const handleNavigation = (path) => {
         if (path === '/admin/schedules') {
             dispatch(setActiveTab('overview'));
             dispatch(setSelectedScheduleId(null));
         }
         navigate(path);
-        if (isMobile) {
-            handleCloseMobileMenu(); // Используем новую функцию
-        }
     };
-
 
     const SidebarContent = ({ isCompact = false }) => (
         <Nav className="flex-column admin-nav">
@@ -192,11 +148,11 @@ const AdminLayout = () => {
                             e.preventDefault();
                             handleNavigation(item.path);
                         }}
-                        title={isCompact ? item.label : undefined}
+                        title={isCompact && !isSidebarExpanded ? item.label : undefined}
                     >
                         <i className={`bi bi-${item.icon} nav-icon`}></i>
                         <span className={`nav-label ${isCompact && !isSidebarExpanded ? 'compact-label' : ''}`}>
-                            {item.label}
+                            {isSidebarExpanded ? item.label : item.label}
                         </span>
                         {item.badge && (
                             <Badge
@@ -217,41 +173,33 @@ const AdminLayout = () => {
             {/* Top Navigation Bar */}
             <Navbar className="admin-navbar shadow-sm sticky-top">
                 <Container fluid className="px-3">
-
                     <div className="d-flex align-items-center">
-                        {/* Mobile Menu Toggle */}
-                        {isMobile && (
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                className={`me-3 mobile-menu-btn ${showMobileMenu ? 'active' : ''}`}
-                                onClick={() => showMobileMenu ? handleCloseMobileMenu() : setShowMobileMenu(true)}
-                            >
-                                <i className="bi bi-list"></i>
-                            </Button>
-                        )}
+                        {/* Sidebar Toggle Button - Now always visible */}
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            className={`me-3 sidebar-menu-btn ${isSidebarExpanded ? 'active' : ''}`}
+                            onClick={handleToggleClick}
+                            onMouseEnter={handleButtonMouseEnter}
+                        >
+                            <i className="bi bi-list"></i>
+                        </Button>
 
-                        {/* Brand */}
                         <Navbar
                             as={Link}
                             to="/admin"
                             className="brand-logo mb-0"
                             onClick={(e) => {
-                                // Предотвращаем стандартное действие Link, чтобы полностью контролировать навигацию
                                 e.preventDefault();
-                                // Используем вашу готовую функцию навигации для '/admin'
                                 handleNavigation('/admin');
                             }}
                         >
                             <i className="bi bi-calendar-check-fill text-primary me-2"></i>
-                                <span className="brand-text">{t('common.appName')}</span>
-                                <Badge bg="secondary" className=" ms-2 brand-badge">{t('common.admin')}</Badge>
+                            <span className="brand-text">{t('common.appName')}</span>
+                            <Badge bg="secondary" className="ms-2 brand-badge">{t('common.admin')}</Badge>
                         </Navbar>
-
                     </div>
 
-
-                    {/* Right side - User menu */}
                     <div className="d-flex align-items-center gap-2">
                         <ThemeToggle variant="icon"/>
                         <LanguageSwitch/>
@@ -295,68 +243,32 @@ const AdminLayout = () => {
 
             {/* Main Container */}
             <div className="admin-main-container">
-                {/* Desktop Sidebar - Modified for compact mode */}
-                {!isMobile && (
-                    <div
-                        ref={sidebarRef}
-                        className={`admin-sidebar-desktop ${isSidebarExpanded ? 'expanded' : 'compact'}`}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <div className="sidebar-content">
-                            {/* Hamburger button for expand */}
-                            <div className="sidebar-toggle-wrapper">
-                                <button
-                                    className="sidebar-toggle-btn"
-                                    onMouseEnter={handleMouseEnter}
-                                    aria-label="Expand sidebar"
-                                >
-                                    <i className="bi bi-list"></i>
-                                </button>
-                            </div>
-
-                            <div className={`sidebar-header ${!isSidebarExpanded ? 'compact' : ''}`}>
-                                {isSidebarExpanded && (
-                                    <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
-                                        {t('navigation.title')}
-                                    </h6>
-                                )}
-                            </div>
-                            <SidebarContent isCompact={true} />
+                {/* Sidebar - Always compact, expands on hover/click */}
+                <div
+                    ref={sidebarRef}
+                    className={`admin-sidebar-desktop ${isSidebarExpanded ? 'expanded' : 'compact'}`}
+                    onMouseLeave={handleSidebarMouseLeave}
+                >
+                    <div className="sidebar-content">
+                        <div className={`sidebar-header ${!isSidebarExpanded ? 'compact' : ''}`}>
+                            {isSidebarExpanded && (
+                                <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
+                                    {t('navigation.title')}
+                                </h6>
+                            )}
                         </div>
+                        <SidebarContent isCompact={true} />
                     </div>
-                )}
+                </div>
 
                 {/* Main Content Area */}
-                <div className={`admin-content-area ${!isMobile ? (isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-compact') : ''}`}>
+                <div className="admin-content-area">
                     <main className="admin-main-content">
                         <Outlet/>
                     </main>
                 </div>
             </div>
 
-            {/* Mobile Sidebar (Offcanvas) */}
-            {showMobileMenu && (
-                <>
-                    {/* Overlay */}
-                    <div
-                        className={`mobile-sidebar-overlay ${isClosing ? 'closing' : ''}`}
-                        onClick={handleCloseMobileMenu}
-                    />
-
-                    {/* Sidebar */}
-                    <div className={`mobile-sidebar ${isClosing ? 'closing' : ''}`}>
-                        <div className="mobile-sidebar-content">
-                            <div className="sidebar-header">
-                                <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3 mt-3">
-                                    {t('navigation.title')}
-                                </h6>
-                            </div>
-                            <SidebarContent/>
-                        </div>
-                    </div>
-                </>
-            )}
             <GlobalAlerts/>
         </div>
     );
