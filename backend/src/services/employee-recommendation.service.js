@@ -27,6 +27,7 @@ const SCORE_CONSTANTS = {
     WORKLOAD_THRESHOLD_LOW: 3,
     WORKLOAD_THRESHOLD_HIGH: 5
 };
+const { EmployeeScorer, SCORING_CONFIG } = require('./employee-recommendation-scoring');
 
 class EmployeeRecommendationService {
     constructor(db) {
@@ -302,9 +303,10 @@ class EmployeeRecommendationService {
     _evaluateEmployee(employee, targetPosition, targetShift, dayOfWeek, date, employeeWeekAssignments, todayAssignments, allWeekAssignments) {
         const evaluation = {
             canWork: true,
-            score: SCORE_CONSTANTS.BASE_SCORE,
+            score: 0,
             reasons: [],
             warnings: [],
+            scoreBreakdown: null,
             isCorrectPosition: false,
             hasNoPosition: false,
             isOtherSite: false,
@@ -319,17 +321,18 @@ class EmployeeRecommendationService {
             restViolationDetails: null
         };
 
-        // Check if already assigned TODAY
+        // Already assigned today - BLOCKING
         const todayAssignment = todayAssignments.find(a => a.emp_id === employee.emp_id);
         if (todayAssignment) {
             evaluation.isAlreadyAssignedToday = true;
             evaluation.canWork = false;
+            evaluation.score = 0; // No score for unavailable
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
             evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);
             return evaluation;
         }
 
-        // Check permanent constraints FIRST (highest priority)
+        // Permanent constraints - BLOCKING
         if (employee.permanentConstraints && employee.permanentConstraints.length > 0) {
             for (const permConstraint of employee.permanentConstraints) {
                 if (permConstraint.constraint_type === 'cannot_work' &&
@@ -337,6 +340,7 @@ class EmployeeRecommendationService {
 
                     evaluation.hasPermanentConstraint = true;
                     evaluation.canWork = false;
+                    evaluation.score = 0; // No score for unavailable
                     evaluation.permanentConstraintDetails.push({
                         type: 'permanent_cannot_work',
                         shift_name: targetShift.shift_name,
@@ -350,6 +354,23 @@ class EmployeeRecommendationService {
                     return evaluation;
                 }
             }
+        }
+
+        // Rest violations - BLOCKING
+        const restViolation = this._checkRestViolations(
+            employee.emp_id,
+            employeeWeekAssignments,
+            targetShift,
+            date
+        );
+
+        if (restViolation) {
+            evaluation.hasRestViolation = true;
+            evaluation.canWork = false;
+            evaluation.score = 0; // No score for unavailable
+            evaluation.restViolationDetails = restViolation;
+            evaluation.warnings.push(restViolation.message);
+            return evaluation;
         }
 
         // Check position match
@@ -379,7 +400,8 @@ class EmployeeRecommendationService {
             evaluation.reasons.push('same_work_site');
         }
 
-        // Check temporary constraints
+        // Temporary constraints
+        let hasPreferWork = false;
         if (employee.constraints && employee.constraints.length > 0) {
             for (const constraint of employee.constraints) {
                 if (constraint.shift_id && constraint.shift_id !== targetShift.id) {
@@ -389,14 +411,22 @@ class EmployeeRecommendationService {
                 if (constraint.constraint_type === 'cannot_work') {
                     evaluation.hasHardConstraint = true;
                     evaluation.canWork = false;
+                    evaluation.score = 0; // No score for unavailable
                     evaluation.constraintDetails.push({
                         type: 'cannot_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
                         date: constraint.target_date || dayOfWeek
                     });
+                    return evaluation; // BLOCKING
+                } else if (constraint.constraint_type === 'prefer_work') {
+                    hasPreferWork = true;
+                    evaluation.constraintDetails.push({
+                        type: 'prefer_work',
+                        target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
+                        date: constraint.target_date || dayOfWeek
+                    });
                 } else if (constraint.constraint_type === 'prefer_not_work') {
                     evaluation.hasSoftConstraint = true;
-                    evaluation.score += SCORE_CONSTANTS.PREFERS_DIFFERENT_TIME;
                     evaluation.constraintDetails.push({
                         type: 'prefer_not_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
@@ -406,35 +436,57 @@ class EmployeeRecommendationService {
             }
         }
 
-
-        // Check rest periods with adjacent days
-        const restViolation = this._checkRestViolations(
-            employee.emp_id,
-            employeeWeekAssignments,
+        // Add workload balance scoring
+        // const weeklyAssignments = employeeWeekAssignments.length;
+        // if (weeklyAssignments > SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) {
+        //     const penalty = (weeklyAssignments - SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) *
+        //         SCORE_CONSTANTS.HIGH_WEEKLY_WORKLOAD_PENALTY_PER_SHIFT;
+        //     evaluation.score += penalty;
+        //     evaluation.warnings.push(`high_weekly_workload: ${weeklyAssignments}`);
+        // } else if (weeklyAssignments < SCORE_CONSTANTS.WORKLOAD_THRESHOLD_LOW) {
+        //     evaluation.score += SCORE_CONSTANTS.LOW_WEEKLY_WORKLOAD_BONUS;
+        //     evaluation.reasons.push(`low_weekly_workload:${weeklyAssignments}`);
+        // }
+        // 2. Calculate score for available employees
+        const scoring = EmployeeScorer.calculateScore(
+            employee,
+            targetPosition,
             targetShift,
-            date
+            employeeWeekAssignments
         );
 
-        if (restViolation) {
-            evaluation.hasRestViolation = true;
-            evaluation.canWork = false;
-            evaluation.restViolationDetails = restViolation;
-            evaluation.warnings.push(restViolation.message);
-            return evaluation;
+        evaluation.score = scoring.score;
+        evaluation.scoreBreakdown = scoring.breakdown;
+
+        // Add preference bonus/penalty
+        if (hasPreferWork) {
+            evaluation.score += SCORING_CONFIG.PREFERENCES.PREFERS_WORK;
+            evaluation.reasons.push('prefers_this_shift');
+        } else if (evaluation.hasSoftConstraint) {
+            evaluation.score += SCORING_CONFIG.PREFERENCES.PREFERS_NOT_WORK;
+            evaluation.warnings.push('prefers_not_work');
         }
 
+        // Set evaluation flags based on scoring
+        evaluation.isCorrectPosition = employee.default_position_id === targetPosition.pos_id;
+        evaluation.hasNoPosition = !employee.default_position_id;
+        evaluation.isOtherSite = employee.work_site_id && employee.work_site_id !== targetPosition.site_id;
 
-        // Add workload balance scoring
-        const weeklyAssignments = employeeWeekAssignments.length;
-        if (weeklyAssignments > SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) {
-            const penalty = (weeklyAssignments - SCORE_CONSTANTS.WORKLOAD_THRESHOLD_HIGH) *
-                SCORE_CONSTANTS.HIGH_WEEKLY_WORKLOAD_PENALTY_PER_SHIFT;
-            evaluation.score += penalty;
-            evaluation.warnings.push(`high_weekly_workload: ${weeklyAssignments}`);
-        } else if (weeklyAssignments < SCORE_CONSTANTS.WORKLOAD_THRESHOLD_LOW) {
-            evaluation.score += SCORE_CONSTANTS.LOW_WEEKLY_WORKLOAD_BONUS;
-            evaluation.reasons.push(`low_weekly_workload:${weeklyAssignments}`);
-        }
+        // Convert scoring reasons to evaluation format
+        scoring.reasons.forEach(reason => {
+            if (reason.type === 'primary_position') evaluation.reasons.push('primary_position_match');
+            if (reason.type === 'same_site') evaluation.reasons.push('same_work_site');
+            if (reason.type === 'flexible') evaluation.reasons.push('flexible_no_position');
+            if (reason.type === 'any_site') evaluation.reasons.push('can_work_any_site');
+            if (reason.type === 'low_workload') evaluation.reasons.push(`low_weekly_workload:${reason.shifts}`);
+        });
+
+        scoring.penalties.forEach(penalty => {
+            if (penalty.type === 'cross_position') evaluation.warnings.push('cross_position_assignment');
+            if (penalty.type === 'different_site') evaluation.warnings.push('different_work_site');
+            if (penalty.type === 'high_workload') evaluation.warnings.push(`high_weekly_workload:${penalty.shifts}`);
+        });
+
 
         return evaluation;
     }

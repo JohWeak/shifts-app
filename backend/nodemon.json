@@ -7,11 +7,17 @@
     "dev-scripts/*",
     "temp/*",
     "src/temp/*",
+    "src/**/*.spec.js",
+    "src/**/*.test.js",
+    "src/temp/*",
+    "src/services/temp_*.json",
 
     "node_modules/",
 
     "*.test.js",
-    "test*.js"
+    "test*.js",
+
+    "**/*_result.json"
   ],
   "exec": "node src/server.js",
   "verbose": true

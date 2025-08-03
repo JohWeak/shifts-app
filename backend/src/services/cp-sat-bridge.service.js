@@ -212,7 +212,7 @@ class CPSATBridge {
                 hard_constraints: CONSTRAINTS.HARD_CONSTRAINTS,
                 soft_constraints: CONSTRAINTS.SOFT_CONSTRAINTS,
                 optimization_weights: CONSTRAINTS.OPTIMIZATION_WEIGHTS,
-                max_solve_time: CONSTRAINTS.SOLVER_SETTINGS.max_time_seconds || 120,
+                max_solve_time: CONSTRAINTS.SOLVER_SETTINGS.MAX_TIME_SECONDS || 120,
                 enable_overtime: CONSTRAINTS.SOLVER_SETTINGS.enable_overtime,
                 enable_weekend_work: CONSTRAINTS.SOLVER_SETTINGS.enable_weekend_work,
                 strict_rest_requirements: CONSTRAINTS.SOLVER_SETTINGS.strict_rest_requirements
@@ -279,6 +279,7 @@ class CPSATBridge {
                             constraintDays.push(dayIndex);
                         }
                     } else if (constraint.day_of_week !== null) {
+                        // day_of_week is 0-6 (Sunday-Saturday)
                         const dayIndex = days.findIndex(d => d.weekday === constraint.day_of_week);
                         if (dayIndex !== -1) {
                             constraintDays.push(dayIndex);
@@ -286,10 +287,22 @@ class CPSATBridge {
                     }
 
                     for (const dayIndex of constraintDays) {
+                        // Need to map real shift_id to temporary shift_id for Python
+                        let mappedShiftId = null;
+                        if (constraint.shift_id) {
+                            // Find the temporary ID for this real shift ID
+                            for (const [tempId, realId] of Object.entries(this.shiftIdMapping)) {
+                                if (realId === constraint.shift_id) {
+                                    mappedShiftId = parseInt(tempId);
+                                    break;
+                                }
+                            }
+                        }
+
                         const constraintData = {
                             emp_id: emp.emp_id,
                             day_index: dayIndex,
-                            shift_id: constraint.shift_id,
+                            shift_id: mappedShiftId, // Use mapped ID
                             constraint_type: constraint.constraint_type,
                             reason: constraint.reason
                         };
@@ -309,10 +322,21 @@ class CPSATBridge {
                     days.forEach((day, index) => {
                         const dayName = day.day_name.toLowerCase();
                         if (dayName === permConstraint.day_of_week) {
+                            // Map real shift_id to temporary shift_id
+                            let mappedShiftId = null;
+                            if (permConstraint.shift_id) {
+                                for (const [tempId, realId] of Object.entries(this.shiftIdMapping)) {
+                                    if (realId === permConstraint.shift_id) {
+                                        mappedShiftId = parseInt(tempId);
+                                        break;
+                                    }
+                                }
+                            }
+
                             const constraintData = {
                                 emp_id: emp.emp_id,
                                 day_index: index,
-                                shift_id: permConstraint.shift_id,
+                                shift_id: mappedShiftId,
                                 constraint_type: permConstraint.constraint_type,
                                 is_permanent: true,
                                 approved_by: permConstraint.approver ?
@@ -339,6 +363,14 @@ class CPSATBridge {
                 description: legal.description
             });
         }
+
+        console.log('[CP-SAT Bridge] Processed constraints:', {
+            cannot_work: cannotWork.length,
+            prefer_work: preferWork.length,
+            permanent_cannot_work: permanentCannotWork.length,
+            sample_cannot_work: cannotWork.slice(0, 3),
+            sample_permanent: permanentCannotWork.slice(0, 3)
+        });
 
         return {
             cannot_work: cannotWork,
@@ -391,19 +423,23 @@ class CPSATBridge {
     async callPythonOptimizer(data) {
         return new Promise(async (resolve, reject) => {
             try {
-                // Убедимся что папка temp не в src
-                const tempDir = path.join(__dirname, '..', '..', 'temp'); // backend/temp вместо backend/src/temp
+                // Correct temp directory path
+                const tempDir = path.join(process.cwd(), 'temp');
+                await fs.mkdir(tempDir, { recursive: true });
+
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
                 const tempFilePath = path.join(tempDir, tempFileName);
                 const resultFilePath = tempFilePath.replace('.json', '_result.json');
 
-                // Ensure temp directory exists
-                await fs.mkdir(tempDir, { recursive: true });
-
                 // Write data to file
                 await fs.writeFile(tempFilePath, JSON.stringify(data, null, 2));
+                console.log(`[CP-SAT Bridge] Created temp file: ${tempFilePath}`);
 
-                console.log(`[CP-SAT Bridge] Saved data to: ${tempFilePath}`);
+                // Verify file exists
+                const fileExists = await fs.access(tempFilePath).then(() => true).catch(() => false);
+                if (!fileExists) {
+                    throw new Error('Failed to create temp file');
+                }
 
                 // Path to Python script
                 const pythonScriptPath = path.join(__dirname, 'cp_sat_optimizer.py');
