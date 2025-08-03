@@ -137,29 +137,28 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
                                         );
                                     })}
                                 </div>
-
-                                <div className="employee-badges">
-                                    {type === 'available' && (
-                                        <Badge bg="success">{t('employee.available')}</Badge>
-                                    )}
-                                    {type === 'cross_position' && (
-                                        <Badge bg="warning" text="dark">{t('employee.crossPosition')}</Badge>
-                                    )}
-                                    {type === 'other_site' && (
-                                        <Badge bg="info">{t('employee.otherSite')}</Badge>
-                                    )}
-                                    {isFlexible && (
-                                        <Badge bg="secondary">{t('employee.flexible')}</Badge>
-                                    )}
-                                    {showWarning && (
-                                        <Badge bg="danger">{t('employee.unavailable')}</Badge>
-                                    )}
-                                    {employee.recommendation?.score && (
-                                        <small className="score-badge">
-                                            {t('employee.score')}: {employee.recommendation.score}
-                                        </small>
-                                    )}
-                                </div>
+                            </div>
+                            <div className="employee-badges">
+                                {type === 'available' && (
+                                    <Badge bg="success">{t('employee.available')}</Badge>
+                                )}
+                                {type === 'cross_position' && (
+                                    <Badge bg="warning" text="dark">{t('employee.crossPosition')}</Badge>
+                                )}
+                                {type === 'other_site' && (
+                                    <Badge bg="info">{t('employee.otherSite')}</Badge>
+                                )}
+                                {isFlexible && (
+                                    <Badge bg="secondary">{t('employee.flexible')}</Badge>
+                                )}
+                                {showWarning && (
+                                    <Badge bg="danger">{t('employee.unavailable')}</Badge>
+                                )}
+                                {employee.recommendation?.score && (
+                                    <small className="score-badge">
+                                        {t('employee.score')}: {employee.recommendation.score}
+                                    </small>
+                                )}
                             </div>
                         </ListGroup.Item>
                     );
@@ -223,7 +222,12 @@ const EmployeeSelectionModal = ({show, onHide, selectedPosition, onEmployeeSelec
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg" className="employee-selection-modal">
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"
+            className="employee-selection-modal"
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{getModalTitle()}</Modal.Title>
             </Modal.Header>

@@ -299,8 +299,9 @@
 /* Employee badges container */
 .employee-selection-modal .employee-badges {
     display: flex;
+    align-self: start;
+    padding-top: var(--space-2);
     flex-direction: column;
-    align-items: flex-end;
     gap: var(--space-1);
 }
 

@@ -120,13 +120,13 @@
 .position-schedule-editor .schedule-table td:first-child {
     /*width: 140px; !* Фиксированная ширина для колонки смен *!*/
     /*min-width: 50px;*/
-    max-width: 140px;
+    max-width: 120px;
 }
 
 /* Equal width for day columns */
 .position-schedule-editor .schedule-table th:not(:first-child),
 .position-schedule-editor .schedule-table td:not(:first-child) {
-    width: calc((100% - 140px) / 7); /* Равная ширина для дней недели */
+    width: calc((100% - 120px) / 7); /* Равная ширина для дней недели */
 }
 
 /* Table headers */
@@ -226,10 +226,11 @@
     line-height: 1.2;
     opacity: 0.7;
 }
-.shift-time {
+.position-schedule-editor .shift-time {
     font-size: var(--text-sm);
     opacity: 0.8;
     line-height: 1.2;
+    font-weight: var(--font-normal);
 }
 
 .shift-color-btn {
@@ -269,14 +270,12 @@
 @media (max-width: 1200px) {
     .position-schedule-editor .schedule-table th:first-child,
     .position-schedule-editor .schedule-table td:first-child {
-        width: 140px;
-        min-width: 100px;
-        max-width: 140px;
+        max-width: 120px;
     }
 
     .position-schedule-editor .schedule-table th:not(:first-child),
     .position-schedule-editor .schedule-table td:not(:first-child) {
-        width: calc((100% - 140px) / 7);
+        width: calc((100% - 120px) / 7);
     }
 }
 @media (max-width: 768px) {
