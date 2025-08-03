@@ -1,5 +1,5 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Outlet} from 'react-router-dom';
 import {
     Container,
@@ -29,9 +29,11 @@ const AdminLayout = () => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1592);
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const dispatch = useDispatch();
     const {pendingCount} = useSelector(state => state.adminRequests);
-
+    const sidebarRef = useRef(null);
+    const expandTimeoutRef = useRef(null)
 
     useEffect(() => {
         // Загружаем счетчик запросов для админа
@@ -69,6 +71,30 @@ const AdminLayout = () => {
         };
     }, [showMobileMenu]);
 
+    // Handle mouse enter/leave for desktop sidebar expansion
+    const handleMouseEnter = () => {
+        if (!isMobile) {
+            clearTimeout(expandTimeoutRef.current);
+            expandTimeoutRef.current = setTimeout(() => {
+                setIsSidebarExpanded(true);
+            }, 100); // Small delay to prevent accidental expansion
+        }
+    };
+    const handleMouseLeave = () => {
+        if (!isMobile) {
+            clearTimeout(expandTimeoutRef.current);
+            setIsSidebarExpanded(false);
+        }
+    };
+
+    // Clean up timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (expandTimeoutRef.current) {
+                clearTimeout(expandTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const navigationItems = [
         {
@@ -154,24 +180,32 @@ const AdminLayout = () => {
     };
 
 
-    const SidebarContent = () => (
+    const SidebarContent = ({ isCompact = false }) => (
         <Nav className="flex-column admin-nav">
             {navigationItems.map(item => (
                 <Nav.Item key={item.key}>
-                    {/* ИЗМЕНЕНИЕ: используем Link вместо Nav.Link с onClick */}
                     <Nav.Link
                         as={Link}
                         to={item.path}
-                        className={`admin-nav-link ${isActive(item.path) ? 'active' : ''}`}
+                        className={`admin-nav-link ${isCompact ? 'compact' : ''} ${isActive(item.path) ? 'active' : ''}`}
                         onClick={(e) => {
-                            e.preventDefault(); // Prevent default Link behavior
+                            e.preventDefault();
                             handleNavigation(item.path);
                         }}
+                        title={isCompact ? item.label : undefined}
                     >
-                        <i className={`bi bi-${item.icon} nav-icon `}></i>
-                        <span
-                            className="flex-grow-1">{item.label}</span> {/* me-auto прижмет текст влево, а остальное вправо */}
-                        {item.badge && <Badge bg="primary">{item.badge}</Badge>}
+                        <i className={`bi bi-${item.icon} nav-icon`}></i>
+                        <span className={`nav-label ${isCompact && !isSidebarExpanded ? 'compact-label' : ''}`}>
+                            {item.label}
+                        </span>
+                        {item.badge && (
+                            <Badge
+                                bg="primary"
+                                className={isCompact && !isSidebarExpanded ? 'compact-badge' : ''}
+                            >
+                                {item.badge}
+                            </Badge>
+                        )}
                     </Nav.Link>
                 </Nav.Item>
             ))}
@@ -259,24 +293,42 @@ const AdminLayout = () => {
                 </Container>
             </Navbar>
 
-            {/* Main Container  */}
+            {/* Main Container */}
             <div className="admin-main-container">
-                {/* Desktop Sidebar */}
+                {/* Desktop Sidebar - Modified for compact mode */}
                 {!isMobile && (
-                    <div className="admin-sidebar-desktop">
+                    <div
+                        ref={sidebarRef}
+                        className={`admin-sidebar-desktop ${isSidebarExpanded ? 'expanded' : 'compact'}`}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                    >
                         <div className="sidebar-content">
-                            <div className="sidebar-header">
-                                <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
-                                    {t('navigation.title')}
-                                </h6>
+                            {/* Hamburger button for expand */}
+                            <div className="sidebar-toggle-wrapper">
+                                <button
+                                    className="sidebar-toggle-btn"
+                                    onMouseEnter={handleMouseEnter}
+                                    aria-label="Expand sidebar"
+                                >
+                                    <i className="bi bi-list"></i>
+                                </button>
                             </div>
-                            <SidebarContent/>
+
+                            <div className={`sidebar-header ${!isSidebarExpanded ? 'compact' : ''}`}>
+                                {isSidebarExpanded && (
+                                    <h6 className="sidebar-title text-muted text-uppercase small fw-bold px-3 mb-3">
+                                        {t('navigation.title')}
+                                    </h6>
+                                )}
+                            </div>
+                            <SidebarContent isCompact={true} />
                         </div>
                     </div>
                 )}
 
                 {/* Main Content Area */}
-                <div className="admin-content-area">
+                <div className={`admin-content-area ${!isMobile ? (isSidebarExpanded ? 'sidebar-expanded' : 'sidebar-compact') : ''}`}>
                     <main className="admin-main-content">
                         <Outlet/>
                     </main>
