@@ -158,6 +158,69 @@
     border-radius: var(--radius-md);
 }
 
+.schedule-management-wrapper {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - var(--app-navbar-height));
+    position: relative;
+}
+
+.schedule-management-wrapper.panel-open {
+    /* Panel will overlay, no need to adjust layout */
+}
+
+.admin-schedule-management-container {
+    flex: 1;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure proper z-index stacking */
+.admin-schedule-management-container .modal {
+    z-index: 1050;
+}
+
+
+
+/* Add visual indicator for cells with pending changes */
+.schedule-cell.has-pending-change {
+    position: relative;
+}
+
+.schedule-cell.has-pending-change::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--bs-success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+[dir="rtl"] .schedule-cell.has-pending-change::after {
+    right: auto;
+    left: 4px;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1500px) {
+    .admin-schedule-management-container {
+        width: 100% !important;
+    }
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .page-header .text-muted {

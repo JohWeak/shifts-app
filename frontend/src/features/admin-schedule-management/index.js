@@ -9,6 +9,7 @@ import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
 import GenerateScheduleModal from './ui/modals/GenerateScheduleModal';
 import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
 import EmployeeSelectionModal from './ui/modals/EmployeeSelectionModal';
+import EmployeeRecommendationPanel from './ui/panels/EmployeeRecommendationPanel';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useScheduleActions } from './model/hooks/useScheduleActions';
 import { addNotification } from 'app/model/notificationsSlice';
@@ -50,17 +51,51 @@ const ScheduleManagement = () => {
         handleDelete: performDelete,
     } = useScheduleActions();
 
-    // --- Локальное состояние для UI, которое было утеряно ---
+    // --- Локальное состояние для UI ---
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
     const [comparisonResults, setComparisonResults] = useState(null);
     const [selectedCell, setSelectedCell] = useState(null);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
+
 
     // --- Эффекты ---
     useEffect(() => {
         dispatch(fetchSchedules());
     }, [dispatch]);
+
+    // Track screen size for panel/modal decision
+    useEffect(() => {
+        const handleResize = () => {
+            const newIsLarge = window.innerWidth >= 1500;
+            setIsLargeScreen(newIsLarge);
+
+            // If switching from large to small screen while panel is open, close it and open modal
+            if (!newIsLarge && isPanelOpen) {
+                setIsPanelOpen(false);
+                setShowEmployeeModal(true);
+            }
+            // If switching from small to large screen while modal is open, close it and open panel
+            else if (newIsLarge && showEmployeeModal) {
+                setShowEmployeeModal(false);
+                setIsPanelOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isPanelOpen, showEmployeeModal]);
+
+    // Close panel when saving schedule
+    useEffect(() => {
+        // Listen for save completion (you might need to add this to your redux state)
+        if (dataLoading === 'succeeded' && isPanelOpen) {
+            // Optionally close panel after successful save
+            setIsPanelOpen(false);
+        }
+    }, [dataLoading, isPanelOpen]);
 
     // --- Обработчики действий ---
     const onGenerateSubmit = async (settings) => {
@@ -90,10 +125,12 @@ const ScheduleManagement = () => {
         }
     };
 
-
-
     const handleTabChange = (newTab) => {
         dispatch(setActiveTab(newTab));
+        // Close panel when switching tabs
+        if (newTab !== 'view') {
+            setIsPanelOpen(false);
+        }
     };
 
     const handleCompareAlgorithms = async () => {
@@ -103,14 +140,24 @@ const ScheduleManagement = () => {
     };
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
-        setSelectedCell({
+        const cell = {
             date: date,
             positionId: positionId,
             shiftId: shiftId,
             employeeIdToReplace: employeeIdToReplace,
-            assignmentIdToReplace: assignmentIdToReplace  // Добавляем assignment ID
-        });
-        setShowEmployeeModal(true);
+            assignmentIdToReplace: assignmentIdToReplace
+        };
+
+        setSelectedCell(cell);
+
+        // Open panel on large screens, modal on small screens
+        if (isLargeScreen) {
+            setIsPanelOpen(true);
+            setShowEmployeeModal(false);
+        } else {
+            setShowEmployeeModal(true);
+            setIsPanelOpen(false);
+        }
     };
 
     const handleEmployeeSelect = async (employeeId, employeeName) => {
@@ -130,7 +177,7 @@ const ScheduleManagement = () => {
                     date: selectedCell.date,
                     shiftId: selectedCell.shiftId,
                     empId: selectedCell.employeeIdToReplace,
-                    assignmentId: selectedCell.assignmentIdToReplace  // Используем сохраненный assignment ID
+                    assignmentId: selectedCell.assignmentIdToReplace
                 }
             }));
         }
@@ -148,8 +195,12 @@ const ScheduleManagement = () => {
             }
         }));
 
-        setShowEmployeeModal(false);
-        setSelectedCell(null);
+        // Don't close panel on large screens (allow multiple selections)
+        // Only close modal on small screens
+        if (!isLargeScreen) {
+            setShowEmployeeModal(false);
+            setSelectedCell(null);
+        }
     };
 
     const onScheduleDeleted = (deletedId) => {
@@ -159,16 +210,30 @@ const ScheduleManagement = () => {
         }));
         if (selectedScheduleId === deletedId) {
             dispatch(setSelectedScheduleId(null));
+            setIsPanelOpen(false);
         }
 
     };
+    const handlePanelClose = () => {
+        setIsPanelOpen(false);
+        setSelectedCell(null);
+    };
+
 
     // --- Рендеринг ---
     const isLoading = dataLoading === 'pending' || actionsLoading;
     const scheduleExists = !!selectedScheduleId;
 
     return (
-            <Container fluid className="p-1 admin-schedule-management-container">
+        <div className={`schedule-management-wrapper ${isPanelOpen ? 'panel-open' : ''}`}>
+            <Container
+                fluid
+                className="p-1 admin-schedule-management-container"
+                style={{
+                    width: isPanelOpen && isLargeScreen ? '70%' : '100%',
+                    transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+            >
                 <PageHeader
                     icon="calendar-week"
                     title={t('schedule.title')}
@@ -216,10 +281,47 @@ const ScheduleManagement = () => {
                     )
                 )}
 
-                <GenerateScheduleModal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} onGenerate={onGenerateSubmit} generating={actionsLoading} />
-                <CompareAlgorithmsModal show={showComparisonModal} onHide={() => setShowComparisonModal(false)} results={comparisonResults} onUseAlgorithm={() => {}} />
-                <EmployeeSelectionModal show={showEmployeeModal} onHide={() => setShowEmployeeModal(false)} selectedPosition={selectedCell} onEmployeeSelect={handleEmployeeSelect} scheduleDetails={scheduleDetails} />
+                {/* Modals */}
+                <GenerateScheduleModal
+                    show={showGenerateModal}
+                    onHide={() => setShowGenerateModal(false)}
+                    onGenerate={onGenerateSubmit}
+                    generating={actionsLoading}
+                />
+
+                <CompareAlgorithmsModal
+                    show={showComparisonModal}
+                    onHide={() => setShowComparisonModal(false)}
+                    results={comparisonResults}
+                    onUseAlgorithm={() => {}}
+                />
+
+                {/* Employee Selection Modal - only for small screens */}
+                {!isLargeScreen && (
+                    <EmployeeSelectionModal
+                        show={showEmployeeModal}
+                        onHide={() => {
+                            setShowEmployeeModal(false);
+                            setSelectedCell(null);
+                        }}
+                        selectedPosition={selectedCell}
+                        onEmployeeSelect={handleEmployeeSelect}
+                        scheduleDetails={scheduleDetails}
+                    />
+                )}
             </Container>
+
+            {/* Employee Recommendation Panel - only for large screens */}
+            {isLargeScreen && (
+                <EmployeeRecommendationPanel
+                    isOpen={isPanelOpen}
+                    onClose={handlePanelClose}
+                    selectedPosition={selectedCell}
+                    onEmployeeSelect={handleEmployeeSelect}
+                    scheduleDetails={scheduleDetails}
+                />
+            )}
+        </div>
     );
 };
 

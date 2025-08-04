@@ -16,6 +16,8 @@ import { getContrastTextColor, isDarkTheme } from 'shared/lib/utils/colorUtils';
 import { useSelector } from "react-redux";
 import { formatEmployeeName as formatEmployeeNameUtil } from 'shared/lib/utils/scheduleUtils'
 import { useShiftColor } from 'shared/hooks/useShiftColor';
+import EmployeeRecommendationPanel from '../panels/EmployeeRecommendationPanel';
+import EmployeeSelectionModal from '../modals/EmployeeSelectionModal';
 import './ScheduleEditor.css';
 
 
@@ -39,6 +41,9 @@ const ScheduleEditor = ({
     const { currentTheme } = useShiftColor();
     const isDark = isDarkTheme();
     const {systemSettings} = useSelector(state => state.settings);
+    const [selectedPosition, setSelectedPosition] = useState(null);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
 
     // Используем наш хук для управления цветами
     const {
