@@ -1,4 +1,4 @@
-/* frontend/src/features/admin-schedule-management/ui/modals/EmployeeSelectionModal.css */
+/* frontend/src/features/admin-schedule-management/ui/modals/EmployeeRecommendationModal.css */
 
 .employee-recommendations {
     height: 100%;
@@ -138,7 +138,7 @@
 /* Tab content */
 .employee-recommendations .tab-content {
     padding: var(--space-4) var(--space-5);
-    max-height: 400px;
+    /*max-height: 400px;*/
     overflow-y: auto;
 }
 
@@ -274,10 +274,10 @@
 }
 
 /* Loading state */
-.employee-recommendations .loading-container {
-    text-align: center;
-    padding: var(--space-8) var(--space-4);
-}
+/*.employee-recommendations .loading-container {*/
+/*    text-align: center;*/
+/*    padding: var(--space-8) var(--space-4);*/
+/*}*/
 
 /* Footer */
 .employee-recommendations .modal-footer {

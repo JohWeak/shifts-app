@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 import { formatEmployeeName as formatEmployeeNameUtil } from 'shared/lib/utils/scheduleUtils'
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import EmployeeRecommendationPanel from '../panels/EmployeeRecommendationPanel';
-import EmployeeSelectionModal from '../modals/EmployeeSelectionModal';
+import EmployeeRecommendationModal from '../modals/EmployeeRecommendationModal';
 import './ScheduleEditor.css';
 
 

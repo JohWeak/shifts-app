@@ -8,7 +8,7 @@ import ScheduleList from './ui/schedule-list/ScheduleList';
 import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
 import GenerateScheduleModal from './ui/modals/GenerateScheduleModal';
 import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
-import EmployeeSelectionModal from './ui/modals/EmployeeSelectionModal';
+import EmployeeRecommendationModal from './ui/modals/EmployeeRecommendationModal';
 import EmployeeRecommendationPanel from './ui/panels/EmployeeRecommendationPanel';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useScheduleActions } from './model/hooks/useScheduleActions';
@@ -298,7 +298,7 @@ const ScheduleManagement = () => {
 
                 {/* Employee Selection Modal - only for small screens */}
                 {!isLargeScreen && (
-                    <EmployeeSelectionModal
+                    <EmployeeRecommendationModal
                         show={showEmployeeModal}
                         onHide={() => {
                             setShowEmployeeModal(false);

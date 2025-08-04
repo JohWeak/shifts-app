@@ -2,10 +2,12 @@
 
 .admin-layout {
     min-height: 100vh;
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-gray-100);
     font-family: var(--bs-body-font-family), serif;
 }
-
+[data-theme="dark"] .admin-layout {
+    background-color: var(--bs-black);
+}
 
 /* TOP NAVBAR */
 .admin-layout .admin-navbar {
@@ -66,12 +68,22 @@
     font-size: 1.4rem;
 }
 
-
-
 /* MAIN CONTAINER */
 .admin-main-container {
     display: flex;
     min-height: calc(100vh - var(--app-navbar-height));
+
+
+}
+.admin-layout .admin-main-content {
+    padding: 1rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.admin-layout .admin-main-content .card {
+    border-radius: calc(var(--radius-lg) - 0px);
 }
 
 /* ======================================================== */
@@ -151,14 +163,7 @@
     padding: 0 0.25rem;
 
 }
-/*.admin-layout .admin-sidebar-desktop.compact .admin-nav .nav-item:first-of-type {*/
-/*    margin-bottom: 2.5rem;*/
-/*    border-top: 1px solid var(--bs-border-color);*/
-/*    border-bottom: 1px solid var(--bs-border-color);*/
-/*}*/
-.admin-layout .admin-sidebar-desktop.compact .admin-nav .nav-item {
-    /*border-top: 1px solid var(--bs-border-color);*/
-}
+
 
 
 [dir="rtl"] .admin-layout .admin-nav {
@@ -242,31 +247,6 @@
     font-size: 0.75rem;
 }
 
-/* Стили при наведении с повышенной специфичностью */
-
-/* Общий эффект сдвига */
-/*.admin-layout .admin-nav .admin-nav-link:hover {*/
-/*    transform: translateX(4px);*/
-/*    color: var(--bs-primary);*/
-/*}*/
-
-/*!* Фон при наведении в СВЕТЛОЙ теме *!*/
-/*[data-theme="light"] .admin-layout .admin-nav .admin-nav-link:hover {*/
-/*    background-color: var(--bs-gray-200);*/
-/*}*/
-
-/*!* Фон при наведении в ТЕМНОЙ теме *!*/
-/*[data-theme="dark"] .admin-layout .admin-nav .admin-nav-link:hover {*/
-/*    background-color: var(--bs-gray-800);*/
-/*}*/
-
-/*!* 4. Стили для активной ссылки. *!*/
-/*.admin-layout .admin-nav .admin-nav-link.active,*/
-/*.admin-layout .admin-nav .admin-nav-link.active:hover {*/
-/*    background-color: var(--bs-primary);*/
-/*    color: var(--bs-white);*/
-/*    transform: none;*/
-/*}*/
 /* Hover Effects */
 .admin-layout .admin-sidebar-desktop.compact .admin-nav-link:hover {
     transform: translate(-1px); /* No transform in compact mode */
@@ -340,13 +320,7 @@
     background-color: var(--bs-black);
 }
 
-.admin-layout .admin-main-content {
-    padding: 1rem;
-}
 
-.admin-layout .admin-main-content .card {
-    border-radius: calc(var(--radius-lg) - 0px);
-}
 
 
 
