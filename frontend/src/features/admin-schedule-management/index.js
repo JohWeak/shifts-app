@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {Container, Spinner, Button} from 'react-bootstrap';
 
 // Widgets, UI, etc.
@@ -10,9 +10,9 @@ import GenerateScheduleModal from './ui/modals/GenerateScheduleModal';
 import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
 import EmployeeRecommendationModal from './ui/modals/EmployeeRecommendationModal';
 import EmployeeRecommendationPanel from './ui/panels/EmployeeRecommendationPanel';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useScheduleActions } from './model/hooks/useScheduleActions';
-import { addNotification } from 'app/model/notificationsSlice';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useScheduleActions} from './model/hooks/useScheduleActions';
+import {addNotification} from 'app/model/notificationsSlice';
 import './index.css';
 
 // Redux Actions
@@ -26,10 +26,9 @@ import {
 } from './model/scheduleSlice';
 
 
-
 // --- Основной компонент ---
 const ScheduleManagement = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     const {
@@ -97,6 +96,21 @@ const ScheduleManagement = () => {
         }
     }, [dataLoading, isPanelOpen]);
 
+    useEffect(() => {
+        console.log('Panel state:', {
+            isPanelOpen,
+            isLargeScreen,
+            selectedCell,
+            showEmployeeModal
+        });
+    }, [isPanelOpen, isLargeScreen, selectedCell, showEmployeeModal]);
+
+
+
+
+
+
+
     // --- Обработчики действий ---
     const onGenerateSubmit = async (settings) => {
         const result = await handleGenerate(settings);
@@ -140,6 +154,9 @@ const ScheduleManagement = () => {
     };
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
+
+        console.log('Cell clicked:', { date, positionId, shiftId });
+
         const cell = {
             date: date,
             positionId: positionId,
@@ -152,9 +169,11 @@ const ScheduleManagement = () => {
 
         // Open panel on large screens, modal on small screens
         if (isLargeScreen) {
+            console.log('Opening panel');
             setIsPanelOpen(true);
             setShowEmployeeModal(false);
         } else {
+            console.log('Opening modal');
             setShowEmployeeModal(true);
             setIsPanelOpen(false);
         }
@@ -225,91 +244,87 @@ const ScheduleManagement = () => {
     const scheduleExists = !!selectedScheduleId;
 
     return (
-        <div className={`schedule-management-wrapper ${isPanelOpen ? 'panel-open' : ''}`}>
-            <Container
-                fluid
-                className="p-1 admin-schedule-management-container"
-                style={{
-                    width: isPanelOpen && isLargeScreen ? '70%' : '100%',
-                    transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-            >
-                <PageHeader
-                    icon="calendar-week"
-                    title={t('schedule.title')}
-                    subtitle={t('schedule.subtitle')}
-                >
-                    <Button
-                        variant="primary"
-                        onClick={() => setShowGenerateModal(true)}
-                        disabled={isLoading}
-                        className="d-flex align-items-center"
+        <div className={`schedule-management-wrapper ${isPanelOpen && isLargeScreen ? 'panel-open' : ''}`}>
+            <div className="schedule-management-content">
+                <Container fluid className="p-1 admin-schedule-management-container">
+                    <PageHeader
+                        icon="calendar-week"
+                        title={t('schedule.title')}
+                        subtitle={t('schedule.subtitle')}
                     >
-                        {isLoading ? (
-                            <Spinner size="sm" className="me-2" />
-                        ) : (
-                            <i className="bi bi-plus-circle me-2"></i>
-                        )}
-                        <span>{t('schedule.generateSchedule')}</span>
-                    </Button>
-                </PageHeader>
+                        <Button
+                            variant="primary"
+                            onClick={() => setShowGenerateModal(true)}
+                            disabled={isLoading}
+                            className="d-flex align-items-center"
+                        >
+                            {isLoading ? (
+                                <Spinner size="sm" className="me-2"/>
+                            ) : (
+                                <i className="bi bi-plus-circle me-2"></i>
+                            )}
+                            <span>{t('schedule.generateSchedule')}</span>
+                        </Button>
+                    </PageHeader>
 
-                {/* Main content */}
-                {activeTab === 'view' && selectedScheduleId ? (
-                    <>
-                        {/* Детали расписания */}
-                        {dataLoading === 'pending' ? (
+                    {/* Main content */}
+                    {activeTab === 'view' && selectedScheduleId ? (
+                        <>
+                            {/* Детали расписания */}
+                            {dataLoading === 'pending' ? (
+                                <div className="text-center p-5">
+                                    <Spinner animation="border"/>
+                                </div>
+                            ) : (
+                                <ScheduleDetails onCellClick={handleCellClick}/>
+                            )}
+                        </>
+                    ) : (
+                        /* Список расписаний */
+                        dataLoading === 'pending' ? (
                             <div className="text-center p-5">
-                                <Spinner animation="border" />
+                                <Spinner animation="border"/>
                             </div>
                         ) : (
-                            <ScheduleDetails onCellClick={handleCellClick} />
-                        )}
-                    </>
-                ) : (
-                    /* Список расписаний */
-                    dataLoading === 'pending' ? (
-                        <div className="text-center p-5">
-                            <Spinner animation="border" />
-                        </div>
-                    ) : (
-                        <ScheduleList
-                            schedules={schedules}
-                            onViewDetails={handleViewDetails}
-                            onScheduleDeleted={onScheduleDeleted}
-                        />
-                    )
-                )}
+                            <ScheduleList
+                                schedules={schedules}
+                                onViewDetails={handleViewDetails}
+                                onScheduleDeleted={onScheduleDeleted}
+                            />
+                        )
+                    )}
 
-                {/* Modals */}
-                <GenerateScheduleModal
-                    show={showGenerateModal}
-                    onHide={() => setShowGenerateModal(false)}
-                    onGenerate={onGenerateSubmit}
-                    generating={actionsLoading}
-                />
-
-                <CompareAlgorithmsModal
-                    show={showComparisonModal}
-                    onHide={() => setShowComparisonModal(false)}
-                    results={comparisonResults}
-                    onUseAlgorithm={() => {}}
-                />
-
-                {/* Employee Selection Modal - only for small screens */}
-                {!isLargeScreen && (
-                    <EmployeeRecommendationModal
-                        show={showEmployeeModal}
-                        onHide={() => {
-                            setShowEmployeeModal(false);
-                            setSelectedCell(null);
-                        }}
-                        selectedPosition={selectedCell}
-                        onEmployeeSelect={handleEmployeeSelect}
-                        scheduleDetails={scheduleDetails}
+                    {/* Modals */}
+                    <GenerateScheduleModal
+                        show={showGenerateModal}
+                        onHide={() => setShowGenerateModal(false)}
+                        onGenerate={onGenerateSubmit}
+                        generating={actionsLoading}
                     />
-                )}
-            </Container>
+
+                    <CompareAlgorithmsModal
+                        show={showComparisonModal}
+                        onHide={() => setShowComparisonModal(false)}
+                        results={comparisonResults}
+                        onUseAlgorithm={() => {
+                        }}
+                    />
+
+                    {/* Employee Selection Modal - only for small screens */}
+                    {!isLargeScreen && (
+                        <EmployeeRecommendationModal
+                            show={showEmployeeModal}
+                            onHide={() => {
+                                setShowEmployeeModal(false);
+                                setSelectedCell(null);
+                            }}
+                            selectedPosition={selectedCell}
+                            onEmployeeSelect={handleEmployeeSelect}
+                            scheduleDetails={scheduleDetails}
+                        />
+                    )}
+                </Container>
+            </div>
 
             {/* Employee Recommendation Panel - only for large screens */}
             {isLargeScreen && (

@@ -44,10 +44,8 @@ const EmployeeRecommendationPanel = ({
                 newWidthPercent = Math.max(20, Math.min(50, newWidthPercent));
                 setCurrentPanelWidth(newWidthPercent);
 
-                const mainContainer = document.querySelector('.admin-schedule-management-container');
-                if (mainContainer) {
-                    mainContainer.style.width = `${100 - newWidthPercent}%`;
-                }
+                // Update CSS variable for layout
+                document.documentElement.style.setProperty('--panel-width', `${newWidthPercent}%`);
             });
         };
 
@@ -70,6 +68,12 @@ const EmployeeRecommendationPanel = ({
             document.body.style.userSelect = '';
         };
     }, [isResizing, currentPanelWidth]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.documentElement.style.setProperty('--panel-width', `${currentPanelWidth}%`);
+        }
+    }, [isOpen, currentPanelWidth]);
 
     // Keyboard shortcuts
     useEffect(() => {

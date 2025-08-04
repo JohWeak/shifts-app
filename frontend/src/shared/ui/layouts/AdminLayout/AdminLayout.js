@@ -178,7 +178,7 @@ const AdminLayout = () => {
                         <Button
                             className={`sidebar-menu-btn ${isSidebarExpanded ? 'active' : ''}`}
                             onClick={handleToggleClick}
-                            onMouseEnter={handleButtonMouseEnter}
+
                         >
                             <i className="bi bi-list"></i>
                         </Button>

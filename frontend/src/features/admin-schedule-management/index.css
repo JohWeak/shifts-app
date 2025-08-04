@@ -165,8 +165,31 @@
     position: relative;
 }
 
-.schedule-management-wrapper.panel-open {
-    /* Panel will overlay, no need to adjust layout */
+/* Content container that will shrink when panel opens */
+.schedule-management-content {
+    flex: 1;
+    width: 100%;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: auto;
+}
+
+/* When panel is open, content takes remaining space */
+.schedule-management-wrapper.panel-open .schedule-management-content {
+    width: calc(100% - var(--panel-width, 30%));
+}
+
+.admin-schedule-management-container {
+    height: 100%;
+}
+
+
+.admin-schedule-management-container {
+    height: 100%;
+}
+
+/* Ensure tables are responsive when space is reduced */
+.schedule-management-wrapper.panel-open .table-responsive {
+    overflow-x: auto;
 }
 
 .admin-schedule-management-container {
@@ -178,8 +201,6 @@
 .admin-schedule-management-container .modal {
     z-index: 1050;
 }
-
-
 
 /* Add visual indicator for cells with pending changes */
 .schedule-cell.has-pending-change {
@@ -202,6 +223,10 @@
     right: auto;
     left: 4px;
 }
+
+
+
+
 
 @keyframes pulse {
     0%, 100% {
