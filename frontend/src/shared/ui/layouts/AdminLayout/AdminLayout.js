@@ -81,7 +81,7 @@ const AdminLayout = () => {
             label: t('navigation.schedules'),
             icon: 'calendar-week',
             path: '/admin/schedules',
-            badge: 'New'
+            badge: t('common.new')
         },
         {
             key: 'algorithms',
@@ -156,7 +156,7 @@ const AdminLayout = () => {
                         </span>
                         {item.badge && (
                             <Badge
-                                bg="primary"
+                                bg="danger"
                                 className={isCompact && !isSidebarExpanded ? 'compact-badge' : ''}
                             >
                                 {item.badge}
@@ -176,7 +176,7 @@ const AdminLayout = () => {
                     <div className="d-flex align-items-center">
                         {/* Sidebar Toggle Button - Now always visible */}
                         <Button
-                            className={`me-3 sidebar-menu-btn ${isSidebarExpanded ? 'active' : ''}`}
+                            className={`sidebar-menu-btn ${isSidebarExpanded ? 'active' : ''}`}
                             onClick={handleToggleClick}
                             onMouseEnter={handleButtonMouseEnter}
                         >
@@ -253,7 +253,7 @@ const AdminLayout = () => {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="admin-content-area">
+                <div className={`admin-content-area ${isSidebarExpanded ? 'under-sidebar' : ''}`}>
                     <main className="admin-main-content">
                         <Outlet/>
                     </main>

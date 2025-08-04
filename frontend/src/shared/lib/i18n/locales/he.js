@@ -134,6 +134,7 @@ export const he = {
         week: 'שבוע',
         weeks: 'שבועות',
         yes: 'כן',
+        new: 'חדש'
     },
     constraints: {
         alreadySubmitted: 'כבר שלחת אילוצים לשבוע זה',
@@ -520,6 +521,7 @@ export const he = {
         settings: 'הגדרות',
         title: 'ניווט',
         workplace: 'סביבת עבודה',
+        requests: 'בקשות',
     },
     notifications: {
         constraintsSaved: 'האילוצים נשמרו בהצלחה',

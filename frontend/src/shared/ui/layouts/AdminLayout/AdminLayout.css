@@ -15,7 +15,7 @@
     box-shadow: var(--bs-box-shadow-sm);
     position: sticky;
     top: 0;
-    z-index: 1030;
+    z-index: 1055;
 }
 
 .admin-layout .brand-logo {
@@ -29,7 +29,11 @@
 .admin-layout .brand-logo:hover {
     color: var(--bs-primary);
 }
-
+.admin-layout .brand-badge {
+    font-size: 0.75rem;
+    align-self: center;
+    transform: translateY(2px);
+}
 
 .admin-layout .user-dropdown-btn {
     background: var(--bs-primary);
@@ -38,28 +42,7 @@
     padding: 0.5rem 1rem;
     transition: all 0.2s ease-in-out;
 }
-.admin-layout .sidebar-menu-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--bs-primary);
-    font-size: 1rem;
-    background-color: transparent;
-}
 
-.admin-layout .sidebar-menu-btn.active {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
-    color: var(--bs-white);
-}
-
-.admin-layout .sidebar-menu-btn:hover {
-    background-color: var(--bs-primary-hover);
-    border-color: var(--bs-primary-hover);
-    color: var(--bs-white);
-}
 
 
 /* USER DROPDOWN */
@@ -98,16 +81,13 @@
 /* 1. Общие стили для самого сайдбара. */
 /* Compact Sidebar (Default) */
 .admin-layout .admin-sidebar-desktop {
-    width: 90px;
+    width: var(--app-colapsed-sidebar-width);
     min-width: 80px;
     background-color: var(--bs-body-bg);
     border-right: 1px solid var(--bs-border-color);
     height: calc(100vh - var(--app-navbar-height));
     position: sticky;
     top: var(--app-navbar-height);
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: width 0.3s ease;
     z-index: 100;
 }
 
@@ -119,10 +99,13 @@
 .admin-layout .admin-sidebar-desktop.expanded {
     width: var(--app-sidebar-width);
     position: fixed;
-    z-index: 1055;
+    z-index: 1040;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
     left: 0;
     top: var(--app-navbar-height);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.3s ease;
 }
 
 [dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded {
@@ -131,6 +114,31 @@
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
+.admin-layout .sidebar-menu-btn {
+    --sidebar-menu-btn-size: 2rem;
+    width: var(--sidebar-menu-btn-size);
+    height: var(--sidebar-menu-btn-size);
+    margin-inline-start: 0;
+    margin-inline-end: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-primary);
+    font-size: 1rem;
+    background-color: transparent;
+}
+
+.admin-layout .sidebar-menu-btn.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.admin-layout .sidebar-menu-btn:hover {
+    background-color: var(--bs-primary-hover);
+    border-color: var(--bs-primary-hover);
+    color: var(--bs-white);
+}
 
 .admin-layout .sidebar-content {
     padding: 1.5rem 0;
@@ -301,8 +309,11 @@
 .admin-layout .admin-content-area {
     flex: 1;
     background-color: var(--bs-gray-100);
-    /*margin-left: 80px; */
+    /*margin-left: 80px;*/
     transition: none; /* No transition since sidebar overlays */
+}
+.admin-layout .admin-content-area.under-sidebar {
+    margin-inline-start: var(--app-colapsed-sidebar-width);
 }
 
 [dir="rtl"] .admin-layout .admin-content-area {

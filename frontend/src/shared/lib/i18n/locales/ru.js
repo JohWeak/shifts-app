@@ -134,6 +134,7 @@ export const ru = {
         week: 'Неделя',
         weeks: 'Недели',
         yes: 'Да',
+        new: 'New',
     },
     constraints: {
         alreadySubmitted: 'Вы уже отправили ограничения на эту неделю',
@@ -520,6 +521,7 @@ export const ru = {
         settings: 'Настройки',
         title: 'Навигация',
         workplace: 'Рабочее место',
+        requests: 'Запросы',
     },
     notifications: {
         constraintsSaved: 'Ограничения успешно сохранены',
