@@ -89,6 +89,7 @@
     position: sticky;
     top: var(--app-navbar-height);
     z-index: 100;
+
 }
 
 [dir="rtl"] .admin-layout .admin-sidebar-desktop {
@@ -107,6 +108,8 @@
     overflow-x: hidden;
     transition: width 0.3s ease;
 }
+
+
 
 [dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded {
     left: auto;
@@ -141,12 +144,23 @@
 }
 
 .admin-layout .sidebar-content {
-    padding: 1.5rem 0;
+    padding: 1.25rem 0;
 }
 
 .admin-layout .admin-nav {
-    padding: 0 0.5rem;
+    padding: 0 0.25rem;
+
 }
+/*.admin-layout .admin-sidebar-desktop.compact .admin-nav .nav-item:first-of-type {*/
+/*    margin-bottom: 2.5rem;*/
+/*    border-top: 1px solid var(--bs-border-color);*/
+/*    border-bottom: 1px solid var(--bs-border-color);*/
+/*}*/
+.admin-layout .admin-sidebar-desktop.compact .admin-nav .nav-item {
+    /*border-top: 1px solid var(--bs-border-color);*/
+}
+
+
 [dir="rtl"] .admin-layout .admin-nav {
     /*padding-left: 0.5rem;*/
     /*padding-right: 0;*/
@@ -163,6 +177,7 @@
     font-weight: 500;
     margin-bottom: 0.25rem;
     transition: all 0.2s ease-in-out;
+
 }
 /* Compact Mode Navigation Items */
 .admin-layout .admin-sidebar-desktop.compact .admin-nav .admin-nav-link {
@@ -174,7 +189,7 @@
 
 
 /* Icon Styles */
-.admin-layout .admin-sidebar-desktop.compact .nav-icon {
+.admin-layout .admin-sidebar-desktop .nav-icon {
     font-size: 1.25rem;
     margin: 0 0 0.25rem 0;
     width: auto;
@@ -182,10 +197,10 @@
 }
 
 .admin-layout .admin-sidebar-desktop.expanded .nav-icon {
-    font-size: 1rem;
+    /*font-size: 1.25rem;*/
     margin: 0;
-    margin-inline-end: 0.75rem;
-    width: 20px;
+    margin-inline-end: 0.5rem;
+    /*width: 20px;*/
 }
 
 /* Label Styles */
@@ -224,7 +239,7 @@
 .admin-layout .admin-sidebar-desktop.expanded .badge {
     position: static;
     margin-inline-start: auto;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 
 /* Стили при наведении с повышенной специфичностью */
