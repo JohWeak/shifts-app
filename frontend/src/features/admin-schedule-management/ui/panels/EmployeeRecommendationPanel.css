@@ -4,7 +4,7 @@
     border-radius: var(--radius-lg);
     position: sticky;
     top: calc(var(--app-navbar-height) + 1.25rem);
-    height: calc(100vh - 100px);
+    height: calc(100vh - 6.5rem);
     background-color: var(--bs-body-bg);
     border-left: 1px solid var(--bs-border-color);
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
@@ -28,10 +28,10 @@
 /* Resize Handle */
 .recommendation-panel .resize-handle {
     position: absolute;
-    top: 0.5rem;
-    left: -4px;
-    width: 4px;
-    height: 100%;
+    top: 0.75rem;
+    left: -0.25rem;
+    width: 0.25rem;
+    height: 97%;
     cursor: col-resize;
     background: transparent;
     z-index: 10;
@@ -93,6 +93,43 @@
     opacity: 1;
     color: var(--bs-body-color);
 }
+
+
+/* Tabs customization */
+.employee-recommendations .nav-tabs {
+    border-bottom: 2px solid var(--bs-border-color);
+    padding: 0 var(--space-5);
+    padding-top: var(--space-3);
+}
+
+.employee-recommendations .nav-tabs .nav-link {
+    color: var(--bs-secondary);
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: var(--space-2) var(--space-4);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-base);
+    margin-bottom: -2px;
+
+}
+
+.employee-recommendations .nav-tabs .nav-link:hover {
+    color: var(--bs-primary);
+    border-bottom-color: var(--bs-gray-300);
+}
+
+.employee-recommendations .nav-tabs .nav-link.active {
+    color: var(--bs-primary);
+    background-color: var(--bs-gray-100);
+    border-bottom-color: var(--bs-primary);
+}
+
+.employee-recommendations .nav-tabs .badge {
+
+}
+
+
+
 
 /* Panel Content */
 .recommendation-panel .panel-content {

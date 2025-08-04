@@ -334,10 +334,10 @@ const EmployeeRecommendations = ({
                         eventKey="available"
                         title={
                             <span>
-                                {t('employee.tabs.available')}
-                                <Badge bg="secondary" pill className="ms-2">
+                                <Badge bg="success" pill className="me-2">
                                     {recommendations?.available?.length || 0}
                                 </Badge>
+                                {t('employee.tabs.available')}
                             </span>
                         }
                     >
@@ -348,10 +348,11 @@ const EmployeeRecommendations = ({
                         eventKey="cross_position"
                         title={
                             <span>
-                                {t('employee.tabs.crossPosition')}
-                                <Badge bg="secondary" pill className="ms-2">
+                                <Badge bg="warning" pill className="me-2">
                                     {recommendations?.cross_position?.length || 0}
                                 </Badge>
+                                {t('employee.tabs.crossPosition')}
+
                             </span>
                         }
                     >
@@ -362,10 +363,11 @@ const EmployeeRecommendations = ({
                         eventKey="other_site"
                         title={
                             <span>
-                                {t('employee.tabs.otherSite')}
-                                <Badge bg="secondary" pill className="ms-2">
+                                <Badge bg="info" pill className="me-2">
                                     {recommendations?.other_site?.length || 0}
                                 </Badge>
+                                {t('employee.tabs.otherSite')}
+
                             </span>
                         }
                     >
@@ -376,13 +378,14 @@ const EmployeeRecommendations = ({
                         eventKey="unavailable"
                         title={
                             <span>
-                                {t('employee.tabs.unavailable')}
-                                <Badge bg="secondary" pill className="ms-2">
+                                <Badge bg="danger" pill className="me-2">
                                     {(recommendations?.unavailable_soft?.length || 0) +
                                         (recommendations?.unavailable_hard?.length || 0) +
                                         (recommendations?.unavailable_busy?.length || 0) +
                                         (recommendations?.unavailable_permanent?.length || 0)}
                                 </Badge>
+                                {t('employee.tabs.unavailable')}
+
                             </span>
                         }
                     >
