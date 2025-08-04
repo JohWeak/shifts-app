@@ -131,11 +131,11 @@ const EmployeeRecommendationPanel = ({
                 />
             </div>
 
-            <div className="panel-footer">
-                <small className="text-muted">
-                    ESC - {t('common.close')}
-                </small>
-            </div>
+            {/*<div className="panel-footer">*/}
+            {/*    <small className="text-muted">*/}
+            {/*        ESC - {t('common.close')}*/}
+            {/*    </small>*/}
+            {/*</div>*/}
         </div>
     );
 };

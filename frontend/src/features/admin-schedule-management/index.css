@@ -178,14 +178,6 @@
     width: calc(100% - var(--panel-width, 30%));
 }
 
-.admin-schedule-management-container {
-    height: 100%;
-}
-
-
-.admin-schedule-management-container {
-    height: 100%;
-}
 
 /* Ensure tables are responsive when space is reduced */
 .schedule-management-wrapper.panel-open .table-responsive {
@@ -194,6 +186,7 @@
 
 .admin-schedule-management-container {
     flex: 1;
+    height: 100%;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

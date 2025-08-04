@@ -44,6 +44,26 @@ const EmployeeRecommendations = ({
         }
     }, [isVisible, selectedPosition, scheduleDetails, dispatch]);
 
+    useEffect(() => {
+        console.log('EmployeeRecommendations: fetching recommendations', {
+            isVisible,
+            hasPosition: !!selectedPosition,
+            hasSchedule: !!scheduleDetails?.schedule?.id
+        });
+
+        if (isVisible && selectedPosition && scheduleDetails?.schedule?.id) {
+            dispatch(fetchRecommendations({
+                positionId: selectedPosition.positionId,
+                shiftId: selectedPosition.shiftId,
+                date: selectedPosition.date,
+                scheduleId: scheduleDetails.schedule.id,
+            })).then(action => {
+                console.log('Recommendations fetched:', action.type);
+                // ... остальной код
+            });
+        }
+    }, [isVisible, selectedPosition, scheduleDetails, dispatch]);
+
     // Save active tab to localStorage
     useEffect(() => {
         localStorage.setItem('recommendationActiveTab', activeTab);

@@ -416,11 +416,11 @@
 .employee-recommendations .score-badge {
     background: linear-gradient(135deg, #037df6 0%, #4a91d9 100%);
     color: white;
-    padding: 0.35rem 0.75rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 0.5rem;
     font-weight: 600;
-    font-size: 0.9rem;
-    min-width: 3rem;
+    font-size: 0.75rem;
+    /*min-width: 3rem;*/
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

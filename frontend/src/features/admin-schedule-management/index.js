@@ -90,12 +90,15 @@ const ScheduleManagement = () => {
     // Close panel when saving schedule
     useEffect(() => {
         // Listen for save completion (you might need to add this to your redux state)
-        if (dataLoading === 'succeeded' && isPanelOpen) {
+        //if (dataLoading === 'succeeded' && isPanelOpen) {
             // Optionally close panel after successful save
-            setIsPanelOpen(false);
-        }
+            //setIsPanelOpen(false);
+        //}
     }, [dataLoading, isPanelOpen]);
 
+    useEffect(() => {
+        console.log('scheduleDetails changed, keys:', scheduleDetails ? Object.keys(scheduleDetails) : 'null');
+    }, [scheduleDetails]);
     useEffect(() => {
         console.log('Panel state:', {
             isPanelOpen,
@@ -104,11 +107,6 @@ const ScheduleManagement = () => {
             showEmployeeModal
         });
     }, [isPanelOpen, isLargeScreen, selectedCell, showEmployeeModal]);
-
-
-
-
-
 
 
     // --- Обработчики действий ---
@@ -140,18 +138,15 @@ const ScheduleManagement = () => {
     };
 
     const handleTabChange = (newTab) => {
+        console.log('handleTabChange:', newTab);
         dispatch(setActiveTab(newTab));
         // Close panel when switching tabs
         if (newTab !== 'view') {
+            console.log('Closing panel due to tab change');
             setIsPanelOpen(false);
         }
     };
 
-    const handleCompareAlgorithms = async () => {
-        const result = await dispatch(compareAlgorithms()).unwrap();
-        setComparisonResults(result);
-        setShowComparisonModal(true);
-    };
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
 
@@ -223,17 +218,20 @@ const ScheduleManagement = () => {
     };
 
     const onScheduleDeleted = (deletedId) => {
+        console.log('onScheduleDeleted:', deletedId);
         dispatch(addNotification({
             message: t('schedule.deleteSuccess'),
             variant: 'success'
         }));
         if (selectedScheduleId === deletedId) {
             dispatch(setSelectedScheduleId(null));
+            console.log('Closing panel due to schedule deletion');
             setIsPanelOpen(false);
         }
-
     };
+
     const handlePanelClose = () => {
+        console.log('handlePanelClose called');
         setIsPanelOpen(false);
         setSelectedCell(null);
     };
