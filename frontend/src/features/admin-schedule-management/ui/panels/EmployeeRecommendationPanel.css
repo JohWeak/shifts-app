@@ -105,16 +105,16 @@
 
 }
 
-.employee-recommendations .nav-tabs .nav-link:hover {
-    color: var(--bs-primary);
-    border-bottom-color: var(--bs-gray-300);
-}
+/*.employee-recommendations .nav-tabs .nav-link:hover {*/
+/*    color: var(--bs-primary);*/
+/*    border-bottom-color: var(--bs-gray-300);*/
+/*}*/
 
-.employee-recommendations .nav-tabs .nav-link.active {
-    color: var(--bs-primary);
-    background-color: var(--bs-gray-100);
-    border-bottom-color: var(--bs-primary);
-}
+/*.employee-recommendations .nav-tabs .nav-link.active {*/
+/*    color: var(--bs-primary);*/
+/*    background-color: var(--bs-gray-100);*/
+/*    border-bottom-color: var(--bs-primary);*/
+/*}*/
 [data-theme="dark"] .employee-recommendations .nav-tabs .nav-link.active {
     background-color: var(--bs-gray-800);
 }
@@ -141,18 +141,6 @@
     font-size: 0.875rem;
 }
 
-    /* Panel Footer */
-.recommendation-panel .panel-footer {
-    padding: 0.75rem 1rem;
-    border-top: 1px solid var(--bs-border-color);
-    background-color: var(--bs-gray-100);
-    text-align: center;
-    flex-shrink: 0;
-}
-
-[data-theme="dark"] .recommendation-panel .panel-footer {
-    background-color: var(--bs-gray-900);
-}
 
 /* Dark Theme */
 [data-theme="dark"] .recommendation-panel {

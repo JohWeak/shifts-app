@@ -102,32 +102,113 @@
 }
 
 /* Tabs customization */
+/*.employee-recommendations .nav-tabs {*/
+/*    border-bottom: 2px solid var(--bs-border-color);*/
+/*    padding: 0 var(--space-5);*/
+/*    padding-top: var(--space-3);*/
+/*}*/
+
+/*.employee-recommendations .nav-tabs .nav-link {*/
+/*    color: var(--bs-secondary);*/
+/*    border: none;*/
+/*    border-bottom: 3px solid transparent;*/
+/*    padding: var(--space-2) var(--space-4);*/
+/*    font-weight: var(--font-medium);*/
+/*    transition: all var(--transition-base);*/
+/*    margin-bottom: -2px;*/
+/*}*/
+
+/*.employee-recommendations .nav-tabs .nav-link:hover {*/
+/*    color: var(--bs-primary);*/
+/*    border-bottom-color: var(--bs-gray-300);*/
+/*}*/
+
+/*.employee-recommendations .nav-tabs .nav-link.active {*/
+/*    color: var(--bs-primary);*/
+/*    background-color: transparent;*/
+/*    border-bottom-color: var(--bs-primary);*/
+/*}*/
+
 .employee-recommendations .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
     border-bottom: 2px solid var(--bs-border-color);
-    padding: 0 var(--space-5);
-    padding-top: var(--space-3);
 }
 
+/* Базовый стиль для табов */
+.employee-recommendations .nav-item {
+    flex: 0 0 auto;
+}
+
+/* Контейнер для проверки ширины */
+@container nav-tabs(min-width: 400px) {
+    /* Если достаточно места - табы в одну строку */
+    .employee-recommendations .nav-tabs {
+        flex-wrap: nowrap;
+    }
+}
+
+@container (max-width: 399px) and (min-width: 260px) {
+    /* Средний размер - 2 строки, равная ширина */
+    .employee-recommendations .nav-item {
+        flex: 1 1 calc(50% - 0.25rem);
+    }
+}
+
+@container (max-width: 259px) {
+    /* Маленький размер - каждый таб на всю ширину */
+    .employee-recommendations .nav-item {
+        flex: 1 1 100%;
+    }
+}
+
+/* Стили для самих табов */
 .employee-recommendations .nav-tabs .nav-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    background-color: var(--bs-body-bg);
     color: var(--bs-secondary);
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: var(--space-2) var(--space-4);
-    font-weight: var(--font-medium);
-    transition: all var(--transition-base);
-    margin-bottom: -2px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .employee-recommendations .nav-tabs .nav-link:hover {
+    background-color: var(--bs-gray-100);
     color: var(--bs-primary);
-    border-bottom-color: var(--bs-gray-300);
+    border-color: var(--bs-primary);
 }
 
 .employee-recommendations .nav-tabs .nav-link.active {
-    color: var(--bs-primary);
-    background-color: transparent;
-    border-bottom-color: var(--bs-primary);
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+    border-color: var(--bs-primary);
 }
+
+[data-theme="dark"] .employee-recommendations .nav-tabs .nav-link {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .employee-recommendations .nav-tabs .nav-link:hover {
+    background-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .employee-recommendations .nav-tabs .nav-link.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+
 
 .employee-recommendations .nav-tabs .badge {
     font-size: var(--text-xs);
@@ -490,9 +571,9 @@
         gap: var(--space-2);
     }
 
-    .employee-recommendations .nav-tabs {
-        padding: 0 var(--space-3);
-    }
+    /*.employee-recommendations .nav-tabs {*/
+    /*    padding: 0 var(--space-3);*/
+    /*}*/
 
     .employee-recommendations .tab-content {
         padding: var(--space-3);
