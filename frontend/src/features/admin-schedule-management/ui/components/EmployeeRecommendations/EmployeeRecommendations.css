@@ -164,35 +164,7 @@
     flex: 0 0 auto;
 }
 
-/* Контейнер для проверки ширины */
-@container nav-tabs(min-width: 600px) {
-    /* Если достаточно места - табы в одну строку */
-    .employee-recommendations .nav-tabs {
-        flex-wrap: nowrap;
-    }
-}
-@container (max-width: 599px) {
-    .employee-recommendations .nav-tabs .nav-link {
-        justify-content: start;
-    }
-}
-@container (max-width: 599px) and (min-width: 359px) {
-    /* Средний размер - 2 строки, равная ширина */
-    .employee-recommendations .nav-item {
-        flex: 1 1 calc(50% - 0.25rem);
-    }
 
-}
-
-@container (max-width: 360px) {
-    /* Маленький размер - каждый таб на всю ширину */
-    .employee-recommendations .nav-item {
-        flex: 1 1 100%;
-    }
-    .employee-recommendations .nav-tabs .nav-link{
-        justify-content: start;
-    }
-}
 
 
 /* Tab content */
@@ -532,6 +504,37 @@
     color: var(--bs-gray-300);
 }
 
+
+/* Контейнер для проверки ширины */
+@container nav-tabs(min-width: 600px) {
+    /* Если достаточно места - табы в одну строку */
+    .employee-recommendations .employee-list,
+    .employee-recommendations .nav-tabs {
+        flex-wrap: nowrap;
+    }
+}
+@container (max-width: 599px) {
+    .employee-recommendations .nav-tabs .nav-link {
+        justify-content: start;
+    }
+}
+@container (max-width: 599px) and (min-width: 359px) {
+    /* Средний размер - 2 строки, равная ширина */
+    .employee-recommendations .nav-item {
+        flex: 1 1 calc(50% - 0.25rem);
+    }
+
+}
+
+@container (max-width: 360px) {
+    /* Маленький размер - каждый таб на всю ширину */
+    .employee-recommendations .nav-item {
+        flex: 1 1 100%;
+    }
+    .employee-recommendations .nav-tabs .nav-link{
+        justify-content: start;
+    }
+}
 
 /* Responsive */
 @media (max-width: 768px) {

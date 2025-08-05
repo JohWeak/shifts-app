@@ -90,16 +90,25 @@ const ScheduleManagement = () => {
 
     // Close panel if no editing
     useEffect(() => {
-        // Закрываем панель когда:
-        // 1. Завершилось сохранение (dataLoading изменился на 'succeeded')
-        // 2. Больше нет редактируемых позиций
-        // 3. Сменилась вкладка
-        if (!isInEditMode && isPanelOpen) {
-            console.log('Closing panel: no positions in edit mode');
+        // Получаем количество позиций в режиме редактирования
+        const editingPositionsCount = Object.values(editingPositions || {}).filter(Boolean).length;
+
+        // Если нет позиций в режиме редактирования и панель открыта - закрываем
+        if (editingPositionsCount === 0 && isPanelOpen) {
+            console.log('No positions in edit mode, closing panel');
             setIsPanelOpen(false);
             setSelectedCell(null);
         }
-    }, [isInEditMode, isPanelOpen]);
+    }, [editingPositions, isPanelOpen]);
+
+    useEffect(() => {
+        if (activeTab !== 'view' && isPanelOpen) {
+            console.log('Tab changed from view, closing panel');
+            setIsPanelOpen(false);
+            setSelectedCell(null);
+        }
+    }, [activeTab, isPanelOpen]);
+
 
     useEffect(() => {
         console.log('scheduleDetails changed, keys:', scheduleDetails ? Object.keys(scheduleDetails) : 'null');
@@ -134,23 +143,16 @@ const ScheduleManagement = () => {
         }
     };
 
-    const handleTabChange = (newTab) => {
-        dispatch(setActiveTab(newTab));
-        // Закрываем панель при смене вкладки
-        if (isPanelOpen) {
-            setIsPanelOpen(false);
-            setSelectedCell(null);
-        }
-    };
 
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
 
-        const isPositionInEditMode = editingPositions && editingPositions[positionId];
-        if (!isPositionInEditMode) {
-            console.log('Position not in edit mode, ignoring click');
+        if (!editingPositions || !editingPositions[positionId]) {
+            console.log('Position', positionId, 'not in edit mode, ignoring cell click');
             return;
         }
+
+        console.log('Cell clicked in edit mode:', { date, positionId, shiftId });
 
         const cell = {
             date: date,
@@ -162,13 +164,10 @@ const ScheduleManagement = () => {
 
         setSelectedCell(cell);
 
-        // Open panel on large screens, modal on small screens
         if (isLargeScreen) {
-            console.log('Opening panel');
             setIsPanelOpen(true);
             setShowEmployeeModal(false);
         } else {
-            console.log('Opening modal');
             setShowEmployeeModal(true);
             setIsPanelOpen(false);
         }
@@ -176,12 +175,12 @@ const ScheduleManagement = () => {
 
     // Listening for a successful save from redux
     useEffect(() => {
-        if (dataLoading === 'succeeded' && isPanelOpen) {
-            console.log('Save successful, closing panel');
-            setIsPanelOpen(false);
-            setSelectedCell(null);
+        // The panel will close automatically when editingPositions is empty.
+        if (dataLoading === 'succeeded') {
+            console.log('Save completed');
+
         }
-    }, [dataLoading, isPanelOpen]);
+    }, [dataLoading]);
 
     const handleEmployeeSelect = async (employeeId, employeeName) => {
         if (!selectedCell) return;
@@ -244,7 +243,13 @@ const ScheduleManagement = () => {
         setIsPanelOpen(false);
         setSelectedCell(null);
     };
-
+    useEffect(() => {
+        return () => {
+            // При уходе со страницы закрываем панель
+            setIsPanelOpen(false);
+            setSelectedCell(null);
+        };
+    }, []);
 
     // --- Рендеринг ---
     const isLoading = dataLoading === 'pending' || actionsLoading;
