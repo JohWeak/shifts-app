@@ -2,22 +2,33 @@
 .admin-permanent-requests .requests-table {
     /*font-size: 0.875rem;*/
 }
-.admin-permanent-requests .card{
+
+.admin-permanent-requests .card {
     border: none;
 }
-.admin-permanent-requests .card-header{
-    border-color: transparent;
-    border-top-left-radius: var(--radius-md)!important;
-    border-top-right-radius: var(--radius-md)!important;
-    border-left: 4px solid transparent;
-    border-right:  4px solid transparent;
+
+.admin-permanent-requests {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
 }
+
+.admin-permanent-requests .card-header {
+    border-color: transparent;
+    border-top-left-radius: var(--radius-md) !important;
+    border-top-right-radius: var(--radius-md) !important;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+}
+
 .admin-permanent-requests .card-header.bg-warning {
     border-left-color: var(--bs-warning);
 }
+
 .admin-permanent-requests .card-header.bg-success {
     border-left-color: var(--bs-success);
 }
+
 .admin-permanent-requests .card-header.bg-secondary {
     border-left-color: var(--bs-secondary);
 }
@@ -26,10 +37,12 @@
     border-left-color: transparent;
     border-right-color: var(--bs-warning);
 }
+
 [dir="rtl"] .admin-permanent-requests .card-header.bg-success {
     border-left-color: transparent;
     border-right-color: var(--bs-success);
 }
+
 [dir="rtl"] .admin-permanent-requests .card-header.bg-secondary {
     border-left-color: transparent;
     border-right-color: var(--bs-secondary);
@@ -45,9 +58,10 @@
 }
 
 .admin-permanent-requests .request-row:hover {
-    background-color: var(--bs-gray-100)!important;
+    background-color: var(--bs-gray-100) !important;
     border-left-color: var(--bs-primary);
 }
+
 [dir="rtl"] .admin-permanent-requests .request-row:hover {
     border-left-color: transparent;
     border-right-color: var(--bs-primary);

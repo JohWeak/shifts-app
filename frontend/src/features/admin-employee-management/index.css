@@ -1,9 +1,12 @@
 /*!* frontend/src/features/admin-employee-management/index.css *!*/
 
-/*.employee-management {*/
-/*    min-height: 100vh;*/
-/*    background-color: var(--bs-body-bg);*/
-/*}*/
+.employee-management {
+    min-height: 100vh;
+    /*background-color: var(--bs-body-bg);*/
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 /*!* Filters card styles *!*/
 /*.employee-filters-card {*/

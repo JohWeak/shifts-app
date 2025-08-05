@@ -1,4 +1,4 @@
-// backend/src/controllers/employee-recommendation.controller.js
+// backend/src/controllers/employee-recommendations.controller.js
 const EmployeeRecommendationService = require('../../services/employee-recommendation.service');
 const db = require('../../models');
 const recommendationService = new EmployeeRecommendationService(db);

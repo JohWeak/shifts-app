@@ -1,4 +1,4 @@
-// frontend/src/features/admin-schedule-management/components/GenerateScheduleModal.js
+// frontend/src/features/admin-schedule-management/ui/generate-schedule/GenerateScheduleModal.js
 import React, {useState, useEffect, useRef, useMemo} from 'react';
 import {Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';

@@ -1,8 +1,8 @@
-// frontend/src/features/admin-schedule-management/ui/components/EmployeeRecommendations/EmployeeRecommendations.js
+// frontend/src/features/admin-schedule-management/ui/employee-recommendations/EmployeeRecommendations.js
 import React, {useState, useEffect} from 'react';
 import {ListGroup, Badge, Alert, Form, Tab, Tabs} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchRecommendations} from '../../../model/scheduleSlice';
+import {fetchRecommendations} from '../../model/scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import './EmployeeRecommendations.css';

@@ -1,11 +1,11 @@
-// frontend/src/features/admin-schedule-management/ui/panels/EmployeeRecommendationPanel.js
+// frontend/src/features/admin-schedule-management/ui/employee-recommendations/EmployeeRecommendationsPanel.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import EmployeeRecommendations from '../components/EmployeeRecommendations/EmployeeRecommendations';
-import './EmployeeRecommendationPanel.css';
+import EmployeeRecommendations from './EmployeeRecommendations';
+import './EmployeeRecommendationsPanel.css';
 
-const EmployeeRecommendationPanel = ({
+const EmployeeRecommendationsPanel = ({
                                          isOpen,
                                          onClose,
                                          selectedPosition,
@@ -134,4 +134,4 @@ const EmployeeRecommendationPanel = ({
     );
 };
 
-export default EmployeeRecommendationPanel;
+export default EmployeeRecommendationsPanel;

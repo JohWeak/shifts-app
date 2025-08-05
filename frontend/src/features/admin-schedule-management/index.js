@@ -1,3 +1,4 @@
+//frontend/src/features/admin-schedule-management/index.js
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Spinner, Button} from 'react-bootstrap';
@@ -6,10 +7,10 @@ import {Container, Spinner, Button} from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import ScheduleList from './ui/schedule-list/ScheduleList';
 import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
-import GenerateScheduleModal from './ui/modals/GenerateScheduleModal';
-import CompareAlgorithmsModal from './ui/modals/CompareAlgorithmsModal';
-import EmployeeRecommendationModal from './ui/modals/EmployeeRecommendationModal';
-import EmployeeRecommendationPanel from './ui/panels/EmployeeRecommendationPanel';
+import GenerateScheduleModal from './ui/generate-schedule/GenerateScheduleModal';
+import CompareAlgorithmsModal from './ui/generate-schedule/CompareAlgorithmsModal';
+import EmployeeRecommendationsModal from './ui/employee-recommendations/EmployeeRecommendationsModal';
+import EmployeeRecommendationsPanel from './ui/employee-recommendations/EmployeeRecommendationsPanel';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useScheduleActions} from './model/hooks/useScheduleActions';
 import {addNotification} from 'app/model/notificationsSlice';
@@ -58,10 +59,9 @@ const ScheduleManagement = () => {
     const [selectedCell, setSelectedCell] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
-    const isInEditMode = Object.keys(editingPositions || {}).length > 0;
 
 
-    // --- Эффекты ---
+
     useEffect(() => {
         dispatch(fetchSchedules());
     }, [dispatch]);
@@ -115,7 +115,7 @@ const ScheduleManagement = () => {
     }, [scheduleDetails]);
 
 
-    // --- Обработчики действий ---
+
     const onGenerateSubmit = async (settings) => {
         const result = await handleGenerate(settings);
 
@@ -142,8 +142,6 @@ const ScheduleManagement = () => {
             dispatch(fetchScheduleDetails(scheduleId));
         }
     };
-
-
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
 
@@ -189,7 +187,7 @@ const ScheduleManagement = () => {
             ? `replace-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`
             : `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employeeId}`;
 
-        // Если это замена, сначала удаляем старого сотрудника
+        // If this is a replacement, we remove the old employee first.
         if (selectedCell.employeeIdToReplace) {
             dispatch(addPendingChange({
                 key: `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`,
@@ -204,7 +202,7 @@ const ScheduleManagement = () => {
             }));
         }
 
-        // Затем добавляем нового
+        // Then add a new one
         dispatch(addPendingChange({
             key,
             change: {
@@ -253,7 +251,6 @@ const ScheduleManagement = () => {
 
     // --- Рендеринг ---
     const isLoading = dataLoading === 'pending' || actionsLoading;
-    const scheduleExists = !!selectedScheduleId;
 
     return (
         <div className={`schedule-management-wrapper ${isPanelOpen && isLargeScreen ? 'panel-open' : ''}`}>
@@ -282,7 +279,7 @@ const ScheduleManagement = () => {
                     {/* Main content */}
                     {activeTab === 'view' && selectedScheduleId ? (
                         <>
-                            {/* Детали расписания */}
+                            {/* Schedule details */}
                             {dataLoading === 'pending' ? (
                                 <div className="text-center p-5">
                                     <Spinner animation="border"/>
@@ -292,7 +289,7 @@ const ScheduleManagement = () => {
                             )}
                         </>
                     ) : (
-                        /* Список расписаний */
+                        /* Schedule list */
                         dataLoading === 'pending' ? (
                             <div className="text-center p-5">
                                 <Spinner animation="border"/>
@@ -324,7 +321,7 @@ const ScheduleManagement = () => {
 
                     {/* Employee Selection Modal - only for small screens */}
                     {!isLargeScreen && (
-                        <EmployeeRecommendationModal
+                        <EmployeeRecommendationsModal
                             show={showEmployeeModal}
                             onHide={() => {
                                 setShowEmployeeModal(false);
@@ -340,7 +337,7 @@ const ScheduleManagement = () => {
 
             {/* Employee Recommendation Panel - only for large screens */}
             {isLargeScreen && (
-                <EmployeeRecommendationPanel
+                <EmployeeRecommendationsPanel
                     isOpen={isPanelOpen}
                     onClose={handlePanelClose}
                     selectedPosition={selectedCell}

@@ -62,14 +62,14 @@ const ConstraintsSchedule = () => {
 
     const modalConfig = {
         reset: {
-            title: t('constraints.modals.resetTitle'),
-            message: t('constraints.modals.resetMessage'),
+            title: t('constraints.generate-schedule.resetTitle'),
+            message: t('constraints.generate-schedule.resetMessage'),
             confirmText: t('common.reset'),
             variant: 'warning'
         },
         submit: {
-            title: t('constraints.modals.submitTitle'),
-            message: t('constraints.modals.submitMessage'),
+            title: t('constraints.generate-schedule.submitTitle'),
+            message: t('constraints.generate-schedule.submitMessage'),
             confirmText: t('common.submit'),
             variant: 'primary'
         }

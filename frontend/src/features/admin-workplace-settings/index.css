@@ -1,5 +1,11 @@
 /* frontend/src/features/admin-workplace-settings/index.css */
 
+
+.workplace-settings-container{
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
 .nav-tabs-custom {
     border-bottom: none;
 }

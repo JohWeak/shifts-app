@@ -5,6 +5,9 @@
     min-height: 100vh;
     padding: 1.5rem;
     overflow-x: hidden;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 [data-theme="dark"] .admin-dashboard {

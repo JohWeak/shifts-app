@@ -8,7 +8,7 @@ const Reports = () => {
     const { t } = useI18n();
 
     return (
-            <Container fluid className="px-0">
+            <Container fluid className="px-0" style={"max-width: 1400px"}>
                 <PageHeader
                     icon="graph-up-arrow"
                     title={t('reports.analyticsAndReports')}

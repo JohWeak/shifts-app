@@ -1,11 +1,11 @@
-// frontend/src/features/admin-schedule-management/ui/modals/EmployeeRecommendationModal.js
+// frontend/src/features/admin-schedule-management/ui/employee-recommendations/EmployeeRecommendationsModal.js
 import React from 'react';
 import {Modal, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import EmployeeRecommendations from '../components/EmployeeRecommendations/EmployeeRecommendations';
-import './EmployeeRecommendationModal.css';
+import EmployeeRecommendations from './EmployeeRecommendations';
+import './EmployeeRecommendationsModal.css';
 
-const EmployeeRecommendationModal = ({show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails}) => {
+const EmployeeRecommendationsModal = ({show, onHide, selectedPosition, onEmployeeSelect, scheduleDetails}) => {
     const {t} = useI18n();
 
     const getModalTitle = () => {
@@ -45,4 +45,4 @@ const EmployeeRecommendationModal = ({show, onHide, selectedPosition, onEmployee
     );
 };
 
-export default EmployeeRecommendationModal;
+export default EmployeeRecommendationsModal;
