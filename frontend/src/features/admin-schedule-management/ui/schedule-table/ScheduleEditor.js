@@ -41,9 +41,7 @@ const ScheduleEditor = ({
     const { currentTheme } = useShiftColor();
     const isDark = isDarkTheme();
     const {systemSettings} = useSelector(state => state.settings);
-    const [selectedPosition, setSelectedPosition] = useState(null);
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
+
 
     // Используем наш хук для управления цветами
     const {
@@ -104,10 +102,6 @@ const ScheduleEditor = ({
 
 
     // Debug logging
-    console.log('ScheduleEditor - Position:', position);
-    console.log('ScheduleEditor - Schedule Details:', scheduleDetails);
-    console.log('ScheduleEditor - Shifts:', shifts);
-    console.log('ScheduleEditor - Assignments:', assignments);
     console.log('Full scheduleDetails structure:', {
         schedule: scheduleDetails?.schedule,
         positions: scheduleDetails?.positions,
@@ -117,19 +111,19 @@ const ScheduleEditor = ({
     });
     console.log('ScheduleEditor - Employees:', employees);
 
-    // Функция для форматирования имени
+    // Function for formatting a name
     const formatEmployeeName = (employee) => {
-        // 1. Собираем контекст: находим всех сотрудников в текущей позиции
+        // Find all employees in the current position.
         const employeesInPosition = employees.filter(emp =>
             emp.default_position_id === position.pos_id ||
             assignments.some(a => a.emp_id === emp.emp_id && a.position_id === position.pos_id)
         );
 
-        // 2. Вызываем нашу утилиту с нужными опциями
+        // We call the utility with the necessary options.
         return formatEmployeeNameUtil(employee, {
             showFullName: !showFirstNameOnly,
-            checkDuplicates: true, // Включаем проверку на дубликаты
-            contextEmployees: employeesInPosition // Передаем список для проверки
+            checkDuplicates: true,
+            contextEmployees: employeesInPosition
         });
     };
 

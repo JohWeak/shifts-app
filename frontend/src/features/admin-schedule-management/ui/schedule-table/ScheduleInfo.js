@@ -40,7 +40,7 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
     return (
         <div className="schedule-info-wrapper">
 
-            {/* --- Actions bar (NEW STRUCTURE) --- */}
+            {/* --- Actions bar  --- */}
             <div className="schedule-actions-bar">
                 <div className="back-action">
                     <Button
@@ -70,7 +70,6 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
             </div>
             {/* Info bar */}
             <div className="schedule-info-bar">
-                {/* ... ваши info-item ... */}
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-geo-alt"></i>

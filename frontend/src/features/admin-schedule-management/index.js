@@ -58,6 +58,7 @@ const ScheduleManagement = () => {
     const [selectedCell, setSelectedCell] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
+    const isInEditMode = Object.keys(editingPositions || {}).length > 0;
 
 
     // --- Эффекты ---
@@ -87,26 +88,22 @@ const ScheduleManagement = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, [isPanelOpen, showEmployeeModal]);
 
-    // Close panel when saving schedule
+    // Close panel if no editing
     useEffect(() => {
-        // Listen for save completion (you might need to add this to your redux state)
-        //if (dataLoading === 'succeeded' && isPanelOpen) {
-            // Optionally close panel after successful save
-            //setIsPanelOpen(false);
-        //}
-    }, [dataLoading, isPanelOpen]);
+        // Закрываем панель когда:
+        // 1. Завершилось сохранение (dataLoading изменился на 'succeeded')
+        // 2. Больше нет редактируемых позиций
+        // 3. Сменилась вкладка
+        if (!isInEditMode && isPanelOpen) {
+            console.log('Closing panel: no positions in edit mode');
+            setIsPanelOpen(false);
+            setSelectedCell(null);
+        }
+    }, [isInEditMode, isPanelOpen]);
 
     useEffect(() => {
         console.log('scheduleDetails changed, keys:', scheduleDetails ? Object.keys(scheduleDetails) : 'null');
     }, [scheduleDetails]);
-    useEffect(() => {
-        console.log('Panel state:', {
-            isPanelOpen,
-            isLargeScreen,
-            selectedCell,
-            showEmployeeModal
-        });
-    }, [isPanelOpen, isLargeScreen, selectedCell, showEmployeeModal]);
 
 
     // --- Обработчики действий ---
@@ -138,19 +135,22 @@ const ScheduleManagement = () => {
     };
 
     const handleTabChange = (newTab) => {
-        console.log('handleTabChange:', newTab);
         dispatch(setActiveTab(newTab));
-        // Close panel when switching tabs
-        if (newTab !== 'view') {
-            console.log('Closing panel due to tab change');
+        // Закрываем панель при смене вкладки
+        if (isPanelOpen) {
             setIsPanelOpen(false);
+            setSelectedCell(null);
         }
     };
 
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
 
-        console.log('Cell clicked:', { date, positionId, shiftId });
+        const isPositionInEditMode = editingPositions && editingPositions[positionId];
+        if (!isPositionInEditMode) {
+            console.log('Position not in edit mode, ignoring click');
+            return;
+        }
 
         const cell = {
             date: date,
@@ -173,6 +173,15 @@ const ScheduleManagement = () => {
             setIsPanelOpen(false);
         }
     };
+
+    // Listening for a successful save from redux
+    useEffect(() => {
+        if (dataLoading === 'succeeded' && isPanelOpen) {
+            console.log('Save successful, closing panel');
+            setIsPanelOpen(false);
+            setSelectedCell(null);
+        }
+    }, [dataLoading, isPanelOpen]);
 
     const handleEmployeeSelect = async (employeeId, employeeName) => {
         if (!selectedCell) return;
