@@ -305,7 +305,7 @@ const EmployeeRecommendations = ({
     };
 
     return (
-        <div className="employee-recommendations">
+        <div className="employee-recommendations"style={{ containerType: 'inline-size' }}>
             <Form.Group className="search-container">
                 <Form.Control
                     type="text"

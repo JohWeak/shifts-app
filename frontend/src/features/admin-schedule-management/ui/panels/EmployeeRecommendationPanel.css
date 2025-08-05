@@ -7,7 +7,7 @@
     height: calc(100vh - 6.5rem);
     background-color: var(--bs-body-bg);
     border-left: 1px solid var(--bs-border-color);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+    /*box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);*/
     display: flex;
     flex-direction: column;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -93,37 +93,6 @@
     opacity: 1;
     color: var(--bs-body-color);
 }
-
-
-/* Tabs customization */
-.employee-recommendations .nav-tabs {
-
-}
-
-.employee-recommendations .nav-tabs .nav-link {
-
-
-}
-
-/*.employee-recommendations .nav-tabs .nav-link:hover {*/
-/*    color: var(--bs-primary);*/
-/*    border-bottom-color: var(--bs-gray-300);*/
-/*}*/
-
-/*.employee-recommendations .nav-tabs .nav-link.active {*/
-/*    color: var(--bs-primary);*/
-/*    background-color: var(--bs-gray-100);*/
-/*    border-bottom-color: var(--bs-primary);*/
-/*}*/
-[data-theme="dark"] .employee-recommendations .nav-tabs .nav-link.active {
-    background-color: var(--bs-gray-800);
-}
-
-.employee-recommendations .nav-tabs .badge {
-
-}
-
-
 
 
 /* Panel Content */
