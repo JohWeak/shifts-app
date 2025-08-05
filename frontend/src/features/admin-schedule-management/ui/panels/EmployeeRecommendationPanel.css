@@ -97,19 +97,11 @@
 
 /* Tabs customization */
 .employee-recommendations .nav-tabs {
-    border-bottom: 2px solid var(--bs-border-color);
-    padding: 0 var(--space-5);
-    padding-top: var(--space-3);
+
 }
 
 .employee-recommendations .nav-tabs .nav-link {
-    color: var(--bs-secondary);
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: var(--space-2) var(--space-4);
-    font-weight: var(--font-medium);
-    transition: all var(--transition-base);
-    margin-bottom: -2px;
+
 
 }
 
@@ -122,6 +114,9 @@
     color: var(--bs-primary);
     background-color: var(--bs-gray-100);
     border-bottom-color: var(--bs-primary);
+}
+[data-theme="dark"] .employee-recommendations .nav-tabs .nav-link.active {
+    background-color: var(--bs-gray-800);
 }
 
 .employee-recommendations .nav-tabs .badge {

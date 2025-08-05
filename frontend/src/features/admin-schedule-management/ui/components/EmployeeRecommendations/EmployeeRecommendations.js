@@ -345,36 +345,6 @@ const EmployeeRecommendations = ({
                     </Tab>
 
                     <Tab
-                        eventKey="cross_position"
-                        title={
-                            <span>
-                                <Badge bg="warning" pill className="me-2">
-                                    {recommendations?.cross_position?.length || 0}
-                                </Badge>
-                                {t('employee.tabs.crossPosition')}
-
-                            </span>
-                        }
-                    >
-                        {renderEmployeeList(recommendations?.cross_position || [], 'cross_position')}
-                    </Tab>
-
-                    <Tab
-                        eventKey="other_site"
-                        title={
-                            <span>
-                                <Badge bg="info" pill className="me-2">
-                                    {recommendations?.other_site?.length || 0}
-                                </Badge>
-                                {t('employee.tabs.otherSite')}
-
-                            </span>
-                        }
-                    >
-                        {renderEmployeeList(recommendations?.other_site || [], 'other_site')}
-                    </Tab>
-
-                    <Tab
                         eventKey="unavailable"
                         title={
                             <span>
@@ -426,6 +396,37 @@ const EmployeeRecommendations = ({
                             })()}
                         </div>
                     </Tab>
+
+                    <Tab
+                        eventKey="cross_position"
+                        title={
+                            <span>
+                                <Badge bg="warning" pill className="me-2">
+                                    {recommendations?.cross_position?.length || 0}
+                                </Badge>
+                                {t('employee.tabs.crossPosition')}
+
+                            </span>
+                        }
+                    >
+                        {renderEmployeeList(recommendations?.cross_position || [], 'cross_position')}
+                    </Tab>
+
+                    <Tab
+                        eventKey="other_site"
+                        title={
+                            <span>
+                                <Badge bg="info" pill className="me-2">
+                                    {recommendations?.other_site?.length || 0}
+                                </Badge>
+                                {t('employee.tabs.otherSite')}
+
+                            </span>
+                        }
+                    >
+                        {renderEmployeeList(recommendations?.other_site || [], 'other_site')}
+                    </Tab>
+
                 </Tabs>
             )}
         </div>
