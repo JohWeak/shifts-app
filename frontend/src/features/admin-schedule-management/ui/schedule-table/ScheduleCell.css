@@ -54,9 +54,10 @@
 
 /* Employee Item */
 .schedule-cell .employee-item {
-    padding: var(--space-1) var(--space-2);
+    padding: 0;
     border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
+    border: none;
 }
 
 .schedule-cell .employee-item:hover {
@@ -71,6 +72,7 @@
 .schedule-cell .employee-name {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
+    margin: 0.25rem
 }
 
 .schedule-cell .employee-name.employee-clickable {
@@ -90,31 +92,32 @@
 
 /* Remove Button  */
 .schedule-cell .remove-btn {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 12px;
-    line-height: 1;
+    position: relative;
+    right: 0;
+    top: 0;
+    padding: 0;
+    margin:0;
+    height: 100%;
+    border-radius: 10%;
+    font-size: 1rem;
+    line-height: 1.8;
+    width: 1rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
+    align-self: start;
     z-index: 10;
-    opacity: 0.7;
-    transition: all var(--transition-fast);
+    justify-content: center;
+    opacity: 0.8;
+    transition: width var(--transition-fast);
 }
-
+[dir="rtl"] .schedule-cell .remove-btn{
+    border-radius: 10%;
+}
 .schedule-cell .remove-btn:hover {
     opacity: 1;
-    transform: scale(1.1);
+    width: 1.375rem;
 }
 
-/* Маленькая кнопка для pending assignments */
-.schedule-cell .pending-assignment .remove-btn {
-    width: 18px;
-    height: 18px;
-    font-size: 10px;
-}
 
 /* Add More Indicator */
 .schedule-cell .add-more-indicator {
@@ -149,12 +152,12 @@
 .schedule-cell.has-pending-change::after {
     content: '';
     position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
+    top: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
     background-color: var(--bs-success);
-    border-radius: 50%;
+    border-radius: 40%;
     animation: pulse 2s infinite;
     z-index: 1;
 }
@@ -164,39 +167,39 @@
     left: 4px;
 }
 
-.pending-assignment {
-    position: relative;
-    padding-left: 20px;
-}
-
-.pending-assignment::before {
-    content: '+';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--bs-success);
-    font-weight: bold;
-    font-size: 1.2em;
-}
 
 /* Сотрудник в процессе замены */
 .employee-item.being-replaced {
     background-color: var(--bs-warning-bg-subtle);
-    padding: 2px 4px;
+    /*padding: 2px 4px;*/
     border-radius: 3px;
-    border: 1px solid var(--bs-warning);
+    border: 1px dashed var(--bs-warning);
+    border-right: none;
 }
+[dir="rtl"] .employee-item.being-replaced {
+    border-right: 1px dashed var(--bs-warning);
+    border-left: 0;
+}
+
 .employee-item.being-replaced:hover {
     background-color: var(--bs-warning-bg-subtle);
 }
+[data-theme="dark"] .employee-item.being-replaced .employee-name{
+    color: #1a1a2e;
+}
+[data-theme="dark"] .employee-item.being-replaced:hover .employee-name{
+    color: var(--bs-primary-dark);
+}
 
+[data-theme="dark"] .employee-item.being-replaced:hover {
+    background-color: var(--bs-warning-bg-subtle);
+
+}
 
 [data-theme="dark"] .schedule-cell {
     border-color: var(--bs-gray-700);
 }
 
-/* Dark theme state colors with better contrast */
 [data-theme="dark"] .schedule-cell.table-warning {
     background-color: var(--bs-secondary)!important;
     padding-top: var(--space-1);
@@ -229,10 +232,18 @@
         padding: var(--space-1);
         min-height: 60px;
     }
-
-    .schedule-cell .employee-item {
-        padding: 2px var(--space-1);
+    .schedule-cell .remove-btn {
+        position: relative;
+        right: 0;
+        top: 0;
+        padding: 0;
+        height: 10px;
+        width: 10px;
+        border-radius: 30%;
+        font-size: 0.75rem;
+        line-height: 1;
     }
+
 
     .schedule-cell .employee-name {
         font-size: var(--text-xs);

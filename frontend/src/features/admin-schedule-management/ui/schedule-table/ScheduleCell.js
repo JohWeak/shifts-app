@@ -163,11 +163,11 @@ const ScheduleCell = ({
                         {isEditing && (
                             <button
                                 type="button"
-                                className="remove-btn btn btn-sm btn-outline-danger p-0 ms-1"
+                                className="remove-btn btn btn-sm btn-danger"
                                 onClick={(e) => handleRemoveClick(e, employee.emp_id, employee.assignment_id)} // Передаём assignment_id
                                 title="Remove employee"
                             >
-                                ×
+                                <i className="bi bi-x icon-x"></i>
                             </button>
                         )}
                     </div>
@@ -196,7 +196,7 @@ const ScheduleCell = ({
                                 {isEditing && onRemovePendingChange && (
                                     <button
                                         type="button"
-                                        className="remove-btn btn btn-sm btn-outline-danger p-0"
+                                        className="remove-btn btn btn-sm btn-outline-danger"
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
@@ -216,7 +216,7 @@ const ScheduleCell = ({
                                         title="Cancel assignment"
 
                                     >
-                                        x
+                                        <i className="bi bi-x icon-x"></i>
                                     </button>
                                 )}
                             </div>
