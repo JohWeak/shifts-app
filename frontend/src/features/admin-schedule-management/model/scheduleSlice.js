@@ -135,6 +135,7 @@ export const fetchRecommendations = createAsyncThunk(
     }
 );
 
+
 // Загрузка рабочих мест
 export const fetchWorkSites = createAsyncThunk(
     'schedule/fetchWorkSites',
@@ -158,7 +159,6 @@ export const fetchWorkSites = createAsyncThunk(
 
 
 
-// --- Слайс (Slice) ---
 
 
 const scheduleSlice = createSlice({

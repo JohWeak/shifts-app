@@ -21,7 +21,9 @@ const EmployeeRecommendations = ({
     const [activeTab, setActiveTab] = useState(() =>
         localStorage.getItem('recommendationActiveTab') || 'available'
     );
+    const [processedRecommendations, setProcessedRecommendations] = useState(null);
 
+    // Загружаем базовые рекомендации
     useEffect(() => {
         if (isVisible && selectedPosition && scheduleDetails?.schedule?.id) {
             dispatch(fetchRecommendations({
@@ -29,20 +31,114 @@ const EmployeeRecommendations = ({
                 shiftId: selectedPosition.shiftId,
                 date: selectedPosition.date,
                 scheduleId: scheduleDetails.schedule.id,
-            })).then(action => {
-                if (fetchRecommendations.fulfilled.match(action)) {
-                    const data = action.payload;
-                    if (data.available.length === 0 && data.cross_position.length > 0) {
-                        setActiveTab('cross_position');
-                    } else if (data.available.length === 0 && data.cross_position.length === 0) {
-                        setActiveTab('unavailable');
-                    } else {
-                        setActiveTab('available');
+            }));
+        }
+    }, [isVisible, selectedPosition, scheduleDetails, dispatch]);
+
+    // Обрабатываем рекомендации с учетом pendingChanges
+    useEffect(() => {
+        if (!recommendations || !pendingChanges) {
+            setProcessedRecommendations(recommendations);
+            return;
+        }
+
+        // Клонируем рекомендации для обработки
+        const processed = JSON.parse(JSON.stringify(recommendations));
+
+        // Получаем все изменения
+        const changes = Object.values(pendingChanges);
+
+        // Обрабатываем удаления
+        changes.filter(c => c.action === 'remove').forEach(removal => {
+            ['unavailable_busy', 'unavailable_hard', 'unavailable_soft'].forEach(category => {
+                const employeeIndex = processed[category]?.findIndex(
+                    emp => emp.emp_id === removal.empId
+                );
+
+                if (employeeIndex !== -1) {
+                    const employee = processed[category][employeeIndex];
+
+                    if (employee.assigned_shift === removal.shiftId &&
+                        employee.assigned_date === removal.date) {
+
+                        // Удаляем из текущей категории
+                        processed[category].splice(employeeIndex, 1);
+
+                        employee.unavailable_reason = null;
+                        employee.assigned_shift = null;
+                        employee.assigned_date = null;
+
+                        if (!employee.recommendation) {
+                            employee.recommendation = { score: 50 };
+                        }
+                        processed.available.push(employee);
                     }
                 }
             });
+        });
+
+        // Обрабатываем новые назначения
+        changes.filter(c => c.action === 'assign').forEach(assignment => {
+            // Находим сотрудника в available
+            const availableIndex = processed.available?.findIndex(
+                emp => emp.emp_id === assignment.empId
+            );
+
+            if (availableIndex !== -1) {
+                const employee = processed.available[availableIndex];
+
+                // Проверяем, не конфликтует ли с другими назначениями
+                const hasConflict = changes.some(other =>
+                    other.action === 'assign' &&
+                    other.empId === assignment.empId &&
+                    other.date === assignment.date &&
+                    other.shiftId !== assignment.shiftId
+                );
+
+                if (hasConflict) {
+                    // Перемещаем в unavailable_busy
+                    processed.available.splice(availableIndex, 1);
+                    employee.unavailable_reason = 'already_assigned';
+                    employee.assigned_shift = assignment.shiftId;
+                    employee.assigned_date = assignment.date;
+                    processed.unavailable_busy.push(employee);
+                }
+            }
+        });
+
+        // Убираем дубликаты
+        ['available', 'cross_position', 'other_site', 'unavailable_busy', 'unavailable_hard', 'unavailable_soft'].forEach(category => {
+            if (processed[category]) {
+                const seen = new Set();
+                processed[category] = processed[category].filter(emp => {
+                    if (seen.has(emp.emp_id)) return false;
+                    seen.add(emp.emp_id);
+                    return true;
+                });
+            }
+        });
+
+        setProcessedRecommendations(processed);
+
+        if (processed.available?.length === 0 && processed.cross_position?.length > 0) {
+            setActiveTab('cross_position');
+        } else if (processed.available?.length === 0 && processed.cross_position?.length === 0) {
+            setActiveTab('unavailable');
+        } else if (processed.available?.length > 0) {
+            setActiveTab('available');
         }
-    }, [isVisible, selectedPosition, scheduleDetails, dispatch]);
+
+    }, [recommendations, pendingChanges]);
+
+    const currentRecommendations = processedRecommendations || recommendations || {
+        available: [],
+        cross_position: [],
+        other_site: [],
+        unavailable_soft: [],
+        unavailable_hard: [],
+        unavailable_busy: [],
+        unavailable_permanent: []
+    };
 
     // Save active tab to localStorage
     useEffect(() => {
@@ -281,23 +377,23 @@ const EmployeeRecommendations = ({
             legal: []
         };
 
-        if (recommendations?.unavailable_soft) {
-            groups.temporary.push(...recommendations.unavailable_soft);
+        if (currentRecommendations?.unavailable_soft) {
+            groups.temporary.push(...currentRecommendations.unavailable_soft);
         }
-        if (recommendations?.unavailable_hard) {
-            groups.temporary.push(...recommendations.unavailable_hard.filter(
+        if (currentRecommendations?.unavailable_hard) {
+            groups.temporary.push(...currentRecommendations.unavailable_hard.filter(
                 emp => emp.unavailable_reason !== 'permanent_constraint' &&
                     emp.unavailable_reason !== 'rest_violation'
             ));
         }
-        if (recommendations?.unavailable_permanent) {
-            groups.permanent.push(...recommendations.unavailable_permanent);
+        if (currentRecommendations?.unavailable_permanent) {
+            groups.permanent.push(...currentRecommendations.unavailable_permanent);
         }
-        if (recommendations?.unavailable_busy) {
-            groups.legal.push(...recommendations.unavailable_busy);
+        if (currentRecommendations?.unavailable_busy) {
+            groups.legal.push(...currentRecommendations.unavailable_busy);
         }
-        if (recommendations?.unavailable_hard) {
-            groups.legal.push(...recommendations.unavailable_hard.filter(
+        if (currentRecommendations?.unavailable_hard) {
+            groups.legal.push(...currentRecommendations.unavailable_hard.filter(
                 emp => emp.unavailable_reason === 'rest_violation'
             ));
         }
@@ -336,13 +432,13 @@ const EmployeeRecommendations = ({
                         title={
                             <span>
                                 <Badge bg="success" pill className="me-2">
-                                    {recommendations?.available?.length || 0}
+                                    {currentRecommendations?.available?.length || 0}
                                 </Badge>
                                 {t('employee.tabs.available')}
                             </span>
                         }
                     >
-                        {renderEmployeeList(recommendations?.available || [], 'available')}
+                        {renderEmployeeList(currentRecommendations?.available || [], 'available')}
                     </Tab>
 
                     <Tab
@@ -350,10 +446,10 @@ const EmployeeRecommendations = ({
                         title={
                             <span>
                                 <Badge bg="danger" pill className="me-2">
-                                    {(recommendations?.unavailable_soft?.length || 0) +
-                                        (recommendations?.unavailable_hard?.length || 0) +
-                                        (recommendations?.unavailable_busy?.length || 0) +
-                                        (recommendations?.unavailable_permanent?.length || 0)}
+                                    {(currentRecommendations?.unavailable_soft?.length || 0) +
+                                        (currentRecommendations?.unavailable_hard?.length || 0) +
+                                        (currentRecommendations?.unavailable_busy?.length || 0) +
+                                        (currentRecommendations?.unavailable_permanent?.length || 0)}
                                 </Badge>
                                 {t('employee.tabs.unavailable')}
 
@@ -403,14 +499,14 @@ const EmployeeRecommendations = ({
                         title={
                             <span>
                                 <Badge bg="warning" pill className="me-2">
-                                    {recommendations?.cross_position?.length || 0}
+                                    {currentRecommendations?.cross_position?.length || 0}
                                 </Badge>
                                 {t('employee.tabs.crossPosition')}
 
                             </span>
                         }
                     >
-                        {renderEmployeeList(recommendations?.cross_position || [], 'cross_position')}
+                        {renderEmployeeList(currentRecommendations?.cross_position || [], 'cross_position')}
                     </Tab>
 
                     <Tab
@@ -418,14 +514,14 @@ const EmployeeRecommendations = ({
                         title={
                             <span>
                                 <Badge bg="info" pill className="me-2">
-                                    {recommendations?.other_site?.length || 0}
+                                    {currentRecommendations?.other_site?.length || 0}
                                 </Badge>
                                 {t('employee.tabs.otherSite')}
 
                             </span>
                         }
                     >
-                        {renderEmployeeList(recommendations?.other_site || [], 'other_site')}
+                        {renderEmployeeList(currentRecommendations?.other_site || [], 'other_site')}
                     </Tab>
 
                 </Tabs>

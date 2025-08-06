@@ -150,7 +150,7 @@ const ScheduleManagement = () => {
             return;
         }
 
-        console.log('Cell clicked in edit mode:', { date, positionId, shiftId });
+        console.log('Cell clicked in edit mode:', { date, positionId, shiftId, employeeIdToReplace });
 
         const cell = {
             date: date,
@@ -285,7 +285,9 @@ const ScheduleManagement = () => {
                                     <Spinner animation="border"/>
                                 </div>
                             ) : (
-                                <ScheduleDetails onCellClick={handleCellClick}/>
+                                <ScheduleDetails
+                                    selectedCell={selectedCell}
+                                    onCellClick={handleCellClick}/>
                             )}
                         </>
                     ) : (

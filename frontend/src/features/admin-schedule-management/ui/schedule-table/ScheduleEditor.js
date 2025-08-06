@@ -28,6 +28,7 @@ const ScheduleEditor = ({
                             canEdit = true,
                             onToggleEdit,
                             onSaveChanges,
+                            selectedCell,
                             onCellClick,
                             onEmployeeClick,
                             onEmployeeRemove,
@@ -201,6 +202,7 @@ const ScheduleEditor = ({
         return (
             <ScheduleCell
                 key={`${shift.shift_id}-${dayIndex}`}
+                selectedCell={selectedCell}
                 date={dateStr}
                 positionId={position.pos_id}
                 shiftId={shift.shift_id}

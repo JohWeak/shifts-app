@@ -5,6 +5,7 @@ import './ScheduleCell.css';
 
 const ScheduleCell = ({
                           date,
+                          selectedCell,
                           positionId,
                           shiftId,
                           employees = [],
@@ -24,8 +25,6 @@ const ScheduleCell = ({
                           ...props
                       }) => {
     const {t} = useI18n();
-
-    const [clickedEmployeeId, setClickedEmployeeId] = useState(null);
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
     );
@@ -48,21 +47,21 @@ const ScheduleCell = ({
         e.stopPropagation();
 
         if (onEmployeeClick && isEditing) {
-            setClickedEmployeeId(empId); // Запоминаем кликнутого
             onEmployeeClick(date, positionId, shiftId, empId);
         }
     };
 
-    // При изменении режима редактирования сбрасываем выделение
-    useEffect(() => {
-        if (!isEditing) {
-            setClickedEmployeeId(null);
-        }
-    }, [isEditing]);
+    const isEmployeeBeingReplaced = (empId) => {
+        return isEditing &&
+            selectedCell?.positionId === positionId &&
+            selectedCell?.date === date &&
+            selectedCell?.shiftId === shiftId &&
+            selectedCell?.employeeIdToReplace === empId;
+    };
 
     const handleCellClick = (e) => {
         if (e.target.closest('.remove-btn') || e.target.closest('.employee-clickable')) {
-            return; // Не открываем модал если кликнули на работника или кнопку
+            return;
         }
 
         if (onCellClick && isEditing) {
@@ -143,7 +142,7 @@ const ScheduleCell = ({
                     <div
                         key={`visible-${employee.emp_id}`}
                         className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
-                            clickedEmployeeId === employee.emp_id ? 'being-replaced' : ''
+                            isEmployeeBeingReplaced(employee.emp_id) ? 'being-replaced' : ''
                         }`}
                         style={{fontSize: '0.8em'}}
                     >

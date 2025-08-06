@@ -23,7 +23,7 @@ import {
     removePendingChange
 } from '../../model/scheduleSlice';
 
-const ScheduleDetails = ({onCellClick}) => {
+const ScheduleDetails = ({onCellClick, selectedCell}) => {
     const dispatch = useDispatch();
     const {t} = useI18n();
 
@@ -142,6 +142,7 @@ const ScheduleDetails = ({onCellClick}) => {
                         scheduleDetails.positions.map(position => (
                             <ScheduleEditor
                                 key={position.pos_id}
+                                selectedCell={selectedCell}
                                 position={position}
                                 isEditing={!!editingPositions[position.pos_id]}
                                 onToggleEdit={() => dispatch(toggleEditPosition(position.pos_id))}
