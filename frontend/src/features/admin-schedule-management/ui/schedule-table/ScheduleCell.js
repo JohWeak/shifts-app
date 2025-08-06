@@ -25,7 +25,7 @@ const ScheduleCell = ({
                       }) => {
     const {t} = useI18n();
 
-    // ПРОСТАЯ логика: удаленные работники не показываются вообще - исправить!
+
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
     );
@@ -33,6 +33,15 @@ const ScheduleCell = ({
     const totalEmployees = visibleEmployees.length + pendingAssignments.length;
     const isEmpty = totalEmployees === 0;
     const isFull = totalEmployees >= requiredEmployees;
+
+    const hasPendingChanges = () => {
+        return Object.values(pendingChanges).some(change =>
+            change.positionId === positionId &&
+            change.date === date &&
+            change.shiftId === shiftId
+        );
+    };
+
 
     const handleCellClick = (e) => {
         if (e.target.closest('.remove-btn') || e.target.closest('.employee-clickable')) {
@@ -53,7 +62,7 @@ const ScheduleCell = ({
         }
     };
 
-    // НОВАЯ функция для клика на работника
+
     const handleEmployeeNameClick = (e, empId) => {
         e.preventDefault();
         e.stopPropagation();
@@ -72,8 +81,9 @@ const ScheduleCell = ({
         if (!isEmpty) baseClasses.push('has-employees');
         if (isEmpty && isEditing) baseClasses.push('table-warning');
         if (isUnderstaffed && !isEmpty) baseClasses.push('table-info');
-
         if (isFull && !shiftColor) baseClasses.push('table-success');
+
+        if (hasPendingChanges()) baseClasses.push('has-pending-change');
 
         return baseClasses.join(' ');
     };
@@ -82,19 +92,18 @@ const ScheduleCell = ({
         const styles = {};
 
         if (shiftColor && !isEmpty) {
-            // Только лёгкий фон, без границ
             styles.backgroundColor = `${shiftColor}`;
         }
 
         return styles;
     };
-    // Render empty cell
+
     if (isEmpty) {
         return (
             <td
                 className={getCellClasses()}
                 onClick={handleCellClick}
-                style={shiftColor && isEditing ? { borderLeft: `4px solid ${shiftColor}` } : {}}
+                style={shiftColor && isEditing ? {borderLeft: `4px solid ${shiftColor}`} : {}}
                 title={isEditing ? t('employee.clickToAssign') : ''}
                 {...props}
             >
@@ -122,7 +131,7 @@ const ScheduleCell = ({
             {...props}
         >
             <div className="employees-container">
-                {/* Visible Employees (не удаленные) */}
+                {/* Visible Employees  */}
                 {visibleEmployees.map((employee) => (
                     <div
                         key={`visible-${employee.emp_id}`}
@@ -206,7 +215,7 @@ const ScheduleCell = ({
                     <div className="add-more-indicator mt-1">
                         <small className="text-muted">
                             <i className="bi bi-plus-circle me-1"></i>
-                            Need {requiredEmployees - totalEmployees} more
+                            {t('employee.needMoreEmployees', {count: (requiredEmployees - totalEmployees)})}
                         </small>
                     </div>
                 )}

@@ -143,7 +143,27 @@
 .schedule-cell.table-success {
     background-color: rgba(var(--bs-success-rgb), 0.1) !important;
 }
+/* Add visual indicator for cells with pending changes */
+.schedule-cell.has-pending-change {
+    position: relative;
+}
 
+.schedule-cell.has-pending-change::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--bs-success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+[dir="rtl"] .schedule-cell.has-pending-change::after {
+    right: auto;
+    left: 4px;
+}
 
 
 [data-theme="dark"] .schedule-cell {
