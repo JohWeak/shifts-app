@@ -90,10 +90,7 @@ const ScheduleManagement = () => {
 
     // Close panel if no editing
     useEffect(() => {
-        // Получаем количество позиций в режиме редактирования
         const editingPositionsCount = Object.values(editingPositions || {}).filter(Boolean).length;
-
-        // Если нет позиций в режиме редактирования и панель открыта - закрываем
         if (editingPositionsCount === 0 && isPanelOpen) {
             console.log('No positions in edit mode, closing panel');
             setIsPanelOpen(false);
@@ -103,7 +100,6 @@ const ScheduleManagement = () => {
 
     useEffect(() => {
         if (activeTab !== 'view' && isPanelOpen) {
-            console.log('Tab changed from view, closing panel');
             setIsPanelOpen(false);
             setSelectedCell(null);
         }
@@ -287,7 +283,8 @@ const ScheduleManagement = () => {
                             ) : (
                                 <ScheduleDetails
                                     selectedCell={selectedCell}
-                                    onCellClick={handleCellClick}/>
+                                    onCellClick={handleCellClick}
+                                />
                             )}
                         </>
                     ) : (

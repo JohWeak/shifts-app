@@ -121,6 +121,7 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                         onUnpublish={() => setShowUnpublishModal(true)}
                         onExport={handleExport}
                         isExporting={isExporting}
+                        scheduleDetails={scheduleDetails}
                     />
 
 

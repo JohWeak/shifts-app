@@ -8,7 +8,15 @@ import {setActiveTab, setSelectedScheduleId} from '../../model/scheduleSlice';
 import ScheduleActions from '../schedule-list/ScheduleActions';
 import './ScheduleInfo.css';
 
-const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExport, isExporting}) => {
+const ScheduleInfo = ({
+                          schedule,
+                          positions = [],
+                          onPublish,
+                          onUnpublish,
+                          onExport,
+                          isExporting,
+                          scheduleDetails
+}) => {
     const {t} = useI18n();
     const dispatch = useDispatch();
 
@@ -28,13 +36,6 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
 
 
     console.log('Schedule fields:', Object.keys(schedule || {}));
-
-// Может быть алгоритм в другом месте?
-    const algorithm = schedule?.algorithm ||
-        schedule?.generation_algorithm ||
-        schedule?.algo ||
-        schedule?.method ||
-        '-';
 
 
     return (
@@ -89,16 +90,9 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-people"></i>
-                        <span className="info-label">{t('position.positions')}</span>
+                        <span className="info-label">{t('schedule.assignments')}</span>
                     </div>
-                    <span className="info-value">{positions.length}</span>
-                </div>
-                <div className="info-item">
-                    <div className="info-item-header">
-                        <i className="bi bi-gear"></i>
-                        <span className="info-label">{t('modal.compareAlgorithms.algorithm')}</span>
-                    </div>
-                    <span className="info-value">{algorithm}</span>
+                    <span className="info-value">{scheduleDetails?.assignments?.length}</span>
                 </div>
                 <div className="info-item">
                     <div className="info-item-header">
@@ -107,6 +101,14 @@ const ScheduleInfo = ({schedule, positions = [], onPublish, onUnpublish, onExpor
                     </div>
                     <span className="info-value">{formatDate(schedule.createdAt)}</span>
                 </div>
+                <div className="info-item">
+                    <div className="info-item-header">
+                        <i className="bi bi-pencil-square"></i>
+                        <span className="info-label">{t('schedule.updated')}</span>
+                    </div>
+                    <span className="info-value">{formatDate(schedule.updatedAt)}</span>
+                </div>
+
             </div>
         </div>
     );

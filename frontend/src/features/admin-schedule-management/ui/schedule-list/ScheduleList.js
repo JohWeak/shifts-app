@@ -228,7 +228,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted,  }) => {
                 variant="danger"
             >
                 {scheduleToDelete && (
-                    <div className="schedule-info bg-light p-3 rounded">
+                    <div className="schedule-info bg-danger bg-opacity-10 p-3 rounded">
                         <p><strong>{t('schedule.weekPeriod')}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
                         <p><strong>{t('schedule.site')}:</strong> {scheduleToDelete.workSite?.site_name || 'N/A'}</p>
                     </div>

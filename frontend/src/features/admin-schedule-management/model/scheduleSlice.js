@@ -170,12 +170,11 @@ const scheduleSlice = createSlice({
         workSites: [],
         recommendations: { available: [], cross_position: [], unavailable_busy: [], unavailable_hard: [], unavailable_soft: [] },
 
-        // Состояния загрузки
-        loading: 'idle', // для основных операций
+
+        loading: 'idle',
         workSitesLoading: 'idle',
         recommendationsLoading: 'idle',
 
-        // Ошибки
         error: null,
 
         // UI Состояния
@@ -187,7 +186,6 @@ const scheduleSlice = createSlice({
 
     },
     reducers: {
-        // Синхронные экшены для управления UI
         updateShiftColor: (state, action) => {
             const { shiftId, color } = action.payload;
 
@@ -335,8 +333,6 @@ const scheduleSlice = createSlice({
                 state.loading = 'succeeded';
 
                 // После успешного обновления данные будут перезагружены через fetchScheduleDetails
-                // который вызывается в самом thunk
-
                 // Очищаем pendingChanges для позиции, которая была сохранена
                 if (action.meta?.arg?.changes) {
                     const positionId = action.meta.arg.changes[0]?.positionId;

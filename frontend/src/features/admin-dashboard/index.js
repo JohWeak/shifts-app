@@ -53,16 +53,13 @@ const AdminDashboard = () => {
                 <Row >
                     {/* 1. Карточка "Total Schedules" */}
                     <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
-                        {/* Добавляем класс dashboard-metric-card */}
                         <Card className="dashboard-metric-card">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
-                                    {/* Добавляем класс metric-icon */}
                                     <div className="metric-icon bg-primary bg-opacity-10 me-3">
                                         <i className="bi bi-calendar-week text-primary fs-4"></i>
                                     </div>
                                     <div>
-                                        {/* Добавляем классы metric-label и metric-value */}
                                         <div className="metric-label">{t('navigation.schedules')}</div>
                                         <div className="metric-value">{stats?.overview.total_schedules || 0}</div>
                                     </div>
@@ -73,7 +70,6 @@ const AdminDashboard = () => {
 
                     {/* 2. Карточка "Published" */}
                     <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
-                        {/* Добавляем классы dashboard-metric-card и metric-success */}
                         <Card className="dashboard-metric-card metric-success">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
@@ -91,7 +87,6 @@ const AdminDashboard = () => {
 
                     {/* 3. Карточка "Draft" */}
                     <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4 ">
-                        {/* Добавляем классы dashboard-metric-card и metric-warning */}
                         <Card className="dashboard-metric-card metric-warning">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
@@ -109,7 +104,6 @@ const AdminDashboard = () => {
 
                     {/* 4. Карточка "Total Assignments" */}
                     <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
-                        {/* Добавляем классы dashboard-metric-card и metric-info */}
                         <Card className="dashboard-metric-card metric-info">
                             <Card.Body>
                                 <div className="d-flex align-items-center">
