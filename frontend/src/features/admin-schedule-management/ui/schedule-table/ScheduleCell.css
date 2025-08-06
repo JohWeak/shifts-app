@@ -77,9 +77,7 @@
     transition: color var(--transition-fast);
 
 }
-.employee-editable {
-    /*font-style: italic;*/
-}
+
 
 .schedule-cell.editing-mode .employee-name.employee-clickable:hover {
     color: var(--bs-primary-hover);
@@ -182,22 +180,17 @@
     font-size: 1.2em;
 }
 
-/* Стили для удаленных сотрудников */
-.employee-item.pending-removal {
-    opacity: 0.5;
-    text-decoration: line-through;
-}
 /* Сотрудник в процессе замены */
 .employee-item.being-replaced {
     background-color: var(--bs-warning-bg-subtle);
     padding: 2px 4px;
     border-radius: 3px;
-    border: 1px dashed var(--bs-warning);
+    border: 1px solid var(--bs-warning);
+}
+.employee-item.being-replaced:hover {
+    background-color: var(--bs-warning-bg-subtle);
 }
 
-[data-theme="dark"] .employee-item.being-replaced {
-    background-color: rgba(255, 193, 7, 0.1);
-}
 
 [data-theme="dark"] .schedule-cell {
     border-color: var(--bs-gray-700);
