@@ -1,5 +1,5 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleCell.js
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './ScheduleCell.css';
 
@@ -25,7 +25,7 @@ const ScheduleCell = ({
                       }) => {
     const {t} = useI18n();
 
-
+    const [clickedEmployeeId, setClickedEmployeeId] = useState(null);
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
     );
@@ -33,6 +33,7 @@ const ScheduleCell = ({
     const totalEmployees = visibleEmployees.length + pendingAssignments.length;
     const isEmpty = totalEmployees === 0;
     const isFull = totalEmployees >= requiredEmployees;
+
 
     const hasPendingChanges = () => {
         return Object.values(pendingChanges).some(change =>
@@ -42,6 +43,22 @@ const ScheduleCell = ({
         );
     };
 
+    const handleEmployeeNameClick = (e, empId) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (onEmployeeClick && isEditing) {
+            setClickedEmployeeId(empId); // Запоминаем кликнутого
+            onEmployeeClick(date, positionId, shiftId, empId);
+        }
+    };
+
+    // При изменении режима редактирования сбрасываем выделение
+    useEffect(() => {
+        if (!isEditing) {
+            setClickedEmployeeId(null);
+        }
+    }, [isEditing]);
 
     const handleCellClick = (e) => {
         if (e.target.closest('.remove-btn') || e.target.closest('.employee-clickable')) {
@@ -59,16 +76,6 @@ const ScheduleCell = ({
 
         if (onRemoveEmployee) {
             onRemoveEmployee(date, positionId, shiftId, empId, assignmentId);
-        }
-    };
-
-
-    const handleEmployeeNameClick = (e, empId) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (onEmployeeClick && isEditing) {
-            onEmployeeClick(date, positionId, shiftId, empId);
         }
     };
 
@@ -135,7 +142,9 @@ const ScheduleCell = ({
                 {visibleEmployees.map((employee) => (
                     <div
                         key={`visible-${employee.emp_id}`}
-                        className="employee-item mb-1 d-flex align-items-center justify-content-between"
+                        className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
+                            clickedEmployeeId === employee.emp_id ? 'being-replaced' : ''
+                        }`}
                         style={{fontSize: '0.8em'}}
                     >
         <span
@@ -166,49 +175,55 @@ const ScheduleCell = ({
                 ))}
 
                 {/* Pending Assignments (новые работники) */}
-                {pendingAssignments.map((assignment, index) => (
-                    <div
-                        key={`pending-${assignment.empId}-${index}`}
-                        className="employee-item mb-1 d-flex align-items-center justify-content-between pending-assignment"
-                        style={{fontSize: '0.8em'}}
-                    >
-                        <span
-                            className="employee-name text-success"
-                        >
-                            {formatEmployeeName && assignment.employee
-                                ? formatEmployeeName(assignment.employee)
-                                : (assignment.empName || 'New Employee')}
-                        </span>
-                        <div className="d-flex align-items-center">
-                            {isEditing && onRemovePendingChange && (
-                                <button
-                                    type="button"
-                                    className="remove-btn btn btn-sm btn-outline-danger p-0"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        // Найти и удалить правильный pending change
-                                        const changeKey = Object.keys(pendingChanges).find(key => {
-                                            const change = pendingChanges[key];
-                                            return change.action === 'assign' &&
-                                                change.empId === assignment.empId &&
-                                                change.positionId === positionId &&
-                                                change.date === date &&
-                                                change.shiftId === shiftId;
-                                        });
-                                        if (changeKey) {
-                                            onRemovePendingChange(changeKey);
-                                        }
-                                    }}
-                                    title="Cancel assignment"
+                {pendingAssignments.map((assignment, index) => {
+                    // Создаем объект сотрудника для formatEmployeeName
+                    const employeeForFormat = {
+                        first_name: assignment.empName?.split(' ')[0] || '',
+                        last_name: assignment.empName?.split(' ').slice(1).join(' ') || ''
+                    };
 
-                                >
-                                    x
-                                </button>
-                            )}
+                    return (
+                        <div
+                            key={`pending-${assignment.empId}-${index}`}
+                            className="employee-item mb-1 d-flex align-items-center justify-content-between pending-assignment"
+                            style={{fontSize: '0.8em'}}
+                        >
+                        <span className="employee-name text-success">
+                            {formatEmployeeName
+                                ? formatEmployeeName(employeeForFormat)
+                                : assignment.empName || 'New Employee'}
+                        </span>
+                            <div className="d-flex align-items-center">
+                                {isEditing && onRemovePendingChange && (
+                                    <button
+                                        type="button"
+                                        className="remove-btn btn btn-sm btn-outline-danger p-0"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            // Найти и удалить правильный pending change
+                                            const changeKey = Object.keys(pendingChanges).find(key => {
+                                                const change = pendingChanges[key];
+                                                return change.action === 'assign' &&
+                                                    change.empId === assignment.empId &&
+                                                    change.positionId === positionId &&
+                                                    change.date === date &&
+                                                    change.shiftId === shiftId;
+                                            });
+                                            if (changeKey) {
+                                                onRemovePendingChange(changeKey);
+                                            }
+                                        }}
+                                        title="Cancel assignment"
+
+                                    >
+                                        x
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {/* Add more employees indicator */}
                 {isEditing && totalEmployees < requiredEmployees && (

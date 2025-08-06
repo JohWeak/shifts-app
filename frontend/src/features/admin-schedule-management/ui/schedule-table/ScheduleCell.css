@@ -158,6 +158,7 @@
     background-color: var(--bs-success);
     border-radius: 50%;
     animation: pulse 2s infinite;
+    z-index: 1;
 }
 
 [dir="rtl"] .schedule-cell.has-pending-change::after {
@@ -165,6 +166,38 @@
     left: 4px;
 }
 
+.pending-assignment {
+    position: relative;
+    padding-left: 20px;
+}
+
+.pending-assignment::before {
+    content: '+';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bs-success);
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Стили для удаленных сотрудников */
+.employee-item.pending-removal {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+/* Сотрудник в процессе замены */
+.employee-item.being-replaced {
+    background-color: var(--bs-warning-bg-subtle);
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px dashed var(--bs-warning);
+}
+
+[data-theme="dark"] .employee-item.being-replaced {
+    background-color: rgba(255, 193, 7, 0.1);
+}
 
 [data-theme="dark"] .schedule-cell {
     border-color: var(--bs-gray-700);

@@ -656,6 +656,8 @@ export const en = {
         'same_work_site': 'Same work site',
         'unknown_shift': 'Unknown shift',
         'weeklyHours': 'Current weekly hours: {hours}h',
+        'pending_removal_from_this_shift': 'Currently assigned here (pending removal)',
+        'will_be_available_after_save': 'Will become available after saving changes',
 
 
     },

@@ -16,7 +16,7 @@ const EmployeeRecommendations = ({
                                  }) => {
     const {t} = useI18n();
     const dispatch = useDispatch();
-    const {recommendations, recommendationsLoading, error} = useSelector(state => state.schedule);
+    const {recommendations, recommendationsLoading, error, pendingChanges} = useSelector(state => state.schedule);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState(() =>
         localStorage.getItem('recommendationActiveTab') || 'available'
@@ -44,26 +44,6 @@ const EmployeeRecommendations = ({
         }
     }, [isVisible, selectedPosition, scheduleDetails, dispatch]);
 
-    useEffect(() => {
-        console.log('EmployeeRecommendations: fetching recommendations', {
-            isVisible,
-            hasPosition: !!selectedPosition,
-            hasSchedule: !!scheduleDetails?.schedule?.id
-        });
-
-        if (isVisible && selectedPosition && scheduleDetails?.schedule?.id) {
-            dispatch(fetchRecommendations({
-                positionId: selectedPosition.positionId,
-                shiftId: selectedPosition.shiftId,
-                date: selectedPosition.date,
-                scheduleId: scheduleDetails.schedule.id,
-            })).then(action => {
-                console.log('Recommendations fetched:', action.type);
-                // ... остальной код
-            });
-        }
-    }, [isVisible, selectedPosition, scheduleDetails, dispatch]);
-
     // Save active tab to localStorage
     useEffect(() => {
         localStorage.setItem('recommendationActiveTab', activeTab);
@@ -71,6 +51,17 @@ const EmployeeRecommendations = ({
             onTabChange(activeTab);
         }
     }, [activeTab, onTabChange]);
+
+    const hasPendingRemoval = (employee) => {
+        return Object.values(pendingChanges || {}).some(change =>
+            change.action === 'remove' &&
+            change.empId === employee.emp_id &&
+            change.date === selectedPosition.date &&
+            change.shiftId === selectedPosition.shiftId
+        );
+    };
+
+
 
     const filterEmployees = (employees) => {
         if (!searchTerm) return employees;
@@ -97,6 +88,7 @@ const EmployeeRecommendations = ({
                     const isFlexible = !employee.default_position_id || employee.flexible_position;
                     const isAvailable = type === 'available' || type === 'cross_position' || type === 'other_site';
                     const showWarning = !isAvailable;
+                    const isPendingRemoval = hasPendingRemoval(employee);
 
                     return (
                         <ListGroup.Item
@@ -120,9 +112,18 @@ const EmployeeRecommendations = ({
                                         <i className="bi bi-person-badge me-1"></i>
                                         {employee.default_position_name || t('employee.flexiblePosition')}
                                     </div>
-
+                                    {/* Showing a message for temporarily deleted items. */}
+                                    {isPendingRemoval && (
+                                        <div className="mt-2 text-info">
+                                            <i className="bi bi-info-circle me-1"></i>
+                                            {t('recommendation.pending_removal_from_this_shift')}
+                                            <small className="d-block text-muted ms-3">
+                                                {t('recommendation.will_be_available_after_save')}
+                                            </small>
+                                        </div>
+                                    )}
                                     {/* For UNAVAILABLE employees - show specific reason */}
-                                    {showWarning && (
+                                    {showWarning && !isPendingRemoval &&(
                                         <>
                                             {employee.unavailable_reason === 'already_assigned' && (
                                                 <div className="mt-2 text-danger">
