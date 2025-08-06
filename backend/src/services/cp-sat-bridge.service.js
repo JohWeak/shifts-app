@@ -63,8 +63,8 @@ class CPSATBridge {
             PositionShift,
             ShiftRequirement,
             EmployeeConstraint,
-            PermanentConstraint, // Add permanent constraints
-            LegalConstraint, // Add legal constraints
+            PermanentConstraint,
+            LegalConstraint,
             ScheduleAssignment
         } = this.db;
 
@@ -516,12 +516,12 @@ class CPSATBridge {
                         reject(error);
                     } finally {
                         // Clean up temp files
-                        try {
-                            await fs.unlink(tempFilePath).catch(() => {});
-                            await fs.unlink(resultFilePath).catch(() => {});
-                        } catch (err) {
-                            console.error('Error cleaning temp files:', err);
-                        }
+                        // try {
+                        //     await fs.unlink(tempFilePath).catch(() => {});
+                        //     await fs.unlink(resultFilePath).catch(() => {});
+                        // } catch (err) {
+                        //     console.error('Error cleaning temp files:', err);
+                        // }
                     }
                 });
 

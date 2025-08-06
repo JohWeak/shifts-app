@@ -68,7 +68,6 @@ class UniversalShiftSchedulerCP:
         min_rest_between_shifts = hard_constraints.get('MIN_REST_BETWEEN_SHIFTS', 11)
         min_rest_after_night = hard_constraints.get('MIN_REST_AFTER_NIGHT_SHIFT', 12)
         min_rest_after_regular = hard_constraints.get('MIN_REST_AFTER_REGULAR_SHIFT', 11)
-        max_consecutive_days = hard_constraints.get('MAX_CONSECUTIVE_DAYS', 6)
         max_night_shifts_per_week = hard_constraints.get('MAX_NIGHT_SHIFTS_PER_WEEK', 3)
 
         # Soft constraints (admin settings) - READ WITH UPPERCASE KEYS
