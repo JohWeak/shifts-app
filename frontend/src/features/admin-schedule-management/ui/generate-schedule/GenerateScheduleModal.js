@@ -3,9 +3,9 @@ import React, {useState, useEffect, useRef, useMemo} from 'react';
 import {Modal, Form, Button, Row, Col, ProgressBar, Spinner, Alert} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from 'shared/config/scheduleConstants';
-import {getNextWeekStart, isValidWeekStartDate} from 'shared/lib/utils/scheduleUtils';
 import {fetchWorkSites, compareAlgorithms} from '../../model/scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import { getNextWeekStart } from 'shared/lib/utils/scheduleUtils';
 import DatePicker from 'shared/ui/components/DatePicker/DatePicker';
 import CompareAlgorithmsModal from './CompareAlgorithmsModal';
 import './GenerateScheduleModal.css';
@@ -69,15 +69,6 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
         }
     }, [safeWorkSites, settings.site_id]);
 
-    // Отдельный эффект для валидации даты
-    useEffect(() => {
-        if (!isValidWeekStartDate(settings.weekStart, weekStartDay)) {
-            const weekStartName = weekStartDay === 1 ? t('weekDays.monday') : t('weekDays.sunday');
-            setFormError(t('schedule.weekStartWarning', { day: weekStartName }));
-        } else {
-            setFormError('');
-        }
-    }, [settings.weekStart, weekStartDay, t]);
 
 
     const handleCompareAlgorithms = async () => {
@@ -133,13 +124,13 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                         </div>
                     ) : (
                         <Form onSubmit={handleSubmit}>
-                            {/* ИЗМЕНЕНА СТРУКТУРА ДЛЯ КОРРЕКТНОЙ ШИРИНЫ */}
                             <Row className="mb-3">
                                 <Col md={6}>
                                     <Form.Group controlId="weekStart">
                                         <Form.Label>{t('modal.generateSchedule.weekStart')}</Form.Label>
                                         <DatePicker
                                             value={settings.weekStart}
+                                            weekStartsOn={weekStartDay}
                                             onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
                                             minDate={new Date()}
                                             placeholder={t('schedule.selectStartDate')}

@@ -29,19 +29,9 @@ const EmployeeRecommendations = ({
         localStorage.getItem('recommendationActiveTab') || 'available'
     );
 
-    useEffect(() => {
-        console.log('Recommendations from Redux:', recommendations);
-        console.log('Loading state:', recommendationsLoading);
-    }, [recommendations, recommendationsLoading]);
-    const fullState = useSelector(state => state);
-    useEffect(() => {
-        console.log('Full Redux state:', fullState);
-        console.log('Schedule state:', fullState.schedule);
-    }, [fullState]);
 
     useEffect(() => {
         if (isVisible && selectedPosition && scheduleDetails?.schedule?.id) {
-            console.log('Dispatching fetchRecommendations');
 
             dispatch(fetchRecommendations({
                 positionId: selectedPosition.positionId,
