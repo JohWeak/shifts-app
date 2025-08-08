@@ -1,14 +1,13 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-list/ScheduleList.js
-import React, { useState, useMemo } from 'react';
-import { Table, Card, Alert, Badge } from 'react-bootstrap';
+import React, { useState, useMemo, useRef } from 'react';
+import { Table, Card, Alert, Badge, Dropdown } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
-import { format, parseISO, isAfter, isBefore, startOfWeek, endOfWeek } from 'date-fns';
+import { format, parseISO, isAfter, startOfWeek, endOfWeek } from 'date-fns';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import { useSortableData } from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 import { deleteSchedule, updateScheduleStatus } from '../../model/scheduleSlice';
-import ActionButtons from 'shared/ui/components/ActionButtons/ActionButtons';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import './ScheduleList.css';
@@ -77,7 +76,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         sortConfig: activeSortConfig
     } = useSortableData(
         activeSchedules,
-        { field: 'week', order: 'DESC' }, // Default sort by date, newest first
+        { field: 'week', order: 'DESC' },
         sortAccessors
     );
 
@@ -192,12 +191,95 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         return currentWeekSchedule && currentWeekSchedule.id === schedule.id;
     };
 
+    const ActionButtons = ({ schedule }) => {
+        const dropdownRef = useRef(null);
+        const [dropdownStyle, setDropdownStyle] = useState({});
+
+        const handleDropdownToggle = (isOpen) => {
+            if (isOpen && dropdownRef.current) {
+                const button = dropdownRef.current.querySelector('.action-dropdown-toggle');
+                if (button) {
+                    const rect = button.getBoundingClientRect();
+                    setDropdownStyle({
+                        position: 'fixed',
+                        top: `${rect.bottom + 2}px`, // Small gap from button
+                        left: `${rect.left - 100}px`, // Adjust for menu width
+                        zIndex: 1055
+                    });
+                }
+            }
+        };
+
+        return (
+            <div className="schedule-actions" onClick={(e) => e.stopPropagation()}>
+                <Dropdown
+                    align="end"
+                    ref={dropdownRef}
+                    onToggle={handleDropdownToggle}
+                >
+                    <Dropdown.Toggle
+                        variant="light"
+                        size="sm"
+                        className="action-dropdown-toggle"
+                    >
+                        <i className="bi bi-three-dots-vertical"></i>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu style={dropdownStyle}>
+                        <Dropdown.Item onClick={() => onViewDetails(schedule.id)}>
+                            <i className="bi bi-eye me-2"></i>
+                            {t('common.view')}
+                        </Dropdown.Item>
+
+                        {schedule.status === 'draft' && (
+                            <>
+                                <Dropdown.Item onClick={() => onViewDetails(schedule.id)}>
+                                    <i className="bi bi-pencil me-2"></i>
+                                    {t('common.edit')}
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    onClick={() => handlePublishClick(schedule)}
+                                    className="text-success"
+                                >
+                                    <i className="bi bi-upload me-2"></i>
+                                    {t('schedule.publish')}
+                                </Dropdown.Item>
+                            </>
+                        )}
+
+                        {schedule.status === 'published' && (
+                            <Dropdown.Item
+                                onClick={() => handleUnpublishClick(schedule)}
+                                className="text-warning"
+                            >
+                                <i className="bi bi-pencil-square me-2"></i>
+                                {t('schedule.unpublish')}
+                            </Dropdown.Item>
+                        )}
+
+                        {canDeleteSchedule(schedule) && (
+                            <>
+                                <Dropdown.Divider />
+                                <Dropdown.Item
+                                    onClick={() => handleDeleteClick(schedule)}
+                                    className="text-danger"
+                                >
+                                    <i className="bi bi-trash me-2"></i>
+                                    {t('common.delete')}
+                                </Dropdown.Item>
+                            </>
+                        )}
+                    </Dropdown.Menu>
+                </Dropdown>
+            </div>
+        );
+    };
+
     const ScheduleTable = ({ schedules, sortConfig, requestSort, title, emptyMessage }) => (
-        <Card className="mb-4">
-            <Card.Header>
+        <Card className="schedule-list-card mb-4">
+            <Card.Header className="schedule-list-header">
                 <h5 className="mb-0">{title}</h5>
             </Card.Header>
-            <Card.Body>
+            <Card.Body className="p-0">
                 {schedules.length === 0 ? (
                     <div className="text-center py-4 text-muted">
                         {emptyMessage}
@@ -235,7 +317,9 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                 >
                                     {t('common.lastUpdated')}
                                 </SortableHeader>
-                                <th>{t('common.actions')}</th>
+                                <th className="text-center actions-header">
+                                    {t('common.actions')}
+                                </th>
                             </tr>
                             </thead>
                             <tbody>
@@ -244,43 +328,32 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                     key={schedule.id}
                                     className={`schedule-row ${isCurrentWeek(schedule) ? 'current-week' : ''}`}
                                     onClick={() => onViewDetails(schedule.id)}
-                                    style={{ cursor: 'pointer' }}
                                 >
-                                    <td className="text-nowrap">
-                                        {formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}
-                                        {isCurrentWeek(schedule) && (
-                                            <Badge bg="info" className="ms-2">
-                                                {t('schedule.currentWeek')}
-                                            </Badge>
-                                        )}
+                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
+                                        <div className="week-period-cell">
+                                                <span className="date-range">
+                                                    {formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}
+                                                </span>
+                                            {isCurrentWeek(schedule) && (
+                                                <Badge bg="info" className="ms-2 current-week-badge">
+                                                    {t('schedule.currentWeek')}
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td>{schedule.workSite?.site_name || 'N/A'}</td>
-                                    <td>
+                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
+                                        {schedule.workSite?.site_name || 'N/A'}
+                                    </td>
+                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
                                         <StatusBadge status={schedule.status} />
                                     </td>
-                                    <td className="text-nowrap">
-                                        {formatDateTime(schedule.updated_at || schedule.created_at)}
+                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
+                                            <span className="last-updated">
+                                                {formatDateTime(schedule.updated_at || schedule.created_at)}
+                                            </span>
                                     </td>
-                                    <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
-                                        <ActionButtons
-                                            onView={() => onViewDetails(schedule.id)}
-                                            onEdit={
-                                                schedule.status === 'draft' ?
-                                                    () => onViewDetails(schedule.id) : null
-                                            }
-                                            onDelete={
-                                                canDeleteSchedule(schedule) ?
-                                                    () => handleDeleteClick(schedule) : null
-                                            }
-                                            onPublish={
-                                                schedule.status === 'draft' ?
-                                                    () => handlePublishClick(schedule) : null
-                                            }
-                                            onUnpublish={
-                                                schedule.status === 'published' ?
-                                                    () => handleUnpublishClick(schedule) : null
-                                            }
-                                        />
+                                    <td className={`actions-cell ${isCurrentWeek(schedule) ? 'current-week-cell' : ''}`}>
+                                        <ActionButtons schedule={schedule} />
                                     </td>
                                 </tr>
                             ))}
@@ -314,7 +387,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                 />
             )}
 
-            {/* Delete Confirmation Modal */}
+            {/* Confirmation Modals */}
             <ConfirmationModal
                 show={!!scheduleToDelete}
                 title={t('schedule.deleteSchedule')}
@@ -333,7 +406,6 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                 )}
             </ConfirmationModal>
 
-            {/* Publish Confirmation Modal */}
             <ConfirmationModal
                 show={!!scheduleToPublish}
                 title={t('schedule.publishSchedule')}
@@ -345,7 +417,6 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                 variant="success"
             />
 
-            {/* Unpublish Confirmation Modal */}
             <ConfirmationModal
                 show={!!scheduleToUnpublish}
                 title={t('schedule.unpublishEdit')}

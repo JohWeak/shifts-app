@@ -199,6 +199,7 @@ export const en = {
         weeks: 'Weeks',
         yes: 'Yes',
         new: 'New',
+        view: 'View',
     },
     constraints: {
         alreadySubmitted: 'You have already submitted constraints for this week',
