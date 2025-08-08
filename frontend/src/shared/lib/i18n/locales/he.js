@@ -733,6 +733,11 @@ export const he = {
         weekStartWarning: 'התאריך הנבחר חייב להיות יום {{day}}.',
         weeklySchedule: 'סידור שבועי',
         workSite: 'אתר עבודה',
+        activeSchedules: 'לוחות זמנים פעילים',
+        inactiveSchedules: 'לוחות זמנים קודמים',
+        noActiveSchedules: 'אין לוחות זמנים פעילים',
+        noInactiveSchedules: 'אין לוחות זמנים קודמים',
+        generatingSchedule: 'יוצר לוח זמנים...',
     },
     settings: {
         algorithmMaxTime: 'זמן מקסימלי לאלגוריתם',

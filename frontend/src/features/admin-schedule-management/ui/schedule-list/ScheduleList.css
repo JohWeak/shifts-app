@@ -1,7 +1,19 @@
-/* Schedule List - гибридный подход */
+/* frontend/src/features/admin-schedule-management/ui/schedule-list/ScheduleList.css */
+
+/* Schedule List  */
 
 .schedule-overview-table {
     position: relative;
+}
+
+/* Current week highlight */
+.schedule-overview-table tbody tr.current-week {
+    background-color: rgba(var(--bs-info-rgb), 0.1);
+    border-left: 4px solid var(--bs-info);
+}
+
+.schedule-overview-table tbody tr.current-week td:first-child {
+    padding-left: calc(0.5rem + 4px);
 }
 
 /* Row hover effect */
@@ -13,6 +25,11 @@
 .schedule-overview-table tbody tr.schedule-row:hover {
     background-color: rgba(var(--bs-primary-rgb), 0.04);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 -1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Current week hover - preserve highlight */
+.schedule-overview-table tbody tr.current-week:hover {
+    background-color: rgba(var(--bs-info-rgb), 0.15);
 }
 
 /* Visual feedback without transform */
@@ -97,10 +114,12 @@
     .schedule-overview-table .badge {
         font-size: 0.75rem;
     }
-    .schedule-overview-table .action-buttons .btn{
+
+    .schedule-overview-table .action-buttons .btn {
         padding: var(--space-0);
         padding-left: var(--space-1);
     }
+
     .schedule-row .status-badge {
         border-radius: var(--radius-sm);
     }

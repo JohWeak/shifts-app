@@ -739,6 +739,11 @@ export const ru = {
         weekStartWarning: 'Выбранная дата должна быть {{day}}.',
         weeklySchedule: 'Недельное расписание',
         workSite: 'Рабочий объект',
+        activeSchedules: 'Активные расписания',
+        inactiveSchedules: 'Прошедшие расписания',
+        noActiveSchedules: 'Нет активных расписаний',
+        noInactiveSchedules: 'Нет прошедших расписаний',
+        generatingSchedule: 'Генерация расписания...',
     },
     settings: {
         algorithmMaxTime: 'Лимит времени для алгоритма',

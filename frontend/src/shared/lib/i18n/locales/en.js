@@ -835,6 +835,11 @@ export const en = {
         weekStartWarning: 'The selected date must be a {day}.',
         weeklySchedule: 'Weekly Schedule',
         workSite: 'Work Site',
+        activeSchedules: 'Active Schedules',
+        inactiveSchedules: 'Past Schedules',
+        noActiveSchedules: 'No active schedules available',
+        noInactiveSchedules: 'No past schedules',
+        generatingSchedule: 'Generating schedule...',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

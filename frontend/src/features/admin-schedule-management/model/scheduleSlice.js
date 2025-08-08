@@ -40,10 +40,19 @@ export const fetchScheduleDetails = createAsyncThunk(
 // Генерация нового расписания
 export const generateSchedule = createAsyncThunk(
     'schedule/generateSchedule',
-    async (settings, { rejectWithValue }) => {
+    async (settings, { dispatch, rejectWithValue }) => {
         try {
             const response = await scheduleAPI.generateSchedule(settings);
-            return response; // Возвращаем только data
+
+            // After successful generation, fetch the details of the new schedule
+            if (response?.schedule_id) {
+                // Fetch updated list first
+                await dispatch(fetchSchedules());
+                // Then fetch details of the new schedule
+                dispatch(fetchScheduleDetails(response.schedule_id));
+            }
+
+            return response;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -324,14 +333,18 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(generateSchedule.fulfilled, (state, action) => {
-                // Диспатч fetchSchedules уже сделан внутри thunk,
-                // здесь мы просто сбрасываем состояние загрузки
-                state.loading = 'succeeded';
+                state.loading = 'idle';
+                // Set the selected schedule ID and switch to view tab
+                if (action.payload?.schedule_id) {
+                    state.selectedScheduleId = action.payload.schedule_id;
+                    state.activeTab = 'view';
+                    // Details will be loaded by fetchScheduleDetails dispatched in the thunk
+                }
+                state.error = null;
             })
             .addCase(generateSchedule.rejected, (state, action) => {
                 state.loading = 'failed';
                 state.error = action.payload;
-
             })
 
             .addCase(compareAlgorithms.pending, (state) => {

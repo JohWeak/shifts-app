@@ -12,6 +12,7 @@ import CompareAlgorithmsModal from './ui/generate-schedule/CompareAlgorithmsModa
 import EmployeeRecommendationsModal from './ui/employee-recommendations/EmployeeRecommendationsModal';
 import EmployeeRecommendationsPanel from './ui/employee-recommendations/EmployeeRecommendationsPanel';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import { nanoid } from '@reduxjs/toolkit';
 import {useScheduleActions} from './model/hooks/useScheduleActions';
 import {addNotification} from 'app/model/notificationsSlice';
 import './index.css';
@@ -56,6 +57,7 @@ const ScheduleManagement = () => {
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
     const [comparisonResults, setComparisonResults] = useState(null);
+    const [loading, setIsLoading] = useState(false);
     const [selectedCell, setSelectedCell] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
@@ -112,23 +114,53 @@ const ScheduleManagement = () => {
 
 
 
-    const onGenerateSubmit = async (settings) => {
-        const result = await handleGenerate(settings);
+    const onGenerateSubmit = async (generationSettings) => {
+        console.log('Generating schedule with settings:', generationSettings);
+        setIsLoading(true);
 
-        if (result.success) {
-            dispatch(addNotification({
-                message: t('schedule.generateSuccess'),
-                variant: 'success'
-            }));
-            setShowGenerateModal(false);
+        const notificationId = nanoid();
+        dispatch(addNotification({
+            id: notificationId,
+            type: 'info',
+            message: t('schedule.generatingSchedule'),
+            persistent: true
+        }));
 
-            dispatch(fetchSchedules());
-        } else {
+        try {
+            const result = await handleGenerate(generationSettings);
+
+            if (result.success) {
+                // Close the modal
+                setShowGenerateModal(false);
+
+                // Update notification
+                dispatch(addNotification({
+                    id: notificationId,
+                    type: 'success',
+                    message: t('schedule.generateSuccess'),
+                    persistent: false
+                }));
+
+                // The schedule will be automatically opened by the slice logic
+                // No need for additional actions here
+            } else {
+                dispatch(addNotification({
+                    id: notificationId,
+                    type: 'error',
+                    message: result.error || t('errors.generateFailed'),
+                    persistent: false
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to generate schedule:', error);
             dispatch(addNotification({
-                message: actionError || t('schedule.generateError'),
-                variant: 'danger',
-                duration: 5000
+                id: notificationId,
+                type: 'error',
+                message: error.message || t('errors.generateFailed'),
+                persistent: false
             }));
+        } finally {
+            setIsLoading(false);
         }
     };
 
