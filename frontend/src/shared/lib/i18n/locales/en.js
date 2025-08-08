@@ -459,6 +459,7 @@ export const en = {
         score: 'Score',
         searchPlaceholder: 'Search by name or email...',
         selectEmployee: 'Select Employee',
+        selectPositionFirst: 'Select position first',
         sendEmail: 'Send Email',
         sessionManagement: 'Session Management',
         setAvailability: 'Set Availability',
@@ -659,6 +660,8 @@ export const en = {
         'weeklyHours': 'Current weekly hours: {hours}h',
         'pending_removal_from_this_shift': 'Currently assigned here (pending removal)',
         'will_be_available_after_save': 'Will become available after saving changes',
+        'became_available_in_edit': 'Available after pending removal',
+        'virtually_assigned': 'Will be assigned after saving',
 
 
     },

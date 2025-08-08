@@ -70,14 +70,33 @@ export const worksiteAPI = {
 
 export const employeeAPI = {
 
-    fetchRecommendations: (scheduleId, positionId, shiftId, date) => {
+    fetchRecommendations: (scheduleId, positionId, shiftId, date, virtualChanges = null) => {
         console.log('fetchRecommendations called with:', {
             scheduleId,
             positionId,
             shiftId,
-            date
+            date,
+            virtualChanges
         });
 
+        // Если есть virtualChanges, отправляем POST запрос
+        if (virtualChanges && virtualChanges.length > 0) {
+            console.log('Sending POST request with virtualChanges');
+            return api.post(API_ENDPOINTS.EMPLOYEES.RECOMMENDATIONS,
+                { virtualChanges },
+                {
+                    params: {
+                        position_id: positionId,
+                        shift_id: shiftId,
+                        date,
+                        schedule_id: scheduleId
+                    }
+                }
+            );
+        }
+
+        // Иначе обычный GET запрос
+        console.log('Sending GET request without virtualChanges');
         return api.get(API_ENDPOINTS.EMPLOYEES.RECOMMENDATIONS, {
             params: {
                 position_id: positionId,
@@ -133,7 +152,6 @@ export const constraintAPI = {
 };
 
 export const positionAPI = {
-    // Принимает siteId и делает GET запрос
     fetchPositions: (siteId) => api.get(API_ENDPOINTS.POSITIONS.BY_SITE(siteId)),
     // Принимает объект должности, извлекает ID для URL, и отправляет весь объект в теле запроса
     updatePosition: (positionData) => api.put(API_ENDPOINTS.POSITIONS.DETAILS(positionData.pos_id), positionData),
@@ -159,7 +177,6 @@ export const updatePositionShiftColor = async (shiftId, color) => {
 };
 
 
-// Добавляем объединенный экспорт в конце файла
 export const apiService = {
     ...api, // базовые методы get, post, put, delete
     auth: authAPI,
@@ -172,5 +189,4 @@ export const apiService = {
     updatePositionShiftColor
 };
 
-// Также экспортируем по умолчанию для обратной совместимости
 export default apiService;

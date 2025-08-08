@@ -4,42 +4,52 @@ const db = require('../../models');
 const recommendationService = new EmployeeRecommendationService(db);
 class EmployeeRecommendationController {
     static async getRecommendations(req, res) {
-        console.log('[EmployeeRecommendationController] Received query params:', req.query);
-
         try {
             const { position_id, shift_id, date, schedule_id } = req.query;
 
-            if (!position_id || !shift_id || !date) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Missing required parameters: position_id, shift_id, date'
-                });
+            // Для POST запросов virtualChanges в body, для GET - в query
+            let virtualChanges = [];
+            if (req.method === 'POST') {
+                virtualChanges = req.body?.virtualChanges || [];
+            } else {
+                virtualChanges = req.query.virtualChanges || [];
+            }
+
+            console.log('[EmployeeRecommendationController] Request:', {
+                method: req.method,
+                position_id,
+                shift_id,
+                date,
+                schedule_id,
+                virtualChanges
+            });
+
+            let parsedVirtualChanges = [];
+            if (typeof virtualChanges === 'string') {
+                try {
+                    parsedVirtualChanges = JSON.parse(virtualChanges);
+                } catch (e) {
+                    console.error('Failed to parse virtualChanges:', e);
+                }
+            } else {
+                parsedVirtualChanges = virtualChanges;
             }
 
             const recommendations = await recommendationService.getRecommendedEmployees(
                 parseInt(position_id),
                 parseInt(shift_id),
                 date,
-                [],
-                schedule_id ? parseInt(schedule_id) : null
+                [], // excludeEmployeeIds
+                schedule_id ? parseInt(schedule_id) : null,
+                parsedVirtualChanges
             );
 
-            res.json({
-                success: true,
-                data: recommendations,
-                meta: {
-                    position_id: parseInt(position_id),
-                    shift_id: parseInt(shift_id),
-                    date: date,
-                    total_employees: Object.values(recommendations).reduce((sum, arr) => sum + arr.length, 0)
-                }
-            });
-
+            res.json(recommendations);
         } catch (error) {
             console.error('[EmployeeRecommendationController] Error:', error);
             res.status(500).json({
-                success: false,
-                error: error.message
+                error: 'Failed to get recommendations',
+                message: error.message
             });
         }
     }

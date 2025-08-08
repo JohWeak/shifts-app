@@ -10,6 +10,7 @@ router.get('/my-shifts', verifyToken, employeeController.getMyShifts);
 
 // Employee recommendations route - ПЕРЕД /:id маршрутами!
 router.get('/recommendations', verifyToken, EmployeeRecommendationController.getRecommendations);
+router.post('/recommendations', verifyToken, EmployeeRecommendationController.getRecommendations);
 
 // Routes protected by JWT and requiring admin role
 router.post('/', ...[verifyToken, isAdmin], employeeController.create);

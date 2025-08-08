@@ -8,7 +8,14 @@ class EmployeeRecommendationService {
         this.db = db;
     }
 
-    async getRecommendedEmployees(positionId, shiftId, date, excludeEmployeeIds = [], scheduleId = null) {
+     async getRecommendedEmployees(
+        positionId,
+        shiftId,
+        date,
+        excludeEmployeeIds = [],
+        scheduleId = null,
+        virtualChanges = []
+    ) {
         const {
             Employee,
             WorkSite,
@@ -152,6 +159,40 @@ class EmployeeRecommendationService {
             }
             console.log(`[EmployeeRecommendation] Found ${weekAssignments.length} assignments for the week`);
 
+
+
+            if (virtualChanges && virtualChanges.length > 0) {
+                console.log(`[EmployeeRecommendation] Applying ${virtualChanges.length} virtual changes`);
+
+                virtualChanges.filter(c => c.action === 'remove').forEach(change => {
+                    weekAssignments = weekAssignments.filter(assignment =>
+                        !(assignment.emp_id === change.emp_id &&
+                            assignment.shift_id === change.shift_id &&
+                            dayjs(assignment.work_date).format('YYYY-MM-DD') === change.date)
+                    );
+                });
+
+                for (const change of virtualChanges.filter(c => c.action === 'assign')) {
+                    const shift = await PositionShift.findByPk(change.shift_id);
+
+                    if (shift) {
+                        const virtualAssignment = {
+                            id: `virtual_${change.emp_id}_${change.shift_id}_${change.date}`,
+                            emp_id: change.emp_id,
+                            position_id: change.position_id,
+                            shift_id: change.shift_id,
+                            work_date: change.date,
+                            schedule_id: scheduleId,
+                            is_virtual: true,
+                            shift: shift
+                        };
+                        weekAssignments.push(virtualAssignment);
+                    }
+                }
+
+                console.log(`[EmployeeRecommendation] After virtual changes: ${weekAssignments.length} assignments`);
+            }
+
             // Group assignments by employee and date
             const assignmentsByEmployee = {};
             const assignmentsByDate = {};
@@ -171,6 +212,16 @@ class EmployeeRecommendationService {
 
             const todayAssignments = assignmentsByDate[date] || [];
             console.log(`[EmployeeRecommendation] ${todayAssignments.length} assignments on ${date}`);
+            if (virtualChanges && virtualChanges.length > 0) {
+                console.log(`[EmployeeRecommendation] Virtual changes details:`, virtualChanges);
+                console.log(`[EmployeeRecommendation] Today assignments after virtual changes:`,
+                    todayAssignments.map(a => ({
+                        emp_id: a.emp_id,
+                        shift: a.shift?.shift_name,
+                        is_virtual: a.is_virtual || false
+                    }))
+                );
+            }
 
             // Categorize employees
             const recommendations = {
@@ -624,6 +675,8 @@ class EmployeeRecommendationService {
 
         return null;
     }
+
+
 }
 
 module.exports = EmployeeRecommendationService;

@@ -7,6 +7,7 @@ const scheduleController = require('../controllers/scheduling/schedule/schedule.
 const generationController = require('../controllers/scheduling/schedule/schedule-generation.controller');
 const employeeController = require('../controllers/scheduling/schedule/schedule-employee.controller');
 const exportController = require('../controllers/scheduling/schedule/schedule-export.controller');
+const {getRecommendationsWithChanges} = require("../controllers/scheduling/employee-recommendation.controller");
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.get('/employee/archive/month', verifyToken, employeeController.getEmploye
 // === ADMIN ROUTES ===
 router.get('/stats/overview', ...[verifyToken, isAdmin], exportController.getScheduleStats);
 router.get('/:scheduleId/export', ...[verifyToken, isAdmin], exportController.exportSchedule);
-router.get('/recommendations/employees', ...[verifyToken, isAdmin], scheduleController.getRecommendedEmployees);
+
 router.post('/generate', ...[verifyToken, isAdmin], generationController.generateNextWeekSchedule);
 router.post('/compare-algorithms', ...[verifyToken, isAdmin], generationController.compareAllAlgorithms);
 router.get('/', ...[verifyToken, isAdmin], scheduleController.getAllSchedules);

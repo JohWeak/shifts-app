@@ -178,15 +178,14 @@ const ScheduleManagement = () => {
 
     const handleEmployeeSelect = async (employeeId, employeeName) => {
         if (!selectedCell) return;
+        console.log('handleEmployeeSelect called:', { employeeId, employeeName, selectedCell });
 
-        const key = selectedCell.employeeIdToReplace
-            ? `replace-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`
-            : `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employeeId}`;
 
         // If this is a replacement, we remove the old employee first.
         if (selectedCell.employeeIdToReplace) {
+            const removeKey = `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`;
             dispatch(addPendingChange({
-                key: `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`,
+                key: removeKey,
                 change: {
                     action: 'remove',
                     positionId: selectedCell.positionId,
@@ -198,9 +197,9 @@ const ScheduleManagement = () => {
             }));
         }
 
-        // Then add a new one
+        const assignKey = `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employeeId}`;
         dispatch(addPendingChange({
-            key,
+            key: assignKey,
             change: {
                 action: 'assign',
                 positionId: selectedCell.positionId,

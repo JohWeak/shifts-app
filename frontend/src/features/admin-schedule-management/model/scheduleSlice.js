@@ -1,8 +1,7 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {employeeAPI, scheduleAPI, worksiteAPI, updatePositionShiftColor} from 'shared/api/apiService';
+import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
 import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
-import ThemeColorService from "../../../shared/lib/services/ThemeColorService";
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -119,21 +118,6 @@ export const exportSchedule = createAsyncThunk(
     }
 );
 
-export const fetchRecommendations = createAsyncThunk(
-    'schedule/fetchRecommendations',
-    async (params, { rejectWithValue }) => {
-        try {
-            return await employeeAPI.fetchRecommendations(
-                params.scheduleId,
-                params.positionId,
-                params.shiftId,
-                params.date
-            );
-        } catch (error) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
 
 
 // Загрузка рабочих мест
@@ -158,8 +142,45 @@ export const fetchWorkSites = createAsyncThunk(
 );
 
 
+export const fetchRecommendations = createAsyncThunk(
+    'schedule/fetchRecommendations',
+    async ({ positionId, shiftId, date, scheduleId }, { getState, rejectWithValue }) => {
+        try {
+            const state = getState();
+            const pendingChanges = state.schedule.pendingChanges;
 
+            const virtualChanges = Object.values(pendingChanges || {}).map(change => ({
+                action: change.action,
+                emp_id: change.empId,
+                position_id: change.positionId,
+                shift_id: change.shiftId,
+                date: change.date
+            }));
 
+            console.log('fetchRecommendations thunk: calling API');
+
+            const response = await employeeAPI.fetchRecommendations(
+                scheduleId,
+                positionId,
+                shiftId,
+                date,
+                virtualChanges.length > 0 ? virtualChanges : null
+            );
+
+            console.log('fetchRecommendations thunk: API response:', response);
+            console.log('fetchRecommendations thunk: returning data:', response.data);
+
+            return response;
+        } catch (error) {
+            console.error('fetchRecommendations thunk error:', error);
+            return rejectWithValue(error.response?.message || 'Failed to fetch recommendations');
+        }
+    }
+);
+
+export const selectPendingChanges = state => state.schedule.pendingChanges;
+export const selectRecommendationsLoading = state => state.schedule.recommendationsLoading;
+export const selectRecommendationsError = state => state.schedule.error;
 
 const scheduleSlice = createSlice({
     name: 'schedule',
@@ -168,7 +189,15 @@ const scheduleSlice = createSlice({
         schedules: [],
         scheduleDetails: null,
         workSites: [],
-        recommendations: { available: [], cross_position: [], unavailable_busy: [], unavailable_hard: [], unavailable_soft: [] },
+        recommendations: {
+            available: [],
+            cross_position: [],
+            other_site: [],
+            unavailable_busy: [],
+            unavailable_hard: [],
+            unavailable_soft: [],
+            unavailable_permanent: []
+        },
 
 
         loading: 'idle',
@@ -229,10 +258,14 @@ const scheduleSlice = createSlice({
         addPendingChange(state, action) {
             const { key, change } = action.payload;
             state.pendingChanges[key] = change;
+            console.log('Added pending change:', key, change);
+            console.log('All pending changes:', state.pendingChanges);
         },
         removePendingChange(state, action) {
             const key = action.payload;
             delete state.pendingChanges[key];
+            console.log('Removed pending change:', key);
+            console.log('Remaining pending changes:', state.pendingChanges);
         },
         clearPositionChanges(state, action) {
             const positionId = action.payload;
@@ -351,17 +384,22 @@ const scheduleSlice = createSlice({
             })
 
             .addCase(fetchRecommendations.pending, (state) => {
+                console.log('fetchRecommendations.pending');
                 state.recommendationsLoading = 'pending';
                 state.error = null;
             })
             .addCase(fetchRecommendations.fulfilled, (state, action) => {
+                console.log('fetchRecommendations.fulfilled, payload:', action.payload);
                 state.recommendationsLoading = 'succeeded';
                 state.recommendations = action.payload;
+                state.error = null;
             })
             .addCase(fetchRecommendations.rejected, (state, action) => {
+                console.log('fetchRecommendations.rejected, error:', action.payload);
                 state.recommendationsLoading = 'failed';
-                state.error = action.payload; // Можно использовать общий error или отдельный
+                state.error = action.payload;
             })
+
             // Обработка fetchWorkSites
             .addCase(fetchWorkSites.pending, (state) => {
                 state.workSitesLoading = 'pending';
