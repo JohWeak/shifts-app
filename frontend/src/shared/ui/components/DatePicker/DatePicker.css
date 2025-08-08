@@ -62,7 +62,7 @@
 .popover.custom-calendar-popover .rdp-day_button {
     width: 38px !important;
     height: 38px !important;
-    border-radius: var(--radius-base) !important;
+    border-radius: var(--radius-sm) !important;
     font-size: var(--text-sm) !important;
     border: 1px solid transparent !important;
     background-color: transparent !important;
@@ -75,13 +75,13 @@
     cursor: not-allowed;
 }
 
-.popover.custom-calendar-popover .rdp-day_selected .rdp-day_button,
-.popover.custom-calendar-popover .rdp-day_selected .rdp-day_button:hover {
-    color: var(--bs-white) !important;
-    background-color: var(--bs-primary) !important;
-    border-color: var(--bs-primary) !important;
-    font-weight: 600 !important;
-}
+/*.popover.custom-calendar-popover .rdp-day_selected .rdp-day_button,*/
+/*.popover.custom-calendar-popover .rdp-day_selected .rdp-day_button:hover {*/
+/*    color: var(--bs-white) !important;*/
+/*    background-color: var(--bs-primary) !important;*/
+/*    border-color: var(--bs-primary) !important;*/
+/*    font-weight: 600 !important;*/
+/*}*/
 .popover.custom-calendar-popover .rdp-day_outside .rdp-day_button {
     opacity: 0.3 !important;
 }
@@ -172,38 +172,46 @@
 }
 
 /* ========================================================================
-    ЧАСТЬ 4: СТИЛИ ДЛЯ ВЫДЕЛЕНИЯ НЕДЕЛИ (ПЕРЕРАБОТАННАЯ ВЕРСИЯ)
+    ЧАСТЬ 4: СТИЛИ ДЛЯ ВЫДЕЛЕНИЯ НЕДЕЛИ (ВЕРСИЯ "КАПСУЛА")
    ======================================================================== */
 
-/* 1. ОБЩИЙ ФОН ДЛЯ ВЫДЕЛЕННОЙ НЕДЕЛИ (ПРИ НАВЕДЕНИИ ИЛИ ВЫБОРЕ) */
-/* Это "подложка", на которой мы будем рисовать остальное */
-.popover.custom-calendar-popover .rdp-day_modifier--week-highlight .rdp-day_button,
-.popover.custom-calendar-popover .rdp-day_modifier--week-selected .rdp-day_button {
+/* --- 1. СТИЛЬ ДЛЯ НАВЕДЕНИЯ (hover) --- */
+/* При наведении вся неделя становится светло-синей "капсулой" */
+
+.popover.custom-calendar-popover .rdp-day_modifier--hovered_week .rdp-day_button {
     background-color: var(--bs-primary-bg-subtle) !important;
-    color: var(--bs-body-color) !important;
-}
-[data-theme='dark'] .popover.custom-calendar-popover .rdp-day_modifier--week-highlight .rdp-day_button,
-[data-theme='dark'] .popover.custom-calendar-popover .rdp-day_modifier--week-selected .rdp-day_button {
-    background-color: var(--bs-gray-900) !important;
+    color: var(--bs-gray-900) !important;
 }
 
 
-/* 3. СТИЛЬ ДЛЯ КОНКРЕТНО ВЫБРАННОГО ДНЯ */
-/* Это самый высокий приоритет. Он должен перекрывать фон недели и быть ярким кружком. */
-.popover.custom-calendar-popover .rdp-day_selected .rdp-day_button,
-.popover.custom-calendar-popover .rdp-day_selected .rdp-day_button:hover { /* Стиль не меняется при наведении */
+/* --- 2. СТИЛЬ ДЛЯ ВЫБРАННОЙ НЕДЕЛИ (selected) --- */
+/* Дни МЕЖДУ началом и концом недели имеют светло-синий фон */
+
+.popover.custom-calendar-popover .rdp-day_modifier--selected_week .rdp-day_button {
+    background-color: var(--bs-primary-bg-subtle) !important;
+    /*border-radius: 0 !important; !* Убираем скругление у серединки *!*/
+    color: var(--bs-gray-900) !important;
+}
+
+
+/* --- 3. АКЦЕНТЫ НА НАЧАЛО И КОНЕЦ ВЫБРАННОЙ НЕДЕЛИ --- */
+/* Начало и конец выбранной недели - ЯРКО-СИНИЕ КРУГИ */
+
+.popover.custom-calendar-popover .rdp-day_modifier--selected_week_start .rdp-day_button,
+.popover.custom-calendar-popover .rdp-day_modifier--selected_week_end .rdp-day_button {
     background-color: var(--bs-primary) !important;
     color: var(--bs-white) !important;
     font-weight: 600 !important;
-    border: 1px solid transparent !important; /* Убираем рамку от "сегодня" */
 }
 
 
-/* 4. СТИЛЬ ДЛЯ СЕГОДНЯШНЕГО ДНЯ */
-/* Применяется, только если он НЕ выбран. Если выбран, сработает правило №3. */
-.popover.custom-calendar-popover .rdp-day_today:not(.rdp-day_selected) .rdp-day_button {
+/* --- 4. СТИЛЬ ДЛЯ СЕГОДНЯШНЕГО ДНЯ (today) --- */
+/* Сохраняем рамку для сегодняшнего дня, если он не является частью выбранной недели */
+.popover.custom-calendar-popover .rdp-day_today:not(.rdp-day_modifier--selected_week) .rdp-day_button {
     font-weight: 700 !important;
     color: var(--bs-primary) !important;
     border: 1px solid var(--bs-primary) !important;
 }
-
+.popover.custom-calendar-popover .rdp-day_today.rdp-day_modifier--selected_week .rdp-day_button {
+    border: 1px solid transparent !important; /* Убираем рамку, если он внутри выбора */
+}

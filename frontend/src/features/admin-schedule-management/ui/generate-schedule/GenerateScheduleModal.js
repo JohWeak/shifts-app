@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from 'shared/config/scheduleConstants';
 import {fetchWorkSites, compareAlgorithms} from '../../model/scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import { getNextWeekStart } from 'shared/lib/utils/scheduleUtils';
+import { getNextWeekStart, isValidWeekStartDate } from 'shared/lib/utils/scheduleUtils';
 import DatePicker from 'shared/ui/components/DatePicker/DatePicker';
 import CompareAlgorithmsModal from './CompareAlgorithmsModal';
 import './GenerateScheduleModal.css';
@@ -20,10 +20,12 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
     const { systemSettings } = useSelector(state => state.settings);
     const weekStartDay = systemSettings?.weekStartDay || 0;
 
+    const minSelectableDate = getNextWeekStart(weekStartDay);
+
     // Локальное состояние для настроек формы
     const [settings, setSettings] = useState({
         ...DEFAULT_GENERATION_SETTINGS,
-        weekStart: getNextWeekStart(weekStartDay),
+        weekStart: minSelectableDate,
         algorithm: 'auto'
     });
 
@@ -50,7 +52,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
             // Сброс настроек при закрытии модала
             setSettings({
                 ...DEFAULT_GENERATION_SETTINGS,
-                weekStart: getNextWeekStart(weekStartDay),
+                weekStart: minSelectableDate,
                 site_id: settings.site_id
             });
             setFormError('');
@@ -132,7 +134,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                                             value={settings.weekStart}
                                             weekStartsOn={weekStartDay}
                                             onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
-                                            minDate={new Date()}
+                                            minDate={minSelectableDate}
                                             placeholder={t('schedule.selectStartDate')}
                                             dateFormat="dd.MM.yyyy"
                                             isInvalid={!!formError}
