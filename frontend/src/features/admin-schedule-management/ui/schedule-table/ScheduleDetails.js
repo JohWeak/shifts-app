@@ -181,11 +181,11 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                 show={showUnpublishModal}
                 onHide={() => setShowUnpublishModal(false)}
                 onConfirm={() => handleStatusUpdate('draft')}
-                title={t('schedule.unpublishEdit')}
+                title={t('schedule.unpublish')}
                 message={t('schedule.confirmUnpublish')}
                 variant="warning"
                 loading={loading === 'pending'}
-                confirmText={t('schedule.unpublishEdit')}
+                confirmText={t('schedule.unpublish')}
                 confirmVariant="warning"
             />
         </>

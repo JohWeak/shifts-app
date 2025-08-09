@@ -21,7 +21,7 @@ const dateFnsLocales = {
  * Получает день начала недели из настроек системы
  */
 export const getWeekStartDay = (systemSettings) => {
-    return systemSettings?.weekStartDay ?? 0; // По умолчанию воскресенье
+    return systemSettings?.weekStartDay ?? 0;
 };
 
 /**
@@ -257,7 +257,6 @@ export const formatWeekRange = (weekOrStartDate, currentLocale = 'en') => {
         // Если входные данные некорректны
         return '';
     }
-    // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
     const locale = dateFnsLocales[currentLocale] || enUS;
 
@@ -287,7 +286,7 @@ export const formatWeekRange = (weekOrStartDate, currentLocale = 'en') => {
 };
 
 export const canDeleteSchedule = (schedule) => {
-    return schedule.status !== 'published';
+    return ['draft', 'unpublished'].includes(schedule.status?.toLowerCase());
 };
 /**
  * Форматирует имя сотрудника с учетом различных опций.

@@ -78,7 +78,7 @@ const ScheduleActionButtons = ({
                             className="unpublish-btn"
                         >
                             <i className="bi bi-pencil-square me-2"></i>
-                            {t('schedule.unpublishEdit')}
+                            {t('schedule.unpublish')}
                         </Button>
                     )}
                 </div>

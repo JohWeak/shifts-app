@@ -9,13 +9,20 @@ import { useSortableData } from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 import { deleteSchedule, updateScheduleStatus } from '../../model/scheduleSlice';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
+import {
+    formatScheduleDate,
+    canDeleteSchedule,
+    formatDateTime,
+    formatFullDate,
+    formatWeekRange
+} from "shared/lib/utils/scheduleUtils";
 import ScheduleActionButtons from '../ActionButtons/ScheduleActionButtons';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import './ScheduleList.css';
 
 const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
     const dispatch = useDispatch();
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
 
     const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -92,27 +99,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         sortAccessors
     );
 
-    const formatScheduleDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        try {
-            return format(new Date(dateString), 'MMM dd, yyyy');
-        } catch (error) {
-            return 'Invalid Date';
-        }
-    };
 
-    const formatDateTime = (dateString) => {
-        if (!dateString) return '-';
-        try {
-            return format(new Date(dateString), 'MMM dd, yyyy HH:mm');
-        } catch (error) {
-            return 'Invalid Date';
-        }
-    };
-
-    const canDeleteSchedule = (schedule) => {
-        return ['draft', 'unpublished'].includes(schedule.status?.toLowerCase());
-    };
 
     const handleDeleteClick = (schedule) => {
         setScheduleToDelete(schedule);
@@ -192,89 +179,6 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         return currentWeekSchedule && currentWeekSchedule.id === schedule.id;
     };
 
-    const ActionButtons = ({ schedule }) => {
-        const dropdownRef = useRef(null);
-        const [dropdownStyle, setDropdownStyle] = useState({});
-
-        const handleDropdownToggle = (isOpen) => {
-            if (isOpen && dropdownRef.current) {
-                const button = dropdownRef.current.querySelector('.action-dropdown-toggle');
-                if (button) {
-                    const rect = button.getBoundingClientRect();
-                    setDropdownStyle({
-                        position: 'fixed',
-                        top: `${rect.bottom }px`, // Small gap from button
-                        left: `${rect.left - 100}px`, // Adjust for menu width
-                        zIndex: 1055
-                    });
-                }
-            }
-        };
-
-        return (
-            <div className="schedule-actions" onClick={(e) => e.stopPropagation()}>
-                <Dropdown
-                    align="end"
-                    ref={dropdownRef}
-                    onToggle={handleDropdownToggle}
-                >
-                    <Dropdown.Toggle
-                        variant="light"
-                        size="sm"
-                        className="action-dropdown-toggle"
-                    >
-                        <i className="bi bi-three-dots-vertical"></i>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu style={dropdownStyle}>
-                        <Dropdown.Item onClick={() => onViewDetails(schedule.id)}>
-                            <i className="bi bi-eye me-2"></i>
-                            {t('common.view')}
-                        </Dropdown.Item>
-
-                        {schedule.status === 'draft' && (
-                            <>
-                                <Dropdown.Item onClick={() => onViewDetails(schedule.id)}>
-                                    <i className="bi bi-pencil me-2"></i>
-                                    {t('common.edit')}
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    onClick={() => handlePublishClick(schedule)}
-                                    className="text-success"
-                                >
-                                    <i className="bi bi-upload me-2"></i>
-                                    {t('schedule.publish')}
-                                </Dropdown.Item>
-                            </>
-                        )}
-
-                        {schedule.status === 'published' && (
-                            <Dropdown.Item
-                                onClick={() => handleUnpublishClick(schedule)}
-                                className="text-warning"
-                            >
-                                <i className="bi bi-pencil-square me-2"></i>
-                                {t('schedule.unpublish')}
-                            </Dropdown.Item>
-                        )}
-
-                        {canDeleteSchedule(schedule) && (
-                            <>
-                                <Dropdown.Divider />
-                                <Dropdown.Item
-                                    onClick={() => handleDeleteClick(schedule)}
-                                    className="text-danger"
-                                >
-                                    <i className="bi bi-trash me-2"></i>
-                                    {t('common.delete')}
-                                </Dropdown.Item>
-                            </>
-                        )}
-                    </Dropdown.Menu>
-                </Dropdown>
-            </div>
-        );
-    };
-
     const ScheduleTable = ({ schedules, sortConfig, requestSort, title, emptyMessage }) => (
         <Card className="schedule-list-card mb-4">
             <Card.Header className="schedule-list-header">
@@ -333,7 +237,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                     <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
                                         <div className="week-period-cell">
                                                 <span className="date-range">
-                                                    {formatScheduleDate(schedule.start_date)} - {formatScheduleDate(schedule.end_date)}
+                                                    {formatWeekRange(schedule.start_date, locale)}
                                                 </span>
                                             {isCurrentWeek(schedule) && (
                                                 <Badge bg="info" className="ms-2 current-week-badge">
@@ -350,7 +254,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                     </td>
                                     <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
                                             <span className="last-updated">
-                                                {formatDateTime(schedule.updatedAt || schedule.createdAt)}
+                                                {formatDateTime(schedule.updatedAt || schedule.createdAt, locale)}
                                             </span>
                                     </td>
                                     <td className={`actions-cell ${isCurrentWeek(schedule) ? 'current-week-cell' : ''}`}>
@@ -427,12 +331,12 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
 
             <ConfirmationModal
                 show={!!scheduleToUnpublish}
-                title={t('schedule.unpublishEdit')}
+                title={t('schedule.unpublish')}
                 message={t('schedule.confirmUnpublish')}
                 onConfirm={handleUnpublishConfirm}
                 onCancel={() => setScheduleToUnpublish(null)}
                 loading={isUpdatingStatus}
-                confirmText={t('schedule.unpublishEdit')}
+                confirmText={t('schedule.unpublish')}
                 variant="warning"
             />
 

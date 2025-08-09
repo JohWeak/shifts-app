@@ -1,11 +1,11 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.js
 import React from 'react';
-import {Button, Col, Row} from 'react-bootstrap';
+import {Button} from 'react-bootstrap';
 import {useDispatch} from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {setActiveTab, setSelectedScheduleId} from '../../model/scheduleSlice';
-import ScheduleActions from '../schedule-list/ScheduleActions';
+import ScheduleActionButtons from "../ActionButtons/ScheduleActionButtons";
 import './ScheduleInfo.css';
 
 const ScheduleInfo = ({
@@ -59,8 +59,9 @@ const ScheduleInfo = ({
                     <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
                 </div>
                 <div className="main-actions">
-                    <ScheduleActions
-                        status={schedule.status}
+                    <ScheduleActionButtons
+                        schedule={schedule}
+                        variant="buttons"
                         onPublish={onPublish}
                         onUnpublish={onUnpublish}
                         onExport={onExport}

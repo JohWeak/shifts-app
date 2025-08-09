@@ -94,8 +94,10 @@
     cursor: pointer;
     position: relative;
     border-left: 2px solid transparent;
+}
+[dir="rtl"]  .schedule-overview-table tbody tr.schedule-row {
+    border-left: none;
     border-right: 2px solid transparent;
-
 
 }
 .schedule-overview-table tbody tr.schedule-row td{
@@ -104,6 +106,9 @@
 
 .schedule-overview-table tbody tr.schedule-row:hover {
     border-left-color: var(--bs-primary);
+}
+[dir="rtl"]  .schedule-overview-table tbody tr.schedule-row:hover {
+    border-right-color: var(--bs-primary);
 
 }
 .schedule-overview-table tbody tr.schedule-row:hover td{
