@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button, Dropdown } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { canDeleteSchedule, canPublishSchedule, canUnpublishSchedule, canEditSchedule } from 'shared/lib/utils/scheduleUtils';
 import './ScheduleActionButtons.css';
 
 const ScheduleActionButtons = ({
@@ -18,31 +19,109 @@ const ScheduleActionButtons = ({
                                    isExporting = false,
                                    className = ''
                                }) => {
-    const { t } = useI18n();
+    const { t, direction } = useI18n();
     const dropdownRef = useRef(null);
+    const menuRef = useRef(null);
     const [showMenu, setShowMenu] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-    const canDelete = ['draft', 'unpublished'].includes(schedule?.status?.toLowerCase());
-    const canPublish = schedule?.status === 'draft';
-    const canUnpublish = schedule?.status === 'published';
-    const canEdit = schedule?.status === 'draft';
+    // Use schedule utils for permissions
+    const canDelete = canDeleteSchedule(schedule);
+    const canPublish = canPublishSchedule(schedule);
+    const canUnpublish = canUnpublishSchedule(schedule);
+    const canEdit = canEditSchedule(schedule);
 
     useEffect(() => {
         if (showMenu && dropdownRef.current && variant === 'dropdown') {
             const button = dropdownRef.current.querySelector('.action-dropdown-toggle');
             if (button) {
                 const rect = button.getBoundingClientRect();
-                setMenuPosition({
-                    top: rect.bottom + 2,
-                    left: rect.right - 160 // Menu width
-                });
+                const menuWidth = 160; // Menu width
+
+                // Calculate position based on direction
+                if (direction === 'rtl') {
+                    setMenuPosition({
+                        top: rect.bottom + 2,
+                        left: rect.left // Align to left edge in RTL
+                    });
+                } else {
+                    setMenuPosition({
+                        top: rect.bottom + 2,
+                        left: rect.right - menuWidth // Align to right edge in LTR
+                    });
+                }
             }
         }
-    }, [showMenu, variant]);
+    }, [showMenu, variant, direction]);
 
-    const handleToggle = (isOpen) => {
-        setShowMenu(isOpen);
+    // Handle click outside to close menu
+    useEffect(() => {
+        if (!showMenu) return;
+
+        const handleClickOutside = (event) => {
+            // Check if click is outside both button and menu
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target) &&
+                menuRef.current &&
+                !menuRef.current.contains(event.target)
+            ) {
+                setShowMenu(false);
+            }
+        };
+
+        const handleEscKey = (event) => {
+            if (event.key === 'Escape') {
+                setShowMenu(false);
+            }
+        };
+
+        // Add delay to prevent immediate closing
+        setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleEscKey);
+        }, 0);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscKey);
+        };
+    }, [showMenu]);
+
+    // Close other dropdowns when opening this one
+    useEffect(() => {
+        if (!showMenu) return;
+
+        const closeOtherDropdowns = () => {
+            // Dispatch custom event to close other dropdowns
+            const event = new CustomEvent('closeDropdowns', { detail: { exceptId: dropdownRef.current?.id } });
+            document.dispatchEvent(event);
+        };
+
+        closeOtherDropdowns();
+    }, [showMenu]);
+
+    // Listen for close events from other dropdowns
+    useEffect(() => {
+        const handleCloseEvent = (event) => {
+            if (dropdownRef.current?.id !== event.detail.exceptId) {
+                setShowMenu(false);
+            }
+        };
+
+        document.addEventListener('closeDropdowns', handleCloseEvent);
+        return () => document.removeEventListener('closeDropdowns', handleCloseEvent);
+    }, []);
+
+    // Generate unique ID for this dropdown
+    useEffect(() => {
+        if (dropdownRef.current && !dropdownRef.current.id) {
+            dropdownRef.current.id = `dropdown-${Math.random().toString(36).substr(2, 9)}`;
+        }
+    }, []);
+
+    const handleToggle = () => {
+        setShowMenu(!showMenu);
     };
 
     const handleItemClick = (callback) => {
@@ -59,7 +138,7 @@ const ScheduleActionButtons = ({
             <div className={`schedule-action-buttons ${className}`}>
                 {/* Status action button */}
                 <div className="status-action">
-                    {canPublish && (
+                    {canPublish && onPublish && (
                         <Button
                             variant="success"
                             size={size}
@@ -70,7 +149,7 @@ const ScheduleActionButtons = ({
                             {t('schedule.publish')}
                         </Button>
                     )}
-                    {canUnpublish && (
+                    {canUnpublish && onUnpublish && (
                         <Button
                             variant="warning"
                             size={size}
@@ -78,7 +157,7 @@ const ScheduleActionButtons = ({
                             className="unpublish-btn"
                         >
                             <i className="bi bi-pencil-square me-2"></i>
-                            {t('schedule.unpublish')}
+                            {t('schedule.unpublishEdit')}
                         </Button>
                     )}
                 </div>
@@ -121,20 +200,20 @@ const ScheduleActionButtons = ({
                 onClick={(e) => e.stopPropagation()}
                 ref={dropdownRef}
             >
-                <Dropdown show={showMenu} onToggle={handleToggle}>
-                    <Dropdown.Toggle
-                        variant="light"
-                        size={size}
-                        className="action-dropdown-toggle"
-                    >
-                        <i className="bi bi-three-dots-vertical"></i>
-                    </Dropdown.Toggle>
-                </Dropdown>
+                <button
+                    type="button"
+                    className={`btn btn-light btn-sm action-dropdown-toggle ${showMenu ? 'show' : ''}`}
+                    onClick={handleToggle}
+                    aria-expanded={showMenu}
+                >
+                    <i className="bi bi-three-dots-vertical"></i>
+                </button>
             </div>
 
             {/* Portal for dropdown menu */}
             {showMenu && ReactDOM.createPortal(
                 <div
+                    ref={menuRef}
                     className="schedule-action-menu-portal"
                     style={{
                         position: 'fixed',
@@ -142,6 +221,8 @@ const ScheduleActionButtons = ({
                         left: menuPosition.left,
                         zIndex: 9999
                     }}
+                    onClick={(e) => e.stopPropagation()}
+                    dir={direction}
                 >
                     <div className="dropdown-menu show">
                         {onView && (
@@ -150,7 +231,7 @@ const ScheduleActionButtons = ({
                                 onClick={handleItemClick(onView)}
                             >
                                 <i className="bi bi-eye"></i>
-                                {t('common.view')}
+                                <span>{t('common.view')}</span>
                             </button>
                         )}
 
@@ -160,7 +241,7 @@ const ScheduleActionButtons = ({
                                 onClick={handleItemClick(onEdit)}
                             >
                                 <i className="bi bi-pencil"></i>
-                                {t('common.edit')}
+                                <span>{t('common.edit')}</span>
                             </button>
                         )}
 
@@ -170,7 +251,7 @@ const ScheduleActionButtons = ({
                                 onClick={handleItemClick(onPublish)}
                             >
                                 <i className="bi bi-upload"></i>
-                                {t('schedule.publish')}
+                                <span>{t('schedule.publish')}</span>
                             </button>
                         )}
 
@@ -180,7 +261,7 @@ const ScheduleActionButtons = ({
                                 onClick={handleItemClick(onUnpublish)}
                             >
                                 <i className="bi bi-pencil-square"></i>
-                                {t('schedule.unpublish')}
+                                <span>{t('schedule.unpublish')}</span>
                             </button>
                         )}
 
@@ -192,7 +273,7 @@ const ScheduleActionButtons = ({
                                     onClick={handleItemClick(() => onExport('pdf'))}
                                 >
                                     <i className="bi bi-file-pdf"></i>
-                                    {t('schedule.export')}
+                                    <span>{t('schedule.export')}</span>
                                 </button>
                             </>
                         )}
@@ -205,7 +286,7 @@ const ScheduleActionButtons = ({
                                     onClick={handleItemClick(onDelete)}
                                 >
                                     <i className="bi bi-trash"></i>
-                                    {t('common.delete')}
+                                    <span>{t('common.delete')}</span>
                                 </button>
                             </>
                         )}

@@ -286,7 +286,23 @@ export const formatWeekRange = (weekOrStartDate, currentLocale = 'en') => {
 };
 
 export const canDeleteSchedule = (schedule) => {
+    if (!schedule) return false;
     return ['draft', 'unpublished'].includes(schedule.status?.toLowerCase());
+};
+
+export const canPublishSchedule = (schedule) => {
+    if (!schedule) return false;
+    return schedule.status === 'draft';
+};
+
+export const canUnpublishSchedule = (schedule) => {
+    if (!schedule) return false;
+    return schedule.status === 'published';
+};
+
+export const canEditSchedule = (schedule) => {
+    if (!schedule) return false;
+    return schedule.status === 'draft';
 };
 /**
  * Форматирует имя сотрудника с учетом различных опций.

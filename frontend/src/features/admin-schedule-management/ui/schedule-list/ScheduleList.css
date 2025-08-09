@@ -97,7 +97,7 @@
 }
 [dir="rtl"]  .schedule-overview-table tbody tr.schedule-row {
     border-left: none;
-    border-right: 2px solid transparent;
+    border-right: 2px solid inherit;
 
 }
 .schedule-overview-table tbody tr.schedule-row td{

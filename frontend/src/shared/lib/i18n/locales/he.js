@@ -134,7 +134,8 @@ export const he = {
         week: 'שבוע',
         weeks: 'שבועות',
         yes: 'כן',
-        new: 'חדש'
+        new: 'חדש',
+        view: 'צפה',
     },
     constraints: {
         alreadySubmitted: 'כבר שלחת אילוצים לשבוע זה',

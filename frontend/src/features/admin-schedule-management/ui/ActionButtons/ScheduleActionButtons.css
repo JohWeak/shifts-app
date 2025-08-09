@@ -124,6 +124,7 @@
     width: 1.25rem;
     text-align: center;
     font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
 .schedule-action-menu-portal .dropdown-divider {
@@ -131,6 +132,15 @@
     margin: 0.25rem 0;
     overflow: hidden;
     border-top: 1px solid var(--bs-border-color);
+}
+
+/* RTL for button variant */
+
+[dir="rtl"] .schedule-action-buttons .publish-btn i,
+[dir="rtl"] .schedule-action-buttons .unpublish-btn i,
+[dir="rtl"] .schedule-action-buttons .export-btn i {
+    margin-right: 0;
+    margin-left: 0.5rem;
 }
 
 /* Responsive adjustments */

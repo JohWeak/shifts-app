@@ -125,10 +125,6 @@
 }
 
 
-/* ... (rest of the file is the same as before) ... */
-[dir="rtl"] .schedule-actions-bar {
-    flex-direction: row-reverse;
-}
 
 .schedule-info-wrapper .back-button {
     display: flex;
