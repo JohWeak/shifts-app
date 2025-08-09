@@ -9,6 +9,7 @@ import { useSortableData } from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 import { deleteSchedule, updateScheduleStatus } from '../../model/scheduleSlice';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
+import ScheduleActionButtons from '../ActionButtons/ScheduleActionButtons';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import './ScheduleList.css';
 
@@ -66,7 +67,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         'week': (schedule) => schedule.start_date,
         'site': (schedule) => schedule.workSite?.site_name || '',
         'status': (schedule) => schedule.status,
-        'updatedAt': (schedule) => schedule.updated_at || schedule.created_at,
+        'updatedAt': (schedule) => schedule.updatedAt || schedule.createdAt,
     }), []);
 
     // Use sortable hook for active schedules
@@ -202,7 +203,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                     const rect = button.getBoundingClientRect();
                     setDropdownStyle({
                         position: 'fixed',
-                        top: `${rect.bottom + 2}px`, // Small gap from button
+                        top: `${rect.bottom }px`, // Small gap from button
                         left: `${rect.left - 100}px`, // Adjust for menu width
                         zIndex: 1055
                     });
@@ -286,7 +287,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                     </div>
                 ) : (
                     <div className="table-responsive">
-                        <Table hover className="schedule-overview-table mb-0">
+                        <Table className="schedule-overview-table mb-0">
                             <thead>
                             <tr>
                                 <SortableHeader
@@ -349,11 +350,18 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                     </td>
                                     <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
                                             <span className="last-updated">
-                                                {formatDateTime(schedule.updated_at || schedule.created_at)}
+                                                {formatDateTime(schedule.updatedAt || schedule.createdAt)}
                                             </span>
                                     </td>
                                     <td className={`actions-cell ${isCurrentWeek(schedule) ? 'current-week-cell' : ''}`}>
-                                        <ActionButtons schedule={schedule} />
+                                        <ScheduleActionButtons
+                                            schedule={schedule}
+                                            variant="dropdown"
+                                            onView={() => onViewDetails(schedule.id)}
+                                            onPublish={() => handlePublishClick(schedule)}
+                                            onUnpublish={() => handleUnpublishClick(schedule)}
+                                            onDelete={canDeleteSchedule(schedule) ? () => handleDeleteClick(schedule) : null}
+                                        />
                                     </td>
                                 </tr>
                             ))}

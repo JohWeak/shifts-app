@@ -19,7 +19,7 @@
     white-space: nowrap;
 }
 
-[data-bs-theme="dark"] .requirements-matrix th {
+[data-theme="dark"] .requirements-matrix th {
     background-color: var(--bs-gray-800);
 }
 
@@ -80,9 +80,9 @@
 }
 
 
-[data-bs-theme="dark"] .total-cell,
-[data-bs-theme="dark"] .day-total,
-[data-bs-theme="dark"] .grand-total {
+[data-theme="dark"] .total-cell,
+[data-theme="dark"] .day-total,
+[data-theme="dark"] .grand-total {
     background-color: var(--bs-gray-900);
 }
 

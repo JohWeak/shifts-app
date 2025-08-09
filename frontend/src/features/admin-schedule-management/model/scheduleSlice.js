@@ -187,9 +187,6 @@ export const fetchRecommendations = createAsyncThunk(
     }
 );
 
-export const selectPendingChanges = state => state.schedule.pendingChanges;
-export const selectRecommendationsLoading = state => state.schedule.recommendationsLoading;
-export const selectRecommendationsError = state => state.schedule.error;
 
 const scheduleSlice = createSlice({
     name: 'schedule',

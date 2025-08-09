@@ -20,7 +20,7 @@
     background-color: var(--bs-gray-200);
 }
 
-[data-bs-theme="dark"] .nav-pills .nav-link:not(.active):hover {
+[data-theme="dark"] .nav-pills .nav-link:not(.active):hover {
     background-color: var(--bs-gray-800);
 }
 

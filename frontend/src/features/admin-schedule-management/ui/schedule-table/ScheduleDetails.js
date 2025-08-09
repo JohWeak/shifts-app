@@ -6,7 +6,6 @@ import {Card, Alert} from 'react-bootstrap';
 import ScheduleEditor from './ScheduleEditor';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import ScheduleInfo from './ScheduleInfo';
-import ScheduleActions from '../schedule-list/ScheduleActions';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
