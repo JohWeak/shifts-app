@@ -739,6 +739,9 @@ export const he = {
         noActiveSchedules: 'אין לוחות זמנים פעילים',
         noInactiveSchedules: 'אין לוחות זמנים קודמים',
         generatingSchedule: 'יוצר לוח זמנים...',
+        unpublishToEdit: 'בטל פרסום כדי לאפשר עריכה',
+        cannotEditStatus: 'לא ניתן לערוך לוח זמנים בסטטוס הנוכחי',
+        saveChangesBeforePublish: 'שמור את כל השינויים לפני הפרסום',
     },
     settings: {
         algorithmMaxTime: 'זמן מקסימלי לאלגוריתם',

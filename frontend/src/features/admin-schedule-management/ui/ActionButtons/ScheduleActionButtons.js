@@ -1,6 +1,6 @@
 // frontend/src/features/admin-schedule-management/ui/ActionButtons/ScheduleActionButtons.js
 import React, { useRef, useState, useEffect } from 'react';
-import { Button, Dropdown } from 'react-bootstrap';
+import {Button, Dropdown, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { canDeleteSchedule, canPublishSchedule, canUnpublishSchedule, canEditSchedule } from 'shared/lib/utils/scheduleUtils';
@@ -17,6 +17,7 @@ const ScheduleActionButtons = ({
                                    onDelete,
                                    onExport,
                                    isExporting = false,
+                                   hasUnsavedChanges = false,
                                    className = ''
                                }) => {
     const { t, direction } = useI18n();
@@ -134,20 +135,47 @@ const ScheduleActionButtons = ({
 
     // Button group variant (for ScheduleInfo)
     if (variant === 'buttons') {
+        // Tooltip for disabled publish button
+        const renderPublishTooltip = (props) => (
+            <Tooltip id="publish-disabled-tooltip" {...props}>
+                {t('schedule.saveChangesBeforePublish')}
+            </Tooltip>
+        );
         return (
             <div className={`schedule-action-buttons ${className}`}>
                 {/* Status action button */}
                 <div className="status-action">
                     {canPublish && onPublish && (
-                        <Button
-                            variant="success"
-                            size={size}
-                            onClick={onPublish}
-                            className="publish-btn"
-                        >
-                            <i className="bi bi-check-circle me-2"></i>
-                            {t('schedule.publish')}
-                        </Button>
+                        hasUnsavedChanges ? (
+                            <OverlayTrigger
+                                placement="top"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={renderPublishTooltip}
+                            >
+                                <span className="d-inline-block">
+                                    <Button
+                                        variant="success"
+                                        size={size}
+                                        disabled
+                                        style={{ pointerEvents: 'none' }}
+                                        className="publish-btn"
+                                    >
+                                        <i className="bi bi-check-circle me-2"></i>
+                                        {t('schedule.publish')}
+                                    </Button>
+                                </span>
+                            </OverlayTrigger>
+                        ) : (
+                            <Button
+                                variant="success"
+                                size={size}
+                                onClick={onPublish}
+                                className="publish-btn"
+                            >
+                                <i className="bi bi-check-circle me-2"></i>
+                                {t('schedule.publish')}
+                            </Button>
+                        )
                     )}
                     {canUnpublish && onUnpublish && (
                         <Button
@@ -157,7 +185,7 @@ const ScheduleActionButtons = ({
                             className="unpublish-btn"
                         >
                             <i className="bi bi-pencil-square me-2"></i>
-                            {t('schedule.unpublish')}
+                            {t('schedule.unpublishEdit')}
                         </Button>
                     )}
                 </div>
@@ -245,7 +273,7 @@ const ScheduleActionButtons = ({
                             </button>
                         )}
 
-                        {canPublish && onPublish && (
+                        {canPublish && onPublish && !hasUnsavedChanges && (
                             <button
                                 className="dropdown-item text-success"
                                 onClick={handleItemClick(onPublish)}

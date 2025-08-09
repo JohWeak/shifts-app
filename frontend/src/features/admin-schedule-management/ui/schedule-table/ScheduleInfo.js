@@ -1,7 +1,7 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleInfo.js
 import React from 'react';
 import {Button} from 'react-bootstrap';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {setActiveTab, setSelectedScheduleId} from '../../model/scheduleSlice';
@@ -17,8 +17,13 @@ const ScheduleInfo = ({
                           isExporting,
                           scheduleDetails
 }) => {
-    const {t} = useI18n();
+    const {t, locale} = useI18n();
     const dispatch = useDispatch();
+    const { editingPositions, pendingChanges } = useSelector(state => state.schedule);
+
+    // Check if there are any positions being edited or unsaved changes
+    const hasUnsavedChanges = Object.values(editingPositions || {}).some(Boolean) ||
+        Object.keys(pendingChanges || {}).length > 0;
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -66,6 +71,7 @@ const ScheduleInfo = ({
                         onUnpublish={onUnpublish}
                         onExport={onExport}
                         isExporting={isExporting}
+                        hasUnsavedChanges={hasUnsavedChanges}
                     />
                 </div>
 

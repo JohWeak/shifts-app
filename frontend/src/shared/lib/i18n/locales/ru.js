@@ -744,6 +744,9 @@ export const ru = {
         noActiveSchedules: 'Нет активных расписаний',
         noInactiveSchedules: 'Нет прошедших расписаний',
         generatingSchedule: 'Генерация расписания...',
+        unpublishToEdit: 'Снимите расписание с публикации для редактирования',
+        cannotEditStatus: 'Расписание нельзя редактировать в текущем статусе',
+        saveChangesBeforePublish: 'Сохраните все изменения перед публикацией',
     },
     settings: {
         algorithmMaxTime: 'Лимит времени для алгоритма',

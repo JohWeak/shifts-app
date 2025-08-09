@@ -1,7 +1,7 @@
 // frontend/src/features/admin-schedule-management/components/ScheduleEditor.js
 import React, { useMemo, useState } from 'react';
 import {format} from "date-fns";
-import { Table, Button, Badge, Spinner, Form } from 'react-bootstrap';
+import {Table, Button, Badge, Spinner, Form, Tooltip, OverlayTrigger} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -14,7 +14,8 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor, isDarkTheme } from 'shared/lib/utils/colorUtils';
 import { useSelector } from "react-redux";
-import { formatEmployeeName as formatEmployeeNameUtil } from 'shared/lib/utils/scheduleUtils'
+import { formatEmployeeName as formatEmployeeNameUtil, canEditSchedule } from 'shared/lib/utils/scheduleUtils';
+
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './ScheduleEditor.css';
 
@@ -22,10 +23,10 @@ import './ScheduleEditor.css';
 
 const ScheduleEditor = ({
                             position,
+                            schedule,
                             isEditing = false,
                             pendingChanges = {},
                             savingChanges = false,
-                            canEdit = true,
                             onToggleEdit,
                             onSaveChanges,
                             selectedCell,
@@ -40,7 +41,8 @@ const ScheduleEditor = ({
     const { currentTheme } = useShiftColor();
     const isDark = isDarkTheme();
     const {systemSettings} = useSelector(state => state.settings);
-
+    const canEdit = canEditSchedule(schedule);
+    const isPublished = schedule?.status === 'published';
 
     // Используем наш хук для управления цветами
     const {
@@ -228,7 +230,13 @@ const ScheduleEditor = ({
     const positionPendingChanges = Object.values(pendingChanges).filter(
         change => change.positionId === position.pos_id
     );
-
+    const renderEditTooltip = (props) => (
+        <Tooltip id="edit-disabled-tooltip" {...props}>
+            {isPublished
+                ? t('schedule.unpublishToEdit')
+                : t('schedule.cannotEditStatus')}
+        </Tooltip>
+    );
 
     return (
         <div className="position-schedule-editor">
@@ -237,12 +245,12 @@ const ScheduleEditor = ({
                 <div>
                     <h6 className="mb-1">{position.pos_name}</h6>
                     <small className="text-muted">
-                        {t('employee.requiredEmployees')}: {position.num_of_emp || 0}
+                        {/*{t('employee.requiredEmployees')}: {position.num_of_emp || 0}*/}
                         <Form.Check
                             type="switch"
                             id={`name-switch-${position.pos_id}`}
                             label={t('employee.showFirstNameOnly')}
-                            className="ms-3 d-inline-block"
+                            className=" d-inline-block"
                             checked={showFirstNameOnly}
                             onChange={(e) => handleNameToggle(e.target.checked)}
                         />
@@ -255,21 +263,43 @@ const ScheduleEditor = ({
                 </div>
                 <div>
 
-                    {/* Edit button */}
-                    {canEdit && !isEditing && (
-                        <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => {
-                                console.log('Edit button clicked for position:', position.pos_id);
-                                if (onToggleEdit) {
-                                    onToggleEdit(position.pos_id);
-                                }
-                            }}
-                        >
-                            <i className="bi bi-pencil me-1"></i>
-                            {t('common.edit')}
-                        </Button>
+                    {/* Edit button - show always but disable when can't edit */}
+                    {!isEditing && (
+                        <>
+                            {!canEdit ? (
+                                <OverlayTrigger
+                                    placement="top"
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={renderEditTooltip}
+                                >
+                            <span className="d-inline-block">
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    disabled
+                                    style={{ pointerEvents: 'none' }}
+                                >
+                                    <i className="bi bi-pencil me-1"></i>
+                                    {t('common.edit')}
+                                </Button>
+                            </span>
+                                </OverlayTrigger>
+                            ) : (
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => {
+                                        console.log('Edit button clicked for position:', position.pos_id);
+                                        if (onToggleEdit) {
+                                            onToggleEdit(position.pos_id);
+                                        }
+                                    }}
+                                >
+                                    <i className="bi bi-pencil me-1"></i>
+                                    {t('common.edit')}
+                                </Button>
+                            )}
+                        </>
                     )}
 
                     {/* Save/Cancel buttons */}

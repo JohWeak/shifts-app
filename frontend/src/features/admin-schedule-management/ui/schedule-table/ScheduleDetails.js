@@ -12,7 +12,6 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 
 import './ScheduleDetails.css';
 
-// Импортируем все необходимые экшены из Redux Slice
 import {
     updateScheduleStatus,
     updateScheduleAssignments,
@@ -92,16 +91,12 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
     };
 
     const handleEmployeeClick = (date, positionId, shiftId, empId) => {
-        // Найдем assignment_id для этого сотрудника
         const assignment = scheduleDetails?.assignments?.find(a =>
             (a.pos_id === positionId || a.position_id === positionId) &&
             a.emp_id === empId &&
             a.shift_id === shiftId &&
             (a.work_date === date || a.date === date)
         );
-
-        // При клике на сотрудника открываем модальное окно для его замены
-        // Передаем assignment_id если он есть
         onCellClick(date, positionId, shiftId, empId, assignment?.id);
     };
 
@@ -144,6 +139,7 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                                 key={position.pos_id}
                                 selectedCell={selectedCell}
                                 position={position}
+                                schedule={scheduleDetails.schedule}
                                 isEditing={!!editingPositions[position.pos_id]}
                                 onToggleEdit={() => dispatch(toggleEditPosition(position.pos_id))}
                                 onSaveChanges={() => handleSaveChanges(position.pos_id)}
