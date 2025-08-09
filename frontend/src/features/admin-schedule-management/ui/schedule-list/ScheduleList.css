@@ -97,11 +97,12 @@
 }
 [dir="rtl"]  .schedule-overview-table tbody tr.schedule-row {
     border-left: none;
-    border-right: 2px solid inherit;
+    border-right: 2px solid transparent;
 
 }
 .schedule-overview-table tbody tr.schedule-row td{
     background-color: transparent;
+    transition: all 0.2s ease;
 }
 
 .schedule-overview-table tbody tr.schedule-row:hover {
@@ -113,7 +114,6 @@
 }
 .schedule-overview-table tbody tr.schedule-row:hover td{
     background-color: rgba(var(--bs-primary-rgb), 0.04)!important;
-
 }
 
 [data-theme="dark"] .schedule-overview-table tbody tr.schedule-row:hover td {
@@ -123,27 +123,14 @@
 /* Current week highlight - PROPERLY APPLIED TO CELLS */
 .schedule-overview-table tbody tr.current-week td.current-week-cell {
     background-color: rgba(var(--bs-info-rgb), 0.08) !important;
+    padding-top: 1rem;
 }
 
 .schedule-overview-table tbody tr.current-week:hover td.current-week-cell {
     background-color: rgba(var(--bs-info-rgb), 0.12) !important;
 }
 
-/* Current week left border */
-.schedule-overview-table tbody tr.current-week::before {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background-color: var(--bs-info);
-    z-index: 1;
-}
 
-/* First cell padding adjustment for current week */
-.schedule-overview-table tbody tr.current-week td:first-child {
-    /*padding-left: calc(0.75rem + 8px);*/
-}
 
 /* Week period cell */
 .schedule-overview-table .week-period-cell {
@@ -155,13 +142,29 @@
 
 .schedule-overview-table .week-period-cell .date-range {
     white-space: nowrap;
-    font-weight: 500;
+    font-size: 1rem;
+}
+
+.schedule-overview-table .site-name {
+    white-space: nowrap;
+    font-size: 0.9rem;
 }
 
 .schedule-overview-table .week-period-cell .current-week-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
     white-space: nowrap;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: var(--radius-sm);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+}
+[dir="rtl"] .schedule-overview-table .week-period-cell .current-week-badge {
+    left: auto;
+    right: 0;
 }
 
 /* Last updated column */
@@ -269,7 +272,7 @@
 .schedule-overview-table .badge {
     font-weight: 500;
     padding: 0.35em 0.65em;
-    font-size: 0.875em;
+    font-size: 0.75em;
 }
 
 /* Prevent text selection */

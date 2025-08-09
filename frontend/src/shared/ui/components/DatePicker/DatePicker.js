@@ -51,9 +51,8 @@ const DatePicker = ({
         onChange(weekStart);
     };
 
-    // ИСПРАВЛЕНО: Логика закрытия календаря
+
     const handleDayClick = (date, modifiers) => {
-        // Используем встроенный модификатор 'disabled', это надежнее
         if (modifiers.disabled) {
             return;
         }
@@ -74,10 +73,8 @@ const DatePicker = ({
         if (!disabled) setShowCalendar(true);
     };
 
-    // ИСПРАВЛЕНО: Логика применения стилей
     const modifiers = {};
 
-    // Сначала применяем стили для ВЫБРАННОЙ недели
     if (selectedDate) {
         const weekStart = startOfWeek(selectedDate, { weekStartsOn });
         const weekEnd = endOfWeek(selectedDate, { weekStartsOn });
@@ -86,7 +83,6 @@ const DatePicker = ({
         modifiers.selected_week_end = weekEnd;
     }
 
-    // Затем, НЕ УДАЛЯЯ старые, добавляем стили для НАВЕДЕННОЙ недели
     if (hoveredDay) {
         const weekStart = startOfWeek(hoveredDay, { weekStartsOn });
         const weekEnd = endOfWeek(hoveredDay, { weekStartsOn });
@@ -95,7 +91,6 @@ const DatePicker = ({
         modifiers.hovered_week_end = weekEnd;
     }
 
-    // Имена классов остались те же, их менять не нужно
     const modifiersClassNames = {
         hovered_week: 'rdp-day_modifier--hovered_week',
         hovered_week_start: 'rdp-day_modifier--hovered_week_start',

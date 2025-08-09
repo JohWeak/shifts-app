@@ -4,7 +4,6 @@ const { formatComparisonResult } = require('./helpers/date-helpers');
 const db = require('../../../models');
 const { Schedule, WorkSite, ScheduleAssignment } = db;
 
-// Импортируем сервисы
 const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
 const CPSATBridge = require('../../../services/cp-sat-bridge.service');
 /**
@@ -97,8 +96,8 @@ const generateNextWeekSchedule = async (req, res) => {
         const algorithm = req.body.algorithm || 'auto';
 
         let weekStart;
-        if (req.body.week_start) {
-            const requestedDate = dayjs(req.body.week_start);
+        if (req.body.weekStart) {
+            const requestedDate = dayjs(req.body.weekStart);
             const dayOfWeek = requestedDate.day();
 
             if (dayOfWeek !== 0) {

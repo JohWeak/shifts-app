@@ -236,9 +236,9 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                 >
                                     <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
                                         <div className="week-period-cell">
-                                                <span className="date-range">
+                                                <div className="date-range">
                                                     {formatWeekRange(schedule.start_date, locale)}
-                                                </span>
+                                                </div>
                                             {isCurrentWeek(schedule) && (
                                                 <Badge bg="info" className="ms-2 current-week-badge">
                                                     {t('schedule.currentWeek')}
@@ -247,7 +247,9 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                                         </div>
                                     </td>
                                     <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
+                                        <span className="site-name">
                                         {schedule.workSite?.site_name || 'N/A'}
+                                            </span>
                                     </td>
                                     <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
                                         <StatusBadge status={schedule.status} />

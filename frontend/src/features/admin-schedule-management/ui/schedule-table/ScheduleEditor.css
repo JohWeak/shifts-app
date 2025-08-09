@@ -13,7 +13,8 @@
 
 .position-schedule-editor .btn-success,
 .position-schedule-editor .btn-outline-secondary,
-.position-schedule-editor .btn-outline-primary {
+.position-schedule-editor .btn-outline-primary,
+.position-schedule-editor .btn-primary{
     border-radius: var(--radius-md);
     align-items: center;
     justify-content: center;
@@ -21,7 +22,6 @@
     padding: var(--space-2) var(--space-1);
     transition: all var(--transition-base);
     white-space: nowrap;
-    /*width: 100%;*/
     min-width: 100px;
 
 }

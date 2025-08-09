@@ -286,7 +286,7 @@ const ScheduleEditor = ({
                                 </OverlayTrigger>
                             ) : (
                                 <Button
-                                    variant="outline-primary"
+                                    variant="primary"
                                     size="sm"
                                     onClick={() => {
                                         console.log('Edit button clicked for position:', position.pos_id);
