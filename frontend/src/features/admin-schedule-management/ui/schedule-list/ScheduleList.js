@@ -32,13 +32,26 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [showError, setShowError] = useState(null);
-    const [isInactiveOpen, setIsInactiveOpen] = useState(() => {
-        const savedState = localStorage.getItem('inactiveSchedulesOpen');
-        return savedState !== null ? JSON.parse(savedState) : true;
+    const [openStates, setOpenStates] = useState(() => {
+        const savedStates = localStorage.getItem('schedulesOpenStates');
+        const defaultStates = {
+            active: true,
+            inactive: true
+        };
+        return savedStates ? { ...defaultStates, ...JSON.parse(savedStates) } : defaultStates;
     });
+
+    // 2. useEffect сохраняет весь объект
     useEffect(() => {
-        localStorage.setItem('inactiveSchedulesOpen', JSON.stringify(isInactiveOpen));
-    }, [isInactiveOpen]);
+        localStorage.setItem('schedulesOpenStates', JSON.stringify(openStates));
+    }, [openStates]);
+
+    const handleToggle = (key) => {
+        setOpenStates(prevStates => ({
+            ...prevStates,
+            [key]: !prevStates[key] // динамический ключ для обновления свойства
+        }));
+    };
 
     // Split schedules into active and inactive
     const {activeSchedules, inactiveSchedules, currentWeekScheduleIds} = useMemo(() => {
@@ -319,6 +332,9 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
                 title={t('schedule.activeSchedules')}
                 emptyMessage={t('schedule.noActiveSchedules')}
                 currentWeekScheduleIds={currentWeekScheduleIds}
+                isCollapsible={true}
+                isOpen={openStates.active}
+                onToggle={() => handleToggle('active')}
             />
 
             {/* Inactive Schedules */}
@@ -332,8 +348,8 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
                     emptyMessage={t('schedule.noInactiveSchedules')}
                     currentWeekScheduleIds={currentWeekScheduleIds}
                     isCollapsible={true}
-                    isOpen={isInactiveOpen}
-                    onToggle={() => setIsInactiveOpen(prev => !prev)}
+                    isOpen={openStates.inactive}
+                    onToggle={() => handleToggle('inactive')}
                 />
             )}
 

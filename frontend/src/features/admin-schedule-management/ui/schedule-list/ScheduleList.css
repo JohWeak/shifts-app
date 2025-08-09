@@ -15,25 +15,30 @@
     padding: 1rem 1.25rem;
     border-top-left-radius: var(--radius-lg)!important;
     border-top-right-radius: var(--radius-lg)!important;
-
 }
-.schedule-list-card .schedule-list-header.active {
-    background-color: rgba(var(--bs-success-rgb), 0.2);
-}
-.schedule-list-card .schedule-list-header.inactive {
-    background-color: rgba(var(--bs-danger-rgb), 0.1);
-}
-
 [data-theme="dark"] .schedule-list-card .schedule-list-header {
     background-color: var(--bs-gray-800);
     border-bottom-color: var(--bs-gray-700);
 }
-[data-theme="dark"]  .schedule-list-card .schedule-list-header.active {
+
+.schedule-list-card .schedule-list-header.active {
     background-color: rgba(var(--bs-success-rgb), 0.2);
 }
-[data-theme="dark"]  .schedule-list-card .schedule-list-header.inactive {
+.schedule-list-card .schedule-list-header.active:hover {
+    background-color: rgba(var(--bs-success-rgb), 0.25);
+}
+
+.schedule-list-card .schedule-list-header.inactive {
     background-color: rgba(var(--bs-danger-rgb), 0.1);
 }
+
+.schedule-list-card .schedule-list-header.inactive:hover {
+    background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+
+
+
 .schedule-list-header.collapsible {
     cursor: pointer;
 }
