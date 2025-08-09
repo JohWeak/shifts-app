@@ -118,7 +118,6 @@
     background-color: inherit;
     color: var(--bs-gray-700);
     font-weight: 500;
-    /*border-bottom: 2px solid var(--bs-border-color);*/
     white-space: nowrap;
     padding: 0.75rem;
 }
@@ -126,12 +125,18 @@
 [data-theme="dark"] .schedule-overview-table thead th {
 
     color: var(--bs-gray-300);
-    /*border-bottom-color: var(--bs-gray-700);*/
 }
 
 .schedule-overview-table thead th.actions-header {
-    width: 60px;
-    min-width: 60px;
+    font-size: 0.75rem;
+    color: var(--bs-body-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+    background-color: var(--bs-gray-100);
+}
+[data-theme="dark"] .schedule-overview-table thead th.actions-header {
+    background-color: var(--bs-gray-900);
 }
 
 /* Table body */
