@@ -1,13 +1,13 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-list/ScheduleList.js
-import React, { useState, useMemo, useRef } from 'react';
-import { Table, Card, Alert, Badge, Dropdown } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
-import { format, parseISO, isAfter, startOfWeek, endOfWeek } from 'date-fns';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useMediaQuery } from 'shared/hooks/useMediaQuery';
-import { useSortableData } from 'shared/hooks/useSortableData';
+import React, {useState, useMemo, useRef} from 'react';
+import {Table, Card, Alert, Badge, Dropdown} from 'react-bootstrap';
+import {useDispatch} from 'react-redux';
+import {format, parseISO, isAfter, startOfWeek, endOfWeek} from 'date-fns';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useMediaQuery} from 'shared/hooks/useMediaQuery';
+import {useSortableData} from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
-import { deleteSchedule, updateScheduleStatus } from '../../model/scheduleSlice';
+import {deleteSchedule, updateScheduleStatus} from '../../model/scheduleSlice';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {
     formatScheduleDate,
@@ -20,9 +20,9 @@ import ScheduleActionButtons from '../ActionButtons/ScheduleActionButtons';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import './ScheduleList.css';
 
-const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
+const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
     const dispatch = useDispatch();
-    const { t, locale } = useI18n();
+    const {t, locale} = useI18n();
 
     const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -34,14 +34,14 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
     const [showError, setShowError] = useState(null);
 
     // Split schedules into active and inactive
-    const { activeSchedules, inactiveSchedules, currentWeekSchedule } = useMemo(() => {
+    const {activeSchedules, inactiveSchedules, currentWeekScheduleIds} = useMemo(() => {
         const today = new Date();
-        const currentWeekStart = startOfWeek(today, { weekStartsOn: 0 });
-        const currentWeekEnd = endOfWeek(today, { weekStartsOn: 0 });
+        const currentWeekStart = startOfWeek(today, {weekStartsOn: 0});
+        const currentWeekEnd = endOfWeek(today, {weekStartsOn: 0});
 
         const active = [];
         const inactive = [];
-        let currentWeek = null;
+        const currentWeek = [];
 
         schedules.forEach(schedule => {
             if (!schedule.end_date) return;
@@ -51,7 +51,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
 
             // Check if this is the current week schedule
             if (startDate <= currentWeekEnd && endDate >= currentWeekStart) {
-                currentWeek = schedule;
+                currentWeek.push(schedule);
             }
 
             // Split into active/inactive based on end date
@@ -61,11 +61,11 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                 inactive.push(schedule);
             }
         });
-
+        const currentWeekScheduleIds = new Set(currentWeek.map(s => s.id));
         return {
             activeSchedules: active,
             inactiveSchedules: inactive,
-            currentWeekSchedule: currentWeek
+            currentWeekScheduleIds: currentWeekScheduleIds
         };
     }, [schedules]);
 
@@ -84,7 +84,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         sortConfig: activeSortConfig
     } = useSortableData(
         activeSchedules,
-        { field: 'week', order: 'DESC' },
+        {field: 'week', order: 'ASC'},
         sortAccessors
     );
 
@@ -95,10 +95,9 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         sortConfig: inactiveSortConfig
     } = useSortableData(
         inactiveSchedules,
-        { field: 'week', order: 'DESC' },
+        {field: 'week', order: 'DESC'},
         sortAccessors
     );
-
 
 
     const handleDeleteClick = (schedule) => {
@@ -175,11 +174,8 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
         }
     };
 
-    const isCurrentWeek = (schedule) => {
-        return currentWeekSchedule && currentWeekSchedule.id === schedule.id;
-    };
 
-    const ScheduleTable = ({ schedules, sortConfig, requestSort, title, emptyMessage }) => (
+    const ScheduleTable = ({schedules, sortConfig, requestSort, title, emptyMessage, currentWeekScheduleIds}) => (
         <Card className="schedule-list-card mb-4">
             <Card.Header className="schedule-list-header">
                 <h5 className="mb-0">{title}</h5>
@@ -228,49 +224,52 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                             </tr>
                             </thead>
                             <tbody>
-                            {schedules.map(schedule => (
-                                <tr
-                                    key={schedule.id}
-                                    className={`schedule-row ${isCurrentWeek(schedule) ? 'current-week' : ''}`}
-                                    onClick={() => onViewDetails(schedule.id)}
-                                >
-                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
-                                        <div className="week-period-cell">
+                            {schedules.map(schedule => {
+                                const isCurrent = currentWeekScheduleIds.has(schedule.id);
+                                return (
+                                    <tr
+                                        key={schedule.id}
+                                        className={`schedule-row ${isCurrent ? 'current-week' : ''}`}
+                                        onClick={() => onViewDetails(schedule.id)}
+                                    >
+                                        <td className={isCurrent ? 'current-week-cell' : ''}>
+                                            <div className="week-period-cell">
                                                 <div className="date-range">
                                                     {formatWeekRange(schedule.start_date, locale)}
                                                 </div>
-                                            {isCurrentWeek(schedule) && (
-                                                <Badge bg="info" className="ms-2 current-week-badge">
-                                                    {t('schedule.currentWeek')}
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
+                                                {isCurrent && (
+                                                    <Badge bg="info" className="ms-2 current-week-badge">
+                                                        {t('schedule.currentWeek')}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className={isCurrent ? 'current-week-cell' : ''}>
                                         <span className="site-name">
                                         {schedule.workSite?.site_name || 'N/A'}
                                             </span>
-                                    </td>
-                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
-                                        <StatusBadge status={schedule.status} />
-                                    </td>
-                                    <td className={isCurrentWeek(schedule) ? 'current-week-cell' : ''}>
+                                        </td>
+                                        <td className={isCurrent ? 'current-week-cell' : ''}>
+                                            <StatusBadge status={schedule.status}/>
+                                        </td>
+                                        <td className={isCurrent ? 'current-week-cell' : ''}>
                                             <span className="last-updated">
                                                 {formatDateTime(schedule.updatedAt || schedule.createdAt, locale)}
                                             </span>
-                                    </td>
-                                    <td className={`actions-cell ${isCurrentWeek(schedule) ? 'current-week-cell' : ''}`}>
-                                        <ScheduleActionButtons
-                                            schedule={schedule}
-                                            variant="dropdown"
-                                            onView={() => onViewDetails(schedule.id)}
-                                            onPublish={() => handlePublishClick(schedule)}
-                                            onUnpublish={() => handleUnpublishClick(schedule)}
-                                            onDelete={canDeleteSchedule(schedule) ? () => handleDeleteClick(schedule) : null}
-                                        />
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className={`actions-cell ${isCurrent ? 'current-week-cell' : ''}`}>
+                                            <ScheduleActionButtons
+                                                schedule={schedule}
+                                                variant="dropdown"
+                                                onView={() => onViewDetails(schedule.id)}
+                                                onPublish={() => handlePublishClick(schedule)}
+                                                onUnpublish={() => handleUnpublishClick(schedule)}
+                                                onDelete={canDeleteSchedule(schedule) ? () => handleDeleteClick(schedule) : null}
+                                            />
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             </tbody>
                         </Table>
                     </div>
@@ -288,6 +287,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                 requestSort={requestActiveSort}
                 title={t('schedule.activeSchedules')}
                 emptyMessage={t('schedule.noActiveSchedules')}
+                currentWeekScheduleIds={currentWeekScheduleIds}
             />
 
             {/* Inactive Schedules */}
@@ -298,6 +298,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
                     requestSort={requestInactiveSort}
                     title={t('schedule.inactiveSchedules')}
                     emptyMessage={t('schedule.noInactiveSchedules')}
+                    currentWeekScheduleIds={currentWeekScheduleIds}
                 />
             )}
 
@@ -314,7 +315,9 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
             >
                 {scheduleToDelete && (
                     <div className="schedule-info bg-danger bg-opacity-10 p-3 rounded">
-                        <p><strong>{t('schedule.weekPeriod')}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}</p>
+                        <p>
+                            <strong>{t('schedule.weekPeriod')}:</strong> {formatScheduleDate(scheduleToDelete.start_date)} - {formatScheduleDate(scheduleToDelete.end_date)}
+                        </p>
                         <p><strong>{t('schedule.site')}:</strong> {scheduleToDelete.workSite?.site_name || 'N/A'}</p>
                     </div>
                 )}
