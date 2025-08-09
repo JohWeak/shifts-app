@@ -134,7 +134,7 @@ const GenerateScheduleModal = ({show, onHide, onGenerate, generating}) => {
                                             value={settings.weekStart}
                                             weekStartsOn={weekStartDay}
                                             onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
-                                            minDate={minSelectableDate}
+                                            //minDate={minSelectableDate}
                                             placeholder={t('schedule.selectStartDate')}
                                             dateFormat="dd.MM.yyyy"
                                             isInvalid={!!formError}

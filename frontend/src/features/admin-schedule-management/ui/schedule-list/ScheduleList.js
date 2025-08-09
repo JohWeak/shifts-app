@@ -175,9 +175,9 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
     };
 
 
-    const ScheduleTable = ({schedules, sortConfig, requestSort, title, emptyMessage, currentWeekScheduleIds}) => (
+    const ScheduleTable = ({schedules, sortConfig, requestSort, title, emptyMessage, currentWeekScheduleIds, className=''}) => (
         <Card className="schedule-list-card mb-4">
-            <Card.Header className="schedule-list-header">
+            <Card.Header className={`schedule-list-header ${className}`}>
                 <h5 className="mb-0">{title}</h5>
             </Card.Header>
             <Card.Body className="p-0">
@@ -205,19 +205,20 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
                                     {t('schedule.site')}
                                 </SortableHeader>
                                 <SortableHeader
-                                    sortKey="status"
-                                    sortConfig={sortConfig}
-                                    onSort={requestSort}
-                                >
-                                    {t('schedule.status')}
-                                </SortableHeader>
-                                <SortableHeader
                                     sortKey="updatedAt"
                                     sortConfig={sortConfig}
                                     onSort={requestSort}
                                 >
                                     {t('common.lastUpdated')}
                                 </SortableHeader>
+                                <SortableHeader
+                                    sortKey="status"
+                                    sortConfig={sortConfig}
+                                    onSort={requestSort}
+                                >
+                                    {t('schedule.status')}
+                                </SortableHeader>
+
                                 <th className="text-center actions-header">
                                     {t('common.actions')}
                                 </th>
@@ -233,9 +234,9 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
                                         onClick={() => onViewDetails(schedule.id)}
                                     >
                                         <td className={isCurrent ? 'current-week-cell' : ''}>
-                                            <div className="week-period-cell">
+                                            <div className="week-period-cell date-range">
+                                                {formatWeekRange(schedule.start_date, locale)}
                                                 <div className="date-range">
-                                                    {formatWeekRange(schedule.start_date, locale)}
                                                 </div>
                                                 {isCurrent && (
                                                     <Badge bg="info" className="ms-2 current-week-badge">
@@ -245,17 +246,17 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
                                             </div>
                                         </td>
                                         <td className={isCurrent ? 'current-week-cell' : ''}>
-                                        <span className="site-name">
-                                        {schedule.workSite?.site_name || 'N/A'}
+                                            <span className="site-name">
+                                                {schedule.workSite?.site_name || 'N/A'}
                                             </span>
-                                        </td>
-                                        <td className={isCurrent ? 'current-week-cell' : ''}>
-                                            <StatusBadge status={schedule.status}/>
                                         </td>
                                         <td className={isCurrent ? 'current-week-cell' : ''}>
                                             <span className="last-updated">
                                                 {formatDateTime(schedule.updatedAt || schedule.createdAt, locale)}
                                             </span>
+                                        </td>
+                                        <td className={isCurrent ? 'current-week-cell' : ''}>
+                                            <StatusBadge status={schedule.status}/>
                                         </td>
                                         <td className={`actions-cell ${isCurrent ? 'current-week-cell' : ''}`}>
                                             <ScheduleActionButtons
@@ -283,6 +284,7 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
             {/* Active Schedules */}
             <ScheduleTable
                 schedules={sortedActiveSchedules}
+                className='active'
                 sortConfig={activeSortConfig}
                 requestSort={requestActiveSort}
                 title={t('schedule.activeSchedules')}
@@ -294,6 +296,7 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
             {sortedInactiveSchedules.length > 0 && (
                 <ScheduleTable
                     schedules={sortedInactiveSchedules}
+                    className='inactive'
                     sortConfig={inactiveSortConfig}
                     requestSort={requestInactiveSort}
                     title={t('schedule.inactiveSchedules')}

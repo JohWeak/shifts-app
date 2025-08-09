@@ -17,10 +17,22 @@
     border-top-right-radius: var(--radius-lg)!important;
 
 }
+.schedule-list-card .schedule-list-header.active {
+    background-color: rgba(var(--bs-success-rgb), 0.2);
+}
+.schedule-list-card .schedule-list-header.inactive {
+    background-color: rgba(var(--bs-danger-rgb), 0.1);
+}
 
 [data-theme="dark"] .schedule-list-card .schedule-list-header {
     background-color: var(--bs-gray-800);
     border-bottom-color: var(--bs-gray-700);
+}
+[data-theme="dark"]  .schedule-list-card .schedule-list-header.active {
+    background-color: rgba(var(--bs-success-rgb), 0.2);
+}
+[data-theme="dark"]  .schedule-list-card .schedule-list-header.inactive {
+    background-color: rgba(var(--bs-danger-rgb), 0.1);
 }
 
 .schedule-list-card .schedule-list-header h5 {
@@ -55,25 +67,38 @@
 
 /* Schedule Table */
 .schedule-overview-table {
-    margin-bottom: 0 !important;
-    table-layout: auto;
-    position: relative;
+    table-layout: fixed;
+    width: 100%;
+}
+.schedule-overview-table th:nth-child(1) { width: 30%; } /* Week Period */
+.schedule-overview-table th:nth-child(2) { width: 20%; } /* Site */
+.schedule-overview-table th:nth-child(3) { width: 30%; } /* Last Updated */
+.schedule-overview-table th:nth-child(4) { width: 10%; } /* Status */
+.schedule-overview-table th:nth-child(5) { width: 10%; } /* Actions */
+.schedule-overview-table td {
+    overflow: hidden;         /* Скрыть все, что не помещается */
+    text-overflow: ellipsis;  /* Добавить многоточие (...) в конце */
+    white-space: nowrap;      /* Запретить перенос текста на новую строку */
 }
 
+.schedule-overview-table .sortable-header{
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
 /* Table headers */
 .schedule-overview-table thead th {
-    background-color: var(--bs-gray-50);
-    font-weight: 600;
+    background-color: inherit;
     color: var(--bs-gray-700);
-    border-bottom: 2px solid var(--bs-border-color);
+    font-weight: 500;
+    /*border-bottom: 2px solid var(--bs-border-color);*/
     white-space: nowrap;
     padding: 0.75rem;
 }
 
 [data-theme="dark"] .schedule-overview-table thead th {
-    background-color: var(--bs-gray-800);
+
     color: var(--bs-gray-300);
-    border-bottom-color: var(--bs-gray-700);
+    /*border-bottom-color: var(--bs-gray-700);*/
 }
 
 .schedule-overview-table thead th.actions-header {
@@ -138,7 +163,7 @@
 .schedule-overview-table .week-period-cell {
     display: flex;
     align-items: center;
-    flex-wrap: nowrap;
+    white-space: normal;
     gap: 0.5rem;
 }
 
