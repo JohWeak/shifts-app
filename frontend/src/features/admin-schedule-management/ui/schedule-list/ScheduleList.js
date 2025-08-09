@@ -1,6 +1,6 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-list/ScheduleList.js
-import React, {useState, useMemo, useRef} from 'react';
-import {Table, Card, Alert, Badge, Dropdown} from 'react-bootstrap';
+import React, {useState, useMemo, useRef, useEffect} from 'react';
+import {Table, Card, Alert, Badge} from 'react-bootstrap';
 import {useDispatch} from 'react-redux';
 import {format, parseISO, isAfter, startOfWeek, endOfWeek} from 'date-fns';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -32,6 +32,13 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [showError, setShowError] = useState(null);
+    const [isInactiveOpen, setIsInactiveOpen] = useState(() => {
+        const savedState = localStorage.getItem('inactiveSchedulesOpen');
+        return savedState !== null ? JSON.parse(savedState) : true;
+    });
+    useEffect(() => {
+        localStorage.setItem('inactiveSchedulesOpen', JSON.stringify(isInactiveOpen));
+    }, [isInactiveOpen]);
 
     // Split schedules into active and inactive
     const {activeSchedules, inactiveSchedules, currentWeekScheduleIds} = useMemo(() => {
@@ -175,107 +182,129 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
     };
 
 
-    const ScheduleTable = ({schedules, sortConfig, requestSort, title, emptyMessage, currentWeekScheduleIds, className=''}) => (
+    const ScheduleTable = ({
+                               schedules,
+                               sortConfig,
+                               requestSort,
+                               title,
+                               emptyMessage,
+                               currentWeekScheduleIds,
+                               className = '',
+                               isCollapsible = false,
+                               isOpen = true,
+                               onToggle = () => {
+                               }
+                           }) => (
         <Card className="schedule-list-card mb-4">
-            <Card.Header className={`schedule-list-header ${className}`}>
-                <h5 className="mb-0">{title}</h5>
+            <Card.Header
+                className={`schedule-list-header ${className} ${isCollapsible ? 'collapsible' : ''} ${!isOpen ? 'closed' : ''}`}
+                onClick={onToggle}
+            >
+                <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">{title}</h5>
+                    {isCollapsible && (
+                        <i className={`bi bi-chevron-down accordion-icon ${!isOpen ? 'closed' : ''}`}></i>
+                    )}
+                </div>
             </Card.Header>
-            <Card.Body className="p-0">
-                {schedules.length === 0 ? (
-                    <div className="text-center py-4 text-muted">
-                        {emptyMessage}
-                    </div>
-                ) : (
-                    <div className="table-responsive">
-                        <Table className="schedule-overview-table mb-0">
-                            <thead>
-                            <tr>
-                                <SortableHeader
-                                    sortKey="week"
-                                    sortConfig={sortConfig}
-                                    onSort={requestSort}
-                                >
-                                    {t('schedule.weekPeriod')}
-                                </SortableHeader>
-                                <SortableHeader
-                                    sortKey="site"
-                                    sortConfig={sortConfig}
-                                    onSort={requestSort}
-                                >
-                                    {t('schedule.site')}
-                                </SortableHeader>
-                                <SortableHeader
-                                    sortKey="updatedAt"
-                                    sortConfig={sortConfig}
-                                    onSort={requestSort}
-                                >
-                                    {t('common.lastUpdated')}
-                                </SortableHeader>
-                                <SortableHeader
-                                    sortKey="status"
-                                    sortConfig={sortConfig}
-                                    onSort={requestSort}
-                                >
-                                    {t('schedule.status')}
-                                </SortableHeader>
-
-                                <th className="text-center actions-header">
-                                    {t('common.actions')}
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {schedules.map(schedule => {
-                                const isCurrent = currentWeekScheduleIds.has(schedule.id);
-                                return (
-                                    <tr
-                                        key={schedule.id}
-                                        className={`schedule-row ${isCurrent ? 'current-week' : ''}`}
-                                        onClick={() => onViewDetails(schedule.id)}
+            {isOpen && (
+                <Card.Body className="p-0">
+                    {schedules.length === 0 ? (
+                        <div className="text-center py-4 text-muted">
+                            {emptyMessage}
+                        </div>
+                    ) : (
+                        <div className="table-responsive">
+                            <Table className="schedule-overview-table mb-0">
+                                <thead>
+                                <tr>
+                                    <SortableHeader
+                                        sortKey="week"
+                                        sortConfig={sortConfig}
+                                        onSort={requestSort}
                                     >
-                                        <td className={isCurrent ? 'current-week-cell' : ''}>
-                                            <div className="week-period-cell date-range">
-                                                {formatWeekRange(schedule.start_date, locale)}
-                                                <div className="date-range">
+                                        {t('schedule.weekPeriod')}
+                                    </SortableHeader>
+                                    <SortableHeader
+                                        sortKey="site"
+                                        sortConfig={sortConfig}
+                                        onSort={requestSort}
+                                    >
+                                        {t('schedule.site')}
+                                    </SortableHeader>
+                                    <SortableHeader
+                                        sortKey="updatedAt"
+                                        sortConfig={sortConfig}
+                                        onSort={requestSort}
+                                    >
+                                        {t('common.lastUpdated')}
+                                    </SortableHeader>
+                                    <SortableHeader
+                                        sortKey="status"
+                                        sortConfig={sortConfig}
+                                        onSort={requestSort}
+                                    >
+                                        {t('schedule.status')}
+                                    </SortableHeader>
+
+                                    <th className="text-center actions-header">
+                                        {t('common.actions')}
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {schedules.map(schedule => {
+                                    const isCurrent = currentWeekScheduleIds.has(schedule.id);
+                                    return (
+                                        <tr
+                                            key={schedule.id}
+                                            className={`schedule-row ${isCurrent ? 'current-week' : ''}`}
+                                            onClick={() => onViewDetails(schedule.id)}
+                                        >
+                                            <td className={isCurrent ? 'current-week-cell' : ''}>
+                                                <div className="week-period-cell date-range">
+                                                    {formatWeekRange(schedule.start_date, locale)}
+                                                    <div className="date-range">
+                                                    </div>
+                                                    {isCurrent && (
+                                                        <Badge bg="info" className="ms-2 current-week-badge">
+                                                            {t('schedule.currentWeek')}
+                                                        </Badge>
+                                                    )}
                                                 </div>
-                                                {isCurrent && (
-                                                    <Badge bg="info" className="ms-2 current-week-badge">
-                                                        {t('schedule.currentWeek')}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className={isCurrent ? 'current-week-cell' : ''}>
+                                            </td>
+                                            <td className={isCurrent ? 'current-week-cell' : ''}>
                                             <span className="site-name">
                                                 {schedule.workSite?.site_name || 'N/A'}
                                             </span>
-                                        </td>
-                                        <td className={isCurrent ? 'current-week-cell' : ''}>
+                                            </td>
+                                            <td className={isCurrent ? 'current-week-cell' : ''}>
                                             <span className="last-updated">
                                                 {formatDateTime(schedule.updatedAt || schedule.createdAt, locale)}
                                             </span>
-                                        </td>
-                                        <td className={isCurrent ? 'current-week-cell' : ''}>
-                                            <StatusBadge status={schedule.status}/>
-                                        </td>
-                                        <td className={`actions-cell ${isCurrent ? 'current-week-cell' : ''}`}>
-                                            <ScheduleActionButtons
-                                                schedule={schedule}
-                                                variant="dropdown"
-                                                onView={() => onViewDetails(schedule.id)}
-                                                onPublish={() => handlePublishClick(schedule)}
-                                                onUnpublish={() => handleUnpublishClick(schedule)}
-                                                onDelete={canDeleteSchedule(schedule) ? () => handleDeleteClick(schedule) : null}
-                                            />
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            </tbody>
-                        </Table>
-                    </div>
-                )}
-            </Card.Body>
+                                            </td>
+                                            <td className={isCurrent ? 'current-week-cell' : ''}>
+                                                <StatusBadge status={schedule.status}/>
+                                            </td>
+                                            <td className={`actions-cell ${isCurrent ? 'current-week-cell' : ''}`}>
+                                                <ScheduleActionButtons
+                                                    schedule={schedule}
+                                                    variant="dropdown"
+                                                    onView={() => onViewDetails(schedule.id)}
+                                                    onPublish={() => handlePublishClick(schedule)}
+                                                    onUnpublish={() => handleUnpublishClick(schedule)}
+                                                    onDelete={canDeleteSchedule(schedule) ? () => handleDeleteClick(schedule) : null}
+                                                />
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                </tbody>
+                            </Table>
+                        </div>
+                    )}
+                </Card.Body>
+            )}
         </Card>
     );
 
@@ -302,6 +331,9 @@ const ScheduleList = ({schedules, onViewDetails, onScheduleDeleted}) => {
                     title={t('schedule.inactiveSchedules')}
                     emptyMessage={t('schedule.noInactiveSchedules')}
                     currentWeekScheduleIds={currentWeekScheduleIds}
+                    isCollapsible={true}
+                    isOpen={isInactiveOpen}
+                    onToggle={() => setIsInactiveOpen(prev => !prev)}
                 />
             )}
 

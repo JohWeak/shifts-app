@@ -34,7 +34,30 @@
 [data-theme="dark"]  .schedule-list-card .schedule-list-header.inactive {
     background-color: rgba(var(--bs-danger-rgb), 0.1);
 }
+.schedule-list-header.collapsible {
+    cursor: pointer;
+}
+.schedule-list-header.collapsible.closed {
+    user-select: none;
+    border-bottom-left-radius: var(--radius-lg)!important;
+    border-bottom-right-radius: var(--radius-lg)!important;
+}
 
+/* Стили для иконки-шеврона */
+.schedule-list-header .accordion-icon {
+    font-size: 0.9rem;
+    color: var(--bs-gray-600);
+    transition: transform 0.3s ease;
+}
+
+/* Поворачиваем иконку, когда блок закрыт */
+.schedule-list-header .accordion-icon.closed {
+    transform: rotate(-90deg);
+}
+
+[data-theme="dark"] .schedule-list-header .accordion-icon {
+    color: var(--bs-gray-400);
+}
 .schedule-list-card .schedule-list-header h5 {
     margin: 0;
     font-size: 1.1rem;
