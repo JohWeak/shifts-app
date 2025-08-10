@@ -433,6 +433,10 @@ export const he = {
         workInfo: 'מידע עבודה',
         workSchedule: 'סידור עבודה',
         workSiteHelp: 'בחר אתר עבודה או "גמיש" לכל שיבוץ',
+        shortage: 'חסרים {count}',
+        fullyStaffed: 'מאויש במלואו',
+        currentlyAssigned: 'משובצים כרגע',
+        needMoreEmployees: 'צריך עוד {count}',
     },
     errors: {
         dateRangeInvalid: 'תאריך ההתחלה לא יכול להיות אחרי תאריך הסיום.',

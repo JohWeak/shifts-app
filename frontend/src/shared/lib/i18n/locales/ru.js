@@ -432,6 +432,10 @@ export const ru = {
         workInfo: 'Рабочая информация',
         workSchedule: 'Рабочий график',
         workSiteHelp: 'Выберите рабочий объект или "Гибкое" для любого назначения',
+        shortage: 'Не хватает {count}',
+        fullyStaffed: 'Полностью укомплектовано',
+        currentlyAssigned: 'Назначено',
+        needMoreEmployees: 'Нужно еще {count}',
     },
     errors: {
         dateRangeInvalid: 'Дата начала не может быть позже даты окончания.',

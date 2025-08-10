@@ -104,27 +104,27 @@ const ScheduleCell = ({
         return styles;
     };
 
-    if (isEmpty) {
-        return (
-            <td
-                className={getCellClasses()}
-                onClick={handleCellClick}
-                style={shiftColor && isEditing ? {borderLeft: `4px solid ${shiftColor}`} : {}}
-                title={isEditing ? t('employee.clickToAssign') : ''}
-                {...props}
-            >
-                <div className="empty-cell">
-                    {isEditing ? (
-                        <div className="text-muted">
-                            <i className="bi bi-plus-circle fs-7"></i>
-                        </div>
-                    ) : (
-                        <span className="text-muted">-</span>
-                    )}
-                </div>
-            </td>
-        );
-    }
+    // if (isEmpty) {
+    //     return (
+    //         <td
+    //             className={getCellClasses()}
+    //             onClick={handleCellClick}
+    //             style={shiftColor && isEditing ? {borderLeft: `4px solid ${shiftColor}`} : {}}
+    //             title={isEditing ? t('employee.clickToAssign') : ''}
+    //             {...props}
+    //         >
+    //             <div className="empty-cell">
+    //                 {isEditing ? (
+    //                     <div className="text-muted">
+    //                         <i className="bi bi-plus-circle fs-7"></i>
+    //                     </div>
+    //                 ) : (
+    //                     <span className="text-muted">-</span>
+    //                 )}
+    //             </div>
+    //         </td>
+    //     );
+    // }
 
 
     // Render cell with employees
@@ -151,7 +151,6 @@ const ScheduleCell = ({
             onClick={(e) => handleEmployeeNameClick(e, employee.emp_id)}
             style={{
                 cursor: isEditing ? 'pointer' : 'default',
-                textDecoration: isEditing ? 'underline' : 'none',
             }}
             title={isEditing ? 'Click to replace this employee' : ''}
         >
@@ -226,8 +225,8 @@ const ScheduleCell = ({
 
                 {/* Add more employees indicator */}
                 {isEditing && totalEmployees < requiredEmployees && (
-                    <div className="add-more-indicator mt-1">
-                        <small className="text-muted">
+                    <div className="add-more-indicator mb-1 bg-info-subtle rounded-1 align p-1">
+                        <small className="text-danger fw-bold ">
                             <i className="bi bi-plus-circle me-1"></i>
                             {t('employee.needMoreEmployees', {count: (requiredEmployees - totalEmployees)})}
                         </small>

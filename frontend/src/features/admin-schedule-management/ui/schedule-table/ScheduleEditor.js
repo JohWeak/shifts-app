@@ -1,24 +1,23 @@
 // frontend/src/features/admin-schedule-management/components/ScheduleEditor.js
-import React, { useMemo, useState } from 'react';
+import React, {useMemo, useState} from 'react';
 import {format} from "date-fns";
 import {Table, Button, Badge, Spinner, Form, Tooltip, OverlayTrigger} from 'react-bootstrap';
 import ScheduleCell from './ScheduleCell';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useMediaQuery } from 'shared/hooks/useMediaQuery';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useMediaQuery} from 'shared/hooks/useMediaQuery';
 import {
     getWeekDates,
     formatShiftTime,
     formatHeaderDate,
     getDayName
 } from 'shared/lib/utils/scheduleUtils';
-import { getContrastTextColor, isDarkTheme } from 'shared/lib/utils/colorUtils';
-import { useSelector } from "react-redux";
-import { formatEmployeeName as formatEmployeeNameUtil, canEditSchedule } from 'shared/lib/utils/scheduleUtils';
+import {getContrastTextColor, isDarkTheme} from 'shared/lib/utils/colorUtils';
+import {useSelector} from "react-redux";
+import {formatEmployeeName as formatEmployeeNameUtil, canEditSchedule} from 'shared/lib/utils/scheduleUtils';
 
-import { useShiftColor } from 'shared/hooks/useShiftColor';
+import {useShiftColor} from 'shared/hooks/useShiftColor';
 import './ScheduleEditor.css';
-
 
 
 const ScheduleEditor = ({
@@ -38,7 +37,7 @@ const ScheduleEditor = ({
                         }) => {
     const isMobile = useMediaQuery('(max-width: 1350px)');
     const {t} = useI18n();
-    const { currentTheme } = useShiftColor();
+    const {currentTheme} = useShiftColor();
     const isDark = isDarkTheme();
     const {systemSettings} = useSelector(state => state.settings);
     const canEdit = canEditSchedule(schedule);
@@ -60,6 +59,22 @@ const ScheduleEditor = ({
         const saved = localStorage.getItem('showFirstNameOnly');
         return saved !== null ? JSON.parse(saved) : true; // true по умолчанию
     });
+
+    // Получаем требования для конкретной смены
+    const getRequiredEmployeesForShift = (shiftId) => {
+        // Сначала пробуем из position.shift_requirements
+        if (position.shift_requirements && position.shift_requirements[shiftId]) {
+            return position.shift_requirements[shiftId];
+        }
+        // Затем из shifts если там есть
+        const shift = shifts.find(s => s.shift_id === shiftId);
+        if (shift && shift.required_staff) {
+            return shift.required_staff;
+        }
+        // Default
+        return 1;
+    };
+
     // Сохраняем при изменении
     const handleNameToggle = (checked) => {
         setShowFirstNameOnly(checked);
@@ -78,6 +93,20 @@ const ScheduleEditor = ({
         });
     }, [position.pos_id, scheduleDetails?.assignments]);
 
+    const currentAssignedCount = useMemo(() => {
+        if (!assignments) return 0;
+        // Считаем уникальных сотрудников на позиции
+        const uniqueEmployees = new Set();
+        assignments.forEach(assignment => {
+            if (assignment.emp_id) {
+                uniqueEmployees.add(assignment.emp_id);
+            }
+        });
+        return uniqueEmployees.size;
+    }, [assignments]);
+
+    const requiredCount = position.num_of_emp || 0;
+    const shortage = Math.max(0, requiredCount - currentAssignedCount);
 
     const employees = useMemo(() => {
         return scheduleDetails?.employees || [];
@@ -199,7 +228,7 @@ const ScheduleEditor = ({
 
         const currentEmployees = cellEmployees.length - pendingRemovals.length;
         const totalEmployees = currentEmployees + pendingAssignments.length;
-        const isUnderstaffed = totalEmployees < position.num_of_emp;
+        const isUnderstaffed = totalEmployees < getRequiredEmployeesForShift(shift.shift_id);
 
         return (
             <ScheduleCell
@@ -213,7 +242,7 @@ const ScheduleEditor = ({
                 pendingRemovals={pendingRemovals}
                 isEditing={isEditing}
                 isUnderstaffed={isUnderstaffed}
-                requiredEmployees={position.num_of_emp}
+                requiredEmployees={getRequiredEmployeesForShift(shift.shift_id)}
                 onCellClick={onCellClick}
                 onEmployeeClick={onEmployeeClick}
                 onRemoveEmployee={(date, posId, shiftId, empId, assignmentId) =>
@@ -239,7 +268,7 @@ const ScheduleEditor = ({
     );
 
     return (
-        <div className="position-schedule-editor">
+        <div className="position-schedule-editor mb-2">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -250,7 +279,7 @@ const ScheduleEditor = ({
                             type="switch"
                             id={`name-switch-${position.pos_id}`}
                             label={t('employee.showFirstNameOnly')}
-                            className=" d-inline-block"
+                            className=" d-inline-block ms-2"
                             checked={showFirstNameOnly}
                             onChange={(e) => handleNameToggle(e.target.checked)}
                         />
@@ -261,15 +290,37 @@ const ScheduleEditor = ({
                         )}
                     </small>
                 </div>
-                <div>
+                <div className="d-flex position-stats flex-row gap-2">
+                    <small className="text-muted d-block">
+                        {t('employee.requiredEmployees')}: {requiredCount}
+                    </small>
 
+                    <small className="text-muted">
+                        {t('employee.currentlyAssigned')}: {currentAssignedCount}/{requiredCount}
+                    </small>
+
+                    <small className={`d-block ${shortage > 0 ? 'text-danger fw-bold' : 'text-success'}`}>
+                        {shortage > 0 ? (
+                            <>
+                                <i className="bi bi-exclamation-triangle me-1"></i>
+                                {t('employee.shortage', { count: shortage })}
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-check-circle me-1"></i>
+                                {t('employee.fullyStaffed')}
+                            </>
+                        )}
+                    </small>
+                </div>
+                <div>
                     {/* Edit button - show always but disable when can't edit */}
                     {!isEditing && (
                         <>
                             {!canEdit ? (
                                 <OverlayTrigger
                                     placement="top"
-                                    delay={{ show: 250, hide: 400 }}
+                                    delay={{show: 250, hide: 400}}
                                     overlay={renderEditTooltip}
                                 >
                             <span className="d-inline-block">
@@ -277,7 +328,7 @@ const ScheduleEditor = ({
                                     variant="outline-primary"
                                     size="sm"
                                     disabled
-                                    style={{ pointerEvents: 'none' }}
+                                    style={{pointerEvents: 'none'}}
                                 >
                                     <i className="bi bi-pencil me-1"></i>
                                     {t('common.edit')}
@@ -385,7 +436,7 @@ const ScheduleEditor = ({
                                         <div className="shift-name">
                                             {shift.shift_name}
                                         </div>
-                                        <div className="shift-time" style={{ color: textColor }}>
+                                        <div className="shift-time" style={{color: textColor}}>
                                             {formatShiftTime(shift.start_time, shift.duration)}
                                         </div>
                                     </div>

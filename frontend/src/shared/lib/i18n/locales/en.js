@@ -504,7 +504,10 @@ export const en = {
         temporaryConstraints: 'Temporary Constraints',
         permanentConstraints: 'Permanent Constraints',
         legalConstraints: 'Legal Constraints',
-        needMoreEmployees: 'Need {count} more employees',
+        needMoreEmployees: 'Need {count} more',
+        shortage: 'Short {count} employee(s)',
+        fullyStaffed: 'Fully staffed',
+        currentlyAssigned: 'Currently assigned',
 
 
     },

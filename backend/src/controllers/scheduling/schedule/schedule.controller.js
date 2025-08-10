@@ -8,6 +8,7 @@ const {
     Position,
     WorkSite,
     PositionShift,
+    ShiftRequirement
 } = db;
 
 
@@ -61,7 +62,6 @@ const getScheduleDetails = async (req, res) => {
         const {scheduleId} = req.params;
         console.log(`[ScheduleController] Getting details for schedule ${scheduleId}`);
 
-        // Получить основную информацию о расписании
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [
                 {
@@ -90,7 +90,7 @@ const getScheduleDetails = async (req, res) => {
                     attributes: ['emp_id', 'first_name', 'last_name']
                 },
                 {
-                    model: PositionShift,  // Изменено с Shift на PositionShift
+                    model: PositionShift,
                     as: 'shift',
                     attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
                 },
@@ -105,37 +105,86 @@ const getScheduleDetails = async (req, res) => {
 
         console.log(`[ScheduleController] Found ${assignments.length} assignments`);
 
-        // Получить все смены через позиции
-        const positions = await Position.findAll({
-            where: {site_id: schedule.site_id},
-            attributes: ['pos_id', 'pos_name', 'profession']
-        });
-
-
-        // Получить все смены через позиции - ОСТАВЛЯЕМ КАК БЫЛО
-        const positionsWithShifts = await Position.findAll({
-            where: { site_id: schedule.site_id },
+        // Получить все позиции с их сменами и требованиями
+        const positions = await db.Position.findAll({
+            where: {
+                site_id: schedule.site_id,
+                is_active: true
+            },
             include: [{
                 model: PositionShift,
                 as: 'shifts',
                 where: { is_active: true },
-                required: false
-            }]
+                required: false,
+                include: [{
+                    model: ShiftRequirement,
+                    as: 'requirements',
+                    required: false
+                }]
+            }],
+            order: [['pos_name', 'ASC']]
         });
 
-        // Собираем все уникальные смены - НЕМНОГО ИЗМЕНЕНО для совместимости
+        // Calculate requirements for each position
+        const enrichedPositions = positions.map(position => {
+            let totalRequiredStaff = 0;
+            const shiftRequirements = {};
+
+            if (position.shifts) {
+                position.shifts.forEach(shift => {
+                    let shiftStaffCount = 1; // Default
+
+                    if (shift.requirements && shift.requirements.length > 0) {
+                        // Find requirement for recurring or specific
+                        const requirement = shift.requirements.find(r => r.is_recurring)
+                            || shift.requirements[0];
+                        if (requirement && requirement.required_staff_count) {
+                            shiftStaffCount = requirement.required_staff_count;
+                        }
+                    }
+
+                    // Store requirement for this specific shift
+                    shiftRequirements[shift.id] = shiftStaffCount;
+                    // Add to total
+                    totalRequiredStaff += shiftStaffCount;
+                });
+            }
+
+            return {
+                pos_id: position.pos_id,
+                pos_name: position.pos_name,
+                profession: position.profession,
+                num_of_emp: totalRequiredStaff, // Total across all shifts
+                shift_requirements: shiftRequirements // Per shift requirements
+            };
+        });
+
+
+        // Collect all unique shifts from the positions we already loaded
         const shiftsMap = new Map();
-        positionsWithShifts.forEach(position => {
+        positions.forEach(position => {
             position.shifts?.forEach(shift => {
                 if (!shiftsMap.has(shift.id)) {
+                    // Get requirement for this shift
+                    let requiredStaff = 1;
+                    if (shift.requirements && shift.requirements.length > 0) {
+                        const requirement = shift.requirements.find(r => r.is_recurring)
+                            || shift.requirements[0];
+                        if (requirement) {
+                            requiredStaff = requirement.required_staff_count;
+                        }
+                    }
+
                     shiftsMap.set(shift.id, {
-                        shift_id: shift.id,  // Используем id как shift_id для совместимости
+                        shift_id: shift.id,
                         shift_name: shift.shift_name,
                         start_time: shift.start_time,
                         end_time: shift.end_time,
                         duration: shift.duration_hours,
-                        shift_type: shift.is_night_shift ? 'night' : (shift.start_time < '12:00:00' ? 'morning' : 'day'),
-                        color: shift.color
+                        shift_type: shift.is_night_shift ? 'night' :
+                            (shift.start_time < '12:00:00' ? 'morning' : 'day'),
+                        color: shift.color,
+                        required_staff: requiredStaff
                     });
                 }
             });
@@ -146,7 +195,10 @@ const getScheduleDetails = async (req, res) => {
 
         // Получить всех сотрудников для данного сайта
         const employees = await Employee.findAll({
-            where: {status: 'active'},
+            where: {
+                work_site_id: schedule.site_id,
+                status: 'active'
+            },
             attributes: ['emp_id', 'first_name', 'last_name', 'status']
         });
 
@@ -164,10 +216,9 @@ const getScheduleDetails = async (req, res) => {
                 createdAt: schedule.createdAt,
                 updatedAt: schedule.updatedAt
             },
-            positions: positions,
+            positions: enrichedPositions,
             assignments: assignments,
             shifts: shifts,
-            all_shifts: shifts, // Алиас для совместимости
             employees: employees
         };
 

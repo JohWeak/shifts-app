@@ -3,7 +3,7 @@
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: var(--bs-gray-800);
+    color: var(--bs-body-color);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -49,6 +49,7 @@
     gap: 1rem;
     padding: 0.75rem 0;
     border-bottom: 1px solid var(--bs-gray-200);
+
 }
 
 .day-constraints-review:last-child {
@@ -59,7 +60,7 @@
 .day-constraints-review .day-name {
     font-weight: 600;
     color: var(--bs-gray-800);
-    text-align: right;
+    text-align: start;
 }
 
 .constraints-list {
@@ -95,11 +96,11 @@
 
 /* Dark mode support */
 [data-theme="dark"] .request-employee-info .info-grid {
-    background-color: var(--bs-dark-bg-subtle);
+    background-color: var(--bs-gray-800);
 }
 
 [data-theme="dark"] .info-label {
-    color: var(--bs-gray-400);
+    color: var(--bs-gray-300);
 }
 
 [data-theme="dark"] .info-value {
@@ -107,7 +108,7 @@
 }
 
 [data-theme="dark"] .constraints-review-box {
-    background-color: var(--bs-dark-bg-subtle);
+    background-color: var(--bs-gray-800);
     border-color: var(--bs-gray-700);
 }
 
