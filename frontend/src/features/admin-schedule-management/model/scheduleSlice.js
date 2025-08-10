@@ -191,7 +191,6 @@ export const fetchRecommendations = createAsyncThunk(
 const scheduleSlice = createSlice({
     name: 'schedule',
     initialState: {
-        // Данные
         schedules: [],
         scheduleDetails: null,
         workSites: [],

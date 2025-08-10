@@ -5,8 +5,8 @@
     background-color: var(--bs-white);
     border-radius: var(--radius-lg);
     padding: var(--space-4);
-    box-shadow: var(--bs-box-shadow-sm);
     transition: all var(--transition-base);
+    box-shadow: var(--bs-box-shadow);
 }
 
 
@@ -30,9 +30,6 @@
     background-color: var(--bs-gray-900);
 }
 
-.position-schedule-editor:hover {
-    box-shadow: var(--bs-box-shadow);
-}
 
 /* Position Header */
 .position-schedule-editor .position-header {

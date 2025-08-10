@@ -17,7 +17,7 @@ const ScheduleCell = ({
                           onCellClick,
                           onEmployeeClick,
                           onRemoveEmployee,
-                          onRemovePendingChange,  // Добавить в пропсы
+                          onRemovePendingChange,
                           pendingChanges = {},
                           className = '',
                           formatEmployeeName = null,
