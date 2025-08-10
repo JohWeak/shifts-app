@@ -86,7 +86,7 @@ const AdminPermanentRequests = () => {
 
     const RequestsTable = ({ requests, sortConfig, requestSort, isPending, isInactive }) => (
         <div className="table-responsive">
-            <Table hover className="requests-table mb-0">
+            <Table className="requests-table mb-0">
                 <thead>
                 <tr>
                     <SortableHeader

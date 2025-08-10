@@ -11,6 +11,7 @@ import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import { groupConstraintsByDay, getDayIndex } from 'shared/lib/utils/constraintUtils';
 import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
+import {useMediaQuery} from "shared/hooks/useMediaQuery";
 import './RequestReviewModal.css';
 
 const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
@@ -30,6 +31,8 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
     const weekStartsOn = useSelector(state =>
         state.settings?.systemSettings?.weekStartDay || 0
     );
+
+    const isMobile = useMediaQuery('(max-width: 992px)');
 
     useEffect(() => {
         if (show && request && request.employee?.defaultPosition?.pos_id) {
@@ -195,7 +198,7 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                                     return (
                                         <div key={day} className="day-constraints-review">
                                             <strong className="day-name">
-                                                {getDayName(dayIndex, t)}:
+                                                {getDayName(dayIndex, t, isMobile)}
                                             </strong>
                                             <div className="constraints-list">
                                                 {constraints.map((constraint, index) => (
