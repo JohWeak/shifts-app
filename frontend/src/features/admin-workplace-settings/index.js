@@ -65,9 +65,9 @@ const WorkplaceSettings = () => {
                     subtitle={t('workplace.subtitle')}
                 />
 
-                <Card className="border-0 shadow-sm">
+                <Card className="workplace-card-container border-0 shadow-sm">
                     <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-                        <Card.Header className="border-bottom bg-none">
+                        <Card.Header className="workplace-card-header border-bottom bg-none">
                             <Nav variant="tabs" className="nav-tabs-custom">
                                 <Nav.Item>
                                     <Nav.Link eventKey="worksites">
@@ -89,8 +89,8 @@ const WorkplaceSettings = () => {
                                 </Nav.Item>
                             </Nav>
                         </Card.Header>
-                        <Card className="border-top-0">
-                            <Card.Body className="p-0">
+                        <Card className="workplace-card border-top-0">
+                            <Card.Body className="p-0 workplace-card-body ">
                                 <Tab.Content>
                                     <Tab.Pane eventKey="worksites">
                                         <WorkSitesTab onSelectSite={handleSiteSelection}/>

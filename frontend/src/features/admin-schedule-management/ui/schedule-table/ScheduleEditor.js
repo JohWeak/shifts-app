@@ -506,53 +506,53 @@ const ScheduleEditor = ({
             </Table>
 
             {/* Edit Mode Statistics */}
-            {/*{isEditing && (*/}
-            {/*    <div className="position-stats mt-2 p-2 bg-light rounded">*/}
-            {/*        <div className="row">*/}
-            {/*            <div className="col-md-6">*/}
-            {/*                <small className="d-block">*/}
-            {/*                    <strong>{t('schedule.currentStatus')}:</strong>*/}
-            {/*                </small>*/}
-            {/*                <small className="d-block text-muted">*/}
-            {/*                    {t('schedule.totalRequired')}: {totalRequired}*/}
-            {/*                </small>*/}
-            {/*                <small className="d-block text-muted">*/}
-            {/*                    {t('schedule.currentAssignments')}: {currentStats.current}*/}
-            {/*                </small>*/}
-            {/*                {currentStats.added > 0 && (*/}
-            {/*                    <small className="d-block text-success">*/}
-            {/*                        {t('schedule.toBeAdded')}: +{currentStats.added}*/}
-            {/*                    </small>*/}
-            {/*                )}*/}
-            {/*                {currentStats.removed > 0 && (*/}
-            {/*                    <small className="d-block text-danger">*/}
-            {/*                        {t('schedule.toBeRemoved')}: -{currentStats.removed}*/}
-            {/*                    </small>*/}
-            {/*                )}*/}
-            {/*            </div>*/}
-            {/*            <div className="col-md-6">*/}
-            {/*                <small className="d-block">*/}
-            {/*                    <strong>{t('schedule.afterSave')}:</strong>*/}
-            {/*                </small>*/}
-            {/*                <small className={`d-block ${shortage === 0 ? 'text-success' : shortage > 0 ? 'text-danger' : 'text-warning'}`}>*/}
-            {/*                    <strong>{currentStats.afterChanges}/{totalRequired}</strong>*/}
-            {/*                </small>*/}
-            {/*                {shortage !== 0 && (*/}
-            {/*                    <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>*/}
-            {/*                        <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>*/}
-            {/*                        {shortage > 0*/}
-            {/*                            ? t('schedule.assignmentsShortage', { count: shortage })*/}
-            {/*                            : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })*/}
-            {/*                        }*/}
-            {/*                    </small>*/}
-            {/*                )}*/}
-            {/*                <small className="d-block text-muted">*/}
-            {/*                    {t('schedule.uniqueEmployees')}: {uniqueEmployees}*/}
-            {/*                </small>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*)}*/}
+            {isEditing && (
+                <div className="position-stats mt-2 p-2 bg-light rounded">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <small className="d-block">
+                                <strong>{t('schedule.currentStatus')}:</strong>
+                            </small>
+                            <small className="d-block text-muted">
+                                {t('schedule.totalRequired')}: {totalRequired}
+                            </small>
+                            <small className="d-block text-muted">
+                                {t('schedule.currentAssignments')}: {currentStats.current}
+                            </small>
+                            {currentStats.added > 0 && (
+                                <small className="d-block text-success">
+                                    {t('schedule.toBeAdded')}: +{currentStats.added}
+                                </small>
+                            )}
+                            {currentStats.removed > 0 && (
+                                <small className="d-block text-danger">
+                                    {t('schedule.toBeRemoved')}: -{currentStats.removed}
+                                </small>
+                            )}
+                        </div>
+                        <div className="col-md-6">
+                            <small className="d-block">
+                                <strong>{t('schedule.afterSave')}:</strong>
+                            </small>
+                            <small className={`d-block ${shortage === 0 ? 'text-success' : shortage > 0 ? 'text-danger' : 'text-warning'}`}>
+                                <strong>{currentStats.afterChanges}/{totalRequired}</strong>
+                            </small>
+                            {shortage !== 0 && (
+                                <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>
+                                    <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>
+                                    {shortage > 0
+                                        ? t('schedule.assignmentsShortage', { count: shortage })
+                                        : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })
+                                    }
+                                </small>
+                            )}
+                            <small className="d-block text-muted">
+                                {t('schedule.uniqueEmployees')}: {uniqueEmployees}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <ColorPickerModal
                 show={colorPickerState.show}
@@ -589,7 +589,7 @@ const ScheduleEditor = ({
                     <strong>{t('schedule.currentStatus')}:</strong>
                     <ul className="mb-0 mt-2">
                         <li>{t('schedule.totalRequired')}: {totalRequired}</li>
-                        <li>{t('schedule.currentAssignments')}: {currentStats.afterChanges}</li>
+                        <li>{t('schedule.currentAssignments')}: {currentStats.currentAssignments}</li>
                         {currentStats.added > 0 && (
                             <li className="text-success">
                                 {t('schedule.toBeAdded')}: +{currentStats.added}
