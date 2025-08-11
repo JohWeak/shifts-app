@@ -78,8 +78,6 @@ const getScheduleDetails = async (req, res) => {
             });
         }
 
-        console.log(`[ScheduleController] Found schedule for site ${schedule.site_id}`);
-
         // Получить все назначения для этого расписания
         const assignments = await ScheduleAssignment.findAll({
             where: {schedule_id: scheduleId},
@@ -92,7 +90,7 @@ const getScheduleDetails = async (req, res) => {
                 {
                     model: PositionShift,
                     as: 'shift',
-                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
+                    attributes: ['id', 'position_id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
                 },
                 {
                     model: Position,
@@ -103,9 +101,7 @@ const getScheduleDetails = async (req, res) => {
             order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
         });
 
-        console.log(`[ScheduleController] Found ${assignments.length} assignments`);
-
-        // Получить все позиции с их сменами и требованиями
+        // Получить все позиции с их СОБСТВЕННЫМИ сменами и требованиями
         const positions = await db.Position.findAll({
             where: {
                 site_id: schedule.site_id,
@@ -125,75 +121,84 @@ const getScheduleDetails = async (req, res) => {
             order: [['pos_name', 'ASC']]
         });
 
+        // Get week dates for calculating total requirements
+        const startDate = new Date(schedule.start_date);
+        const endDate = new Date(schedule.end_date);
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
         // Calculate requirements for each position
         const enrichedPositions = positions.map(position => {
-            let totalRequiredStaff = 0;
-            const shiftRequirements = {};
+            let totalRequiredAssignments = 0;  // Total assignments needed for the week
+            const shiftRequirements = {};      // Requirements per shift
+            const positionShifts = [];         // Only shifts for THIS position
 
-            if (position.shifts) {
+            if (position.shifts && position.shifts.length > 0) {
                 position.shifts.forEach(shift => {
-                    let shiftStaffCount = 1; // Default
+                    // This shift belongs ONLY to this position
+                    let staffPerDay = 1; // Default
 
                     if (shift.requirements && shift.requirements.length > 0) {
-                        // Find requirement for recurring or specific
+                        // Get the recurring requirement or first one
                         const requirement = shift.requirements.find(r => r.is_recurring)
                             || shift.requirements[0];
                         if (requirement && requirement.required_staff_count) {
-                            shiftStaffCount = requirement.required_staff_count;
+                            staffPerDay = requirement.required_staff_count;
                         }
                     }
 
                     // Store requirement for this specific shift
-                    shiftRequirements[shift.id] = shiftStaffCount;
-                    // Add to total
-                    totalRequiredStaff += shiftStaffCount;
+                    shiftRequirements[shift.id] = staffPerDay;
+
+                    // Calculate total: days * staff per day for this shift
+                    // Assuming all days are working days (adjust if needed)
+                    totalRequiredAssignments += (totalDays * staffPerDay);
+
+                    // Add to position's shifts array
+                    positionShifts.push({
+                        shift_id: shift.id,
+                        shift_name: shift.shift_name,
+                        start_time: shift.start_time,
+                        end_time: shift.end_time,
+                        duration_hours: shift.duration_hours,
+                        color: shift.color,
+                        required_staff: staffPerDay,
+                        position_id: position.pos_id // Important: mark which position owns this shift
+                    });
                 });
             }
+
+            // Count actual assignments for this position
+            const actualAssignments = assignments.filter(a =>
+                a.position_id === position.pos_id
+            ).length;
 
             return {
                 pos_id: position.pos_id,
                 pos_name: position.pos_name,
                 profession: position.profession,
-                num_of_emp: totalRequiredStaff, // Total across all shifts
-                shift_requirements: shiftRequirements // Per shift requirements
+                num_of_emp: position.num_of_emp || 1, // Legacy field - employees on position
+                total_required_assignments: totalRequiredAssignments, // NEW: total assignments needed
+                current_assignments: actualAssignments, // NEW: current assignments count
+                shift_requirements: shiftRequirements, // Per shift requirements
+                shifts: positionShifts // Shifts that belong to THIS position only
             };
         });
 
-
-        // Collect all unique shifts from the positions we already loaded
+        // Create a global shifts array but mark position ownership
+        const allShifts = [];
         const shiftsMap = new Map();
-        positions.forEach(position => {
-            position.shifts?.forEach(shift => {
-                if (!shiftsMap.has(shift.id)) {
-                    // Get requirement for this shift
-                    let requiredStaff = 1;
-                    if (shift.requirements && shift.requirements.length > 0) {
-                        const requirement = shift.requirements.find(r => r.is_recurring)
-                            || shift.requirements[0];
-                        if (requirement) {
-                            requiredStaff = requirement.required_staff_count;
-                        }
-                    }
 
-                    shiftsMap.set(shift.id, {
-                        shift_id: shift.id,
-                        shift_name: shift.shift_name,
-                        start_time: shift.start_time,
-                        end_time: shift.end_time,
-                        duration: shift.duration_hours,
-                        shift_type: shift.is_night_shift ? 'night' :
-                            (shift.start_time < '12:00:00' ? 'morning' : 'day'),
-                        color: shift.color,
-                        required_staff: requiredStaff
-                    });
+        enrichedPositions.forEach(position => {
+            position.shifts.forEach(shift => {
+                const key = `${shift.position_id}-${shift.shift_id}`;
+                if (!shiftsMap.has(key)) {
+                    shiftsMap.set(key, shift);
+                    allShifts.push(shift);
                 }
             });
         });
 
-        const shifts = Array.from(shiftsMap.values());
-
-
-        // Получить всех сотрудников для данного сайта
+        // Get employees for this site
         const employees = await Employee.findAll({
             where: {
                 work_site_id: schedule.site_id,
@@ -202,9 +207,7 @@ const getScheduleDetails = async (req, res) => {
             attributes: ['emp_id', 'first_name', 'last_name', 'status']
         });
 
-        console.log(`[ScheduleController] Found ${employees.length} employees`);
-
-        // Подготовить структуру данных для фронтенда
+        // Prepare response
         const responseData = {
             schedule: {
                 id: schedule.id,
@@ -218,11 +221,18 @@ const getScheduleDetails = async (req, res) => {
             },
             positions: enrichedPositions,
             assignments: assignments,
-            shifts: shifts,
+            shifts: allShifts, // All shifts with position markers
             employees: employees
         };
 
-        console.log(`[ScheduleController] Sending response with ${positions.length} positions`);
+        console.log(`[ScheduleController] Response: ${enrichedPositions.length} positions, example:`,
+            enrichedPositions[0] ? {
+                name: enrichedPositions[0].pos_name,
+                total_required: enrichedPositions[0].total_required_assignments,
+                current: enrichedPositions[0].current_assignments,
+                shifts_count: enrichedPositions[0].shifts.length
+            } : 'none'
+        );
 
         res.json({
             success: true,

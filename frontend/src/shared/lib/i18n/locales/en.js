@@ -847,6 +847,13 @@ export const en = {
         unpublishToEdit: 'Unpublish schedule to enable editing',
         cannotEditStatus: 'Schedule cannot be edited in current status',
         saveChangesBeforePublish: 'Save all changes before publishing',
+        totalAssignments: 'Total assignments',
+        assignmentsShortage: 'Missing {count} assignment(s)',
+        assignmentsOverage: 'Extra {count} assignment(s)',
+        uniqueEmployees: 'Unique employees',
+        defaultStaffPerShift: 'Default staff per shift',
+        confirmSaveWithShortage: 'Schedule is missing {count} assignments. Save anyway?',
+        confirmSaveWithOverage: 'Schedule has {count} extra assignments. Save anyway?',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

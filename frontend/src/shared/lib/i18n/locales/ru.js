@@ -751,6 +751,13 @@ export const ru = {
         unpublishToEdit: 'Снимите расписание с публикации для редактирования',
         cannotEditStatus: 'Расписание нельзя редактировать в текущем статусе',
         saveChangesBeforePublish: 'Сохраните все изменения перед публикацией',
+        totalAssignments: 'Всего назначений',
+        assignmentsShortage: 'Не хватает {count} назначений',
+        assignmentsOverage: 'Лишних {count} назначений',
+        uniqueEmployees: 'Уникальных сотрудников',
+        defaultStaffPerShift: 'Сотрудников на смену по умолчанию',
+        confirmSaveWithShortage: 'В расписании не хватает {count} назначений. Сохранить?',
+        confirmSaveWithOverage: 'В расписании {count} лишних назначений. Сохранить?',
     },
     settings: {
         algorithmMaxTime: 'Лимит времени для алгоритма',

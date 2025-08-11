@@ -42,8 +42,9 @@ const ScheduleEditor = ({
     const {systemSettings} = useSelector(state => state.settings);
     const canEdit = canEditSchedule(schedule);
     const isPublished = schedule?.status === 'published';
-
-    // Используем наш хук для управления цветами
+    const totalRequired = position.total_required_assignments || 0;
+    const currentAssignments = position.current_assignments || assignments?.length || 0;
+    const shortage = totalRequired - currentAssignments;
     const {
         colorPickerState,
         openColorPicker,
@@ -75,6 +76,21 @@ const ScheduleEditor = ({
         return 1;
     };
 
+    // Handle save with confirmation if shortage/overage
+    const handleSaveClick = () => {
+        if (shortage !== 0) {
+            // Show confirmation modal
+            const message = shortage > 0
+                ? t('schedule.confirmSaveWithShortage', { count: Math.abs(shortage) })
+                : t('schedule.confirmSaveWithOverage', { count: Math.abs(shortage) });
+
+            if (window.confirm(message)) {
+                onSaveChanges(position.pos_id);
+            }
+        } else {
+            onSaveChanges(position.pos_id);
+        }
+    };
     // Сохраняем при изменении
     const handleNameToggle = (checked) => {
         setShowFirstNameOnly(checked);
@@ -93,20 +109,16 @@ const ScheduleEditor = ({
         });
     }, [position.pos_id, scheduleDetails?.assignments]);
 
-    const currentAssignedCount = useMemo(() => {
+    const uniqueEmployees = useMemo(() => {
         if (!assignments) return 0;
-        // Считаем уникальных сотрудников на позиции
-        const uniqueEmployees = new Set();
-        assignments.forEach(assignment => {
-            if (assignment.emp_id) {
-                uniqueEmployees.add(assignment.emp_id);
-            }
+        const unique = new Set();
+        assignments.forEach(a => {
+            if (a.emp_id) unique.add(a.emp_id);
         });
-        return uniqueEmployees.size;
+        return unique.size;
     }, [assignments]);
 
-    const requiredCount = position.num_of_emp || 0;
-    const shortage = Math.max(0, requiredCount - currentAssignedCount);
+
 
     const employees = useMemo(() => {
         return scheduleDetails?.employees || [];
@@ -290,29 +302,6 @@ const ScheduleEditor = ({
                         )}
                     </small>
                 </div>
-                <div className="d-flex position-stats flex-row gap-2">
-                    <small className="text-muted d-block">
-                        {t('employee.requiredEmployees')}: {requiredCount}
-                    </small>
-
-                    <small className="text-muted">
-                        {t('employee.currentlyAssigned')}: {currentAssignedCount}/{requiredCount}
-                    </small>
-
-                    <small className={`d-block ${shortage > 0 ? 'text-danger fw-bold' : 'text-success'}`}>
-                        {shortage > 0 ? (
-                            <>
-                                <i className="bi bi-exclamation-triangle me-1"></i>
-                                {t('employee.shortage', { count: shortage })}
-                            </>
-                        ) : (
-                            <>
-                                <i className="bi bi-check-circle me-1"></i>
-                                {t('employee.fullyStaffed')}
-                            </>
-                        )}
-                    </small>
-                </div>
                 <div>
                     {/* Edit button - show always but disable when can't edit */}
                     {!isEditing && (
@@ -360,11 +349,7 @@ const ScheduleEditor = ({
                                 variant="success"
                                 size="sm"
                                 className="me-2"
-                                onClick={() => {
-                                    if (onSaveChanges) {
-                                        onSaveChanges(position.pos_id);
-                                    }
-                                }}
+                                onClick={handleSaveClick}
                                 disabled={savingChanges || positionPendingChanges.length === 0}
                             >
                                 {savingChanges ? (
@@ -440,7 +425,7 @@ const ScheduleEditor = ({
                                             {formatShiftTime(shift.start_time, shift.duration)}
                                         </div>
                                     </div>
-                                    {/* Кнопка редактирования цвета */}
+                                    {/* Color picker button */}
                                     {canEdit && (
                                         <button
                                             className="btn btn-sm shift-color-btn"
@@ -477,10 +462,33 @@ const ScheduleEditor = ({
             {/* Edit Mode Message */}
             {
                 isEditing && (
-                    <div className="alert alert-info mt-3 mb-0">
-                        <i className="bi bi-pencil me-2"></i>
-                        <strong>{t('position.editPosition')}: {position.pos_name}.</strong> {t('employee.clickToAssignEmployee')}
+                    <div className="position-stats mt-2">
+                        <small className="d-block text-muted">
+                            {t('schedule.totalAssignments')}: {currentAssignments}/{totalRequired}
+                        </small>
+
+                        {shortage !== 0 && (
+                            <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>
+                                <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>
+                                {shortage > 0
+                                    ? t('schedule.assignmentsShortage', { count: shortage })
+                                    : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })
+                                }
+                            </small>
+                        )}
+
+                        <small className="d-block text-muted">
+                            {t('schedule.uniqueEmployees')}: {uniqueEmployees}
+                        </small>
+
+                        {position.num_of_emp && (
+                            <small className="d-block text-muted">
+                                {t('schedule.defaultStaffPerShift')}: {position.num_of_emp}
+                            </small>
+                        )}
                     </div>
+
+
                 )
             }
 
