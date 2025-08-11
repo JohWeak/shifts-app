@@ -526,6 +526,85 @@ const getRecommendedEmployees = async (req, res) => {
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
+}
+    /**
+     * Get schedule statistics for dashboard
+     */
+    const getScheduleStatistics = async (req, res) => {
+        try {
+            const {scheduleId} = req.params;
+
+            const stats = await cpSatBridge.getScheduleStatistics(scheduleId);
+
+            res.json({
+                success: true,
+                data: stats
+            });
+
+        } catch (error) {
+            console.error('[ScheduleController] Error getting statistics:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error getting schedule statistics'
+            });
+        }
+    };
+
+    /**
+     * Get dashboard overview (multiple schedules)
+     */
+    const getDashboardOverview = async (req, res) => {
+        try {
+            const {siteId} = req.params;
+            const {startDate, endDate} = req.query;
+
+            // Get all schedules in date range
+            const schedules = await Schedule.findAll({
+                where: {
+                    site_id: siteId,
+                    start_date: {
+                        [Op.between]: [startDate, endDate]
+                    }
+                },
+                order: [['start_date', 'DESC']],
+                limit: 10
+            });
+
+            // Get stats for each schedule
+            const statsPromises = schedules.map(schedule =>
+                cpSatBridge.getScheduleStatistics(schedule.id)
+            );
+
+            const allStats = await Promise.all(statsPromises);
+
+            // Aggregate data
+            const overview = {
+                schedules_count: schedules.length,
+                avg_coverage: Math.round(
+                    allStats.reduce((sum, s) => sum + s.summary.overall_coverage, 0) / allStats.length
+                ),
+                total_issues: allStats.reduce((sum, s) => sum + s.summary.issues_count, 0),
+                schedules: schedules.map((schedule, index) => ({
+                    id: schedule.id,
+                    start_date: schedule.start_date,
+                    status: schedule.status,
+                    statistics: allStats[index].summary
+                }))
+            };
+
+            res.json({
+                success: true,
+                data: overview
+            });
+
+        } catch (error) {
+            console.error('[ScheduleController] Error getting dashboard:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error getting dashboard overview'
+            });
+        }
+
 };
 
 module.exports = {
@@ -534,5 +613,7 @@ module.exports = {
     updateScheduleStatus,
     updateScheduleAssignments,
     deleteSchedule,
-    getRecommendedEmployees
+    getRecommendedEmployees,
+    getScheduleStatistics,
+    getDashboardOverview
 };

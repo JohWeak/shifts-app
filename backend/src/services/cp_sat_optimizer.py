@@ -44,6 +44,8 @@ class UniversalShiftSchedulerCP:
         days = data['days']
         constraints = data['constraints']
         settings = data.get('settings', {})
+        # Extract position-shift mapping
+        position_shifts_map = data.get('position_shifts_map', {})
 
         # Get constraints from configuration with UPPERCASE keys
         hard_constraints = settings.get('hard_constraints', {})
@@ -93,11 +95,20 @@ class UniversalShiftSchedulerCP:
         for emp in employees:
             emp_id = emp['emp_id']
             for day_idx, day in enumerate(days):
-                for shift in shifts:
-                    for position in positions:
-                        var_name = f"assign_{emp_id}_{day_idx}_{shift['shift_id']}_{position['pos_id']}"
-                        assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] = \
-                            self.model.NewBoolVar(var_name)
+                for position in positions:
+                    pos_id = str(position['pos_id'])  # Convert to string for key matching
+
+                    # Get valid shifts for this position
+                    valid_shifts = position_shifts_map.get(pos_id, [])
+
+                    for shift in shifts:
+                        # Only create variable if this shift belongs to this position
+                        if shift['shift_id'] in valid_shifts:
+                            var_name = f"assign_{emp_id}_{day_idx}_{shift['shift_id']}_{position['pos_id']}"
+                            assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] = \
+                                self.model.NewBoolVar(var_name)
+
+        print(f"[CP-SAT] Created {len(assignments)} assignment variables")
 
         # 1. APPLY ALL CONSTRAINTS IN ORDER OF PRIORITY
 
@@ -160,53 +171,52 @@ class UniversalShiftSchedulerCP:
         for day_idx, day in enumerate(days):
             date_str = day['date']
 
-            for shift in shifts:
-                shift_id = shift['shift_id']
-                real_shift_id = shift.get('real_shift_id', shift_id)
+            for position in positions:
+                pos_id = position['pos_id']
+                pos_str = str(pos_id)
 
-                for position in positions:
-                    pos_id = position['pos_id']
+                # Get valid shifts for this position
+                valid_shifts = position_shifts_map.get(pos_str, [])
 
-                    # Build the key to find requirement
-                    # Try different key formats for compatibility
-                    requirement_key = f"{pos_id}-{real_shift_id}-{date_str}"
+                for shift_id in valid_shifts:
+                    # Find the shift object
+                    shift = next((s for s in shifts if s['shift_id'] == shift_id), None)
+                    if not shift:
+                        continue
+
+                    # Build requirement key
+                    requirement_key = f"{pos_id}-{shift_id}-{date_str}"
                     requirement = shift_requirements.get(requirement_key)
 
-                    # If not found, try with temp shift_id
-                    if not requirement:
-                        requirement_key = f"{pos_id}-{shift_id}-{date_str}"
-                        requirement = shift_requirements.get(requirement_key)
-
-                    # Default to position's num_of_emp or 1
                     if requirement:
                         required_employees = requirement.get('required_staff', 1)
-                        print(f"[CP-SAT] Found requirement for {pos_id}-{shift_id} on {date_str}: {required_employees} staff")
+                        print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
                     else:
-                        required_employees = position.get('num_of_emp', 1)
-                        print(f"[CP-SAT] Using default for {pos_id}-{shift_id} on {date_str}: {required_employees} staff")
+                        required_employees = 1
+                        print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: defaulting to 1 staff")
 
-                    # Only create constraints if staff is needed
                     if required_employees > 0:
                         assignment_vars = []
+
+                        # Only employees with matching position can work
                         for emp in employees:
-                            # Allow any employee with matching position
                             if emp.get('default_position_id') == pos_id:
                                 key = (emp['emp_id'], day_idx, shift_id, pos_id)
                                 if key in assignments:
                                     assignment_vars.append(assignments[key])
 
                         if assignment_vars:
-                            # Create shortage variable for flexibility
+                            # Create shortage variable
                             shortage_var = self.model.NewIntVar(
                                 0, required_employees,
                                 f"shortage_{day_idx}_{shift_id}_{pos_id}"
                             )
                             shortage_vars.append(shortage_var)
 
-                            # Coverage constraint: assignments + shortage = required
+                            # Exact coverage: assignments + shortage = required
                             self.model.Add(sum(assignment_vars) + shortage_var == required_employees)
 
-                            print(f"[CP-SAT] Created coverage constraint: {len(assignment_vars)} candidates for {required_employees} required")
+                            print(f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, {required_employees} required")
 
         # 3. HARD CONSTRAINTS (LEGAL REQUIREMENTS)
 

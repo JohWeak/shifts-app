@@ -84,13 +84,13 @@ class CPSATBridge {
                     {
                         model: EmployeeConstraint,
                         as: 'constraints',
-                        where: { status: 'active' },
+                        where: {status: 'active'},
                         required: false
                     },
                     {
                         model: PermanentConstraint,
                         as: 'permanentConstraints',
-                        where: { is_active: true },
+                        where: {is_active: true},
                         required: false,
                         include: [{
                             model: Employee,
@@ -106,7 +106,7 @@ class CPSATBridge {
 
             // Get legal constraints
             const legalConstraints = await LegalConstraint.findAll({
-                where: { is_active: true },
+                where: {is_active: true},
                 transaction
             });
 
@@ -119,7 +119,7 @@ class CPSATBridge {
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     include: [{
                         model: ShiftRequirement,
@@ -135,31 +135,34 @@ class CPSATBridge {
 
             // Create shift mapping for backward compatibility
             const shiftIdMapping = {};
-            let temporaryShiftId = 1;
 
-            const shiftsMap = new Map();
             const shiftsArray = [];
-            const shiftRequirementsMap = {}; // ADD THIS!
+            const shiftRequirementsMap = {};
+            const positionShiftsMap = {};
 
             positions.forEach(position => {
-                position.shifts?.forEach(posShift => {
-                    if (!shiftsMap.has(posShift.id)) {
-                        const tempId = temporaryShiftId++;
-                        shiftIdMapping[tempId] = posShift.id;
+                if (!positionShiftsMap[position.pos_id]) {
+                    positionShiftsMap[position.pos_id] = [];
+                }
 
-                        const shiftData = {
-                            shift_id: tempId,
-                            real_shift_id: posShift.id,
-                            shift_name: posShift.shift_name,
-                            start_time: posShift.start_time,
-                            duration: posShift.duration_hours || 8,
-                            shift_type: this.determineShiftType(posShift.start_time),
-                            is_night_shift: posShift.is_night_shift || false,
-                            position_id: position.pos_id // ADD position reference
-                        };
-                        shiftsMap.set(posShift.id, shiftData);
+                position.shifts?.forEach(posShift => {
+                    // Create shift data with position tracking
+                    const shiftData = {
+                        shift_id: posShift.id,
+                        shift_name: posShift.shift_name,
+                        start_time: posShift.start_time,
+                        duration: posShift.duration_hours || 8,
+                        shift_type: this.determineShiftType(posShift.start_time),
+                        is_night_shift: posShift.is_night_shift || false,
+                        position_id: position.pos_id
+                    };
+
+                    // Only add if not already added
+                    if (!shiftsArray.find(s => s.shift_id === posShift.id)) {
                         shiftsArray.push(shiftData);
                     }
+                    // Track this shift for this position
+                    positionShiftsMap[position.pos_id].push(posShift.id);
 
                     // Process shift requirements for each day
                     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
@@ -171,24 +174,13 @@ class CPSATBridge {
                         // Default requirement
                         let requiredStaff = 1;
 
-                        // Check if there are specific requirements
+                        // Find requirement for this day
                         if (posShift.requirements && posShift.requirements.length > 0) {
-                            // Find matching requirement for this day
                             const dayRequirement = posShift.requirements.find(req => {
-                                // Check recurring requirements
                                 if (req.is_recurring) {
-                                    // If day_of_week is null, applies to all days
-                                    if (req.day_of_week === null || req.day_of_week === undefined) {
-                                        return true;
-                                    }
-                                    // Otherwise match specific day
-                                    return req.day_of_week === dayOfWeek;
+                                    return req.day_of_week === dayOfWeek || req.day_of_week === null;
                                 }
-                                // Check specific date requirements
-                                if (req.specific_date) {
-                                    return req.specific_date === dateStr;
-                                }
-                                return false;
+                                return req.specific_date === dateStr;
                             });
 
                             if (dayRequirement) {
@@ -201,7 +193,6 @@ class CPSATBridge {
                         shiftRequirementsMap[key] = {
                             position_id: position.pos_id,
                             shift_id: posShift.id,
-                            temp_shift_id: shiftsMap.get(posShift.id).shift_id, // Use temp ID for Python
                             date: dateStr,
                             day_index: dayOffset,
                             required_staff: requiredStaff,
@@ -255,7 +246,7 @@ class CPSATBridge {
 
                 days.push({
                     date: currentDate.toISOString().split('T')[0],
-                    day_name: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
+                    day_name: currentDate.toLocaleDateString('en-US', {weekday: 'long'}),
                     day_index: i,
                     weekday: currentDate.getDay()
                 });
@@ -286,6 +277,7 @@ class CPSATBridge {
                 employees: employeesData,
                 shifts: shiftsArray,
                 positions: positionsData,
+                position_shifts_map: positionShiftsMap,
                 days: days,
                 constraints: constraintsData,
                 existing_assignments: existingAssignments,
@@ -297,13 +289,9 @@ class CPSATBridge {
                 employees: employeesData.length,
                 shifts: shiftsArray.length,
                 positions: positionsData.length,
+                position_shifts_map: positionShiftsMap,
                 days: days.length,
-                cannot_work_constraints: constraintsData.cannot_work.length,
-                prefer_work_constraints: constraintsData.prefer_work.length,
-                permanent_cannot_work: constraintsData.permanent_cannot_work.length,
-                legal_constraints: constraintsData.legal_constraints.length,
-                shift_requirements: Object.keys(shiftRequirementsMap).length,
-                sample_requirements: Object.values(shiftRequirementsMap).slice(0, 3)
+                shift_requirements_count: Object.keys(shiftRequirementsMap).length
             });
 
             return preparedData;
@@ -451,7 +439,7 @@ class CPSATBridge {
      * Get existing assignments for the week
      */
     async getExistingAssignments(employeeIds, weekStart, transaction = null) {
-        const { ScheduleAssignment, PositionShift, Position } = this.db;
+        const {ScheduleAssignment, PositionShift, Position} = this.db;
 
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
 
@@ -492,7 +480,7 @@ class CPSATBridge {
             try {
                 // Use backend/temp directory, not src/temp
                 const tempDir = path.join(__dirname, '..', '..', 'temp');
-                await fs.mkdir(tempDir, { recursive: true });
+                await fs.mkdir(tempDir, {recursive: true});
 
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
                 const tempFilePath = path.join(tempDir, tempFileName);
@@ -599,11 +587,13 @@ class CPSATBridge {
         });
     }
 
+    // backend/src/services/cp-sat-bridge.service.js
+
     /**
      * Save schedule to database
      */
-    async saveSchedule(siteId, weekStart, scheduleData,  transaction = null) {
-        const { Schedule, ScheduleAssignment } = this.db;
+    async saveSchedule(siteId, weekStart, scheduleData, transaction = null) {
+        const {Schedule, ScheduleAssignment} = this.db;
 
         try {
             const weekEnd = dayjs(weekStart).add(6, 'days');
@@ -619,23 +609,16 @@ class CPSATBridge {
                     algorithm: 'CP-SAT-Python',
                     timezone: 'Asia/Jerusalem'
                 }
-            }, { transaction });
+            }, {transaction});
 
             const assignments = [];
 
             for (const assignment of scheduleData) {
-                // Преобразуем временный shift_id обратно в реальный position_shift id
-                const realShiftId = this.shiftIdMapping[assignment.shift_id];
-
-                if (!realShiftId) {
-                    console.warn(`[CP-SAT Bridge] No mapping found for shift_id ${assignment.shift_id}, skipping`);
-                    continue;
-                }
-
+                // Since we're now using real shift IDs, no mapping needed!
                 assignments.push({
                     schedule_id: newSchedule.id,
                     emp_id: assignment.emp_id,
-                    shift_id: realShiftId, // Используем реальный ID из position_shifts
+                    shift_id: assignment.shift_id, // Already the real ID
                     position_id: assignment.position_id,
                     work_date: assignment.date,
                     status: 'scheduled',
@@ -644,16 +627,26 @@ class CPSATBridge {
             }
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments, { transaction });
+                await ScheduleAssignment.bulkCreate(assignments, {transaction});
             }
 
             console.log(`[CP-SAT Bridge] Saved schedule with ${assignments.length} assignments`);
+
+            // Calculate detailed statistics
+            const stats = await this.calculateDetailedStats(
+                newSchedule.id,
+                siteId,
+                weekStart,
+                assignments,
+                transaction
+            );
 
             return {
                 schedule_id: newSchedule.id,
                 assignments_count: assignments.length,
                 week_start: weekStart,
-                week_end: weekEnd.toISOString().split('T')[0]
+                week_end: weekEnd.format('YYYY-MM-DD'),
+                statistics: stats
             };
 
         } catch (error) {
@@ -663,26 +656,245 @@ class CPSATBridge {
     }
 
     /**
-     * Calculate schedule statistics
+     * Calculate detailed schedule statistics for dashboard
      */
-    calculateScheduleStats(schedule) {
-        const stats = {
-            total_assignments: schedule.length,
-            employees_used: new Set(schedule.map(s => s.emp_id)).size,
-            positions_covered: new Set(schedule.map(s => s.position_id)).size,
-            shifts_covered: new Set(schedule.map(s => s.shift_id)).size,
-            daily_distribution: {}
-        };
+    async calculateDetailedStats(scheduleId, siteId, weekStart, assignments, transaction = null) {
+        const {Position, PositionShift, ShiftRequirement, Employee} = this.db;
 
-        // Daily distribution
-        schedule.forEach(assignment => {
-            if (!stats.daily_distribution[assignment.date]) {
-                stats.daily_distribution[assignment.date] = 0;
+        try {
+            // Load positions with requirements
+            const positions = await Position.findAll({
+                where: {site_id: siteId, is_active: true},
+                include: [{
+                    model: PositionShift,
+                    as: 'shifts',
+                    where: {is_active: true},
+                    required: false,
+                    include: [{
+                        model: ShiftRequirement,
+                        as: 'requirements',
+                        required: false
+                    }]
+                }],
+                transaction
+            });
+
+            // Load employees
+            const employees = await Employee.findAll({
+                where: {work_site_id: siteId, status: 'active'},
+                attributes: ['emp_id', 'first_name', 'last_name', 'default_position_id'],
+                transaction
+            });
+
+            // Calculate required assignments
+            let totalRequired = 0;
+            const requirementsByDay = {};
+            const requirementsByPosition = {};
+
+            for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + dayOffset);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayOfWeek = date.getDay();
+
+                requirementsByDay[dateStr] = {required: 0, assigned: 0};
+
+                positions.forEach(position => {
+                    if (!requirementsByPosition[position.pos_id]) {
+                        requirementsByPosition[position.pos_id] = {
+                            name: position.pos_name,
+                            required: 0,
+                            assigned: 0,
+                            coverage: 0
+                        };
+                    }
+
+                    position.shifts?.forEach(shift => {
+                        let requiredStaff = 1;
+
+                        if (shift.requirements?.length > 0) {
+                            const dayReq = shift.requirements.find(r =>
+                                r.is_recurring && (r.day_of_week === dayOfWeek || r.day_of_week === null)
+                            );
+                            if (dayReq) {
+                                requiredStaff = dayReq.required_staff_count || 1;
+                            }
+                        }
+
+                        totalRequired += requiredStaff;
+                        requirementsByDay[dateStr].required += requiredStaff;
+                        requirementsByPosition[position.pos_id].required += requiredStaff;
+                    });
+                });
             }
-            stats.daily_distribution[assignment.date]++;
-        });
 
-        return stats;
+            // Count actual assignments
+            const assignmentsByEmployee = {};
+            const assignmentsByShift = {};
+            const assignmentsByPosition = {};
+
+            assignments.forEach(assignment => {
+                // By day
+                if (requirementsByDay[assignment.work_date]) {
+                    requirementsByDay[assignment.work_date].assigned++;
+                }
+
+                // By position
+                if (requirementsByPosition[assignment.position_id]) {
+                    requirementsByPosition[assignment.position_id].assigned++;
+                }
+
+                // By employee
+                if (!assignmentsByEmployee[assignment.emp_id]) {
+                    const emp = employees.find(e => e.emp_id === assignment.emp_id);
+                    assignmentsByEmployee[assignment.emp_id] = {
+                        name: emp ? `${emp.first_name} ${emp.last_name}` : `Employee ${assignment.emp_id}`,
+                        shifts: 0,
+                        hours: 0,
+                        position_match: 0
+                    };
+                }
+                assignmentsByEmployee[assignment.emp_id].shifts++;
+                assignmentsByEmployee[assignment.emp_id].hours += 8; // Assuming 8-hour shifts
+
+                // Check position match
+                const emp = employees.find(e => e.emp_id === assignment.emp_id);
+                if (emp && emp.default_position_id === assignment.position_id) {
+                    assignmentsByEmployee[assignment.emp_id].position_match++;
+                }
+
+                // By shift
+                if (!assignmentsByShift[assignment.shift_id]) {
+                    assignmentsByShift[assignment.shift_id] = 0;
+                }
+                assignmentsByShift[assignment.shift_id]++;
+            });
+
+            // Calculate coverage percentages
+            Object.keys(requirementsByPosition).forEach(posId => {
+                const pos = requirementsByPosition[posId];
+                pos.coverage = pos.required > 0
+                    ? Math.round((pos.assigned / pos.required) * 100)
+                    : 100;
+            });
+
+            Object.keys(requirementsByDay).forEach(date => {
+                const day = requirementsByDay[date];
+                day.coverage = day.required > 0
+                    ? Math.round((day.assigned / day.required) * 100)
+                    : 100;
+            });
+
+            // Calculate overall metrics
+            const overallCoverage = totalRequired > 0
+                ? Math.round((assignments.length / totalRequired) * 100)
+                : 100;
+
+            const avgShiftsPerEmployee = Object.keys(assignmentsByEmployee).length > 0
+                ? assignments.length / Object.keys(assignmentsByEmployee).length
+                : 0;
+
+            // Find issues
+            const issues = [];
+
+            // Check for understaffed days
+            Object.entries(requirementsByDay).forEach(([date, data]) => {
+                if (data.assigned < data.required) {
+                    issues.push({
+                        type: 'understaffed_day',
+                        severity: 'high',
+                        date,
+                        shortage: data.required - data.assigned
+                    });
+                }
+            });
+
+            // Check for understaffed positions
+            Object.entries(requirementsByPosition).forEach(([posId, data]) => {
+                if (data.coverage < 100) {
+                    issues.push({
+                        type: 'understaffed_position',
+                        severity: data.coverage < 80 ? 'high' : 'medium',
+                        position: data.name,
+                        coverage: data.coverage
+                    });
+                }
+            });
+
+            // Check for overworked employees
+            Object.entries(assignmentsByEmployee).forEach(([empId, data]) => {
+                if (data.hours > 48) {
+                    issues.push({
+                        type: 'overworked_employee',
+                        severity: 'medium',
+                        employee: data.name,
+                        hours: data.hours
+                    });
+                }
+            });
+
+            return {
+                summary: {
+                    total_assignments: assignments.length,
+                    total_required: totalRequired,
+                    overall_coverage: overallCoverage,
+                    employees_used: Object.keys(assignmentsByEmployee).length,
+                    positions_covered: Object.keys(requirementsByPosition).length,
+                    avg_shifts_per_employee: Math.round(avgShiftsPerEmployee * 10) / 10,
+                    issues_count: issues.length
+                },
+                by_day: requirementsByDay,
+                by_position: requirementsByPosition,
+                by_employee: assignmentsByEmployee,
+                by_shift: assignmentsByShift,
+                issues,
+                metadata: {
+                    schedule_id: scheduleId,
+                    site_id: siteId,
+                    week_start: weekStart,
+                    calculated_at: new Date().toISOString()
+                }
+            };
+
+        } catch (error) {
+            console.error('[CP-SAT Bridge] Error calculating stats:', error);
+            return {
+                summary: {
+                    total_assignments: assignments.length,
+                    error: error.message
+                }
+            };
+        }
+    }
+
+    /**
+     * Get schedule statistics for dashboard (public method)
+     */
+    async getScheduleStatistics(scheduleId) {
+        const {ScheduleAssignment, Schedule} = this.db;
+
+        try {
+            const schedule = await Schedule.findByPk(scheduleId);
+            if (!schedule) {
+                throw new Error('Schedule not found');
+            }
+
+            const assignments = await ScheduleAssignment.findAll({
+                where: {schedule_id: scheduleId},
+                raw: true
+            });
+
+            return await this.calculateDetailedStats(
+                scheduleId,
+                schedule.site_id,
+                schedule.start_date,
+                assignments
+            );
+
+        } catch (error) {
+            console.error('[CP-SAT Bridge] Error getting statistics:', error);
+            throw error;
+        }
     }
 }
 
