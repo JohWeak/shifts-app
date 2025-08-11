@@ -2,7 +2,6 @@
 import api from './index';
 import { API_ENDPOINTS } from '../config/apiEndpoints';
 
-// Группируем функции в объекты-неймспейсы, сохраняя исходные имена.
 
 export const authAPI = {
     loginUser: (credentials) => api.post(API_ENDPOINTS.AUTH.LOGIN, credentials),
@@ -49,7 +48,6 @@ export const scheduleAPI = {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            // Возвращаем что-то для индикации успеха, если нужно
             return { success: true };
         } catch (error) {
             console.error('Export failed:', error);
@@ -62,10 +60,14 @@ export const scheduleAPI = {
         api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_MONTH, {
             params: { year, month }
         }),
+
 };
 
 export const worksiteAPI = {
-    fetchWorkSites: () => api.get(API_ENDPOINTS.WORKSITES.BASE)
+    fetchWorkSites: () => api.get(API_ENDPOINTS.WORKSITES.BASE),
+    fetchWorkSiteStats: (siteId, params) =>
+        api.get(API_ENDPOINTS.WORKSITES.STATS_OVERVIEW(siteId), { params }),
+
 };
 
 export const employeeAPI = {
@@ -178,7 +180,7 @@ export const updatePositionShiftColor = async (shiftId, color) => {
 
 
 export const apiService = {
-    ...api, // базовые методы get, post, put, delete
+    ...api, //  get, post, put, delete
     auth: authAPI,
     schedule: scheduleAPI,
     worksite: worksiteAPI,

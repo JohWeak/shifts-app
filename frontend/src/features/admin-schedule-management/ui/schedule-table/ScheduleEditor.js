@@ -485,7 +485,7 @@ const ScheduleEditor = ({
                                             {shift.shift_name}
                                         </div>
                                         <div className="shift-time" style={{color: textColor}}>
-                                            {formatShiftTime(shift.start_time, shift.duration)}
+                                            {formatShiftTime(shift.start_time, shift.end_time)}
                                         </div>
                                     </div>
                                     {canEdit && (
@@ -521,7 +521,7 @@ const ScheduleEditor = ({
 
             {/* Edit Mode Statistics */}
             {isEditing && (
-                <div className="position-stats mt-2 p-2 bg-light rounded">
+                <div className="position-stats mt-2 p-2 rounded">
                     <div className="row">
                         <div className="col-md-6">
                             <small className="d-block">

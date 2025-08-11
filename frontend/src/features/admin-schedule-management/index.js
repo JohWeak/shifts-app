@@ -270,7 +270,6 @@ const ScheduleManagement = () => {
     };
     useEffect(() => {
         return () => {
-            // При уходе со страницы закрываем панель
             setIsPanelOpen(false);
             setSelectedCell(null);
         };

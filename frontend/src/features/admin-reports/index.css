@@ -1,0 +1,55 @@
+/* frontend/src/features/admin-reports/index.css */
+.reports-container {
+    background-color: var(--bs-gray-100);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+}
+
+[data-theme="dark"] .reports-container {
+    background-color: var(--bs-black);
+}
+
+.reports-container .filter-bar {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+    background-color: var(--bs-body-bg);
+}
+
+.reports-container .summary-card {
+    border-left-width: 4px;
+    height: 100%;
+}
+
+.reports-container .summary-card .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.reports-container .summary-card .metric-label {
+    font-size: 0.9rem;
+    color: var(--bs-secondary);
+}
+
+.chart-container {
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    min-height: 400px;
+    background-color: var(--bs-body-bg);
+}
+
+.chart-container .recharts-responsive-container {
+    font-size: 0.8rem;
+}
+
+.chart-container .recharts-tooltip-wrapper {
+    background: var(--bs-body-bg) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: var(--radius-md);
+    box-shadow: var(--bs-box-shadow-sm);
+}
+
+.chart-container .recharts-tooltip-label {
+    font-weight: bold;
+    color: var(--bs-emphasis-color);
+}

@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
         WEEKLY_BY_POSITION: (positionId) => `/api/schedules/position/${positionId}/weekly`,
         EMPLOYEE_ARCHIVE_SUMMARY: '/api/schedules/employee/archive/summary',
         EMPLOYEE_ARCHIVE_MONTH: '/api/schedules/employee/archive/month',
+
     },
     // Employees
     EMPLOYEES: {
@@ -34,7 +35,8 @@ export const API_ENDPOINTS = {
 
     // Work Sites
     WORKSITES: {
-        BASE: '/api/worksites'
+        BASE: '/api/worksites',
+        STATS_OVERVIEW: (siteId) => `/api/worksites/${siteId}/statistics`,
     },
 
     // Constraints

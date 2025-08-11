@@ -10,6 +10,8 @@ const {
     PositionShift,
     ShiftRequirement
 } = db;
+const cpSatBridge = require('../../../services/cp-sat-bridge.service');
+
 
 
 const getAllSchedules = async (req, res) => {
@@ -110,7 +112,7 @@ const getScheduleDetails = async (req, res) => {
             include: [{
                 model: PositionShift,
                 as: 'shifts',
-                where: { is_active: true },
+                where: {is_active: true},
                 required: false,
                 include: [{
                     model: ShiftRequirement,
@@ -281,8 +283,8 @@ const updateScheduleStatus = async (req, res) => {
         }
 
         await Schedule.update(
-            { status },
-            { where: { id: scheduleId } }
+            {status},
+            {where: {id: scheduleId}}
         );
         // Возвращаем обновленное расписание с связями
         const updatedSchedule = await Schedule.findByPk(scheduleId, {
@@ -527,84 +529,99 @@ const getRecommendedEmployees = async (req, res) => {
         });
     }
 }
-    /**
-     * Get schedule statistics for dashboard
-     */
-    const getScheduleStatistics = async (req, res) => {
-        try {
-            const {scheduleId} = req.params;
+/**
+ * Get schedule statistics for dashboard
+ */
+const handleGetScheduleStatistics = async (req, res) => {
+    try {
+        const {scheduleId} = req.params;
+        const stats = await cpSatBridge.getScheduleStatistics(scheduleId);
 
-            const stats = await cpSatBridge.getScheduleStatistics(scheduleId);
+        res.json({
+            success: true,
+            data: stats
+        });
 
-            res.json({
-                success: true,
-                data: stats
-            });
+    } catch (error) {
+        console.error('[ScheduleController] Error getting statistics:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error getting schedule statistics'
+        });
+    }
+};
 
-        } catch (error) {
-            console.error('[ScheduleController] Error getting statistics:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error getting schedule statistics'
-            });
+/**
+ * @description Handles HTTP request to get dashboard overview (multiple schedules)
+ * @route GET /api/worksites/:siteId/statistics
+ */
+const getDashboardOverview = async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const { startDate, endDate } = req.query;
+
+        // Проверка наличия обязательных параметров
+        if (!startDate || !endDate) {
+            return res.status(400).json({ success: false, message: 'startDate and endDate are required' });
         }
-    };
 
-    /**
-     * Get dashboard overview (multiple schedules)
-     */
-    const getDashboardOverview = async (req, res) => {
-        try {
-            const {siteId} = req.params;
-            const {startDate, endDate} = req.query;
+        const schedules = await Schedule.findAll({
+            where: {
+                site_id: siteId,
+                start_date: {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                }
+            },
+            order: [['start_date', 'DESC']],
+        });
 
-            // Get all schedules in date range
-            const schedules = await Schedule.findAll({
-                where: {
-                    site_id: siteId,
-                    start_date: {
-                        [Op.between]: [startDate, endDate]
-                    }
-                },
-                order: [['start_date', 'DESC']],
-                limit: 10
-            });
-
-            // Get stats for each schedule
-            const statsPromises = schedules.map(schedule =>
-                cpSatBridge.getScheduleStatistics(schedule.id)
-            );
-
-            const allStats = await Promise.all(statsPromises);
-
-            // Aggregate data
-            const overview = {
-                schedules_count: schedules.length,
-                avg_coverage: Math.round(
-                    allStats.reduce((sum, s) => sum + s.summary.overall_coverage, 0) / allStats.length
-                ),
-                total_issues: allStats.reduce((sum, s) => sum + s.summary.issues_count, 0),
-                schedules: schedules.map((schedule, index) => ({
-                    id: schedule.id,
-                    start_date: schedule.start_date,
-                    status: schedule.status,
-                    statistics: allStats[index].summary
-                }))
-            };
-
-            res.json({
+        if (schedules.length === 0) {
+            return res.json({
                 success: true,
-                data: overview
-            });
-
-        } catch (error) {
-            console.error('[ScheduleController] Error getting dashboard:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error getting dashboard overview'
+                data: {
+                    schedules_count: 0,
+                    avg_coverage: 0,
+                    total_issues: 0,
+                    schedules: []
+                }
             });
         }
 
+        const statsPromises = schedules.map(schedule =>
+            cpSatBridge.getScheduleStatistics(schedule.id)
+        );
+
+        const allStats = await Promise.all(statsPromises);
+
+        const validStats = allStats.filter(s => s && s.summary);
+        const avgCoverage = validStats.length > 0 ?
+            Math.round(validStats.reduce((sum, s) => sum + s.summary.overall_coverage, 0) / validStats.length) : 0;
+        const totalIssues = validStats.reduce((sum, s) => sum + s.summary.issues_count, 0);
+
+        const overview = {
+            schedules_count: schedules.length,
+            avg_coverage: avgCoverage,
+            total_issues: totalIssues,
+            schedules: schedules.map((schedule, index) => ({
+                id: schedule.id,
+                start_date: schedule.start_date,
+                status: schedule.status,
+                statistics: allStats[index] ? allStats[index].summary : null
+            }))
+        };
+
+        res.json({
+            success: true,
+            data: overview
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error getting dashboard:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error getting dashboard overview'
+        });
+    }
 };
 
 module.exports = {
@@ -614,6 +631,6 @@ module.exports = {
     updateScheduleAssignments,
     deleteSchedule,
     getRecommendedEmployees,
-    getScheduleStatistics,
-    getDashboardOverview
+    handleGetScheduleStatistics,
+    getDashboardOverview,
 };

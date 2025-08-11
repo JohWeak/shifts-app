@@ -1,5 +1,4 @@
 // backend/src/services/cp-sat-bridge.service.js
-// backend/src/services/cp-sat-bridge.service.js
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
@@ -13,15 +12,14 @@ class CPSATBridge {
         this.db = database || db;
     }
 
-    static async generateOptimalSchedule(database, siteId, weekStart, transaction = null) {
-        const bridge = new CPSATBridge(database || db);
+     async generateOptimalSchedule(siteId, weekStart, transaction = null) {
 
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
 
-            const data = await bridge.prepareScheduleData(siteId, weekStart, transaction);
+            const data = await this.prepareScheduleData(siteId, weekStart, transaction);
 
-            const pythonResult = await bridge.callPythonOptimizer(data);
+            const pythonResult = await this.callPythonOptimizer(data);
 
             if (!pythonResult.success) {
                 return {
@@ -31,12 +29,12 @@ class CPSATBridge {
                 };
             }
 
-            const savedSchedule = await bridge.saveSchedule(siteId, weekStart, pythonResult.schedule, transaction);
+            const savedSchedule = await this.saveSchedule(siteId, weekStart, pythonResult.schedule, transaction);
 
             return {
                 success: true,
                 schedule: savedSchedule,
-                stats: bridge.calculateScheduleStats(pythonResult.schedule),
+                stats: this.calculateScheduleStats(pythonResult.schedule),
                 algorithm: 'CP-SAT-Python',
                 solve_time: pythonResult.solve_time,
                 status: pythonResult.status,
@@ -919,5 +917,5 @@ class CPSATBridge {
         }
     }
 }
-
-module.exports = CPSATBridge;
+const cpSatBridge = new CPSATBridge(db);
+module.exports = cpSatBridge;

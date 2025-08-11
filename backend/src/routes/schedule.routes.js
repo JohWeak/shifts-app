@@ -21,8 +21,7 @@ router.get('/employee/archive/month', verifyToken, employeeController.getEmploye
 router.get('/stats/overview', ...[verifyToken, isAdmin], exportController.getScheduleStats);
 router.get('/:scheduleId/export', ...[verifyToken, isAdmin], exportController.exportSchedule);
 
-router.get('/schedules/:scheduleId/statistics', ...[verifyToken, isAdmin], scheduleController.getScheduleStatistics);
-router.get('/sites/:siteId/dashboard', ...[verifyToken, isAdmin], scheduleController.getDashboardOverview);
+router.get('/schedules/:scheduleId/statistics', ...[verifyToken, isAdmin], scheduleController.handleGetScheduleStatistics);
 
 router.post('/generate', ...[verifyToken, isAdmin], generationController.generateNextWeekSchedule);
 router.post('/compare-algorithms', ...[verifyToken, isAdmin], generationController.compareAllAlgorithms);

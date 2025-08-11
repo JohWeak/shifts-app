@@ -82,7 +82,6 @@ const router = createBrowserRouter([
     { path: "/", element: <Navigate to="/login" replace /> },
     { path: "*", element: <Navigate to="/login" replace /> },
 ]);
-// --- Конец новой части ---
 
 function App() {
     return (

@@ -5,7 +5,7 @@ const db = require('../../../models');
 const { Schedule, WorkSite, ScheduleAssignment } = db;
 
 const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
-const CPSATBridge = require('../../../services/cp-sat-bridge.service');
+const cpSatBridge = require('../../../services/cp-sat-bridge.service');
 /**
  * Check Python availability
  */
@@ -138,7 +138,7 @@ const generateNextWeekSchedule = async (req, res) => {
             case 'cp-sat':
                 try {
                     console.log('[ScheduleController] Attempting CP-SAT generation...');
-                    result = await CPSATBridge.generateOptimalSchedule(db, siteId, weekStart, transaction);
+                    result = await cpSatBridge.generateOptimalSchedule(siteId, weekStart, transaction);
                     if (!result.success) {
                         console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
                         result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction);
@@ -258,9 +258,8 @@ const compareAllAlgorithms = async (req, res) => {
         const pythonAvailable = await checkPythonAvailability();
         if (pythonAvailable) {
             try {
-                const bridge = new CPSATBridge(db);
-                const data = await bridge.prepareScheduleData(siteId, weekStart);
-                const pythonResult = await bridge.callPythonOptimizer(data);
+                const data = await cpSatBridge.prepareScheduleData(siteId, weekStart);
+                const pythonResult = await cpSatBridge.callPythonOptimizer(data);
 
                 comparison['cp-sat'] = {
                     status: 'success',
