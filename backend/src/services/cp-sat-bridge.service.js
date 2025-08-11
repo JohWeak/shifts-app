@@ -139,6 +139,7 @@ class CPSATBridge {
 
             const shiftsMap = new Map();
             const shiftsArray = [];
+            const shiftRequirementsMap = {}; // ADD THIS!
 
             positions.forEach(position => {
                 position.shifts?.forEach(posShift => {
@@ -151,12 +152,63 @@ class CPSATBridge {
                             real_shift_id: posShift.id,
                             shift_name: posShift.shift_name,
                             start_time: posShift.start_time,
-                            duration: posShift.duration_hours,
+                            duration: posShift.duration_hours || 8,
                             shift_type: this.determineShiftType(posShift.start_time),
-                            is_night_shift: posShift.is_night_shift || false
+                            is_night_shift: posShift.is_night_shift || false,
+                            position_id: position.pos_id // ADD position reference
                         };
                         shiftsMap.set(posShift.id, shiftData);
                         shiftsArray.push(shiftData);
+                    }
+
+                    // Process shift requirements for each day
+                    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+                        const date = new Date(weekStart);
+                        date.setDate(date.getDate() + dayOffset);
+                        const dayOfWeek = date.getDay();
+                        const dateStr = date.toISOString().split('T')[0];
+
+                        // Default requirement
+                        let requiredStaff = 1;
+
+                        // Check if there are specific requirements
+                        if (posShift.requirements && posShift.requirements.length > 0) {
+                            // Find matching requirement for this day
+                            const dayRequirement = posShift.requirements.find(req => {
+                                // Check recurring requirements
+                                if (req.is_recurring) {
+                                    // If day_of_week is null, applies to all days
+                                    if (req.day_of_week === null || req.day_of_week === undefined) {
+                                        return true;
+                                    }
+                                    // Otherwise match specific day
+                                    return req.day_of_week === dayOfWeek;
+                                }
+                                // Check specific date requirements
+                                if (req.specific_date) {
+                                    return req.specific_date === dateStr;
+                                }
+                                return false;
+                            });
+
+                            if (dayRequirement) {
+                                requiredStaff = dayRequirement.required_staff_count || 1;
+                            }
+                        }
+
+                        // Create unique key for this position-shift-date combination
+                        const key = `${position.pos_id}-${posShift.id}-${dateStr}`;
+                        shiftRequirementsMap[key] = {
+                            position_id: position.pos_id,
+                            shift_id: posShift.id,
+                            temp_shift_id: shiftsMap.get(posShift.id).shift_id, // Use temp ID for Python
+                            date: dateStr,
+                            day_index: dayOffset,
+                            required_staff: requiredStaff,
+                            is_working_day: requiredStaff > 0
+                        };
+
+                        console.log(`[CP-SAT Bridge] Requirement for ${position.pos_name} - ${posShift.shift_name} on ${dateStr}: ${requiredStaff} staff`);
                     }
                 });
             });
@@ -173,13 +225,25 @@ class CPSATBridge {
                     status: emp.status
                 }));
 
-            // Format position data
-            const positionsData = positions.map(position => ({
-                pos_id: position.pos_id,
-                pos_name: position.pos_name,
-                profession: position.profession,
-                num_of_emp: position.num_of_emp
-            }));
+            // Format position data - include required employees info
+            const positionsData = positions.map(position => {
+                // Calculate total required assignments for this position
+                let totalRequired = 0;
+                for (const key in shiftRequirementsMap) {
+                    const req = shiftRequirementsMap[key];
+                    if (req.position_id === position.pos_id) {
+                        totalRequired += req.required_staff;
+                    }
+                }
+
+                return {
+                    pos_id: position.pos_id,
+                    pos_name: position.pos_name,
+                    profession: position.profession,
+                    num_of_emp: position.num_of_emp || 1, // Legacy field
+                    total_required: totalRequired // Total assignments needed for the week
+                };
+            });
 
             // Generate days array
             const days = [];
@@ -225,6 +289,7 @@ class CPSATBridge {
                 days: days,
                 constraints: constraintsData,
                 existing_assignments: existingAssignments,
+                shift_requirements: shiftRequirementsMap, // Now properly populated!
                 settings: settings
             };
 
@@ -236,7 +301,9 @@ class CPSATBridge {
                 cannot_work_constraints: constraintsData.cannot_work.length,
                 prefer_work_constraints: constraintsData.prefer_work.length,
                 permanent_cannot_work: constraintsData.permanent_cannot_work.length,
-                legal_constraints: constraintsData.legal_constraints.length
+                legal_constraints: constraintsData.legal_constraints.length,
+                shift_requirements: Object.keys(shiftRequirementsMap).length,
+                sample_requirements: Object.values(shiftRequirementsMap).slice(0, 3)
             });
 
             return preparedData;

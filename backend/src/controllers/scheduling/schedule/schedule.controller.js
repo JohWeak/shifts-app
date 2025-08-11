@@ -128,32 +128,40 @@ const getScheduleDetails = async (req, res) => {
 
         // Calculate requirements for each position
         const enrichedPositions = positions.map(position => {
-            let totalRequiredAssignments = 0;  // Total assignments needed for the week
-            const shiftRequirements = {};      // Requirements per shift
-            const positionShifts = [];         // Only shifts for THIS position
+            let totalRequiredAssignments = 0;
+            const shiftRequirements = {};
+            const positionShifts = [];
 
             if (position.shifts && position.shifts.length > 0) {
                 position.shifts.forEach(shift => {
-                    // This shift belongs ONLY to this position
                     let staffPerDay = 1; // Default
 
+                    // Get requirements for this shift
                     if (shift.requirements && shift.requirements.length > 0) {
-                        // Get the recurring requirement or first one
-                        const requirement = shift.requirements.find(r => r.is_recurring)
-                            || shift.requirements[0];
-                        if (requirement && requirement.required_staff_count) {
-                            staffPerDay = requirement.required_staff_count;
+                        // For each day of the week, sum up requirements
+                        for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                            // Find requirement for this day
+                            const dayRequirement = shift.requirements.find(r =>
+                                (r.is_recurring && r.day_of_week === dayOfWeek) ||
+                                (r.is_recurring && r.day_of_week === null) // All days
+                            );
+
+                            const dayStaff = dayRequirement ? dayRequirement.required_staff_count : 1;
+                            totalRequiredAssignments += dayStaff;
+
+                            // Store for frontend
+                            if (!shiftRequirements[shift.id]) {
+                                shiftRequirements[shift.id] = {};
+                            }
+                            shiftRequirements[shift.id][dayOfWeek] = dayStaff;
                         }
+                    } else {
+                        // No requirements set, assume 1 person per day for 7 days
+                        totalRequiredAssignments += 7;
+                        shiftRequirements[shift.id] = 1; // Default for all days
                     }
 
-                    // Store requirement for this specific shift
-                    shiftRequirements[shift.id] = staffPerDay;
-
-                    // Calculate total: days * staff per day for this shift
-                    // Assuming all days are working days (adjust if needed)
-                    totalRequiredAssignments += (totalDays * staffPerDay);
-
-                    // Add to position's shifts array
+                    // Add shift info
                     positionShifts.push({
                         shift_id: shift.id,
                         shift_name: shift.shift_name,
@@ -161,8 +169,8 @@ const getScheduleDetails = async (req, res) => {
                         end_time: shift.end_time,
                         duration_hours: shift.duration_hours,
                         color: shift.color,
-                        required_staff: staffPerDay,
-                        position_id: position.pos_id // Important: mark which position owns this shift
+                        position_id: position.pos_id,
+                        requirements: shift.requirements || []
                     });
                 });
             }
@@ -177,8 +185,8 @@ const getScheduleDetails = async (req, res) => {
                 pos_name: position.pos_name,
                 profession: position.profession,
                 num_of_emp: position.num_of_emp || 1, // Legacy field - employees on position
-                total_required_assignments: totalRequiredAssignments, // NEW: total assignments needed
-                current_assignments: actualAssignments, // NEW: current assignments count
+                total_required_assignments: totalRequiredAssignments, //  total assignments needed
+                current_assignments: actualAssignments, // current assignments count
                 shift_requirements: shiftRequirements, // Per shift requirements
                 shifts: positionShifts // Shifts that belong to THIS position only
             };

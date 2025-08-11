@@ -155,27 +155,58 @@ class UniversalShiftSchedulerCP:
 
         # 2. POSITION COVERAGE CONSTRAINTS (with shortage variables for flexibility)
         shortage_vars = []
-        for day_idx in range(len(days)):
+        shift_requirements = data.get('shift_requirements', {})
+
+        for day_idx, day in enumerate(days):
+            date_str = day['date']
+
             for shift in shifts:
+                shift_id = shift['shift_id']
+                real_shift_id = shift.get('real_shift_id', shift_id)
+
                 for position in positions:
-                    assignment_vars = []
-                    for emp in employees:
-                        # Only employees with matching position
-                        if emp.get('default_position_id') == position['pos_id']:
-                            assignment_vars.append(
-                                assignments[(emp['emp_id'], day_idx, shift['shift_id'], position['pos_id'])]
+                    pos_id = position['pos_id']
+
+                    # Build the key to find requirement
+                    # Try different key formats for compatibility
+                    requirement_key = f"{pos_id}-{real_shift_id}-{date_str}"
+                    requirement = shift_requirements.get(requirement_key)
+
+                    # If not found, try with temp shift_id
+                    if not requirement:
+                        requirement_key = f"{pos_id}-{shift_id}-{date_str}"
+                        requirement = shift_requirements.get(requirement_key)
+
+                    # Default to position's num_of_emp or 1
+                    if requirement:
+                        required_employees = requirement.get('required_staff', 1)
+                        print(f"[CP-SAT] Found requirement for {pos_id}-{shift_id} on {date_str}: {required_employees} staff")
+                    else:
+                        required_employees = position.get('num_of_emp', 1)
+                        print(f"[CP-SAT] Using default for {pos_id}-{shift_id} on {date_str}: {required_employees} staff")
+
+                    # Only create constraints if staff is needed
+                    if required_employees > 0:
+                        assignment_vars = []
+                        for emp in employees:
+                            # Allow any employee with matching position
+                            if emp.get('default_position_id') == pos_id:
+                                key = (emp['emp_id'], day_idx, shift_id, pos_id)
+                                if key in assignments:
+                                    assignment_vars.append(assignments[key])
+
+                        if assignment_vars:
+                            # Create shortage variable for flexibility
+                            shortage_var = self.model.NewIntVar(
+                                0, required_employees,
+                                f"shortage_{day_idx}_{shift_id}_{pos_id}"
                             )
+                            shortage_vars.append(shortage_var)
 
-                    # Required employees per position
-                    required_employees = position.get('num_of_emp', 1)
+                            # Coverage constraint: assignments + shortage = required
+                            self.model.Add(sum(assignment_vars) + shortage_var == required_employees)
 
-                    # Shortage variable to allow flexibility
-                    shortage_var = self.model.NewIntVar(0, required_employees,
-                                                        f"shortage_{day_idx}_{shift['shift_id']}_{position['pos_id']}")
-                    shortage_vars.append(shortage_var)
-
-                    # Coverage constraint with shortage
-                    self.model.Add(sum(assignment_vars) + shortage_var == required_employees)
+                            print(f"[CP-SAT] Created coverage constraint: {len(assignment_vars)} candidates for {required_employees} required")
 
         # 3. HARD CONSTRAINTS (LEGAL REQUIREMENTS)
 

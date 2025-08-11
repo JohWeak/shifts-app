@@ -137,15 +137,29 @@ const ScheduleEditor = ({
             return position.total_required_assignments;
         }
 
-        // Calculate based on shifts and requirements
+        // Fallback calculation
         let total = 0;
-        const daysInWeek = 7;
 
-        shifts.forEach(shift => {
-            const requiredStaff = position.shift_requirements?.[shift.shift_id] ||
-                shift.required_staff || 1;
-            total += (daysInWeek * requiredStaff);
-        });
+        if (position.shift_requirements) {
+            // If we have detailed requirements per shift/day
+            Object.entries(position.shift_requirements).forEach(([shiftId, requirements]) => {
+                if (typeof requirements === 'object') {
+                    // Sum up daily requirements
+                    Object.values(requirements).forEach(dayReq => {
+                        total += (dayReq || 1);
+                    });
+                } else {
+                    // Simple requirement for all days
+                    total += (requirements * 7);
+                }
+            });
+        } else {
+            // Default calculation
+            const numShifts = shifts.length || 1;
+            const daysInWeek = 7;
+            const defaultStaff = position.num_of_emp || 1;
+            total = numShifts * daysInWeek * defaultStaff;
+        }
 
         return total;
     }, [position, shifts]);
