@@ -241,7 +241,7 @@ class CPSATBridge {
                     pos_name: position.pos_name,
                     profession: position.profession,
                     num_of_emp: position.num_of_emp || 1, // Legacy field
-                    total_required: totalRequired // Total assignments needed for the week
+                    total_required: totalRequired
                 };
             });
 
@@ -289,7 +289,7 @@ class CPSATBridge {
                 days: days,
                 constraints: constraintsData,
                 existing_assignments: existingAssignments,
-                shift_requirements: shiftRequirementsMap, // Now properly populated!
+                shift_requirements: shiftRequirementsMap,
                 settings: settings
             };
 
