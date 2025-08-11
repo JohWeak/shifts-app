@@ -866,6 +866,28 @@ class CPSATBridge {
             };
         }
     }
+    /**
+     * Calculate schedule statistics
+     */
+    calculateScheduleStats(schedule) {
+        const stats = {
+            total_assignments: schedule.length,
+            employees_used: new Set(schedule.map(s => s.emp_id)).size,
+            positions_covered: new Set(schedule.map(s => s.position_id)).size,
+            shifts_covered: new Set(schedule.map(s => s.shift_id)).size,
+            daily_distribution: {}
+        };
+
+        // Daily distribution
+        schedule.forEach(assignment => {
+            if (!stats.daily_distribution[assignment.date]) {
+                stats.daily_distribution[assignment.date] = 0;
+            }
+            stats.daily_distribution[assignment.date]++;
+        });
+
+        return stats;
+    }
 
     /**
      * Get schedule statistics for dashboard (public method)
