@@ -1,4 +1,4 @@
-// frontend/src/features/admin-schedule-management/components/ScheduleEditor.js
+// frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleEditor.js
 import React, {useMemo, useState} from 'react';
 import {format} from "date-fns";
 import {Table, Button, Badge, Spinner, Form, Tooltip, OverlayTrigger} from 'react-bootstrap';
@@ -15,10 +15,10 @@ import {
 import {getContrastTextColor, isDarkTheme} from 'shared/lib/utils/colorUtils';
 import {useSelector} from "react-redux";
 import {formatEmployeeName as formatEmployeeNameUtil, canEditSchedule} from 'shared/lib/utils/scheduleUtils';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import './ScheduleEditor.css';
-
 
 const ScheduleEditor = ({
                             position,
@@ -42,9 +42,9 @@ const ScheduleEditor = ({
     const {systemSettings} = useSelector(state => state.settings);
     const canEdit = canEditSchedule(schedule);
     const isPublished = schedule?.status === 'published';
-    const totalRequired = position.total_required_assignments || 0;
-    const currentAssignments = position.current_assignments || assignments?.length || 0;
-    const shortage = totalRequired - currentAssignments;
+
+    const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+
     const {
         colorPickerState,
         openColorPicker,
@@ -58,67 +58,17 @@ const ScheduleEditor = ({
     // Загружаем сохранённое состояние переключателя или используем true по умолчанию
     const [showFirstNameOnly, setShowFirstNameOnly] = useState(() => {
         const saved = localStorage.getItem('showFirstNameOnly');
-        return saved !== null ? JSON.parse(saved) : true; // true по умолчанию
+        return saved !== null ? JSON.parse(saved) : true;
     });
-
-    // Получаем требования для конкретной смены
-    const getRequiredEmployeesForShift = (shiftId) => {
-        // Сначала пробуем из position.shift_requirements
-        if (position.shift_requirements && position.shift_requirements[shiftId]) {
-            return position.shift_requirements[shiftId];
-        }
-        // Затем из shifts если там есть
-        const shift = shifts.find(s => s.shift_id === shiftId);
-        if (shift && shift.required_staff) {
-            return shift.required_staff;
-        }
-        // Default
-        return 1;
-    };
-
-    // Handle save with confirmation if shortage/overage
-    const handleSaveClick = () => {
-        if (shortage !== 0) {
-            // Show confirmation modal
-            const message = shortage > 0
-                ? t('schedule.confirmSaveWithShortage', { count: Math.abs(shortage) })
-                : t('schedule.confirmSaveWithOverage', { count: Math.abs(shortage) });
-
-            if (window.confirm(message)) {
-                onSaveChanges(position.pos_id);
-            }
-        } else {
-            onSaveChanges(position.pos_id);
-        }
-    };
-    // Сохраняем при изменении
-    const handleNameToggle = (checked) => {
-        setShowFirstNameOnly(checked);
-        localStorage.setItem('showFirstNameOnly', JSON.stringify(checked));
-    };
 
     // Extract data from scheduleDetails
     const assignments = useMemo(() => {
         if (!scheduleDetails?.assignments) return [];
-
-        // Filter assignments for this position
-        // Handle both pos_id and position_id field names
         return scheduleDetails.assignments.filter(a => {
             const assignmentPosId = a.pos_id || a.position_id;
             return assignmentPosId === position.pos_id;
         });
     }, [position.pos_id, scheduleDetails?.assignments]);
-
-    const uniqueEmployees = useMemo(() => {
-        if (!assignments) return 0;
-        const unique = new Set();
-        assignments.forEach(a => {
-            if (a.emp_id) unique.add(a.emp_id);
-        });
-        return unique.size;
-    }, [assignments]);
-
-
 
     const employees = useMemo(() => {
         return scheduleDetails?.employees || [];
@@ -132,9 +82,127 @@ const ScheduleEditor = ({
     ], []);
 
     const shifts = useMemo(() => {
-        return scheduleDetails?.shifts || position?.shifts || defaultShifts;
-    }, [defaultShifts, scheduleDetails?.shifts, position?.shifts]);
+        // Use position's own shifts if available
+        if (position.shifts && position.shifts.length > 0) {
+            return position.shifts;
+        }
+        // Otherwise use shifts from scheduleDetails (filtered for this position if needed)
+        if (scheduleDetails?.shifts) {
+            return scheduleDetails.shifts.filter(s =>
+                !s.position_id || s.position_id === position.pos_id
+            );
+        }
+        return defaultShifts;
+    }, [position.shifts, scheduleDetails?.shifts, position.pos_id, defaultShifts]);
 
+    // Calculate total pending changes for this position
+    const positionPendingChanges = useMemo(() => {
+        return Object.values(pendingChanges).filter(
+            change => change.positionId === position.pos_id
+        );
+    }, [pendingChanges, position.pos_id]);
+
+    // Calculate current total assignments (including pending changes)
+    const currentStats = useMemo(() => {
+        let currentAssignments = assignments.length;
+        let addedCount = 0;
+        let removedCount = 0;
+
+        positionPendingChanges.forEach(change => {
+            if (change.action === 'assign') {
+                addedCount++;
+            } else if (change.action === 'remove') {
+                removedCount++;
+            } else if (change.action === 'replace') {
+                addedCount++;
+                if (change.employeeIdToReplace) {
+                    removedCount++;
+                }
+            }
+        });
+
+        const totalCurrent = currentAssignments + addedCount - removedCount;
+
+        return {
+            current: currentAssignments,
+            afterChanges: totalCurrent,
+            added: addedCount,
+            removed: removedCount
+        };
+    }, [assignments.length, positionPendingChanges]);
+
+    // Get total required assignments for the position
+    const totalRequired = useMemo(() => {
+        if (position.total_required_assignments) {
+            return position.total_required_assignments;
+        }
+
+        // Calculate based on shifts and requirements
+        let total = 0;
+        const daysInWeek = 7;
+
+        shifts.forEach(shift => {
+            const requiredStaff = position.shift_requirements?.[shift.shift_id] ||
+                shift.required_staff || 1;
+            total += (daysInWeek * requiredStaff);
+        });
+
+        return total;
+    }, [position, shifts]);
+
+    const shortage = totalRequired - currentStats.afterChanges;
+
+    // Count unique employees (including pending)
+    const uniqueEmployees = useMemo(() => {
+        const unique = new Set();
+        assignments.forEach(a => {
+            if (a.emp_id) unique.add(a.emp_id);
+        });
+
+        // Add pending assignments
+        positionPendingChanges.forEach(change => {
+            if ((change.action === 'assign' || change.action === 'replace') && change.empId) {
+                unique.add(change.empId);
+            }
+            if (change.action === 'remove' && change.empId) {
+                unique.delete(change.empId);
+            }
+        });
+
+        return unique.size;
+    }, [assignments, positionPendingChanges]);
+
+    // Получаем требования для конкретной смены
+    const getRequiredEmployeesForShift = (shiftId) => {
+        if (position.shift_requirements && position.shift_requirements[shiftId]) {
+            return position.shift_requirements[shiftId];
+        }
+        const shift = shifts.find(s => s.shift_id === shiftId || s.id === shiftId);
+        if (shift && shift.required_staff) {
+            return shift.required_staff;
+        }
+        return 1;
+    };
+
+    // Handle save with confirmation if shortage/overage
+    const handleSaveClick = () => {
+        if (shortage !== 0) {
+            setShowSaveConfirmation(true);
+        } else {
+            onSaveChanges(position.pos_id);
+        }
+    };
+
+    const handleSaveConfirm = () => {
+        setShowSaveConfirmation(false);
+        onSaveChanges(position.pos_id);
+    };
+
+    // Сохраняем при изменении
+    const handleNameToggle = (checked) => {
+        setShowFirstNameOnly(checked);
+        localStorage.setItem('showFirstNameOnly', JSON.stringify(checked));
+    };
 
     // Helper function to format date for header
     const weekDates = useMemo(() => {
@@ -142,33 +210,19 @@ const ScheduleEditor = ({
         return getWeekDates(scheduleDetails.schedule.start_date, systemSettings?.weekStartDay || 0);
     }, [scheduleDetails?.schedule?.start_date, systemSettings?.weekStartDay]);
 
-
-    // Debug logging
-    console.log('Full scheduleDetails structure:', {
-        schedule: scheduleDetails?.schedule,
-        positions: scheduleDetails?.positions,
-        assignments: scheduleDetails?.assignments,
-        employees: scheduleDetails?.employees,
-        shifts: scheduleDetails?.shifts
-    });
-    console.log('ScheduleEditor - Employees:', employees);
-
     // Function for formatting a name
     const formatEmployeeName = (employee) => {
-        // Find all employees in the current position.
         const employeesInPosition = employees.filter(emp =>
             emp.default_position_id === position.pos_id ||
             assignments.some(a => a.emp_id === emp.emp_id && a.position_id === position.pos_id)
         );
 
-        // We call the utility with the necessary options.
         return formatEmployeeNameUtil(employee, {
             showFullName: !showFirstNameOnly,
             checkDuplicates: true,
             contextEmployees: employeesInPosition
         });
     };
-
 
     if (!position) {
         return (
@@ -186,16 +240,12 @@ const ScheduleEditor = ({
         );
     }
 
-    const hasPendingChanges = Object.keys(pendingChanges).length > 0;
-
     const renderCell = (shift, dayIndex) => {
         const date = weekDates[dayIndex];
         const dateStr = format(date, 'yyyy-MM-dd');
 
-
         // Find assignments for this position, shift and date
         const cellAssignments = assignments.filter(assignment => {
-            // Check different possible field names
             const assignmentPosId = assignment.pos_id || assignment.position_id;
             const assignmentDate = assignment.work_date || assignment.date;
 
@@ -210,16 +260,15 @@ const ScheduleEditor = ({
             if (employee) {
                 return {
                     ...employee,
-                    assignment_id: assignment.id, // Это уже есть
+                    assignment_id: assignment.id,
                     employee_name: employee.name || `${employee.first_name} ${employee.last_name}`
                 };
             }
 
-            // If employee not found, use data from assignment
             return {
                 emp_id: assignment.emp_id,
                 employee_name: assignment.employee_name || 'Unknown Employee',
-                assignment_id: assignment.id // Убедитесь что это тоже есть
+                assignment_id: assignment.id
             };
         }).filter(Boolean);
 
@@ -267,10 +316,6 @@ const ScheduleEditor = ({
         );
     };
 
-    // Calculate total pending changes for this position
-    const positionPendingChanges = Object.values(pendingChanges).filter(
-        change => change.positionId === position.pos_id
-    );
     const renderEditTooltip = (props) => (
         <Tooltip id="edit-disabled-tooltip" {...props}>
             {isPublished
@@ -285,25 +330,38 @@ const ScheduleEditor = ({
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h6 className="mb-1">{position.pos_name}</h6>
-                    <small className="text-muted">
-                        {/*{t('employee.requiredEmployees')}: {position.num_of_emp || 0}*/}
+                    <div className="d-flex align-items-center gap-2">
                         <Form.Check
                             type="switch"
                             id={`name-switch-${position.pos_id}`}
                             label={t('employee.showFirstNameOnly')}
-                            className=" d-inline-block ms-2"
+                            className="d-inline-block text-muted"
                             checked={showFirstNameOnly}
                             onChange={(e) => handleNameToggle(e.target.checked)}
                         />
-                        {hasPendingChanges && positionPendingChanges.length > 0 && (
-                            <Badge bg="warning" className="ms-2">
-                                {t('position.unsavedChanges')} ({positionPendingChanges.length})
+
+                        {/* Live statistics badges */}
+                        <Badge bg={shortage === 0 ? 'success' : shortage > 0 ? 'danger' : 'warning'}>
+                            {t('schedule.assignments')}: {currentStats.afterChanges}/{totalRequired}
+                        </Badge>
+
+                        {positionPendingChanges.length > 0 && (
+                            <Badge bg="info">
+                                {t('schedule.pending')}: {positionPendingChanges.length}
                             </Badge>
                         )}
-                    </small>
+
+                        {shortage !== 0 && (
+                            <Badge bg={shortage > 0 ? 'danger' : 'warning'}>
+                                {shortage > 0
+                                    ? `↓ ${shortage}`
+                                    : `↑ ${Math.abs(shortage)}`}
+                            </Badge>
+                        )}
+                    </div>
                 </div>
                 <div>
-                    {/* Edit button - show always but disable when can't edit */}
+                    {/* Edit button */}
                     {!isEditing && (
                         <>
                             {!canEdit ? (
@@ -312,28 +370,23 @@ const ScheduleEditor = ({
                                     delay={{show: 250, hide: 400}}
                                     overlay={renderEditTooltip}
                                 >
-                            <span className="d-inline-block">
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    disabled
-                                    style={{pointerEvents: 'none'}}
-                                >
-                                    <i className="bi bi-pencil me-1"></i>
-                                    {t('common.edit')}
-                                </Button>
-                            </span>
+                                    <span className="d-inline-block">
+                                        <Button
+                                            variant="outline-primary"
+                                            size="sm"
+                                            disabled
+                                            style={{pointerEvents: 'none'}}
+                                        >
+                                            <i className="bi bi-pencil me-1"></i>
+                                            {t('common.edit')}
+                                        </Button>
+                                    </span>
                                 </OverlayTrigger>
                             ) : (
                                 <Button
                                     variant="primary"
                                     size="sm"
-                                    onClick={() => {
-                                        console.log('Edit button clicked for position:', position.pos_id);
-                                        if (onToggleEdit) {
-                                            onToggleEdit(position.pos_id);
-                                        }
-                                    }}
+                                    onClick={() => onToggleEdit(position.pos_id)}
                                 >
                                     <i className="bi bi-pencil me-1"></i>
                                     {t('common.edit')}
@@ -367,11 +420,7 @@ const ScheduleEditor = ({
                             <Button
                                 variant="outline-secondary"
                                 size="sm"
-                                onClick={() => {
-                                    if (onToggleEdit) {
-                                        onToggleEdit(position.pos_id);
-                                    }
-                                }}
+                                onClick={() => onToggleEdit(position.pos_id)}
                                 disabled={savingChanges}
                             >
                                 {t('common.cancel')}
@@ -425,7 +474,6 @@ const ScheduleEditor = ({
                                             {formatShiftTime(shift.start_time, shift.duration)}
                                         </div>
                                     </div>
-                                    {/* Color picker button */}
                                     {canEdit && (
                                         <button
                                             className="btn btn-sm shift-color-btn"
@@ -435,7 +483,7 @@ const ScheduleEditor = ({
                                                 openColorPicker(
                                                     shift.shift_id,
                                                     currentColor,
-                                                    shift // передаем объект смены
+                                                    shift
                                                 );
                                             }}
                                             title={t('shift.editColor')}
@@ -448,49 +496,63 @@ const ScheduleEditor = ({
                             </tr>
                         );
                     })) : (
-
                     <tr>
                         <td colSpan="8" className="text-center text-muted py-3">
                             {t('schedule.noShiftsDefined')}
                         </td>
                     </tr>
-                )
-                }
+                )}
                 </tbody>
             </Table>
 
-            {/* Edit Mode Message */}
-            {
-                isEditing && (
-                    <div className="position-stats mt-2">
-                        <small className="d-block text-muted">
-                            {t('schedule.totalAssignments')}: {currentAssignments}/{totalRequired}
-                        </small>
-
-                        {shortage !== 0 && (
-                            <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>
-                                <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>
-                                {shortage > 0
-                                    ? t('schedule.assignmentsShortage', { count: shortage })
-                                    : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })
-                                }
-                            </small>
-                        )}
-
-                        <small className="d-block text-muted">
-                            {t('schedule.uniqueEmployees')}: {uniqueEmployees}
-                        </small>
-
-                        {position.num_of_emp && (
-                            <small className="d-block text-muted">
-                                {t('schedule.defaultStaffPerShift')}: {position.num_of_emp}
-                            </small>
-                        )}
-                    </div>
-
-
-                )
-            }
+            {/* Edit Mode Statistics */}
+            {/*{isEditing && (*/}
+            {/*    <div className="position-stats mt-2 p-2 bg-light rounded">*/}
+            {/*        <div className="row">*/}
+            {/*            <div className="col-md-6">*/}
+            {/*                <small className="d-block">*/}
+            {/*                    <strong>{t('schedule.currentStatus')}:</strong>*/}
+            {/*                </small>*/}
+            {/*                <small className="d-block text-muted">*/}
+            {/*                    {t('schedule.totalRequired')}: {totalRequired}*/}
+            {/*                </small>*/}
+            {/*                <small className="d-block text-muted">*/}
+            {/*                    {t('schedule.currentAssignments')}: {currentStats.current}*/}
+            {/*                </small>*/}
+            {/*                {currentStats.added > 0 && (*/}
+            {/*                    <small className="d-block text-success">*/}
+            {/*                        {t('schedule.toBeAdded')}: +{currentStats.added}*/}
+            {/*                    </small>*/}
+            {/*                )}*/}
+            {/*                {currentStats.removed > 0 && (*/}
+            {/*                    <small className="d-block text-danger">*/}
+            {/*                        {t('schedule.toBeRemoved')}: -{currentStats.removed}*/}
+            {/*                    </small>*/}
+            {/*                )}*/}
+            {/*            </div>*/}
+            {/*            <div className="col-md-6">*/}
+            {/*                <small className="d-block">*/}
+            {/*                    <strong>{t('schedule.afterSave')}:</strong>*/}
+            {/*                </small>*/}
+            {/*                <small className={`d-block ${shortage === 0 ? 'text-success' : shortage > 0 ? 'text-danger' : 'text-warning'}`}>*/}
+            {/*                    <strong>{currentStats.afterChanges}/{totalRequired}</strong>*/}
+            {/*                </small>*/}
+            {/*                {shortage !== 0 && (*/}
+            {/*                    <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>*/}
+            {/*                        <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>*/}
+            {/*                        {shortage > 0*/}
+            {/*                            ? t('schedule.assignmentsShortage', { count: shortage })*/}
+            {/*                            : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })*/}
+            {/*                        }*/}
+            {/*                    </small>*/}
+            {/*                )}*/}
+            {/*                <small className="d-block text-muted">*/}
+            {/*                    {t('schedule.uniqueEmployees')}: {uniqueEmployees}*/}
+            {/*                </small>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*)}*/}
 
             <ColorPickerModal
                 show={colorPickerState.show}
@@ -507,8 +569,46 @@ const ScheduleEditor = ({
                     resetShiftColor(colorPickerState.shiftId);
                 }}
             />
-        </div>
 
+            {/* Save Confirmation Modal */}
+            <ConfirmationModal
+                show={showSaveConfirmation}
+                onHide={() => setShowSaveConfirmation(false)}
+                onConfirm={handleSaveConfirm}
+                title={t('schedule.saveChanges')}
+                message={
+                    shortage > 0
+                        ? t('schedule.confirmSaveWithShortage', { count: shortage })
+                        : t('schedule.confirmSaveWithOverage', { count: Math.abs(shortage) })
+                }
+                confirmText={t('common.save')}
+                confirmVariant="warning"
+                loading={savingChanges}
+            >
+                <div className="alert alert-info">
+                    <strong>{t('schedule.currentStatus')}:</strong>
+                    <ul className="mb-0 mt-2">
+                        <li>{t('schedule.totalRequired')}: {totalRequired}</li>
+                        <li>{t('schedule.currentAssignments')}: {currentStats.afterChanges}</li>
+                        {currentStats.added > 0 && (
+                            <li className="text-success">
+                                {t('schedule.toBeAdded')}: +{currentStats.added}
+                            </li>
+                        )}
+                        {currentStats.removed > 0 && (
+                            <li className="text-danger">
+                                {t('schedule.toBeRemoved')}: -{currentStats.removed}
+                            </li>
+                        )}
+                        <li>
+                            <strong>
+                                {t('schedule.afterSave')}: {currentStats.afterChanges}/{totalRequired}
+                            </strong>
+                        </li>
+                    </ul>
+                </div>
+            </ConfirmationModal>
+        </div>
     );
 };
 
