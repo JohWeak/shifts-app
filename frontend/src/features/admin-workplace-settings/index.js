@@ -58,7 +58,7 @@ const WorkplaceSettings = () => {
 
     return (
 
-            <Container fluid className="px-0 workplace-settings-container">
+            <Container fluid className="p-1 workplace-settings-container">
                 <PageHeader
                     icon="building"
                     title={t('workplace.title')}

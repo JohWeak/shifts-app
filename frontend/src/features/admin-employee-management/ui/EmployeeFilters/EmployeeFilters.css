@@ -3,7 +3,12 @@
     --bs-accordion-btn-bg: #f1f2f4;
     --bs-accordion-active-bg: #f1f2f4;
 }
-
+.filters-accordion .accordion-item {
+    border-radius: var(--radius-lg)!important;
+    border-bottom-left-radius: 0!important;
+    border-bottom-right-radius: 0!important;
+    overflow: hidden;
+}
 /* Стили для заголовка внутри кнопки аккордеона */
 .filters-accordion .accordion-header h6 {
     font-size: 0.75rem;
@@ -16,7 +21,12 @@
 .filters-accordion .accordion-button {
     border-color: var(--bs-border-color);
     max-height: 3rem;
+    border-bottom-left-radius: 0!important;
+    border-bottom-right-radius: 0!important;
 
+}
+.filters-accordion .accordion-button.collapsed {
+    border-bottom: none;
 }
 [data-theme="dark"] .filters-accordion .accordion-button {
     background-color: var(--bs-gray-900);
@@ -24,11 +34,16 @@
 }
 
 .filters-accordion .accordion-button:not(.collapsed) {
-    box-shadow: none; /* Убираем тень при открытии */
+    box-shadow: none;
+    background-color: var(--bs-gray-100);
+}
+[data-theme="dark"] .filters-accordion .accordion-button:not(.collapsed) {
+    background-color: var(--bs-gray-900);
+
 }
 
 .filters-accordion .accordion-button:focus {
-    box-shadow: none; /* Убираем обводку при фокусе */
+    box-shadow: none;
 }
 
 /* Кастомизация стрелочки */

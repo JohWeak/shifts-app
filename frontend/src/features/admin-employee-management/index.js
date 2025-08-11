@@ -266,8 +266,8 @@ const EmployeeManagement = () => {
                     </Container>
                 )}
 
-                <Container fluid className="px-2 mt-3">
-                    <Row className="g-3">
+                <Container fluid className="p-0 mt-3">
+                    <Row className="">
                         <Col xs={12}>
                             <EmployeeFilters />
                         </Col>

@@ -197,7 +197,7 @@ const AdminPermanentRequests = () => {
     }
 
     return (
-        <Container fluid className="admin-permanent-requests py-3">
+        <Container fluid className="admin-permanent-requests p-1">
             <PageHeader
                 icon='clipboard-check'
                 title={t('admin.requests.title')}
