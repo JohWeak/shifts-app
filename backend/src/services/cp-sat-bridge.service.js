@@ -33,13 +33,22 @@ class CPSATBridge {
 
             return {
                 success: true,
-                schedule: savedSchedule,
-                stats: this.calculateScheduleStats(pythonResult.schedule),
+                schedule: {
+                    schedule_id: savedSchedule.schedule_id,
+                    assignments_count: savedSchedule.assignments_count,
+                    week_start: savedSchedule.week_start,
+                    week_end: savedSchedule.week_end
+                },
+                stats: {
+                    basic: this.calculateScheduleStats(pythonResult.schedule),
+                    detailed: savedSchedule.statistics
+                },
                 algorithm: 'CP-SAT-Python',
                 solve_time: pythonResult.solve_time,
                 status: pythonResult.status,
                 coverage_rate: pythonResult.coverage_rate || 100,
-                shortage_count: pythonResult.shortage_count || 0
+                shortage_count: pythonResult.shortage_count || 0,
+                issues: savedSchedule.statistics?.issues || []
             };
 
         } catch (error) {

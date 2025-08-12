@@ -84,11 +84,15 @@ class UniversalShiftSchedulerCP:
         workload_balance_weight = optimization_weights.get('WORKLOAD_BALANCE', 5)
         position_match_bonus = optimization_weights.get('POSITION_MATCH_BONUS', 20)
         site_match_bonus = optimization_weights.get('SITE_MATCH_BONUS', 10)
+        excess_assignment_penalty = optimization_weights.get('EXCESS_ASSIGNMENT_PENALTY', 100)
 
         print(f"[Universal CP-SAT] Configuration from constants:")
         print(f"  - Max {max_hours_per_day}h/day, min {min_rest_between_shifts}h rest")
         print(f"  - Max {max_shifts_per_day} shifts/day, {max_consecutive_work_days} consecutive days")
         print(f"  - Shortage penalty: {shortage_penalty}, Prefer work bonus: {prefer_work_bonus}")
+
+        # Initialize objective terms list EARLY
+        objective_terms = []
 
         # Create decision variables
         assignments = {}
@@ -124,18 +128,25 @@ class UniversalShiftSchedulerCP:
             if shift_id is not None:
                 # Specific shift constraint
                 for position in positions:
-                    key = (emp_id, day_idx, shift_id, position['pos_id'])
-                    if key in assignments:
-                        self.model.Add(assignments[key] == 0)
-                        applied_permanent += 1
-            else:
-                # All shifts on this day constraint
-                for shift in shifts:
-                    for position in positions:
-                        key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                    # Check if employee can work this position
+                    emp = next((e for e in employees if e['emp_id'] == emp_id), None)
+                    if emp and emp.get('default_position_id') == position['pos_id']:
+                        key = (emp_id, day_idx, shift_id, position['pos_id'])
                         if key in assignments:
                             self.model.Add(assignments[key] == 0)
                             applied_permanent += 1
+                            print(f"[CP-SAT] Blocked: emp {emp_id} on day {day_idx} shift {shift_id}")
+            else:
+                # All shifts on this day - block ALL shifts for this employee
+                for shift in shifts:
+                    for position in positions:
+                        emp = next((e for e in employees if e['emp_id'] == emp_id), None)
+                        if emp and emp.get('default_position_id') == position['pos_id']:
+                            key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                            if key in assignments:
+                                self.model.Add(assignments[key] == 0)
+                                applied_permanent += 1
+                print(f"[CP-SAT] Blocked ALL shifts for emp {emp_id} on day {day_idx}")
 
         print(f"[Universal CP-SAT] Applied {applied_permanent} permanent constraint variables")
 
@@ -164,7 +175,7 @@ class UniversalShiftSchedulerCP:
 
         print(f"[Universal CP-SAT] Applied {applied_temporary} temporary constraint variables")
 
-        # 2. POSITION COVERAGE CONSTRAINTS (with shortage variables for flexibility)
+        # 2. POSITION COVERAGE CONSTRAINTS (with exact requirements)
         shortage_vars = []
         shift_requirements = data.get('shift_requirements', {})
 
@@ -179,21 +190,16 @@ class UniversalShiftSchedulerCP:
                 valid_shifts = position_shifts_map.get(pos_str, [])
 
                 for shift_id in valid_shifts:
-                    # Find the shift object
-                    shift = next((s for s in shifts if s['shift_id'] == shift_id), None)
-                    if not shift:
-                        continue
-
-                    # Build requirement key
+                    # Find requirement
                     requirement_key = f"{pos_id}-{shift_id}-{date_str}"
                     requirement = shift_requirements.get(requirement_key)
 
                     if requirement:
                         required_employees = requirement.get('required_staff', 1)
-                        print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
                     else:
                         required_employees = 1
-                        print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: defaulting to 1 staff")
+
+                    print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
 
                     if required_employees > 0:
                         assignment_vars = []
@@ -206,15 +212,47 @@ class UniversalShiftSchedulerCP:
                                     assignment_vars.append(assignments[key])
 
                         if assignment_vars:
-                            # Create shortage variable
-                            shortage_var = self.model.NewIntVar(
-                                0, required_employees,
-                                f"shortage_{day_idx}_{shift_id}_{pos_id}"
-                            )
-                            shortage_vars.append(shortage_var)
+                            # EXACT constraint to prevent over-assignment
+                            if required_employees == 1:
+                                # For single employee requirement, use at most 1
+                                self.model.Add(sum(assignment_vars) <= 1)
 
-                            # Exact coverage: assignments + shortage = required
-                            self.model.Add(sum(assignment_vars) + shortage_var == required_employees)
+                                # Create shortage var for objective
+                                shortage_var = self.model.NewBoolVar(
+                                    f"shortage_{day_idx}_{shift_id}_{pos_id}"
+                                )
+                                self.model.Add(shortage_var == (1 - sum(assignment_vars)))
+                                shortage_vars.append(shortage_var)
+                            else:
+                                # For multiple employees, use exact constraint with shortage/excess tracking
+                                actual_assigned = self.model.NewIntVar(
+                                    0, len(assignment_vars),
+                                    f"actual_{day_idx}_{shift_id}_{pos_id}"
+                                )
+                                self.model.Add(actual_assigned == sum(assignment_vars))
+
+                                # Shortage variable
+                                shortage_var = self.model.NewIntVar(
+                                    0, required_employees,
+                                    f"shortage_{day_idx}_{shift_id}_{pos_id}"
+                                )
+                                self.model.AddMaxEquality(
+                                    shortage_var,
+                                    [0, required_employees - actual_assigned]
+                                )
+                                shortage_vars.append(shortage_var)
+
+                                # Excess variable (penalize over-assignment)
+                                excess_var = self.model.NewIntVar(
+                                    0, len(assignment_vars),
+                                    f"excess_{day_idx}_{shift_id}_{pos_id}"
+                                )
+                                self.model.AddMaxEquality(
+                                    excess_var,
+                                    [0, actual_assigned - required_employees]
+                                )
+                                # Add penalty for excess assignments
+                                objective_terms.append(excess_var * -excess_assignment_penalty)
 
                             print(f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, {required_employees} required")
 
@@ -236,10 +274,12 @@ class UniversalShiftSchedulerCP:
                             day_hours.append(assignment_var * shift['duration'])
 
                 # Hard constraint on hours
-                self.model.Add(sum(day_hours) <= max_hours_per_day)
+                if day_hours:
+                    self.model.Add(sum(day_hours) <= max_hours_per_day)
 
                 # Soft constraint on number of shifts (usually 1 per day)
-                self.model.Add(sum(day_assignments) <= max_shifts_per_day)
+                if day_assignments:
+                    self.model.Add(sum(day_assignments) <= max_shifts_per_day)
 
         # 3.2 Maximum hours per week
         for emp in employees:
@@ -253,7 +293,8 @@ class UniversalShiftSchedulerCP:
                             assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
                             week_hours.append(assignment_var * shift['duration'])
 
-            self.model.Add(sum(week_hours) <= max_hours_per_week)
+            if week_hours:
+                self.model.Add(sum(week_hours) <= max_hours_per_week)
 
         # 3.3 Minimum rest between shifts on same day
         for emp in employees:
@@ -337,8 +378,7 @@ class UniversalShiftSchedulerCP:
             if night_shift_vars:
                 self.model.Add(sum(night_shift_vars) <= max_night_shifts_per_week)
 
-        # 5. OPTIMIZATION OBJECTIVE
-        objective_terms = []
+        # 5. OPTIMIZATION OBJECTIVE (using pre-initialized objective_terms)
 
         # 5.1 Minimize shortage (highest priority)
         for shortage_var in shortage_vars:
