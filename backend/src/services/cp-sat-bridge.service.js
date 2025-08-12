@@ -384,31 +384,21 @@ class CPSATBridge {
                     days.forEach((day, index) => {
                         const dayName = day.day_name.toLowerCase();
                         if (dayName === permConstraint.day_of_week) {
-                            // Map real shift_id to temporary shift_id
-                            let mappedShiftId = null;
-                            if (permConstraint.shift_id) {
-                                for (const [tempId, realId] of Object.entries(this.shiftIdMapping)) {
-                                    if (realId === permConstraint.shift_id) {
-                                        mappedShiftId = parseInt(tempId);
-                                        break;
-                                    }
-                                }
-                            }
-
                             const constraintData = {
                                 emp_id: emp.emp_id,
                                 day_index: index,
-                                shift_id: mappedShiftId,
+                                shift_id: permConstraint.shift_id || null,
                                 constraint_type: permConstraint.constraint_type,
                                 is_permanent: true,
                                 approved_by: permConstraint.approver ?
                                     `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
-                                    'Unknown',
+                                    permConstraint.approved_by_name || 'Unknown',
                                 approved_at: permConstraint.approved_at
                             };
 
                             if (permConstraint.constraint_type === 'cannot_work') {
                                 permanentCannotWork.push(constraintData);
+                                console.log(`[Bridge] Permanent constraint: emp ${emp.emp_id} cannot work ${dayName} shift ${permConstraint.shift_id || 'ALL'}`);
                             }
                         }
                     });

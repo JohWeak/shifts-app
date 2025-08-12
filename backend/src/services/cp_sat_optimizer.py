@@ -118,6 +118,8 @@ class UniversalShiftSchedulerCP:
 
         # 1.1 PERMANENT CONSTRAINTS (highest priority - absolutely cannot be violated)
         applied_permanent = 0
+        blocked_assignments = set()  # Track what we've blocked
+
         for perm_constraint in permanent_cannot_work:
             emp_id = perm_constraint['emp_id']
             day_idx = perm_constraint['day_index']
@@ -125,30 +127,35 @@ class UniversalShiftSchedulerCP:
 
             print(f"[CP-SAT] Applying permanent constraint: emp={emp_id}, day={day_idx}, shift={shift_id}")
 
+            # Find employee's position
+            emp = next((e for e in employees if e['emp_id'] == emp_id), None)
+            if not emp:
+                continue
+
+            emp_position_id = emp.get('default_position_id')
+
             if shift_id is not None:
-                # Specific shift constraint
-                for position in positions:
-                    # Check if employee can work this position
-                    emp = next((e for e in employees if e['emp_id'] == emp_id), None)
-                    if emp and emp.get('default_position_id') == position['pos_id']:
-                        key = (emp_id, day_idx, shift_id, position['pos_id'])
-                        if key in assignments:
-                            self.model.Add(assignments[key] == 0)
-                            applied_permanent += 1
-                            print(f"[CP-SAT] Blocked: emp {emp_id} on day {day_idx} shift {shift_id}")
+                # Specific shift constraint - block only this shift
+                key = (emp_id, day_idx, shift_id, emp_position_id)
+                if key in assignments:
+                    self.model.Add(assignments[key] == 0)
+                    blocked_assignments.add(key)
+                    applied_permanent += 1
+                    print(f"[CP-SAT] Blocked: emp {emp_id} on day {day_idx} shift {shift_id}")
             else:
                 # All shifts on this day - block ALL shifts for this employee
+                blocked_count = 0
                 for shift in shifts:
-                    for position in positions:
-                        emp = next((e for e in employees if e['emp_id'] == emp_id), None)
-                        if emp and emp.get('default_position_id') == position['pos_id']:
-                            key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
-                            if key in assignments:
-                                self.model.Add(assignments[key] == 0)
-                                applied_permanent += 1
-                print(f"[CP-SAT] Blocked ALL shifts for emp {emp_id} on day {day_idx}")
+                    key = (emp_id, day_idx, shift['shift_id'], emp_position_id)
+                    if key in assignments:
+                        self.model.Add(assignments[key] == 0)
+                        blocked_assignments.add(key)
+                        applied_permanent += 1
+                        blocked_count += 1
+                print(f"[CP-SAT] Blocked ALL {blocked_count} shifts for emp {emp_id} on day {day_idx}")
 
         print(f"[Universal CP-SAT] Applied {applied_permanent} permanent constraint variables")
+        print(f"[Universal CP-SAT] Total blocked assignments: {len(blocked_assignments)}")
 
         # 1.2 TEMPORARY CANNOT WORK CONSTRAINTS (second priority)
         applied_temporary = 0

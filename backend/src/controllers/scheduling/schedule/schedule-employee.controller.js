@@ -25,7 +25,6 @@ const getWeeklySchedule = async (req, res) => {
         console.log('[GetWeeklySchedule] User ID:', userId);
 
         // Get employee by user ID
-        // Ищем сотрудника по emp_id = userId
         const employee = await Employee.findByPk(userId, {
             include: [
                 {
