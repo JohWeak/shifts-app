@@ -48,11 +48,11 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
                             <Form.Group controlId="weekStart">
                                 <Form.Label>{t('modal.generateSchedule.weekStart')}</Form.Label>
                                 <DatePicker
+                                    displayMode="inline"
+                                    selectionMode="week"
                                     value={settings.weekStart}
                                     weekStartsOn={weekStartDay}
                                     onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
-                                    placeholder={t('schedule.selectStartDate')}
-                                    dateFormat="dd.MM.yyyy"
                                     isInvalid={!!formError}
                                 />
                                 <Form.Control.Feedback type="invalid">{formError}</Form.Control.Feedback>

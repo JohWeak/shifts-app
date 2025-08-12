@@ -1,6 +1,6 @@
 // frontend/src/shared/ui/components/DatePicker/DatePicker.js
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, InputGroup, Overlay, Popover } from 'react-bootstrap';
+import { Form, InputGroup, Overlay, Popover, Card } from 'react-bootstrap';
 import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { enUS, he, ru } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -17,6 +17,8 @@ const DatePicker = ({
                         disabled = false,
                         className = '',
                         isInvalid = false,
+                        displayMode = 'input', // 'input' | 'inline'
+                        selectionMode = 'week', // 'week' | 'day'
                     }) => {
     const { language } = useI18n();
     const [showCalendar, setShowCalendar] = useState(false);
@@ -35,29 +37,35 @@ const DatePicker = ({
     useEffect(() => {
         if (value && isValid(value)) {
             setSelectedDate(value);
-            setInputValue(format(value, dateFormat));
+            if (displayMode === 'input') {
+                setInputValue(format(value, dateFormat));
+            }
         } else {
             setSelectedDate(undefined);
-            setInputValue('');
+            if (displayMode === 'input') {
+                setInputValue('');
+            }
         }
-    }, [value, dateFormat]);
+    }, [value, dateFormat, displayMode]);
 
 
     const handleDateSelect = (date) => {
         if (!date) return;
-        const weekStart = startOfWeek(date, { weekStartsOn });
-        setSelectedDate(weekStart);
-        setInputValue(format(weekStart, dateFormat));
-        onChange(weekStart);
+        const finalDate = selectionMode === 'week' ? startOfWeek(date, { weekStartsOn }) : date;
+        setSelectedDate(finalDate);
+        if (displayMode === 'input') {
+            setInputValue(format(finalDate, dateFormat));
+        }
+        onChange(finalDate);
     };
 
 
     const handleDayClick = (date, modifiers) => {
-        if (modifiers.disabled) {
-            return;
-        }
+        if (modifiers.disabled) return;
         handleDateSelect(date);
-        setShowCalendar(false);
+        if (displayMode === 'input') {
+            setShowCalendar(false);
+        }
     };
 
     const handleInputChange = (e) => {
@@ -75,32 +83,54 @@ const DatePicker = ({
 
     const modifiers = {};
 
-    if (selectedDate) {
-        const weekStart = startOfWeek(selectedDate, { weekStartsOn });
-        const weekEnd = endOfWeek(selectedDate, { weekStartsOn });
-        modifiers.selected_week = { from: weekStart, to: weekEnd };
-        modifiers.selected_week_start = weekStart;
-        modifiers.selected_week_end = weekEnd;
-    }
-
-    if (hoveredDay) {
-        const weekStart = startOfWeek(hoveredDay, { weekStartsOn });
-        const weekEnd = endOfWeek(hoveredDay, { weekStartsOn });
-        modifiers.hovered_week = { from: weekStart, to: weekEnd };
-        modifiers.hovered_week_start = weekStart;
-        modifiers.hovered_week_end = weekEnd;
+    if (selectionMode === 'week') {
+        if (selectedDate) {
+            const weekStart = startOfWeek(selectedDate, { weekStartsOn });
+            const weekEnd = endOfWeek(selectedDate, { weekStartsOn });
+            modifiers.selected_week = { from: weekStart, to: weekEnd };
+        }
+        if (hoveredDay) {
+            const weekStart = startOfWeek(hoveredDay, { weekStartsOn });
+            const weekEnd = endOfWeek(hoveredDay, { weekStartsOn });
+            modifiers.hovered_week = { from: weekStart, to: weekEnd };
+        }
     }
 
     const modifiersClassNames = {
         hovered_week: 'rdp-day_modifier--hovered_week',
-        hovered_week_start: 'rdp-day_modifier--hovered_week_start',
-        hovered_week_end: 'rdp-day_modifier--hovered_week_end',
         selected_week: 'rdp-day_modifier--selected_week',
-        selected_week_start: 'rdp-day_modifier--selected_week_start',
-        selected_week_end: 'rdp-day_modifier--selected_week_end',
         today: 'rdp-day_today',
     };
+    const CalendarComponent = (
+        <DayPicker
+            mode="single"
+            selected={selectedDate}
+            onDayClick={handleDayClick}
+            locale={currentLocale}
+            weekStartsOn={weekStartsOn}
+            disabled={{ before: minDate }}
+            fromMonth={minDate}
+            captionLayout="dropdown-buttons"
+            showOutsideDays
+            fixedWeeks
+            modifiers={modifiers}
+            modifiersClassNames={modifiersClassNames}
+            onDayMouseEnter={(day) => selectionMode === 'week' && setHoveredDay(day)}
+            onDayMouseLeave={() => selectionMode === 'week' && setHoveredDay(null)}
+        />
+    );
 
+    if (displayMode === 'inline') {
+        return (
+            <Card className={`custom-datepicker-inline custom-day-picker-wrapper ${className}`}>
+                <Card.Body className="p-2">
+                    {CalendarComponent}
+                </Card.Body>
+            </Card>
+        );
+    }
+
+    // Поведение по умолчанию (с полем ввода)
     return (
         <div className={`custom-datepicker ${className}`}>
             <InputGroup onClick={handleInputClick} style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
@@ -121,23 +151,9 @@ const DatePicker = ({
             </InputGroup>
 
             <Overlay show={showCalendar} target={inputRef.current} placement="bottom-start" onHide={() => setShowCalendar(false)} rootClose>
-                <Popover className="custom-calendar-popover">
+                <Popover className="custom-calendar-popover custom-day-picker-wrapper">
                     <Popover.Body className="p-2">
-                        <DayPicker
-                            mode="single"
-                            onDayClick={handleDayClick}
-                            locale={currentLocale}
-                            weekStartsOn={weekStartsOn}
-                            disabled={{ before: minDate }}
-                            fromMonth={minDate}
-                            captionLayout="dropdown-buttons"
-                            showOutsideDays
-                            fixedWeeks
-                            modifiers={modifiers}
-                            modifiersClassNames={modifiersClassNames}
-                            onDayMouseEnter={(day) => setHoveredDay(day)}
-                            onDayMouseLeave={() => setHoveredDay(null)}
-                        />
+                        {CalendarComponent}
                     </Popover.Body>
                 </Popover>
             </Overlay>
