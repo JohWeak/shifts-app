@@ -7,8 +7,8 @@ import {Container, Spinner, Button} from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import ScheduleList from './ui/schedule-list/ScheduleList';
 import ScheduleDetails from './ui/schedule-table/ScheduleDetails';
-import GenerateScheduleModal from './ui/generate-schedule/GenerateScheduleModal';
 import CompareAlgorithmsModal from './ui/generate-schedule/CompareAlgorithmsModal';
+import GenerateScheduleForm from './ui/generate-schedule/GenerateScheduleForm';
 import EmployeeRecommendationsModal from './ui/employee-recommendations/EmployeeRecommendationsModal';
 import EmployeeRecommendationsPanel from './ui/employee-recommendations/EmployeeRecommendationsPanel';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -25,6 +25,7 @@ import {
     setActiveTab,
     addPendingChange,
     setSelectedScheduleId,
+    fetchWorkSites
 } from './model/scheduleSlice';
 
 
@@ -41,6 +42,8 @@ const ScheduleManagement = () => {
         activeTab,
         selectedScheduleId,
         editingPositions,
+        workSites,
+        workSitesLoading,
         //pendingChanges
     } = useSelector((state) => state.schedule);
 
@@ -60,12 +63,14 @@ const ScheduleManagement = () => {
     const [loading, setIsLoading] = useState(false);
     const [selectedCell, setSelectedCell] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isGenerateFormVisible, setIsGenerateFormVisible] = useState(false);
     const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
 
 
 
     useEffect(() => {
         dispatch(fetchSchedules());
+        dispatch(fetchWorkSites());
     }, [dispatch]);
 
     // Track screen size for panel/modal decision
@@ -131,7 +136,7 @@ const ScheduleManagement = () => {
 
             if (result.success) {
                 // Close the modal
-                setShowGenerateModal(false);
+                setIsGenerateFormVisible(false);
 
                 // Update notification
                 dispatch(addNotification({
@@ -141,8 +146,6 @@ const ScheduleManagement = () => {
                     persistent: false
                 }));
 
-                // The schedule will be automatically opened by the slice logic
-                // No need for additional actions here
             } else {
                 dispatch(addNotification({
                     id: notificationId,
@@ -287,21 +290,23 @@ const ScheduleManagement = () => {
                         title={t('schedule.title')}
                         subtitle={t('schedule.subtitle')}
                     >
-                        <Button
-                            variant="primary"
-                            onClick={() => setShowGenerateModal(true)}
-                            disabled={isLoading}
-                            className="d-flex align-items-center"
-                        >
-                            {isLoading ? (
-                                <Spinner size="sm" className="me-2"/>
-                            ) : (
-                                <i className="bi bi-plus-circle me-2"></i>
-                            )}
+                        <Button variant="primary"
+                                onClick={() => setIsGenerateFormVisible(!isGenerateFormVisible)}
+                                disabled={actionsLoading}>
+                            <i className={`bi ${isGenerateFormVisible ? 'bi-chevron-up' : 'bi-plus-circle'} me-2`}></i>
                             <span>{t('schedule.generateSchedule')}</span>
                         </Button>
                     </PageHeader>
-
+                    {/* Animated form container - only visible when the form is open */}
+                    <div className={`generate-schedule-form-container ${isGenerateFormVisible ? 'visible' : ''}`}>
+                        <GenerateScheduleForm
+                            onGenerate={onGenerateSubmit}
+                            onCancel={() => setIsGenerateFormVisible(false)}
+                            generating={actionsLoading}
+                            workSites={workSites}
+                            workSitesLoading={workSitesLoading === 'pending'}
+                        />
+                    </div>
                     {/* Main content */}
                     {activeTab === 'view' && selectedScheduleId ? (
                         <>
@@ -333,13 +338,6 @@ const ScheduleManagement = () => {
                     )}
 
                     {/* Modals */}
-                    <GenerateScheduleModal
-                        show={showGenerateModal}
-                        onHide={() => setShowGenerateModal(false)}
-                        onGenerate={onGenerateSubmit}
-                        generating={actionsLoading}
-                    />
-
                     <CompareAlgorithmsModal
                         show={showComparisonModal}
                         onHide={() => setShowComparisonModal(false)}

@@ -1,4 +1,37 @@
-/* Schedule Management - гибридный подход */
+/* Schedule Management */
+
+.generate-schedule-form-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), margin 0.5s ease;
+    padding: 0;
+    box-shadow: none;
+    margin-top: -2.25rem;
+    margin-bottom: 2.25rem;
+    border-radius: var(--radius-lg);
+}
+
+.generate-schedule-form-container.visible {
+    max-height: 200px;
+    margin-bottom: 1rem;
+}
+
+.generate-schedule-form-card {
+    background-color: var(--bs-gray-50)!important;
+    border-color: transparent!important;
+    box-shadow: var(--bs-box-shadow-sm);
+    border-top-left-radius: 0!important;
+    border-top-right-radius: 0!important;
+}
+
+[data-theme="dark"] .generate-schedule-form-card {
+    background-color: var(--bs-gray-900)!important;
+}
+.generate-schedule-form-card .generate-buttons button{
+    min-width: 120px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+}
 
 /* SCHEDULE TABLE */
 .schedule-table {
@@ -133,10 +166,13 @@
 }
 
 .page-header{
-    padding: var(--space-2) var(--space-2);
+    padding: var(--space-2) var(--space-1);
 }
+
 .page-header .page-header-actions .btn-primary{
     border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--text-base);
 }
 
 .schedule-management-wrapper {

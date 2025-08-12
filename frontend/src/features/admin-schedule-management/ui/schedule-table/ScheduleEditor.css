@@ -238,7 +238,7 @@
     position: absolute;
     top: 2px;
     right: 2px;
-    opacity: 0.3;
+    opacity: 0.2;
     background: transparent;
     border: none;
     transition: all 0.2s ease;
@@ -246,6 +246,9 @@
 [dir="rtl"] .shift-color-btn {
     left: 2px;
     right: auto;
+}
+[data-theme="dark"] .shift-color-btn {
+    color: var(--bs-gray-700);
 }
 .shift-color-btn:active {
     border:none!important;
