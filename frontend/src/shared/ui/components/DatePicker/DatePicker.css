@@ -44,7 +44,10 @@
    Теперь все селекторы для DayPicker тоже будут начинаться с .custom-day-picker-wrapper,
    чтобы гарантировать их применение.
 */
-
+.rdp-root{
+    justify-self: center !important;
+    padding: 0.5rem;
+}
 /* Общий контейнер календаря */
 .custom-day-picker-wrapper .rdp {
     margin: 0 !important;
@@ -213,6 +216,4 @@
     color: var(--bs-primary) !important;
     border: 1px solid var(--bs-primary) !important;
 }
-.custom-day-picker-wrapper .rdp-day_today.rdp-day_modifier--selected_week .rdp-day_button {
-    border: 1px solid transparent !important; /* Убираем рамку, если он внутри выбора */
-}
+

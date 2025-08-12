@@ -40,10 +40,11 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
     const isFormValid = settings.site_id && settings.weekStart && settings.algorithm && !formError;
 
     return (
-        <Card className="generate-schedule-form-card">
+        <Card className="generate-schedule-form-card px-2">
             <Card.Body>
                 <Form onSubmit={handleSubmit}>
                     <Row className="mb-3">
+
                         <Col md={6}>
                             <Form.Group controlId="weekStart">
                                 <Form.Label>{t('modal.generateSchedule.weekStart')}</Form.Label>
@@ -63,6 +64,7 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
                                 <Form.Label>{t('modal.generateSchedule.workSite')}</Form.Label>
                                 {workSitesLoading === 'pending' ? <Spinner size="sm" /> : (
                                     <Form.Select
+                                        style={{cursor: 'pointer'}}
                                         value={settings.site_id || ''}
                                         onChange={(e) => setSettings(prev => ({ ...prev, site_id: parseInt(e.target.value) }))}
                                     >
@@ -74,16 +76,7 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
                             </Form.Group>
                         </Col>
                     </Row>
-                    {/*<Form.Group className="mb-3">*/}
-                    {/*    <Form.Label>{t('modal.generateSchedule.selectAlgorithm')}</Form.Label>*/}
-                    {/*    <Form.Select value={settings.algorithm} onChange={(e) => setSettings(prev => ({ ...prev, algorithm: e.target.value }))} required>*/}
-                    {/*        {safeAlgorithmTypes.map(algo => (*/}
-                    {/*            <option key={algo.value} value={algo.value}>*/}
-                    {/*                {t(`modal.generateSchedule.algorithms.${algo.value}`)}*/}
-                    {/*            </option>*/}
-                    {/*        ))}*/}
-                    {/*    </Form.Select>*/}
-                    {/*</Form.Group>*/}
+
                     <div className="d-flex justify-content-end gap-2 generate-buttons">
                         <Button variant="outline-secondary" onClick={onCancel} disabled={generating}>{t('common.cancel')}</Button>
                         <Button type="submit" variant="primary" disabled={generating || !isFormValid}>
