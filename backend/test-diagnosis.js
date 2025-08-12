@@ -8,16 +8,6 @@ const path = require('path');
 async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
     console.log('=== SCHEDULE DIAGNOSIS ===');
     console.log(`Site: ${siteId}, Week: ${weekStart}\n`);
-    const {
-        Employee,
-        Position,
-        PositionShift,
-        ShiftRequirement,
-        EmployeeConstraint,
-        PermanentConstraint,
-        LegalConstraint,
-        ScheduleAssignment
-    } = this.db;
 
     try {
         // Test database connection
