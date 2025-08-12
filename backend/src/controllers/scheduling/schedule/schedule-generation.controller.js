@@ -139,6 +139,19 @@ const generateNextWeekSchedule = async (req, res) => {
                 try {
                     console.log('[ScheduleController] Attempting CP-SAT generation...');
                     result = await cpSatBridge.generateOptimalSchedule(siteId, weekStart, transaction);
+
+                    // Добавляем детальную статистику
+                    if (result.success && result.schedule) {
+                        const detailedStats = await cpSatBridge.calculateDetailedStats(
+                            result.schedule.schedule_id,
+                            siteId,
+                            weekStart,
+                            [], // assignments будут загружены внутри метода
+                            transaction
+                        );
+                        result.statistics = detailedStats;
+                    }
+
                     if (!result.success) {
                         console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
                         result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction);

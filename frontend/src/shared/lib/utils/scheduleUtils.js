@@ -91,14 +91,17 @@ export const getWeekDates = (startDate, weekStartDay = 0) => {
  */
 export const formatScheduleDate = (startDate, endDate = null) => {
     if (!startDate) return '-';
-
+    let end = endDate;
     try {
         const start = parseISO(startDate);
-        if (endDate) {
-            const end = parseISO(endDate);
-            return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
+        if (!endDate) {
+             end = addDays(start, 6);
         }
-        return format(start, 'MMM d, yyyy');
+        else {
+             end = parseISO(endDate);
+        }
+
+        return `${format(start, 'dd/MM')} - ${format(end, 'dd/MM, yyyy')}`;
     } catch {
         return startDate;
     }
@@ -120,9 +123,7 @@ export const formatShiftTime = (startTime, endOrDuration) => {
         const cleanStart = startTime.substring(0, 5);
         let cleanEnd;
 
-        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
 
-        // Проверяем, является ли второй аргумент ВРЕМЕНЕМ ОКОНЧАНИЯ (т.е. строкой с ':')
         if (typeof endOrDuration === 'string' && endOrDuration.includes(':')) {
             // --- Сценарий 1: Передано startTime + endTime ---
             const endTime = endOrDuration;
