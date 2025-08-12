@@ -8,6 +8,16 @@ const path = require('path');
 async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
     console.log('=== SCHEDULE DIAGNOSIS ===');
     console.log(`Site: ${siteId}, Week: ${weekStart}\n`);
+    const {
+        Employee,
+        Position,
+        PositionShift,
+        ShiftRequirement,
+        EmployeeConstraint,
+        PermanentConstraint,
+        LegalConstraint,
+        ScheduleAssignment
+    } = this.db;
 
     try {
         // Test database connection
@@ -137,23 +147,7 @@ async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
                 }
             });
         });
-        // Проверяем, что есть в БД для requirements
-        const allRequirements = await ShiftRequirement.findAll({
-            include: [{
-                model: PositionShift,
-                as: 'positionShift',
-                where: {
-                    position_id: positions.map(p => p.pos_id)
-                }
-            }],
-            transaction
-        });
 
-        console.log('\n=== DATABASE SHIFT REQUIREMENTS ===');
-        console.log(`Total requirements in DB: ${allRequirements.length}`);
-        allRequirements.forEach(req => {
-            console.log(`  - Day ${req.day_of_week}, Shift ${req.position_shift_id}: ${req.required_staff_count} staff`);
-        });
         // 5. Save diagnosis data
         const diagnosisDir = path.join(__dirname, 'diagnosis');
         await fs.mkdir(diagnosisDir, { recursive: true });
