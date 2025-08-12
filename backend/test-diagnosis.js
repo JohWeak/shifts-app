@@ -53,7 +53,7 @@ async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
 
         console.log('\nConstraints by Employee:');
         Object.entries(byEmployee).forEach(([empId, constraints]) => {
-            const emp = data.employees.find(e => e.emp_id == empId);
+            const emp = data.employees.find(e => e.emp_id === empId);
             console.log(`\nEmployee ${empId} (${emp?.name}):`);
             if (constraints.permanent.length > 0) {
                 console.log('  Permanent:');
@@ -105,6 +105,8 @@ async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
             };
         });
 
+
+
         Object.entries(data.shift_requirements).forEach(([key, req]) => {
             if (!byPosition[req.position_id].requirements[req.shift_id]) {
                 const shift = data.shifts.find(s => s.shift_id === req.shift_id);
@@ -135,7 +137,23 @@ async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
                 }
             });
         });
+        // Проверяем, что есть в БД для requirements
+        const allRequirements = await ShiftRequirement.findAll({
+            include: [{
+                model: PositionShift,
+                as: 'positionShift',
+                where: {
+                    position_id: positions.map(p => p.pos_id)
+                }
+            }],
+            transaction
+        });
 
+        console.log('\n=== DATABASE SHIFT REQUIREMENTS ===');
+        console.log(`Total requirements in DB: ${allRequirements.length}`);
+        allRequirements.forEach(req => {
+            console.log(`  - Day ${req.day_of_week}, Shift ${req.position_shift_id}: ${req.required_staff_count} staff`);
+        });
         // 5. Save diagnosis data
         const diagnosisDir = path.join(__dirname, 'diagnosis');
         await fs.mkdir(diagnosisDir, { recursive: true });
@@ -202,8 +220,8 @@ async function diagnoseScheduling(siteId = 1, weekStart = '2025-08-17') {
 
                 if (requirement && empIds.length > requirement.required_staff) {
                     overAssignments++;
-                    const pos = data.positions.find(p => p.pos_id == posId);
-                    const shift = data.shifts.find(s => s.shift_id == shiftId);
+                    const pos = data.positions.find(p => p.pos_id === posId);
+                    const shift = data.shifts.find(s => s.shift_id === shiftId);
                     console.log(`❌ OVER-ASSIGNMENT: ${pos?.pos_name} - ${shift?.shift_name} on ${date}`);
                     console.log(`   Required: ${requirement.required_staff}, Assigned: ${empIds.length}`);
                 }

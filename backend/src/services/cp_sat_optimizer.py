@@ -98,18 +98,25 @@ class UniversalShiftSchedulerCP:
         assignments = {}
         for emp in employees:
             emp_id = emp['emp_id']
+            emp_position = emp.get('default_position_id')  # Получаем позицию сотрудника
+
             for day_idx, day in enumerate(days):
                 for position in positions:
-                    pos_id = str(position['pos_id'])  # Convert to string for key matching
+                    pos_id = position['pos_id']
 
+                    # КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: создаем переменные ТОЛЬКО для позиции сотрудника
+                    if emp_position != pos_id:
+                        continue  # Пропускаем если позиция не совпадает
+
+                    pos_str = str(pos_id)
                     # Get valid shifts for this position
-                    valid_shifts = position_shifts_map.get(pos_id, [])
+                    valid_shifts = position_shifts_map.get(pos_str, [])
 
                     for shift in shifts:
                         # Only create variable if this shift belongs to this position
                         if shift['shift_id'] in valid_shifts:
-                            var_name = f"assign_{emp_id}_{day_idx}_{shift['shift_id']}_{position['pos_id']}"
-                            assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] = \
+                            var_name = f"assign_{emp_id}_{day_idx}_{shift['shift_id']}_{pos_id}"
+                            assignments[(emp_id, day_idx, shift['shift_id'], pos_id)] = \
                                 self.model.NewBoolVar(var_name)
 
         print(f"[CP-SAT] Created {len(assignments)} assignment variables")
@@ -182,10 +189,11 @@ class UniversalShiftSchedulerCP:
 
         print(f"[Universal CP-SAT] Applied {applied_temporary} temporary constraint variables")
 
-        # 2. POSITION COVERAGE CONSTRAINTS (with exact requirements)
+        # 2. POSITION COVERAGE CONSTRAINTS (with EXACT requirements)
         shortage_vars = []
         shift_requirements = data.get('shift_requirements', {})
 
+        # ВАЖНО: Создаем ограничения ТОЛЬКО для существующих требований
         for day_idx, day in enumerate(days):
             date_str = day['date']
 
@@ -201,14 +209,12 @@ class UniversalShiftSchedulerCP:
                     requirement_key = f"{pos_id}-{shift_id}-{date_str}"
                     requirement = shift_requirements.get(requirement_key)
 
-                    if requirement:
-                        required_employees = requirement.get('required_staff', 1)
-                    else:
-                        required_employees = 1
+                    # КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Обрабатываем ТОЛЬКО если есть требование
+                    if requirement and requirement.get('required_staff', 0) > 0:
+                        required_employees = requirement.get('required_staff')
 
-                    print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
+                        print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
 
-                    if required_employees > 0:
                         assignment_vars = []
 
                         # Only employees with matching position can work
@@ -219,49 +225,38 @@ class UniversalShiftSchedulerCP:
                                     assignment_vars.append(assignments[key])
 
                         if assignment_vars:
-                            # EXACT constraint to prevent over-assignment
-                            if required_employees == 1:
-                                # For single employee requirement, use at most 1
-                                self.model.Add(sum(assignment_vars) <= 1)
+                            # Create a variable for actual assignments
+                            actual_assigned = self.model.NewIntVar(
+                                0, len(assignment_vars),
+                                f"actual_{day_idx}_{shift_id}_{pos_id}"
+                            )
+                            self.model.Add(actual_assigned == sum(assignment_vars))
 
-                                # Create shortage var for objective
-                                shortage_var = self.model.NewBoolVar(
-                                    f"shortage_{day_idx}_{shift_id}_{pos_id}"
-                                )
-                                self.model.Add(shortage_var == (1 - sum(assignment_vars)))
-                                shortage_vars.append(shortage_var)
+                            # HARD CONSTRAINT: Must assign EXACTLY the required number
+                            if len(assignment_vars) >= required_employees:
+                                # We have enough employees - enforce exact requirement
+                                self.model.Add(actual_assigned == required_employees)
+                                print(f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, EXACTLY {required_employees} required")
                             else:
-                                # For multiple employees, use exact constraint with shortage/excess tracking
-                                actual_assigned = self.model.NewIntVar(
-                                    0, len(assignment_vars),
-                                    f"actual_{day_idx}_{shift_id}_{pos_id}"
-                                )
-                                self.model.Add(actual_assigned == sum(assignment_vars))
-
-                                # Shortage variable
+                                # Not enough employees - do the best we can
+                                self.model.Add(actual_assigned <= required_employees)
                                 shortage_var = self.model.NewIntVar(
                                     0, required_employees,
                                     f"shortage_{day_idx}_{shift_id}_{pos_id}"
                                 )
-                                self.model.AddMaxEquality(
-                                    shortage_var,
-                                    [0, required_employees - actual_assigned]
-                                )
+                                self.model.Add(shortage_var == required_employees - actual_assigned)
                                 shortage_vars.append(shortage_var)
+                                print(f"[CP-SAT] Warning: Only {len(assignment_vars)} candidates for {required_employees} required")
+                    else:
+                        # НЕТ ТРЕБОВАНИЯ = ЗАПРЕЩАЕМ назначения на этот день/смену/позицию
+                        for emp in employees:
+                            if emp.get('default_position_id') == pos_id:
+                                key = (emp['emp_id'], day_idx, shift_id, pos_id)
+                                if key in assignments:
+                                    # ВАЖНО: Запрещаем назначение если нет требования
+                                    self.model.Add(assignments[key] == 0)
 
-                                # Excess variable (penalize over-assignment)
-                                excess_var = self.model.NewIntVar(
-                                    0, len(assignment_vars),
-                                    f"excess_{day_idx}_{shift_id}_{pos_id}"
-                                )
-                                self.model.AddMaxEquality(
-                                    excess_var,
-                                    [0, actual_assigned - required_employees]
-                                )
-                                # Add penalty for excess assignments
-                                objective_terms.append(excess_var * -excess_assignment_penalty)
-
-                            print(f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, {required_employees} required")
+        print(f"[CP-SAT] Total shortage variables: {len(shortage_vars)}")
 
         # 3. HARD CONSTRAINTS (LEGAL REQUIREMENTS)
 
@@ -387,7 +382,7 @@ class UniversalShiftSchedulerCP:
 
         # 5. OPTIMIZATION OBJECTIVE (using pre-initialized objective_terms)
 
-        # 5.1 Minimize shortage (highest priority)
+        # 5.1 Minimize shortage (highest priority - but should be 0 if we have enough employees)
         for shortage_var in shortage_vars:
             objective_terms.append(shortage_var * -shortage_penalty)
 
@@ -413,7 +408,7 @@ class UniversalShiftSchedulerCP:
                                 assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] * prefer_work_bonus
                             )
 
-        # 5.3 Position matching bonus
+        # 5.3 Position matching bonus (reduced importance)
         for emp in employees:
             emp_id = emp['emp_id']
             default_pos = emp.get('default_position_id')
@@ -426,35 +421,29 @@ class UniversalShiftSchedulerCP:
                                 assignments[(emp_id, day_idx, shift['shift_id'], default_pos)] * position_match_bonus
                             )
 
-        # 5.4 Balance workload
-        total_shifts_vars = []
+        # 5.4 REMOVE workload balancing - we don't want to spread work equally
+        # We want to use minimum number of employees needed
 
+        # 5.5 Add small penalty for using too many different employees
+        # This encourages using fewer employees more consistently
+        unique_employees_working = []
         for emp in employees:
             emp_id = emp['emp_id']
-            emp_shifts = []
+            emp_works = self.model.NewBoolVar(f'emp_works_{emp_id}')
 
+            # Employee works if they have any assignment
+            emp_assignments = []
             for day_idx in range(len(days)):
                 for shift in shifts:
                     for position in positions:
                         if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                            emp_shifts.append(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
+                            emp_assignments.append(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
 
-            if emp_shifts:
-                total_var = self.model.NewIntVar(0, len(days) * len(shifts), f'total_shifts_{emp_id}')
-                self.model.Add(sum(emp_shifts) == total_var)
-                total_shifts_vars.append(total_var)
-
-        # Minimize difference between max and min workload
-        if len(total_shifts_vars) > 1:
-            max_shifts = self.model.NewIntVar(0, len(days) * len(shifts), 'max_shifts')
-            min_shifts = self.model.NewIntVar(0, len(days) * len(shifts), 'min_shifts')
-
-            self.model.AddMaxEquality(max_shifts, total_shifts_vars)
-            self.model.AddMinEquality(min_shifts, total_shifts_vars)
-
-            balance_var = self.model.NewIntVar(0, len(days) * len(shifts), 'balance')
-            self.model.Add(balance_var == max_shifts - min_shifts)
-            objective_terms.append(balance_var * -workload_balance_weight)
+            if emp_assignments:
+                self.model.AddMaxEquality(emp_works, emp_assignments)
+                unique_employees_working.append(emp_works)
+                # Small penalty for each employee used (encourages using fewer employees)
+                objective_terms.append(emp_works * -2)
 
         # Set objective function
         if objective_terms:

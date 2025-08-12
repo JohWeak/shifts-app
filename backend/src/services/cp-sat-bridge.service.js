@@ -179,7 +179,7 @@ class CPSATBridge {
                         const dateStr = date.toISOString().split('T')[0];
 
                         // Default requirement
-                        let requiredStaff = 1;
+                        let requiredStaff = 0;
 
                         // Find requirement for this day
                         if (posShift.requirements && posShift.requirements.length > 0) {
@@ -191,22 +191,26 @@ class CPSATBridge {
                             });
 
                             if (dayRequirement) {
-                                requiredStaff = dayRequirement.required_staff_count || 1;
+                                requiredStaff = dayRequirement.required_staff_count || 0;  // ИСПРАВЛЕНО: тоже 0 по умолчанию
                             }
+                        } else {
+                            requiredStaff = 0;
                         }
 
                         // Create unique key for this position-shift-date combination
-                        const key = `${position.pos_id}-${posShift.id}-${dateStr}`;
-                        shiftRequirementsMap[key] = {
-                            position_id: position.pos_id,
-                            shift_id: posShift.id,
-                            date: dateStr,
-                            day_index: dayOffset,
-                            required_staff: requiredStaff,
-                            is_working_day: requiredStaff > 0
-                        };
+                        if (requiredStaff > 0) {  // Добавляем только если нужны работники
+                            const key = `${position.pos_id}-${posShift.id}-${dateStr}`;
+                            shiftRequirementsMap[key] = {
+                                position_id: position.pos_id,
+                                shift_id: posShift.id,
+                                date: dateStr,
+                                day_index: dayOffset,
+                                required_staff: requiredStaff,
+                                is_working_day: true
+                            };
 
-                        console.log(`[CP-SAT Bridge] Requirement for ${position.pos_name} - ${posShift.shift_name} on ${dateStr}: ${requiredStaff} staff`);
+                            console.log(`[CP-SAT Bridge] Requirement for ${position.pos_name} - ${posShift.shift_name} on ${dateStr}: ${requiredStaff} staff`);
+                        }
                     }
                 });
             });
@@ -707,14 +711,14 @@ class CPSATBridge {
                     }
 
                     position.shifts?.forEach(shift => {
-                        let requiredStaff = 1;
+                        let requiredStaff = 0;
 
                         if (shift.requirements?.length > 0) {
                             const dayReq = shift.requirements.find(r =>
                                 r.is_recurring && (r.day_of_week === dayOfWeek || r.day_of_week === null)
                             );
                             if (dayReq) {
-                                requiredStaff = dayReq.required_staff_count || 1;
+                                requiredStaff = dayReq.required_staff_count || 0;
                             }
                         }
 
