@@ -405,7 +405,7 @@ const PositionsTab = ({selectedSite}) => {
                                     <SortableHeader sortKey="status" sortConfig={sortConfig} onSort={requestSort}>
                                         {t('common.status')}
                                     </SortableHeader>
-                                    <th></th>
+                                    <th className="text-muted text-center">{t('common.actions')}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -418,7 +418,7 @@ const PositionsTab = ({selectedSite}) => {
                                                 cursor: 'pointer',
                                             }}
                                         >
-                                            <td className="fw-semibold">
+                                            <td className="">
                                                 <i className={`bi bi-chevron-right me-2 transition-icon`}></i>
                                                 {position.pos_name}
                                             </td>

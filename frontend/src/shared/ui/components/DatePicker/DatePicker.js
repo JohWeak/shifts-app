@@ -20,7 +20,7 @@ const DatePicker = ({
                         displayMode = 'input', // 'input' | 'inline'
                         selectionMode = 'week', // 'week' | 'day'
                     }) => {
-    const { language } = useI18n();
+    const { locale, } = useI18n();
     const [showCalendar, setShowCalendar] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [hoveredDay, setHoveredDay] = useState(null);
@@ -32,7 +32,7 @@ const DatePicker = ({
         he: he,
         ru: ru,
     };
-    const currentLocale = localeMap[language] || enUS;
+    const currentLocale = localeMap[locale] || he;
 
     useEffect(() => {
         if (value && isValid(value)) {
@@ -88,18 +88,27 @@ const DatePicker = ({
             const weekStart = startOfWeek(selectedDate, { weekStartsOn });
             const weekEnd = endOfWeek(selectedDate, { weekStartsOn });
             modifiers.selected_week = { from: weekStart, to: weekEnd };
+            modifiers.selected_week_start = weekStart;
+            modifiers.selected_week_end = weekEnd;
         }
         if (hoveredDay) {
             const weekStart = startOfWeek(hoveredDay, { weekStartsOn });
             const weekEnd = endOfWeek(hoveredDay, { weekStartsOn });
             modifiers.hovered_week = { from: weekStart, to: weekEnd };
+            modifiers.hovered_week_start = weekStart;
+            modifiers.hovered_week_end = weekEnd;
         }
     }
 
     const modifiersClassNames = {
         hovered_week: 'rdp-day_modifier--hovered_week',
-        selected_week: 'rdp-day_modifier--selected_week',
+        hovered_week_start: 'rdp-day_modifier--hovered_week_start',
+        hovered_week_end: 'rdp-day_modifier--hovered_week_end',
         today: 'rdp-day_today',
+        selected_week: 'rdp-day_modifier--selected_week',
+        selected_week_start: 'rdp-day_modifier--selected_week_start',
+        selected_week_end: 'rdp-day_modifier--selected_week_end',
+
     };
     const CalendarComponent = (
         <DayPicker

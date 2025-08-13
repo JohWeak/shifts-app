@@ -53,18 +53,18 @@
 }
 
 
-.day-header-cell {
+.week-schedule-section .day-header-cell {
     min-width: 120px;
     text-align: center;
     padding: 0.5rem;
 }
 
-.day-name {
+.week-schedule-section .day-name {
     font-weight: 600;
     margin-bottom: 0.25rem;
 }
 
-.day-date {
+.week-schedule-section .day-date {
     font-size: 0.75rem;
     color: var(--bs-gray-600);
 }
@@ -83,77 +83,77 @@
     right: 0;
 }
 /* Shift Info */
-.shift-info-cell {
+.week-schedule-section .shift-info-cell {
     padding: 0.75rem;
 }
 
-.shift-header-info {
+.week-schedule-section .shift-header-info {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-.shift-header-name {
+.week-schedule-section .shift-header-name {
     font-weight: 600;
     font-size: 0.95rem;
 }
 
-.shift-header-time {
+.week-schedule-section .shift-header-time {
     font-size: 0.85rem;
     color: var(--bs-gray-600);
 }
 
 
 /* Shift Cells */
-.employee-cell {
+.week-schedule-section .employee-cell {
     padding: 0.5rem;
     vertical-align: top;
     cursor: pointer;
 
 }
 
-.shift-cell {
+.week-schedule-section .shift-cell {
     padding: 0.5rem;
     border-radius: 0.25rem;
     min-height: 60px;
     transition: all 0.2s ease;
 }
 
-.shift-cell:hover {
+.week-schedule-section .shift-cell:hover {
     transform: scale(1.02);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.current-user-shift {
+.week-schedule-section .current-user-shift {
     border: 1px solid var(--bs-primary);
     font-weight: 600;
 }
 
-.shift-employees {
+.week-schedule-section .shift-employees {
     margin-top: 0.5rem;
     font-size: 0.75rem;
 }
 
-.employee-name {
+.week-schedule-section .employee-name {
     line-height: 1.3;
 }
 
-.empty-shift {
+.week-schedule-section .empty-shift {
     text-align: center;
     color: var(--bs-gray-400);
 }
 
 /* Legend */
-.legend {
+.week-schedule-section .legend {
     text-align: center;
 }
 
 /* Today column highlight */
-.today-column {
+.week-schedule-section .today-column {
     background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
 }
 
-.today-badge {
+.week-schedule-section .today-badge {
     font-size: 0.65rem;
     padding: 0.2rem 0.4rem;
 }
@@ -169,7 +169,7 @@
 }
 
 /* Employee cells */
-.shift-cell {
+.week-schedule-section .shift-cell {
     padding: 0.5rem;
     border-radius: 0.25rem;
     min-height: 50px;
@@ -178,27 +178,27 @@
     justify-content: center;
 }
 
-.shift-employees {
+.week-schedule-section .shift-employees {
     text-align: center;
     font-size: 0.875rem;
 }
 
-.employee-name {
+.week-schedule-section .employee-name {
     line-height: 1.3;
     padding: 0.125rem 0;
 }
 
-.empty-slot {
+.week-schedule-section .empty-slot {
     opacity: 0.5;
 }
 
 /* Current user highlight */
-.current-user-shift {
+.week-schedule-section .current-user-shift {
     position: relative;
     box-shadow: inset 0 0 0 1px var(--bs-primary);
 }
 
-.current-user-shift::before {
+.week-schedule-section .current-user-shift::before {
     content: '';
     position: absolute;
     top: 0;
@@ -240,7 +240,7 @@
     background: var(--bs-gray-600);
 }
 
-.shift-header-info .color-picker-btn {
+.week-schedule-section .shift-header-info .color-picker-btn {
     position: absolute;
     top: 18px;
     right: 12px;
@@ -250,16 +250,16 @@
     line-height: 1;
     color: inherit !important;
 }
-[dir="rtl"] .shift-header-info .color-picker-btn{
+[dir="rtl"] .week-schedule-section .shift-header-info .color-picker-btn{
     position: absolute;
     top: 18px;
     left: 0;
 }
-.shift-header-info:hover .color-picker-btn {
+.week-schedule-section .shift-header-info:hover .color-picker-btn {
     opacity: 0.7;
 }
 
-.shift-header-info .color-picker-btn:hover {
+.week-schedule-section .shift-header-info .color-picker-btn:hover {
     opacity: 1 !important;
 }
 
@@ -269,15 +269,15 @@
         font-size: 0.75rem;
     }
 
-    .shift-header-cell {
+    .week-schedule-section .shift-header-cell {
         min-width: 100px;
     }
 
-    .day-header-cell {
+    .week-schedule-section .day-header-cell {
         min-width: 100px;
     }
 
-    .shift-cell {
+    .week-schedule-section .shift-cell {
         min-height: 50px;
         padding: 0.375rem;
     }
@@ -286,16 +286,16 @@
         font-size: 0.75rem;
     }
 
-    .employee-name {
+    .week-schedule-section .employee-name {
         font-size: 0.75rem;
     }
-    .shift-header-info .color-picker-btn {
+    .week-schedule-section .shift-header-info .color-picker-btn {
         opacity: 0.8;
     }
-    .shift-header-time {
+    .week-schedule-section .shift-header-time {
         font-size: 0.75rem;
     }
-    .shift-header-name {
+    .week-schedule-section .shift-header-name {
         font-size: 0.85rem;
     }
 }

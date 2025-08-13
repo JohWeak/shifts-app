@@ -254,7 +254,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
             </div>
 
             <div className="table-responsive">
-                <Table bordered hover className="requirements-matrix">
+                <Table bordered className="requirements-matrix">
                     <thead>
                     <tr>
                         <th className="shift-header">{t('workplace.shifts.shift')}</th>

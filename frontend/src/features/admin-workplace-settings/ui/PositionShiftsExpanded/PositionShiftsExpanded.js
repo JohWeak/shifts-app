@@ -171,7 +171,7 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
                                                             className="shift-color-indicator me-2"
                                                             style={{backgroundColor: shift.color}}
                                                         />
-                                                        <strong>{shift.shift_name}</strong>
+                                                        <span>{shift.shift_name}</span>
                                                     </div>
                                                 </td>
                                                 <td>

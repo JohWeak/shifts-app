@@ -7,7 +7,9 @@
     --bs-table-bg: transparent;
     transition: background-color 0.8s ease-out ;
 }
-
+.positions-table > tbody > .position-row:hover {
+    --bs-table-hover-bg:  rgba(var(--bs-primary-rgb), 0.07);
+}
 /* Для АКТИВНОЙ (раскрытой) строки задаем постоянный фон */
 .positions-table > tbody > .position-row.expanded {
     background-color: rgba(var(--bs-primary-rgb), 0.07);
@@ -48,7 +50,8 @@
 /* Задаем transition для псевдоэлемента, где и находится иконка */
 .position-row .transition-icon::before {
     transition: transform 0.3s ease-in-out, color 0.2s ease-in-out;
-    display: inline-block; /* Необходимо для transform */
+    display: inline-block;
+    font-size: 0.75rem;
 }
 
 /* Поворачиваем и окрашиваем ПСЕВДОЭЛЕМЕНТ в раскрытой строке */

@@ -112,7 +112,7 @@
     background-color: var(--bs-body-bg) !important;
     color: var(--bs-body-color) !important;
     border-radius: var(--radius-base) !important;
-    display: flex; /* Для центрирования svg */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -124,15 +124,24 @@
 [data-theme='dark'] .custom-day-picker-wrapper .rdp-button_next:hover {
     background-color: var(--bs-gray-800) !important;
 }
-
+[dir="rtl"] .custom-day-picker-wrapper .rdp-button_previous svg,
+[dir="rtl"] .custom-day-picker-wrapper .rdp-button_next svg {
+    transform: rotate(180deg);
+}
+.custom-day-picker-wrapper .rdp-month_caption{
+    padding: 1rem 0.5rem;
+}
+.custom-day-picker-wrapper .rdp-weekday{
+    text-align: center;
+}
 /*
 
   Уменьшаем размер SVG иконки внутри кнопок навигации
 */
 .custom-day-picker-wrapper .rdp-button_previous svg,
 .custom-day-picker-wrapper .rdp-button_next svg {
-    width: 14px !important;
-    height: 14px !important;
+    width: 16px !important;
+    height: 16px !important;
     /* ИСПОЛЬЗУЕМ FILL ВМЕСТО COLOR */
     fill: var(--bs-body-color) !important;
 }
@@ -211,7 +220,7 @@
 
 /* --- 4. СТИЛЬ ДЛЯ СЕГОДНЯШНЕГО ДНЯ (today) --- */
 /* Сохраняем рамку для сегодняшнего дня, если он не является частью выбранной недели */
-.custom-day-picker-wrapper .rdp-day_today:not(.rdp-day_modifier--selected_week) .rdp-day_button {
+.custom-day-picker-wrapper .rdp-day_today .rdp-day_button {
     font-weight: 700 !important;
     color: var(--bs-primary) !important;
     border: 1px solid var(--bs-primary) !important;

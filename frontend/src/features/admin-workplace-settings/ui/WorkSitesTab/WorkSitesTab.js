@@ -350,7 +350,7 @@ const WorkSitesTab = ({onSelectSite}) => {
                             <SortableHeader sortKey="employees" sortConfig={sortConfig} onSort={requestSort}>
                                 {t('workplace.worksites.employees')}
                             </SortableHeader>
-                            <th></th>
+                            <th className="text-muted text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -361,7 +361,7 @@ const WorkSitesTab = ({onSelectSite}) => {
                                 onClick={() => handleRowClick(site)}
                                 style={{cursor: 'pointer'}}
                             >
-                                <td className="fw-semibold">{site.site_name}</td>
+                                <td className="site-name">{site.site_name}</td>
                                 <td>{site.address || '-'}</td>
                                 <td>{site.phone || '-'}</td>
                                 <td onClick={(e) => e.stopPropagation()}>
