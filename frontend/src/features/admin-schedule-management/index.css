@@ -12,7 +12,7 @@
 }
 
 .generate-schedule-form-container.visible {
-    max-height: 600px;
+    max-height: 800px;
     margin-bottom: 1rem;
 }
 
@@ -32,6 +32,64 @@
     padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
 }
+.generate-form-layout {
+    display: flex;
+    flex-wrap: wrap; /* Для мобильных устройств */
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.form-settings-section {
+    flex: 1; /* Занимает доступное пространство */
+    min-width: 280px; /* Минимальная ширина, чтобы не сжималось слишком сильно */
+}
+
+.form-calendar-section {
+    flex-shrink: 0; /* Календарь не будет сжиматься */
+}
+
+/* Стили для списка чекбоксов */
+.positions-checkbox-group {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 0.75rem;
+    background-color: var(--bs-gray-100);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--bs-border-color);
+}
+
+[data-theme="dark"] .positions-checkbox-group {
+    background-color: var(--bs-gray-800);
+}
+
+.positions-checkbox-group .form-check {
+    margin-bottom: 0.5rem;
+
+}
+.positions-checkbox-group .form-check .form-check-input,
+.positions-checkbox-group .form-check label{
+    cursor: pointer;
+}
+
+.generate-schedule-form-card .generate-buttons button {
+    min-width: 120px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .generate-form-layout {
+        flex-direction: column;
+    }
+
+    .form-calendar-section {
+        align-self: center;
+    }
+}
+
+
+
 
 /* SCHEDULE TABLE */
 .schedule-table {

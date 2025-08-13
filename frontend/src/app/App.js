@@ -4,12 +4,14 @@ import {
     RouterProvider,
     Navigate,
     Outlet
-} from 'react-router-dom';import {Provider, useDispatch} from 'react-redux';
+} from 'react-router-dom';
+import {Provider, useDispatch} from 'react-redux';
 import store from 'app/store/store';
 import {I18nProvider} from 'shared/lib/i18n/i18nProvider';
 import {ErrorBoundary} from 'shared/ui/components/ErrorBoundary/ErrorBoundary';
 import {fetchSystemSettings} from 'features/admin-system-settings/model/settingsSlice';
 import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleSlice';
+import {fetchPositions} from "features/admin-workplace-settings/model/workplaceSlice";
 
 // Pages
 import Login from '../features/auth';
@@ -42,7 +44,8 @@ const AppInitializer = ({ children }) => {
     useEffect(() => {
         Promise.all([
             dispatch(fetchSystemSettings()),
-            dispatch(fetchWorkSites())
+            dispatch(fetchWorkSites()),
+            dispatch(fetchPositions())
         ]);
     }, [dispatch]);
     return children;

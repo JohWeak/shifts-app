@@ -219,7 +219,6 @@
 
 
 /* --- 4. СТИЛЬ ДЛЯ СЕГОДНЯШНЕГО ДНЯ (today) --- */
-/* Сохраняем рамку для сегодняшнего дня, если он не является частью выбранной недели */
 .custom-day-picker-wrapper .rdp-day_today .rdp-day_button {
     font-weight: 700 !important;
     color: var(--bs-primary) !important;

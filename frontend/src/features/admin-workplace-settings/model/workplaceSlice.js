@@ -332,13 +332,13 @@ const workplaceSlice = createSlice({
             })
             .addCase(fetchPositions.fulfilled, (state, action) => {
                 state.positionsLoading = false;
-                state.positions = action.payload || []; // Защита от undefined
+                state.positions = action.payload || [];
                 console.log('Positions saved to store:', state.positions);
             })
             .addCase(fetchPositions.rejected, (state, action) => {
                 state.positionsLoading = false;
                 state.error = action.payload;
-                state.positions = []; // Устанавливаем пустой массив при ошибке
+                state.positions = [];
             })
             // Create position
             .addCase(createPosition.fulfilled, (state, action) => {
