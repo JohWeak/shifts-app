@@ -129,12 +129,15 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
         localMatrix.shifts.forEach((shift) => {
             daysOfWeek.forEach(day => {
                 const localReq = shift.requirements[day.id];
-                // Находим оригинальную смену и требование для сравнения
                 const originalShift = reduxMatrix.shifts.find(s => s.id === shift.id);
                 if (!originalShift) return;
                 const originalReq = originalShift.requirements[day.id];
 
-                if (localReq.required_staff !== originalReq.required_staff) {
+                // ИЗМЕНЕНО: Сохраняем если значение отличается ИЛИ если нет requirement_id но есть значение > 0
+                const needsUpdate = localReq.required_staff !== originalReq.required_staff;
+                const needsCreate = !originalReq.requirement_id && localReq.required_staff > 0;
+
+                if (needsUpdate || needsCreate) {
                     const payload = {
                         day_of_week: day.id,
                         required_staff_count: localReq.required_staff,
@@ -308,7 +311,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                                                 type="button"
                                                 className="btn-decrement"
                                                 onClick={() => handleStepChange(shift.id, day.id, -1)}
-                                                tabIndex="-1" // Убираем из навигации по Tab, чтобы не мешать
+                                                tabIndex="-1"
                                             >
                                                 -
                                             </button>

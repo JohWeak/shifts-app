@@ -183,22 +183,28 @@ class CPSATBridge {
 
                         // Find requirement for this day
                         if (posShift.requirements && posShift.requirements.length > 0) {
-                            const dayRequirement = posShift.requirements.find(req => {
-                                if (req.is_recurring) {
-                                    return req.day_of_week === dayOfWeek || req.day_of_week === null;
+                            // Сначала ищем конкретное требование для этого дня недели
+                            let dayRequirement = posShift.requirements.find(req => {
+                                if (!req.is_recurring) {
+                                    return req.specific_date === dateStr;
                                 }
-                                return req.specific_date === dateStr;
+                                return req.day_of_week === dayOfWeek;
                             });
 
-                            if (dayRequirement) {
-                                requiredStaff = dayRequirement.required_staff_count || 0;  // ИСПРАВЛЕНО: тоже 0 по умолчанию
+                            // Если не нашли конкретное, ищем общее (day_of_week = null означает ВСЕ дни)
+                            if (!dayRequirement) {
+                                dayRequirement = posShift.requirements.find(req => {
+                                    return req.is_recurring && req.day_of_week === null;
+                                });
                             }
-                        } else {
-                            requiredStaff = 0;
+
+                            if (dayRequirement) {
+                                requiredStaff = dayRequirement.required_staff_count || 0;
+                            }
                         }
 
                         // Create unique key for this position-shift-date combination
-                        if (requiredStaff > 0) {  // Добавляем только если нужны работники
+                        if (requiredStaff > 0) {
                             const key = `${position.pos_id}-${posShift.id}-${dateStr}`;
                             shiftRequirementsMap[key] = {
                                 position_id: position.pos_id,
