@@ -187,15 +187,29 @@ const ScheduleEditor = ({
     }, [assignments, positionPendingChanges]);
 
     // Получаем требования для конкретной смены
-    const getRequiredEmployeesForShift = (shiftId) => {
+    const getRequiredEmployeesForShift = (shiftId, dayIndex) => {
+        // Если есть требования по дням
         if (position.shift_requirements && position.shift_requirements[shiftId]) {
-            return position.shift_requirements[shiftId];
+            const requirements = position.shift_requirements[shiftId];
+
+            // Если это объект с днями недели
+            if (typeof requirements === 'object' && !Array.isArray(requirements)) {
+                return requirements[dayIndex] || 0;
+            }
+
+            // Если это просто число (старый формат)
+            if (typeof requirements === 'number') {
+                return requirements;
+            }
         }
+
+        // Fallback на старую логику
         const shift = shifts.find(s => s.shift_id === shiftId || s.id === shiftId);
         if (shift && shift.required_staff) {
             return shift.required_staff;
         }
-        return 1;
+
+        return 0;
     };
 
     // Handle save with confirmation if shortage/overage
@@ -317,7 +331,7 @@ const ScheduleEditor = ({
                 pendingRemovals={pendingRemovals}
                 isEditing={isEditing}
                 isUnderstaffed={isUnderstaffed}
-                requiredEmployees={getRequiredEmployeesForShift(shift.shift_id)}
+                requiredEmployees={getRequiredEmployeesForShift(shift.shift_id, dayIndex)}
                 onCellClick={onCellClick}
                 onEmployeeClick={onEmployeeClick}
                 onRemoveEmployee={(date, posId, shiftId, empId, assignmentId) =>

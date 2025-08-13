@@ -33,7 +33,6 @@ const ScheduleCell = ({
     const isEmpty = totalEmployees === 0;
     const isFull = totalEmployees >= requiredEmployees;
 
-
     const hasPendingChanges = () => {
         return Object.values(pendingChanges).some(change =>
             change.positionId === positionId &&
@@ -199,7 +198,6 @@ const ScheduleCell = ({
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            // Найти и удалить правильный pending change
                                             const changeKey = Object.keys(pendingChanges).find(key => {
                                                 const change = pendingChanges[key];
                                                 return change.action === 'assign' &&
@@ -222,7 +220,6 @@ const ScheduleCell = ({
                         </div>
                     );
                 })}
-
                 {/* Add more employees indicator */}
                 {isEditing && totalEmployees < requiredEmployees && (
                     <div className="add-more-indicator mb-1 bg-info-subtle rounded-1 align p-1">
