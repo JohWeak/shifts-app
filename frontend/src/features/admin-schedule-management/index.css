@@ -11,36 +11,43 @@
     border-radius: var(--radius-lg);
 }
 
+.generate-schedule-form-container .form-calendar-section {
+    margin-top: 2rem;
+}
+
 .generate-schedule-form-container.visible {
     max-height: 800px;
     margin-bottom: 1rem;
 }
 
 .generate-schedule-form-card {
-    background-color: var(--bs-gray-50)!important;
-    border-color: transparent!important;
+    background-color: var(--bs-gray-50) !important;
+    border-color: transparent !important;
     box-shadow: var(--bs-box-shadow-sm);
-    border-top-left-radius: 0!important;
-    border-top-right-radius: 0!important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
 }
 
 [data-theme="dark"] .generate-schedule-form-card {
-    background-color: var(--bs-gray-900)!important;
+    background-color: var(--bs-gray-900) !important;
 }
-.generate-schedule-form-card .generate-buttons button{
+
+.generate-schedule-form-card .generate-buttons button {
     min-width: 120px;
     padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
 }
+
 .generate-form-layout {
     display: flex;
     flex-wrap: wrap; /* Для мобильных устройств */
     gap: 2rem;
     align-items: flex-start;
+    max-width: 800px;
 }
 
 .form-settings-section {
-    flex: 1; /* Занимает доступное пространство */
+    flex:1;
     min-width: 280px; /* Минимальная ширина, чтобы не сжималось слишком сильно */
 }
 
@@ -66,8 +73,9 @@
     margin-bottom: 0.5rem;
 
 }
+
 .positions-checkbox-group .form-check .form-check-input,
-.positions-checkbox-group .form-check label{
+.positions-checkbox-group .form-check label {
     cursor: pointer;
 }
 
@@ -87,8 +95,6 @@
         align-self: center;
     }
 }
-
-
 
 
 /* SCHEDULE TABLE */
@@ -200,7 +206,8 @@
     box-shadow: var(--bs-box-shadow-sm);
     transform: translateY(-1px);
 }
-.employee-item:hover .remove-btn{
+
+.employee-item:hover .remove-btn {
     transform: none;
 }
 
@@ -223,11 +230,11 @@
     color: var(--bs-success);
 }
 
-.page-header{
+.page-header {
     padding: var(--space-2) var(--space-1);
 }
 
-.page-header .page-header-actions .btn-primary{
+.page-header .page-header-actions .btn-primary {
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-3);
     font-size: var(--text-base);
@@ -274,9 +281,6 @@
 }
 
 
-
-
-
 @keyframes pulse {
     0%, 100% {
         opacity: 1;
@@ -300,14 +304,16 @@
     .page-header .text-muted {
         display: none;
     }
-    .page-header{
+
+    .page-header {
         margin-bottom: 2rem;
     }
 
-    .page-header .page-header-actions .btn{
+    .page-header .page-header-actions .btn {
         font-size: 0.875rem;
     }
 }
+
 @media (max-width: 576px) {
     .schedule-table {
         font-size: 0.75rem;
