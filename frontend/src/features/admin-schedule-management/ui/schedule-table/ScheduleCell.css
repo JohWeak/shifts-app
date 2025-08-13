@@ -7,8 +7,8 @@
     padding: var(--space-2);
     vertical-align: middle;
     position: relative;
-    transition: all var(--transition-base);
-
+    /*transition: all var(--transition-base);*/
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .schedule-cell.editing-mode {
@@ -32,7 +32,7 @@
 
 /* Empty Cell Styles */
 .schedule-cell .empty-cell {
-    min-height: 60px;
+    min-height: 80px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -46,7 +46,7 @@
     transition: all var(--transition-fast);
 }
 .schedule-cell.editing-mode .empty-cell {
-    min-height: 60px;
+    min-height: 80px;
     width: 100%;
     display: flex;
     align-items: center;
@@ -60,6 +60,7 @@
     position: relative;
     min-height: 60px;
     padding: 4px;
+    justify-content: center;
 
 }
 
@@ -132,27 +133,36 @@
 
 /* Add More Indicator */
 .schedule-cell .add-more-indicator {
-    padding-top: var(--space-1);
+    padding: var(--space-2);
     font-size: var(--text-xs);
     opacity: 0.7;
+    background: rgba(var(--bs-danger-rgb), 0.3);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    /*color: var(--bs-btn-hover-color);*/
+}
+.schedule-cell .add-more-indicator:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+
 }
 
 .schedule-cell .add-more-indicator i {
     font-size: var(--text-xs);
 }
 
+
 /* Cell State Colors */
-.schedule-cell.table-warning {
+.schedule-cell.empty-editing {
     background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
     box-shadow: 3px 3px 6px -7px rgba(0,0,0,0.68) inset;
-
 }
 
-.schedule-cell.table-info {
-    background-color: rgba(var(--bs-info-rgb), 0.1) !important;
+.schedule-cell.understaffed {
+    background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
 }
 
-.schedule-cell.table-success {
+.schedule-cell.full {
     background-color: rgba(var(--bs-success-rgb), 0.1) !important;
 }
 /* Add visual indicator for cells with pending changes */
@@ -244,7 +254,10 @@
 
 .draggable-employee.dragging {
     opacity: 0.5;
-    transform: scale(0.95);
+    /*transform: scale(0.95);*/
+    text-align: center;
+    max-width: 120px;
+
 }
 
 .schedule-cell.drag-over {
@@ -259,26 +272,26 @@
 }
 
 .dragging-active {
-    cursor: grabbing !important;
+
+
 }
 
 .draggable-employee.dragging {
-    opacity: 0.4;
-    cursor: grabbing !important;
+    opacity: 1;
+
 }
 
 /* Employee highlighting across all cells */
 .draggable-employee.employee-highlighted,
 .employee-item.employee-highlighted {
-    background-color: rgba(25, 135, 84, 0.2) !important;
-    box-shadow: 6px 0 6px -5px rgba(25, 135, 84, 0.2)!important;
-    transform: scale(1.02);
+    background-color: rgba(209, 248, 231, 0.97) !important;
+    box-shadow: var(--shadow-sm)!important;
+    transform: translateY(-1px);
     z-index: 10;
 }
 [data-theme="dark"] .draggable-employee.employee-highlighted,
 [data-theme="dark"] .employee-item.employee-highlighted {
-    background-color: rgba(12, 66, 41, 0.9) !important;
-    box-shadow: 6px 0 6px -5px rgba(25, 135, 84, 0.2)!important;
+    background-color: rgba(0, 69, 38, 0.97) !important;
 }
 @keyframes highlightPulse {
     0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }

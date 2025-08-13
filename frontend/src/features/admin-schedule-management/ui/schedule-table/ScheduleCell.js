@@ -15,7 +15,6 @@ const ScheduleCell = ({
                           pendingAssignments = [],
                           pendingRemovals = [],
                           isEditing = false,
-                          isUnderstaffed = false,
                           requiredEmployees = 1,
                           onAddPendingChange,
                           onCellClick,
@@ -54,6 +53,7 @@ const ScheduleCell = ({
     const totalEmployees = visibleEmployees.length + pendingAssignments.length;
     const isEmpty = totalEmployees === 0;
     const isFull = totalEmployees >= requiredEmployees;
+    const isUnderstaffed = totalEmployees < requiredEmployees    ;
 
     const hasPendingChanges = () => {
         return Object.values(pendingChanges).some(change =>
@@ -101,16 +101,16 @@ const ScheduleCell = ({
         }
     };
 
-    // Для ячейки с сотрудниками, добавляем класс has-employees:
+
     const getCellClasses = () => {
         const baseClasses = ['schedule-cell', 'text-center', 'position-relative'];
 
         if (className) baseClasses.push(className);
         if (isEditing) baseClasses.push('editing-mode');
         if (!isEmpty) baseClasses.push('has-employees');
-        if (isEmpty && isEditing) baseClasses.push('table-warning');
-        if (isUnderstaffed && !isEmpty) baseClasses.push('table-info');
-        if (isFull && !shiftColor) baseClasses.push('table-success');
+        if (isEmpty && isEditing) baseClasses.push('empty-editing');
+        if (isUnderstaffed && !isEmpty) baseClasses.push('understaffed');
+        if (isFull && !shiftColor) baseClasses.push('full');
         if (hasPendingChanges()) baseClasses.push('has-pending-change');
 
         return baseClasses.join(' ');
@@ -118,7 +118,7 @@ const ScheduleCell = ({
 
     const getCellStyle = () => {
         const styles = {};
-        if (shiftColor && !isEmpty) {
+        if (shiftColor) {
             styles.backgroundColor = `${shiftColor}`;
         }
         return styles;
@@ -235,7 +235,7 @@ const ScheduleCell = ({
                     const employeeData = {
                         empId: assignment.empId,
                         name: assignment.empName || 'New Employee',
-                        assignmentId: null, // У pending нет ID
+                        assignmentId: null,
                         isPending: true
                     };
 
@@ -297,8 +297,8 @@ const ScheduleCell = ({
 
                 {/* Add more employees indicator */}
                 {isEditing && totalEmployees < requiredEmployees && (
-                    <div className="add-more-indicator mb-1 bg-info-subtle rounded-1 align p-1">
-                        <small className="text-danger fw-bold ">
+                    <div className="add-more-indicator">
+                        <small className="fw-bold ">
                             <i className="bi bi-plus-circle me-1"></i>
                             {t('employee.needMoreEmployees', {count: (requiredEmployees - totalEmployees)})}
                         </small>

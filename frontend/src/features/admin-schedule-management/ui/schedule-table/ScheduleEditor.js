@@ -330,7 +330,6 @@ const ScheduleEditor = ({
                 pendingAssignments={pendingAssignments}
                 pendingRemovals={pendingRemovals}
                 isEditing={isEditing}
-                isUnderstaffed={isUnderstaffed}
                 requiredEmployees={getRequiredEmployeesForShift(shift.shift_id, dayIndex)}
                 onCellClick={onCellClick}
                 onEmployeeClick={onEmployeeClick}
