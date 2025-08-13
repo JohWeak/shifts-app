@@ -1,7 +1,6 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleCell.js
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import DraggableEmployee from './DraggableEmployee';
-import { useDragAndDrop } from '../../model/hooks/useDragAndDrop';
 import './ScheduleCell.css';
 
 
@@ -27,19 +26,11 @@ const ScheduleCell = ({
                           highlightedEmployeeId,
                           onEmployeeMouseEnter,
                           onEmployeeMouseLeave,
+                          dnd,
+                          onDrop,
                           ...props
                       }) => {
     const {t} = useI18n();
-    // Хуки для drag&drop и подсветки
-    const {
-        isDragging,
-        handleDragStart,
-        handleDragEnd,
-        handleDragOver,
-        handleDragEnter,
-        handleDragLeave,
-        handleDrop
-    } = useDragAndDrop(onAddPendingChange, isEditing);
 
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
@@ -157,18 +148,18 @@ const ScheduleCell = ({
             style={getCellStyle()}
             title={isEditing ? 'Click on employee name to replace, or click empty space to add' : ''}
             // Drag&drop handlers для всей ячейки
-            onDragOver={isEditing ? handleDragOver : undefined}
-            onDragEnter={isEditing ? handleDragEnter : undefined}
-            onDragLeave={isEditing ? handleDragLeave : undefined}
-            onDrop={isEditing ? (e) => {
-                // Определяем, куда именно дропаем
-                const isOnEmployee = e.target.closest('.draggable-employee');
-                const targetEmployee = isOnEmployee ?
-                    JSON.parse(isOnEmployee.dataset.employeeData || '{}') : null;
-
-                handleDrop(e, cellData, targetEmployee);
-            } : undefined}
-            {...props}
+            onDragOver={dnd.handleDragOver}
+            onDragEnter={dnd.handleDragEnterCell}
+            onDragLeave={dnd.handleDragLeaveCell}
+            onDrop={(e) => {
+                e.preventDefault();
+                // Определяем, был ли дроп на сотруднике или на ячейке
+                const dropTargetEmployeeEl = e.target.closest('.draggable-employee');
+                const targetEmployee = dropTargetEmployeeEl
+                    ? JSON.parse(dropTargetEmployeeEl.dataset.employeeData)
+                    : null;
+                onDrop(cellData, targetEmployee);
+            }}
         >
             <div className="employees-container">
                 {/* Visible Employees с drag&drop */}
@@ -188,12 +179,11 @@ const ScheduleCell = ({
                             employee={employeeData}
                             isEditMode={isEditing}
                             cellData={cellData}
-                            onDragStart={handleDragStart}
-                            onDragEnd={handleDragEnd}
+                            onDragStart={(e) => dnd.handleDragStart(e, employeeData, cellData)}
+                            onDragEnd={dnd.handleDragEnd}
                             onMouseEnter={() => onEmployeeMouseEnter(employee.emp_id)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === employee.emp_id}
-                            onDrop={(e) => handleDrop(e, cellData, employeeData)}
                             className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
                                 isEmployeeBeingReplaced(employee.emp_id) ? 'being-replaced' : ''
                             }`}
@@ -245,8 +235,8 @@ const ScheduleCell = ({
                             employee={employeeData}
                             isEditMode={isEditing}
                             cellData={cellData}
-                            onDragStart={handleDragStart}
-                            onDragEnd={handleDragEnd}
+                            onDragStart={(e) => dnd.handleDragStart(e, employeeData, cellData)}
+                            onDragEnd={dnd.handleDragEnd}
                             onMouseEnter={() => onEmployeeMouseEnter(assignment.empId)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === assignment.empId}

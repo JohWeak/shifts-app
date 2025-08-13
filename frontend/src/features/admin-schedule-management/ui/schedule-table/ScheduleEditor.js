@@ -18,6 +18,9 @@ import {formatEmployeeName as formatEmployeeNameUtil, canEditSchedule} from 'sha
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import { useEmployeeHighlight } from '../../model/hooks/useEmployeeHighlight';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
+import { useDragAndDrop } from '../../model/hooks/useDragAndDrop';
+import { useDispatch } from 'react-redux';
+import { addPendingChange } from '../../model/scheduleSlice';
 import './ScheduleEditor.css';
 
 const ScheduleEditor = ({
@@ -39,6 +42,8 @@ const ScheduleEditor = ({
     const {t} = useI18n();
     const {currentTheme} = useShiftColor();
     const isDark = isDarkTheme();
+    const dispatch = useDispatch();
+    const dnd = useDragAndDrop(isEditing);
     const {
         highlightedEmployeeId,
         handleMouseEnter,
@@ -190,6 +195,18 @@ const ScheduleEditor = ({
 
         return unique.size;
     }, [assignments, positionPendingChanges]);
+
+    const handleDrop = (targetCell, targetEmployee = null) => {
+        const changes = dnd.createChangesOnDrop(targetCell, targetEmployee);
+
+        if (changes.length > 0) {
+            const timestamp = Date.now();
+            changes.forEach((change, index) => {
+                const key = `${change.action}-${change.empId}-${timestamp}-${index}`;
+                dispatch(addPendingChange({ key, change }));
+            });
+        }
+    };
 
     // Получаем требования для конкретной смены
     const getRequiredEmployeesForShift = (shiftId, dayIndex) => {
@@ -343,6 +360,8 @@ const ScheduleEditor = ({
                 highlightedEmployeeId={highlightedEmployeeId}
                 onEmployeeMouseEnter={handleMouseEnter}
                 onEmployeeMouseLeave={handleMouseLeave}
+                dnd={dnd}
+                onDrop={handleDrop}
             />
         );
     };
