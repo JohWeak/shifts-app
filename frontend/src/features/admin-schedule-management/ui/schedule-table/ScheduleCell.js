@@ -2,7 +2,6 @@
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import DraggableEmployee from './DraggableEmployee';
 import { useDragAndDrop } from '../../model/hooks/useDragAndDrop';
-import { useEmployeeHighlight } from '../../model/hooks/useEmployeeHighlight';
 import './ScheduleCell.css';
 
 
@@ -25,6 +24,9 @@ const ScheduleCell = ({
                           className = '',
                           formatEmployeeName = null,
                           shiftColor = null,
+                          highlightedEmployeeId,
+                          onEmployeeMouseEnter,
+                          onEmployeeMouseLeave,
                           ...props
                       }) => {
     const {t} = useI18n();
@@ -38,13 +40,6 @@ const ScheduleCell = ({
         handleDragLeave,
         handleDrop
     } = useDragAndDrop(onAddPendingChange, isEditing);
-
-    const {
-        highlightedEmployeeId,
-        handleMouseEnter,
-        handleMouseLeave
-    } = useEmployeeHighlight();
-
 
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
@@ -195,8 +190,8 @@ const ScheduleCell = ({
                             cellData={cellData}
                             onDragStart={handleDragStart}
                             onDragEnd={handleDragEnd}
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
+                            onMouseEnter={() => onEmployeeMouseEnter(employee.emp_id)}
+                            onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === employee.emp_id}
                             onDrop={(e) => handleDrop(e, cellData, employeeData)}
                             className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
@@ -230,7 +225,7 @@ const ScheduleCell = ({
                     );
                 })}
 
-                {/* Pending Assignments с подсветкой (но без drag, так как они еще не сохранены) */}
+                {/* Pending Assignments  */}
                 {pendingAssignments.map((assignment, index) => {
                     const employeeData = {
                         empId: assignment.empId,
@@ -252,8 +247,8 @@ const ScheduleCell = ({
                             cellData={cellData}
                             onDragStart={handleDragStart}
                             onDragEnd={handleDragEnd}
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
+                            onMouseEnter={() => onEmployeeMouseEnter(assignment.empId)}
+                            onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === assignment.empId}
                             className="employee-item mb-1 d-flex align-items-center justify-content-between pending-assignment"
                             renderContent={() => (

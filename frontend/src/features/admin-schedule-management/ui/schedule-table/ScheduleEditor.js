@@ -16,7 +16,7 @@ import {getContrastTextColor, isDarkTheme} from 'shared/lib/utils/colorUtils';
 import {useSelector} from "react-redux";
 import {formatEmployeeName as formatEmployeeNameUtil, canEditSchedule} from 'shared/lib/utils/scheduleUtils';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-
+import { useEmployeeHighlight } from '../../model/hooks/useEmployeeHighlight';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import './ScheduleEditor.css';
 
@@ -39,6 +39,11 @@ const ScheduleEditor = ({
     const {t} = useI18n();
     const {currentTheme} = useShiftColor();
     const isDark = isDarkTheme();
+    const {
+        highlightedEmployeeId,
+        handleMouseEnter,
+        handleMouseLeave
+    } = useEmployeeHighlight();
     const {systemSettings} = useSelector(state => state.settings);
     const canEdit = canEditSchedule(schedule);
     const isPublished = schedule?.status === 'published';
@@ -315,10 +320,6 @@ const ScheduleEditor = ({
             change.shiftId === shift.shift_id
         );
 
-        const currentEmployees = cellEmployees.length - pendingRemovals.length;
-        const totalEmployees = currentEmployees + pendingAssignments.length;
-        const isUnderstaffed = totalEmployees < getRequiredEmployeesForShift(shift.shift_id);
-
         return (
             <ScheduleCell
                 key={`${shift.shift_id}-${dayIndex}`}
@@ -339,6 +340,9 @@ const ScheduleEditor = ({
                 pendingChanges={pendingChanges}
                 formatEmployeeName={formatEmployeeName}
                 shiftColor={shift.color}
+                highlightedEmployeeId={highlightedEmployeeId}
+                onEmployeeMouseEnter={handleMouseEnter}
+                onEmployeeMouseLeave={handleMouseLeave}
             />
         );
     };

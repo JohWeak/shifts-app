@@ -21,7 +21,7 @@ const DraggableEmployee = ({
             draggable={isEditMode}
             onDragStart={(e) => isEditMode && onDragStart && onDragStart(e, employee, cellData)}
             onDragEnd={(e) => isEditMode && onDragEnd && onDragEnd(e)}
-            onMouseEnter={() => onMouseEnter && onMouseEnter(employee.empId)}
+            onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             onDragOver={(e) => {
                 if (isEditMode) {
