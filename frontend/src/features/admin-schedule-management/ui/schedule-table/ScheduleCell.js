@@ -1,7 +1,10 @@
 // frontend/src/features/admin-schedule-management/ui/schedule-table/ScheduleCell.js
-import React, {useEffect, useState} from 'react';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import DraggableEmployee from './DraggableEmployee';
+import { useDragAndDrop } from '../../model/hooks/useDragAndDrop';
+import { useEmployeeHighlight } from '../../model/hooks/useEmployeeHighlight';
 import './ScheduleCell.css';
+
 
 const ScheduleCell = ({
                           date,
@@ -14,6 +17,7 @@ const ScheduleCell = ({
                           isEditing = false,
                           isUnderstaffed = false,
                           requiredEmployees = 1,
+                          onAddPendingChange,
                           onCellClick,
                           onEmployeeClick,
                           onRemoveEmployee,
@@ -25,6 +29,24 @@ const ScheduleCell = ({
                           ...props
                       }) => {
     const {t} = useI18n();
+    // Хуки для drag&drop и подсветки
+    const {
+        isDragging,
+        handleDragStart,
+        handleDragEnd,
+        handleDragOver,
+        handleDragEnter,
+        handleDragLeave,
+        handleDrop
+    } = useDragAndDrop(onAddPendingChange, isEditing);
+
+    const {
+        highlightedEmployeeId,
+        handleMouseEnter,
+        handleMouseLeave
+    } = useEmployeeHighlight();
+
+
     const visibleEmployees = employees.filter(emp =>
         !pendingRemovals.some(removal => removal.empId === emp.emp_id)
     );
@@ -59,7 +81,9 @@ const ScheduleCell = ({
     };
 
     const handleCellClick = (e) => {
-        if (e.target.closest('.remove-btn') || e.target.closest('.employee-clickable')) {
+        if (e.target.closest('.remove-btn') ||
+            e.target.closest('.employee-clickable') ||
+            e.target.closest('.draggable-employee')) {
             return;
         }
 
@@ -87,7 +111,6 @@ const ScheduleCell = ({
         if (isEmpty && isEditing) baseClasses.push('table-warning');
         if (isUnderstaffed && !isEmpty) baseClasses.push('table-info');
         if (isFull && !shiftColor) baseClasses.push('table-success');
-
         if (hasPendingChanges()) baseClasses.push('has-pending-change');
 
         return baseClasses.join(' ');
@@ -95,12 +118,17 @@ const ScheduleCell = ({
 
     const getCellStyle = () => {
         const styles = {};
-
         if (shiftColor && !isEmpty) {
             styles.backgroundColor = `${shiftColor}`;
         }
-
         return styles;
+    };
+
+    // Данные ячейки для drag&drop
+    const cellData = {
+        date,
+        shiftId,
+        positionId
     };
 
     // if (isEmpty) {
@@ -133,93 +161,140 @@ const ScheduleCell = ({
             onClick={handleCellClick}
             style={getCellStyle()}
             title={isEditing ? 'Click on employee name to replace, or click empty space to add' : ''}
+            // Drag&drop handlers для всей ячейки
+            onDragOver={isEditing ? handleDragOver : undefined}
+            onDragEnter={isEditing ? handleDragEnter : undefined}
+            onDragLeave={isEditing ? handleDragLeave : undefined}
+            onDrop={isEditing ? (e) => {
+                // Определяем, куда именно дропаем
+                const isOnEmployee = e.target.closest('.draggable-employee');
+                const targetEmployee = isOnEmployee ?
+                    JSON.parse(isOnEmployee.dataset.employeeData || '{}') : null;
+
+                handleDrop(e, cellData, targetEmployee);
+            } : undefined}
             {...props}
         >
             <div className="employees-container">
-                {/* Visible Employees  */}
-                {visibleEmployees.map((employee) => (
-                    <div
-                        key={`visible-${employee.emp_id}`}
-                        className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
-                            isEmployeeBeingReplaced(employee.emp_id) ? 'being-replaced' : ''
-                        }`}
-                        style={{fontSize: '0.8em'}}
-                    >
-        <span
-            className={`employee-name employee-clickable ${isEditing ? 'employee-editable' : ''}`}
-            onClick={(e) => handleEmployeeNameClick(e, employee.emp_id)}
-            style={{
-                cursor: isEditing ? 'pointer' : 'default',
-            }}
-            title={isEditing ? 'Click to replace this employee' : ''}
-        >
-            {formatEmployeeName
-                ? formatEmployeeName(employee)
-                : `${employee.first_name} ${employee.last_name}`}
-        </span>
+                {/* Visible Employees с drag&drop */}
+                {visibleEmployees.map((employee) => {
+                    const employeeData = {
+                        empId: employee.emp_id,
+                        name: formatEmployeeName
+                            ? formatEmployeeName(employee)
+                            : `${employee.first_name} ${employee.last_name}`,
+                        assignmentId: employee.assignment_id,
+                        isPending: false
+                    };
 
-                        {isEditing && (
-                            <button
-                                type="button"
-                                className="remove-btn btn btn-sm btn-danger"
-                                onClick={(e) => handleRemoveClick(e, employee.emp_id, employee.assignment_id)} // Передаём assignment_id
-                                title="Remove employee"
-                            >
-                                <i className="bi bi-x icon-x"></i>
-                            </button>
-                        )}
-                    </div>
-                ))}
+                    return (
+                        <DraggableEmployee
+                            key={`visible-${employee.emp_id}`}
+                            employee={employeeData}
+                            isEditMode={isEditing}
+                            cellData={cellData}
+                            onDragStart={handleDragStart}
+                            onDragEnd={handleDragEnd}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                            isHighlighted={highlightedEmployeeId === employee.emp_id}
+                            onDrop={(e) => handleDrop(e, cellData, employeeData)}
+                            className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
+                                isEmployeeBeingReplaced(employee.emp_id) ? 'being-replaced' : ''
+                            }`}
+                            renderContent={() => (
+                                <>
+                                    <span
+                                        className={`employee-name employee-clickable ${isEditing ? 'employee-editable' : ''}`}
+                                        onClick={(e) => handleEmployeeNameClick(e, employee.emp_id)}
+                                        style={{
+                                            cursor: isEditing ? 'pointer' : 'default',
+                                        }}
+                                        title={isEditing ? 'Click to replace this employee' : ''}
+                                    >
+                                        {employeeData.name}
+                                    </span>
+                                    {isEditing && (
+                                        <button
+                                            type="button"
+                                            className="remove-btn btn btn-sm btn-danger"
+                                            onClick={(e) => handleRemoveClick(e, employee.emp_id, employee.assignment_id)}
+                                            title="Remove employee"
+                                        >
+                                            <i className="bi bi-x icon-x"></i>
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        />
+                    );
+                })}
 
-                {/* Pending Assignments (новые работники) */}
+                {/* Pending Assignments с подсветкой (но без drag, так как они еще не сохранены) */}
                 {pendingAssignments.map((assignment, index) => {
-                    // Создаем объект сотрудника для formatEmployeeName
+                    const employeeData = {
+                        empId: assignment.empId,
+                        name: assignment.empName || 'New Employee',
+                        assignmentId: null, // У pending нет ID
+                        isPending: true
+                    };
+
                     const employeeForFormat = {
                         first_name: assignment.empName?.split(' ')[0] || '',
                         last_name: assignment.empName?.split(' ').slice(1).join(' ') || ''
                     };
 
                     return (
-                        <div
+                        <DraggableEmployee
                             key={`pending-${assignment.empId}-${index}`}
+                            employee={employeeData}
+                            isEditMode={isEditing}
+                            cellData={cellData}
+                            onDragStart={handleDragStart}
+                            onDragEnd={handleDragEnd}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                            isHighlighted={highlightedEmployeeId === assignment.empId}
                             className="employee-item mb-1 d-flex align-items-center justify-content-between pending-assignment"
-                            style={{fontSize: '0.8em'}}
-                        >
-                        <span className="employee-name text-success">
-                            {formatEmployeeName
-                                ? formatEmployeeName(employeeForFormat)
-                                : assignment.empName || 'New Employee'}
-                        </span>
-                            <div className="d-flex align-items-center">
-                                {isEditing && onRemovePendingChange && (
-                                    <button
-                                        type="button"
-                                        className="remove-btn btn btn-sm btn-outline-danger"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            const changeKey = Object.keys(pendingChanges).find(key => {
-                                                const change = pendingChanges[key];
-                                                return change.action === 'assign' &&
-                                                    change.empId === assignment.empId &&
-                                                    change.positionId === positionId &&
-                                                    change.date === date &&
-                                                    change.shiftId === shiftId;
-                                            });
-                                            if (changeKey) {
-                                                onRemovePendingChange(changeKey);
-                                            }
-                                        }}
-                                        title="Cancel assignment"
-
-                                    >
-                                        <i className="bi bi-x icon-x"></i>
-                                    </button>
-                                )}
-                            </div>
-                        </div>
+                            renderContent={() => (
+                                <>
+                                    <span className="employee-name text-success">
+                                        {formatEmployeeName
+                                            ? formatEmployeeName(employeeForFormat)
+                                            : assignment.empName || 'New Employee'}
+                                    </span>
+                                    <div className="d-flex align-items-center">
+                                        {isEditing && onRemovePendingChange && (
+                                            <button
+                                                type="button"
+                                                className="remove-btn btn btn-sm btn-outline-danger"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    const changeKey = Object.keys(pendingChanges).find(key => {
+                                                        const change = pendingChanges[key];
+                                                        return change.action === 'assign' &&
+                                                            change.empId === assignment.empId &&
+                                                            change.positionId === positionId &&
+                                                            change.date === date &&
+                                                            change.shiftId === shiftId;
+                                                    });
+                                                    if (changeKey) {
+                                                        onRemovePendingChange(changeKey);
+                                                    }
+                                                }}
+                                                title="Cancel assignment"
+                                            >
+                                                <i className="bi bi-x icon-x"></i>
+                                            </button>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        />
                     );
                 })}
+
                 {/* Add more employees indicator */}
                 {isEditing && totalEmployees < requiredEmployees && (
                     <div className="add-more-indicator mb-1 bg-info-subtle rounded-1 align p-1">
@@ -229,6 +304,19 @@ const ScheduleCell = ({
                         </small>
                     </div>
                 )}
+
+                {/* Empty cell content if no employees */}
+                {/*{isEmpty && (*/}
+                {/*    <div className="empty-cell">*/}
+                {/*        {isEditing ? (*/}
+                {/*            <div className="text-muted">*/}
+                {/*                <i className="bi bi-plus-circle fs-7"></i>*/}
+                {/*            </div>*/}
+                {/*        ) : (*/}
+                {/*            <span className="text-muted">-</span>*/}
+                {/*        )}*/}
+                {/*    </div>*/}
+                {/*)}*/}
             </div>
         </td>
     );
