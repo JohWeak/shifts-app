@@ -115,7 +115,7 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
                     </div>
                 </Form>
                 {/* --- Кнопки вынесены из Form для лучшего контроля --- */}
-                <div className="d-flex justify-content-end gap-2 mt-3 generate-buttons">
+                <div className="d-flex generate-buttons">
                     <Button variant="outline-secondary" onClick={onCancel} disabled={generating}>{t('common.cancel')}</Button>
                     <Button onClick={handleSubmit} variant="primary" disabled={generating || !isFormValid}>
                         {generating ? <><Spinner size="sm" className="me-2" />{t('modal.generateSchedule.generating')}</> : t('modal.generateSchedule.generate')}

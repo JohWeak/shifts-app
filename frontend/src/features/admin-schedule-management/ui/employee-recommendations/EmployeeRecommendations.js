@@ -26,7 +26,7 @@ const EmployeeRecommendations = ({
 
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState(() =>
-        localStorage.getItem('recommendationActiveTab') || 'available'
+        localStorage.getItem('available') || 'available'
     );
 
 

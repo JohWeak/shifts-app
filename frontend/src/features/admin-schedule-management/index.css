@@ -11,44 +11,51 @@
     border-radius: var(--radius-lg);
 }
 
-.generate-schedule-form-container .form-calendar-section {
-    margin-top: 2rem;
-}
 
 .generate-schedule-form-container.visible {
     max-height: 800px;
     margin-bottom: 1rem;
 }
 
-.generate-schedule-form-card {
+.generate-schedule-form-container .generate-schedule-form-card {
     background-color: var(--bs-gray-50) !important;
     border-color: transparent !important;
     box-shadow: var(--bs-box-shadow-sm);
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
+    padding: var(--space-3);
+
 }
 
 [data-theme="dark"] .generate-schedule-form-card {
     background-color: var(--bs-gray-900) !important;
 }
-
+.generate-schedule-form-card .generate-buttons{
+    justify-content: space-around;
+    gap: var(--space-5);
+    margin-top: var(--space-3);
+}
 .generate-schedule-form-card .generate-buttons button {
-    min-width: 120px;
+    width: 152px;
     padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
 }
 
 .generate-form-layout {
     display: flex;
-    flex-wrap: wrap; /* Для мобильных устройств */
-    gap: 2rem;
+    flex-wrap: wrap;
     align-items: flex-start;
-    max-width: 800px;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.generate-schedule-form-container .form-calendar-section {
+    margin-top: 2rem;
 }
 
 .form-settings-section {
-    flex:1;
-    min-width: 280px; /* Минимальная ширина, чтобы не сжималось слишком сильно */
+    flex:0.5;
+    min-width: 312px; /* Минимальная ширина, чтобы не сжималось слишком сильно */
 }
 
 .form-calendar-section {
@@ -86,13 +93,20 @@
 }
 
 /* Адаптивность */
-@media (max-width: 768px) {
+@media (max-width: 827px) {
     .generate-form-layout {
         flex-direction: column;
+        gap: 0;
     }
 
     .form-calendar-section {
-        align-self: center;
+        width: 100%;
+    }
+    .form-settings-section {
+        width: 100%;
+    }
+    .generate-schedule-form-card .generate-buttons button {
+        width: 50%
     }
 }
 
