@@ -123,25 +123,24 @@ const ScheduleCell = ({
             className={getCellClasses()}
             onClick={handleCellClick}
             style={getCellStyle()}
-            title={isEditing ? 'Click on employee name to replace, or click empty space to add' : ''}
+            title={isEditing ? 'Click on employee name to replace, or Drag employees to move them between shifts' : ''}
             // Drag&drop handlers для всей ячейки
-            onDragOver={dnd.handleDragOver}
+            onDragOver={(e) => dnd.handleDragOver(e, cellData)}
+            onDragEnter={(e) => {
+                e.currentTarget.classList.add('drag-over');
+            }}
             onDragLeave={dnd.handleDragLeave}
             onDrop={(e) => {
                 e.preventDefault();
-                e.currentTarget.classList.remove('drag-over');
-
-                // Проверим что cellData существует
-                if (!cellData || !cellData.date) {
-                    console.error('Invalid cellData on drop:', cellData);
-                    return;
-                }
+                // Убираем все классы drag
+                e.currentTarget.classList.remove('drag-over', 'has-duplicate');
+                document.querySelectorAll('.is-duplicate').forEach(el =>
+                    el.classList.remove('is-duplicate')
+                );
 
                 const dropTargetEl = e.target.closest('.draggable-employee');
                 const targetEmployeeData = dropTargetEl ?
-                    JSON.parse(dropTargetEl.dataset.employeeData || '{}') : null;
-
-                console.log('Calling onDrop with:', { cellData, targetEmployeeData });
+                    JSON.parse(dropTargetEl.dataset.employeeData) : null;
                 onDrop(cellData, targetEmployeeData);
             }}
         >

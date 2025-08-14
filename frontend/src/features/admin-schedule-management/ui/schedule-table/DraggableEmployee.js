@@ -11,6 +11,7 @@ const DraggableEmployee = ({
                                onMouseLeave,
                                isHighlighted,
                                isDragOver,
+                               cellData,
                                className = '',
                                renderContent
                            }) => {
@@ -20,11 +21,27 @@ const DraggableEmployee = ({
             data-employee-id={employee.empId}
             data-employee-data={JSON.stringify(employee)}
             draggable={isEditMode}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onMouseEnter={onMouseEnter}
+            onDragStart={(e) => isEditMode && onDragStart && onDragStart(e, employee, cellData)}
+            onDragEnd={(e) => isEditMode && onDragEnd && onDragEnd(e)}
+            onMouseEnter={() => onMouseEnter && onMouseEnter(employee.empId)}
             onMouseLeave={onMouseLeave}
-
+            onDragEnter={(e) => {
+                if (isEditMode) {
+                    e.stopPropagation();
+                    e.currentTarget.classList.add('drag-over');
+                }
+            }}
+            onDragOver={(e) => {
+                if (isEditMode) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }}
+            onDragLeave={(e) => {
+                if (isEditMode) {
+                    e.currentTarget.classList.remove('drag-over', 'is-duplicate');
+                }
+            }}
         >
             {renderContent ? renderContent() : (
                 <span className="employee-name">

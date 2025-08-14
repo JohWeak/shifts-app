@@ -242,18 +242,6 @@
     position: relative;
     transition: all var(--transition-base);
 }
-.schedule-cell.drag-over.has-duplicate {
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    border: 2px solid #dc3545 !important;
-    cursor: not-allowed;
-}
-
-.draggable-employee.drag-over.is-duplicate {
-    outline: 2px dashed #dc3545 !important;
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    cursor: not-allowed;
-}
-
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

@@ -9,15 +9,13 @@
 }
 .draggable-employee.dragging {
     opacity: 0.5;
-    transform: scale(0.95);
-    cursor: grab!important;
+    cursor: grabbing !important;
 }
 
 .schedule-cell.drag-over {
     background-color: rgba(13, 110, 253, 0.15) !important;
     backdrop-filter: blur(10px);
     box-shadow: inset 0 0 10px rgba(13, 110, 253, 0.2);
-
 }
 
 .draggable-employee.drag-over {
@@ -44,16 +42,46 @@
 
 .schedule-cell.drag-over.has-duplicate {
     background-color: rgba(220, 53, 69, 0.15) !important;
-    border: 2px solid #dc3545 !important;
     cursor: not-allowed;
 }
+.schedule-cell.drag-over.has-duplicate::before {
+    content: '⚠';
+    position: absolute;
+    top: 0;
+    left: 2px;
+    color: #dc3545;
+    font-size: 1rem;
+    z-index: 100;
+}
 
-.draggable-employee.drag-over.is-duplicate {
+.draggable-employee.is-duplicate {
     outline: 2px dashed #dc3545 !important;
+    outline-offset: 2px !important;
     background-color: rgba(220, 53, 69, 0.15) !important;
     cursor: not-allowed;
+    position: relative;
 }
 
+.draggable-employee.is-duplicate::before {
+    content: '✕';
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #dc3545;
+    color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    z-index: 100;
+}
+/*.draggable-employee[data-employee-id].employee-highlighted {*/
+/*    background-color: rgba(25, 135, 84, 0.2) !important;*/
+/*    box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.4);*/
+/*}*/
 @keyframes highlightPulse {
     0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
     50% { box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2); }
