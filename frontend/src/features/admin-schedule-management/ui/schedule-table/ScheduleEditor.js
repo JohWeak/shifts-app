@@ -20,8 +20,9 @@ import { useEmployeeHighlight } from '../../model/hooks/useEmployeeHighlight';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import { useDragAndDrop } from '../../model/hooks/useDragAndDrop';
 import { useDispatch } from 'react-redux';
-import { addPendingChange } from '../../model/scheduleSlice';
+import { addPendingChange, removePendingChange } from '../../model/scheduleSlice';
 import './ScheduleEditor.css';
+import {addNotification} from "../../../../app/model/notificationsSlice";
 
 const ScheduleEditor = ({
                             position,
@@ -43,7 +44,6 @@ const ScheduleEditor = ({
     const {currentTheme} = useShiftColor();
     const isDark = isDarkTheme();
     const dispatch = useDispatch();
-    const dnd = useDragAndDrop(isEditing);
     const {
         highlightedEmployeeId,
         handleMouseEnter,
@@ -196,16 +196,36 @@ const ScheduleEditor = ({
         return unique.size;
     }, [assignments, positionPendingChanges]);
 
+    const dnd = useDragAndDrop(isEditing, pendingChanges, assignments);
     const handleDrop = (targetCell, targetEmployee = null) => {
-        const changes = dnd.createChangesOnDrop(targetCell, targetEmployee);
 
-        if (changes.length > 0) {
-            const timestamp = Date.now();
-            changes.forEach((change, index) => {
-                const key = `${change.action}-${change.empId}-${timestamp}-${index}`;
-                dispatch(addPendingChange({ key, change }));
-            });
+        console.log('handleDrop called:', { targetCell, targetEmployee });
+        const changesToApply = dnd.createChangesOnDrop(targetCell, targetEmployee);
+        console.log('Changes to apply:', changesToApply);
+        // Проверяем на ошибки
+        const hasError = changesToApply.some(item => item.action === 'error');
+
+        if (hasError) {
+            // Показываем уведомление об ошибке
+            const errorItem = changesToApply.find(item => item.action === 'error');
+            console.error('Drop cancelled:', errorItem.message)
+            dispatch(addNotification({
+                type: 'warning',
+                message: errorItem.message || 'Cannot complete this operation'
+            }));
+            return;
         }
+
+        // Если нет ошибок - применяем изменения
+        changesToApply.forEach(item => {
+            console.log('Applying change:', item);
+            if (item.action === 'removePending') {
+                dispatch(removePendingChange(item.pendingKey));
+            }
+            else if (item.change) {
+                dispatch(addPendingChange(item));
+            }
+        });
     };
 
     // Получаем требования для конкретной смены
@@ -357,11 +377,11 @@ const ScheduleEditor = ({
                 pendingChanges={pendingChanges}
                 formatEmployeeName={formatEmployeeName}
                 shiftColor={shift.color}
+                dnd={dnd}
+                onDrop={handleDrop}
                 highlightedEmployeeId={highlightedEmployeeId}
                 onEmployeeMouseEnter={handleMouseEnter}
                 onEmployeeMouseLeave={handleMouseLeave}
-                dnd={dnd}
-                onDrop={handleDrop}
             />
         );
     };

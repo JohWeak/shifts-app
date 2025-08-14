@@ -112,35 +112,12 @@ const ScheduleCell = ({
 
     // Данные ячейки для drag&drop
     const cellData = {
-        date,
-        shiftId,
-        positionId
+        date: date,
+        shiftId: shiftId,
+        positionId: positionId
     };
 
-    // if (isEmpty) {
-    //     return (
-    //         <td
-    //             className={getCellClasses()}
-    //             onClick={handleCellClick}
-    //             style={shiftColor && isEditing ? {borderLeft: `4px solid ${shiftColor}`} : {}}
-    //             title={isEditing ? t('employee.clickToAssign') : ''}
-    //             {...props}
-    //         >
-    //             <div className="empty-cell">
-    //                 {isEditing ? (
-    //                     <div className="text-muted">
-    //                         <i className="bi bi-plus-circle fs-7"></i>
-    //                     </div>
-    //                 ) : (
-    //                     <span className="text-muted">-</span>
-    //                 )}
-    //             </div>
-    //         </td>
-    //     );
-    // }
-
-
-    // Render cell with employees
+    // Render cell
     return (
         <td
             className={getCellClasses()}
@@ -149,16 +126,23 @@ const ScheduleCell = ({
             title={isEditing ? 'Click on employee name to replace, or click empty space to add' : ''}
             // Drag&drop handlers для всей ячейки
             onDragOver={dnd.handleDragOver}
-            onDragEnter={dnd.handleDragEnterCell}
-            onDragLeave={dnd.handleDragLeaveCell}
+            onDragLeave={dnd.handleDragLeave}
             onDrop={(e) => {
                 e.preventDefault();
-                // Определяем, был ли дроп на сотруднике или на ячейке
-                const dropTargetEmployeeEl = e.target.closest('.draggable-employee');
-                const targetEmployee = dropTargetEmployeeEl
-                    ? JSON.parse(dropTargetEmployeeEl.dataset.employeeData)
-                    : null;
-                onDrop(cellData, targetEmployee);
+                e.currentTarget.classList.remove('drag-over');
+
+                // Проверим что cellData существует
+                if (!cellData || !cellData.date) {
+                    console.error('Invalid cellData on drop:', cellData);
+                    return;
+                }
+
+                const dropTargetEl = e.target.closest('.draggable-employee');
+                const targetEmployeeData = dropTargetEl ?
+                    JSON.parse(dropTargetEl.dataset.employeeData || '{}') : null;
+
+                console.log('Calling onDrop with:', { cellData, targetEmployeeData });
+                onDrop(cellData, targetEmployeeData);
             }}
         >
             <div className="employees-container">
@@ -181,6 +165,7 @@ const ScheduleCell = ({
                             cellData={cellData}
                             onDragStart={(e) => dnd.handleDragStart(e, employeeData, cellData)}
                             onDragEnd={dnd.handleDragEnd}
+                            isDragOver={dnd.dragOverEmployeeId === employee.emp_id}
                             onMouseEnter={() => onEmployeeMouseEnter(employee.emp_id)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === employee.emp_id}
@@ -217,11 +202,21 @@ const ScheduleCell = ({
 
                 {/* Pending Assignments  */}
                 {pendingAssignments.map((assignment, index) => {
+                    const changeKey = Object.keys(pendingChanges).find(key => {
+                        const change = pendingChanges[key];
+                        return change.action === 'assign' &&
+                            change.empId === assignment.empId &&
+                            change.positionId === positionId &&
+                            change.date === date &&
+                            change.shiftId === shiftId;
+                    });
+
                     const employeeData = {
                         empId: assignment.empId,
                         name: assignment.empName || 'New Employee',
                         assignmentId: null,
-                        isPending: true
+                        isPending: true,
+                        pendingKey: changeKey
                     };
 
                     const employeeForFormat = {
@@ -237,6 +232,7 @@ const ScheduleCell = ({
                             cellData={cellData}
                             onDragStart={(e) => dnd.handleDragStart(e, employeeData, cellData)}
                             onDragEnd={dnd.handleDragEnd}
+                            isDragOver={dnd.dragOverEmployeeId === assignment.emp_id}
                             onMouseEnter={() => onEmployeeMouseEnter(assignment.empId)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === assignment.empId}
