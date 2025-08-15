@@ -17,7 +17,7 @@
 
 
 /* ==========================================================
-    ЧАСТЬ 2: СТИЛИ ДЛЯ POPOVER'А (контейнера) - ИСПРАВЛЕНАЯ ВЕРСИЯ
+    ЧАСТЬ 2: СТИЛИ ДЛЯ POPOVER'А (контейнера)
    ========================================================== */
 
 .custom-day-picker-wrapper {
@@ -38,7 +38,7 @@
 
 
 /* ==========================================================
-    ЧАСТЬ 3: СТИЛИ ДЛЯ DAYPICKER (внутри нашего Popover)
+    ЧАСТЬ 3: СТИЛИ ДЛЯ DAYPICKER (внутри Popover)
    ========================================================== */
 /*
    Теперь все селекторы для DayPicker тоже будут начинаться с .custom-day-picker-wrapper,
@@ -88,7 +88,7 @@
 }
 
 .custom-datepicker-inline .rdp {
-    /*margin: 0; */
+    margin: 0;
 }
 /* --- Стили для заголовка и навигации --- */
 
@@ -114,7 +114,13 @@
     border-radius: var(--radius-base) !important;
     display: flex;
     align-items: center;
-    justify-content: center;
+    /*justify-content: center;*/
+}
+.custom-day-picker-wrapper .rdp-button_previous{
+    justify-content: start;
+}
+.custom-day-picker-wrapper .rdp-button_next {
+    justify-content: end;
 }
 .custom-day-picker-wrapper .rdp-button_previous:hover,
 .custom-day-picker-wrapper .rdp-button_next:hover {
@@ -129,7 +135,7 @@
     transform: rotate(180deg);
 }
 .custom-day-picker-wrapper .rdp-month_caption{
-    padding: 1rem 0.5rem;
+    padding: 0.5rem;
 }
 .custom-day-picker-wrapper .rdp-weekday{
     text-align: center;
