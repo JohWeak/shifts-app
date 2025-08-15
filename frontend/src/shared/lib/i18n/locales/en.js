@@ -60,6 +60,21 @@ export const en = {
                     noEmployees: 'No employees in this category'
                 }
             },
+            confirmApprove: 'Confirm Approve',
+            confirmApproveMessage: 'Are you sure you want to approve this request?',
+            confirmReject: 'Confirm Reject',
+            confirmRejectMessage: 'Are you sure you want to reject this request?',
+            reviewError: 'Failed to review request',
+            approvedSuccess: 'Request approved successfully',
+            rejectedSuccess: 'Request rejected successfully',
+            review: 'Review',
+            reviewSuccess: 'Request reviewed successfully',
+            reviewPending: 'Review Pending',
+            reviewPendingMessage: 'This request is pending review',
+            reviewApproved: 'Review Approved',
+            reviewRejected: 'Review Rejected',
+            reviewApprovedMessage: 'This request has been approved',
+            reviewRejectedMessage: 'This request has been rejected',
 
         }
     },

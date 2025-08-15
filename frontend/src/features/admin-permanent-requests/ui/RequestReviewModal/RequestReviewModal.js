@@ -1,21 +1,21 @@
 // frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.js
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { reviewRequest } from '../../model/adminRequestsSlice';
-import { addNotification } from 'app/model/notificationsSlice';
-import { positionAPI } from 'shared/api/apiService';
+import React, {useState, useEffect} from 'react';
+import {Modal, Button, Form, Alert, Spinner} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {reviewRequest} from '../../model/adminRequestsSlice';
+import {addNotification} from 'app/model/notificationsSlice';
+import {positionAPI} from 'shared/api/apiService';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
-import { groupConstraintsByDay, getDayIndex } from 'shared/lib/utils/constraintUtils';
+import {formatDateTime, getDayName} from 'shared/lib/utils/scheduleUtils';
+import {groupConstraintsByDay, getDayIndex} from 'shared/lib/utils/constraintUtils';
 import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
 import {useMediaQuery} from "shared/hooks/useMediaQuery";
 import './RequestReviewModal.css';
 
-const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
-    const { t, locale } = useI18n();
+const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
+    const {t, locale} = useI18n();
     const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(false);
@@ -152,7 +152,7 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
             </Modal.Header>
             <Modal.Body>
                 {loadingShifts ? (
-                    <LoadingState />
+                    <LoadingState/>
                 ) : (
                     <>
                         {/* Employee Information */}
@@ -169,23 +169,27 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                                     </span>
                                 </div>
                                 <div className="info-item">
-                                    <span className="info-label">{t('admin.requests.position')}:</span>
-                                    <span className="info-value">
-                                        {request.employee?.defaultPosition?.pos_name || '-'}
-                                    </span>
-                                </div>
-                                <div className="info-item">
-                                    <span className="info-label">{t('admin.requests.worksite')}:</span>
-                                    <span className="info-value">
-                                        {request.employee?.workSite?.site_name || '-'}
-                                    </span>
-                                </div>
-                                <div className="info-item">
                                     <span className="info-label">{t('admin.requests.sentAt')}:</span>
                                     <span className="info-value">
                                         {formatDateTime(request.requested_at, locale)}
                                     </span>
                                 </div>
+                                {request.employee?.workSite && (
+                                    <div className="info-item">
+                                        <span className="info-label">{t('admin.requests.worksite')}:</span>
+                                        <span className="info-value">
+                                        {request.employee?.workSite?.site_name || '-'}
+                                    </span>
+                                    </div>
+                                )}
+                                {request.employee?.defaultPosition && (
+                                    <div className="info-item">
+                                        <span className="info-label">{t('admin.requests.position')}:</span>
+                                        <span className="info-value">
+                                            {request.employee?.defaultPosition?.pos_name || '-'}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -280,27 +284,32 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                     </>
                 )}
             </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={onHide} disabled={loading}>
+            <Modal.Footer className="justify-content-between requests-footer">
+                <Button
+                    variant="secondary"
+                    onClick={onHide}
+                    disabled={loading}
+                    className="close-button"
+                >
                     {t('common.close')}
                 </Button>
                 {request.status === 'pending' && !loadingShifts && (
-                    <>
+                    <div className="gap-2 d-flex action-buttons">
                         <Button
                             variant="danger"
                             onClick={() => handleReviewClick('rejected')}
                             disabled={loading}
                         >
-                            {loading ? <Spinner size="sm" /> : t('admin.requests.reject')}
+                            {loading ? <Spinner size="sm"/> : t('admin.requests.reject')}
                         </Button>
                         <Button
                             variant="success"
                             onClick={() => handleReviewClick('approved')}
                             disabled={loading}
                         >
-                            {loading ? <Spinner size="sm" /> : t('admin.requests.approve')}
+                            {loading ? <Spinner size="sm"/> : t('admin.requests.approve')}
                         </Button>
-                    </>
+                    </div>
                 )}
                 {request.status !== 'pending' && (
                     <Button
@@ -349,7 +358,7 @@ const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
                         onClick={handleRevertToPending}
                         disabled={!revertReason.trim() || loading}
                     >
-                        {loading ? <Spinner size="sm" /> : t('admin.requests.revert')}
+                        {loading ? <Spinner size="sm"/> : t('admin.requests.revert')}
                     </Button>
                 </Modal.Footer>
             </Modal>

@@ -1,24 +1,24 @@
 // frontend/src/features/admin-permanent-requests/index.js
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Card, Table, Badge } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { fetchAllRequests } from './model/adminRequestsSlice';
+import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Container, Card, Table, Badge} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {fetchAllRequests} from './model/adminRequestsSlice';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
 import RequestReviewModal from './ui/RequestReviewModal/RequestReviewModal';
-import { formatDateTime } from 'shared/lib/utils/scheduleUtils';
-import { useSortableData } from 'shared/hooks/useSortableData';
+import {formatDateTime} from 'shared/lib/utils/scheduleUtils';
+import {useSortableData} from 'shared/hooks/useSortableData';
 import './index.css';
 
 const AdminPermanentRequests = () => {
-    const { t, locale } = useI18n();
+    const {t, locale} = useI18n();
     const dispatch = useDispatch();
 
-    const { items: requests, loading, error } = useSelector(state => {
+    const {items: requests, loading, error} = useSelector(state => {
         return state.adminRequests;
     });
 
@@ -59,19 +59,19 @@ const AdminPermanentRequests = () => {
         sortedItems: sortedPendingRequests,
         requestSort: requestPendingSort,
         sortConfig: pendingSortConfig
-    } = useSortableData(pendingRequests, { field: 'requested_at', order: 'ASC' }, sortAccessors);
+    } = useSortableData(pendingRequests, {field: 'requested_at', order: 'ASC'}, sortAccessors);
 
     const {
         sortedItems: sortedActiveRequests,
         requestSort: requestActiveSort,
         sortConfig: activeSortConfig
-    } = useSortableData(activeProcessedRequests, { field: 'reviewed_at', order: 'DESC' }, sortAccessors);
+    } = useSortableData(activeProcessedRequests, {field: 'reviewed_at', order: 'DESC'}, sortAccessors);
 
     const {
         sortedItems: sortedInactiveRequests,
         requestSort: requestInactiveSort,
         sortConfig: inactiveSortConfig
-    } = useSortableData(inactiveRequests, { field: 'reviewed_at', order: 'DESC' }, sortAccessors);
+    } = useSortableData(inactiveRequests, {field: 'reviewed_at', order: 'DESC'}, sortAccessors);
 
     const handleRequestClick = (request) => {
         setSelectedRequest(request);
@@ -84,7 +84,7 @@ const AdminPermanentRequests = () => {
         dispatch(fetchAllRequests());
     };
 
-    const RequestsTable = ({ requests, sortConfig, requestSort, isPending, isInactive }) => (
+    const RequestsTable = ({requests, sortConfig, requestSort, isPending, isInactive}) => (
         <div className="table-responsive">
             <Table className="requests-table mb-0">
                 <thead>
@@ -118,15 +118,14 @@ const AdminPermanentRequests = () => {
                     >
                         {t('admin.requests.sentAt')}
                     </SortableHeader>
-                    {!isPending && (
-                        <SortableHeader
-                            sortKey="reviewed_at"
-                            sortConfig={sortConfig}
-                            onSort={requestSort}
-                        >
-                            {t('admin.requests.reviewedAt')}
-                        </SortableHeader>
-                    )}
+
+                    <SortableHeader
+                        sortKey="reviewed_at"
+                        sortConfig={sortConfig}
+                        onSort={requestSort}>
+                        {t('admin.requests.reviewedAt')}
+                    </SortableHeader>
+
                     <SortableHeader
                         sortKey="status"
                         sortConfig={sortConfig}
@@ -157,13 +156,10 @@ const AdminPermanentRequests = () => {
                         </td>
 
                         <td>{formatDateTime(request.requested_at, locale)}</td>
-                        {!isPending && (
-                            <td>
-                                {request.reviewed_at
-                                    ? formatDateTime(request.reviewed_at, locale)
-                                    : '-'
-                                }
-                            </td>
+                        {isPending ? (
+                            <td>-</td>
+                        ) : (
+                            <td>{request.reviewed_at ? formatDateTime(request.reviewed_at, locale) : '-'}</td>
                         )}
                         <td>
                             <StatusBadge
@@ -179,7 +175,7 @@ const AdminPermanentRequests = () => {
     );
 
     if (loading) {
-        return <LoadingState />;
+        return <LoadingState/>;
     }
 
     if (error) {

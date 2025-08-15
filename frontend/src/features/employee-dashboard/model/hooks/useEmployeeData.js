@@ -8,7 +8,7 @@ import {
     checkScheduleUpdates,
     selectNewUpdatesCount,
     setDashboardStats,
-} from '../model/employeeDataSlice';
+} from '../employeeDataSlice';
 
 export const useEmployeeData = () => {
     const dispatch = useDispatch();

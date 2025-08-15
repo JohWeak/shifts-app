@@ -108,7 +108,9 @@
 .previous-review-info .alert {
     margin-bottom: 0;
 }
-
+.request-review-modal .requests-footer button{
+    width: 100px;
+}
 /* Dark mode support */
 [data-theme="dark"] .request-employee-info .info-grid {
     background-color: var(--bs-gray-800);
@@ -166,8 +168,20 @@
     .constraints-list{
         flex-wrap: wrap;
         gap: 2.25rem;
-
     }
+    .request-review-modal .requests-footer{
+        flex-direction: column-reverse;
+    }
+    .request-review-modal .requests-footer .close-button{
+        align-self: start;
+    }
+    .request-review-modal .requests-footer .action-buttons{
+        width: 100%;
+    }
+    .request-review-modal .requests-footer .action-buttons button{
+        width: calc(50% - 0.5rem);
+    }
+
     .constraint-badge {
         transform: rotate(90deg);
         overflow: clip;

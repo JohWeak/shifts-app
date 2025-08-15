@@ -41,17 +41,11 @@ const ConstraintsSchedule = () => {
     const isMobile = useMediaQuery('(max-width: 888px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
     useEffect(() => {
-        // Если есть ячейка для анимации...
         if (justChangedCell) {
-            // ...устанавливаем таймер, чтобы очистить состояние через 300мс
-            // (немного дольше, чем длительность нашей CSS-анимации)
             const timer = setTimeout(() => {
                 setJustChangedCell(null);
             }, 200);
 
-            // Это "функция очистки". Она сработает, если вы кликнете
-            // на другую ячейку до того, как таймер завершится,
-            // предотвращая гонку состояний.
             return () => clearTimeout(timer);
         }
     }, [justChangedCell]);
@@ -62,14 +56,14 @@ const ConstraintsSchedule = () => {
 
     const modalConfig = {
         reset: {
-            title: t('constraints.generate-schedule.resetTitle'),
-            message: t('constraints.generate-schedule.resetMessage'),
+            title: t('constraints.modals.resetTitle'),
+            message: t('constraints.modals.resetMessage'),
             confirmText: t('common.reset'),
             variant: 'warning'
         },
         submit: {
-            title: t('constraints.generate-schedule.submitTitle'),
-            message: t('constraints.generate-schedule.submitMessage'),
+            title: t('constraints.modals.submitTitle'),
+            message: t('constraints.modals.submitMessage'),
             confirmText: t('common.submit'),
             variant: 'primary'
         }

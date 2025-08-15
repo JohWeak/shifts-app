@@ -45,8 +45,8 @@ export const ConfirmationModal = ({
         <Modal
             show={show}
             onHide={!loading ? onCancel : undefined}
-            centered
             size={size}
+            centered
             backdrop={loading ? 'static' : true}
             className="confirmation-modal"
         >

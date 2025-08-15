@@ -4,7 +4,7 @@ import {useSelector} from "react-redux";
 import {useNavigate} from 'react-router-dom';
 import {Container, Row, Col, Card} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useEmployeeData} from './hooks/useEmployeeData';
+import {useEmployeeData} from './model/hooks/useEmployeeData';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
@@ -104,7 +104,7 @@ const EmployeeDashboard = () => {
         {
             id: 'constraints',
             title: t('employee.dashboard.constraints'),
-            subtitle: t('employee.dashboard.submitPreferences'),
+            subtitle: t('employee.dashboard.submitConstraints'),
             icon: 'bi-shield-check',
             color: 'success',
             path: '/employee/constraints',

@@ -225,7 +225,7 @@ const EmployeeLayout = () => {
                 <Container fluid className="px-0">
                     <GlobalAlerts />
                     <Outlet />
-                    {process.env.NODE_ENV === 'development' && <DebugReduxState />}
+                    {/*{process.env.NODE_ENV === 'development' && <DebugReduxState />}*/}
                 </Container>
             </main>
         </>

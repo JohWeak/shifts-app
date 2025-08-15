@@ -42,10 +42,13 @@
 
 .employee-dashboard .dashboard-card.highlight {
     border-color: var(--bs-warning);
-    animation: pulse 2s infinite;
+    animation: cardPulse 2s infinite;
+}
+.employee-dashboard .dashboard-card.highlight:hover {
+    animation: none;
 }
 
-@keyframes pulse {
+@keyframes cardPulse {
     0% {
         box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
     }
