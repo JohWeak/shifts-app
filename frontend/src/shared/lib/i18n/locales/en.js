@@ -584,6 +584,7 @@ export const en = {
             weekStartHintMonday: 'Week must start on Monday',
             weekStartHintSunday: 'Week must start on Sunday',
             workSite: 'Work Site',
+            chooseWeek: 'Choose Week',
         },
         requestTimeOff: {
             allDay: 'All Day',
