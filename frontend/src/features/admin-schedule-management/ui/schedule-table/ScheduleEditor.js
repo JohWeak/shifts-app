@@ -495,6 +495,7 @@ const ScheduleEditor = ({
                             <Button
                                 variant="outline-secondary"
                                 size="sm"
+                                className="ms-1"
                                 onClick={() => onToggleEdit(position.pos_id)}
                                 disabled={savingChanges}
                             >

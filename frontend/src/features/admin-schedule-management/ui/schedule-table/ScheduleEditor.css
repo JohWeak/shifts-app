@@ -143,31 +143,7 @@
     color: var(--bs-gray-100);
 }
 
-/* Shift Cell Styles */
-/*.position-schedule-editor td.shift-morning {*/
-/*    background-color: rgba(var(--bs-warning-rgb), 0.1);*/
-/*}*/
 
-/*.position-schedule-editor td.shift-day {*/
-/*    background-color: rgba(var(--bs-info-rgb), 0.1);*/
-/*}*/
-
-/*.position-schedule-editor td.shift-night {*/
-/*    background-color: rgba(var(--bs-primary-rgb), 0.1);*/
-/*}*/
-
-/* Dark theme shift cells */
-/*[data-theme="dark"] .position-schedule-editor td.shift-morning {*/
-/*    color: var(--bs-gray-800) ;*/
-/*}*/
-
-/*[data-theme="dark"] .position-schedule-editor td.shift-day {*/
-/*    color: var(--bs-gray-800);*/
-/*}*/
-
-/*[data-theme="dark"] .position-schedule-editor td.shift-night {*/
-/*    color: var(--bs-gray-800);*/
-/*}*/
 
 /* Shift cell content */
 .position-schedule-editor td.shift-morning,
@@ -219,6 +195,7 @@
     align-items: start;
     gap: 2px;
     padding: 0.5rem;
+    opacity: 1;
 
 }
 .position-schedule-editor .schedule-table .shift-name {
@@ -241,11 +218,15 @@
     opacity: 0.2;
     background: transparent;
     border: none;
-    transition: all 0.2s ease;
 }
 [dir="rtl"] .shift-color-btn {
     left: 2px;
     right: auto;
+}
+.shift-color-btn:hover {
+    transition: all 0.3s ease;
+    opacity: 0.8;
+    transform: scale(1.2);
 }
 [data-theme="dark"] .shift-color-btn {
     color: var(--bs-gray-700);
@@ -259,13 +240,6 @@
 }
 
 
-.shift-name-cell:hover .shift-color-btn {
-    opacity: 0.7;
-}
-
-.shift-color-btn:hover i{
-    font-size: 1.5rem;
-}
 .shift-color-btn:focus {
     outline: none!important;
     border:none!important;
