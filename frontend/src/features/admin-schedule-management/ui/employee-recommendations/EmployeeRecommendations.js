@@ -51,34 +51,16 @@ const EmployeeRecommendations = ({
     useEffect(() => {
         if (!recommendations) return;
 
-        const currentTabEmpty = (() => {
-            switch (activeTab) {
-                case 'available':
-                    return !recommendations.available?.length;
-                case 'cross_position':
-                    return !recommendations.cross_position?.length;
-                case 'other_site':
-                    return !recommendations.other_site?.length;
-                case 'unavailable':
-                    const groups = groupUnavailableEmployees();
-                    return !groups.temporary.length && !groups.permanent.length && !groups.legal.length;
-                default:
-                    return false;
-            }
-        })();
-
-        // Переключаем только если текущий таб пустой
-        if (currentTabEmpty) {
-            if (recommendations.available?.length > 0) {
-                setActiveTab('available');
-            } else if (recommendations.cross_position?.length > 0) {
-                setActiveTab('cross_position');
-            } else if (recommendations.other_site?.length > 0) {
-                setActiveTab('other_site');
-            } else {
-                setActiveTab('unavailable');
-            }
+        if (recommendations.available?.length > 0) {
+            setActiveTab('available');
+        } else if (recommendations.cross_position?.length > 0) {
+            setActiveTab('cross_position');
+        } else if (recommendations.other_site?.length > 0) {
+            setActiveTab('other_site');
+        } else {
+            setActiveTab('unavailable');
         }
+
     }, [recommendations]);
     // Save active tab
     useEffect(() => {
@@ -331,11 +313,9 @@ const EmployeeRecommendations = ({
     };
 
 
-
-
     return (
         <div className="employee-recommendations" style={{containerType: 'inline-size'}}>
-            <div style={{ fontSize: '10px', color: 'gray', padding: '5px' }}>
+            <div style={{fontSize: '10px', color: 'gray', padding: '5px'}}>
                 Debug: {recommendations ? Object.keys(recommendations).map(key =>
                 `${key}: ${recommendations[key]?.length || 0}`
             ).join(', ') : 'No recommendations'}

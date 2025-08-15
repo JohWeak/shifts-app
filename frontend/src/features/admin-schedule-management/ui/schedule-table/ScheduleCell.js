@@ -38,8 +38,9 @@ const ScheduleCell = ({
 
     const totalEmployees = visibleEmployees.length + pendingAssignments.length;
     const isEmpty = totalEmployees === 0;
-    const isFull = totalEmployees >= requiredEmployees;
-    const isUnderstaffed = totalEmployees < requiredEmployees    ;
+    const isFull = totalEmployees === requiredEmployees;
+    const isUnderstaffed = totalEmployees < requiredEmployees;
+    const isOverstaffed = totalEmployees > requiredEmployees;
 
     const hasPendingChanges = () => {
         return Object.values(pendingChanges).some(change =>
@@ -96,6 +97,7 @@ const ScheduleCell = ({
         if (!isEmpty) baseClasses.push('has-employees');
         if (isEmpty && isEditing) baseClasses.push('empty-editing');
         if (isUnderstaffed && !isEmpty) baseClasses.push('understaffed');
+        if (isOverstaffed) baseClasses.push('overstaffed');
         if (isFull && !shiftColor) baseClasses.push('full');
         if (hasPendingChanges()) baseClasses.push('has-pending-change');
 

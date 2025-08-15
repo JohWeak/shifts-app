@@ -44,7 +44,6 @@ const EmployeeRecommendationsPanel = ({
                 newWidthPercent = Math.max(20, Math.min(50, newWidthPercent));
                 setCurrentPanelWidth(newWidthPercent);
 
-                // Update CSS variable for layout
                 document.documentElement.style.setProperty('--panel-width', `${newWidthPercent}%`);
             });
         };

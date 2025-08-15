@@ -38,7 +38,7 @@
     padding: var(--space-3) var(--space-4);
 }
 .confirmation-modal .modal-footer button{
-    width: 120px;
+    min-width: 120px;
 }
 
 /* Стили для темной темы */

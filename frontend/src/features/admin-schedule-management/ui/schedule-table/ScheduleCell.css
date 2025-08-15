@@ -127,6 +127,11 @@
     opacity: 1;
     width: 1.375rem;
 }
+.schedule-cell .remove-btn:active{
+    opacity: 0.4;
+    border-radius: 5%;
+    width: 100%;
+}
 
 
 /* Add More Indicator */
@@ -158,6 +163,9 @@
 
 .schedule-cell.understaffed {
     background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
+}
+.schedule-cell.overstaffed {
+    background-color: rgba(var(--bs-primary-rgb), 0.2) !important;
 }
 
 .schedule-cell.full {

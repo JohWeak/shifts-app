@@ -337,7 +337,12 @@ const ScheduleEditor = ({
 
             return {
                 emp_id: assignment.emp_id,
-                employee_name: assignment.employee_name || 'Unknown Employee',
+                first_name: assignment.first_name || assignment.employee.first_name || '',
+                last_name: assignment.last_name || assignment.employee.last_name || '',
+                employee_name: assignment.employee_name ||
+                    (assignment.employee.first_name && assignment.employee.last_name ?
+                        `${assignment.employee.first_name} ${assignment.employee.last_name}` :
+                        'Unknown Employee'),
                 assignment_id: assignment.id
             };
         }).filter(Boolean);

@@ -56,7 +56,6 @@ const ScheduleManagement = () => {
     } = useScheduleActions();
 
     // --- Локальное состояние для UI ---
-    const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showComparisonModal, setShowComparisonModal] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
     const [comparisonResults, setComparisonResults] = useState(null);
@@ -79,12 +78,10 @@ const ScheduleManagement = () => {
             const newIsLarge = window.innerWidth >= 1500;
             setIsLargeScreen(newIsLarge);
 
-            // If switching from large to small screen while panel is open, close it and open modal
             if (!newIsLarge && isPanelOpen) {
                 setIsPanelOpen(false);
                 setShowEmployeeModal(true);
             }
-            // If switching from small to large screen while modal is open, close it and open panel
             else if (newIsLarge && showEmployeeModal) {
                 setShowEmployeeModal(false);
                 setIsPanelOpen(true);
