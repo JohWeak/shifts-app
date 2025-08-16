@@ -102,7 +102,10 @@
     opacity: 1;
     color: var(--bs-body-color);
 }
-
+.employee-recommendations .search-container {
+    padding: var(--space-3) var(--space-2);
+    border-bottom: 1px solid var(--bs-border-color);
+}
 
 /* Panel Content */
 .recommendation-panel .panel-content {
