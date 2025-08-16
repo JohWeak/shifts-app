@@ -91,14 +91,18 @@ const ScheduleManagement = () => {
         }
     };
 
-    const PANEL_WIDTH_PERCENT = 25;
-    const ADD_MARGIN_PERCENT = 1;
-
+    const GAP_VALUE = '1rem';
     const contentStyles = {
-        marginRight: isPanelOpen && isLargeScreen ? `${panelWidth + ADD_MARGIN_PERCENT}%` : '0',
+        // Используем calc() для смешивания процентов и rem
+        marginRight: isPanelOpen && isLargeScreen
+            ? `calc(${panelWidth}% + ${GAP_VALUE})`
+            : '0',
     };
+
     if (direction === 'rtl') {
-        contentStyles.marginLeft = isPanelOpen && isLargeScreen ? `${panelWidth + ADD_MARGIN_PERCENT}%` : '0';
+        contentStyles.marginLeft = isPanelOpen && isLargeScreen
+            ? `calc(${panelWidth}% + ${GAP_VALUE})`
+            : '0';
         delete contentStyles.marginRight;
     }
 
