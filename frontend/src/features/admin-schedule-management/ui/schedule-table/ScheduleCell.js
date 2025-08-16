@@ -88,6 +88,40 @@ const ScheduleCell = ({
         }
     };
 
+    // Helper to get employee styling classes
+    const getEmployeeClassName = (employee, isPending = false) => {
+        let classes = ['schedule-employee'];
+
+        if (isPending) {
+            classes.push('pending-employee');
+
+            // Check if this is an autofilled employee
+            const pendingChange = Object.values(pendingChanges).find(
+                change => change.empId === employee.emp_id &&
+                    change.date === date &&
+                    change.shiftId === shiftId &&
+                    change.positionId === positionId
+            );
+
+            if (pendingChange) {
+                if (pendingChange.isAutofilled && !pendingChange.isSaved) {
+                    classes.push('autofilled-employee');
+                }
+                if (pendingChange.isCrossPosition) {
+                    classes.push('cross-position-employee');
+                }
+                if (pendingChange.isCrossSite) {
+                    classes.push('cross-site-employee');
+                }
+            }
+        }
+
+        if (employee.emp_id === highlightedEmployeeId) {
+            classes.push('highlighted');
+        }
+
+        return classes.join(' ');
+    };
 
     const getCellClasses = () => {
         const baseClasses = ['schedule-cell', 'text-center', 'position-relative'];
