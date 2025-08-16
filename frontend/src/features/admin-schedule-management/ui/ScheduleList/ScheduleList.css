@@ -1,0 +1,391 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleList/ScheduleList.css */
+
+/* Schedule List Cards */
+.schedule-list-card {
+    border: 1px solid var(--bs-border-color)!important;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: visible;
+}
+
+.schedule-list-card .schedule-list-header {
+    background-color: var(--bs-gray-100);
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1rem 1.25rem;
+    border-top-left-radius: var(--radius-lg)!important;
+    border-top-right-radius: var(--radius-lg)!important;
+}
+[data-theme="dark"] .schedule-list-card .schedule-list-header {
+    background-color: var(--bs-gray-800);
+    border-bottom-color: var(--bs-gray-700);
+}
+
+.schedule-list-card .schedule-list-header.active {
+    background-color: rgba(var(--bs-success-rgb), 0.2);
+}
+.schedule-list-card .schedule-list-header.active:hover {
+    background-color: rgba(var(--bs-success-rgb), 0.25);
+}
+
+.schedule-list-card .schedule-list-header.inactive {
+    background-color: rgba(var(--bs-danger-rgb), 0.1);
+}
+
+.schedule-list-card .schedule-list-header.inactive:hover {
+    background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+
+
+
+.schedule-list-header.collapsible {
+    cursor: pointer;
+}
+.schedule-list-header.collapsible.closed {
+    border-bottom-left-radius: var(--radius-lg)!important;
+    border-bottom-right-radius: var(--radius-lg)!important;
+}
+
+.schedule-list-header .accordion-icon {
+    font-size: 0.9rem;
+    color: var(--bs-gray-600);
+    transition: transform 0.3s ease;
+}
+
+/* Поворачиваем иконку, когда блок закрыт */
+.schedule-list-header .accordion-icon.closed {
+    transform: rotate(-90deg);
+}
+
+[data-theme="dark"] .schedule-list-header .accordion-icon {
+    color: var(--bs-gray-400);
+}
+.schedule-list-card .schedule-list-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--bs-gray-800);
+}
+
+[data-theme="dark"] .schedule-list-card .schedule-list-header h5 {
+    color: var(--bs-gray-100);
+}
+
+/* Card body */
+.schedule-list-card .card-body {
+    padding: 0;
+    position: relative;
+    overflow: visible;
+}
+
+/* Table responsive wrapper */
+.schedule-list-card .table-responsive {
+    margin: 0;
+    border: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    position: relative;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+
+}
+
+/* Schedule Table */
+.schedule-overview-table {
+    table-layout: fixed;
+    width: 100%;
+}
+.schedule-overview-table th:nth-child(1) { width: 30%; } /* Week Period */
+.schedule-overview-table th:nth-child(2) { width: 20%; } /* Site */
+.schedule-overview-table th:nth-child(3) { width: 30%; } /* Last Updated */
+.schedule-overview-table th:nth-child(4) { width: 10%; } /* Status */
+.schedule-overview-table th:nth-child(5) { width: 10%; } /* Actions */
+.schedule-overview-table td {
+    overflow: hidden;         /* Скрыть все, что не помещается */
+    text-overflow: ellipsis;  /* Добавить многоточие (...) в конце */
+    white-space: nowrap;      /* Запретить перенос текста на новую строку */
+}
+
+.schedule-overview-table .sortable-header{
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+/* Table headers */
+.schedule-overview-table thead th {
+    background-color: inherit;
+    color: var(--bs-gray-700);
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 0.75rem;
+}
+
+[data-theme="dark"] .schedule-overview-table thead th {
+
+    color: var(--bs-gray-300);
+}
+
+.schedule-overview-table thead th.actions-header {
+    font-size: 0.75rem;
+    color: var(--bs-body-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+    background-color: var(--bs-gray-100);
+}
+[data-theme="dark"] .schedule-overview-table thead th.actions-header {
+    background-color: var(--bs-gray-900);
+}
+
+/* Table body */
+.schedule-overview-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+
+/* Row styling */
+.schedule-overview-table tbody tr.schedule-row {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    border-left: 2px solid transparent;
+
+}
+[dir="rtl"]  .schedule-overview-table tbody tr.schedule-row {
+    border-left: none;
+    border-right: 2px solid transparent;
+
+}
+.schedule-overview-table tbody tr.schedule-row td{
+    background-color: transparent;
+    transition: all 0.2s ease;
+
+}
+
+.schedule-overview-table tbody tr.schedule-row:hover {
+    border-left-color: var(--bs-primary);
+}
+[dir="rtl"]  .schedule-overview-table tbody tr.schedule-row:hover {
+    border-right-color: var(--bs-primary);
+
+}
+.schedule-overview-table tbody tr.schedule-row:hover td{
+    background-color: rgba(var(--bs-primary-rgb), 0.04)!important;
+}
+
+[data-theme="dark"] .schedule-overview-table tbody tr.schedule-row:hover td {
+    background-color: rgba(var(--bs-primary-rgb), 0.08)!important;
+}
+
+/* Current week highlight - PROPERLY APPLIED TO CELLS */
+.schedule-overview-table tbody tr.current-week td.current-week-cell {
+    background-color: rgba(var(--bs-info-rgb), 0.08) !important;
+    padding-top: 1rem;
+}
+
+.schedule-overview-table tbody tr.current-week:hover td.current-week-cell {
+    background-color: rgba(var(--bs-info-rgb), 0.12) !important;
+}
+
+
+
+/* Week period cell */
+.schedule-overview-table .week-period-cell {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    gap: 0.5rem;
+}
+
+.schedule-overview-table .week-period-cell .date-range {
+    white-space: nowrap;
+    font-size: 1rem;
+}
+
+.schedule-overview-table .site-name {
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.schedule-overview-table .week-period-cell .current-week-badge {
+    position: absolute;
+    top: 0;
+    left: 6px;
+    white-space: nowrap;
+    font-size: 0.625rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: var(--radius-sm);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+}
+[dir="rtl"] .schedule-overview-table .week-period-cell .current-week-badge {
+    left: auto;
+    right: 0;
+}
+
+/* Last updated column */
+.schedule-overview-table .last-updated {
+    white-space: nowrap;
+    color: var(--bs-gray-600);
+    font-size: 0.9rem;
+}
+
+[data-theme="dark"] .schedule-overview-table .last-updated {
+    color: var(--bs-gray-400);
+}
+
+/* Actions cell */
+.schedule-overview-table .actions-cell {
+    padding: 0.5rem;
+    text-align: center;
+    width: 60px;
+    position: relative;
+}
+
+/* Action dropdown container */
+.schedule-overview-table .schedule-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: static;
+}
+
+/* Dropdown positioning */
+.schedule-overview-table .schedule-actions .dropdown {
+    position: static;
+}
+
+/* Dropdown toggle button */
+.schedule-overview-table .schedule-actions .action-dropdown-toggle {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--bs-gray-600);
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .schedule-overview-table .schedule-actions .action-dropdown-toggle {
+    color: var(--bs-gray-400);
+}
+
+.schedule-overview-table .schedule-actions .action-dropdown-toggle:hover,
+.schedule-overview-table .schedule-actions .action-dropdown-toggle:focus,
+.schedule-overview-table .schedule-actions .action-dropdown-toggle:active,
+.schedule-overview-table .schedule-actions .show > .action-dropdown-toggle {
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-gray-300);
+    color: var(--bs-dark);
+    box-shadow: none;
+}
+
+[data-theme="dark"] .schedule-overview-table .schedule-actions .action-dropdown-toggle:hover,
+[data-theme="dark"] .schedule-overview-table .schedule-actions .action-dropdown-toggle:focus,
+[data-theme="dark"] .schedule-overview-table .schedule-actions .action-dropdown-toggle:active,
+[data-theme="dark"] .schedule-overview-table .schedule-actions .show > .action-dropdown-toggle {
+    background-color: var(--bs-gray-700);
+    border-color: var(--bs-gray-600);
+    color: var(--bs-gray-100);
+}
+
+/* Remove default dropdown arrow */
+.schedule-overview-table .schedule-actions .action-dropdown-toggle::after {
+    display: none;
+}
+
+/* Dropdown menu */
+.schedule-overview-table .schedule-actions .dropdown-menu {
+    border-radius: var(--bs-border-radius);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--bs-border-color);
+    padding: 0.25rem 0;
+    min-width: 160px;
+}
+
+.schedule-overview-table .schedule-actions .dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.schedule-overview-table .schedule-actions .dropdown-item:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .schedule-overview-table .schedule-actions .dropdown-item:hover {
+    background-color: var(--bs-gray-700);
+}
+
+.schedule-overview-table .schedule-actions .dropdown-item i {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Status badges */
+.schedule-overview-table .badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+}
+
+/* Prevent text selection */
+.schedule-overview-table tbody tr.schedule-row {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .schedule-overview-table {
+        font-size: 0.875rem;
+    }
+
+    .schedule-overview-table thead th {
+        padding: 0.5rem;
+        font-size: 0.8125rem;
+    }
+
+    .schedule-overview-table tbody td {
+        padding: 0.5rem;
+    }
+
+    .schedule-overview-table .week-period-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .schedule-overview-table .week-period-cell .current-week-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .schedule-overview-table .last-updated {
+        font-size: 0.8125rem;
+    }
+
+    .schedule-overview-table .badge {
+        font-size: 0.75rem;
+    }
+
+    .schedule-overview-table .schedule-actions .action-dropdown-toggle {
+        padding: 0.125rem 0.375rem;
+        font-size: 0.875rem;
+    }
+
+    .schedule-overview-table .schedule-actions .dropdown-menu {
+        min-width: 140px;
+        font-size: 0.875rem;
+    }
+
+    .schedule-overview-table .schedule-actions .dropdown-item {
+        padding: 0.375rem 0.75rem;
+    }
+}

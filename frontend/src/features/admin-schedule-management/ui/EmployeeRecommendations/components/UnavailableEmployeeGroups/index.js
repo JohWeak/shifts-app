@@ -1,3 +1,5 @@
+//frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/components/UnavailableEmployeeGroups/index.js
+
 import React from 'react';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import EmployeeList from '../EmployeeList';

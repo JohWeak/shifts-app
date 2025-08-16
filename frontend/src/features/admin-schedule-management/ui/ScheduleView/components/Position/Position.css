@@ -1,0 +1,269 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/Position.css */
+
+/* Position Schedule Editor Container */
+.position-schedule-editor {
+    background-color: var(--bs-white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    transition: all var(--transition-base);
+    box-shadow: var(--bs-box-shadow);
+}
+
+
+
+.position-schedule-editor .btn-success,
+.position-schedule-editor .btn-outline-secondary,
+.position-schedule-editor .btn-outline-primary,
+.position-schedule-editor .btn-primary{
+    border-radius: var(--radius-md);
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-medium);
+    padding: var(--space-2) var(--space-1);
+    transition: all var(--transition-base);
+    white-space: nowrap;
+    min-width: 100px;
+
+}
+
+[data-theme="dark"] .position-schedule-editor {
+    background-color: var(--bs-gray-900);
+}
+
+
+/* Position Header */
+.position-schedule-editor .position-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.position-schedule-editor .position-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.position-schedule-editor .position-name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    margin: 0;
+    color: var(--bs-emphasis-color);
+}
+
+.position-schedule-editor .position-badge {
+    font-size: var(--text-sm);
+}
+
+/* Edit Controls */
+.position-schedule-editor .edit-controls {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+[data-theme="dark"] .position-schedule-editor .btn-outline-secondary {
+    color: var(--bs-gray-500);
+}
+
+/* Schedule Table Wrapper */
+.position-schedule-editor .table-responsive {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--bs-border-color);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .position-schedule-editor .table-responsive {
+    border-color: var(--bs-gray-700);
+}
+
+/* Schedule Table Customization */
+.position-schedule-editor .schedule-table {
+    margin-bottom: 0;
+    table-layout: fixed; /* Фиксированная ширина колонок */
+    width: 100%;
+}
+
+/* Table borders for dark theme */
+[data-theme="dark"] .position-schedule-editor .schedule-table {
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .position-schedule-editor .schedule-table td,
+[data-theme="dark"] .position-schedule-editor .schedule-table th {
+    border-color: var(--bs-gray-700) !important;
+}
+
+/* Override Bootstrap table styles for dark theme */
+[data-theme="dark"] .position-schedule-editor .table > :not(caption) > * > * {
+    border-bottom-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .position-schedule-editor .table-bordered > :not(caption) > * > * {
+    border-width: 1px;
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .position-schedule-editor .table-bordered > :not(caption) > * {
+    border-width: 1px;
+    border-color: var(--bs-gray-700);
+}
+
+/* Fixed column widths */
+.position-schedule-editor .schedule-table th:first-child,
+.position-schedule-editor .schedule-table td:first-child {
+    /*width: 140px; !* Фиксированная ширина для колонки смен *!*/
+    /*min-width: 50px;*/
+    max-width: 120px;
+}
+
+/* Equal width for day columns */
+.position-schedule-editor .schedule-table th:not(:first-child),
+.position-schedule-editor .schedule-table td:not(:first-child) {
+    width: calc((100% - 120px) / 7); /* Равная ширина для дней недели */
+}
+
+/* Table headers */
+.position-schedule-editor .schedule-table th {
+    background-color: var(--bs-gray-100);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-3);
+    border-bottom: 2px solid var(--bs-border-color);
+    text-align: center;
+}
+
+[data-theme="dark"] .position-schedule-editor .schedule-table th {
+    background-color: var(--bs-gray-800);
+    color: var(--bs-gray-100);
+}
+
+
+
+/* Shift cell content */
+.position-schedule-editor td.shift-morning,
+.position-schedule-editor td.shift-day,
+.position-schedule-editor td.shift-night {
+    font-weight: var(--font-medium);
+    vertical-align: middle;
+}
+
+/* All table cells uniform height */
+.position-schedule-editor .schedule-table td {
+    height: 80px;
+    min-height: 80px;
+    vertical-align: middle;
+}
+
+/* Edit Mode Indicator */
+.position-schedule-editor .edit-mode-alert {
+    margin-top: var(--space-3);
+    border-radius: var(--radius-md);
+}
+
+/* Loading State */
+.position-schedule-editor.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Empty state for schedule cells */
+.position-schedule-editor .schedule-cell:empty::after {
+    content: '-';
+    color: var(--bs-secondary);
+    display: block;
+    text-align: center;
+}
+.shift-name-cell {
+    position: relative;
+    font-weight: var(--font-semibold);
+    vertical-align: middle;
+    transition: all 0.3s ease;
+
+}
+.schedule-table .shift-header {
+    align-content: center;
+}
+.shift-name-cell .shift-info {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 2px;
+    padding: 0.5rem;
+    opacity: 1;
+
+}
+.position-schedule-editor .schedule-table .shift-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    line-height: 1.2;
+    opacity: 0.7;
+}
+.position-schedule-editor .shift-time {
+    font-size: var(--text-sm);
+    opacity: 0.8;
+    line-height: 1.2;
+    font-weight: var(--font-normal);
+}
+
+.shift-color-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    opacity: 0.2;
+    background: transparent;
+    border: none;
+}
+[dir="rtl"] .shift-color-btn {
+    left: 2px;
+    right: auto;
+}
+.shift-color-btn:hover {
+    transition: all 0.3s ease;
+    opacity: 0.8;
+    transform: scale(1.2);
+}
+[data-theme="dark"] .shift-color-btn {
+    color: var(--bs-gray-700);
+}
+.shift-color-btn:active {
+    border:none!important;
+}
+.shift-color-btn i{
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+
+.shift-color-btn:focus {
+    outline: none!important;
+    border:none!important;
+}
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .position-schedule-editor .schedule-table th:first-child,
+    .position-schedule-editor .schedule-table td:first-child {
+        max-width: 120px;
+    }
+
+    .position-schedule-editor .schedule-table th:not(:first-child),
+    .position-schedule-editor .schedule-table td:not(:first-child) {
+        width: calc((100% - 120px) / 7);
+    }
+}
+@media (max-width: 768px) {
+    .position-schedule-editor .schedule-table {
+        font-size: var(--text-sm);
+    }
+
+    .position-schedule-editor .schedule-table td {
+        height: 60px;
+        min-height: 60px;
+    }
+
+}

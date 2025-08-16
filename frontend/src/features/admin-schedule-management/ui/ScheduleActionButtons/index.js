@@ -9,7 +9,7 @@ import {
     canUnpublishSchedule,
     canEditSchedule
 } from 'shared/lib/utils/scheduleUtils';
-import './index.css';
+import './ScheduleActionButtons.css';
 
 const ScheduleActionButtons = ({
                                    schedule,

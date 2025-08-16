@@ -1,3 +1,5 @@
+//frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/components/EmployeeListItem/index.js
+
 import React from 'react';
 import { ListGroup, Badge } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';

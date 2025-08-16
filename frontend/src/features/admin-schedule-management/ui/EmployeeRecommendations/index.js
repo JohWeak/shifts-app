@@ -1,3 +1,5 @@
+// frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/index.js
+
 import React, { useState, useEffect } from 'react';
 import { Alert, Form, Tab, Tabs, Badge } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
