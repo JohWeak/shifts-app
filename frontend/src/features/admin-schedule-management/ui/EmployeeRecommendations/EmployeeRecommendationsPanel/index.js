@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import EmployeeRecommendations from './index';
+import EmployeeRecommendations from '../index';
 import './EmployeeRecommendationsPanel.css';
 
 const EmployeeRecommendationsPanel = ({

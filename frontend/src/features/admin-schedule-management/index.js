@@ -7,8 +7,8 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 // UI Components
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import GenerateScheduleForm from './ui/GenerateScheduleForm';
-import EmployeeRecommendationsModal from './ui/EmployeeRecommendations/EmployeeRecommendationsModal';
-import EmployeeRecommendationsPanel from './ui/EmployeeRecommendations/EmployeeRecommendationsPanel';
+import EmployeeRecommendationsModal from './ui/EmployeeRecommendations/EmployeeRecommendationsModal/EmployeeRecommendationsModal';
+import EmployeeRecommendationsPanel from './ui/EmployeeRecommendations/EmployeeRecommendationsPanel/EmployeeRecommendationsPanel';
 import ScheduleContent from './ui/ScheduleContent';
 
 // Hooks & Actions
