@@ -908,6 +908,9 @@ export const en = {
         autofilledEmployee: 'Auto-assigned',
         crossPositionAssignment: 'Cross-position assignment',
         crossSiteAssignment: 'Cross-site assignment',
+        noPositionsToFill: 'No positions to fill',
+        allPositionsFilled: 'All positions filled',
+        autofilling: 'Autofilling...',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

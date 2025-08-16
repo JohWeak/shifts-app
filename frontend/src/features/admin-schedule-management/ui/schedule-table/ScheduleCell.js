@@ -89,15 +89,15 @@ const ScheduleCell = ({
     };
 
     // Helper to get employee styling classes
-    const getEmployeeClassName = (employee, isPending = false) => {
-        let classes = ['schedule-employee'];
+    const getEmployeeClassName = (employeeId, isPending = false) => {
+        let classes = ['employee-item mb-1 d-flex align-items-center justify-content-between'];
 
         if (isPending) {
-            classes.push('pending-employee');
+            classes.push('pending-assignment');
 
             // Check if this is an autofilled employee
             const pendingChange = Object.values(pendingChanges).find(
-                change => change.empId === employee.emp_id &&
+                change => change.empId === employeeId &&
                     change.date === date &&
                     change.shiftId === shiftId &&
                     change.positionId === positionId
@@ -115,8 +115,11 @@ const ScheduleCell = ({
                 }
             }
         }
+        if (isEmployeeBeingReplaced(employeeId)) {
+            classes.push('being-replaced');
+        }
 
-        if (employee.emp_id === highlightedEmployeeId) {
+        if (employeeId === highlightedEmployeeId) {
             classes.push('highlighted');
         }
 
@@ -204,9 +207,7 @@ const ScheduleCell = ({
                             onMouseEnter={() => onEmployeeMouseEnter(employee.emp_id)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === employee.emp_id}
-                            className={`employee-item mb-1 d-flex align-items-center justify-content-between ${
-                                isEmployeeBeingReplaced(employee.emp_id) ? 'being-replaced' : ''
-                            }`}
+                            className={getEmployeeClassName(employee.emp_id)}
                             renderContent={() => (
                                 <>
                                     <span
@@ -267,11 +268,11 @@ const ScheduleCell = ({
                             cellData={cellData}
                             onDragStart={(e) => dnd.handleDragStart(e, employeeData, cellData)}
                             onDragEnd={dnd.handleDragEnd}
-                            isDragOver={dnd.dragOverEmployeeId === assignment.emp_id}
+                            isDragOver={dnd.dragOverEmployeeId === assignment.empId}
                             onMouseEnter={() => onEmployeeMouseEnter(assignment.empId)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === assignment.empId}
-                            className="employee-item mb-1 d-flex align-items-center justify-content-between pending-assignment"
+                            className={getEmployeeClassName(assignment.empId)}
                             renderContent={() => (
                                 <>
                                     <span className="employee-name text-success">

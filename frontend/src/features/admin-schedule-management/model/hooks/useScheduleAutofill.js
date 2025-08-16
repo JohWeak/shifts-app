@@ -13,7 +13,21 @@ export const useScheduleAutofill = () => {
     const [autofilledChanges, setAutofilledChanges] = useState(new Set());
 
     const { scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
+    /**
+     * Get required staff count for specific shift and day
+     */
+    const getRequiredStaffCount = useCallback((shift, dayOfWeek) => {
+        // First check if we have requirements array with day_of_week
+        if (shift.requirements && Array.isArray(shift.requirements)) {
+            const dayRequirement = shift.requirements.find(req => req.day_of_week === dayOfWeek);
+            if (dayRequirement !== undefined) {
+                return dayRequirement.required_staff_count || 0;
+            }
+        }
 
+        // If no specific requirement found, return 0 (no staff needed)
+        return 0;
+    }, []);
     /**
      * Calculate missing employees for a specific position
      */
@@ -24,20 +38,35 @@ export const useScheduleAutofill = () => {
         const startDate = new Date(scheduleDetails.schedule.start_date);
 
         position.shifts?.forEach(shift => {
-            // Get required count from shift requirements
-            const requirements = shift.requirements?.[0];
-            const requiredCount = requirements?.required_staff_count ||
-                position.shift_requirements?.[shift.shift_id]?.['0'] ||
-                2; // default to 2 if not found
-
-            // Check each day of the week
+            // Check each day of the week (0 = Sunday, 6 = Saturday)
             for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + dayIndex);
                 const dateStr = date.toISOString().split('T')[0];
 
+                // Get day of week (0 = Sunday, 6 = Saturday)
+                const dayOfWeek = date.getDay();
+
                 // Get required count for this specific day
-                const dayRequiredCount = position.shift_requirements?.[shift.shift_id]?.[dayIndex] || requiredCount;
+                let dayRequiredCount = 0;
+
+                // Method 1: Check shift_requirements object
+                if (position.shift_requirements?.[shift.shift_id]?.[dayIndex] !== undefined) {
+                    dayRequiredCount = position.shift_requirements[shift.shift_id][dayIndex];
+                }
+                // Method 2: Check requirements array
+                else if (shift.requirements && Array.isArray(shift.requirements)) {
+                    const dayRequirement = shift.requirements.find(req => req.day_of_week === dayOfWeek);
+                    if (dayRequirement) {
+                        dayRequiredCount = dayRequirement.required_staff_count || 0;
+                    }
+                }
+
+                // Skip if no staff required (0 means day off or no requirement)
+                if (dayRequiredCount === 0) {
+                    console.log(`No staff required for ${position.pos_name} - ${shift.shift_name} on day ${dayIndex} (${dateStr})`);
+                    continue;
+                }
 
                 // Count current assignments for this shift/date
                 const currentAssignments = scheduleDetails.assignments?.filter(
@@ -73,11 +102,12 @@ export const useScheduleAutofill = () => {
                         date: dateStr,
                         missing,
                         dayIndex,
+                        dayOfWeek,
                         requiredCount: dayRequiredCount,
                         currentCount: totalAssigned
                     };
 
-                    console.log(`Missing employees for ${position.pos_name} - ${shift.shift_name} on ${dateStr}:`, {
+                    console.log(`Missing employees for ${position.pos_name} - ${shift.shift_name} on ${dateStr} (day ${dayIndex}):`, {
                         required: dayRequiredCount,
                         current: currentAssignments,
                         pendingAdd: pendingAdditions,
@@ -100,8 +130,11 @@ export const useScheduleAutofill = () => {
             console.error('No schedule details available');
             return { filled: 0, total: 0, changes: [] };
         }
+        setIsAutofilling(true);
 
         console.log('Starting autofill for position:', position.pos_name);
+        console.log('Position shift requirements:', position.shift_requirements);
+        console.log('Position shifts:', position.shifts);
 
         const missingByShift = calculateMissingEmployees(position, scheduleDetails, pendingChanges);
         const shiftKeys = Object.keys(missingByShift);
@@ -184,18 +217,6 @@ export const useScheduleAutofill = () => {
                             continue;
                         }
 
-                        // Check if employee is in unavailable categories
-                        const isUnavailable =
-                            recommendations.unavailable_busy?.some(e => e.emp_id === employee.emp_id) ||
-                            recommendations.unavailable_hard?.some(e => e.emp_id === employee.emp_id) ||
-                            recommendations.unavailable_soft?.some(e => e.emp_id === employee.emp_id) ||
-                            recommendations.unavailable_permanent?.some(e => e.emp_id === employee.emp_id);
-
-                        if (isUnavailable) {
-                            console.log(`Skipping ${employee.first_name} ${employee.last_name} - unavailable`);
-                            continue;
-                        }
-
                         // Create pending change for this assignment
                         const changeKey = `autofill-${positionId}-${date}-${shiftId}-${employee.emp_id}-${nanoid(6)}`;
                         const change = {
@@ -232,6 +253,8 @@ export const useScheduleAutofill = () => {
                     type: 'error',
                     message: t('schedule.recommendationsFetchFailed')
                 }));
+            } finally {
+                setIsAutofilling(false);
             }
         }
 
@@ -243,6 +266,30 @@ export const useScheduleAutofill = () => {
         });
 
         console.log(`Autofill completed: filled ${totalFilled} of ${totalNeeded} positions`);
+
+        // Show appropriate notification
+        if (totalFilled === 0 && totalNeeded === 0) {
+            // No positions needed filling
+            dispatch(addNotification({
+                type: 'info',
+                message: t('schedule.allPositionsFilled')
+            }));
+        } else if (totalFilled === totalNeeded && totalFilled > 0) {
+            dispatch(addNotification({
+                type: 'success',
+                message: t('schedule.autofillSuccess')
+            }));
+        } else if (totalFilled > 0 && totalFilled < totalNeeded) {
+            dispatch(addNotification({
+                type: 'warning',
+                message: t('schedule.autofillPartial', { filled: totalFilled, total: totalNeeded })
+            }));
+        } else if (totalFilled === 0 && totalNeeded > 0) {
+            dispatch(addNotification({
+                type: 'warning',
+                message: t('schedule.noAvailableEmployeesForAutofill')
+            }));
+        }
 
         return { filled: totalFilled, total: totalNeeded, changes: newChanges };
     }, [dispatch, scheduleDetails, pendingChanges, calculateMissingEmployees, t]);
@@ -284,20 +331,25 @@ export const useScheduleAutofill = () => {
             setAutofilledChanges(new Set(allNewChanges));
 
             // Show notification based on results
-            if (totalFilled === 0) {
+            if (totalFilled === 0 && totalNeeded === 0) {
                 dispatch(addNotification({
                     type: 'info',
-                    message: t('schedule.noPositionsToFill')
+                    message: t('schedule.allPositionsFilled')
                 }));
-            } else if (totalFilled === totalNeeded) {
+            } else if (totalFilled === totalNeeded && totalFilled > 0) {
                 dispatch(addNotification({
                     type: 'success',
                     message: t('schedule.autofillSuccess')
                 }));
-            } else {
+            } else if (totalFilled > 0) {
                 dispatch(addNotification({
                     type: 'warning',
                     message: t('schedule.autofillPartial', { filled: totalFilled, total: totalNeeded })
+                }));
+            } else {
+                dispatch(addNotification({
+                    type: 'warning',
+                    message: t('schedule.noAvailableEmployeesForAutofill')
                 }));
             }
 
