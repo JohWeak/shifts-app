@@ -6,7 +6,8 @@ import {
     deleteSchedule,
     updateScheduleStatus,
     exportSchedule,
-    clearAutofilledStatus, updateScheduleAssignments
+    clearAutofilledStatus,
+    updateScheduleAssignments
 } from '../scheduleSlice';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 

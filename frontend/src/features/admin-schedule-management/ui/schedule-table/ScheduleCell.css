@@ -168,7 +168,7 @@
 }
 
 .schedule-cell.full {
-    background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+    background-color: rgba(var(--bs-success-rgb), 0) !important;
 }
 /* Add visual indicator for cells with pending changes */
 .schedule-cell.has-pending-change {
