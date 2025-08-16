@@ -898,7 +898,7 @@ export const en = {
         saveChanges: 'Save Changes',
         pending: 'Pending',
         autofill: 'Autofill',
-        autofillSchedule: 'Autofill Schedule',
+        autofillSchedule: 'Autofill All',
         autofillInProgress: 'Autofilling positions...',
         autofillSuccess: 'Schedule autofilled successfully',
         autofillPartial: 'Partially filled: {filled} of {total} positions',
@@ -911,6 +911,7 @@ export const en = {
         noPositionsToFill: 'No positions to fill',
         allPositionsFilled: 'All positions filled',
         autofilling: 'Autofilling...',
+        noPositionsInEditMode: 'No positions in edit mode',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

@@ -75,7 +75,6 @@ const ScheduleInfo = ({
                         onExport={onExport}
                         isExporting={isExporting}
                         hasUnsavedChanges={hasUnsavedChanges}
-                        hasEditingPositions={hasEditingPositions}
                         onAutofill={onAutofill}
                         isAutofilling={isAutofilling}
                     />

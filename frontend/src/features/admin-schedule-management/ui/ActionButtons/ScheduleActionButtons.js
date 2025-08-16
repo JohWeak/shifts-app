@@ -24,7 +24,6 @@ const ScheduleActionButtons = ({
                                    isExporting = false,
                                    hasUnsavedChanges = false,
                                    className = '',
-                                   hasEditingPositions,
                                    onAutofill,
                                    isAutofilling,
                                }) => {
@@ -153,7 +152,7 @@ const ScheduleActionButtons = ({
             <div className={`schedule-action-buttons ${className}`}>
                 {/* Status action button */}
                 <div className="status-action">
-                    {hasEditingPositions &&(
+                    {hasUnsavedChanges &&(
                         <Button
                             variant="primary"
                             size="sm"

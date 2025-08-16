@@ -31,15 +31,12 @@ const AlertItem = ({ notification }) => {
 
     useEffect(() => {
         let timer;
-        // Устанавливаем таймер на удаление, если указана длительность
         if (notification.duration && !isClosing) {
             timer = setTimeout(() => {
-                // НЕ удаляем сразу, а запускаем анимацию закрытия
                 handleClose();
             }, notification.duration);
         }
 
-        // Очищаем таймер при размонтировании или изменении
         return () => clearTimeout(timer);
     }, [notification.duration, isClosing]); // Зависим от isClosing, чтобы не создавать таймер заново
 
@@ -61,16 +58,16 @@ const AlertItem = ({ notification }) => {
             dismissible={isManuallyClosable}
             className={`global-alert-item ${isUpdated ? 'updated' : ''} ${isClosing ? 'closing' : ''}`}
         >
-            {notification.variant === 'info' && (
-                <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                    className="me-2"
-                />
-            )}
+            {/*{notification.variant === 'info' && (*/}
+            {/*    <Spinner*/}
+            {/*        as="span"*/}
+            {/*        animation="border"*/}
+            {/*        size="sm"*/}
+            {/*        role="status"*/}
+            {/*        aria-hidden="true"*/}
+            {/*        className="me-2"*/}
+            {/*    />*/}
+            {/*)}*/}
             {t(notification.message)}
         </Alert>
     );

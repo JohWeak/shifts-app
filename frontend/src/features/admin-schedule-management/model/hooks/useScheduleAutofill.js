@@ -130,7 +130,6 @@ export const useScheduleAutofill = () => {
             console.error('No schedule details available');
             return { filled: 0, total: 0, changes: [] };
         }
-        setIsAutofilling(true);
 
         console.log('Starting autofill for position:', position.pos_name);
         console.log('Position shift requirements:', position.shift_requirements);
@@ -185,7 +184,7 @@ export const useScheduleAutofill = () => {
 
             try {
                 console.log(`Fetching recommendations for shift ${shiftId} on ${date}`);
-
+                setIsAutofilling(true);
                 // Fetch recommendations for this shift
                 const result = await dispatch(fetchRecommendations({
                     positionId,
@@ -264,7 +263,6 @@ export const useScheduleAutofill = () => {
             newChanges.forEach(key => newSet.add(key));
             return newSet;
         });
-
         console.log(`Autofill completed: filled ${totalFilled} of ${totalNeeded} positions`);
 
         // Show appropriate notification
@@ -333,22 +331,22 @@ export const useScheduleAutofill = () => {
             // Show notification based on results
             if (totalFilled === 0 && totalNeeded === 0) {
                 dispatch(addNotification({
-                    type: 'info',
+                    variant: 'info',
                     message: t('schedule.allPositionsFilled')
                 }));
             } else if (totalFilled === totalNeeded && totalFilled > 0) {
                 dispatch(addNotification({
-                    type: 'success',
+                    variant: 'success',
                     message: t('schedule.autofillSuccess')
                 }));
             } else if (totalFilled > 0) {
                 dispatch(addNotification({
-                    type: 'warning',
+                    variant: 'warning',
                     message: t('schedule.autofillPartial', { filled: totalFilled, total: totalNeeded })
                 }));
             } else {
                 dispatch(addNotification({
-                    type: 'warning',
+                    variant: 'warning',
                     message: t('schedule.noAvailableEmployeesForAutofill')
                 }));
             }
@@ -362,7 +360,7 @@ export const useScheduleAutofill = () => {
         } finally {
             setIsAutofilling(false);
         }
-    }, [scheduleDetails, autofillPosition, dispatch, t]);
+    }, [autofillPosition, dispatch, t, scheduleDetails.positions]);
 
     /**
      * Clear autofilled status when changes are saved or cancelled
