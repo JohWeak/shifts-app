@@ -15,11 +15,14 @@ const ScheduleInfo = ({
                           onUnpublish,
                           onExport,
                           isExporting,
-                          scheduleDetails
-}) => {
+                          scheduleDetails,
+                          onAutofill,
+                          isAutofilling,
+                      }) => {
     const {t, locale} = useI18n();
     const dispatch = useDispatch();
-    const { editingPositions, pendingChanges } = useSelector(state => state.schedule);
+    const {editingPositions, pendingChanges} = useSelector(state => state.schedule);
+    const hasEditingPositions = Object.values(editingPositions).some(Boolean);
 
     // Check if there are any positions being edited or unsaved changes
     const hasUnsavedChanges = Object.values(editingPositions || {}).some(Boolean) ||
@@ -72,6 +75,9 @@ const ScheduleInfo = ({
                         onExport={onExport}
                         isExporting={isExporting}
                         hasUnsavedChanges={hasUnsavedChanges}
+                        hasEditingPositions={hasEditingPositions}
+                        onAutofill={onAutofill}
+                        isAutofilling={isAutofilling}
                     />
                 </div>
 

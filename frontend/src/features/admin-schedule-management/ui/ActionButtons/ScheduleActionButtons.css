@@ -14,7 +14,7 @@
     display: flex;
     flex-grow: 1;
 }
-
+.schedule-action-buttons .autofill-all-btn,
 .schedule-action-buttons .publish-btn,
 .schedule-action-buttons .unpublish-btn,
 .schedule-action-buttons .export-btn {
@@ -30,6 +30,7 @@
     min-width: 100px;
 }
 
+.schedule-action-buttons .autofill-all-btn:hover,
 .schedule-action-buttons .publish-btn:hover,
 .schedule-action-buttons .unpublish-btn:hover,
 .schedule-action-buttons .export-btn:hover:not(:disabled) {

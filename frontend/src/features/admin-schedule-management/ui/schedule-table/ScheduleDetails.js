@@ -43,8 +43,6 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
         return <LoadingState size="lg" message={t('common.loading')}/>;
     }
 
-    // Check if any positions are in edit mode
-    const hasEditingPositions = Object.values(editingPositions).some(Boolean);
 
     // Handle autofill all
     const handleAutofillAll = () => {
@@ -146,7 +144,6 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
         <>
             <Card className="mb-3 ">
                 <Card.Body>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
                     <ScheduleInfo
                         schedule={scheduleDetails.schedule}
                         positions={scheduleDetails.positions}
@@ -155,30 +152,9 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                         onExport={handleExport}
                         isExporting={isExporting}
                         scheduleDetails={scheduleDetails}
+                        onAutofill={handleAutofillAll}
+                        isAutofilling={isAutofilling}
                     />
-                    {/* Global autofill button */}
-                    {hasEditingPositions && (
-                        <Button
-                            variant="info"
-                            size="sm"
-                            onClick={handleAutofillAll}
-                            disabled={isAutofilling}
-                        >
-                            {isAutofilling ? (
-                                <>
-                                    <Spinner size="sm" className="me-1" />
-                                    {t('schedule.autofillInProgress')}
-                                </>
-                            ) : (
-                                <>
-                                    <i className="bi bi-magic me-1"></i>
-                                    {t('schedule.autofillSchedule')}
-                                </>
-                            )}
-                        </Button>
-                    )}
-                </div>
-
 
                 </Card.Body>
                 {exportAlert && (

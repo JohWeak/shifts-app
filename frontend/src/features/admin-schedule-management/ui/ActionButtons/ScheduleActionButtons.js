@@ -1,9 +1,14 @@
 // frontend/src/features/admin-schedule-management/ui/ActionButtons/ScheduleActionButtons.js
-import React, { useRef, useState, useEffect } from 'react';
-import {Button, Dropdown, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import React, {useRef, useState, useEffect} from 'react';
+import {Button, Dropdown, OverlayTrigger, Spinner, Tooltip} from 'react-bootstrap';
 import ReactDOM from 'react-dom';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { canDeleteSchedule, canPublishSchedule, canUnpublishSchedule, canEditSchedule } from 'shared/lib/utils/scheduleUtils';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {
+    canDeleteSchedule,
+    canPublishSchedule,
+    canUnpublishSchedule,
+    canEditSchedule
+} from 'shared/lib/utils/scheduleUtils';
 import './ScheduleActionButtons.css';
 
 const ScheduleActionButtons = ({
@@ -18,13 +23,16 @@ const ScheduleActionButtons = ({
                                    onExport,
                                    isExporting = false,
                                    hasUnsavedChanges = false,
-                                   className = ''
+                                   className = '',
+                                   hasEditingPositions,
+                                   onAutofill,
+                                   isAutofilling,
                                }) => {
-    const { t, direction } = useI18n();
+    const {t, direction} = useI18n();
     const dropdownRef = useRef(null);
     const menuRef = useRef(null);
     const [showMenu, setShowMenu] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+    const [menuPosition, setMenuPosition] = useState({top: 0, left: 0});
 
     // Use schedule utils for permissions
     const canDelete = canDeleteSchedule(schedule);
@@ -95,7 +103,7 @@ const ScheduleActionButtons = ({
 
         const closeOtherDropdowns = () => {
             // Dispatch custom event to close other dropdowns
-            const event = new CustomEvent('closeDropdowns', { detail: { exceptId: dropdownRef.current?.id } });
+            const event = new CustomEvent('closeDropdowns', {detail: {exceptId: dropdownRef.current?.id}});
             document.dispatchEvent(event);
         };
 
@@ -145,11 +153,32 @@ const ScheduleActionButtons = ({
             <div className={`schedule-action-buttons ${className}`}>
                 {/* Status action button */}
                 <div className="status-action">
+                    {hasEditingPositions &&(
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={onAutofill}
+                            disabled={isAutofilling}
+                            className="autofill-all-btn me-2"
+                        >
+                            {isAutofilling ? (
+                                <>
+                                    <Spinner size="sm" className="me-1"/>
+                                    {t('schedule.autofillInProgress')}
+                                </>
+                            ) : (
+                                <>
+                                    <i className="bi bi-magic me-1"></i>
+                                    {t('schedule.autofillSchedule')}
+                                </>
+                            )}
+                        </Button>
+                    )}
                     {canPublish && onPublish && (
                         hasUnsavedChanges ? (
                             <OverlayTrigger
                                 placement="top"
-                                delay={{ show: 250, hide: 400 }}
+                                delay={{show: 250, hide: 400}}
                                 overlay={renderPublishTooltip}
                             >
                                 <span className="d-inline-block">
@@ -157,7 +186,7 @@ const ScheduleActionButtons = ({
                                         variant="success"
                                         size={size}
                                         disabled
-                                        style={{ pointerEvents: 'none' }}
+                                        style={{pointerEvents: 'none'}}
                                         className="publish-btn"
                                     >
                                         <i className="bi bi-check-circle me-2"></i>
