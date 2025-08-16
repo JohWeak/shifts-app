@@ -1,12 +1,11 @@
-// frontend/src/features/admin-schedule-management/ui/employee-recommendations/EmployeeRecommendations.js
-import React, {useState, useEffect} from 'react';
-import {ListGroup, Badge, Alert, Form, Tab, Tabs} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-    fetchRecommendations,
-} from '../../model/scheduleSlice';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useState, useEffect } from 'react';
+import { Alert, Form, Tab, Tabs, Badge } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRecommendations } from '../../model/scheduleSlice';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import EmployeeList from './components/EmployeeList';
+import UnavailableEmployeeGroups from './components/UnavailableEmployeeGroups';
 import './EmployeeRecommendations.css';
 
 const EmployeeRecommendations = ({
@@ -16,53 +15,34 @@ const EmployeeRecommendations = ({
                                      isVisible = true,
                                      onTabChange = null
                                  }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const recommendations = useSelector(state => state.schedule.recommendations);
-    const recommendationsLoading = useSelector(state => state.schedule.recommendationsLoading);
-    const error = useSelector(state => state.schedule.error);
-    const pendingChanges = useSelector(state => state.schedule.pendingChanges);
+    const { recommendations, recommendationsLoading, error, pendingChanges } = useSelector(state => state.schedule);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState(() =>
-        localStorage.getItem('available') || 'available'
-    );
-
+    const [activeTab, setActiveTab] = useState(() => localStorage.getItem('recommendationActiveTab') || 'available');
 
     useEffect(() => {
         if (isVisible && selectedPosition && scheduleDetails?.schedule?.id) {
-
             dispatch(fetchRecommendations({
                 positionId: selectedPosition.positionId,
                 shiftId: selectedPosition.shiftId,
                 date: selectedPosition.date,
                 scheduleId: scheduleDetails.schedule.id
-            }))
-                .then((action) => {
-                    console.log('fetchRecommendations completed:', action);
-                })
-                .catch((error) => {
-                    console.error('fetchRecommendations failed:', error);
-                });
+            }));
         }
     }, [isVisible, selectedPosition, scheduleDetails, pendingChanges, dispatch]);
 
     useEffect(() => {
         if (!recommendations) return;
-
-        if (recommendations.available?.length > 0) {
-            setActiveTab('available');
-        } else if (recommendations.cross_position?.length > 0) {
-            setActiveTab('cross_position');
-        } else if (recommendations.other_site?.length > 0) {
-            setActiveTab('other_site');
-        } else {
-            setActiveTab('unavailable');
+        if (activeTab === 'available' && recommendations.available?.length === 0) {
+            if (recommendations.cross_position?.length > 0) setActiveTab('cross_position');
+            else if (recommendations.other_site?.length > 0) setActiveTab('other_site');
+            else setActiveTab('unavailable');
         }
+    }, [recommendations, activeTab]);
 
-    }, [recommendations]);
-    // Save active tab
     useEffect(() => {
         localStorage.setItem('recommendationActiveTab', activeTab);
         if (onTabChange) {
@@ -70,256 +50,21 @@ const EmployeeRecommendations = ({
         }
     }, [activeTab, onTabChange]);
 
-
-    const filterEmployees = (employees) => {
-        if (!searchTerm) return employees;
-        return employees.filter(employee =>
-            `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    };
-
-    const handleEmployeeClick = (employee, showWarning) => {
-        if (showWarning) {
-            const confirmAssign = window.confirm(
-                t('employee.confirmOverride', {
-                    name: `${employee.first_name} ${employee.last_name}`,
-                    reason: employee.unavailable_reason?.replace('_', ' ') || 'N/A',
-                    note: employee.note || ''
-                })
-            );
-            if (confirmAssign) {
-                onEmployeeSelect(employee);
-            }
-        } else {
-            onEmployeeSelect(employee);
-        }
-    };
-
-    const groupUnavailableEmployees = () => {
-        const groups = {
-            temporary: [],
-            permanent: [],
-            legal: []
-        };
-
-        if (recommendations?.unavailable_soft) {
-            groups.temporary.push(...recommendations.unavailable_soft);
-        }
-        if (recommendations?.unavailable_hard) {
-            groups.temporary.push(...recommendations.unavailable_hard.filter(
-                emp => emp.unavailable_reason !== 'permanent_constraint' &&
-                    emp.unavailable_reason !== 'rest_violation'
-            ));
-        }
-        if (recommendations?.unavailable_permanent) {
-            groups.permanent.push(...recommendations.unavailable_permanent);
-        }
-        if (recommendations?.unavailable_busy) {
-            groups.legal.push(...recommendations.unavailable_busy);
-        }
-        if (recommendations?.unavailable_hard) {
-            groups.legal.push(...recommendations.unavailable_hard.filter(
-                emp => emp.unavailable_reason === 'rest_violation'
-            ));
-        }
-
-        return groups;
-    };
-    const renderEmployeeList = (employees, type) => {
-        const filtered = filterEmployees(employees);
-
-
-        if (!selectedPosition || !scheduleDetails) {
-            return (
-                <div className="employee-recommendations p-4 text-center">
-                    <p className="text-muted">{t('employee.selectPositionFirst')}</p>
-                </div>
-            );
-        }
-
-        if (filtered.length === 0) {
-            return (
-                <Alert variant="info" className="mt-3">
-                    <i className="bi bi-info-circle me-2"></i>
-                    {searchTerm ? t('employee.noMatchingEmployees') : t('employee.noEmployeesInCategory')}
-                </Alert>
-            );
-        }
-
+    if (!selectedPosition || !scheduleDetails) {
         return (
-            <ListGroup>
-                {filtered.map(employee => {
-                    const isFlexible = !employee.default_position_id || employee.flexible_position;
-                    const isAvailable = type === 'available' || type === 'cross_position' || type === 'other_site';
-                    const showWarning = !isAvailable;
-                    const isBecameAvailable = employee.recommendation?.reasons?.includes('became_available');
-
-                    return (
-                        <ListGroup.Item
-                            key={employee.emp_id}
-                            action
-                            onClick={() => handleEmployeeClick(employee, showWarning)}
-                            className={`employee-list-item ${showWarning ? 'list-group-item-warning' : ''} ${isFlexible ? 'flexible-employee' : ''}`}
-                        >
-                            <div className="employee-info">
-                                <div>
-                                    <div className="employee-name">
-                                        {employee.first_name} {employee.last_name}
-                                    </div>
-
-                                    <div className="employee-site">
-                                        <i className="bi bi-building me-1"></i>
-                                        {employee.work_site_name || t('employee.noWorkSite')}
-                                    </div>
-
-                                    <div className="employee-position">
-                                        <i className="bi bi-person-badge me-1"></i>
-                                        {employee.default_position_name || t('employee.flexiblePosition')}
-                                    </div>
-                                    {/* Showing a message for temporarily deleted items. */}
-                                    {isBecameAvailable && (
-                                        <div className="mt-2 text-info">
-                                            <i className="bi bi-arrow-clockwise me-1"></i>
-                                            {t('recommendation.became_available_in_edit')}
-                                        </div>
-                                    )}
-                                    {/* Show specific reason */}
-                                    {showWarning && (
-                                        <>
-                                            {employee.unavailable_reason === 'already_assigned' && (
-                                                <div className="mt-2 text-danger">
-                                                    <i className="bi bi-calendar-check me-1"></i>
-                                                    {t('recommendation.already_assigned_to', [employee.assigned_shift || t('recommendation.unknown_shift')])}
-                                                </div>
-                                            )}
-
-                                            {employee.unavailable_reason === 'permanent_constraint' &&
-                                                employee.constraint_details?.[0] && (
-                                                    <div className="permanent-constraint-info mt-2">
-                                                        <div className="text-danger">
-                                                            <i className="bi bi-lock-fill me-1"></i>
-                                                            {t('employee.permanentConstraint')}
-                                                        </div>
-                                                        <small className="text-muted d-block ms-3">
-                                                            {t('employee.approvedBy', {
-                                                                approver: employee.constraint_details[0].approved_by,
-                                                                date: new Date(employee.constraint_details[0].approved_at).toLocaleDateString()
-                                                            })}
-                                                        </small>
-                                                    </div>
-                                                )}
-
-                                            {employee.unavailable_reason === 'rest_violation' && employee.rest_details && (
-                                                <div className="mt-2 text-danger">
-                                                    <i className="bi bi-moon me-1"></i>
-                                                    {employee.rest_details.type === 'after'
-                                                        ? t('recommendation.rest_violation_after', [
-                                                            employee.rest_details.restHours,
-                                                            employee.rest_details.previousShift,
-                                                            employee.rest_details.requiredRest
-                                                        ])
-                                                        : t('recommendation.rest_violation_before', [
-                                                            employee.rest_details.restHours,
-                                                            employee.rest_details.nextShift,
-                                                            employee.rest_details.requiredRest
-                                                        ])
-                                                    }
-                                                </div>
-                                            )}
-
-                                            {employee.unavailable_reason === 'hard_constraint' && (
-                                                <div className="mt-2 text-danger">
-                                                    <i className="bi bi-x-circle me-1"></i>
-                                                    {t('recommendation.Cannot work')}
-                                                </div>
-                                            )}
-
-                                            {employee.unavailable_reason === 'soft_constraint' && (
-                                                <div className="mt-2 text-danger">
-                                                    <i className="bi bi-dash-circle me-1"></i>
-                                                    {t('recommendation.prefer_different_time')}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-
-                                    {/* For AVAILABLE employees - show reasons and warnings */}
-                                    {isAvailable && !isBecameAvailable && (
-                                        <>
-                                            {employee.recommendation?.reasons?.map((reason, idx) => {
-                                                const parts = reason.split(':');
-                                                const key = parts[0];
-                                                const params = parts.slice(1);
-                                                const translationKey = `recommendation.${key}`;
-                                                const translation = t(translationKey, params);
-
-                                                if (translation && translation !== translationKey) {
-                                                    return (
-                                                        <small key={idx} className="d-block text-success">
-                                                            <i className="bi bi-check-circle me-1"></i>
-                                                            {translation}
-                                                        </small>
-                                                    );
-                                                }
-                                                return null;
-                                            })}
-
-                                            {employee.recommendation?.warnings?.map((warning, idx) => {
-                                                const parts = warning.split(':');
-                                                const key = parts[0];
-                                                const params = parts.slice(1);
-                                                const translationKey = `recommendation.${key}`;
-                                                const translation = t(translationKey, params);
-
-                                                if (translation && translation !== translationKey) {
-                                                    return (
-                                                        <small key={idx} className="d-block text-warning">
-                                                            <i className="bi bi-exclamation-triangle me-1"></i>
-                                                            {translation}
-                                                        </small>
-                                                    );
-                                                }
-                                                return null;
-                                            })}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="employee-badges">
-                                <small className="score-badge">
-                                    {t('employee.score')}: {employee.recommendation?.score || 0}
-                                </small>
-                                {type === 'available' && (
-                                    <Badge bg="success">{t('employee.available')}</Badge>
-                                )}
-                                {type === 'cross_position' && (
-                                    <Badge bg="warning" text="dark">{t('employee.crossPosition')}</Badge>
-                                )}
-                                {type === 'other_site' && (
-                                    <Badge bg="info">{t('employee.otherSite')}</Badge>
-                                )}
-                                {isFlexible && (
-                                    <Badge bg="secondary">{t('employee.flexible')}</Badge>
-                                )}
-                                {showWarning && (
-                                    <Badge bg="danger">{t('employee.unavailable')}</Badge>
-                                )}
-                            </div>
-                        </ListGroup.Item>
-                    );
-                })}
-            </ListGroup>
+            <div className="employee-recommendations p-4 text-center">
+                <p className="text-muted">{t('employee.selectPositionFirst')}</p>
+            </div>
         );
-    };
+    }
 
+    const countUnavailable = (recommendations?.unavailable_soft?.length || 0) +
+        (recommendations?.unavailable_hard?.length || 0) +
+        (recommendations?.unavailable_busy?.length || 0) +
+        (recommendations?.unavailable_permanent?.length || 0);
 
     return (
-        <div className="employee-recommendations" style={{containerType: 'inline-size'}}>
-            <div style={{fontSize: '10px', color: 'gray', padding: '5px'}}>
-                Debug: {recommendations ? Object.keys(recommendations).map(key =>
-                `${key}: ${recommendations[key]?.length || 0}`
-            ).join(', ') : 'No recommendations'}
-            </div>
+        <div className="employee-recommendations" style={{ containerType: 'inline-size' }}>
             <Form.Group className="search-container">
                 <Form.Control
                     type="text"
@@ -331,116 +76,35 @@ const EmployeeRecommendations = ({
                 />
             </Form.Group>
 
-            {recommendationsLoading === 'pending' && (
-                <LoadingState message={t('common.loading')}/>
-            )}
-
-            {error && (
-                <Alert variant="danger">
-                    <i className="bi bi-exclamation-triangle me-2"></i>
-                    {error}
-                </Alert>
-            )}
+            {recommendationsLoading === 'pending' && <LoadingState message={t('common.loading')} />}
+            {error && <Alert variant="danger"><i className="bi bi-exclamation-triangle me-2"></i>{error}</Alert>}
 
             {recommendationsLoading !== 'pending' && !error && (
                 <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-3">
                     <Tab
                         eventKey="available"
-                        title={
-                            <span>
-                                <Badge bg="success" pill className="me-2">
-                                    {recommendations?.available?.length || 0}
-                                </Badge>
-                                {t('employee.tabs.available')}
-                            </span>
-                        }
+                        title={<span><Badge bg="success" pill className="me-2">{recommendations?.available?.length || 0}</Badge>{t('employee.tabs.available')}</span>}
                     >
-                        {renderEmployeeList(recommendations?.available || [], 'available')}
+                        <EmployeeList employees={recommendations?.available} type="available" onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
-
                     <Tab
                         eventKey="unavailable"
-                        title={
-                            <span>
-                                <Badge bg="danger" pill className="me-2">
-                                    {(recommendations?.unavailable_soft?.length || 0) +
-                                        (recommendations?.unavailable_hard?.length || 0) +
-                                        (recommendations?.unavailable_busy?.length || 0) +
-                                        (recommendations?.unavailable_permanent?.length || 0)}
-                                </Badge>
-                                {t('employee.tabs.unavailable')}
-
-                            </span>
-                        }
+                        title={<span><Badge bg="danger" pill className="me-2">{countUnavailable}</Badge>{t('employee.tabs.unavailable')}</span>}
                     >
-                        <div className="unavailable-groups">
-                            {(() => {
-                                const groups = groupUnavailableEmployees();
-
-                                return (
-                                    <>
-                                        {groups.temporary.length > 0 && (
-                                            <div className="unavailable-group">
-                                                <h6 className="group-title">
-                                                    {t('employee.temporaryConstraints')}
-                                                </h6>
-                                                {renderEmployeeList(groups.temporary, 'unavailable_temporary')}
-                                            </div>
-                                        )}
-
-                                        {groups.permanent.length > 0 && (
-                                            <div className="unavailable-group">
-                                                <h6 className="group-title">
-                                                    {t('employee.permanentConstraints')}
-                                                </h6>
-                                                {renderEmployeeList(groups.permanent, 'unavailable_permanent')}
-                                            </div>
-                                        )}
-
-                                        {groups.legal.length > 0 && (
-                                            <div className="unavailable-group">
-                                                <h6 className="group-title">
-                                                    {t('employee.legalConstraints')}
-                                                </h6>
-                                                {renderEmployeeList(groups.legal, 'unavailable_legal')}
-                                            </div>
-                                        )}
-                                    </>
-                                );
-                            })()}
-                        </div>
+                        <UnavailableEmployeeGroups recommendations={recommendations} onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
-
                     <Tab
                         eventKey="cross_position"
-                        title={
-                            <span>
-                                <Badge bg="warning" pill className="me-2">
-                                    {recommendations?.cross_position?.length || 0}
-                                </Badge>
-                                {t('employee.tabs.crossPosition')}
-
-                            </span>
-                        }
+                        title={<span><Badge bg="warning" pill className="me-2">{recommendations?.cross_position?.length || 0}</Badge>{t('employee.tabs.crossPosition')}</span>}
                     >
-                        {renderEmployeeList(recommendations?.cross_position || [], 'cross_position')}
+                        <EmployeeList employees={recommendations?.cross_position} type="cross_position" onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
-
                     <Tab
                         eventKey="other_site"
-                        title={
-                            <span>
-                                <Badge bg="info" pill className="me-2">
-                                    {recommendations?.other_site?.length || 0}
-                                </Badge>
-                                {t('employee.tabs.otherSite')}
-
-                            </span>
-                        }
+                        title={<span><Badge bg="info" pill className="me-2">{recommendations?.other_site?.length || 0}</Badge>{t('employee.tabs.otherSite')}</span>}
                     >
-                        {renderEmployeeList(recommendations?.other_site || [], 'other_site')}
+                        <EmployeeList employees={recommendations?.other_site} type="other_site" onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
-
                 </Tabs>
             )}
         </div>
