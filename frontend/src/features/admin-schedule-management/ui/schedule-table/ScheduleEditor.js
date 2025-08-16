@@ -494,7 +494,7 @@ const ScheduleEditor = ({
                             >
                                 {isAutofilling ? (
                                     <>
-                                        <Spinner size="sm" className="me-1" />
+                                        <Spinner size="sm" className="mx-2" />
                                         {t('schedule.autofilling')}
                                     </>
                                 ) : (

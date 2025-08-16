@@ -90,7 +90,7 @@ const ScheduleCell = ({
 
     // Helper to get employee styling classes
     const getEmployeeClassName = (employeeId, isPending = false) => {
-        let classes = ['employee-item mb-1 d-flex align-items-center justify-content-between'];
+        let classes = ['mb-1 d-flex align-items-center justify-content-between employee-item'];
 
         if (isPending) {
             classes.push('pending-assignment');
@@ -102,6 +102,7 @@ const ScheduleCell = ({
                     change.shiftId === shiftId &&
                     change.positionId === positionId
             );
+            console.log('Pending change: ', pendingChange);
 
             if (pendingChange) {
                 if (pendingChange.isAutofilled && !pendingChange.isSaved) {
@@ -272,7 +273,7 @@ const ScheduleCell = ({
                             onMouseEnter={() => onEmployeeMouseEnter(assignment.empId)}
                             onMouseLeave={onEmployeeMouseLeave}
                             isHighlighted={highlightedEmployeeId === assignment.empId}
-                            className={getEmployeeClassName(assignment.empId)}
+                            className={getEmployeeClassName(assignment.empId, employeeData.isPending)}
                             renderContent={() => (
                                 <>
                                     <span className="employee-name text-success">

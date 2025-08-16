@@ -228,8 +228,8 @@ export const useScheduleAutofill = () => {
                             empName: `${employee.first_name} ${employee.last_name}`,
                             isAutofilled: true,
                             autofillCategory: category,
-                            isCrossPosition: category === 'cross_position',
-                            isCrossSite: category === 'other_site'
+                            isCrossPosition: category === 'cross_position' || employee.default_position_id !== positionId,
+                            isCrossSite: category === 'other_site' || employee.work_site_id === null
                         };
 
                         console.log(`Assigning ${employee.first_name} ${employee.last_name} from ${category}`);
