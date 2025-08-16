@@ -5,7 +5,8 @@ import {
     generateSchedule,
     deleteSchedule,
     updateScheduleStatus,
-    exportSchedule
+    exportSchedule,
+    clearAutofilledStatus, updateScheduleAssignments
 } from '../scheduleSlice';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
@@ -16,7 +17,6 @@ export const useScheduleActions = () => {
     const [error, setError] = useState(null);
 
     const handleGenerate = async (settings) => {
-
         setLoading(true);
         setError(null);
         try {
@@ -66,6 +66,34 @@ export const useScheduleActions = () => {
             return { success: true };
         } catch (err) {
             setError(err.message || t('errors.exportFailed'));
+            return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSaveChanges = async (scheduleId, changes) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const result = await dispatch(updateScheduleAssignments({
+                scheduleId,
+                changes
+            })).unwrap();
+
+            // Mark autofilled changes as saved (remove green dashed border)
+            // but keep cross-position/cross-site styling
+            const autofilledKeys = changes
+                .filter(c => c.isAutofilled)
+                .map(c => `autofill-${c.positionId}-${c.date}-${c.shiftId}-${c.empId}`);
+
+            if (autofilledKeys.length > 0) {
+                dispatch(clearAutofilledStatus(autofilledKeys));
+            }
+
+            return { success: true, result };
+        } catch (err) {
+            setError(err.message || t('errors.saveFailed'));
             return { success: false, error: err.message };
         } finally {
             setLoading(false);

@@ -1,8 +1,8 @@
 // frontend/src/features/admin-schedule-management/components/ScheduleDetails.js
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Card, Alert} from 'react-bootstrap';
-
+import {Card, Alert, Button, Spinner} from 'react-bootstrap';
+import { useScheduleAutofill } from '../../model/hooks/useScheduleAutofill';
 import ScheduleEditor from './ScheduleEditor';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import ScheduleInfo from './ScheduleInfo';
@@ -18,14 +18,14 @@ import {
     exportSchedule,
     toggleEditPosition,
     addPendingChange,
-    removePendingChange
+    removePendingChange,
+    clearAutofilledStatus,
 } from '../../model/scheduleSlice';
 
 const ScheduleDetails = ({onCellClick, selectedCell}) => {
     const dispatch = useDispatch();
     const {t} = useI18n();
 
-    // Получаем данные напрямую из Redux store
     const {scheduleDetails, editingPositions, pendingChanges, loading} = useSelector(state => state.schedule);
 
     // --- Локальное состояние только для UI этого компонента ---
@@ -35,12 +35,32 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
     const [exportAlert, setExportAlert] = useState(null); // Для уведомления об экспорте
     const [isSaving, setIsSaving] = useState(false); // Для спиннера на кнопке Save
 
+    // Autofill hooks and state
+    const { autofillPosition, autofillAllEditingPositions, isAutofilling } = useScheduleAutofill();
+    const [showAutofillModal, setShowAutofillModal] = useState(false);
+
     if (!scheduleDetails) {
         return <LoadingState size="lg" message={t('common.loading')}/>;
     }
 
-    // --- Обработчики, которые диспатчат экшены Redux ---
+    // Check if any positions are in edit mode
+    const hasEditingPositions = Object.values(editingPositions).some(Boolean);
 
+    // Handle autofill all
+    const handleAutofillAll = () => {
+        setShowAutofillModal(true);
+    };
+
+    const confirmAutofill = async () => {
+        await autofillAllEditingPositions(editingPositions);
+        setShowAutofillModal(false);
+    };
+
+    const handlePositionAutofill = async (position) => {
+        await autofillPosition(position);
+    };
+
+    // --- Обработчики, которые диспатчат экшены Redux ---
     const handleStatusUpdate = async (status) => {
         // .unwrap() помогает обработать результат промиса (успех/ошибка)
         await dispatch(updateScheduleStatus({scheduleId: scheduleDetails.schedule.id, status})).unwrap();
@@ -53,9 +73,26 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
         if (positionChanges.length === 0) return;
 
         setIsSaving(true);
-        await dispatch(updateScheduleAssignments({scheduleId: scheduleDetails.schedule.id, changes: positionChanges}));
-        setIsSaving(false);
-        // Режим редактирования закроется автоматически, так как pendingChanges для этой позиции очистятся в слайсе
+        try {
+            await dispatch(updateScheduleAssignments({
+                scheduleId: scheduleDetails.schedule.id,
+                changes: positionChanges
+            })).unwrap();
+
+            // Clear autofilled status but keep cross-position/cross-site styling
+            const autofilledKeys = [];
+            Object.entries(pendingChanges).forEach(([key, change]) => {
+                if (change.positionId === positionId && change.isAutofilled) {
+                    autofilledKeys.push(key);
+                }
+            });
+
+            if (autofilledKeys.length > 0) {
+                dispatch(clearAutofilledStatus(autofilledKeys));
+            }
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleExport = async (format) => {
@@ -108,6 +145,7 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
         <>
             <Card className="mb-3 ">
                 <Card.Body>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                     <ScheduleInfo
                         schedule={scheduleDetails.schedule}
                         positions={scheduleDetails.positions}
@@ -117,6 +155,28 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                         isExporting={isExporting}
                         scheduleDetails={scheduleDetails}
                     />
+                    {/* Global autofill button */}
+                    {hasEditingPositions && (
+                        <Button
+                            variant="info"
+                            size="sm"
+                            onClick={handleAutofillAll}
+                            disabled={isAutofilling}
+                        >
+                            {isAutofilling ? (
+                                <>
+                                    <Spinner size="sm" className="me-1" />
+                                    {t('schedule.autofillInProgress')}
+                                </>
+                            ) : (
+                                <>
+                                    <i className="bi bi-magic me-1"></i>
+                                    {t('schedule.autofillSchedule')}
+                                </>
+                            )}
+                        </Button>
+                    )}
+                </div>
 
 
                 </Card.Body>
@@ -151,6 +211,8 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                                 onEmployeeClick={handleEmployeeClick}
                                 onEmployeeRemove={handleEmployeeRemove}
                                 onRemovePendingChange={handleRemovePendingChange}
+                                onAutofill={handlePositionAutofill}
+                                isAutofilling={isAutofilling}
                             />
                         ))
                     ) : (
@@ -183,6 +245,17 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
                 loading={loading === 'pending'}
                 confirmText={t('schedule.unpublish')}
                 confirmVariant="warning"
+            />
+            {/* Autofill confirmation modal */}
+            <ConfirmationModal
+                show={showAutofillModal}
+                onHide={() => setShowAutofillModal(false)}
+                onConfirm={confirmAutofill}
+                title={t('schedule.autofillSchedule')}
+                message={t('schedule.confirmAutofill')}
+                loading={isAutofilling}
+                confirmText={t('schedule.autofill')}
+                confirmVariant="info"
             />
         </>
     );

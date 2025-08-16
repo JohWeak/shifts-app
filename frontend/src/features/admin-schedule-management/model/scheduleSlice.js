@@ -203,6 +203,7 @@ const scheduleSlice = createSlice({
             unavailable_soft: [],
             unavailable_permanent: []
         },
+        autofilledChanges: {},
 
 
         loading: 'idle',
@@ -263,12 +264,19 @@ const scheduleSlice = createSlice({
         addPendingChange(state, action) {
             const { key, change } = action.payload;
             state.pendingChanges[key] = change;
+
+            // Track if this was an autofilled change
+            if (change.isAutofilled) {
+                state.autofilledChanges[key] = true;
+            }
+
             console.log('Added pending change:', key, change);
             console.log('All pending changes:', state.pendingChanges);
         },
         removePendingChange(state, action) {
             const key = action.payload;
             delete state.pendingChanges[key];
+            delete state.autofilledChanges[key];
             console.log('Removed pending change:', key);
             console.log('Remaining pending changes:', state.pendingChanges);
         },
@@ -279,6 +287,25 @@ const scheduleSlice = createSlice({
                     delete state.pendingChanges[key];
                 }
             });
+        },
+        clearAutofilledStatus(state, action) {
+            const keys = action.payload;
+            if (keys) {
+                keys.forEach(key => {
+                    if (state.pendingChanges[key]) {
+                        state.pendingChanges[key].isSaved = true;
+                    }
+                    delete state.autofilledChanges[key];
+                });
+            } else {
+                // Clear all autofilled status
+                state.autofilledChanges = {};
+                Object.keys(state.pendingChanges).forEach(key => {
+                    if (state.pendingChanges[key].isAutofilled) {
+                        state.pendingChanges[key].isSaved = true;
+                    }
+                });
+            }
         },
         // сброс при выходе из детального просмотра
         resetScheduleView(state) {
@@ -460,6 +487,7 @@ export const {
     removePendingChange,
     clearPositionChanges,
     updateShiftColor,
+    clearAutofilledStatus
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;
