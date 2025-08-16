@@ -57,6 +57,7 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
     };
 
     const handlePositionAutofill = async (position) => {
+        console.log('[FILL 2]: handlePositionAutofill', position);
         await autofillPosition(position);
     };
 

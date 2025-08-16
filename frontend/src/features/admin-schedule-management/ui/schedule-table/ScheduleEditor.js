@@ -53,7 +53,6 @@ const ScheduleEditor = ({
         handleMouseLeave
     } = useEmployeeHighlight();
     const {systemSettings} = useSelector(state => state.settings);
-    const { autofillPosition, isAutofilling } = useScheduleAutofill();
     const canEdit = canEditSchedule(schedule);
     const isPublished = schedule?.status === 'published';
 
@@ -280,6 +279,7 @@ const ScheduleEditor = ({
 
     const handleAutofill = async () => {
         if (onAutofill) {
+            console.log('[FILL 1]: Autofill called for position:', position);
             await onAutofill(position);
         }
     };
@@ -485,7 +485,7 @@ const ScheduleEditor = ({
                         <>
                             {/* Autofill button */}
                             <Button
-                                variant="info"
+                                variant="primary"
                                 size="sm"
                                 className="me-2"
                                 onClick={handleAutofill}
@@ -495,7 +495,7 @@ const ScheduleEditor = ({
                                 {isAutofilling ? (
                                     <>
                                         <Spinner size="sm" className="me-1" />
-                                        {t('schedule.autofillInProgress')}
+                                        {t('schedule.autofilling')}
                                     </>
                                 ) : (
                                     <>

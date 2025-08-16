@@ -20,20 +20,26 @@ export const useScheduleAutofill = () => {
     const calculateMissingEmployees = useCallback((position, scheduleDetails, pendingChanges) => {
         const missingByShift = {};
 
+        // Get start date from schedule
+        const startDate = new Date(scheduleDetails.schedule.start_date);
+
         position.shifts?.forEach(shift => {
-            const weekDates = getWeekDates(scheduleDetails.schedule.start_date);
+            // Get required count from shift requirements
+            const requirements = shift.requirements?.[0];
+            const requiredCount = requirements?.required_staff_count ||
+                position.shift_requirements?.[shift.shift_id]?.['0'] ||
+                2; // default to 2 if not found
 
-            weekDates.forEach((date, dayIndex) => {
+            // Check each day of the week
+            for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + dayIndex);
                 const dateStr = date.toISOString().split('T')[0];
-                const shiftKey = `${position.pos_id}-${shift.shift_id}-${dateStr}`;
 
-                // Get required employees for this shift
-                const requirement = position.employee_requirements?.find(
-                    req => req.shift_id === shift.shift_id
-                );
-                const requiredCount = requirement?.employees_required || 0;
+                // Get required count for this specific day
+                const dayRequiredCount = position.shift_requirements?.[shift.shift_id]?.[dayIndex] || requiredCount;
 
-                // Count current assignments
+                // Count current assignments for this shift/date
                 const currentAssignments = scheduleDetails.assignments?.filter(
                     a => a.position_id === position.pos_id &&
                         a.shift_id === shift.shift_id &&
@@ -57,38 +63,34 @@ export const useScheduleAutofill = () => {
                 ).length;
 
                 const totalAssigned = currentAssignments + pendingAdditions - pendingRemovals;
-                const missing = requiredCount - totalAssigned;
+                const missing = dayRequiredCount - totalAssigned;
 
                 if (missing > 0) {
-                    if (!missingByShift[shiftKey]) {
-                        missingByShift[shiftKey] = {
-                            positionId: position.pos_id,
-                            shiftId: shift.shift_id,
-                            date: dateStr,
-                            missing,
-                            dayIndex
-                        };
-                    }
+                    const shiftKey = `${position.pos_id}-${shift.shift_id}-${dateStr}`;
+                    missingByShift[shiftKey] = {
+                        positionId: position.pos_id,
+                        shiftId: shift.shift_id,
+                        date: dateStr,
+                        missing,
+                        dayIndex,
+                        requiredCount: dayRequiredCount,
+                        currentCount: totalAssigned
+                    };
+
+                    console.log(`Missing employees for ${position.pos_name} - ${shift.shift_name} on ${dateStr}:`, {
+                        required: dayRequiredCount,
+                        current: currentAssignments,
+                        pendingAdd: pendingAdditions,
+                        pendingRemove: pendingRemovals,
+                        total: totalAssigned,
+                        missing
+                    });
                 }
-            });
+            }
         });
 
         return missingByShift;
     }, []);
-
-    /**
-     * Get week dates helper
-     */
-    const getWeekDates = (startDate) => {
-        const dates = [];
-        const start = new Date(startDate);
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(start);
-            date.setDate(start.getDate() + i);
-            dates.push(date);
-        }
-        return dates;
-    };
 
     /**
      * Autofill a single position
@@ -99,24 +101,58 @@ export const useScheduleAutofill = () => {
             return { filled: 0, total: 0, changes: [] };
         }
 
+        console.log('Starting autofill for position:', position.pos_name);
+
         const missingByShift = calculateMissingEmployees(position, scheduleDetails, pendingChanges);
         const shiftKeys = Object.keys(missingByShift);
 
         if (shiftKeys.length === 0) {
+            console.log('No missing employees for position:', position.pos_name);
+            dispatch(addNotification({
+                type: 'info',
+                message: t('schedule.noPositionsToFill')
+            }));
             return { filled: 0, total: 0, changes: [] };
         }
+
+        console.log('Missing employees by shift:', missingByShift);
 
         let totalFilled = 0;
         let totalNeeded = 0;
         const newChanges = [];
-        const usedEmployees = new Set();
+        const usedEmployeesByDate = {}; // Track used employees per date
 
         // Process each shift that needs employees
         for (const shiftKey of shiftKeys) {
             const { positionId, shiftId, date, missing } = missingByShift[shiftKey];
             totalNeeded += missing;
 
+            // Initialize date tracking if needed
+            if (!usedEmployeesByDate[date]) {
+                usedEmployeesByDate[date] = new Set();
+
+                // Add already assigned employees for this date
+                scheduleDetails.assignments?.forEach(a => {
+                    if (a.work_date === date) {
+                        usedEmployeesByDate[date].add(a.emp_id);
+                    }
+                });
+
+                // Add pending assignments for this date
+                Object.values(pendingChanges).forEach(change => {
+                    if (change.date === date) {
+                        if (change.action === 'assign') {
+                            usedEmployeesByDate[date].add(change.empId);
+                        } else if (change.action === 'remove') {
+                            usedEmployeesByDate[date].delete(change.empId);
+                        }
+                    }
+                });
+            }
+
             try {
+                console.log(`Fetching recommendations for shift ${shiftId} on ${date}`);
+
                 // Fetch recommendations for this shift
                 const result = await dispatch(fetchRecommendations({
                     positionId,
@@ -125,27 +161,11 @@ export const useScheduleAutofill = () => {
                     scheduleId: scheduleDetails.schedule.id
                 })).unwrap();
 
+                console.log('Recommendations received:', result);
+
                 const recommendations = result.data || result;
 
-                // Collect employees already assigned on this date across all shifts
-                const employeesOnDate = new Set();
-                scheduleDetails.assignments?.forEach(a => {
-                    if (a.work_date === date) {
-                        employeesOnDate.add(a.emp_id);
-                    }
-                });
-
-                // Add pending assignments for this date
-                Object.values(pendingChanges).forEach(change => {
-                    if (change.action === 'assign' && change.date === date) {
-                        employeesOnDate.add(change.empId);
-                    }
-                });
-
-                // Track employees we're about to assign to this shift
-                const assignedToShift = new Set();
-
-                // Priority order: available -> flexible -> cross_position -> other_site
+                // Priority order: available -> cross_position -> other_site
                 const categoryPriority = ['available', 'cross_position', 'other_site'];
                 let filledForShift = 0;
 
@@ -153,21 +173,31 @@ export const useScheduleAutofill = () => {
                     if (filledForShift >= missing) break;
 
                     const categoryEmployees = recommendations[category] || [];
+                    console.log(`Checking ${category} category with ${categoryEmployees.length} employees`);
 
                     for (const employee of categoryEmployees) {
                         if (filledForShift >= missing) break;
 
-                        // Skip if employee is already assigned on this date
-                        if (employeesOnDate.has(employee.emp_id)) continue;
+                        // Skip if employee is already used on this date
+                        if (usedEmployeesByDate[date].has(employee.emp_id)) {
+                            console.log(`Skipping ${employee.first_name} ${employee.last_name} - already assigned on ${date}`);
+                            continue;
+                        }
 
-                        // Skip if we've already used this employee in this autofill session
-                        if (usedEmployees.has(employee.emp_id)) continue;
+                        // Check if employee is in unavailable categories
+                        const isUnavailable =
+                            recommendations.unavailable_busy?.some(e => e.emp_id === employee.emp_id) ||
+                            recommendations.unavailable_hard?.some(e => e.emp_id === employee.emp_id) ||
+                            recommendations.unavailable_soft?.some(e => e.emp_id === employee.emp_id) ||
+                            recommendations.unavailable_permanent?.some(e => e.emp_id === employee.emp_id);
 
-                        // Skip if already assigned to this specific shift
-                        if (assignedToShift.has(employee.emp_id)) continue;
+                        if (isUnavailable) {
+                            console.log(`Skipping ${employee.first_name} ${employee.last_name} - unavailable`);
+                            continue;
+                        }
 
                         // Create pending change for this assignment
-                        const changeKey = `autofill-${positionId}-${date}-${shiftId}-${employee.emp_id}-${nanoid()}`;
+                        const changeKey = `autofill-${positionId}-${date}-${shiftId}-${employee.emp_id}-${nanoid(6)}`;
                         const change = {
                             action: 'assign',
                             positionId,
@@ -181,24 +211,41 @@ export const useScheduleAutofill = () => {
                             isCrossSite: category === 'other_site'
                         };
 
+                        console.log(`Assigning ${employee.first_name} ${employee.last_name} from ${category}`);
+
                         dispatch(addPendingChange({ key: changeKey, change }));
 
                         newChanges.push(changeKey);
-                        usedEmployees.add(employee.emp_id);
-                        employeesOnDate.add(employee.emp_id);
-                        assignedToShift.add(employee.emp_id);
+                        usedEmployeesByDate[date].add(employee.emp_id);
                         filledForShift++;
                         totalFilled++;
                     }
                 }
 
+                if (filledForShift < missing) {
+                    console.log(`Could only fill ${filledForShift} of ${missing} needed for shift ${shiftId} on ${date}`);
+                }
+
             } catch (error) {
                 console.error(`Failed to fetch recommendations for ${shiftKey}:`, error);
+                dispatch(addNotification({
+                    type: 'error',
+                    message: t('schedule.recommendationsFetchFailed')
+                }));
             }
         }
 
+        // Update autofilled changes tracking
+        setAutofilledChanges(prev => {
+            const newSet = new Set(prev);
+            newChanges.forEach(key => newSet.add(key));
+            return newSet;
+        });
+
+        console.log(`Autofill completed: filled ${totalFilled} of ${totalNeeded} positions`);
+
         return { filled: totalFilled, total: totalNeeded, changes: newChanges };
-    }, [dispatch, scheduleDetails, pendingChanges, calculateMissingEmployees]);
+    }, [dispatch, scheduleDetails, pendingChanges, calculateMissingEmployees, t]);
 
     /**
      * Autofill all positions in edit mode
@@ -223,6 +270,8 @@ export const useScheduleAutofill = () => {
                 return;
             }
 
+            console.log(`Autofilling ${positionsToFill.length} positions`);
+
             // Autofill each position
             for (const position of positionsToFill) {
                 const result = await autofillPosition(position);
@@ -231,7 +280,7 @@ export const useScheduleAutofill = () => {
                 allNewChanges.push(...result.changes);
             }
 
-            // Store autofilled changes for styling
+            // Store all autofilled changes for styling
             setAutofilledChanges(new Set(allNewChanges));
 
             // Show notification based on results
