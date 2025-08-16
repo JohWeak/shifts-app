@@ -34,6 +34,7 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
     // --- Локальное состояние только для UI этого компонента ---
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [showUnpublishModal, setShowUnpublishModal] = useState(false);
+    const [showAutofillModal, setShowAutofillModal] = useState(false);
     const [isExporting, setIsExporting] = useState(false); // Для спиннера на кнопке экспорта
     const [exportAlert, setExportAlert] = useState(null); // Для уведомления об экспорте
     const [isSaving, setIsSaving] = useState(false); // Для спиннера на кнопке Save
@@ -82,16 +83,32 @@ const ScheduleDetails = ({onCellClick, selectedCell}) => {
 
         if (positionChanges.length === 0) return;
 
-        // Validate changes
-        const violations = validatePendingChanges();
-        if (violations.length > 0) {
-            setValidationViolations(violations);
-            setPendingSavePositionId(positionId);
-            setShowValidationModal(true);
-            return;
-        }
+        setIsSaving(true);
 
-        await performSave(positionId);
+        try {
+            // Validate changes on backend
+            console.log('Validating changes...');
+            const violations = await validatePendingChanges();
+            console.log('Validation result:', violations);
+
+            if (violations.length > 0) {
+                setValidationViolations(violations);
+                setPendingSavePositionId(positionId);
+                setShowValidationModal(true);
+                setIsSaving(false);
+                return; // Stop here, don't save
+            }
+
+            // Only save if no violations or user confirmed
+            await performSave(positionId);
+        } catch (error) {
+            console.error('Save/validation failed:', error);
+            dispatch(addNotification({
+                type: 'error',
+                message: t('schedule.validationFailed')
+            }));
+            setIsSaving(false);
+        }
     };
 
     const performSave = async (positionId) => {

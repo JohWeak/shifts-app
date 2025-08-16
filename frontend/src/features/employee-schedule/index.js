@@ -72,11 +72,13 @@ const EmployeeSchedule = () => {
     const hasAssignedPosition = employeeInfo?.position_id || false;
 
     const hasDataForView = (data) => {
-        if (!data?.current) return false;
+        if (!data?.current && !data?.next) return false;
         if (showFullSchedule) {
-            return data.current.days && data.current.days.length > 0;
+            return data.current.days && data.current.days.length > 0 ||
+                data.next.days && data.next.days.length > 0;
         }
-        return data.current.schedule && data.current.schedule.length > 0;
+        return data.current.schedule && data.current.schedule.length > 0 ||
+            data.next.schedule && data.next.schedule.length > 0;
     };
     const hasAnyData = hasDataForView(scheduleData);
 

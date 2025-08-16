@@ -139,7 +139,7 @@ export const fetchEmployeeArchiveMonth = createAsyncThunk(
     }
 );
 
-// Check for schedule updates - используем правильный метод
+// Check for schedule updates
 export const checkScheduleUpdates = createAsyncThunk(
     'employeeData/checkUpdates',
     async (_, { getState, dispatch }) => {
@@ -184,10 +184,10 @@ export const checkScheduleUpdates = createAsyncThunk(
                 return { hasUpdates: true };
             }
 
-            return null; // Обновлений нет
+            return null;
         } catch (error) {
             console.error('Error checking schedule updates:', error);
-            return null; // В случае ошибки ничего не делаем
+            return null;
         }
     }
 );

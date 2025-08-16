@@ -1,9 +1,9 @@
 /* frontend/src/index.css */
 @import './app/design-system.css';
 
-html {
-    scrollbar-gutter: stable ;
-}
+/*html {*/
+/*    scrollbar-gutter: stable ;*/
+/*}*/
 
 body.modal-open {
 

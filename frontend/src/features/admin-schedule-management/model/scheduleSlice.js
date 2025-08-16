@@ -28,7 +28,7 @@ export const fetchScheduleDetails = createAsyncThunk(
     async (scheduleId, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            console.log('Schedule details response:', response); // Для отладки
+            console.log('Schedule details response:', response);
 
             return response; // Возвращаем только data
         } catch (error) {
@@ -37,7 +37,7 @@ export const fetchScheduleDetails = createAsyncThunk(
     }
 );
 
-// Генерация нового расписания
+
 export const generateSchedule = createAsyncThunk(
     'schedule/generateSchedule',
     async (settings, { dispatch, rejectWithValue }) => {

@@ -912,6 +912,7 @@ export const en = {
         allPositionsFilled: 'All positions filled',
         autofilling: 'Autofilling...',
         noPositionsInEditMode: 'No positions in edit mode',
+        processingChanges: 'Processing...',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

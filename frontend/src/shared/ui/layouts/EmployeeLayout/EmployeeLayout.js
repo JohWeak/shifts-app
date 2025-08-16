@@ -41,8 +41,8 @@ const EmployeeLayout = () => {
                     console.log('[Data Preload] Загрузка ограничений...');
                     dispatch(fetchEmployeeConstraints({ weekStart }));
                 }
-                if (scheduleAction?.current?.employee?.position_id) {
-                    const positionId = scheduleAction.current.employee.position_id;
+                const positionId = scheduleAction.data.current?.employee?.position_id;
+                if (positionId) {
                     dispatch(fetchPositionSchedule({ positionId }));
                 }
 

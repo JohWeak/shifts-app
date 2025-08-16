@@ -1,7 +1,7 @@
 // frontend/src/features/admin-schedule-management/model/hooks/useScheduleAutofill.js
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchRecommendations, addPendingChange} from '../scheduleSlice';
+import {fetchRecommendations, addPendingChange, addBatchPendingChanges} from '../scheduleSlice';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {addNotification} from 'app/model/notificationsSlice';
 import {nanoid} from '@reduxjs/toolkit';

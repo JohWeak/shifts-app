@@ -60,6 +60,7 @@ export const scheduleAPI = {
         api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_MONTH, {
             params: { year, month }
         }),
+    validateSchedule: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.VALIDATE(scheduleId)),
 
 };
 

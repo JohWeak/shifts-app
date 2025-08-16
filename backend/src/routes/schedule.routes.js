@@ -7,6 +7,7 @@ const scheduleController = require('../controllers/scheduling/schedule/schedule.
 const generationController = require('../controllers/scheduling/schedule/schedule-generation.controller');
 const employeeController = require('../controllers/scheduling/schedule/schedule-employee.controller');
 const exportController = require('../controllers/scheduling/schedule/schedule-export.controller');
+const ScheduleValidationController = require('../controllers/scheduling/schedule-validation.controller');
 
 const router = express.Router();
 
@@ -31,5 +32,20 @@ router.put('/:scheduleId/status', ...[verifyToken, isAdmin], scheduleController.
 router.put('/:scheduleId/update-assignments', ...[verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
 router.delete('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.deleteSchedule);
 router.get('/admin/weekly', ...[verifyToken, isAdmin], employeeController.getAdminWeeklySchedule);
+router.post('/schedules/:id/validate',
+    ...[verifyToken, isAdmin],
+    (req, res, next) => {
+        req.db = req.app.get('db'); // Pass db to controller
+        next();
+    },
+    ScheduleValidationController.validateChanges
+);
+router.get('/schedules/validation-check', (req, res) => {
+    res.json({
+        message: 'Validation endpoint is available',
+        path: '/api/schedules/:id/validate'
+    });
+});
+
 
 module.exports = router;

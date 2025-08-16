@@ -208,12 +208,22 @@ const ScheduleManagement = () => {
         }
     }, [dataLoading]);
 
-    const handleEmployeeSelect = async (employeeId, employeeName) => {
+    const handleEmployeeSelect = async (employee) => {
         if (!selectedCell) return;
-        console.log('handleEmployeeSelect called:', { employeeId, employeeName, selectedCell });
+        console.log('handleEmployeeSelect called:', { employee, selectedCell });
 
+        // Get target position details
+        const targetPosition = scheduleDetails.positions.find(p => p.pos_id === selectedCell.positionId);
 
-        // If this is a replacement, we remove the old employee first.
+        // Determine if this is cross-position, cross-site, or flexible assignment
+        const isCrossPosition = employee.default_position_id &&
+            employee.default_position_id !== selectedCell.positionId;
+        const isCrossSite = employee.work_site_id &&
+            targetPosition?.work_site_id &&
+            employee.work_site_id !== targetPosition.work_site_id;
+        const isFlexible = !employee.default_position_id;
+
+        // If this is a replacement, we remove the old employee first
         if (selectedCell.employeeIdToReplace) {
             const removeKey = `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`;
             dispatch(addPendingChange({
@@ -229,7 +239,7 @@ const ScheduleManagement = () => {
             }));
         }
 
-        const assignKey = `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employeeId}`;
+        const assignKey = `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employee.emp_id}`;
         dispatch(addPendingChange({
             key: assignKey,
             change: {
@@ -237,9 +247,11 @@ const ScheduleManagement = () => {
                 positionId: selectedCell.positionId,
                 date: selectedCell.date,
                 shiftId: selectedCell.shiftId,
-                empId: employeeId,
-                empName: employeeName,
-
+                empId: employee.emp_id,
+                empName: `${employee.first_name} ${employee.last_name}`,
+                isCrossPosition,
+                isCrossSite,
+                isFlexible
             }
         }));
 

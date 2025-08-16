@@ -88,10 +88,10 @@ const EmployeeRecommendations = ({
                 })
             );
             if (confirmAssign) {
-                onEmployeeSelect(employee.emp_id, `${employee.first_name} ${employee.last_name}`);
+                onEmployeeSelect(employee);
             }
         } else {
-            onEmployeeSelect(employee.emp_id, `${employee.first_name} ${employee.last_name}`);
+            onEmployeeSelect(employee);
         }
     };
 
