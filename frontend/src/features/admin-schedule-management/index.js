@@ -238,7 +238,8 @@ const ScheduleManagement = () => {
                 date: selectedCell.date,
                 shiftId: selectedCell.shiftId,
                 empId: employeeId,
-                empName: employeeName
+                empName: employeeName,
+
             }
         }));
 

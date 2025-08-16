@@ -273,6 +273,35 @@ const scheduleSlice = createSlice({
             console.log('Added pending change:', key, change);
             console.log('All pending changes:', state.pendingChanges);
         },
+        addBatchPendingChanges(state, action) {
+            const changes = action.payload;
+            changes.forEach(({ key, change }) => {
+                state.pendingChanges[key] = change;
+                if (change.isAutofilled) {
+                    state.autofilledChanges[key] = true;
+                }
+            });
+            console.log(`Added ${changes.length} pending changes in batch`);
+        },
+        // Optimized save - just clear pending and mark as saved
+        applyPendingChanges(state, action) {
+            const positionId = action.payload;
+
+            // Mark position as no longer editing
+            state.editingPositions[positionId] = false;
+
+            // Clear pending changes for this position but keep the assignments
+            Object.keys(state.pendingChanges).forEach(key => {
+                if (state.pendingChanges[key].positionId === positionId) {
+                    // Mark autofilled as saved
+                    if (state.pendingChanges[key].isAutofilled) {
+                        state.pendingChanges[key].isSaved = true;
+                    }
+                    // Don't delete, just mark as applied
+                    state.pendingChanges[key].isApplied = true;
+                }
+            });
+        },
         removePendingChange(state, action) {
             const key = action.payload;
             delete state.pendingChanges[key];
@@ -490,7 +519,9 @@ export const {
     removePendingChange,
     clearPositionChanges,
     updateShiftColor,
-    clearAutofilledStatus
+    clearAutofilledStatus,
+    addBatchPendingChanges,
+    applyPendingChanges
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

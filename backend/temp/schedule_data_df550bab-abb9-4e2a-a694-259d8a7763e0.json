@@ -1,0 +1,256 @@
+{
+  "employees": [
+    {
+      "emp_id": 34,
+      "name": "Innactive 2 test",
+      "default_position_id": 7,
+      "status": "active"
+    },
+    {
+      "emp_id": 35,
+      "name": "Innactive 3 test",
+      "default_position_id": 7,
+      "status": "active"
+    },
+    {
+      "emp_id": 36,
+      "name": "Innactive 4 test",
+      "default_position_id": 8,
+      "status": "active"
+    },
+    {
+      "emp_id": 37,
+      "name": "Innactive5 test",
+      "default_position_id": 9,
+      "status": "active"
+    }
+  ],
+  "shifts": [
+    {
+      "shift_id": 13,
+      "shift_name": "Morn",
+      "start_time": "05:00:00",
+      "duration": 8,
+      "shift_type": "night",
+      "is_night_shift": false,
+      "position_id": 7
+    },
+    {
+      "shift_id": 16,
+      "shift_name": "Afternoon Shift",
+      "start_time": "14:35:00",
+      "duration": 5,
+      "shift_type": "day",
+      "is_night_shift": false,
+      "position_id": 7
+    }
+  ],
+  "positions": [
+    {
+      "pos_id": 7,
+      "pos_name": "1 Pos Of Innactive Site",
+      "profession": "Prof of Innactive Site",
+      "num_of_emp": 1,
+      "total_required": 20
+    }
+  ],
+  "position_shifts_map": {
+    "7": [
+      13,
+      16
+    ]
+  },
+  "days": [
+    {
+      "date": "2025-08-10",
+      "day_name": "Sunday",
+      "day_index": 0,
+      "weekday": 0
+    },
+    {
+      "date": "2025-08-11",
+      "day_name": "Monday",
+      "day_index": 1,
+      "weekday": 1
+    },
+    {
+      "date": "2025-08-12",
+      "day_name": "Tuesday",
+      "day_index": 2,
+      "weekday": 2
+    },
+    {
+      "date": "2025-08-13",
+      "day_name": "Wednesday",
+      "day_index": 3,
+      "weekday": 3
+    },
+    {
+      "date": "2025-08-14",
+      "day_name": "Thursday",
+      "day_index": 4,
+      "weekday": 4
+    },
+    {
+      "date": "2025-08-15",
+      "day_name": "Friday",
+      "day_index": 5,
+      "weekday": 5
+    },
+    {
+      "date": "2025-08-16",
+      "day_name": "Saturday",
+      "day_index": 6,
+      "weekday": 6
+    }
+  ],
+  "constraints": {
+    "cannot_work": [],
+    "prefer_work": [],
+    "permanent_cannot_work": [],
+    "legal_constraints": []
+  },
+  "existing_assignments": [],
+  "shift_requirements": {
+    "7-13-2025-08-10": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-10",
+      "day_index": 0,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-13-2025-08-11": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-11",
+      "day_index": 1,
+      "required_staff": 2,
+      "is_working_day": true
+    },
+    "7-13-2025-08-12": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-12",
+      "day_index": 2,
+      "required_staff": 3,
+      "is_working_day": true
+    },
+    "7-13-2025-08-13": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-13",
+      "day_index": 3,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-13-2025-08-14": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-14",
+      "day_index": 4,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-13-2025-08-15": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-15",
+      "day_index": 5,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-13-2025-08-16": {
+      "position_id": 7,
+      "shift_id": 13,
+      "date": "2025-08-16",
+      "day_index": 6,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-16-2025-08-10": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-10",
+      "day_index": 0,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-16-2025-08-11": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-11",
+      "day_index": 1,
+      "required_staff": 2,
+      "is_working_day": true
+    },
+    "7-16-2025-08-12": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-12",
+      "day_index": 2,
+      "required_staff": 3,
+      "is_working_day": true
+    },
+    "7-16-2025-08-13": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-13",
+      "day_index": 3,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-16-2025-08-14": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-14",
+      "day_index": 4,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-16-2025-08-15": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-15",
+      "day_index": 5,
+      "required_staff": 1,
+      "is_working_day": true
+    },
+    "7-16-2025-08-16": {
+      "position_id": 7,
+      "shift_id": 16,
+      "date": "2025-08-16",
+      "day_index": 6,
+      "required_staff": 1,
+      "is_working_day": true
+    }
+  },
+  "settings": {
+    "week_start": "2025-08-10",
+    "site_id": 6,
+    "hard_constraints": {
+      "MAX_HOURS_PER_DAY": 12,
+      "MAX_HOURS_PER_WEEK": 48,
+      "MIN_REST_BETWEEN_SHIFTS": 8,
+      "MIN_REST_AFTER_NIGHT_SHIFT": 12,
+      "MIN_REST_AFTER_REGULAR_SHIFT": 8,
+      "MAX_CONSECUTIVE_DAYS": 6,
+      "MAX_NIGHT_SHIFTS_PER_WEEK": 7
+    },
+    "soft_constraints": {
+      "MAX_SHIFTS_PER_DAY": 1,
+      "MAX_CONSECUTIVE_WORK_DAYS": 6,
+      "MAX_HOURS_PER_WEEK": 48,
+      "MAX_CANNOT_WORK_DAYS_PER_WEEK": 3,
+      "MAX_PREFER_WORK_DAYS_PER_WEEK": 5
+    },
+    "optimization_weights": {
+      "SHORTAGE_PENALTY": 1000,
+      "PREFER_WORK_BONUS": 10,
+      "WORKLOAD_BALANCE": 5,
+      "POSITION_MATCH_BONUS": 20,
+      "SITE_MATCH_BONUS": 10
+    },
+    "max_solve_time": 240
+  }
+}

@@ -1,18 +1,19 @@
 // frontend/src/features/admin-schedule-management/model/hooks/useScheduleAutofill.js
-import { useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchRecommendations, addPendingChange } from '../scheduleSlice';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { addNotification } from 'app/model/notificationsSlice';
-import { nanoid } from '@reduxjs/toolkit';
+import {useState, useCallback} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchRecommendations, addPendingChange} from '../scheduleSlice';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {addNotification} from 'app/model/notificationsSlice';
+import {nanoid} from '@reduxjs/toolkit';
 
 export const useScheduleAutofill = () => {
     const dispatch = useDispatch();
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [isAutofilling, setIsAutofilling] = useState(false);
     const [autofilledChanges, setAutofilledChanges] = useState(new Set());
-
-    const { scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
+    const [isProcessing, setIsProcessing] = useState(false); // Separate flag for UI updates
+    const animationTimeoutRef = useRef(null);
+    const {scheduleDetails, pendingChanges} = useSelector(state => state.schedule);
     /**
      * Get required staff count for specific shift and day
      */
@@ -123,54 +124,71 @@ export const useScheduleAutofill = () => {
     }, []);
 
     /**
-     * Autofill a single position
+     * Autofill a single position with batching
      */
     const autofillPosition = useCallback(async (position) => {
         if (!scheduleDetails?.schedule?.id) {
             console.error('No schedule details available');
-            return { filled: 0, total: 0, changes: [] };
+            return {filled: 0, total: 0, changes: []};
         }
 
+        setIsProcessing(true); // Start UI blocking
+
         console.log('Starting autofill for position:', position.pos_name);
-        console.log('Position shift requirements:', position.shift_requirements);
-        console.log('Position shifts:', position.shifts);
 
         const missingByShift = calculateMissingEmployees(position, scheduleDetails, pendingChanges);
         const shiftKeys = Object.keys(missingByShift);
 
         if (shiftKeys.length === 0) {
-            console.log('No missing employees for position:', position.pos_name);
+            setIsProcessing(false);
             dispatch(addNotification({
                 type: 'info',
                 message: t('schedule.noPositionsToFill')
             }));
-            return { filled: 0, total: 0, changes: [] };
+            return {filled: 0, total: 0, changes: []};
         }
-
-        console.log('Missing employees by shift:', missingByShift);
 
         let totalFilled = 0;
         let totalNeeded = 0;
-        const newChanges = [];
-        const usedEmployeesByDate = {}; // Track used employees per date
+        const batchChanges = []; // Collect all changes for batch update
+        const usedEmployeesByDate = {};
 
-        // Process each shift that needs employees
-        for (const shiftKey of shiftKeys) {
-            const { positionId, shiftId, date, missing } = missingByShift[shiftKey];
+        // Fetch all recommendations first (parallel requests)
+        const recommendationPromises = shiftKeys.map(async (shiftKey) => {
+            const {positionId, shiftId, date} = missingByShift[shiftKey];
+            try {
+                const result = await dispatch(fetchRecommendations({
+                    positionId,
+                    shiftId,
+                    date,
+                    scheduleId: scheduleDetails.schedule.id
+                })).unwrap();
+                return {shiftKey, recommendations: result.data || result, ...missingByShift[shiftKey]};
+            } catch (error) {
+                console.error(`Failed to fetch recommendations for ${shiftKey}:`, error);
+                return null;
+            }
+        });
+
+        const allRecommendations = await Promise.all(recommendationPromises);
+
+        // Process recommendations and build batch changes
+        for (const recData of allRecommendations) {
+            if (!recData) continue;
+
+            const {shiftKey, recommendations, positionId, shiftId, date, missing} = recData;
             totalNeeded += missing;
 
-            // Initialize date tracking if needed
+            // Initialize date tracking
             if (!usedEmployeesByDate[date]) {
                 usedEmployeesByDate[date] = new Set();
 
-                // Add already assigned employees for this date
                 scheduleDetails.assignments?.forEach(a => {
                     if (a.work_date === date) {
                         usedEmployeesByDate[date].add(a.emp_id);
                     }
                 });
 
-                // Add pending assignments for this date
                 Object.values(pendingChanges).forEach(change => {
                     if (change.date === date) {
                         if (change.action === 'assign') {
@@ -182,114 +200,77 @@ export const useScheduleAutofill = () => {
                 });
             }
 
-            try {
-                console.log(`Fetching recommendations for shift ${shiftId} on ${date}`);
-                setIsAutofilling(true);
-                // Fetch recommendations for this shift
-                const result = await dispatch(fetchRecommendations({
-                    positionId,
-                    shiftId,
-                    date,
-                    scheduleId: scheduleDetails.schedule.id
-                })).unwrap();
+            const categoryPriority = ['available', 'flexible', 'cross_position', 'other_site'];
+            let filledForShift = 0;
 
-                console.log('Recommendations received:', result);
+            for (const category of categoryPriority) {
+                if (filledForShift >= missing) break;
 
-                const recommendations = result.data || result;
+                const categoryEmployees = recommendations[category] || [];
 
-                // Priority order: available -> cross_position -> other_site
-                const categoryPriority = ['available', 'cross_position', 'other_site'];
-                let filledForShift = 0;
-
-                for (const category of categoryPriority) {
+                for (const employee of categoryEmployees) {
                     if (filledForShift >= missing) break;
 
-                    const categoryEmployees = recommendations[category] || [];
-                    console.log(`Checking ${category} category with ${categoryEmployees.length} employees`);
+                    if (usedEmployeesByDate[date].has(employee.emp_id)) continue;
 
-                    for (const employee of categoryEmployees) {
-                        if (filledForShift >= missing) break;
+                    const changeKey = `autofill-${positionId}-${date}-${shiftId}-${employee.emp_id}-${nanoid(6)}`;
+                    const change = {
+                        action: 'assign',
+                        positionId,
+                        shiftId,
+                        date,
+                        empId: employee.emp_id,
+                        empName: `${employee.first_name} ${employee.last_name}`,
+                        isAutofilled: true,
+                        autofillCategory: category,
+                        isCrossPosition: category === 'cross_position' ||
+                            (category === 'flexible' && employee.default_position_id !== positionId),
+                        isCrossSite: category === 'other_site',
+                        isFlexible: category === 'flexible'
+                    };
 
-                        // Skip if employee is already used on this date
-                        if (usedEmployeesByDate[date].has(employee.emp_id)) {
-                            console.log(`Skipping ${employee.first_name} ${employee.last_name} - already assigned on ${date}`);
-                            continue;
-                        }
-
-                        // Create pending change for this assignment
-                        const changeKey = `autofill-${positionId}-${date}-${shiftId}-${employee.emp_id}-${nanoid(6)}`;
-                        const change = {
-                            action: 'assign',
-                            positionId,
-                            shiftId,
-                            date,
-                            empId: employee.emp_id,
-                            empName: `${employee.first_name} ${employee.last_name}`,
-                            isAutofilled: true,
-                            autofillCategory: category,
-                            isCrossPosition: category === 'cross_position' || employee.default_position_id !== positionId,
-                            isCrossSite: category === 'other_site' || employee.work_site_id === null
-                        };
-
-                        console.log(`Assigning ${employee.first_name} ${employee.last_name} from ${category}`);
-
-                        dispatch(addPendingChange({ key: changeKey, change }));
-
-                        newChanges.push(changeKey);
-                        usedEmployeesByDate[date].add(employee.emp_id);
-                        filledForShift++;
-                        totalFilled++;
-                    }
+                    batchChanges.push({key: changeKey, change});
+                    usedEmployeesByDate[date].add(employee.emp_id);
+                    filledForShift++;
+                    totalFilled++;
                 }
-
-                if (filledForShift < missing) {
-                    console.log(`Could only fill ${filledForShift} of ${missing} needed for shift ${shiftId} on ${date}`);
-                }
-
-            } catch (error) {
-                console.error(`Failed to fetch recommendations for ${shiftKey}:`, error);
-                dispatch(addNotification({
-                    type: 'error',
-                    message: t('schedule.recommendationsFetchFailed')
-                }));
-            } finally {
-                setIsAutofilling(false);
             }
         }
 
-        // Update autofilled changes tracking
-        setAutofilledChanges(prev => {
-            const newSet = new Set(prev);
-            newChanges.forEach(key => newSet.add(key));
-            return newSet;
-        });
-        console.log(`Autofill completed: filled ${totalFilled} of ${totalNeeded} positions`);
+        // Apply all changes in batches with animation
+        if (batchChanges.length > 0) {
+            const BATCH_SIZE = 5;
+            const BATCH_DELAY = 100; // ms between batches
 
-        // Show appropriate notification
-        if (totalFilled === 0 && totalNeeded === 0) {
-            // No positions needed filling
-            dispatch(addNotification({
-                type: 'info',
-                message: t('schedule.allPositionsFilled')
-            }));
-        } else if (totalFilled === totalNeeded && totalFilled > 0) {
-            dispatch(addNotification({
-                type: 'success',
-                message: t('schedule.autofillSuccess')
-            }));
-        } else if (totalFilled > 0 && totalFilled < totalNeeded) {
-            dispatch(addNotification({
-                type: 'warning',
-                message: t('schedule.autofillPartial', { filled: totalFilled, total: totalNeeded })
-            }));
-        } else if (totalFilled === 0 && totalNeeded > 0) {
-            dispatch(addNotification({
-                type: 'warning',
-                message: t('schedule.noAvailableEmployeesForAutofill')
-            }));
+            for (let i = 0; i < batchChanges.length; i += BATCH_SIZE) {
+                const batch = batchChanges.slice(i, i + BATCH_SIZE);
+
+                // Use requestAnimationFrame for smooth animation
+                await new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        dispatch(addBatchPendingChanges(batch));
+                        setTimeout(resolve, BATCH_DELAY);
+                    });
+                });
+            }
+
+            // Update autofilled changes tracking
+            const changeKeys = batchChanges.map(item => item.key);
+            setAutofilledChanges(prev => {
+                const newSet = new Set(prev);
+                changeKeys.forEach(key => newSet.add(key));
+                return newSet;
+            });
         }
 
-        return { filled: totalFilled, total: totalNeeded, changes: newChanges };
+        // Keep processing state for a bit longer to ensure all UI updates complete
+        setTimeout(() => {
+            setIsProcessing(false);
+        }, 500);
+
+        console.log(`Autofill completed: filled ${totalFilled} of ${totalNeeded} positions`);
+
+        return {filled: totalFilled, total: totalNeeded, changes: batchChanges.map(item => item.key)};
     }, [dispatch, scheduleDetails, pendingChanges, calculateMissingEmployees, t]);
 
     /**
@@ -342,7 +323,7 @@ export const useScheduleAutofill = () => {
             } else if (totalFilled > 0) {
                 dispatch(addNotification({
                     variant: 'warning',
-                    message: t('schedule.autofillPartial', { filled: totalFilled, total: totalNeeded })
+                    message: t('schedule.autofillPartial', {filled: totalFilled, total: totalNeeded})
                 }));
             } else {
                 dispatch(addNotification({
@@ -382,6 +363,7 @@ export const useScheduleAutofill = () => {
         clearAutofilledStatus,
         isAutofilled,
         isAutofilling,
-        autofilledChanges
+        autofilledChanges,
+        isProcessing,
     };
 };
