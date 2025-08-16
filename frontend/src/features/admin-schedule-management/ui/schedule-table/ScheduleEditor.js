@@ -14,6 +14,7 @@ import {
 } from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor, isDarkTheme} from 'shared/lib/utils/colorUtils';
 import {useSelector} from "react-redux";
+import { useScheduleAutofill } from '../../model/hooks/useScheduleAutofill';
 import {formatEmployeeName as formatEmployeeNameUtil, canEditSchedule} from 'shared/lib/utils/scheduleUtils';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import { useEmployeeHighlight } from '../../model/hooks/useEmployeeHighlight';
@@ -37,7 +38,8 @@ const ScheduleEditor = ({
                             onEmployeeClick,
                             onEmployeeRemove,
                             onRemovePendingChange,
-                            scheduleDetails
+                            scheduleDetails,
+                            onAutofill
                         }) => {
     const isMobile = useMediaQuery('(max-width: 1350px)');
     const {t} = useI18n();
@@ -50,6 +52,7 @@ const ScheduleEditor = ({
         handleMouseLeave
     } = useEmployeeHighlight();
     const {systemSettings} = useSelector(state => state.settings);
+    const { autofillPosition, isAutofilling } = useScheduleAutofill();
     const canEdit = canEditSchedule(schedule);
     const isPublished = schedule?.status === 'published';
 
@@ -274,6 +277,14 @@ const ScheduleEditor = ({
         localStorage.setItem('showFirstNameOnly', JSON.stringify(checked));
     };
 
+    const handleAutofill = async () => {
+        if (onAutofill) {
+            onAutofill(position);
+        } else {
+            await autofillPosition(position);
+        }
+    };
+
     // Helper function to format date for header
     const weekDates = useMemo(() => {
         if (!scheduleDetails?.schedule?.start_date) return [];
@@ -473,6 +484,28 @@ const ScheduleEditor = ({
                     {/* Save/Cancel buttons */}
                     {isEditing && (
                         <>
+                            {/* Autofill button */}
+                            <Button
+                                variant="info"
+                                size="sm"
+                                className="me-2"
+                                onClick={handleAutofill}
+                                disabled={isAutofilling || savingChanges}
+                                title={t('schedule.autofillTooltip')}
+                            >
+                                {isAutofilling ? (
+                                    <>
+                                        <Spinner size="sm" className="me-1" />
+                                        {t('schedule.autofillInProgress')}
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="bi bi-magic me-1"></i>
+                                        {t('schedule.autofill')}
+                                    </>
+                                )}
+                            </Button>
+
                             <Button
                                 variant="success"
                                 size="sm"
