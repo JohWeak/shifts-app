@@ -1,4 +1,4 @@
-// backend/src/services/employee-recommendations-scoring.js
+// backend/src/services/EmployeeRecommendations-scoring.js
 /**
  * Scoring system explanation:
  *

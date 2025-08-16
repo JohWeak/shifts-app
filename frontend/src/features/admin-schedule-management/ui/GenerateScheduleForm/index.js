@@ -1,4 +1,4 @@
-//frontend/src/features/admin-schedule-management/ui/generate-schedule/GenerateScheduleForm.js
+//frontend/src/features/admin-schedule-management/ui/generate-schedule/index.js
 import React, {useState, useEffect, useMemo} from 'react';
 import {Form, Button, Row, Col, Spinner, Card} from 'react-bootstrap';
 import {useSelector} from 'react-redux';
@@ -6,6 +6,7 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {getNextWeekStart} from 'shared/lib/utils/scheduleUtils';
 import DatePicker from 'shared/ui/components/DatePicker/DatePicker';
 import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from 'shared/config/scheduleConstants';
+import './GenerateScheduleForm.css'
 
 const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, workSitesLoading}) => {
     const {t} = useI18n();

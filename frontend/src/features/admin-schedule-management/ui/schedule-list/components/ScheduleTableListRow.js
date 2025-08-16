@@ -5,7 +5,7 @@ import { Badge } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import { formatWeekRange, formatDateTime, canDeleteSchedule } from "shared/lib/utils/scheduleUtils";
-import ScheduleActionButtons from '../../ActionButtons/ScheduleActionButtons';
+import ScheduleActionButtons from '../../ScheduleActionButtons';
 
 const ScheduleTableListRow = ({ schedule, isCurrent, onView, onPublish, onUnpublish, onDelete }) => {
     const { t, locale } = useI18n();

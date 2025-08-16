@@ -1,6 +1,7 @@
 import React from 'react';
 import { ListGroup, Badge } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import './EmployeeListItem.css'
 
 const EmployeeListItem = ({ employee, type, onItemClick }) => {
     const { t } = useI18n();

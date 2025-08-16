@@ -1,7 +1,8 @@
 import React from 'react';
 import { ListGroup, Alert } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import EmployeeListItem from './EmployeeListItem';
+import EmployeeListItem from '../EmployeeListItem';
+import './EmployeeList.css'
 
 const EmployeeList = ({ employees, type, onItemClick, searchTerm }) => {
     const { t } = useI18n();

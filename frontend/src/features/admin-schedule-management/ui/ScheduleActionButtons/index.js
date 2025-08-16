@@ -1,4 +1,4 @@
-// frontend/src/features/admin-schedule-management/ui/ActionButtons/ScheduleActionButtons.js
+// frontend/src/features/admin-schedule-management/ui/ActionButtons/index.js
 import React, {useRef, useState, useEffect} from 'react';
 import {Button, Dropdown, OverlayTrigger, Spinner, Tooltip} from 'react-bootstrap';
 import ReactDOM from 'react-dom';
@@ -9,7 +9,7 @@ import {
     canUnpublishSchedule,
     canEditSchedule
 } from 'shared/lib/utils/scheduleUtils';
-import './ScheduleActionButtons.css';
+import './index.css';
 
 const ScheduleActionButtons = ({
                                    schedule,

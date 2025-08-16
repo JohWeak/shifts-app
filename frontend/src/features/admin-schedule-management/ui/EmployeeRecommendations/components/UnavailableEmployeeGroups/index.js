@@ -1,6 +1,7 @@
 import React from 'react';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import EmployeeList from './EmployeeList';
+import EmployeeList from '../EmployeeList';
+import './UnavailableEmployeeGroups.css';
 
 const UnavailableEmployeeGroups = ({ recommendations, onItemClick, searchTerm }) => {
     const { t } = useI18n();

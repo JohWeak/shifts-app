@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {setActiveTab, setSelectedScheduleId} from '../../model/scheduleSlice';
-import ScheduleActionButtons from "../ActionButtons/ScheduleActionButtons";
+import ScheduleActionButtons from "../ScheduleActionButtons";
 import './ScheduleInfo.css';
 
 const ScheduleInfo = ({

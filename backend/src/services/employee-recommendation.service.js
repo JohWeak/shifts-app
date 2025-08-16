@@ -1,4 +1,4 @@
-// backend/src/services/employee-recommendations.service.js
+// backend/src/services/EmployeeRecommendations.service.js
 const {Op} = require('sequelize');
 const dayjs = require('dayjs');
 const {EmployeeScorer, SCORING_CONFIG} = require('./employee-recommendation-scoring');

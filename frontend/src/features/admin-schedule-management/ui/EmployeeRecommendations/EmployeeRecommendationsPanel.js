@@ -1,8 +1,8 @@
-// frontend/src/features/admin-schedule-management/ui/employee-recommendations/EmployeeRecommendationsPanel.js
+// frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/EmployeeRecommendationsPanel.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import EmployeeRecommendations from './EmployeeRecommendations';
+import EmployeeRecommendations from './index';
 import './EmployeeRecommendationsPanel.css';
 
 const EmployeeRecommendationsPanel = ({

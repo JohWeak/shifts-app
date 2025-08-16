@@ -1,4 +1,4 @@
-// frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.js
+// frontend/src/features/admin-employee-management/ui/EmployeeList/index.js
 import React, {useMemo, useState} from 'react';
 import { Card, Table, Button, Badge, Spinner, Pagination, Form } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
