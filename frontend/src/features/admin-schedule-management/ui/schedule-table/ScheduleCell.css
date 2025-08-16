@@ -250,6 +250,60 @@
     transition: all var(--transition-base);
 }
 
+
+/* Автозаполненные сотрудники - зеленая пунктирная рамка */
+.employee-item.auto-filled {
+    border: 2px dashed #28a745 !important;
+    padding: 2px;
+    animation: autoFillPulse 0.5s ease-in;
+}
+
+/* Сотрудники с другой позиции или гибкие - желтая рамка */
+.employee-item.other-position {
+    box-shadow: inset 3px 0 0 #ffc107;
+    background: linear-gradient(90deg, rgba(255,193,7,0.08) 0%, transparent 15%);
+}
+
+/* Сотрудники с другого сайта - голубая рамка */
+.employee-item.other-site {
+    box-shadow: inset 0 0 0 2px #17a2b8;
+    background: linear-gradient(90deg, rgba(23,162,184,0.08) 0%, transparent 15%);
+}
+
+/* Комбинация меток */
+.employee-item.other-position.other-site {
+    box-shadow: inset 3px 0 0 #ffc107, inset 0 0 0 2px #17a2b8;
+}
+
+/* Удаляем стили auto-filled после изменения */
+.employee-item.auto-filled.dragging,
+.employee-item.auto-filled.being-replaced {
+    border-color: inherit !important;
+    border-style: solid !important;
+}
+
+/* Анимация автозаполнения */
+@keyframes autoFillPulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* RTL поддержка */
+[dir="rtl"] .employee-item.other-position {
+    box-shadow: inset -3px 0 0 #ffc107;
+    background: linear-gradient(270deg, rgba(255,193,7,0.08) 0%, transparent 15%);
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .schedule-cell {

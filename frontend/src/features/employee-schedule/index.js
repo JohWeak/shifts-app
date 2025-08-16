@@ -3,14 +3,15 @@ import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Container, Form, Alert, Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
+import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
+
+import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import PersonalScheduleView from './ui/PersonalScheduleView';
 import FullScheduleView from './ui/FullScheduleView';
 
-import {scheduleAPI} from 'shared/api/apiService';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 
 import './index.css';
@@ -55,13 +56,11 @@ const EmployeeSchedule = () => {
     useEffect(() => {
         localStorage.setItem('employee_showFullSchedule', JSON.stringify(showFullSchedule));
 
-        // Если пользователь включил полное расписание и у него есть должность
         if (showFullSchedule && personalSchedule?.current?.employee?.position_id) {
             const positionId = personalSchedule.current.employee.position_id;
             // Загружаем данные для должности (они кешируются отдельно)
             dispatch(fetchPositionSchedule({ positionId }));
         }
-        // Загрузку персонального расписания мы отсюда ПОЛНОСТЬЮ УБРАЛИ
 
     }, [dispatch, showFullSchedule, personalSchedule]);
 

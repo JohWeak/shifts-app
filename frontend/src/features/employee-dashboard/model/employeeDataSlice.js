@@ -71,9 +71,9 @@ export const fetchPositionSchedule = createAsyncThunk(
 
         try {
             const currentResponse = await scheduleAPI.fetchPositionWeeklySchedule(positionId);
-            const currentData = currentResponse; // .data уже извлечено в apiService
+            const currentData = currentResponse;
             let nextData = null;
-
+            console.log('[fetchPositionSchedule] Current data:', currentData, 'Current response: ', currentResponse);
             if (currentData?.week?.start) {
                 const nextWeekStart = format(addWeeks(parseISO(currentData.week.start), 1), 'yyyy-MM-dd');
                 nextData = await scheduleAPI.fetchPositionWeeklySchedule(positionId, nextWeekStart);

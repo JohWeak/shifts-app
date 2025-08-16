@@ -10,6 +10,7 @@ import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
 import {
     fetchPersonalSchedule,
+    fetchPositionSchedule,
     fetchEmployeeArchiveSummary,
     checkScheduleUpdates,
     fetchEmployeeConstraints,
@@ -31,18 +32,24 @@ const EmployeeLayout = () => {
         const initialLoad = async () => {
             try {
                 // --- ЭТАП 1: Загружаем критически важные данные ---
-                console.log('[Data Preload] Загрузка персонального расписания...');
                 const scheduleAction = await dispatch(fetchPersonalSchedule({})).unwrap();
+                console.log('[Data Preload] Загрузка персонального расписания...', scheduleAction);
+
 
                 const weekStart = scheduleAction.data.current?.week?.start;
                 if (weekStart) {
                     console.log('[Data Preload] Загрузка ограничений...');
                     dispatch(fetchEmployeeConstraints({ weekStart }));
                 }
+                if (scheduleAction?.current?.employee?.position_id) {
+                    const positionId = scheduleAction.current.employee.position_id;
+                    dispatch(fetchPositionSchedule({ positionId }));
+                }
 
                 // --- ЭТАП 2: В фоне загружаем важные, но не критические данные ---
-                console.log('[Data Preload] Фоновая загрузка сводки по архиву...');
+
                 dispatch(fetchEmployeeArchiveSummary());
+
 
                 // Загружаем запросы для подсчета новых обновлений
                 console.log('[Data Preload] Загрузка запросов...');
