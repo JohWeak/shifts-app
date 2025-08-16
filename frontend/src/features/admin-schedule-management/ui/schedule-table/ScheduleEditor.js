@@ -39,7 +39,8 @@ const ScheduleEditor = ({
                             onEmployeeRemove,
                             onRemovePendingChange,
                             scheduleDetails,
-                            onAutofill
+                            onAutofill,
+                            isAutofilling = false
                         }) => {
     const isMobile = useMediaQuery('(max-width: 1350px)');
     const {t} = useI18n();
@@ -279,9 +280,7 @@ const ScheduleEditor = ({
 
     const handleAutofill = async () => {
         if (onAutofill) {
-            onAutofill(position);
-        } else {
-            await autofillPosition(position);
+            await onAutofill(position);
         }
     };
 

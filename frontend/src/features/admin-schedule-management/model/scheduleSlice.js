@@ -290,9 +290,11 @@ const scheduleSlice = createSlice({
         },
         clearAutofilledStatus(state, action) {
             const keys = action.payload;
-            if (keys) {
+            if (keys && Array.isArray(keys)) {
                 keys.forEach(key => {
+                    // Remove green dashed border but keep cross-position/site info
                     if (state.pendingChanges[key]) {
+                        state.pendingChanges[key].isAutofilled = false;
                         state.pendingChanges[key].isSaved = true;
                     }
                     delete state.autofilledChanges[key];
@@ -301,7 +303,8 @@ const scheduleSlice = createSlice({
                 // Clear all autofilled status
                 state.autofilledChanges = {};
                 Object.keys(state.pendingChanges).forEach(key => {
-                    if (state.pendingChanges[key].isAutofilled) {
+                    if (state.pendingChanges[key]?.isAutofilled) {
+                        state.pendingChanges[key].isAutofilled = false;
                         state.pendingChanges[key].isSaved = true;
                     }
                 });
