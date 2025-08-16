@@ -1,10 +1,13 @@
+// frontend/src/features/admin-schedule-management/ui/ScheduleContent/index.js
+
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Spinner } from 'react-bootstrap';
 import ScheduleList from '../ScheduleList';
 import ScheduleView from '../ScheduleView';
 
-const ScheduleContent = ({ onCellClick, onScheduleDeleted, handleViewDetails }) => {
+// Принимаем все UI-пропсы через ...rest
+const ScheduleContent = ({ onScheduleDeleted, handleViewDetails, ...viewProps }) => {
     const { schedules, activeTab, selectedScheduleId, loading } = useSelector((state) => state.schedule);
 
     if (loading === 'pending' && !schedules.length) {
@@ -16,7 +19,7 @@ const ScheduleContent = ({ onCellClick, onScheduleDeleted, handleViewDetails }) 
     }
 
     if (activeTab === 'view' && selectedScheduleId) {
-        return <ScheduleView onCellClick={onCellClick} />;
+        return <ScheduleView {...viewProps} />;
     }
 
     return (
@@ -27,5 +30,4 @@ const ScheduleContent = ({ onCellClick, onScheduleDeleted, handleViewDetails }) 
         />
     );
 };
-
 export default ScheduleContent;

@@ -1,3 +1,5 @@
+// frontend/src/features/admin-schedule-management/index.js
+
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Button } from 'react-bootstrap';
@@ -7,8 +9,6 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 // UI Components
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import GenerateScheduleForm from './ui/GenerateScheduleForm';
-import EmployeeRecommendationsModal from './ui/EmployeeRecommendations/EmployeeRecommendationsModal/EmployeeRecommendationsModal';
-import EmployeeRecommendationsPanel from './ui/EmployeeRecommendations/EmployeeRecommendationsPanel/EmployeeRecommendationsPanel';
 import ScheduleContent from './ui/ScheduleContent';
 
 // Hooks & Actions
@@ -22,49 +22,25 @@ import {
     fetchWorkSites,
     addPendingChange
 } from './model/scheduleSlice';
-
 import './index.css';
 
 const ScheduleManagement = () => {
-    const { t } = useI18n();
+    const { t, direction } = useI18n();
     const dispatch = useDispatch();
 
-    // --- DATA SELECTORS ---
     const { selectedScheduleId, scheduleDetails, workSites, workSitesLoading } = useSelector((state) => state.schedule);
-
-    // --- CUSTOM HOOKS FOR LOGIC & STATE ---
     const { loading: actionsLoading, handleGenerate } = useScheduleActions();
     const { selectedCell, isPanelOpen, showEmployeeModal, isLargeScreen, handleCellClick, closeAllModals } = useScheduleUI();
-
-    // --- LOCAL UI STATE ---
     const [isGenerateFormVisible, setIsGenerateFormVisible] = useState(false);
 
-    // --- DATA FETCHING ---
     useEffect(() => {
         dispatch(fetchSchedules());
         dispatch(fetchWorkSites());
     }, [dispatch]);
 
-    // --- HANDLERS ---
-    const onGenerateSubmit = async (settings) => {
-        const notificationId = nanoid();
-        dispatch(addNotification({ id: notificationId, type: 'info', message: t('schedule.generatingSchedule'), persistent: true }));
-
-        const result = await handleGenerate(settings);
-
-        if (result.success) {
-            setIsGenerateFormVisible(false);
-            dispatch(addNotification({ id: notificationId, type: 'success', message: t('schedule.generateSuccess') }));
-        } else {
-            dispatch(addNotification({ id: notificationId, type: 'error', message: result.error || t('errors.generateFailed') }));
-        }
-    };
-
     const handleViewDetails = (scheduleId) => {
         dispatch(setSelectedScheduleId(scheduleId));
-        if (scheduleId) {
-            dispatch(fetchScheduleDetails(scheduleId));
-        }
+        if (scheduleId) dispatch(fetchScheduleDetails(scheduleId));
     };
 
     const handleEmployeeSelect = (employee) => {
@@ -76,26 +52,16 @@ const ScheduleManagement = () => {
 
         if (selectedCell.employeeIdToReplace) {
             const removeKey = `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`;
-            dispatch(addPendingChange({ key: removeKey, change: { action: 'remove', ...selectedCell } }));
+            dispatch(addPendingChange({ key: removeKey, change: { action: 'remove', positionId: selectedCell.positionId, date: selectedCell.date, shiftId: selectedCell.shiftId, empId: selectedCell.employeeIdToReplace, assignmentId: selectedCell.assignmentIdToReplace } }));
         }
 
         const assignKey = `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employee.emp_id}`;
         dispatch(addPendingChange({
             key: assignKey,
-            change: {
-                action: 'assign',
-                positionId: selectedCell.positionId,
-                date: selectedCell.date,
-                shiftId: selectedCell.shiftId,
-                empId: employee.emp_id,
-                empName: `${employee.first_name} ${employee.last_name}`,
-                isCrossPosition, isCrossSite, isFlexible
-            }
+            change: { action: 'assign', positionId: selectedCell.positionId, date: selectedCell.date, shiftId: selectedCell.shiftId, empId: employee.emp_id, empName: `${employee.first_name} ${employee.last_name}`, isCrossPosition, isCrossSite, isFlexible }
         }));
 
-        if (!isLargeScreen) {
-            closeAllModals();
-        }
+        if (!isLargeScreen) closeAllModals();
     };
 
     const onScheduleDeleted = (deletedId) => {
@@ -106,9 +72,37 @@ const ScheduleManagement = () => {
         }
     };
 
+    const onGenerateSubmit = async (settings) => {
+        const notificationId = nanoid();
+        dispatch(addNotification({ id: notificationId, type: 'info', message: t('schedule.generatingSchedule'), persistent: true }));
+        const result = await handleGenerate(settings);
+        if (result.success) {
+            setIsGenerateFormVisible(false);
+            dispatch(addNotification({ id: notificationId, type: 'success', message: t('schedule.generateSuccess') }));
+        } else {
+            dispatch(addNotification({ id: notificationId, type: 'error', message: result.error || t('errors.generateFailed') }));
+        }
+    };
+
+    const PANEL_WIDTH_PERCENT = 25;
+    const ADD_MARGIN_PERCENT = 1;
+    const contentStyles = {
+        // Если панель открыта и экран большой, добавляем отступ справа (или слева для RTL)
+        // равный ширине панели. Иначе отступ 0.
+        marginRight: isPanelOpen && isLargeScreen ? `${PANEL_WIDTH_PERCENT + ADD_MARGIN_PERCENT}%` : '0',
+    };
+
+    const isRTL = direction === 'rtl';
+    if (isRTL) {
+        contentStyles.marginLeft = isPanelOpen && isLargeScreen ? `${PANEL_WIDTH_PERCENT + ADD_MARGIN_PERCENT}%` : '0';
+        delete contentStyles.marginRight;
+    }
+
     return (
-        <div className={`schedule-management-wrapper ${isPanelOpen && isLargeScreen ? 'panel-open' : ''}`}>
-            <div className="schedule-management-content">
+        <div className="schedule-management-wrapper">
+            <div className="schedule-management-content"
+                 style={contentStyles}
+            >
                 <Container fluid className="p-1 admin-schedule-management-container">
                     <PageHeader icon="calendar-week" title={t('schedule.title')} subtitle={t('schedule.subtitle')}>
                         <Button variant="primary" onClick={() => setIsGenerateFormVisible(!isGenerateFormVisible)} disabled={actionsLoading}>
@@ -117,8 +111,8 @@ const ScheduleManagement = () => {
                         </Button>
                     </PageHeader>
 
-                    <div className={`generate-schedule-form-container ${isGenerateFormVisible ? 'visible' : ''}`}>
-                        {isGenerateFormVisible && (
+                    {isGenerateFormVisible && (
+                        <div className="generate-schedule-form-container visible">
                             <GenerateScheduleForm
                                 onGenerate={onGenerateSubmit}
                                 onCancel={() => setIsGenerateFormVisible(false)}
@@ -126,34 +120,23 @@ const ScheduleManagement = () => {
                                 workSites={workSites}
                                 workSitesLoading={workSitesLoading === 'pending'}
                             />
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     <ScheduleContent
-                        onCellClick={handleCellClick}
-                        onScheduleDeleted={onScheduleDeleted}
                         handleViewDetails={handleViewDetails}
+                        onScheduleDeleted={onScheduleDeleted}
+                        onCellClick={handleCellClick}
+                        onEmployeeSelect={handleEmployeeSelect}
+                        selectedCell={selectedCell}
+                        isPanelOpen={isPanelOpen}
+                        showEmployeeModal={showEmployeeModal}
+                        isLargeScreen={isLargeScreen}
+                        closeAllModals={closeAllModals}
+                        panelWidth={PANEL_WIDTH_PERCENT}
                     />
                 </Container>
             </div>
-
-            {isLargeScreen ? (
-                <EmployeeRecommendationsPanel
-                    isOpen={isPanelOpen}
-                    onClose={closeAllModals}
-                    selectedPosition={selectedCell}
-                    onEmployeeSelect={handleEmployeeSelect}
-                    scheduleDetails={scheduleDetails}
-                />
-            ) : (
-                <EmployeeRecommendationsModal
-                    show={showEmployeeModal}
-                    onHide={closeAllModals}
-                    selectedPosition={selectedCell}
-                    onEmployeeSelect={handleEmployeeSelect}
-                    scheduleDetails={scheduleDetails}
-                />
-            )}
         </div>
     );
 };

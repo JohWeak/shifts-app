@@ -19,7 +19,7 @@ import ScheduleEditorHeader from './components/ScheduleEditorHeader';
 import PositionScheduleTable from './components/PositionScheduleTable';
 import './Position.css';
 
-const ScheduleEditor = ({
+const PositionEditor = ({
                             position,
                             schedule,
                             isEditing = false,
@@ -328,4 +328,4 @@ const ScheduleEditor = ({
     );
 };
 
-export default ScheduleEditor;
+export default PositionEditor;

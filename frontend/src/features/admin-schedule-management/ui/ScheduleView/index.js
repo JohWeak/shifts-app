@@ -1,4 +1,4 @@
-// frontend/src/features/admin-schedule-management/components/index.js
+// frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Alert, Spinner } from 'react-bootstrap';
@@ -10,15 +10,26 @@ import {
     updateScheduleAssignments, exportSchedule, toggleEditPosition,
     addPendingChange, removePendingChange, clearAutofilledStatus, applyPendingChanges,
 } from '../../model/scheduleSlice';
-import ScheduleEditor from './components/Position';
+import PositionEditor from './components/Position';
 import ScheduleInfo from './components/ScheduleInfo';
 import ValidationModal from './components/ValidationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import { useScheduleAutofill } from '../../model/hooks/useScheduleAutofill';
+import EmployeeRecommendationsPanel from '../EmployeeRecommendations/EmployeeRecommendationsPanel';
+import EmployeeRecommendationsModal from '../EmployeeRecommendations/EmployeeRecommendationsModal';
 import './ScheduleView.css';
 
-const ScheduleDetails = ({ onCellClick, selectedCell }) => {
+const ScheduleView = ({
+                          onCellClick,
+                          selectedCell,
+                          onEmployeeSelect,
+                          isPanelOpen,
+                          showEmployeeModal,
+                          isLargeScreen,
+                          closeAllModals,
+                          panelWidth,
+                      }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
@@ -101,13 +112,30 @@ const ScheduleDetails = ({ onCellClick, selectedCell }) => {
         onCellClick(date, positionId, shiftId, empId, assignment?.id);
     };
 
-    if (!scheduleDetails) return <LoadingState size="lg" message={t('common.loading')} />;
+    if (loading === 'pending' && !scheduleDetails) {
+        return <LoadingState size="lg" message={t('common.loading')} />;
+    }
+    if (!scheduleDetails) {
+        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')} />;
+    }
 
     const isUIBlocked = isProcessing || isAutofilling;
 
     return (
         <>
-            {isUIBlocked && <div className="schedule-processing-overlay"><div className="processing-spinner"><Spinner animation="border" variant="primary" /><p>{t('schedule.processingChanges')}</p></div></div>}
+            {isUIBlocked &&
+                <div
+                    className="schedule-processing-overlay">
+                    <div
+                        className="processing-spinner">
+                        <Spinner
+                            animation="border"
+                            variant="primary"
+                        />
+                        <p>{t('schedule.processingChanges')}</p>
+                    </div>
+                </div>
+            }
 
             <Card className={`mb-3 ${isUIBlocked ? 'disabled-card' : ''}`}>
                 <Card.Body>
@@ -129,7 +157,7 @@ const ScheduleDetails = ({ onCellClick, selectedCell }) => {
                 <Card.Body>
                     {scheduleDetails.positions?.length > 0 ? (
                         scheduleDetails.positions.map(position => (
-                            <ScheduleEditor
+                            <PositionEditor
                                 key={position.pos_id}
                                 position={position}
                                 schedule={scheduleDetails.schedule}
@@ -161,8 +189,27 @@ const ScheduleDetails = ({ onCellClick, selectedCell }) => {
                 violations={validationViolations}
                 title={t('schedule.validationWarning')} />
             {renderModals()}
+            {/* Portal render */}
+            {isLargeScreen ? (
+                <EmployeeRecommendationsPanel
+                    isOpen={isPanelOpen}
+                    onClose={closeAllModals}
+                    selectedPosition={selectedCell}
+                    onEmployeeSelect={onEmployeeSelect}
+                    scheduleDetails={scheduleDetails}
+                    panelWidth={panelWidth}
+                />
+            ) : (
+                <EmployeeRecommendationsModal
+                    show={showEmployeeModal}
+                    onHide={closeAllModals}
+                    selectedPosition={selectedCell}
+                    onEmployeeSelect={onEmployeeSelect}
+                    scheduleDetails={scheduleDetails}
+                />
+            )}
         </>
     );
 };
 
-export default ScheduleDetails;
+export default ScheduleView;

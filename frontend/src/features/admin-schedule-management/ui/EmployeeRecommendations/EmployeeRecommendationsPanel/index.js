@@ -1,8 +1,9 @@
 // frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/EmployeeRecommendationsPanel.js
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { Button } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import EmployeeRecommendations from '../index';
+import EmployeeRecommendations from '../';
 import './EmployeeRecommendationsPanel.css';
 
 const EmployeeRecommendationsPanel = ({
@@ -97,11 +98,11 @@ const EmployeeRecommendationsPanel = ({
         return `${position?.pos_name || ''} - ${shift?.shift_name || ''} (${date})`;
     };
 
-    return (
+    return ReactDOM.createPortal(
         <div
             ref={panelRef}
             className={`recommendation-panel ${isOpen ? 'open' : ''}`}
-            style={{ width: isOpen ? `${currentPanelWidth}%` : '0' }}
+            style={{ width: `${panelWidth}%` }}
         >
             <div
                 className="resize-handle"
@@ -129,7 +130,8 @@ const EmployeeRecommendationsPanel = ({
                     isVisible={isOpen}
                 />
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
