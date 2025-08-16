@@ -341,7 +341,7 @@ export const useScheduleAutofill = () => {
         } finally {
             setIsAutofilling(false);
         }
-    }, [autofillPosition, dispatch, t, scheduleDetails.positions]);
+    }, [autofillPosition, dispatch, t, scheduleDetails]);
 
     /**
      * Clear autofilled status when changes are saved or cancelled
