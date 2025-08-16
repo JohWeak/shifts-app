@@ -29,6 +29,7 @@ const ScheduleView = ({
                           isLargeScreen,
                           closeAllModals,
                           panelWidth,
+                          onPanelWidthChange
                       }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
@@ -198,6 +199,7 @@ const ScheduleView = ({
                     onEmployeeSelect={onEmployeeSelect}
                     scheduleDetails={scheduleDetails}
                     panelWidth={panelWidth}
+                    onWidthChange={onPanelWidthChange}
                 />
             ) : (
                 <EmployeeRecommendationsModal

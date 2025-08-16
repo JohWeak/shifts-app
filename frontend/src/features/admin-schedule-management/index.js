@@ -32,6 +32,13 @@ const ScheduleManagement = () => {
     const { loading: actionsLoading, handleGenerate } = useScheduleActions();
     const { selectedCell, isPanelOpen, showEmployeeModal, isLargeScreen, handleCellClick, closeAllModals } = useScheduleUI();
     const [isGenerateFormVisible, setIsGenerateFormVisible] = useState(false);
+    const [panelWidth, setPanelWidth] = useState(() =>
+        parseInt(localStorage.getItem('recommendationPanelWidth')) || 25
+    );
+    const handlePanelWidthChange = (newWidth) => {
+        setPanelWidth(newWidth);
+        localStorage.setItem('recommendationPanelWidth', newWidth.toString());
+    };
 
     useEffect(() => {
         dispatch(fetchSchedules());
@@ -86,15 +93,12 @@ const ScheduleManagement = () => {
 
     const PANEL_WIDTH_PERCENT = 25;
     const ADD_MARGIN_PERCENT = 1;
-    const contentStyles = {
-        // Если панель открыта и экран большой, добавляем отступ справа (или слева для RTL)
-        // равный ширине панели. Иначе отступ 0.
-        marginRight: isPanelOpen && isLargeScreen ? `${PANEL_WIDTH_PERCENT + ADD_MARGIN_PERCENT}%` : '0',
-    };
 
-    const isRTL = direction === 'rtl';
-    if (isRTL) {
-        contentStyles.marginLeft = isPanelOpen && isLargeScreen ? `${PANEL_WIDTH_PERCENT + ADD_MARGIN_PERCENT}%` : '0';
+    const contentStyles = {
+        marginRight: isPanelOpen && isLargeScreen ? `${panelWidth + ADD_MARGIN_PERCENT}%` : '0',
+    };
+    if (direction === 'rtl') {
+        contentStyles.marginLeft = isPanelOpen && isLargeScreen ? `${panelWidth + ADD_MARGIN_PERCENT}%` : '0';
         delete contentStyles.marginRight;
     }
 
@@ -133,7 +137,8 @@ const ScheduleManagement = () => {
                         showEmployeeModal={showEmployeeModal}
                         isLargeScreen={isLargeScreen}
                         closeAllModals={closeAllModals}
-                        panelWidth={PANEL_WIDTH_PERCENT}
+                        panelWidth={panelWidth}
+                        onPanelWidthChange={handlePanelWidthChange}
                     />
                 </Container>
             </div>

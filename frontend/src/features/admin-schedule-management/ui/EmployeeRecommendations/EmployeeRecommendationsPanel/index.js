@@ -1,23 +1,21 @@
 // frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/EmployeeRecommendationsPanel.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import ReactDOM from 'react-dom';
-import { Button } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {Button} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import EmployeeRecommendations from '../';
 import './EmployeeRecommendationsPanel.css';
 
 const EmployeeRecommendationsPanel = ({
-                                         isOpen,
-                                         onClose,
-                                         selectedPosition,
-                                         onEmployeeSelect,
-                                         scheduleDetails,
-                                         panelWidth = 30
-                                     }) => {
-    const { t } = useI18n();
-    const [currentPanelWidth, setCurrentPanelWidth] = useState(() =>
-        parseInt(localStorage.getItem('recommendationPanelWidth')) || panelWidth
-    );
+                                          isOpen,
+                                          onClose,
+                                          selectedPosition,
+                                          onEmployeeSelect,
+                                          scheduleDetails,
+                                          panelWidth,
+                                          onWidthChange
+                                      }) => {
+    const {t, direction} = useI18n();
     const [isResizing, setIsResizing] = useState(false);
     const panelRef = useRef(null);
     const startXRef = useRef(0);
@@ -27,7 +25,7 @@ const EmployeeRecommendationsPanel = ({
     const handleMouseDown = (e) => {
         setIsResizing(true);
         startXRef.current = e.pageX;
-        startWidthRef.current = currentPanelWidth;
+        startWidthRef.current = panelWidth;
         e.preventDefault();
     };
 
@@ -37,21 +35,19 @@ const EmployeeRecommendationsPanel = ({
 
             requestAnimationFrame(() => {
                 const containerWidth = window.innerWidth;
-                const isRTL = document.dir === 'rtl';
+                const isRTL = direction === 'rtl';
 
                 let diff = isRTL ? startXRef.current - e.pageX : e.pageX - startXRef.current;
                 let newWidthPercent = startWidthRef.current - (diff / containerWidth * 100);
 
-                newWidthPercent = Math.max(20, Math.min(50, newWidthPercent));
-                setCurrentPanelWidth(newWidthPercent);
+                newWidthPercent = Math.max(20, Math.min(50, newWidthPercent)); // Ограничения
 
-                document.documentElement.style.setProperty('--panel-width', `${newWidthPercent}%`);
+                onWidthChange(newWidthPercent);
             });
         };
 
         const handleMouseUp = () => {
             setIsResizing(false);
-            localStorage.setItem('recommendationPanelWidth', currentPanelWidth.toString());
         };
 
         if (isResizing) {
@@ -67,13 +63,8 @@ const EmployeeRecommendationsPanel = ({
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
         };
-    }, [isResizing, currentPanelWidth]);
+    }, [isResizing, onWidthChange]);
 
-    useEffect(() => {
-        if (isOpen) {
-            document.documentElement.style.setProperty('--panel-width', `${currentPanelWidth}%`);
-        }
-    }, [isOpen, currentPanelWidth]);
 
     // Keyboard shortcuts
     useEffect(() => {
@@ -102,7 +93,7 @@ const EmployeeRecommendationsPanel = ({
         <div
             ref={panelRef}
             className={`recommendation-panel ${isOpen ? 'open' : ''}`}
-            style={{ width: `${panelWidth}%` }}
+            style={{width: `${panelWidth}%`}}
         >
             <div
                 className="resize-handle"
