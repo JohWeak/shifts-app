@@ -7,6 +7,7 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {setActiveTab, setSelectedScheduleId} from '../../../../model/scheduleSlice';
 import ScheduleActionButtons from "../../../ScheduleActionButtons";
 import './ScheduleInfo.css';
+import {formatWeekRange} from "../../../../../../shared/lib/utils/scheduleUtils";
 
 const ScheduleInfo = ({
                           schedule,
@@ -63,7 +64,7 @@ const ScheduleInfo = ({
                 </div>
                 <div className="schedule-date-range">
                     {t('schedule.week')}
-                    <span>{formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}</span>
+                    <span>{formatWeekRange(schedule.start_date, locale)}</span>
                 </div>
                 <div className="main-actions">
                     <ScheduleActionButtons

@@ -135,10 +135,9 @@ export const formatShiftTime = (startTime, endOrDuration) => {
                 ? endOrDuration
                 : parseFloat(endOrDuration);
 
-            // Добавим проверку на случай, если duration не является числом
             if (isNaN(duration)) {
                 console.warn('Некорректная длительность в formatShiftTime:', endOrDuration);
-                return cleanStart; // Возвращаем только время начала
+                return cleanStart;
             }
 
             // Ваша оригинальная, рабочая логика для вычисления времени окончания
