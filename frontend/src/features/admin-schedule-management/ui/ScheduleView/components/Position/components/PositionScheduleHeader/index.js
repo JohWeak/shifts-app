@@ -1,10 +1,10 @@
-//frontend/src/features/admin-schedule-management/ui/ScheduleView/components/Position/components/ScheduleEditorHeader/index.js
+//frontend/src/features/admin-schedule-management/ui/ScheduleView/components/Position/components/PositionScheduleHeader/index.js
 
 import React from 'react';
 import { Button, Badge, Form, Spinner, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
-const ScheduleEditorHeader = ({
+const PositionScheduleHeader = ({
                                   position,
                                   isEditing,
                                   canEdit,
@@ -152,4 +152,4 @@ const ScheduleEditorHeader = ({
     );
 };
 
-export default ScheduleEditorHeader;
+export default PositionScheduleHeader;

@@ -15,7 +15,7 @@ import ScheduleCell from '../ScheduleCell';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import { usePositionScheduleData } from './hooks/usePositionScheduleData';
-import ScheduleEditorHeader from './components/ScheduleEditorHeader';
+import PositionScheduleHeader from './components/PositionScheduleHeader';
 import PositionScheduleTable from './components/PositionScheduleTable';
 import './Position.css';
 
@@ -237,7 +237,7 @@ const PositionEditor = ({
 
     return (
         <div className="position-schedule-editor mb-2">
-            <ScheduleEditorHeader
+            <PositionScheduleHeader
                 position={position}
                 isEditing={isEditing}
                 canEdit={canEdit}
