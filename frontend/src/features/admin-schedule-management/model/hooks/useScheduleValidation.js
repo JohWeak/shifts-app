@@ -9,28 +9,37 @@ export const useScheduleValidation = () => {
     const { scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
 
     /**
-     * Validate pending changes using backend service
+     * Validate pending changes for a specific position
      */
-    const validatePendingChanges = useCallback(async () => {
+    const validatePositionChanges = useCallback(async (positionId) => {
         if (!scheduleDetails?.schedule?.id) {
+            console.log('No schedule details for validation');
             return [];
         }
 
         try {
-            // Filter only non-applied changes
-            const changes = Object.values(pendingChanges).filter(c => !c.isApplied);
+            // Filter changes for specific position only
+            const positionChanges = Object.values(pendingChanges).filter(
+                c => c.positionId === positionId && !c.isApplied
+            );
 
-            if (changes.length === 0) {
+            if (positionChanges.length === 0) {
+                console.log('No changes to validate for position:', positionId);
                 return [];
             }
-            const scheduleId = scheduleDetails.schedule.id;
-            const response = await scheduleAPI.validateSchedule(scheduleId);
 
-            return response.data.violations || [];
+            console.log('Validating changes for position:', positionId, positionChanges);
+
+            const response = await scheduleAPI.validateScheduleChanges(
+                scheduleDetails.schedule.id,
+                positionChanges
+            );
+
+            console.log('Validation response:', response);
+            return response.violations || [];
 
         } catch (error) {
             console.error('Validation failed:', error);
-            // Log full error for debugging
             if (error.response) {
                 console.error('Response error:', error.response.data);
                 console.error('Response status:', error.response.status);
@@ -38,9 +47,38 @@ export const useScheduleValidation = () => {
             // Return empty array on error to not block saving
             return [];
         }
-    }, [pendingChanges, scheduleDetails?.schedule?.id]);
+    }, [pendingChanges, scheduleDetails]);
+
+    /**
+     * Validate all pending changes (for global save)
+     */
+    const validateAllPendingChanges = useCallback(async () => {
+        if (!scheduleDetails?.schedule?.id) {
+            return [];
+        }
+
+        try {
+            const changes = Object.values(pendingChanges).filter(c => !c.isApplied);
+
+            if (changes.length === 0) {
+                return [];
+            }
+
+            const response = await scheduleAPI.validateScheduleChanges(
+                scheduleDetails.schedule.id,
+                changes
+            );
+
+            return response.violations || [];
+
+        } catch (error) {
+            console.error('Validation failed:', error);
+            return [];
+        }
+    }, [pendingChanges, scheduleDetails]);
 
     return {
-        validatePendingChanges
+        validatePositionChanges,
+        validateAllPendingChanges
     };
 };

@@ -5,10 +5,9 @@ import { Card, Alert, Spinner } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useScheduleValidation } from '../../model/hooks/useScheduleValidation';
 import { useScheduleDetailsActions } from '../../model/hooks/useScheduleDetailsActions';
-import { addNotification } from '../../../../app/model/notificationsSlice';
 import {
-    updateScheduleAssignments, exportSchedule, toggleEditPosition,
-    addPendingChange, removePendingChange, clearAutofilledStatus, applyPendingChanges,
+    exportSchedule, toggleEditPosition,
+    addPendingChange, removePendingChange,
 } from '../../model/scheduleSlice';
 import PositionEditor from './components/Position';
 import ScheduleInfo from './components/ScheduleInfo';
@@ -38,53 +37,37 @@ const ScheduleView = ({
     const { autofillPosition, isAutofilling: isPositionAutofilling, isProcessing } = useScheduleAutofill();
 
     // --- ACTIONS & MODALS HOOK ---
-    const { promptPublish, promptUnpublish, promptAutofill, isAutofilling, renderModals } = useScheduleDetailsActions(scheduleDetails?.schedule);
+    const {
+        promptPublish,
+        promptUnpublish,
+        promptAutofill,
+        isAutofilling,
+        renderModals,
+        handleSavePosition,
+        confirmSaveWithViolations,
+        validationViolations,
+        showValidationModal,
+        setShowValidationModal
+    } = useScheduleDetailsActions(scheduleDetails?.schedule);
 
     // --- LOCAL UI STATE ---
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [exportAlert, setExportAlert] = useState(null);
-    const [validationViolations, setValidationViolations] = useState([]);
-    const [showValidationModal, setShowValidationModal] = useState(false);
-    const [pendingSavePositionId, setPendingSavePositionId] = useState(null);
 
     // --- HOOKS FOR LOGIC ---
-    const { validatePendingChanges } = useScheduleValidation();
-
-    const performSave = async (positionId) => {
-        const positionChanges = Object.values(pendingChanges).filter(c => c.positionId === positionId && !c.isApplied);
-        setIsSaving(true);
-        try {
-            await dispatch(updateScheduleAssignments({ scheduleId: scheduleDetails.schedule.id, changes: positionChanges })).unwrap();
-            dispatch(applyPendingChanges(positionId));
-            const autofilledKeys = positionChanges.filter(c => c.isAutofilled).map(c => `autofill-${c.positionId}-${c.date}-${c.shiftId}-${c.empId}`);
-            if (autofilledKeys.length > 0) dispatch(clearAutofilledStatus(autofilledKeys));
-            dispatch(addNotification({ variant: 'success', message: t('schedule.saveSuccess') }));
-        } catch (error) {
-            dispatch(addNotification({ variant: 'error', message: t('schedule.saveFailed') }));
-        } finally {
-            setIsSaving(false);
-            setShowValidationModal(false);
-            setPendingSavePositionId(null);
-        }
-    };
 
     const handleSaveChanges = async (positionId) => {
-        const positionChanges = Object.values(pendingChanges).filter(c => c.positionId === positionId && !c.isApplied);
-        if (positionChanges.length === 0) return;
         setIsSaving(true);
+
         try {
-            const violations = await validatePendingChanges();
-            if (violations.length > 0) {
-                setValidationViolations(violations);
-                setPendingSavePositionId(positionId);
-                setShowValidationModal(true);
-                setIsSaving(false);
-                return;
+            const result = await handleSavePosition(positionId);
+
+            if (!result.showValidation) {
+                // Successfully saved or handled
+                console.log('Position saved successfully');
             }
-            await performSave(positionId);
-        } catch (error) {
-            dispatch(addNotification({ type: 'error', message: t('schedule.validationFailed') }));
+        } finally {
             setIsSaving(false);
         }
     };
@@ -183,13 +166,18 @@ const ScheduleView = ({
                 </Card.Body>
             </Card>
 
-            <ValidationModal
-                show={showValidationModal}
-                onHide={() => setShowValidationModal(false)}
-                onConfirm={() => performSave(pendingSavePositionId)}
-                violations={validationViolations}
-                title={t('schedule.validationWarning')} />
+            {showValidationModal && (
+                <ValidationModal
+                    show={showValidationModal}
+                    onHide={() => setShowValidationModal(false)}
+                    onConfirm={confirmSaveWithViolations}
+                    violations={validationViolations}
+                    title={t('schedule.validationWarning')}
+                />
+            )}
+
             {renderModals()}
+
             {/* Portal render */}
             {isLargeScreen ? (
                 <EmployeeRecommendationsPanel

@@ -9,12 +9,15 @@ import { canEditSchedule, formatEmployeeName as formatEmployeeNameUtil } from 's
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import { useEmployeeHighlight } from '../../../../model/hooks/useEmployeeHighlight';
 import { useDragAndDrop } from '../../../../model/hooks/useDragAndDrop';
+import { usePositionScheduleData } from './hooks/usePositionScheduleData';
+import { useScheduleDetailsActions } from '../../../../model/hooks/useScheduleDetailsActions';
+
 import { addPendingChange, removePendingChange } from '../../../../model/scheduleSlice';
 import { addNotification } from "../../../../../../app/model/notificationsSlice";
+
 import ScheduleCell from '../ScheduleCell';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-import { usePositionScheduleData } from './hooks/usePositionScheduleData';
 import PositionScheduleHeader from './components/PositionScheduleHeader';
 import PositionScheduleTable from './components/PositionScheduleTable';
 import './Position.css';

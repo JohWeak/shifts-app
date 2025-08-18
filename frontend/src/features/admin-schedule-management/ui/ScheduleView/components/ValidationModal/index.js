@@ -2,6 +2,7 @@
 import React from 'react';
 import { Modal, Button, Alert, ListGroup } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import './ValidationModal.css';
 
 const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
     const { t } = useI18n();
@@ -15,39 +16,58 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
     }, {});
 
     return (
-        <Modal show={show} onHide={onHide} size="lg">
+        <Modal show={show} onHide={onHide} size="lg" className="validation-modal">
             <Modal.Header closeButton>
-                <Modal.Title>{title}</Modal.Title>
+                <Modal.Title>{title || t('schedule.validationWarning')}</Modal.Title>
             </Modal.Header>
+
             <Modal.Body>
                 <Alert variant="warning">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
                     {t('schedule.validationWarningMessage')}
                 </Alert>
 
                 {Object.entries(groupedViolations).map(([type, violations]) => (
                     <div key={type} className="mb-3">
-                        <h6>{t(`validation.${type}`)}</h6>
+                        <h6 className="text-danger">
+                            {t(`validation.${type}`)}
+                        </h6>
                         <ListGroup>
                             {violations.map((violation, idx) => (
                                 <ListGroup.Item key={idx} variant="warning">
                                     {type === 'rest_violation' && (
-                                        <>
+                                        <div>
+                                            <strong>{violation.employeeName}</strong>
+                                            <br />
                                             {t('validation.restViolationDetail', {
-                                                employee: violation.employeeId,
                                                 date: violation.date,
                                                 restHours: violation.restHours,
-                                                requiredRest: violation.requiredRest
+                                                requiredRest: violation.requiredRest,
+                                                currentShift: violation.currentShift || violation.previousShift,
+                                                nextShift: violation.nextShift
                                             })}
-                                        </>
+                                        </div>
                                     )}
                                     {type === 'weekly_hours_violation' && (
-                                        <>
+                                        <div>
+                                            <strong>{violation.employeeName}</strong>
+                                            <br />
                                             {t('validation.weeklyHoursDetail', {
-                                                employee: violation.employeeId,
                                                 totalHours: violation.totalHours,
                                                 maxHours: violation.maxHours
                                             })}
-                                        </>
+                                        </div>
+                                    )}
+                                    {type === 'daily_hours_violation' && (
+                                        <div>
+                                            <strong>{violation.employeeName}</strong>
+                                            <br />
+                                            {t('validation.dailyHoursDetail', {
+                                                date: violation.date,
+                                                totalHours: violation.totalHours,
+                                                maxHours: violation.maxHours
+                                            })}
+                                        </div>
                                     )}
                                 </ListGroup.Item>
                             ))}
@@ -55,11 +75,13 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
                     </div>
                 ))}
             </Modal.Body>
+
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>
                     {t('common.cancel')}
                 </Button>
                 <Button variant="warning" onClick={onConfirm}>
+                    <i className="bi bi-exclamation-triangle me-2"></i>
                     {t('schedule.saveAnyway')}
                 </Button>
             </Modal.Footer>

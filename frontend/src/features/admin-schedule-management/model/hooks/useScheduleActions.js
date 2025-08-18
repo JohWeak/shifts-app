@@ -30,7 +30,6 @@ export const useScheduleActions = () => {
             setLoading(false);
         }
     };
-
     const handleDelete = async (scheduleId) => {
         setLoading(true);
         setError(null);
