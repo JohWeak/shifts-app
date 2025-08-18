@@ -913,6 +913,9 @@ export const en = {
         autofilling: 'Autofilling...',
         noPositionsInEditMode: 'No positions in edit mode',
         processingChanges: 'Processing...',
+        saveAnyway: 'Save anyway',
+        validationWarningMessage: 'Please review the schedule before saving.',
+        validationWarning: 'Validation Warning',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',
@@ -1014,6 +1017,18 @@ export const en = {
         required: 'This field is required',
         strongPassword: 'Password must contain uppercase, lowercase, number and special character',
         unique: 'This value already exists',
+        dailyHoursDetail: 'Date: {date} Total hours: {totalHours} Max hours: {maxHours}',
+        weeklyHoursDetail: 'Weekly Total hours: {totalHours} Max hours: {maxHours}',
+        restViolationDetail:
+            'Date: {date} ' +
+            'Rest: {restHours} ' +
+            'Required rest: {requiredRest} ' +
+            'Current shift: {currentShift}' +
+            'Next shift: {nextShift}',
+        rest_violation: 'Rest Violation',
+        weekly_hours_violation: 'Weekly Hours Violation',
+        daily_hours_violation: 'Daily Hours Violation',
+
     },
     workSite: {
         addWorkSite: 'Add Work Site',
