@@ -914,8 +914,10 @@ export const en = {
         noPositionsInEditMode: 'No positions in edit mode',
         processingChanges: 'Processing...',
         saveAnyway: 'Save anyway',
-        validationWarningMessage: 'Please review the schedule before saving.',
-        validationWarning: 'Validation Warning',
+        validationWarning: 'Schedule Validation Warning',
+        validationWarningMessage: 'The following legal compliance issues were found. These violations may result in penalties or legal issues. Do you want to continue anyway?',
+        validationFailed: 'Validation check failed',
+        validatingChanges: 'Validating changes...',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',
@@ -1019,15 +1021,42 @@ export const en = {
         unique: 'This value already exists',
         dailyHoursDetail: 'Date: {date} Total hours: {totalHours} Max hours: {maxHours}',
         weeklyHoursDetail: 'Weekly Total hours: {totalHours} Max hours: {maxHours}',
-        restViolationDetail:
-            'Date: {date} ' +
-            'Rest: {restHours} ' +
-            'Required rest: {requiredRest} ' +
-            'Current shift: {currentShift}' +
-            'Next shift: {nextShift}',
-        rest_violation: 'Rest Violation',
-        weekly_hours_violation: 'Weekly Hours Violation',
-        daily_hours_violation: 'Daily Hours Violation',
+        rest_violation: {
+            title: 'Rest Time Violations',
+            beforeDetail: 'On {date}: Only {restHours} hours of rest before {nextShift} shift (minimum required: {requiredRest} hours)',
+            afterDetail: 'On {date}: Only {restHours} hours of rest after {previousShift} shift (minimum required: {requiredRest} hours)',
+            generalDetail: 'On {date}: Only {restHours} hours of rest between shifts (minimum required: {requiredRest} hours)'
+        },
+
+        weekly_hours_violation: {
+            title: 'Weekly Hours Violations',
+            detail: 'Working {totalHours} hours this week (maximum allowed: {maxHours} hours)'
+        },
+
+        daily_hours_violation: {
+            title: 'Daily Hours Violations',
+            detail: 'On {date}: Working {totalHours} hours in one day (maximum allowed: {maxHours} hours)'
+        },
+
+        consecutive_shifts_violation: {
+            title: 'Consecutive Days Violations',
+            detail: 'Working {consecutiveDays} consecutive days (maximum allowed: {maxDays} days)'
+        },
+
+        // Severity levels
+        severity: {
+            critical: 'Critical',
+            high: 'High',
+            medium: 'Medium',
+            low: 'Low'
+        },
+
+        // General messages
+        noViolations: 'No violations found',
+        violationSummary: '{count} violation(s) found',
+        checkingCompliance: 'Checking legal compliance...',
+        complianceCheckFailed: 'Could not verify compliance'
+
 
     },
     workSite: {

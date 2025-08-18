@@ -1,0 +1,70 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ValidationModal/ValidationModal.css */
+
+.validation-modal .modal-dialog {
+    max-width: 700px;
+}
+
+.validation-modal .modal-header {
+    background-color: #fff3cd;
+    border-bottom: 2px solid #ffc107;
+}
+
+.validation-modal .modal-title {
+    color: #856404;
+    font-weight: 600;
+}
+
+.validation-item {
+    border-left: 4px solid #ffc107;
+    transition: all 0.2s ease;
+}
+
+.violation-item:hover {
+    background-color: #fff9e6;
+    transform: translateX(2px);
+}
+
+.employee-name {
+    color: #495057;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.violation-details {
+    flex: 1;
+}
+
+.violation-severity {
+    margin-left: 1rem;
+}
+
+.validation-modal .alert {
+    border-radius: 8px;
+    border: 1px solid #ffc107;
+}
+
+.validation-modal h6 {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.validation-modal .list-group-item {
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ffc107;
+}
+
+.validation-modal .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+    font-weight: 500;
+}
+
+.validation-modal .btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
