@@ -18,6 +18,42 @@ const dateFnsLocales = {
     ru: ru
 };
 /**
+ * Форматирует дату в заданный строковый формат с расширенными опциями.
+ * Поддерживает: YYYY, YY, MM, M, DD, D.
+ * @param {string | Date} dateInput - Входная дата в виде строки или объекта Date.
+ * @param {string} format - Строка формата, например 'DD.MM.YYYY' или 'YYYY-M-D'.
+ * @returns {string} - Отформатированная строка даты или пустая строка при ошибке.
+ */
+export const formatDate = (dateInput, format = 'DD.MM.YYYY') => {
+    const date = new Date(dateInput);
+
+    if (isNaN(date.getTime())) {
+        console.error("Invalid date provided:", dateInput);
+        return '';
+    }
+
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const replacements = {
+        YYYY: year,
+        YY: String(year).slice(-2),
+        MM: String(month).padStart(2, '0'),
+        M: month,
+        DD: String(day).padStart(2, '0'),
+        D: day
+    };
+
+    // Используем регулярное выражение для поиска всех ключей и их замены
+    // Это предотвращает баг, когда YYYY заменяется, а потом в остатке YY
+    const regex = /YYYY|YY|MM|M|DD|D/g;
+
+    return format.replace(regex, (match) => replacements[match]);
+};
+
+
+/**
  * Получает день начала недели из настроек системы
  */
 export const getWeekStartDay = (systemSettings) => {
@@ -163,7 +199,7 @@ export const formatShiftTime = (startTime, endOrDuration) => {
  * @param {Date} date - Дата
  * @returns {string} - Отформатированная дата
  */
-export const formatHeaderDate = (date) => {
+export const formatTableHeaderDate = (date) => {
     return format(date,  'dd/MM');
 };
 

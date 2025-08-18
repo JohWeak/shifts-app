@@ -560,14 +560,14 @@ class EmployeeRecommendationService {
             return dayDiff === 1; // Только вчера или завтра
         });
 
-        console.log(`[RestViolation] Checking for emp ${empId} on ${date}:`, {
-            targetShift: targetShift.shift_name,
-            relevantAssignments: relevantAssignments.length,
-            assignments: relevantAssignments.map(a => ({
-                date: a.work_date,
-                shift: a.shift?.shift_name
-            }))
-        });
+        // console.log(`[RestViolation] Checking for emp ${empId} on ${date}:`, {
+        //     targetShift: targetShift.shift_name,
+        //     relevantAssignments: relevantAssignments.length,
+        //     assignments: relevantAssignments.map(a => ({
+        //         date: a.work_date,
+        //         shift: a.shift?.shift_name
+        //     }))
+        // });
 
         for (const assignment of relevantAssignments) {
             if (!assignment.shift) {
@@ -605,16 +605,16 @@ class EmployeeRecommendationService {
                     : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'after';
 
-                console.log(`[RestViolation] Previous day check:`, {
-                    prevShift: assignment.shift.shift_name,
-                    prevStart: assignment.shift.start_time,
-                    prevDuration: prevShiftDuration,
-                    prevEndHour: prevShiftStart + prevShiftDuration,
-                    targetStart: targetShift.start_time,
-                    restHours,
-                    requiredRest,
-                    isViolation: restHours < requiredRest
-                });
+                // console.log(`[RestViolation] Previous day check:`, {
+                //     prevShift: assignment.shift.shift_name,
+                //     prevStart: assignment.shift.start_time,
+                //     prevDuration: prevShiftDuration,
+                //     prevEndHour: prevShiftStart + prevShiftDuration,
+                //     targetStart: targetShift.start_time,
+                //     restHours,
+                //     requiredRest,
+                //     isViolation: restHours < requiredRest
+                // });
 
                 if (restHours < requiredRest) {
                     return {
@@ -649,17 +649,17 @@ class EmployeeRecommendationService {
                     : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'before';
 
-                console.log(`[RestViolation] Next day check:`, {
-                    targetShift: targetShift.shift_name,
-                    targetStart: targetShift.start_time,
-                    targetDuration: targetShiftDuration,
-                    targetEndHour: targetShiftStart + targetShiftDuration,
-                    nextShift: assignment.shift.shift_name,
-                    nextStart: assignment.shift.start_time,
-                    restHours,
-                    requiredRest,
-                    isViolation: restHours < requiredRest
-                });
+                // console.log(`[RestViolation] Next day check:`, {
+                //     targetShift: targetShift.shift_name,
+                //     targetStart: targetShift.start_time,
+                //     targetDuration: targetShiftDuration,
+                //     targetEndHour: targetShiftStart + targetShiftDuration,
+                //     nextShift: assignment.shift.shift_name,
+                //     nextStart: assignment.shift.start_time,
+                //     restHours,
+                //     requiredRest,
+                //     isViolation: restHours < requiredRest
+                // });
 
                 if (restHours < requiredRest) {
                     return {

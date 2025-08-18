@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { formatHeaderDate, getDayName, formatShiftTime } from 'shared/lib/utils/scheduleUtils';
+import { formatTableHeaderDate, getDayName, formatShiftTime } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 
 const PositionScheduleTable = ({
@@ -24,7 +24,7 @@ const PositionScheduleTable = ({
                 {weekDates.map((date, index) => {
                     const dayIndex = date.getDay();
                     const dayName = getDayName(dayIndex, t, isMobile);
-                    const formattedDate = formatHeaderDate(date, isMobile);
+                    const formattedDate = formatTableHeaderDate(date);
 
                     return (
                         <th key={index} className="text-center">

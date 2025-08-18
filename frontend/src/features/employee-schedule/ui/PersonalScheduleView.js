@@ -2,7 +2,7 @@
 import React from 'react';
 import {Button, Card, Badge} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatShiftTime, getDayName, formatHeaderDate} from 'shared/lib/utils/scheduleUtils';
+import {formatShiftTime, getDayName, formatTableHeaderDate} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
@@ -65,7 +65,7 @@ const PersonalScheduleView = ({ scheduleData, employeeInfo, getShiftColor, openC
                                 <Card.Body className="py-2">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div className="day-info">
-                                            <span className="day-date">{formatHeaderDate(dateObj)}</span>
+                                            <span className="day-date">{formatTableHeaderDate(dateObj)}</span>
                                             <strong
                                                 className="day-name ms-2">{getDayName(day.day_of_week ?? dateObj.getDay(), t)}</strong>
                                             {isToday && <Badge bg="primary"

@@ -258,14 +258,14 @@
 }
 
 /* Cross-position employees - yellow border */
-.employee-item.cross-position-employee {
-    border: 1px solid #ffc107;
+.employee-item.cross-position-employee{
+    outline: 1px dashed rgba(var(--bs-warning-rgb), 0.7);
     background-color: rgba(var(--bs-warning-rgb), 0.2);
 }
 
 /* Cross-site employees - blue border */
 .employee-item.cross-site-employee {
-    border: 2px solid #17a2b8;
+    outline: 1px dashed rgba(var(--bs-info-rgb), 0.7);
     background-color: rgba(23, 162, 184, 0.1);
 }
 

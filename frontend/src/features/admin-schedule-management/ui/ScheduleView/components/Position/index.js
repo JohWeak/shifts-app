@@ -205,6 +205,10 @@ const PositionEditor = ({
 
         const pendingAssignments = positionPendingChanges.filter(c => c.action === 'assign' && c.date === dateStr && c.shiftId === shift.shift_id);
         const pendingRemovals = positionPendingChanges.filter(c => c.action === 'remove' && c.date === dateStr && c.shiftId === shift.shift_id);
+        console.log('pendingAssignments' ,pendingAssignments);
+        console.log('pendingRemovals', pendingRemovals);
+
+
 
         return (
             <ScheduleCell

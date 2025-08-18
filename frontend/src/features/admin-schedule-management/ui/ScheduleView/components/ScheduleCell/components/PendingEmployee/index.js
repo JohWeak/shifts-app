@@ -30,8 +30,8 @@ const PendingEmployee = ({
     const getClassName = () => {
         let classes = 'mb-1 d-flex align-items-center justify-content-between employee-item pending-assignment';
         if (pendingChange.isAutofilled) classes += ' autofilled-employee';
-        if (pendingChange.isCrossPosition) classes += ' cross-position-employee';
         if (pendingChange.isCrossSite) classes += ' cross-site-employee';
+        if (pendingChange.isCrossPosition) classes += ' cross-position-employee';
         if (isHighlighted) classes += ' highlighted';
         return classes;
     };

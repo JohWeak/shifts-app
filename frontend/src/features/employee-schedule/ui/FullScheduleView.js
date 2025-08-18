@@ -5,7 +5,7 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     formatShiftTime,
     getDayName,
-    formatHeaderDate,
+    formatTableHeaderDate,
     formatEmployeeName,
     formatWeekRange
 } from 'shared/lib/utils/scheduleUtils';
@@ -97,9 +97,9 @@ const FullScheduleView = ({ user, scheduleData, employeeData, getShiftColor, ope
                                         <th key={day.date} className={`day-header-cell ${isToday ? 'today-column' : ''}`}>
                                             <div className="day-name">{getDayName(dateObj.getDay(), t)}</div>
                                             {isToday ? (
-                                                <Badge bg="primary" className="today-badge mt-1">{formatHeaderDate(dateObj)}</Badge>
+                                                <Badge bg="primary" className="today-badge mt-1">{formatTableHeaderDate(dateObj)}</Badge>
                                             ) : (
-                                                <div className="day-date">{formatHeaderDate(dateObj)}</div>
+                                                <div className="day-date">{formatTableHeaderDate(dateObj)}</div>
                                             )}
                                         </th>
                                     );

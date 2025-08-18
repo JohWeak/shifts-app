@@ -53,9 +53,11 @@ const ScheduleManagement = () => {
     const handleEmployeeSelect = (employee) => {
         if (!selectedCell) return;
         const targetPosition = scheduleDetails.positions.find(p => p.pos_id === selectedCell.positionId);
+        const targetSite = scheduleDetails.schedule.work_site;
         const isCrossPosition = employee.default_position_id && employee.default_position_id !== selectedCell.positionId;
-        const isCrossSite = employee.work_site_id && targetPosition?.work_site_id && employee.work_site_id !== targetPosition.work_site_id;
-        const isFlexible = !employee.default_position_id;
+        const isCrossSite = employee.work_site_id && targetSite?.site_id && employee.work_site_id !== targetSite.site_id;
+        const isFlexible = !employee.default_position_id || !employee.work_site_id;
+        console.log('[Target Position]', targetPosition);
 
         if (selectedCell.employeeIdToReplace) {
             const removeKey = `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`;
@@ -93,7 +95,6 @@ const ScheduleManagement = () => {
 
     const GAP_VALUE = '1rem';
     const contentStyles = {
-        // Используем calc() для смешивания процентов и rem
         marginRight: isPanelOpen && isLargeScreen
             ? `calc(${panelWidth}% + ${GAP_VALUE})`
             : '0',
@@ -113,14 +114,18 @@ const ScheduleManagement = () => {
             >
                 <Container fluid className="p-1 admin-schedule-management-container">
                     <PageHeader icon="calendar-week" title={t('schedule.title')} subtitle={t('schedule.subtitle')}>
-                        <Button variant="primary" onClick={() => setIsGenerateFormVisible(!isGenerateFormVisible)} disabled={actionsLoading}>
-                            <i className={`bi ${isGenerateFormVisible ? 'bi-chevron-up' : 'bi-plus-circle'} me-2`}></i>
+                        <Button
+                            variant={`${isGenerateFormVisible ? 'outline-primary' : 'primary'}`}
+                            onClick={() => setIsGenerateFormVisible(!isGenerateFormVisible)} 
+                            disabled={actionsLoading}
+                        >
+                            <i className={`bi ${isGenerateFormVisible ? 'bi-chevron-up' : 'bi-gear'} me-2`}></i>
                             <span>{t('schedule.generateSchedule')}</span>
                         </Button>
                     </PageHeader>
 
-                    {isGenerateFormVisible && (
-                        <div className="generate-schedule-form-container visible">
+
+                        <div className={`generate-schedule-form-container ${isGenerateFormVisible ? 'visible' : ''}`}>
                             <GenerateScheduleForm
                                 onGenerate={onGenerateSubmit}
                                 onCancel={() => setIsGenerateFormVisible(false)}
@@ -129,7 +134,7 @@ const ScheduleManagement = () => {
                                 workSitesLoading={workSitesLoading === 'pending'}
                             />
                         </div>
-                    )}
+
 
                     <ScheduleContent
                         handleViewDetails={handleViewDetails}

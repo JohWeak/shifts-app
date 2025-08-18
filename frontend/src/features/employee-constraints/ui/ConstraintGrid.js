@@ -5,7 +5,7 @@ import { X, Check } from 'react-bootstrap-icons';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     formatShiftTime,
-    formatHeaderDate,
+    formatTableHeaderDate,
     getCanonicalShiftType,
     getShiftIcon,
     getDayName,
@@ -83,7 +83,7 @@ const DayHeader = ({day, getDayHeaderClass, onCellClick, t, as: Component = 'th'
         {/* Структура теперь соответствует FullScheduleView */}
         <div className="day-name">{getDayName(new Date(day.date).getDay(), t, isMobile)}</div>
         <small className="day-date">
-            {formatHeaderDate(new Date(day.date))}
+            {formatTableHeaderDate(new Date(day.date))}
         </small>
     </Component>
 );

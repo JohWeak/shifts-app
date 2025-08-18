@@ -39,8 +39,8 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
 
                 {Object.entries(groupedViolations).map(([groupType, violations]) => (
                     <div key={groupType} className="mb-4">
-                        <h6 className="text-danger mb-3">
-                            <i className={`bi ${getIconForViolationType(groupType)} me-2`}></i>
+                        <h6 className="text-danger mb-2">
+                            <i className={`bi ${getIconForViolationType(groupType)} me-1`}></i>
                             {t(`validation.${groupType}.title`)}
                         </h6>
                         <ListGroup>
@@ -126,7 +126,7 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
                                         </div>
 
                                         <div className="violation-severity">
-                                            <Badge variant={getSeverityVariant(violation)}>
+                                            <Badge bg={getSeverityVariant(violation)}>
                                                 {t(`validation.severity.${getSeverityLevel(violation)}`)}
                                             </Badge>
                                         </div>
@@ -164,25 +164,22 @@ const getIconForViolationType = (type) => {
 
 const getSeverityLevel = (violation) => {
     // Determine severity based on how much the constraint is violated
-    if (violation.type === 'rest_violation') {
+    if (violation.type === 'rest_violation' || 'before' || 'after' ) {
         const deficit = violation.requiredRest - violation.restHours;
-        if (deficit >= 4) return 'critical';
-        if (deficit >= 2) return 'high';
-        return 'medium';
+        if (deficit >= 5) return 'critical';
+        if (deficit >= 1) return 'high';
     }
 
     if (violation.type === 'weekly_hours_violation') {
         const excess = violation.totalHours - violation.maxHours;
-        if (excess >= 8) return 'critical';
-        if (excess >= 4) return 'high';
-        return 'medium';
+        if (excess >= 16) return 'critical';
+        if (excess >= 12) return 'high';
     }
 
     if (violation.type === 'daily_hours_violation') {
         const overtime = violation.totalHours - violation.maxHours;
         if (overtime >= 1) return 'critical';
     }
-
     return 'medium';
 };
 

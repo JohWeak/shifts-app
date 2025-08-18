@@ -2,8 +2,6 @@
 
 
 
-
-
 /* SCHEDULE TABLE */
 .schedule-table {
     width: 100%;
@@ -141,7 +139,7 @@
     padding: var(--space-2) var(--space-1);
 }
 
-.schedule-management-content .page-header .page-header-actions .btn-primary {
+.schedule-management-content .page-header .page-header-actions button {
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-3);
     font-size: var(--text-base);
@@ -165,12 +163,6 @@
     overflow-x: auto;
 }
 
-/* When panel is open, content takes remaining space */
-/*.schedule-management-wrapper.panel-open .schedule-management-content {*/
-/*    width: calc(100% - var(--panel-width, 30%));*/
-/*}*/
-
-
 /* Ensure tables are responsive when space is reduced */
 .schedule-management-wrapper.panel-open .table-responsive {
     overflow-x: auto;
@@ -179,7 +171,6 @@
 .admin-schedule-management-container {
     flex: 1;
     height: 100%;
-    /*transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);*/
 }
 
 /* Ensure proper z-index stacking */

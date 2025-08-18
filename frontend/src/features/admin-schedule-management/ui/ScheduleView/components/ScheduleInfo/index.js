@@ -7,7 +7,7 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {setActiveTab, setSelectedScheduleId} from '../../../../model/scheduleSlice';
 import ScheduleActionButtons from "../../../ScheduleActionButtons";
 import './ScheduleInfo.css';
-import {formatWeekRange} from "../../../../../../shared/lib/utils/scheduleUtils";
+import {formatWeekRange, formatDate as formatDateUtil } from "shared/lib/utils/scheduleUtils";
 
 const ScheduleInfo = ({
                           schedule,
@@ -28,14 +28,8 @@ const ScheduleInfo = ({
     const hasUnsavedChanges = Object.values(editingPositions || {}).some(Boolean) ||
         Object.keys(pendingChanges || {}).length > 0;
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        }).replace(/\//g, '.');
-    };
+    const dateFormat = 'DD.MM.YYYY';
+
 
     const handleBackClick = () => {
         dispatch(setActiveTab('overview'));
@@ -111,14 +105,14 @@ const ScheduleInfo = ({
                         <i className="bi bi-calendar-check"></i>
                         <span className="info-label">{t('schedule.created')}</span>
                     </div>
-                    <span className="info-value">{formatDate(schedule.createdAt)}</span>
+                    <span className="info-value">{formatDateUtil(schedule.createdAt, dateFormat)}</span>
                 </div>
                 <div className="info-item">
                     <div className="info-item-header">
                         <i className="bi bi-pencil-square"></i>
                         <span className="info-label">{t('schedule.updated')}</span>
                     </div>
-                    <span className="info-value">{formatDate(schedule.updatedAt)}</span>
+                    <span className="info-value">{formatDateUtil(schedule.updatedAt, dateFormat)}</span>
                 </div>
 
             </div>

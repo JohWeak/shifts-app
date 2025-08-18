@@ -97,7 +97,7 @@ const getScheduleDetails = async (req, res) => {
                 {
                     model: Position,
                     as: 'position',
-                    attributes: ['pos_id', 'pos_name', 'profession']
+                    attributes: ['pos_id', 'pos_name', 'profession', 'site_id', 'num_of_emp']
                 }
             ],
             order: [['work_date', 'ASC'], ['shift_id', 'ASC']]

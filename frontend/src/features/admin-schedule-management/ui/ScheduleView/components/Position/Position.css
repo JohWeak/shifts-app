@@ -66,7 +66,7 @@
 }
 
 [data-theme="dark"] .position-schedule-editor .btn-outline-secondary {
-    color: var(--bs-gray-500);
+    /*color: var(--bs-gray-500);*/
 }
 
 /* Schedule Table Wrapper */
