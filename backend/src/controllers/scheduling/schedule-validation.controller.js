@@ -1,6 +1,7 @@
 // backend/src/controllers/scheduling/schedule-validation.controller.js
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
+const db = require('../../models');
 const EmployeeRecommendationService = require('../../services/employee-recommendation.service');
 const constraints = require('../../config/scheduling-constraints');
 
@@ -8,7 +9,12 @@ class ScheduleValidationController {
     static async validateChanges(req, res) {
         try {
             const { scheduleId, changes } = req.body;
-            const { Employee, Schedule, ScheduleAssignment, PositionShift } = req.db;
+            const {
+                Employee,
+                Schedule,
+                ScheduleAssignment,
+                PositionShift
+            } = db;
 
             // Get schedule details with shifts
             const schedule = await Schedule.findByPk(scheduleId, {
@@ -18,7 +24,7 @@ class ScheduleValidationController {
                     include: [{
                         model: PositionShift,
                         as: 'shift',
-                        attributes: ['shift_id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift']
+                        attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift']
                     }]
                 }]
             });
@@ -30,7 +36,7 @@ class ScheduleValidationController {
             // Get all shifts for the schedule
             const shifts = await PositionShift.findAll({
                 where: {
-                    shift_id: {
+                    id: {
                         [Op.in]: [...new Set([
                             ...schedule.assignments.map(a => a.shift_id),
                             ...changes.filter(c => c.action === 'assign').map(c => c.shiftId)
@@ -41,7 +47,7 @@ class ScheduleValidationController {
 
             const shiftMap = {};
             shifts.forEach(shift => {
-                shiftMap[shift.shift_id] = shift;
+                shiftMap[shift.id] = shift;
             });
 
             const violations = [];

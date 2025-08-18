@@ -27,14 +27,7 @@ router.get('/schedules/:scheduleId/statistics', ...[verifyToken, isAdmin], sched
 router.post('/generate', ...[verifyToken, isAdmin], generationController.generateNextWeekSchedule);
 router.post('/compare-algorithms', ...[verifyToken, isAdmin], generationController.compareAllAlgorithms);
 router.get('/', ...[verifyToken, isAdmin], scheduleController.getAllSchedules);
-router.post('/:scheduleId/validate',
-    ...[verifyToken, isAdmin],
-    (req, res, next) => {
-        req.db = req.app.get('db'); // Pass db to controller
-        next();
-    },
-    ScheduleValidationController.validateChanges
-);
+router.post('/:scheduleId/validate', ...[verifyToken, isAdmin], ScheduleValidationController.validateChanges);
 router.get('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.getScheduleDetails);
 router.put('/:scheduleId/status', ...[verifyToken, isAdmin], scheduleController.updateScheduleStatus);
 router.put('/:scheduleId/update-assignments', ...[verifyToken, isAdmin], scheduleController.updateScheduleAssignments);

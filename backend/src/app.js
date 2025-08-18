@@ -5,7 +5,10 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const db = require('./models');
 const app = express();
+
+app.set('db', db);
 
 // Middleware
 // --- НАСТРОЙКА CORS ДЛЯ ЛОКАЛЬНОЙ РАЗРАБОТКИ ---
@@ -49,7 +52,6 @@ app.use('/api/shifts', require('./routes/shift.routes'));
 app.use('/api/constraints', require('./routes/constraint.routes'));
 app.use('/api/schedule-settings', require('./routes/schedule-settings.routes'));
 app.use('/api/settings', require('./routes/settings.routes'));
-
 
 app.use('/api/test', require('./routes/test.routes'));
 
