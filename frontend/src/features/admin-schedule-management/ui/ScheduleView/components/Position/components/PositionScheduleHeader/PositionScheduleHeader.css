@@ -1,1 +1,4 @@
 /* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/Position/components/PositionScheduleHeader/PositionScheduleHeader.css*/
+.autofilling-button {
+    transition: all 0.3s ease;
+}

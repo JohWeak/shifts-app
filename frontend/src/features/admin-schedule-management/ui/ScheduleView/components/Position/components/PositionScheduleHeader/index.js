@@ -100,25 +100,29 @@ const PositionScheduleHeader = ({
 
                 {isEditing && (
                     <div className="d-flex gap-2">
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={onAutofill}
-                            disabled={isAutofilling || savingChanges}
-                            title={t('schedule.autofillTooltip')}
-                        >
-                            {isAutofilling ? (
-                                <>
-                                    <Spinner size="sm" className="mx-2" />
-                                    {t('schedule.autofilling')}
-                                </>
-                            ) : (
-                                <>
-                                    <i className="bi bi-magic me-1"></i>
-                                    {t('schedule.autofill')}
-                                </>
-                            )}
-                        </Button>
+                        {shortage>0 && (
+                            <Button
+                                variant="primary"
+                                className={`autofilling-button ${shortage>0 ? 'visible' : 'invisible'}`}
+                                size="sm"
+                                onClick={onAutofill}
+                                disabled={isAutofilling || savingChanges}
+                                title={t('schedule.autofillTooltip')}
+                            >
+                                {isAutofilling ? (
+                                    <>
+                                        <Spinner size="sm" className="mx-2" />
+                                        {t('schedule.autofilling')}
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="bi bi-magic me-1"></i>
+                                        {t('schedule.autofill')}
+                                    </>
+                                )}
+                            </Button>
+                        )}
+
                         <Button
                             variant="success"
                             size="sm"
