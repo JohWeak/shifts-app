@@ -1,6 +1,7 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/components/PendingEmployee/index.js
 import React from 'react';
 import DraggableEmployee from '../../../DraggableEmployee';
+import './AssignedEmployee.css';
 
 // Этот компонент отвечает за уже сохраненного, существующего сотрудника
 const AssignedEmployee = ({
@@ -14,19 +15,28 @@ const AssignedEmployee = ({
                               onMouseEnter,
                               onMouseLeave,
                               dnd,
-                              cellData
+                              cellData,
+                              isCrossPosition,
+                              isCrossSite,
+                              isFlexible,
                           }) => {
     const employeeData = {
         empId: employee.emp_id,
         name: formatEmployeeName(employee),
         assignmentId: employee.assignment_id,
-        isPending: false
+        isPending: false,
+        isCrossPosition: isCrossPosition || employee.isCrossPosition,
+        isCrossSite: isCrossSite || employee.isCrossSite,
+        isFlexible: isFlexible || employee.isFlexible
     };
 
     const getClassName = () => {
-        let classes = 'mb-1 d-flex align-items-center justify-content-between employee-item';
+        let classes = 'mb-1 d-flex align-items-center justify-content-between employee-item assigned-employee';
         if (isBeingReplaced) classes += ' being-replaced';
         if (isHighlighted) classes += ' highlighted';
+        if (isCrossPosition || employee.isCrossPosition) classes += ' cross-position-employee';
+        if (isCrossSite || employee.isCrossSite) classes += ' cross-site-employee';
+        if (isFlexible || employee.isFlexible) classes += ' flexible-employee';
         return classes;
     };
 
@@ -51,6 +61,22 @@ const AssignedEmployee = ({
                         title={isEditing ? 'Click to replace this employee' : ''}
                     >
                         {employeeData.name}
+
+                        {(isCrossPosition || employee.isCrossPosition) && (
+                            <span className="badge-indicator cross-position-badge" title="Cross-position">
+                                <i className="bi bi-arrow-left-right"></i>
+                            </span>
+                        )}
+                        {(isCrossSite || employee.isCrossSite) && (
+                            <span className="badge-indicator cross-site-badge" title="Cross-site">
+                                <i className="bi bi-building"></i>
+                            </span>
+                        )}
+                        {(isFlexible || employee.isFlexible) && (
+                            <span className="badge-indicator flexible-badge" title="Flexible">
+                                <i className="bi bi-shuffle"></i>
+                            </span>
+                        )}
                     </span>
                     {isEditing && (
                         <button

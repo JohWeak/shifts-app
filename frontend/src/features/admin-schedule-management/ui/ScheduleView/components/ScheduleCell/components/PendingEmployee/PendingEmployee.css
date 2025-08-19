@@ -1,0 +1,91 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/components/PendingEmployee/PendingEmployee.css */
+
+.pending-assignment {
+    position: relative;
+    opacity: 0.9;
+    font-style: italic;
+}
+
+/* Autofilled with green dashed border */
+.pending-assignment.autofilled-employee {
+    border: 2px dashed #28a745 !important;
+    animation: pulse 2s ease-in-out;
+    background-color: rgba(40, 167, 69, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Cross-position styling - yellow border (persists after save) */
+.pending-assignment.cross-position-employee {
+    border: 2px solid #ffc107 !important;
+    background-color: rgba(255, 193, 7, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Cross-site styling - blue border (persists after save) */
+.pending-assignment.cross-site-employee {
+    border: 2px solid #17a2b8 !important;
+    background-color: rgba(23, 162, 184, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Flexible employee styling - purple border */
+.pending-assignment.flexible-employee {
+    border: 2px solid #6f42c1 !important;
+    background-color: rgba(111, 66, 193, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Combined autofilled + cross-position */
+.pending-assignment.autofilled-employee.cross-position-employee {
+    border: 2px dashed #ffc107 !important;
+}
+
+/* Combined autofilled + cross-site */
+.pending-assignment.autofilled-employee.cross-site-employee {
+    border: 2px dashed #17a2b8 !important;
+}
+
+/* Animation for autofilled */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+}
+
+/* Badge indicators */
+.badge-indicator {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+
+.cross-position-badge {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.cross-site-badge {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.flexible-badge {
+    background-color: #6f42c1;
+    color: #fff;
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import DraggableEmployee from '../../../DraggableEmployee';
+import './PendingEmployee.css';
 
 // Этот компонент отвечает за нового, еще не сохраненного сотрудника
 const PendingEmployee = ({
@@ -12,14 +13,20 @@ const PendingEmployee = ({
                              onMouseLeave,
                              dnd,
                              cellData,
-                             pendingChange
+                             pendingChange,
+                             isCrossPosition,
+                             isCrossSite,
+                             isFlexible
                          }) => {
     const employeeData = {
         empId: assignment.empId,
         name: assignment.empName,
         assignmentId: null,
         isPending: true,
-        pendingKey: pendingChange.key
+        pendingKey: pendingChange.key,
+        isCrossPosition: isCrossPosition || pendingChange?.isCrossPosition,
+        isCrossSite: isCrossSite || pendingChange?.isCrossSite,
+        isFlexible: isFlexible || pendingChange?.isFlexible
     };
 
     const employeeForFormat = {
@@ -29,9 +36,18 @@ const PendingEmployee = ({
 
     const getClassName = () => {
         let classes = 'mb-1 d-flex align-items-center justify-content-between employee-item pending-assignment';
-        if (pendingChange.isAutofilled) classes += ' autofilled-employee';
-        if (pendingChange.isCrossSite) classes += ' cross-site-employee';
-        if (pendingChange.isCrossPosition) classes += ' cross-position-employee';
+        if (pendingChange?.isAutofilled && !pendingChange?.isSaved) {
+            classes += ' autofilled-employee';
+        }
+        if (isCrossSite || pendingChange?.isCrossSite) {
+            classes += ' cross-site-employee';
+        }
+        if (isCrossPosition || pendingChange?.isCrossPosition) {
+            classes += ' cross-position-employee';
+        }
+        if (isFlexible || pendingChange?.isFlexible) {
+            classes += ' flexible-employee';
+        }
         if (isHighlighted) classes += ' highlighted';
         return classes;
     };
@@ -52,6 +68,22 @@ const PendingEmployee = ({
                 <>
                     <span className="employee-name text-success">
                         {formatEmployeeName(employeeForFormat)}
+
+                        {(isCrossPosition || pendingChange?.isCrossPosition) && (
+                            <span className="badge-indicator cross-position-badge" title="Cross-position">
+                                <i className="bi bi-arrow-left-right"></i>
+                            </span>
+                        )}
+                        {(isCrossSite || pendingChange?.isCrossSite) && (
+                            <span className="badge-indicator cross-site-badge" title="Cross-site">
+                                <i className="bi bi-building"></i>
+                            </span>
+                        )}
+                        {(isFlexible || pendingChange?.isFlexible) && (
+                            <span className="badge-indicator flexible-badge" title="Flexible">
+                                <i className="bi bi-shuffle"></i>
+                            </span>
+                        )}
                     </span>
                     {isEditing && (
                         <button

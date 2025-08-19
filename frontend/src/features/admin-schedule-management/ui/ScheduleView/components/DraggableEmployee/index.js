@@ -1,4 +1,4 @@
-// frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
+// frontend/src/features/admin-schedule-management/ui/ScheduleView/components/DraggableEmployee/index.js
 import React from 'react';
 import './DraggableEmployee.css';
 

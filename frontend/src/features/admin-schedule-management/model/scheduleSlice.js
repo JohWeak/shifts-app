@@ -431,23 +431,64 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
-                state.loading = 'succeeded';
+                // НЕ перезагружаем scheduleDetails
+                // Просто обновляем локально с сохранением флагов
 
-                // После успешного обновления данные будут перезагружены через fetchScheduleDetails
-                // Очищаем pendingChanges для позиции, которая была сохранена
-                if (action.meta?.arg?.changes) {
-                    const positionId = action.meta.arg.changes[0]?.positionId;
-                    if (positionId) {
-                        // Удаляем все изменения для этой позиции
-                        Object.keys(state.pendingChanges).forEach(key => {
-                            if (state.pendingChanges[key].positionId === positionId) {
-                                delete state.pendingChanges[key];
+                const positionId = action.meta.arg.changes[0]?.positionId;
+                if (positionId) {
+                    // Применяем изменения из pendingChanges к assignments
+                    Object.values(state.pendingChanges).forEach(change => {
+                        if (change.positionId === positionId && !change.isApplied) {
+                            if (change.action === 'assign') {
+                                // Проверяем, нет ли уже такого assignment
+                                const existingIndex = state.scheduleDetails.assignments.findIndex(
+                                    a => a.emp_id === change.empId &&
+                                        a.position_id === change.positionId &&
+                                        a.shift_id === change.shiftId &&
+                                        a.work_date === change.date
+                                );
+
+                                if (existingIndex === -1) {
+                                    // Добавляем новый assignment с флагами
+                                    state.scheduleDetails.assignments.push({
+                                        emp_id: change.empId,
+                                        position_id: change.positionId,
+                                        shift_id: change.shiftId,
+                                        work_date: change.date,
+                                        employee: {
+                                            emp_id: change.empId,
+                                            first_name: change.empName?.split(' ')[0] || '',
+                                            last_name: change.empName?.split(' ').slice(1).join(' ') || ''
+                                        },
+                                        // Сохраняем флаги
+                                        isCrossPosition: change.isCrossPosition || false,
+                                        isCrossSite: change.isCrossSite || false,
+                                        isFlexible: change.isFlexible || false
+                                    });
+                                }
+                            } else if (change.action === 'remove') {
+                                // Удаляем assignment
+                                state.scheduleDetails.assignments = state.scheduleDetails.assignments.filter(
+                                    a => !(
+                                        a.emp_id === change.empId &&
+                                        a.position_id === change.positionId &&
+                                        a.shift_id === change.shiftId &&
+                                        a.work_date === change.date
+                                    )
+                                );
                             }
-                        });
+                        }
+                    });
 
-                        // Выключаем режим редактирования для этой позиции
-                        state.editingPositions[positionId] = false;
-                    }
+                    // Очищаем pendingChanges для этой позиции
+                    Object.keys(state.pendingChanges).forEach(key => {
+                        if (state.pendingChanges[key].positionId === positionId) {
+                            delete state.pendingChanges[key];
+                        }
+                    });
+
+                    // Выходим из режима редактирования
+                    state.editingPositions[positionId] = false;
                 }
             })
 

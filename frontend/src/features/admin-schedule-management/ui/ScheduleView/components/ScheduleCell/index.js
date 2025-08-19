@@ -1,7 +1,7 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/index.js
 
 import React from 'react';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import AssignedEmployee from './components/AssignedEmployee';
 import PendingEmployee from './components/PendingEmployee';
 import './ScheduleCell.css';
@@ -29,7 +29,7 @@ const ScheduleCell = ({
                           selectedCell,
                           className = ''
                       }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
 
     const visibleEmployees = employees.filter(emp => !pendingRemovals.some(r => r.empId === emp.emp_id));
     const totalEmployees = visibleEmployees.length + pendingAssignments.length;
@@ -64,14 +64,14 @@ const ScheduleCell = ({
 
     const handleEmployeeNameClick = (e, empId) => {
         e.stopPropagation();
-        if(isEditing) onEmployeeClick(date, positionId, shiftId, empId);
+        if (isEditing) onEmployeeClick(date, positionId, shiftId, empId);
     };
 
     const isEmployeeBeingReplaced = (empId) => {
         return isEditing && selectedCell?.positionId === positionId && selectedCell?.date === date && selectedCell?.shiftId === shiftId && selectedCell?.employeeIdToReplace === empId;
     };
 
-    const cellData = { date, shiftId, positionId };
+    const cellData = {date, shiftId, positionId};
 
     return (
         <td
@@ -104,11 +104,20 @@ const ScheduleCell = ({
                         onMouseLeave={onEmployeeMouseLeave}
                         dnd={dnd}
                         cellData={cellData}
+                        isCrossPosition={employee.isCrossPosition}
+                        isCrossSite={employee.isCrossSite}
+                        isFlexible={employee.isFlexible}
                     />
                 ))}
                 {pendingAssignments.map((assignment) => {
-                    const changeKey = Object.keys(pendingChanges).find(key => pendingChanges[key].action === 'assign' && pendingChanges[key].empId === assignment.empId && pendingChanges[key].positionId === positionId && pendingChanges[key].date === date && pendingChanges[key].shiftId === shiftId);
-                    const pendingChange = changeKey ? { key: changeKey, ...pendingChanges[changeKey] } : null;
+                    const changeKey = Object.keys(pendingChanges).find(key =>
+                        pendingChanges[key].action === 'assign' &&
+                        pendingChanges[key].empId === assignment.empId &&
+                        pendingChanges[key].positionId === positionId &&
+                        pendingChanges[key].date === date &&
+                        pendingChanges[key].shiftId === shiftId
+                    );
+                    const pendingChange = changeKey ? {key: changeKey, ...pendingChanges[changeKey]} : null;
                     if (!pendingChange) return null;
 
                     return (
@@ -124,12 +133,17 @@ const ScheduleCell = ({
                             dnd={dnd}
                             cellData={cellData}
                             pendingChange={pendingChange}
+                            isCrossPosition={pendingChange?.isCrossPosition || assignment.isCrossPosition}
+                            isCrossSite={pendingChange?.isCrossSite || assignment.isCrossSite}
+                            isFlexible={pendingChange?.isFlexible || assignment.isFlexible}
                         />
                     );
                 })}
                 {isEditing && totalEmployees < requiredEmployees && (
                     <div className="add-more-indicator">
-                        <small className="fw-bold "><i className="bi bi-plus-circle me-1"></i>{t('employee.needMoreEmployees', { count: (requiredEmployees - totalEmployees) })}</small>
+                        <small className="fw-bold "><i
+                            className="bi bi-plus-circle me-1"></i>{t('employee.needMoreEmployees', {count: (requiredEmployees - totalEmployees)})}
+                        </small>
                     </div>
                 )}
             </div>

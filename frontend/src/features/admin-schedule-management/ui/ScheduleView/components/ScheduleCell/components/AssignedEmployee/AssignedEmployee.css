@@ -1,0 +1,84 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/components/AssignedEmployee/AssignedEmployee.css */
+
+.assigned-employee {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+/* Cross-position styling - yellow border */
+.assigned-employee.cross-position-employee {
+    border: 2px solid #ffc107 !important;
+    background-color: rgba(255, 193, 7, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Cross-site styling - blue border */
+.assigned-employee.cross-site-employee {
+    border: 2px solid #17a2b8 !important;
+    background-color: rgba(23, 162, 184, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Flexible employee styling - purple border */
+.assigned-employee.flexible-employee {
+    border: 2px solid #6f42c1 !important;
+    background-color: rgba(111, 66, 193, 0.05) !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+/* Combined styles - gradient border */
+.assigned-employee.cross-position-employee.cross-site-employee {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(23, 162, 184, 0.05)) !important;
+    border: 2px solid transparent !important;
+    background-clip: padding-box;
+    position: relative;
+}
+
+.assigned-employee.cross-position-employee.cross-site-employee::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #ffc107, #17a2b8);
+    border-radius: 4px;
+    z-index: -1;
+}
+
+/* Badge indicators */
+.assigned-employee .badge-indicator {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+
+.assigned-employee .cross-position-badge {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.assigned-employee .cross-site-badge {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.assigned-employee .flexible-badge {
+    background-color: #6f42c1;
+    color: #fff;
+}
+
+.assigned-employee.highlighted {
+    box-shadow: 0 0 0 2px #007bff;
+}
+
+.assigned-employee.being-replaced {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
