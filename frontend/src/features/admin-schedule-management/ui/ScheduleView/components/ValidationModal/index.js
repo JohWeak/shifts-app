@@ -2,6 +2,7 @@
 import React from 'react';
 import { Modal, Button, Alert, ListGroup, Badge } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { formatDate } from 'shared/lib/utils/scheduleUtils'
 import './ValidationModal.css';
 
 const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
@@ -20,10 +21,10 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
         return acc;
     }, {});
 
-    const formatDate = (dateStr) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString();
-    };
+    // const formatDate = (dateStr) => {
+    //     const date = new Date(dateStr);
+    //     return date.toLocaleDateString();
+    // };
 
     return (
         <Modal show={show} onHide={onHide} size="lg" className="validation-modal">

@@ -11,7 +11,7 @@ import {
     eachDayOfInterval,
     isSameDay
 } from 'date-fns';
-import { enUS, he, ru } from 'date-fns/locale'; // Пример для en, he, ru
+import { enUS, he, ru } from 'date-fns/locale';
 const dateFnsLocales = {
     en: enUS,
     he: he,
