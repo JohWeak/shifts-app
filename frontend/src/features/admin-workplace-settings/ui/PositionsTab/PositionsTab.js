@@ -279,17 +279,17 @@ const PositionsTab = ({selectedSite}) => {
         defaultStaff: (p) => p.num_of_emp || 1,
         shifts: (p) => p.totalShifts || 0,
         employees: (p) => p.totalEmployees || 0,
-        status: (p) => (p.is_active ? 0 : 1), // Сортируем по статусу
-    }), [workSites]); // Добавили workSites в зависимости
+        status: (p) => (p.is_active ? 0 : 1),
+    }), [workSites]);
 
-// Используем хук для сортировки
+
     const {sortedItems: sortedPositions, requestSort, sortConfig} = useSortableData(
         filteredPositions,
         {field: 'status', order: 'ASC'}, // Начальная сортировка
         sortingAccessors
     );
 
-    // Подсчет деактивированных работников для предупреждения
+
     const getEmployeeCountForWarning = (position) => {
         return position.employeeCount || 0;
     };
