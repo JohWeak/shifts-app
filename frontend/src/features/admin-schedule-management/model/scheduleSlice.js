@@ -30,7 +30,7 @@ export const fetchScheduleDetails = createAsyncThunk(
             const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
             console.log('Schedule details response:', response);
 
-            return response; // Возвращаем только data
+            return response;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -407,11 +407,11 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(compareAlgorithms.fulfilled, (state, action) => {
-                state.loading = 'succeeded'; // Сбрасываем загрузку
-                // ...
+                state.loading = 'succeeded';
+
             })
             .addCase(compareAlgorithms.rejected, (state, action) => {
-                state.loading = 'failed'; // Сбрасываем загрузку
+                state.loading = 'failed';
                 state.error = action.payload;
             })
 
@@ -421,7 +421,6 @@ const scheduleSlice = createSlice({
             })
             .addCase(deleteSchedule.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                // Удаляем расписание из списка
                 state.schedules = state.schedules.filter(s => s.id !== action.payload);
                 state.error = null;
             })

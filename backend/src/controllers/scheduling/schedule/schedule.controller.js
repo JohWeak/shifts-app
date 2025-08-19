@@ -124,9 +124,6 @@ const getScheduleDetails = async (req, res) => {
         });
 
         // Get week dates for calculating total requirements
-        const startDate = new Date(schedule.start_date);
-        const endDate = new Date(schedule.end_date);
-        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
         // Calculate requirements for each position
         const enrichedPositions = positions.map(position => {
@@ -136,7 +133,6 @@ const getScheduleDetails = async (req, res) => {
 
             if (position.shifts && position.shifts.length > 0) {
                 position.shifts.forEach(shift => {
-                    let staffPerDay = 1; // Default
 
                     // Get requirements for this shift
                     if (shift.requirements && shift.requirements.length > 0) {

@@ -68,7 +68,11 @@ const ScheduleCell = ({
     };
 
     const isEmployeeBeingReplaced = (empId) => {
-        return isEditing && selectedCell?.positionId === positionId && selectedCell?.date === date && selectedCell?.shiftId === shiftId && selectedCell?.employeeIdToReplace === empId;
+        return isEditing &&
+            selectedCell?.positionId === positionId &&
+            selectedCell?.date === date &&
+            selectedCell?.shiftId === shiftId &&
+            selectedCell?.employeeIdToReplace === empId;
     };
 
     const cellData = {date, shiftId, positionId};

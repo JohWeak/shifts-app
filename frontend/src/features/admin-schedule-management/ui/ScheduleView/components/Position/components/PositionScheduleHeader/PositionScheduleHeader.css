@@ -1,4 +1,69 @@
 /* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/Position/components/PositionScheduleHeader/PositionScheduleHeader.css*/
-.autofilling-button {
+
+/* Position Header */
+.position-schedule-editor .position-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.position-schedule-editor .position-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.position-schedule-editor .position-name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    margin: 0;
+    color: var(--bs-emphasis-color);
+}
+
+.position-schedule-editor .position-badge {
+    font-size: var(--text-sm);
+}
+
+/* Edit Controls */
+.position-schedule-editor .edit-controls {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+[data-theme="dark"] .position-schedule-editor .btn-outline-secondary {
+    /*color: var(--bs-gray-500);*/
+}
+
+
+.position-schedule-editor .autofilling-button {
     transition: all 0.3s ease;
+}
+.autofilling-button.hide {
+    transform: translateX(100px);
+    opacity: 0;
+    z-index: -1;
+}
+.autofilling-button.show {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 1;
+}
+
+.position-schedule-editor .btn-success,
+.position-schedule-editor .btn-outline-secondary,
+.position-schedule-editor .btn-outline-primary,
+.position-schedule-editor .btn-primary{
+    border-radius: var(--radius-md);
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-medium);
+    padding: var(--space-2) var(--space-1);
+    transition: all var(--transition-base);
+    white-space: nowrap;
+    min-width: 100px;
+
 }

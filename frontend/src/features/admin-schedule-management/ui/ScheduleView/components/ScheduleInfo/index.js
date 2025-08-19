@@ -37,9 +37,6 @@ const ScheduleInfo = ({
     };
 
 
-    console.log('Schedule fields:', Object.keys(schedule || {}));
-
-
     return (
         <div className="schedule-info-wrapper">
 

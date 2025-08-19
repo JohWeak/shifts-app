@@ -3,6 +3,8 @@
 import React from 'react';
 import { Button, Badge, Form, Spinner, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import './PositionScheduleHeader.css'
+
 
 const PositionScheduleHeader = ({
                                   position,
@@ -100,10 +102,9 @@ const PositionScheduleHeader = ({
 
                 {isEditing && (
                     <div className="d-flex gap-2">
-                        {shortage>0 && (
                             <Button
                                 variant="primary"
-                                className={`autofilling-button ${shortage>0 ? 'visible' : 'invisible'}`}
+                                className={`autofilling-button ${shortage>0 ? 'show' : 'hide'}`}
                                 size="sm"
                                 onClick={onAutofill}
                                 disabled={isAutofilling || savingChanges}
@@ -121,7 +122,6 @@ const PositionScheduleHeader = ({
                                     </>
                                 )}
                             </Button>
-                        )}
 
                         <Button
                             variant="success"

@@ -69,7 +69,7 @@ export const useScheduleDetailsActions = (schedule) => {
         } catch (error) {
             console.error('Save/validation failed:', error);
             dispatch(addNotification({
-                type: 'error',
+                variant: 'error',
                 message: t('schedule.saveFailed')
             }));
             return { success: false, error };
@@ -91,7 +91,7 @@ export const useScheduleDetailsActions = (schedule) => {
             dispatch(applyPendingChanges(positionId));
 
             dispatch(addNotification({
-                type: 'success',
+                variant: 'success',
                 message: t('schedule.saveSuccess')
             }));
 

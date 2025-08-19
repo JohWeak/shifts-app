@@ -918,6 +918,7 @@ export const en = {
         validationWarningMessage: 'The following legal compliance issues were found. These violations may result in penalties or legal issues. Do you want to continue anyway?',
         validationFailed: 'Validation check failed',
         validatingChanges: 'Validating changes...',
+        noShiftsDefined: 'No shifts defined',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

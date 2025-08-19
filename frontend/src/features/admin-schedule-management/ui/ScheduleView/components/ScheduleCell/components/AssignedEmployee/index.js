@@ -3,7 +3,6 @@ import React from 'react';
 import DraggableEmployee from '../../../DraggableEmployee';
 import './AssignedEmployee.css';
 
-// Этот компонент отвечает за уже сохраненного, существующего сотрудника
 const AssignedEmployee = ({
                               employee,
                               isEditing,
@@ -60,8 +59,6 @@ const AssignedEmployee = ({
                         style={{ cursor: isEditing ? 'pointer' : 'default' }}
                         title={isEditing ? 'Click to replace this employee' : ''}
                     >
-                        {employeeData.name}
-
                         {(isCrossPosition || employee.isCrossPosition) && (
                             <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>
@@ -77,6 +74,8 @@ const AssignedEmployee = ({
                                 <i className="bi bi-shuffle"></i>
                             </span>
                         )}
+
+                        {employeeData.name}
                     </span>
                     {isEditing && (
                         <button
