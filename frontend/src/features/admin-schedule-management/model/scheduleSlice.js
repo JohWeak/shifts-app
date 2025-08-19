@@ -431,7 +431,6 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
-                // НЕ перезагружаем scheduleDetails
                 // Просто обновляем локально с сохранением флагов
 
                 const positionId = action.meta.arg.changes[0]?.positionId;

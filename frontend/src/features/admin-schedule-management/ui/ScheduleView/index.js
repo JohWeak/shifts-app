@@ -92,7 +92,12 @@ const ScheduleView = ({
     };
 
     const handleEmployeeClick = (date, positionId, shiftId, empId) => {
-        const assignment = scheduleDetails?.assignments?.find(a => (a.pos_id === positionId || a.position_id === positionId) && a.emp_id === empId && a.shift_id === shiftId && (a.work_date === date || a.date === date));
+        const assignment = scheduleDetails?.assignments?.find(a =>
+            (a.pos_id === positionId || a.position_id === positionId) &&
+            a.emp_id === empId &&
+            a.shift_id === shiftId &&
+            (a.work_date === date || a.date === date)
+        );
         onCellClick(date, positionId, shiftId, empId, assignment?.id);
     };
 
