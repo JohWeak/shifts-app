@@ -8,6 +8,7 @@ export const useScheduleUI = () => {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [showEmployeeModal, setShowEmployeeModal] = useState(false);
     const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1500);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -46,6 +47,14 @@ export const useScheduleUI = () => {
             setSelectedCell(null);
         }
     }, [activeTab, isPanelOpen]);
+
+    useEffect(() => {
+        if(isSaving && isPanelOpen){
+            setIsPanelOpen(false);
+            setSelectedCell(null);
+            setIsSaving(false)
+        }
+    }, [isSaving, isPanelOpen]);
 
     const handleCellClick = (date, positionId, shiftId, employeeIdToReplace = null, assignmentIdToReplace = null) => {
         if (!editingPositions?.[positionId]) return;

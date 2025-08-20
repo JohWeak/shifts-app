@@ -29,6 +29,7 @@ const AssignedEmployee = ({
         isFlexible: isFlexible || employee.isFlexible
     };
 
+
     const getClassName = () => {
         let classes = 'mb-1 d-flex align-items-center justify-content-between employee-item assigned-employee';
         if (isBeingReplaced) classes += ' being-replaced';

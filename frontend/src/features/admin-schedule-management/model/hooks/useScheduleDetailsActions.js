@@ -1,21 +1,21 @@
 // frontend/src/features/admin-schedule-management/model/hooks/useScheduleDetailsActions.js
 
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {applyPendingChanges, updateScheduleAssignments, updateScheduleStatus} from '../scheduleSlice';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-import { useScheduleAutofill } from './useScheduleAutofill';
-import { useScheduleValidation } from './useScheduleValidation';
+import {useScheduleAutofill} from './useScheduleAutofill';
+import {useScheduleValidation} from './useScheduleValidation';
 import {addNotification} from "../../../../app/model/notificationsSlice";
 
 export const useScheduleDetailsActions = (schedule) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { editingPositions } = useSelector(state => state.schedule);
-    const { autofillAllEditingPositions, isAutofilling } = useScheduleAutofill();
-    const { scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
-    const { validatePositionChanges } = useScheduleValidation();
+    const {editingPositions} = useSelector(state => state.schedule);
+    const {autofillAllEditingPositions, isAutofilling} = useScheduleAutofill();
+    const {scheduleDetails, pendingChanges} = useSelector(state => state.schedule);
+    const {validatePositionChanges} = useScheduleValidation();
 
     const [validationViolations, setValidationViolations] = useState([]);
     const [showValidationModal, setShowValidationModal] = useState(false);
@@ -28,7 +28,7 @@ export const useScheduleDetailsActions = (schedule) => {
     const handleStatusUpdate = async (status) => {
         setIsUpdating(true);
         try {
-            await dispatch(updateScheduleStatus({ scheduleId: schedule.id, status })).unwrap();
+            await dispatch(updateScheduleStatus({scheduleId: schedule.id, status})).unwrap();
             setShowPublishModal(false);
             setShowUnpublishModal(false);
         } catch (e) {
@@ -60,7 +60,7 @@ export const useScheduleDetailsActions = (schedule) => {
                 setValidationViolations(violations);
                 setPendingSavePositionId(positionId);
                 setShowValidationModal(true);
-                return { showValidation: true, violations };
+                return {showValidation: true, violations};
             }
 
             // No violations, proceed with save
@@ -72,7 +72,7 @@ export const useScheduleDetailsActions = (schedule) => {
                 variant: 'error',
                 message: t('schedule.saveFailed')
             }));
-            return { success: false, error };
+            return {success: false, error};
         }
     };
 
@@ -80,7 +80,6 @@ export const useScheduleDetailsActions = (schedule) => {
         const positionChanges = Object.values(pendingChanges).filter(
             c => c.positionId === positionId && !c.isApplied
         );
-
         try {
             await dispatch(updateScheduleAssignments({
                 scheduleId: scheduleDetails.schedule.id,
@@ -98,11 +97,12 @@ export const useScheduleDetailsActions = (schedule) => {
             setShowValidationModal(false);
             setPendingSavePositionId(null);
 
-            return { success: true };
+            return {success: true};
 
         } catch (error) {
             console.error('Save failed:', error);
-            return { success: false, error };
+            return {success: false, error};
+
         }
     };
 

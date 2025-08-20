@@ -369,39 +369,80 @@ const updateScheduleAssignments = async (req, res) => {
 
         // Track new cross-site employees
         const newCrossSiteEmployeeIds = new Set();
+        const processedChanges = [];
+        const errors = [];
 
+        // Process each change
         for (const change of changes) {
-            if (change.action === 'assign') {
-                // Check if employee exists and is from another site
-                const employee = await Employee.findByPk(change.empId, {
-                    attributes: ['emp_id', 'work_site_id', 'default_position_id']
-                });
+            try {
+                if (change.action === 'assign') {
+                    // Сначала проверяем, нет ли уже такого назначения
+                    const existingAssignment = await ScheduleAssignment.findOne({
+                        where: {
+                            schedule_id: scheduleId,
+                            emp_id: change.empId,
+                            shift_id: change.shiftId,
+                            position_id: change.positionId,
+                            work_date: change.date
+                        }
+                    });
 
-                if (employee && employee.work_site_id !== schedule.site_id) {
-                    newCrossSiteEmployeeIds.add(change.empId);
-                }
-
-                // Add new assignment
-                await ScheduleAssignment.create({
-                    schedule_id: scheduleId,
-                    emp_id: change.empId,
-                    shift_id: change.shiftId,
-                    position_id: change.positionId,
-                    work_date: change.date,
-                    status: 'scheduled',
-                    notes: 'Manually assigned via edit interface'
-                });
-                console.log(`[ScheduleController] Added assignment: ${change.empName} to ${change.date} ${change.shiftId}`);
-
-            } else if (change.action === 'remove') {
-                // Remove existing assignment
-                const deleted = await ScheduleAssignment.destroy({
-                    where: {
-                        id: change.assignmentId,
-                        schedule_id: scheduleId
+                    if (existingAssignment) {
+                        console.log(`[ScheduleController] Assignment already exists for ${change.empName} on ${change.date}`);
+                        continue; // Пропускаем, если уже существует
                     }
+
+                    // Check if employee is from another site
+                    const employee = await Employee.findByPk(change.empId, {
+                        attributes: ['emp_id', 'work_site_id', 'default_position_id']
+                    });
+
+                    if (employee && employee.work_site_id !== schedule.site_id) {
+                        newCrossSiteEmployeeIds.add(change.empId);
+                    }
+
+                    // Add new assignment
+                    await ScheduleAssignment.create({
+                        schedule_id: scheduleId,
+                        emp_id: change.empId,
+                        shift_id: change.shiftId,
+                        position_id: change.positionId,
+                        work_date: change.date,
+                        status: 'scheduled',
+                        notes: 'Manually assigned via edit interface'
+                    });
+
+                    processedChanges.push({...change, status: 'created'});
+                    console.log(`[ScheduleController] Added assignment: ${change.empName} to ${change.date} shift ${change.shiftId}`);
+
+                } else if (change.action === 'remove') {
+                    // Удаляем по всем параметрам, а не только по ID
+                    const whereClause = {
+                        schedule_id: scheduleId,
+                        emp_id: change.empId,
+                        shift_id: change.shiftId,
+                        position_id: change.positionId,
+                        work_date: change.date
+                    };
+
+                    // Если есть assignmentId, используем его
+                    if (change.assignmentId) {
+                        whereClause.id = change.assignmentId;
+                    }
+
+                    const deleted = await ScheduleAssignment.destroy({
+                        where: whereClause
+                    });
+
+                    processedChanges.push({...change, status: 'deleted', count: deleted});
+                    console.log(`[ScheduleController] Removed ${deleted} assignment(s) for employee ${change.empId} on ${change.date}`);
+                }
+            } catch (changeError) {
+                console.error(`[ScheduleController] Error processing change:`, changeError.message);
+                errors.push({
+                    change,
+                    error: changeError.message
                 });
-                console.log(`[ScheduleController] Removed assignment ID: ${change.assignmentId}, deleted: ${deleted}`);
             }
         }
 

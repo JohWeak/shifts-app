@@ -104,9 +104,6 @@ export const updateScheduleAssignments = createAsyncThunk(
         try {
             const response = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
 
-            // После успешного обновления перезагружаем детали расписания
-            await dispatch(fetchScheduleDetails(scheduleId));
-
             return response;
         } catch (error) {
             return rejectWithValue(error.message);
@@ -507,6 +504,10 @@ const scheduleSlice = createSlice({
                         a => a.position_id === positionId
                     ).length;
                 }
+            })
+            .addCase(updateScheduleAssignments.rejected, (state, action) => {
+                state.loading = 'failed';
+                state.error = action.payload;
             })
 
             .addCase(fetchRecommendations.pending, (state) => {

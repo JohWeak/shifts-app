@@ -178,6 +178,7 @@ const ScheduleView = ({
                     onConfirm={confirmSaveWithViolations}
                     violations={validationViolations}
                     title={t('schedule.validationWarning')}
+                    isSaving={isSaving}
                 />
             )}
 

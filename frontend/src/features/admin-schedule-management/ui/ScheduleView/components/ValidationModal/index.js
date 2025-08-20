@@ -1,12 +1,29 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ValidationModal/index.js
-import React from 'react';
-import { Modal, Button, Alert, ListGroup, Badge } from 'react-bootstrap';
+import React, {useState} from 'react';
+import {Modal, Button, Alert, ListGroup, Badge, Spinner} from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { formatDate } from 'shared/lib/utils/scheduleUtils'
 import './ValidationModal.css';
 
-const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
+const ValidationModal = ({
+                             show,
+                             onHide,
+                             onConfirm,
+                             violations,
+                             title,
+                             isConfirming = false
+                         }) => {
     const { t } = useI18n();
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handleConfirm = async () => {
+        setIsProcessing(true);
+        try {
+            await onConfirm();
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     const groupedViolations = violations.reduce((acc, violation) => {
         // Use type for grouping (rest_violation, weekly_hours_violation, etc.)
@@ -140,12 +157,36 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
             </Modal.Body>
 
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>
+                <Button
+                    variant="secondary"
+                    onClick={onHide}
+                    disabled={isProcessing}
+                >
                     {t('common.cancel')}
                 </Button>
-                <Button variant="warning" onClick={onConfirm}>
-                    <i className="bi bi-exclamation-triangle me-2"></i>
-                    {t('schedule.saveAnyway')}
+                <Button
+                    variant="warning"
+                    onClick={handleConfirm}
+                    disabled={isProcessing}
+                >
+                    {isProcessing ? (
+                        <>
+                            <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="me-2"
+                            />
+                            {t('common.saving')}
+                        </>
+                    ) : (
+                        <>
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            {t('schedule.saveAnyway')}
+                        </>
+                    )}
                 </Button>
             </Modal.Footer>
         </Modal>
