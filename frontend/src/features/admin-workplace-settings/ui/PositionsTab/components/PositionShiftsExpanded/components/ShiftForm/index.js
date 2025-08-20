@@ -1,4 +1,4 @@
-// frontend/src/features/admin-workplace-settings/ui/ShiftForm/ShiftForm.js
+// frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftForm/index.js
 import React, { useState, useEffect } from 'react';
 import {
     Modal,
@@ -11,7 +11,7 @@ import {
 } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { createPositionShift, updatePositionShift } from '../../model/workplaceSlice';
+import { createPositionShift, updatePositionShift } from '../../../../../../model/workplaceSlice';
 import './ShiftForm.css';
 
 const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {

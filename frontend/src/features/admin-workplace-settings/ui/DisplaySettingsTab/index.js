@@ -1,4 +1,4 @@
-// frontend/src/features/admin-workplace-settings/ui/DisplaySettingsTab/DisplaySettingsTab.js
+// frontend/src/features/admin-workplace-settings/ui/DisplaySettingsTab/index.js
 import React, { useState, useEffect } from 'react';
 import {
     Card,

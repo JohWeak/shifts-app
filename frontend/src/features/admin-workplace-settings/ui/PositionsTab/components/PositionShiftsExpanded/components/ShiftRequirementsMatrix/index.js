@@ -1,4 +1,4 @@
-// frontend/src/features/admin-workplace-settings/ui/ShiftRequirementsMatrix/ShiftRequirementsMatrix.js
+// frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftRequirementsMatrix/index.js
 import React, {useState, useEffect} from 'react';
 import {
     Table,
@@ -18,7 +18,7 @@ import {
     fetchRequirementsMatrix,
     updateShiftRequirement,
     createShiftRequirement
-} from '../../model/workplaceSlice';
+} from '../../../../../../model/workplaceSlice';
 import './ShiftRequirementsMatrix.css';
 
 const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) => {

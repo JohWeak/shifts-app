@@ -1,0 +1,12 @@
+/* frontend/src/features/admin-workplace-settings/ui/WorkplaceActionButtons/WorkplaceActionButtons.css */
+
+.workplace-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.workplace-actions .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+}

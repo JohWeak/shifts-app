@@ -1,9 +1,9 @@
-// frontend/src/features/admin-workplace-settings/ui/WorkSiteModal/WorkSiteModal.js
+// frontend/src/features/admin-workplace-settings/ui/WorkSiteModal/index.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { createWorkSite, updateWorkSite } from '../../model/workplaceSlice';
+import { createWorkSite, updateWorkSite } from '../../../../model/workplaceSlice';
 
 import './WorkSiteModal.css';
 

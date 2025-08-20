@@ -1,9 +1,9 @@
-// frontend/src/features/admin-workplace-settings/ui/PositionModal/PositionModal.js
+// frontend/src/features/admin-workplace-settings/ui/PositionModal/index.js
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { createPosition, updatePosition } from '../../model/workplaceSlice';
+import { createPosition, updatePosition } from '../../../../model/workplaceSlice';
 
 import './PositionModal.css';
 

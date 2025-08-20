@@ -1,4 +1,4 @@
-// frontend/src/features/admin-workplace-settings/ui/PositionShiftsExpanded/PositionShiftsExpanded.js
+// frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/index.js
 import React, {useState, useEffect} from 'react';
 import {
     Modal,
@@ -12,8 +12,8 @@ import {
 } from 'react-bootstrap';
 import {useDispatch} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import ShiftForm from '../ShiftForm/ShiftForm';
-import ShiftRequirementsMatrix from '../ShiftRequirementsMatrix/ShiftRequirementsMatrix';
+import ShiftForm from './components/ShiftForm';
+import ShiftRequirementsMatrix from './components/ShiftRequirementsMatrix';
 import api from 'shared/api';
 
 import './PositionShiftsExpanded.css';
