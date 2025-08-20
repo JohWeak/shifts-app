@@ -75,14 +75,14 @@ const PendingEmployee = ({
                                 onNameClick(e, assignment.empId);
                             }
                         }}
-                        style={{ cursor: isEditing ? 'pointer' : 'default' }}
+                        style={{cursor: isEditing ? 'pointer' : 'default'}}
                         title={isEditing ? 'Click to replace this employee' : ''}
                     >
-                    {(isCrossPosition || pendingChange?.isCrossPosition) && (
-                        <span className="badge-indicator cross-position-badge" title="Cross-position">
+                        {(isCrossPosition || pendingChange?.isCrossPosition) && (
+                            <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>
                             </span>
-                    )}
+                        )}
                         {(isCrossSite || pendingChange?.isCrossSite) && (
                             <span className="badge-indicator cross-site-badge" title="Cross-site">
                                 <i className="bi bi-building"></i>
