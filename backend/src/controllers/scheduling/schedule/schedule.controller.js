@@ -389,7 +389,7 @@ const updateScheduleAssignments = async (req, res) => {
 
                     if (existingAssignment) {
                         console.log(`[ScheduleController] Assignment already exists for ${change.empName} on ${change.date}`);
-                        continue; // Пропускаем, если уже существует
+                        continue;
                     }
 
                     // Check if employee is from another site
@@ -416,7 +416,6 @@ const updateScheduleAssignments = async (req, res) => {
                     console.log(`[ScheduleController] Added assignment: ${change.empName} to ${change.date} shift ${change.shiftId}`);
 
                 } else if (change.action === 'remove') {
-                    // Удаляем по всем параметрам, а не только по ID
                     const whereClause = {
                         schedule_id: scheduleId,
                         emp_id: change.empId,
@@ -459,9 +458,10 @@ const updateScheduleAssignments = async (req, res) => {
 
         res.json({
             success: true,
-            message: `Successfully processed ${changes.length} changes`,
+            message: `Successfully processed ${processedChanges.length} of ${changes.length} changes`,
             data: {
-                changesProcessed: changes.length,
+                changesProcessed: processedChanges.length,
+                errors: errors.length > 0 ? errors : undefined,
                 newEmployees: newEmployees.map(e => ({
                     ...e.toJSON(),
                     isCrossSite: true

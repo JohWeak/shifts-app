@@ -200,7 +200,12 @@ const PositionEditor = ({
         const cellAssignments = assignments.filter(a => (a.work_date || a.date) === dateStr && a.shift_id === shift.shift_id);
         const cellEmployees = cellAssignments.map(a => ({
             ...employees.find(emp => emp.emp_id === a.emp_id),
-            assignment_id: a.id
+            assignment_id: a.id,
+            emp_id: a.emp_id,
+            isCrossPosition: a.isCrossPosition,
+            isCrossSite: a.isCrossSite,
+            isFlexible: a.isFlexible
+
         })).filter(e => e.emp_id);
 
         const pendingAssignments = positionPendingChanges.filter(c => c.action === 'assign' && c.date === dateStr && c.shiftId === shift.shift_id);

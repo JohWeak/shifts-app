@@ -3,45 +3,56 @@
 .pending-assignment {
     position: relative;
     opacity: 0.9;
+    padding-inline-end: 1rem;
 }
 
-/* Autofilled with green dashed border */
+
+/* --- Уникальная логика состояний для PendingEmployee --- */
+
+/* Autofilled с зеленой пунктирной рамкой */
 .pending-assignment.autofilled-employee {
-    border: 1px dashed #28a745 !important;
+    border: 1px dashed var(--autofilled-color) !important;
     animation: autofill-pulse 2s ease-in-out;
-    /*background-color: rgba(40, 167, 69, 0.2) !important;*/
 }
 
-/* Cross-position styling - yellow border (persists after save) */
+/* Cross-position styling - сплошная желтая рамка */
 .pending-assignment.cross-position-employee {
-    border: 1px solid #ffc107 !important;
-    background-color: rgba(255, 193, 7, 0.05) !important;
+    border: 1px solid var(--cross-position-color) !important;
+    background-color: rgba(var(--cross-position-color-rgb), var(--pending-bg-opacity)) !important;
 }
 
-/* Cross-site styling - blue border (persists after save) */
+/* Cross-site styling - сплошная синяя рамка */
 .pending-assignment.cross-site-employee {
-    border: 1px solid #17a2b8 !important;
-    background-color: rgba(23, 162, 184, 0.05) !important;
+    border: 1px solid var(--cross-site-color) !important;
+    background-color: rgba(var(--cross-site-color-rgb), var(--pending-bg-opacity)) !important;
 }
 
-/* Flexible employee styling - purple border */
+/* Flexible employee styling - сплошная фиолетовая рамка */
 .pending-assignment.flexible-employee {
-    border: 1px solid #6f42c1 !important;
-    background-color: rgba(111, 66, 193, 0.05) !important;
-
+    border: 1px solid var(--flexible-color) !important;
+    background-color: rgba(var(--flexible-color-rgb), var(--pending-bg-opacity)) !important;
 }
 
-/* Combined autofilled + cross-position */
+
+/* Комбинированные стили: autofilled + другое состояние = пунктирная рамка нужного цвета */
+
 .pending-assignment.autofilled-employee.cross-position-employee {
-    border: 1px dashed #ffc107 !important;
+    border-style: dashed !important;
+    border-color: var(--cross-position-color) !important;
 }
 
-/* Combined autofilled + cross-site */
 .pending-assignment.autofilled-employee.cross-site-employee {
-    border: 1px dashed #17a2b8 !important;
+    border-style: dashed !important;
+    border-color: var(--cross-site-color) !important;
 }
 
-/* Animation for autofilled */
+.pending-assignment.autofilled-employee.flexible-employee {
+    border-style: dashed !important;
+    border-color: var(--flexible-color) !important;
+}
+
+
+
 @keyframes autofill-pulse {
     0% {
         transform: translateY(-50px);
@@ -55,29 +66,4 @@
         transform: translateY(0);
         opacity: 1;
     }
-}
-
-/* Badge indicators */
-.pending-assignment .badge-indicator {
-    display: inline-block;
-    margin: 1px;
-    font-size: 8px;
-    padding: 1px 3px;
-    border-radius: 3px;
-    vertical-align: middle;
-}
-
-.pending-assignment .cross-position-badge {
-    background-color: #ffc107;
-    color: #000;
-}
-
-.pending-assignment .cross-site-badge {
-    background-color: #17a2b8;
-    color: #fff;
-}
-
-.pending-assignment .flexible-badge {
-    background-color: #6f42c1;
-    color: #fff;
 }

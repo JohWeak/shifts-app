@@ -1,10 +1,10 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card, Alert, Spinner } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useScheduleValidation } from '../../model/hooks/useScheduleValidation';
-import { useScheduleDetailsActions } from '../../model/hooks/useScheduleDetailsActions';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Card, Alert, Spinner} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useScheduleValidation} from '../../model/hooks/useScheduleValidation';
+import {useScheduleDetailsActions} from '../../model/hooks/useScheduleDetailsActions';
 import {
     exportSchedule, toggleEditPosition,
     addPendingChange, removePendingChange,
@@ -14,7 +14,7 @@ import ScheduleInfo from './components/ScheduleInfo';
 import ValidationModal from './components/ValidationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import { useScheduleAutofill } from '../../model/hooks/useScheduleAutofill';
+import {useScheduleAutofill} from '../../model/hooks/useScheduleAutofill';
 import EmployeeRecommendationsPanel from '../EmployeeRecommendations/EmployeeRecommendationsPanel';
 import EmployeeRecommendationsModal from '../EmployeeRecommendations/EmployeeRecommendationsModal';
 import './ScheduleView.css';
@@ -30,11 +30,11 @@ const ScheduleView = ({
                           panelWidth,
                           onPanelWidthChange
                       }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
-    const { scheduleDetails, editingPositions, pendingChanges, loading } = useSelector(state => state.schedule);
-    const { autofillPosition, isAutofilling: isPositionAutofilling, isProcessing } = useScheduleAutofill();
+    const {scheduleDetails, editingPositions, pendingChanges, loading} = useSelector(state => state.schedule);
+    const {autofillPosition, isAutofilling: isPositionAutofilling, isProcessing} = useScheduleAutofill();
 
     // --- ACTIONS & MODALS HOOK ---
     const {
@@ -64,7 +64,6 @@ const ScheduleView = ({
             const result = await handleSavePosition(positionId);
 
             if (!result.showValidation) {
-                // Successfully saved or handled
                 console.log('Position saved successfully');
             }
         } finally {
@@ -76,10 +75,10 @@ const ScheduleView = ({
         setIsExporting(true);
         setExportAlert(null);
         try {
-            const result = await dispatch(exportSchedule({ scheduleId: scheduleDetails.schedule.id, format })).unwrap();
-            setExportAlert({ type: 'success', message: `${t('schedule.exportSuccess')}: ${result.filename}` });
+            const result = await dispatch(exportSchedule({scheduleId: scheduleDetails.schedule.id, format})).unwrap();
+            setExportAlert({type: 'success', message: `${t('schedule.exportSuccess')}: ${result.filename}`});
         } catch (error) {
-            setExportAlert({ type: 'danger', message: `${t('common.error')}: ${error}` });
+            setExportAlert({type: 'danger', message: `${t('common.error')}: ${error}`});
         } finally {
             setIsExporting(false);
             setTimeout(() => setExportAlert(null), 5000);
@@ -88,7 +87,7 @@ const ScheduleView = ({
 
     const handleEmployeeRemove = (date, positionId, shiftId, empId, assignmentId = null) => {
         const key = `remove-${positionId}-${date}-${shiftId}-${empId}`;
-        dispatch(addPendingChange({ key, change: { action: 'remove', positionId, date, shiftId, empId, assignmentId } }));
+        dispatch(addPendingChange({key, change: {action: 'remove', positionId, date, shiftId, empId, assignmentId}}));
     };
 
     const handleEmployeeClick = (date, positionId, shiftId, empId) => {
@@ -102,10 +101,10 @@ const ScheduleView = ({
     };
 
     if (loading === 'pending' && !scheduleDetails) {
-        return <LoadingState size="lg" message={t('common.loading')} />;
+        return <LoadingState size="lg" message={t('common.loading')}/>;
     }
     if (!scheduleDetails) {
-        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')} />;
+        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')}/>;
     }
 
     const isUIBlocked = isProcessing || isAutofilling;
@@ -138,7 +137,15 @@ const ScheduleView = ({
                         onAutofill={promptAutofill}
                         isAutofilling={isAutofilling}
                     />
-                    {exportAlert && <Alert variant={exportAlert.type} dismissible onClose={() => setExportAlert(null)}>{exportAlert.message}</Alert>}
+                    {exportAlert &&
+                        <Alert
+                            variant={exportAlert.type}
+                            dismissible
+                            onClose={() => setExportAlert(null)}
+                        >
+                            {exportAlert.message}
+                        </Alert>
+                    }
                 </Card.Body>
             </Card>
 
@@ -166,7 +173,11 @@ const ScheduleView = ({
                             />
                         ))
                     ) : (
-                        <EmptyState icon={<i className="bi bi-person-workspace fs-1"></i>} title={t('position.noPositions')} description="This schedule doesn't have any position assignments yet." />
+                        <EmptyState
+                            icon={<i className="bi bi-person-workspace fs-1"></i>}
+                            title={t('position.noPositions')}
+                            description="This schedule doesn't have any position assignments yet."
+                        />
                     )}
                 </Card.Body>
             </Card>

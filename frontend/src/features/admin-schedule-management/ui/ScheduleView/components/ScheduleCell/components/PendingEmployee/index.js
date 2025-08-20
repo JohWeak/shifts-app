@@ -78,23 +78,24 @@ const PendingEmployee = ({
                         style={{cursor: isEditing ? 'pointer' : 'default'}}
                         title={isEditing ? 'Click to replace this employee' : ''}
                     >
-                        {(isCrossPosition || pendingChange?.isCrossPosition) && (
+                        <div className="badge-container">
+                            {(isCrossPosition || pendingChange?.isCrossPosition) && (
                             <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>
                             </span>
-                        )}
-                        {(isCrossSite || pendingChange?.isCrossSite) && (
-                            <span className="badge-indicator cross-site-badge" title="Cross-site">
+                            )}
+                            {(isCrossSite || pendingChange?.isCrossSite) && (
+                                <span className="badge-indicator cross-site-badge" title="Cross-site">
                                 <i className="bi bi-building"></i>
                             </span>
-                        )}
-                        {(isFlexible || pendingChange?.isFlexible) && (
-                            <span className="badge-indicator flexible-badge" title="Flexible">
+                            )}
+                            {(isFlexible || pendingChange?.isFlexible) && (
+                                <span className="badge-indicator flexible-badge" title="Flexible">
                                 <i className="bi bi-shuffle"></i>
                             </span>
-                        )}
-
-                        {formatEmployeeName(employeeForFormat)}
+                            )}
+                        </div>
+                            {formatEmployeeName(employeeForFormat)}
                     </span>
 
                     {isEditing && (

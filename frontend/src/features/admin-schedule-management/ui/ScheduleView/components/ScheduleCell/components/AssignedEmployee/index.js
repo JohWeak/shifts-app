@@ -60,6 +60,7 @@ const AssignedEmployee = ({
                         style={{ cursor: isEditing ? 'pointer' : 'default' }}
                         title={isEditing ? 'Click to replace this employee' : ''}
                     >
+                        <div className="badge-container">
                         {(isCrossPosition || employee.isCrossPosition) && (
                             <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>
@@ -75,6 +76,7 @@ const AssignedEmployee = ({
                                 <i className="bi bi-shuffle"></i>
                             </span>
                         )}
+                            </div>
 
                         {employeeData.name}
                     </span>

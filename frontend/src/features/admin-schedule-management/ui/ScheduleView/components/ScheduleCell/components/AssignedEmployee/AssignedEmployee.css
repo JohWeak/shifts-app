@@ -1,84 +1,61 @@
 /* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/components/AssignedEmployee/AssignedEmployee.css */
+.assigned-employee {
+    --cross-position-bg-color: var(--cross-position-bg-light);
+    --cross-site-bg-color: var(--cross-site-bg-light);
+    --flexible-bg-color: var(--flexible-bg-light);
+    --gradient-start-color: var(--cross-site-bg-light);
+    --gradient-end-color: var(--cross-position-bg-light);
+}
 
+[data-theme="dark"] .assigned-employee {
+    --cross-position-bg-color: var(--cross-position-bg-dark);
+    --cross-site-bg-color: var(--cross-site-bg-dark);
+    --flexible-bg-color: var(--flexible-bg-dark);
+    --gradient-start-color: var(--cross-site-bg-dark);
+    --gradient-end-color: var(--cross-position-bg-dark);
+}
+
+
+/* --- Основные стили компонента --- */
 .assigned-employee {
     position: relative;
     transition: all 0.2s ease;
+    border: 1px solid transparent !important;
+    padding-inline-end: 1rem;
 }
 
-/* Cross-position styling - yellow border */
+/* --- Стилизация состояний сотрудника --- */
+
+/* Cross-position styling - yellow */
 .assigned-employee.cross-position-employee {
-    border: 2px solid #ffc107 !important;
-    background-color: rgba(255, 193, 7, 0.05) !important;
-    border-radius: 4px;
-    padding: 2px 4px;
+    border-color: var(--cross-position-color) !important;
+    background-color: var(--cross-position-bg-color) !important;
 }
 
-/* Cross-site styling - blue border */
+/* Cross-site styling - blue */
 .assigned-employee.cross-site-employee {
-    border: 2px solid #17a2b8 !important;
-    background-color: rgba(23, 162, 184, 0.05) !important;
-    border-radius: 4px;
-    padding: 2px 4px;
+    border-color: var(--cross-site-color) !important;
+    background-color: var(--cross-site-bg-color) !important;
 }
 
-/* Flexible employee styling - purple border */
+/* Flexible employee styling - purple */
 .assigned-employee.flexible-employee {
-    border: 2px solid #6f42c1 !important;
-    background-color: rgba(111, 66, 193, 0.05) !important;
-    border-radius: 4px;
-    padding: 2px 4px;
+    border-color: var(--flexible-color) !important;
+    background-color: var(--flexible-bg-color) !important;
 }
 
-/* Combined styles - gradient border */
+/* Combined styles - gradient border and background */
 .assigned-employee.cross-position-employee.cross-site-employee {
-    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(23, 162, 184, 0.05)) !important;
-    border: 2px solid transparent !important;
-    background-clip: padding-box;
-    position: relative;
+    background: linear-gradient(135deg, var(--gradient-start-color), var(--gradient-end-color)) !important;
+    border-color: var(--cross-site-color) !important;
+    border-bottom-color: var(--cross-position-color) !important;
+    /* RTL-совместимое свойство для рамки */
+    border-inline-end-color: var(--cross-position-color) !important;
 }
 
-.assigned-employee.cross-position-employee.cross-site-employee::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(135deg, #ffc107, #17a2b8);
-    border-radius: 4px;
-    z-index: -1;
-}
 
-/* Badge indicators */
-.assigned-employee .badge-indicator {
-    display: inline-block;
-    margin: 1px;
-    font-size: 8px;
-    padding: 1px 3px;
-    border-radius: 3px;
-    vertical-align: middle;
-}
-
-.assigned-employee .cross-position-badge {
-    background-color: #ffc107;
-    color: #000;
-}
-
-.assigned-employee .cross-site-badge {
-    background-color: #17a2b8;
-    color: #fff;
-}
-
-.assigned-employee .flexible-badge {
-    background-color: #6f42c1;
-    color: #fff;
-}
+/* --- Стили состояний (выделение, замена) --- */
 
 .assigned-employee.highlighted {
-    box-shadow: 0 0 0 2px #007bff;
-}
-
-.assigned-employee.being-replaced {
-    opacity: 0.5;
-    text-decoration: line-through;
+    box-shadow: 0 0 0 2px var(--highlight-color);
 }
