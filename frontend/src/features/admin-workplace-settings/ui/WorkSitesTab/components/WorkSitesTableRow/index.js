@@ -24,14 +24,15 @@ const WorkSitesTableRow = ({
             <td className="site-name">{site.site_name}</td>
             <td>{site.address || '-'}</td>
             <td>{site.phone || '-'}</td>
+
+            <td className="text-center"><Badge bg={site.positionCount > 0 ? 'info' : 'secondary'} pill>{site.positionCount || 0}</Badge></td>
+            <td className="text-center"><Badge bg={site.employeeCount > 0 ? 'primary' : 'secondary'} pill>{site.employeeCount || 0}</Badge></td>
             <td>
                 <Badge bg={site.is_active ? 'success' : 'secondary'}>
                     {site.is_active ? t('common.active') : t('common.inactive')}
                 </Badge>
             </td>
-            <td className="text-center"><Badge bg={site.positionCount > 0 ? 'info' : 'secondary'} pill>{site.positionCount || 0}</Badge></td>
-            <td className="text-center"><Badge bg={site.employeeCount > 0 ? 'primary' : 'secondary'} pill>{site.employeeCount || 0}</Badge></td>
-            <td>
+            <td onClick={(e) => e.stopPropagation()}>
                 <WorkplaceActionButtons
                     item={site}
                     onEdit={onEdit}

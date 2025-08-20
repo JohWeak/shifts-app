@@ -21,9 +21,9 @@ const WorkSitesTable = ({
                 <SortableHeader sortKey="name" sortConfig={sortConfig} onSort={requestSort}>{t('workplace.worksites.name')}</SortableHeader>
                 <SortableHeader sortKey="address" sortConfig={sortConfig} onSort={requestSort}>{t('workplace.worksites.address')}</SortableHeader>
                 <SortableHeader sortKey="phone" sortConfig={sortConfig} onSort={requestSort}>{t('workplace.worksites.phone')}</SortableHeader>
-                <SortableHeader sortKey="status" sortConfig={sortConfig} onSort={requestSort}>{t('common.status')}</SortableHeader>
                 <SortableHeader sortKey="positions" sortConfig={sortConfig} onSort={requestSort}>{t('workplace.worksites.positions')}</SortableHeader>
                 <SortableHeader sortKey="employees" sortConfig={sortConfig} onSort={requestSort}>{t('workplace.worksites.employees')}</SortableHeader>
+                <SortableHeader sortKey="status" sortConfig={sortConfig} onSort={requestSort}>{t('common.status')}</SortableHeader>
                 <th className="text-muted text-center">{t('common.actions')}</th>
             </tr>
             </thead>

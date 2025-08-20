@@ -1,12 +1,16 @@
 /* frontend/src/index.css */
 @import './app/design-system.css';
+/* === ГЛОБАЛЬНЫЕ СТИЛИ ДЛЯ СТАБИЛЬНОГО SCROLLBAR === */
 
-/*html {*/
-/*    scrollbar-gutter: stable ;*/
-/*}*/
+/* 1. Управляем поведением и резервируем место (решает проблему сдвига) */
+html {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
 
 body.modal-open {
-
     overflow: inherit !important;
     padding-right: 0 !important;
 }
@@ -63,3 +67,5 @@ body {
     background-color: var(--bs-gray-800);
     color: var(--bs-gray-300);
 }
+
+
