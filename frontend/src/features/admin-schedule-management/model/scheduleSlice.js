@@ -430,63 +430,82 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
-                // Просто обновляем локально с сохранением флагов
+                const { newEmployees = [] } = action.payload;
+                const { changes } = action.meta.arg;
+                const positionId = changes[0]?.positionId;
 
-                const positionId = action.meta.arg.changes[0]?.positionId;
-                if (positionId) {
-                    // Применяем изменения из pendingChanges к assignments
-                    Object.values(state.pendingChanges).forEach(change => {
-                        if (change.positionId === positionId && !change.isApplied) {
-                            if (change.action === 'assign') {
-                                // Проверяем, нет ли уже такого assignment
-                                const existingIndex = state.scheduleDetails.assignments.findIndex(
-                                    a => a.emp_id === change.empId &&
-                                        a.position_id === change.positionId &&
-                                        a.shift_id === change.shiftId &&
-                                        a.work_date === change.date
-                                );
+                if (!positionId || !state.scheduleDetails) return;
 
-                                if (existingIndex === -1) {
-                                    // Добавляем новый assignment с флагами
-                                    state.scheduleDetails.assignments.push({
-                                        emp_id: change.empId,
-                                        position_id: change.positionId,
-                                        shift_id: change.shiftId,
-                                        work_date: change.date,
-                                        employee: {
-                                            emp_id: change.empId,
-                                            first_name: change.empName?.split(' ')[0] || '',
-                                            last_name: change.empName?.split(' ').slice(1).join(' ') || ''
-                                        },
-                                        // Сохраняем флаги
-                                        isCrossPosition: change.isCrossPosition || false,
-                                        isCrossSite: change.isCrossSite || false,
-                                        isFlexible: change.isFlexible || false
-                                    });
-                                }
-                            } else if (change.action === 'remove') {
-                                // Удаляем assignment
-                                state.scheduleDetails.assignments = state.scheduleDetails.assignments.filter(
-                                    a => !(
-                                        a.emp_id === change.empId &&
-                                        a.position_id === change.positionId &&
-                                        a.shift_id === change.shiftId &&
-                                        a.work_date === change.date
-                                    )
-                                );
-                            }
+                // Add new cross-site employees to the employees list
+                if (newEmployees.length > 0) {
+                    const existingIds = new Set(state.scheduleDetails.employees.map(e => e.emp_id));
+                    newEmployees.forEach(emp => {
+                        if (!existingIds.has(emp.emp_id)) {
+                            state.scheduleDetails.employees.push(emp);
                         }
                     });
+                }
 
-                    // Очищаем pendingChanges для этой позиции
-                    Object.keys(state.pendingChanges).forEach(key => {
-                        if (state.pendingChanges[key].positionId === positionId) {
-                            delete state.pendingChanges[key];
+                // Apply changes locally
+                changes.forEach(change => {
+                    if (change.action === 'assign') {
+                        // Find employee data
+                        const employee = state.scheduleDetails.employees.find(e => e.emp_id === change.empId);
+
+                        // Check if assignment already exists
+                        const existingIndex = state.scheduleDetails.assignments.findIndex(
+                            a => a.emp_id === change.empId &&
+                                a.position_id === change.positionId &&
+                                a.shift_id === change.shiftId &&
+                                a.work_date === change.date
+                        );
+
+                        if (existingIndex === -1) {
+                            // Add new assignment
+                            state.scheduleDetails.assignments.push({
+                                emp_id: change.empId,
+                                position_id: change.positionId,
+                                shift_id: change.shiftId,
+                                work_date: change.date,
+                                employee: employee || {
+                                    emp_id: change.empId,
+                                    first_name: change.empName?.split(' ')[0] || '',
+                                    last_name: change.empName?.split(' ').slice(1).join(' ') || ''
+                                },
+                                isCrossPosition: change.isCrossPosition,
+                                isCrossSite: change.isCrossSite,
+                                isFlexible: change.isFlexible
+                            });
                         }
-                    });
+                    } else if (change.action === 'remove') {
+                        // Remove assignment
+                        state.scheduleDetails.assignments = state.scheduleDetails.assignments.filter(
+                            a => !(
+                                a.emp_id === change.empId &&
+                                a.position_id === change.positionId &&
+                                a.shift_id === change.shiftId &&
+                                a.work_date === change.date
+                            )
+                        );
+                    }
+                });
 
-                    // Выходим из режима редактирования
-                    state.editingPositions[positionId] = false;
+                // Clear pending changes for this position
+                Object.keys(state.pendingChanges).forEach(key => {
+                    if (state.pendingChanges[key].positionId === positionId) {
+                        delete state.pendingChanges[key];
+                    }
+                });
+
+                // Exit edit mode
+                state.editingPositions[positionId] = false;
+
+                // Update position stats
+                const position = state.scheduleDetails.positions.find(p => p.pos_id === positionId);
+                if (position) {
+                    position.current_assignments = state.scheduleDetails.assignments.filter(
+                        a => a.position_id === positionId
+                    ).length;
                 }
             })
 

@@ -103,7 +103,7 @@ const getScheduleDetails = async (req, res) => {
             order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
         });
 
-        // Получить все позиции с их СОБСТВЕННЫМИ сменами и требованиями
+        // Получить все позиции с их сменами и требованиями
         const positions = await db.Position.findAll({
             where: {
                 site_id: schedule.site_id,
@@ -123,7 +123,6 @@ const getScheduleDetails = async (req, res) => {
             order: [['pos_name', 'ASC']]
         });
 
-        // Get week dates for calculating total requirements
 
         // Calculate requirements for each position
         const enrichedPositions = positions.map(position => {
@@ -205,12 +204,56 @@ const getScheduleDetails = async (req, res) => {
         });
 
         // Get employees for this site
-        const employees = await Employee.findAll({
+        const siteEmployees = await Employee.findAll({
             where: {
                 work_site_id: schedule.site_id,
                 status: 'active'
             },
-            attributes: ['emp_id', 'first_name', 'last_name', 'status']
+            attributes: ['emp_id', 'first_name', 'last_name', 'status', 'work_site_id', 'default_position_id']
+        });
+
+        // Get employees from other sites who are assigned to this schedule
+        const assignedEmployeeIds = assignments
+            .map(a => a.emp_id)
+            .filter((id, index, self) => self.indexOf(id) === index); // unique
+
+        const crossSiteEmployeeIds = assignedEmployeeIds.filter(
+            id => !siteEmployees.find(e => e.emp_id === id)
+        );
+
+        let crossSiteEmployees = [];
+        if (crossSiteEmployeeIds.length > 0) {
+            crossSiteEmployees = await Employee.findAll({
+                where: {
+                    emp_id: crossSiteEmployeeIds,
+                    status: 'active'
+                },
+                attributes: ['emp_id', 'first_name', 'last_name', 'status', 'work_site_id', 'default_position_id']
+            });
+        }
+
+        // Combine all employees
+        const allEmployees = [
+            ...siteEmployees.map(e => e.toJSON()),
+            ...crossSiteEmployees.map(e => ({
+                ...e.toJSON(),
+                isCrossSite: true
+            }))
+        ];
+
+        // Add cross-assignment flags to assignments
+        const enhancedAssignments = assignments.map(a => {
+            const assignment = a.toJSON();
+            const employee = allEmployees.find(e => e.emp_id === assignment.emp_id);
+
+            if (employee) {
+                assignment.isCrossPosition = employee.default_position_id &&
+                    employee.default_position_id !== assignment.position_id;
+                assignment.isCrossSite = employee.work_site_id !== schedule.site_id;
+                assignment.isFlexible = !employee.work_site_id || !employee.default_position_id || false;
+            }
+
+            return assignment;
         });
 
         // Prepare response
@@ -226,19 +269,15 @@ const getScheduleDetails = async (req, res) => {
                 updatedAt: schedule.updatedAt
             },
             positions: enrichedPositions,
-            assignments: assignments,
-            shifts: allShifts, // All shifts with position markers
-            employees: employees
+            assignments: enhancedAssignments,
+            shifts: allShifts,
+            employees: allEmployees
         };
 
-        console.log(`[ScheduleController] Response: ${enrichedPositions.length} positions, example:`,
-            enrichedPositions[0] ? {
-                name: enrichedPositions[0].pos_name,
-                total_required: enrichedPositions[0].total_required_assignments,
-                current: enrichedPositions[0].current_assignments,
-                shifts_count: enrichedPositions[0].shifts.length
-            } : 'none'
-        );
+        console.log(`[ScheduleController] Response: 
+        ${enrichedPositions.length} positions, 
+        ${allEmployees.length} employees 
+        (${crossSiteEmployees.length} cross-site)`);
 
         res.json({
             success: true,
@@ -328,9 +367,20 @@ const updateScheduleAssignments = async (req, res) => {
             });
         }
 
-        // Process each change
+        // Track new cross-site employees
+        const newCrossSiteEmployeeIds = new Set();
+
         for (const change of changes) {
             if (change.action === 'assign') {
+                // Check if employee exists and is from another site
+                const employee = await Employee.findByPk(change.empId, {
+                    attributes: ['emp_id', 'work_site_id', 'default_position_id']
+                });
+
+                if (employee && employee.work_site_id !== schedule.site_id) {
+                    newCrossSiteEmployeeIds.add(change.empId);
+                }
+
                 // Add new assignment
                 await ScheduleAssignment.create({
                     schedule_id: scheduleId,
@@ -355,11 +405,26 @@ const updateScheduleAssignments = async (req, res) => {
             }
         }
 
+        // Get new cross-site employees to add to the frontend
+        let newEmployees = [];
+        if (newCrossSiteEmployeeIds.size > 0) {
+            newEmployees = await Employee.findAll({
+                where: {
+                    emp_id: Array.from(newCrossSiteEmployeeIds)
+                },
+                attributes: ['emp_id', 'first_name', 'last_name', 'work_site_id', 'default_position_id']
+            });
+        }
+
         res.json({
             success: true,
             message: `Successfully processed ${changes.length} changes`,
             data: {
-                changesProcessed: changes.length
+                changesProcessed: changes.length,
+                newEmployees: newEmployees.map(e => ({
+                    ...e.toJSON(),
+                    isCrossSite: true
+                }))
             }
         });
 

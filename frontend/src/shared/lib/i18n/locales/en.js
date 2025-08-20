@@ -919,6 +919,8 @@ export const en = {
         validationFailed: 'Validation check failed',
         validatingChanges: 'Validating changes...',
         noShiftsDefined: 'No shifts defined',
+        notFound: 'Not found',
+        selectFromList: 'Choose another schedule from list',
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

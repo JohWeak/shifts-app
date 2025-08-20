@@ -9,6 +9,7 @@ const PendingEmployee = ({
                              isHighlighted,
                              formatEmployeeName,
                              onCancelClick,
+                             onNameClick,
                              onMouseEnter,
                              onMouseLeave,
                              dnd,
@@ -66,7 +67,17 @@ const PendingEmployee = ({
             className={getClassName()}
             renderContent={() => (
                 <>
-                    <span className="employee-name text-success">
+                    <span
+                        className="employee-name text-success employee-clickable"
+                        onClick={(e) => {
+                            if (isEditing && onNameClick) {
+                                e.stopPropagation();
+                                onNameClick(e, assignment.empId);
+                            }
+                        }}
+                        style={{ cursor: isEditing ? 'pointer' : 'default' }}
+                        title={isEditing ? 'Click to replace this employee' : ''}
+                    >
                     {(isCrossPosition || pendingChange?.isCrossPosition) && (
                         <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>

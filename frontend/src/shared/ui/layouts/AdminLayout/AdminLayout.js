@@ -17,7 +17,11 @@ import {useI18n} from "shared/lib/i18n/i18nProvider";
 
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
-import {setActiveTab, setSelectedScheduleId} from 'features/admin-schedule-management/model/scheduleSlice';
+import {
+    fetchSchedules,
+    setActiveTab,
+    setSelectedScheduleId
+} from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import './AdminLayout.css';
 
@@ -32,8 +36,16 @@ const AdminLayout = () => {
     const expandTimeoutRef = useRef(null);
 
     useEffect(() => {
-        // Загружаем счетчик запросов для админа
-        dispatch(fetchAllRequests());
+        // Preload current week schedules on app init
+        const preloadData = async () => {
+            try {
+                await dispatch(fetchAllRequests()).unwrap();
+                await dispatch(fetchSchedules()).unwrap();
+            } catch (error) {
+                console.error('Failed to preload data:', error);
+            }
+        };
+        preloadData();
     }, [dispatch]);
 
     const handleLogout = () => {

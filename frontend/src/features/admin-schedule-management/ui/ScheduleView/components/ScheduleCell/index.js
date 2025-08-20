@@ -132,6 +132,7 @@ const ScheduleCell = ({
                             isHighlighted={highlightedEmployeeId === assignment.empId}
                             formatEmployeeName={formatEmployeeName}
                             onCancelClick={handleCancelClick}
+                            onNameClick={handleEmployeeNameClick}
                             onMouseEnter={onEmployeeMouseEnter}
                             onMouseLeave={onEmployeeMouseLeave}
                             dnd={dnd}
