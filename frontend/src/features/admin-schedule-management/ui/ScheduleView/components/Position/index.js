@@ -27,7 +27,7 @@ const PositionEditor = ({
                             schedule,
                             isEditing = false,
                             pendingChanges = {},
-                            savingChanges = false,
+                            isSaving,
                             onToggleEdit,
                             onSaveChanges,
                             selectedCell,
@@ -243,6 +243,7 @@ const PositionEditor = ({
             <PositionScheduleHeader
                 position={position}
                 isEditing={isEditing}
+                isSaving={isSaving}
                 canEdit={canEdit}
                 isPublished={schedule?.status === 'published'}
                 shortage={shortage}
@@ -255,7 +256,6 @@ const PositionEditor = ({
                 onSaveClick={handleSaveClick}
                 onAutofill={handleAutofill}
                 isAutofilling={isAutofilling}
-                savingChanges={savingChanges}
             />
 
             <PositionScheduleTable
@@ -302,7 +302,7 @@ const PositionEditor = ({
                 }
                 confirmText={t('common.save')}
                 confirmVariant="warning"
-                loading={savingChanges}
+                loading={isSaving}
             >
                 <div className="alert alert-info">
                     <strong>{t('schedule.currentStatus')}:</strong>

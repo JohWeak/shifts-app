@@ -1,29 +1,29 @@
 //frontend/src/features/admin-schedule-management/ui/ScheduleView/components/Position/components/PositionScheduleHeader/index.js
 
 import React from 'react';
-import { Button, Badge, Form, Spinner, Tooltip, OverlayTrigger } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {Button, Badge, Form, Spinner, Tooltip, OverlayTrigger} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './PositionScheduleHeader.css'
 
 
 const PositionScheduleHeader = ({
-                                  position,
-                                  isEditing,
-                                  canEdit,
-                                  isPublished,
-                                  shortage,
-                                  currentStats,
-                                  totalRequired,
-                                  positionPendingChanges,
-                                  showFirstNameOnly,
-                                  onNameToggle,
-                                  onToggleEdit,
-                                  onSaveClick,
-                                  onAutofill,
-                                  isAutofilling,
-                                  savingChanges
-                              }) => {
-    const { t } = useI18n();
+                                    position,
+                                    isEditing,
+                                    canEdit,
+                                    isPublished,
+                                    isSaving,
+                                    shortage,
+                                    currentStats,
+                                    totalRequired,
+                                    positionPendingChanges,
+                                    showFirstNameOnly,
+                                    onNameToggle,
+                                    onToggleEdit,
+                                    onSaveClick,
+                                    onAutofill,
+                                    isAutofilling,
+                                }) => {
+    const {t} = useI18n();
 
     const renderEditTooltip = (props) => (
         <Tooltip id="edit-disabled-tooltip" {...props}>
@@ -72,7 +72,7 @@ const PositionScheduleHeader = ({
                         {!canEdit ? (
                             <OverlayTrigger
                                 placement="top"
-                                delay={{ show: 250, hide: 400 }}
+                                delay={{show: 250, hide: 400}}
                                 overlay={renderEditTooltip}
                             >
                                 <span className="d-inline-block">
@@ -80,7 +80,7 @@ const PositionScheduleHeader = ({
                                         variant="outline-primary"
                                         size="sm"
                                         disabled
-                                        style={{ pointerEvents: 'none' }}
+                                        style={{pointerEvents: 'none'}}
                                     >
                                         <i className="bi bi-pencil me-1"></i>
                                         {t('common.edit')}
@@ -102,36 +102,36 @@ const PositionScheduleHeader = ({
 
                 {isEditing && (
                     <div className="d-flex gap-2">
-                            <Button
-                                variant="primary"
-                                className={`autofilling-button ${shortage>0 ? 'show' : 'hide'}`}
-                                size="sm"
-                                onClick={onAutofill}
-                                disabled={isAutofilling || savingChanges}
-                                title={t('schedule.autofillTooltip')}
-                            >
-                                {isAutofilling ? (
-                                    <>
-                                        <Spinner size="sm" className="mx-2" />
-                                        {t('schedule.autofilling')}
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="bi bi-magic me-1"></i>
-                                        {t('schedule.autofill')}
-                                    </>
-                                )}
-                            </Button>
+                        <Button
+                            variant="primary"
+                            className={`autofilling-button ${shortage > 0 ? 'show' : 'hide'}`}
+                            size="sm"
+                            onClick={onAutofill}
+                            disabled={isAutofilling || isSaving}
+                            title={t('schedule.autofillTooltip')}
+                        >
+                            {isAutofilling ? (
+                                <>
+                                    <Spinner size="sm" className="mx-2"/>
+                                    {t('schedule.autofilling')}
+                                </>
+                            ) : (
+                                <>
+                                    <i className="bi bi-magic me-1"></i>
+                                    {t('schedule.autofill')}
+                                </>
+                            )}
+                        </Button>
 
                         <Button
                             variant="success"
                             size="sm"
                             onClick={onSaveClick}
-                            disabled={savingChanges || positionPendingChanges.length === 0}
+                            disabled={isSaving || positionPendingChanges.length === 0}
                         >
-                            {savingChanges ? (
+                            {isSaving ? (
                                 <>
-                                    <Spinner size="sm" className="me-1" />
+                                    <Spinner size="sm" className="me-1"/>
                                     {t('common.saving')}
                                 </>
                             ) : (
@@ -145,7 +145,7 @@ const PositionScheduleHeader = ({
                             variant="outline-secondary"
                             size="sm"
                             onClick={() => onToggleEdit(position.pos_id)}
-                            disabled={savingChanges}
+                            disabled={isSaving}
                         >
                             {t('common.cancel')}
                         </Button>

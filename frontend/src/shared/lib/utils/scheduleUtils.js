@@ -18,13 +18,23 @@ const dateFnsLocales = {
     ru: ru
 };
 /**
- * Форматирует дату в заданный строковый формат с расширенными опциями.
- * Поддерживает: YYYY, YY, MM, M, DD, D.
+ * Форматирует дату в заданный строковый формат, поддерживая числовые и текстовые значения.
+ *
+ * Плейсхолдеры:
+ * - Год:   YYYY (2025), YY (25)
+ * - Месяц: MMMM (August), MMM (Aug), MM (08), M (8)
+ * - День:  DD (05), D (5)
+ * - День недели:
+ *   - dddd: Полное название (e.g., Wednesday)
+ *   - ddd:  Короткое название (e.g., Wed)
+ *   - dd:   Самое короткое название (e.g., W)
+ *
  * @param {string | Date} dateInput - Входная дата в виде строки или объекта Date.
- * @param {string} format - Строка формата, например 'DD.MM.YYYY' или 'YYYY-M-D'.
+ * @param {string} format - Строка формата, например 'dddd, D MMMM YYYY'.
+ * @param {string} [locale='en-US'] - Локаль для названий месяцев и дней недели (e.g., 'ru-RU').
  * @returns {string} - Отформатированная строка даты или пустая строка при ошибке.
  */
-export const formatDate = (dateInput, format = 'DD.MM.YYYY') => {
+export const formatDate = (dateInput, format = 'DD.MM.YYYY', locale = 'en-US') => {
     const date = new Date(dateInput);
 
     if (isNaN(date.getTime())) {
@@ -39,15 +49,20 @@ export const formatDate = (dateInput, format = 'DD.MM.YYYY') => {
     const replacements = {
         YYYY: year,
         YY: String(year).slice(-2),
+        MMMM: new Intl.DateTimeFormat(locale, { month: 'long' }).format(date),
+        MMM: new Intl.DateTimeFormat(locale, { month: 'short' }).format(date),
         MM: String(month).padStart(2, '0'),
         M: month,
         DD: String(day).padStart(2, '0'),
-        D: day
+        D: day,
+
+        dddd: new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date),
+        ddd: new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date),
+        dd: new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(date),
     };
 
-    // Используем регулярное выражение для поиска всех ключей и их замены
-    // Это предотвращает баг, когда YYYY заменяется, а потом в остатке YY
-    const regex = /YYYY|YY|MM|M|DD|D/g;
+
+    const regex = /YYYY|YY|MMMM|MMM|MM|M|dddd|ddd|dd|DD|D/g;
 
     return format.replace(regex, (match) => replacements[match]);
 };
