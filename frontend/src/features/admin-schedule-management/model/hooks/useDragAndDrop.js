@@ -55,7 +55,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             return false;
         }
 
-        // ВАЖНО: Сначала проверяем pending removals
         // Если сотрудник удален из этой ячейки временно, его МОЖНО добавить обратно
         const hasPendingRemoval = Object.values(pendingChanges).some(change => {
             return change.action === 'remove' &&

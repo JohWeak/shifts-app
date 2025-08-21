@@ -49,13 +49,8 @@
     background: linear-gradient(135deg, var(--gradient-start-color), var(--gradient-end-color)) !important;
     border-color: var(--cross-site-color) !important;
     border-bottom-color: var(--cross-position-color) !important;
-    /* RTL-совместимое свойство для рамки */
     border-inline-end-color: var(--cross-position-color) !important;
 }
 
 
-/* --- Стили состояний (выделение, замена) --- */
 
-.assigned-employee.highlighted {
-    box-shadow: 0 0 0 2px var(--highlight-color);
-}
