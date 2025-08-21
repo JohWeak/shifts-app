@@ -34,8 +34,7 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
     try {
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
 
-        // 1. Удалить ВСЕ assignments для этой недели и сайта
-        // (даже если нет связанного schedule)
+
         const deletedAssignments = await ScheduleAssignment.destroy({
             where: {
                 work_date: {

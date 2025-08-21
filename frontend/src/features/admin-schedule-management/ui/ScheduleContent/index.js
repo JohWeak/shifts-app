@@ -17,7 +17,7 @@ const ScheduleContent = ({ onScheduleDeleted, handleViewDetails, ...viewProps })
         );
     }
 
-    // Simple condition: if schedule is selected, show details, otherwise show list
+    // if schedule is selected, show details, otherwise show list
     if (selectedScheduleId) {
         return <ScheduleView {...viewProps} />;
     }

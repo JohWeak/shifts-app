@@ -28,11 +28,24 @@ export const useScheduleDetailsActions = (schedule) => {
     const handleStatusUpdate = async (status) => {
         setIsUpdating(true);
         try {
-            await dispatch(updateScheduleStatus({scheduleId: schedule.id, status})).unwrap();
+            await dispatch(updateScheduleStatus({ scheduleId: schedule.id, status })).unwrap();
+
             setShowPublishModal(false);
             setShowUnpublishModal(false);
+
+            dispatch(addNotification({
+                variant: 'success',
+                message: t('schedule.updateStatusSuccess', {
+                    status: t(`schedule.statuses.${status.toLowerCase()}`)
+                })
+            }));
         } catch (e) {
             console.error("Failed to update status:", e);
+            dispatch(addNotification({
+                variant: 'danger',
+                message: e?.message || t('schedule.updateStatusError')
+            }));
+
         } finally {
             setIsUpdating(false);
         }

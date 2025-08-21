@@ -926,6 +926,15 @@ export const en = {
         noShiftsDefined: 'No shifts defined',
         notFound: 'Not found',
         selectFromList: 'Choose another schedule from list',
+        updateStatusSuccess: 'Schedule status successfully updated to "{status}".',
+        updateStatusError: 'An unexpected error occurred while updating the schedule status.',
+        statuses: {
+            draft: 'Draft',
+            published: 'Published',
+            archived: 'Archived'
+        },
+
+
     },
     settings: {
         algorithmMaxTime: 'Algorithm Time Limit',

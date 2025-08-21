@@ -57,26 +57,28 @@ const AssignedEmployee = ({
                     <span
                         className={`employee-name employee-clickable ${isEditing ? 'employee-editable' : ''}`}
                         onClick={(e) => onNameClick(e, employee.emp_id)}
-                        style={{ cursor: isEditing ? 'pointer' : 'default' }}
+                        style={{cursor: isEditing ? 'pointer' : 'default'}}
                         title={isEditing ? 'Click to replace this employee' : ''}
                     >
-                        <div className="badge-container">
-                        {(isCrossPosition || employee.isCrossPosition) && (
-                            <span className="badge-indicator cross-position-badge" title="Cross-position">
+                        {isEditing && (
+                            <div className="badge-container">
+                                {(isCrossPosition || employee.isCrossPosition) && (
+                                    <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>
                             </span>
-                        )}
-                        {(isCrossSite || employee.isCrossSite) && (
-                            <span className="badge-indicator cross-site-badge" title="Cross-site">
+                                )}
+                                {(isCrossSite || employee.isCrossSite) && (
+                                    <span className="badge-indicator cross-site-badge" title="Cross-site">
                                 <i className="bi bi-building"></i>
                             </span>
-                        )}
-                        {(isFlexible || employee.isFlexible) && (
-                            <span className="badge-indicator flexible-badge" title="Flexible">
+                                )}
+                                {(isFlexible || employee.isFlexible) && (
+                                    <span className="badge-indicator flexible-badge" title="Flexible">
                                 <i className="bi bi-shuffle"></i>
                             </span>
-                        )}
+                                )}
                             </div>
+                        )}
 
                         {employeeData.name}
                     </span>
