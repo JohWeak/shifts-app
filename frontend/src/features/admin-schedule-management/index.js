@@ -40,10 +40,9 @@ const ScheduleManagement = () => {
         localStorage.setItem('recommendationPanelWidth', newWidth.toString());
     };
 
-    // useEffect(() => {
-    //     dispatch(fetchSchedules());
-    //     dispatch(fetchWorkSites());
-    // }, [dispatch]);
+    useEffect(() => {
+        dispatch(fetchSchedules());
+    }, [dispatch]);
 
     const handleViewDetails = (scheduleId) => {
         dispatch(setSelectedScheduleId(scheduleId));

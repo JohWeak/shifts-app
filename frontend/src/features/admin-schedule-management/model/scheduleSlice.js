@@ -211,7 +211,6 @@ const scheduleSlice = createSlice({
 
         // UI Состояния
         selectedScheduleId: null,
-        activeTab: 'overview',
         editingPositions: {},
         pendingChanges: {},
         workSitesLastFetched: null,
@@ -235,13 +234,10 @@ const scheduleSlice = createSlice({
                 });
             }
         },
-        setActiveTab(state, action) {
-            state.activeTab = action.payload;
-        },
+
         setSelectedScheduleId(state, action) {
             state.selectedScheduleId = action.payload;
-            state.scheduleDetails = null; // Сбрасываем детали при выборе нового расписания
-            state.activeTab = action.payload ? 'view' : 'overview';
+            state.scheduleDetails = null;
         },
         // Синхронные экшены для управления редактированием
         toggleEditPosition(state, action) {
@@ -340,7 +336,6 @@ const scheduleSlice = createSlice({
         resetScheduleView(state) {
             state.selectedScheduleId = null;
             state.scheduleDetails = null;
-            state.activeTab = 'overview';
             state.editingPositions = {};
             state.pendingChanges = {};
         }
@@ -372,7 +367,6 @@ const scheduleSlice = createSlice({
                 state.loading = 'idle';
                 state.scheduleDetails = action.payload;
                 state.selectedScheduleId = action.payload?.schedule?.id;
-                state.activeTab = 'view';
             })
             .addCase(fetchScheduleDetails.rejected, (state, action) => {
                 state.loading = 'failed';
@@ -386,11 +380,9 @@ const scheduleSlice = createSlice({
             })
             .addCase(generateSchedule.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                // Set the selected schedule ID and switch to view tab
                 if (action.payload?.schedule_id) {
                     state.selectedScheduleId = action.payload.schedule_id;
-                    state.activeTab = 'view';
-                    // Details will be loaded by fetchScheduleDetails dispatched in the thunk
+
                 }
                 state.error = null;
             })
@@ -570,7 +562,6 @@ const scheduleSlice = createSlice({
 });
 
 export const {
-    setActiveTab,
     setSelectedScheduleId,
     resetScheduleView,
     toggleEditPosition,

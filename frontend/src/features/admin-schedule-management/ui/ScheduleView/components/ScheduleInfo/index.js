@@ -4,7 +4,7 @@ import {Button} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {setActiveTab, setSelectedScheduleId} from '../../../../model/scheduleSlice';
+import {resetScheduleView} from '../../../../model/scheduleSlice';
 import ScheduleActionButtons from "../../../ScheduleActionButtons";
 import './ScheduleInfo.css';
 import {formatWeekRange, formatDate as formatDateUtil } from "shared/lib/utils/scheduleUtils";
@@ -32,8 +32,7 @@ const ScheduleInfo = ({
 
 
     const handleBackClick = () => {
-        dispatch(setActiveTab('overview'));
-        dispatch(setSelectedScheduleId(null));
+        dispatch(resetScheduleView());
     };
 
 

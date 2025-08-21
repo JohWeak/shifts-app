@@ -18,8 +18,7 @@ import {useI18n} from "shared/lib/i18n/i18nProvider";
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import {
-    fetchSchedules,
-    setActiveTab,
+    fetchSchedules, resetScheduleView,
     setSelectedScheduleId
 } from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
@@ -142,8 +141,7 @@ const AdminLayout = () => {
 
     const handleNavigation = (path) => {
         if (path === '/admin/schedules') {
-            dispatch(setActiveTab('overview'));
-            dispatch(setSelectedScheduleId(null));
+            dispatch(resetScheduleView());
         }
         navigate(path);
     };
