@@ -13,18 +13,6 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
     const showWarning = !isAvailable;
     const isBecameAvailable = employee.recommendation?.reasons?.includes('became_available');
 
-    // Helper function to parse warnings
-    const parseWarning = (warning) => {
-        if (warning.startsWith('already_assigned_elsewhere:')) {
-            const parts = warning.split(':');
-            return {
-                type: 'already_assigned_elsewhere',
-                site: parts[1] || '',
-                shift: parts[2] || ''
-            };
-        }
-        return { type: warning };
-    };
 
     const handleItemClick = () => {
         if (showWarning) {
@@ -73,17 +61,14 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                             {employee.unavailable_reason === 'already_assigned' && (
                                 <div className="mt-2 text-danger">
                                     <i className="bi bi-calendar-check me-1"></i>
-                                    {employee.assignedScheduleName
-                                        ? (employee.assignedSiteToday
-                                            ? t('recommendation.already_assigned_in_schedule_site',
-                                                employee.assignedScheduleName,
-                                                employee.assignedSiteToday,
-                                                employee.assigned_shift || t('recommendation.unknown_shift'))
-                                            : t('recommendation.already_assigned_in_schedule',
-                                                employee.assignedScheduleName,
-                                                employee.assigned_shift || t('recommendation.unknown_shift')))
-                                        : t('recommendation.already_assigned_to',
-                                            employee.assigned_shift || t('recommendation.unknown_shift'))
+                                    {employee.assignedSiteToday
+                                        ? t('recommendation.already_assigned_at', [
+                                            employee.assignedSiteToday,
+                                            employee.assigned_shift || t('recommendation.unknown_shift')
+                                        ])
+                                        : t('recommendation.already_assigned_to', [
+                                            employee.assigned_shift || t('recommendation.unknown_shift')
+                                        ])
                                     }
                                 </div>
                             )}
@@ -96,11 +81,30 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                             {employee.unavailable_reason === 'rest_violation' && employee.rest_details && (
                                 <div className="mt-2 text-danger">
                                     <i className="bi bi-moon me-1"></i>
-                                    {employee.rest_details.type === 'after' ? t('recommendation.rest_violation_after', [employee.rest_details.restHours, employee.rest_details.previousShift, employee.rest_details.requiredRest]) : t('recommendation.rest_violation_before', [employee.rest_details.restHours, employee.rest_details.nextShift, employee.rest_details.requiredRest])}
+                                    {employee.rest_details.type === 'after'
+                                        ? t('recommendation.rest_violation_after', [
+                                            employee.rest_details.restHours,
+                                            employee.rest_details.previousShift,
+                                            employee.rest_details.requiredRest
+                                        ])
+                                        : t('recommendation.rest_violation_before', [
+                                            employee.rest_details.restHours,
+                                            employee.rest_details.nextShift,
+                                            employee.rest_details.requiredRest
+                                        ])
+                                    }
                                 </div>
                             )}
-                            {employee.unavailable_reason === 'hard_constraint' && <div className="mt-2 text-danger"><i className="bi bi-x-circle me-1"></i>{t('recommendation.Cannot work')}</div>}
-                            {employee.unavailable_reason === 'soft_constraint' && <div className="mt-2 text-danger"><i className="bi bi-dash-circle me-1"></i>{t('recommendation.prefer_different_time')}</div>}
+                            {employee.unavailable_reason === 'hard_constraint' &&
+                                <div className="mt-2 text-danger">
+                                    <i className="bi bi-x-circle me-1"></i>
+                                    {t('recommendation.Cannot work')}
+                                </div>}
+                            {employee.unavailable_reason === 'soft_constraint' &&
+                                <div className="mt-2 text-danger">
+                                    <i className="bi bi-dash-circle me-1"></i>
+                                    {t('recommendation.prefer_different_time')}
+                                </div>}
                         </>
                     )}
                     {isAvailable && !isBecameAvailable && (
@@ -115,20 +119,27 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                                 return null;
                             })}
                             {employee.recommendation?.warnings?.map((warning, idx) => {
-                                const parsedWarning = parseWarning(warning);
-                                if (parsedWarning.type === 'already_assigned_elsewhere') {
+                                // Special handling for already_assigned_at warning
+                                if (warning.startsWith('already_assigned_at:')) {
+                                    const parts = warning.split(':');
+                                    const site = parts[1] || '';
+                                    const shift = parts[2] || '';
                                     return (
                                         <small key={idx} className="d-block text-warning">
                                             <i className="bi bi-exclamation-triangle me-1"></i>
-                                            {t('recommendation.already_assigned_elsewhere', parsedWarning.site, parsedWarning.shift)}
+                                            {t('recommendation.already_assigned_at', [site, shift])}
                                         </small>
                                     );
                                 }
+                                // Handle other warnings
                                 const [key, ...params] = warning.split(':');
                                 const translationKey = `recommendation.${key}`;
                                 const translation = t(translationKey, params);
                                 if (translation && translation !== translationKey) {
-                                    return <small key={idx} className="d-block text-warning"><i className="bi bi-exclamation-triangle me-1"></i>{translation}</small>;
+                                    return <small key={idx} className="d-block text-warning">
+                                        <i className="bi bi-exclamation-triangle me-1"></i>
+                                        {translation}
+                                    </small>;
                                 }
                                 return null;
                             })}
@@ -137,12 +148,24 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                 </div>
             </div>
             <div className="employee-badges">
-                <small className="score-badge">{t('employee.score')}: {employee.recommendation?.score || 0}</small>
-                {type === 'available' && <Badge bg="success">{t('employee.available')}</Badge>}
-                {type === 'cross_position' && <Badge bg="warning" text="dark">{t('employee.crossPosition')}</Badge>}
-                {type === 'other_site' && <Badge bg="info">{t('employee.otherSite')}</Badge>}
-                {isFlexible && <Badge bg="secondary">{t('employee.flexible')}</Badge>}
-                {showWarning && <Badge bg="danger">{t('employee.unavailable')}</Badge>}
+                <small className="score-badge">
+                    {t('employee.score')}: {employee.recommendation?.score || 0}
+                </small>
+                {type === 'available' &&
+                    <Badge bg="success">{t('employee.available')}</Badge>
+                }
+                {type === 'cross_position' &&
+                    <Badge bg="warning" text="dark">{t('employee.crossPosition')}</Badge>
+                }
+                {type === 'other_site' &&
+                    <Badge bg="info">{t('employee.otherSite')}</Badge>
+                }
+                {isFlexible &&
+                    <Badge bg="secondary">{t('employee.flexible')}</Badge>
+                }
+                {showWarning &&
+                    <Badge bg="danger">{t('employee.unavailable')}</Badge>
+                }
             </div>
         </ListGroup.Item>
     );

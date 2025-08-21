@@ -273,7 +273,6 @@ class EmployeeRecommendationService {
                         unavailable_reason: 'already_assigned',
                         assigned_shift: evaluation.assignedShiftToday,
                         assignedSiteToday: evaluation.assignedSiteToday,
-                        assignedScheduleName: evaluation.assignedScheduleName
                     });
                 } else if (evaluation.hasPermanentConstraint) {
                     recommendations.unavailable_permanent.push({
@@ -369,7 +368,6 @@ class EmployeeRecommendationService {
             permanentConstraintDetails: [],
             assignedShiftToday: null,
             assignedSiteToday: null,
-            assignedScheduleName: null,
             restViolationDetails: null
         };
 
@@ -382,15 +380,14 @@ class EmployeeRecommendationService {
             evaluation.canWork = false;
             evaluation.score = 0;
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
-            evaluation.assignedScheduleName = todayAssignment.schedule?.name || 'Another schedule';
 
             // Include schedule name in warning
             const siteName = todayAssignment.position?.workSite?.site_name || '';
             if (siteName) {
                 evaluation.assignedSiteToday = siteName;
-                evaluation.warnings.push(`already_assigned_in_schedule:${evaluation.assignedScheduleName}:${siteName}:${evaluation.assignedShiftToday}`);
+                evaluation.warnings.push(`already_assigned_at:${siteName}:${evaluation.assignedShiftToday}`);
             } else {
-                evaluation.warnings.push(`already_assigned_in_schedule:${evaluation.assignedScheduleName}:${evaluation.assignedShiftToday}`);
+                evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);
             }
             return evaluation;
         }

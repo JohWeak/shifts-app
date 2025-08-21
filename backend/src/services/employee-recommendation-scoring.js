@@ -78,7 +78,8 @@ class EmployeeScorer {
         // 2. Work site matching
         if (!employee.work_site_id) {
             // Can work anywhere - neutral
-            reasons.push({ type: 'any_site', points: 0 });
+            score += SCORING_CONFIG.SITE_MATCH.ANY;
+            reasons.push({ type: 'any_site', points: SCORING_CONFIG.SITE_MATCH.ANY });
         } else if (employee.work_site_id === targetPosition.site_id) {
             score += SCORING_CONFIG.SITE_MATCH.SAME;
             reasons.push({ type: 'same_site', points: SCORING_CONFIG.SITE_MATCH.SAME });

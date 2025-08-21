@@ -686,6 +686,7 @@ export const en = {
         'assigned_at_other_site': 'Working at another site today',
         'already_assigned_in_schedule': 'Already assigned in "{0}" to {1}',
         'already_assigned_in_schedule_site': 'Already assigned in "{0}" at {1} to {2}',
+        'already_assigned_at': 'Already assigned at {0} to {1}',
 
 
     },
