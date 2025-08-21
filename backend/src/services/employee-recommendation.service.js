@@ -112,85 +112,79 @@ class EmployeeRecommendationService {
                 ]
             });
 
+            const targetDate = dayjs(date).format('YYYY-MM-DD');
+            const weekStart = dayjs(date).startOf('week').format('YYYY-MM-DD');
+            const weekEnd = dayjs(date).endOf('week').format('YYYY-MM-DD');
+
             let weekAssignments = [];
-            if (scheduleId) {
-                const schedule = await Schedule.findByPk(scheduleId);
-                if (schedule) {
-                    weekAssignments = await ScheduleAssignment.findAll({
-                        where: {
-                            schedule_id: scheduleId
-                        },
-                        include: [
-                            {
-                                model: PositionShift,
-                                as: 'shift',
-                                attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
-                            },
-                            {
-                                model: Position,
-                                as: 'position',
-                                attributes: ['pos_id', 'pos_name', 'work_site_id'],
-                                include: [{
-                                    model: WorkSite,
-                                    as: 'workSite',
-                                    attributes: ['site_id', 'site_name']
-                                }]
-                            }
-                        ]
-                    });
-                }
-            } else {
-                const weekStart = dayjs(date).startOf('week').format('YYYY-MM-DD');
-                const weekEnd = dayjs(date).endOf('week').format('YYYY-MM-DD');
-
-                weekAssignments = await ScheduleAssignment.findAll({
-                    where: {
-                        work_date: {
-                            [Op.between]: [weekStart, weekEnd]
-                        },
-                        emp_id: {
-                            [Op.in]: employees.map(e => e.emp_id)
-                        }
+            weekAssignments = await ScheduleAssignment.findAll({
+                where: {
+                    work_date: {
+                        [Op.between]: [weekStart, weekEnd]
                     },
-                    include: [
-                        {
-                            model: PositionShift,
-                            as: 'shift',
-                            attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
-                        },
-                        {
-                            model: Position,
-                            as: 'position',
-                            attributes: ['pos_id', 'pos_name', 'work_site_id'],
-                            include: [{
-                                model: WorkSite,
-                                as: 'workSite',
-                                attributes: ['site_id', 'site_name']
-                            }]
-                        }
-                    ]
-                });
-            }
+                    // Remove schedule_id filter to get assignments from ALL schedules
+                    // This is critical for cross-schedule conflict detection
+                },
+                include: [
+                    {
+                        model: PositionShift,
+                        as: 'shift',
+                        attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
+                    },
+                    {
+                        model: Position,
+                        as: 'position',
+                        attributes: ['pos_id', 'pos_name', 'site_id'],
+                        include: [{
+                            model: WorkSite,
+                            as: 'workSite',
+                            attributes: ['site_id', 'site_name']
+                        }]
+                    },
+                    {
+                        model: Schedule,
+                        as: 'schedule',
+                        attributes: ['id', 'status']
+                    }
+                ]
+            });
 
-            console.log(`[EmployeeRecommendation] Found ${weekAssignments.length} assignments for the week`);
+            console.log(`[EmployeeRecommendation] Found ${weekAssignments.length} total assignments across ALL schedules for week ${weekStart} to ${weekEnd}`);
 
 
 
-            if (virtualChanges && virtualChanges.length > 0) {
-                console.log(`[EmployeeRecommendation] Applying ${virtualChanges.length} virtual changes`);
+            // Log assignments for the target date specifically
+            const todayAssignmentsAll = weekAssignments.filter(a =>
+                dayjs(a.work_date).format('YYYY-MM-DD') === targetDate
+            );
+            console.log(`[EmployeeRecommendation] ${todayAssignmentsAll.length} assignments on ${targetDate} across all schedules`);
 
+            // If we have a specific schedule, apply virtual changes
+            if (scheduleId && virtualChanges && virtualChanges.length > 0) {
+                console.log(`[EmployeeRecommendation] Applying ${virtualChanges.length} virtual changes for schedule ${scheduleId}`);
+
+                // Remove assignments that are being removed in virtual changes
                 virtualChanges.filter(c => c.action === 'remove').forEach(change => {
                     weekAssignments = weekAssignments.filter(assignment =>
-                        !(assignment.emp_id === change.emp_id &&
+                        // Only remove from current schedule
+                        !(assignment.schedule_id === scheduleId &&
+                            assignment.emp_id === change.emp_id &&
                             assignment.shift_id === change.shift_id &&
                             dayjs(assignment.work_date).format('YYYY-MM-DD') === change.date)
                     );
                 });
 
+                // Add virtual assignments
                 for (const change of virtualChanges.filter(c => c.action === 'assign')) {
                     const shift = await PositionShift.findByPk(change.shift_id);
+                    const position = await Position.findByPk(change.position_id, {
+                        include: [{
+                            model: WorkSite,
+                            as: 'workSite'
+                        }]
+                    });
 
-                    if (shift) {
+                    if (shift && position) {
                         const virtualAssignment = {
                             id: `virtual_${change.emp_id}_${change.shift_id}_${change.date}`,
                             emp_id: change.emp_id,
@@ -199,13 +193,13 @@ class EmployeeRecommendationService {
                             work_date: change.date,
                             schedule_id: scheduleId,
                             is_virtual: true,
-                            shift: shift
+                            shift: shift,
+                            position: position,
+                            schedule: {id: scheduleId, name: 'Current', status: 'draft'}
                         };
                         weekAssignments.push(virtualAssignment);
                     }
                 }
-
-                console.log(`[EmployeeRecommendation] After virtual changes: ${weekAssignments.length} assignments`);
             }
 
             // Group assignments by employee and date
@@ -278,7 +272,8 @@ class EmployeeRecommendationService {
                         ...employeeData,
                         unavailable_reason: 'already_assigned',
                         assigned_shift: evaluation.assignedShiftToday,
-                        assignedSiteToday: evaluation.assignedSiteToday
+                        assignedSiteToday: evaluation.assignedSiteToday,
+                        assignedScheduleName: evaluation.assignedScheduleName
                     });
                 } else if (evaluation.hasPermanentConstraint) {
                     recommendations.unavailable_permanent.push({
@@ -374,6 +369,7 @@ class EmployeeRecommendationService {
             permanentConstraintDetails: [],
             assignedShiftToday: null,
             assignedSiteToday: null,
+            assignedScheduleName: null,
             restViolationDetails: null
         };
 
@@ -386,13 +382,22 @@ class EmployeeRecommendationService {
             evaluation.canWork = false;
             evaluation.score = 0;
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
-            evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);
+            evaluation.assignedScheduleName = todayAssignment.schedule?.name || 'Another schedule';
+
+            // Include schedule name in warning
+            const siteName = todayAssignment.position?.workSite?.site_name || '';
+            if (siteName) {
+                evaluation.assignedSiteToday = siteName;
+                evaluation.warnings.push(`already_assigned_in_schedule:${evaluation.assignedScheduleName}:${siteName}:${evaluation.assignedShiftToday}`);
+            } else {
+                evaluation.warnings.push(`already_assigned_in_schedule:${evaluation.assignedScheduleName}:${evaluation.assignedShiftToday}`);
+            }
             return evaluation;
         }
 
         // NEW: Check if flexible or cross-site employee is assigned anywhere else today
         const isFlexible = !employee.default_position_id;
-        const isCrossSite = employee.work_site_id !== targetPosition.work_site_id;
+        const isCrossSite = employee.work_site_id !== targetPosition.site_id;
 
         if (isFlexible || isCrossSite) {
             // Check ALL assignments for today across all sites

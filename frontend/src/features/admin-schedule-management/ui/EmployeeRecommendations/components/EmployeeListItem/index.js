@@ -70,11 +70,21 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                     )}
                     {showWarning && (
                         <>
-
                             {employee.unavailable_reason === 'already_assigned' && (
                                 <div className="mt-2 text-danger">
                                     <i className="bi bi-calendar-check me-1"></i>
-                                    {t('recommendation.already_assigned_to', [employee.assigned_shift || t('recommendation.unknown_shift')])}
+                                    {employee.assignedScheduleName
+                                        ? (employee.assignedSiteToday
+                                            ? t('recommendation.already_assigned_in_schedule_site',
+                                                employee.assignedScheduleName,
+                                                employee.assignedSiteToday,
+                                                employee.assigned_shift || t('recommendation.unknown_shift'))
+                                            : t('recommendation.already_assigned_in_schedule',
+                                                employee.assignedScheduleName,
+                                                employee.assigned_shift || t('recommendation.unknown_shift')))
+                                        : t('recommendation.already_assigned_to',
+                                            employee.assigned_shift || t('recommendation.unknown_shift'))
+                                    }
                                 </div>
                             )}
                             {employee.unavailable_reason === 'permanent_constraint' && employee.constraint_details?.[0] && (
