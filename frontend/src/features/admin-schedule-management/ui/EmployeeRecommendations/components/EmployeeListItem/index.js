@@ -13,6 +13,19 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
     const showWarning = !isAvailable;
     const isBecameAvailable = employee.recommendation?.reasons?.includes('became_available');
 
+    // Helper function to parse warnings
+    const parseWarning = (warning) => {
+        if (warning.startsWith('already_assigned_elsewhere:')) {
+            const parts = warning.split(':');
+            return {
+                type: 'already_assigned_elsewhere',
+                site: parts[1] || '',
+                shift: parts[2] || ''
+            };
+        }
+        return { type: warning };
+    };
+
     const handleItemClick = () => {
         if (showWarning) {
             const confirmAssign = window.confirm(
@@ -57,7 +70,7 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                     )}
                     {showWarning && (
                         <>
-                            {/* ... (Вся логика отображения причин недоступности) ... */}
+
                             {employee.unavailable_reason === 'already_assigned' && (
                                 <div className="mt-2 text-danger">
                                     <i className="bi bi-calendar-check me-1"></i>
@@ -92,6 +105,15 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                                 return null;
                             })}
                             {employee.recommendation?.warnings?.map((warning, idx) => {
+                                const parsedWarning = parseWarning(warning);
+                                if (parsedWarning.type === 'already_assigned_elsewhere') {
+                                    return (
+                                        <small key={idx} className="d-block text-warning">
+                                            <i className="bi bi-exclamation-triangle me-1"></i>
+                                            {t('recommendation.already_assigned_elsewhere', parsedWarning.site, parsedWarning.shift)}
+                                        </small>
+                                    );
+                                }
                                 const [key, ...params] = warning.split(':');
                                 const translationKey = `recommendation.${key}`;
                                 const translation = t(translationKey, params);

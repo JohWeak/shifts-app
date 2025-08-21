@@ -120,11 +120,23 @@ class EmployeeRecommendationService {
                         where: {
                             schedule_id: scheduleId
                         },
-                        include: [{
-                            model: PositionShift,
-                            as: 'shift',
-                            attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
-                        }]
+                        include: [
+                            {
+                                model: PositionShift,
+                                as: 'shift',
+                                attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
+                            },
+                            {
+                                model: Position,
+                                as: 'position',
+                                attributes: ['pos_id', 'pos_name', 'work_site_id'],
+                                include: [{
+                                    model: WorkSite,
+                                    as: 'workSite',
+                                    attributes: ['site_id', 'site_name']
+                                }]
+                            }
+                        ]
                     });
                 }
             } else {
@@ -140,23 +152,26 @@ class EmployeeRecommendationService {
                             [Op.in]: employees.map(e => e.emp_id)
                         }
                     },
-                    include: [{
-                        model: PositionShift,
-                        as: 'shift',
-                        attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
-                    }]
+                    include: [
+                        {
+                            model: PositionShift,
+                            as: 'shift',
+                            attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
+                        },
+                        {
+                            model: Position,
+                            as: 'position',
+                            attributes: ['pos_id', 'pos_name', 'work_site_id'],
+                            include: [{
+                                model: WorkSite,
+                                as: 'workSite',
+                                attributes: ['site_id', 'site_name']
+                            }]
+                        }
+                    ]
                 });
             }
-            if (weekAssignments.length > 0) {
-                console.log(`[EmployeeRecommendation] Sample assignments:`,
-                    weekAssignments.slice(0, 3).map(a => ({
-                        emp_id: a.emp_id,
-                        date: a.work_date,
-                        shift: a.shift?.shift_name,
-                        shift_start: a.shift?.start_time
-                    }))
-                );
-            }
+
             console.log(`[EmployeeRecommendation] Found ${weekAssignments.length} assignments for the week`);
 
 
@@ -262,7 +277,8 @@ class EmployeeRecommendationService {
                     recommendations.unavailable_busy.push({
                         ...employeeData,
                         unavailable_reason: 'already_assigned',
-                        assigned_shift: evaluation.assignedShiftToday
+                        assigned_shift: evaluation.assignedShiftToday,
+                        assignedSiteToday: evaluation.assignedSiteToday
                     });
                 } else if (evaluation.hasPermanentConstraint) {
                     recommendations.unavailable_permanent.push({
@@ -357,6 +373,7 @@ class EmployeeRecommendationService {
             constraintDetails: [],
             permanentConstraintDetails: [],
             assignedShiftToday: null,
+            assignedSiteToday: null,
             restViolationDetails: null
         };
 
@@ -371,6 +388,33 @@ class EmployeeRecommendationService {
             evaluation.assignedShiftToday = todayAssignment.shift?.shift_name || 'Unknown shift';
             evaluation.warnings.push(`already_assigned_to:${evaluation.assignedShiftToday}`);
             return evaluation;
+        }
+
+        // NEW: Check if flexible or cross-site employee is assigned anywhere else today
+        const isFlexible = !employee.default_position_id;
+        const isCrossSite = employee.work_site_id !== targetPosition.work_site_id;
+
+        if (isFlexible || isCrossSite) {
+            // Check ALL assignments for today across all sites
+            const todayDate = date;
+            const employeeAssignmentsToday = allWeekAssignments.filter(a =>
+                a.emp_id === employee.emp_id &&
+                a.work_date === todayDate
+            );
+
+            if (employeeAssignmentsToday.length > 0) {
+                const assignmentDetails = employeeAssignmentsToday[0];
+                const siteName = assignmentDetails.position?.workSite?.site_name || 'Unknown site';
+                const shiftName = assignmentDetails.shift?.shift_name || 'Unknown shift';
+
+                evaluation.isAlreadyAssignedToday = true;
+                evaluation.canWork = false;
+                evaluation.score = 0;
+                evaluation.assignedShiftToday = shiftName;
+                evaluation.assignedSiteToday = siteName;
+                evaluation.warnings.push(`already_assigned_elsewhere:${siteName}:${shiftName}`);
+                return evaluation;
+            }
         }
 
         // Permanent constraints - BLOCKING

@@ -682,6 +682,8 @@ export const en = {
         'will_be_available_after_save': 'Will become available after saving changes',
         'became_available_in_edit': 'Available after pending removal',
         'virtually_assigned': 'Will be assigned after saving',
+        'already_assigned_elsewhere': 'Already assigned at {0} to {1}',
+        'assigned_at_other_site': 'Working at another site today',
 
 
     },
