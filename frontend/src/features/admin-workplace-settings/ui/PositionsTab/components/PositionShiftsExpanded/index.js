@@ -107,8 +107,8 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
         <tr className="position-shifts-row">
             <td colSpan="8" className="position-shifts-col p-0">
                 <div className={`position-shifts-expanded ${isClosing ? 'closing' : ''}`}>
-                    <Card className="m-3">
-                        <Card.Body className={"pb-1"}>
+                    <Card className="">
+                        <Card.Body className='position-shifts-card'>
                             {error && (
                                 <Alert variant="danger" dismissible onClose={() => setError(null)}>
                                     {error}
@@ -149,7 +149,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                         </Card.Body>
                                     </Card>
                                 ) : (
-                                    <Table responsive hover>
+                                    <Table responsive>
                                         <thead>
                                         <tr>
                                             <th>{t('workplace.shifts.name')}</th>

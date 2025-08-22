@@ -16,25 +16,28 @@
     background-color: var(--bs-primary);
     color: white;
 }
-
+[data-theme="dark"] .nav-pills .nav-link.active {
+    background-color: var(--bs-primary);
+}
 .nav-pills .nav-link:not(.active):hover {
     background-color: var(--bs-gray-200);
 }
 
 [data-theme="dark"] .nav-pills .nav-link:not(.active):hover {
     background-color: var(--bs-gray-800);
+    color: var(--bs-white);
 }
 
-.position-shifts-expanded {
-    animation: expandRow 0.5s ease-out;
-}
-.position-shifts-expanded.closing {
-    animation: collapseRow 0.2s ease-in forwards;
-}
+/*.position-shifts-expanded {*/
+/*    animation: expandRow 0.3s ease-out;*/
+/*}*/
+/*.position-shifts-expanded.closing {*/
+/*    animation: collapseRow 0.15s ease-in forwards;*/
+/*}*/
 @keyframes expandRow {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -59,22 +62,20 @@
 .position-shifts-expanded .card {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     position: relative;
-    overflow: hidden; /* Это ключ к тому, чтобы кнопки выезжали "из-за края" */
+    overflow: hidden;
+    border-radius: var(--radius-sm)!important;
+    border: 1px solid var(--bs-border-color);
 }
 
-/* Контейнер для кнопок */
 .card-actions-toolbar {
-    position: absolute; /* Позиционируем относительно Card */
-    bottom: 1rem;      /* Отступ снизу */
-    right: 1rem;       /* Отступ справа */
-
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
     display: flex;
     gap: 0.5rem;
-
-    /* Начальное состояние - за пределами видимости */
-    transform: translateX(calc(100% + 2rem)); /* Смещаем вправо на всю свою ширину + отступ */
+    transform: translateX(calc(100% + 2rem));
     transition: transform 0.3s ease-in-out;
-    z-index: 2; /* Чтобы быть поверх футера, если он есть */
+    z-index: 2;
 }
 
 /* Видимое состояние */
@@ -82,7 +83,6 @@
     transform: translateX(0);
 }
 
-/* Для RTL языков - опционально, но хорошая практика */
 [dir="rtl"] .card-actions-toolbar {
     right: auto;
     left: 1rem;

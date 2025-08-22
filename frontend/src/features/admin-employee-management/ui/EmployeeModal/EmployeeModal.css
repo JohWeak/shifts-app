@@ -1,23 +1,25 @@
 /* frontend/src/features/admin-employee-management/ui/EmployeeModal/EmployeeModal.css */
 
 /* Modal customization */
+
 .employee-modal .modal-content {
+    margin-top: calc(var(--app-navbar-height) + 1rem);
     border: none;
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
 .employee-modal .modal-header {
-    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-hover) 100%);
+    background-color: var(--bs-primary);
     border-bottom: none;
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-5) var(--space-5);
 }
 
 .employee-modal .modal-header .modal-title {
     font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
     display: flex;
     align-items: center;
+    color: var(--bs-white);
 }
 
 .employee-modal .modal-header .btn-close {
@@ -51,11 +53,7 @@
     transition: all var(--transition-fast);
 }
 
-.employee-modal .form-control:focus,
-.employee-modal .form-select:focus {
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
-}
+
 
 /* Dark mode form inputs */
 [data-theme="dark"] .employee-modal .form-control,
@@ -77,7 +75,7 @@
 }
 
 .employee-modal .input-group .btn-outline-secondary {
-    border-left: none;
+    border: none;
     border-color: var(--bs-border-color);
     background-color: var(--bs-white);
     color: var(--bs-secondary);
@@ -146,14 +144,16 @@
 }
 
 /* Button styling */
-.employee-modal .btn {
+.employee-modal .modal-footer .btn {
     padding: var(--space-2) var(--space-4);
     font-weight: var(--font-medium);
     border-radius: var(--radius-base);
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast);
+    min-width: 100px;
+    justify-content: center;
 }
 
 .employee-modal .btn i {
@@ -198,11 +198,11 @@
 }
 .employee-modal .card {
     border: 1px solid var(--bs-border-color);
-    box-shadow: none;
+    box-shadow: 0 -1px 1px 1px rgba(var(--bs-primary-rgb), 0.2) inset;
 }
 
 .employee-modal .card-header {
-    background-color: var(--bs-gray-100);
+    background-color: var(--bs-border-color);
     border-bottom: 1px solid var(--bs-border-color);
     padding: 0.75rem 1rem;
 }
@@ -301,15 +301,6 @@
 [data-theme="dark"] .employee-modal .modal-body::-webkit-scrollbar-thumb:hover {
     background: var(--bs-gray-500);
 }
-
-/* Focus styles for accessibility */
-.employee-modal .form-control:focus-visible,
-.employee-modal .form-select:focus-visible,
-.employee-modal .btn:focus-visible {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: 2px;
-}
-
 /* Error state styling */
 .employee-modal .form-control.is-invalid,
 .employee-modal .form-select.is-invalid {

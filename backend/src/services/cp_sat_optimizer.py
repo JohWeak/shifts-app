@@ -5,33 +5,36 @@ import sys
 import argparse
 from datetime import datetime, timedelta
 
+
+def _parse_time(time_str):
+    """Convert time format HH:MM:SS to hours"""
+    parts = time_str.split(':')
+    return int(parts[0]) + int(parts[1]) / 60
+
+
+def _calculate_rest_hours(shift1, shift2, is_next_day=False):
+    """Calculate rest hours between two shifts"""
+    shift1_end = _parse_time(shift1['start_time']) + shift1['duration']
+    shift2_start = _parse_time(shift2['start_time'])
+
+    if is_next_day:
+        # Shifts on different days
+        if shift1_end > 24:  # Night shift extends to next day
+            shift1_end -= 24
+            rest_hours = shift2_start - shift1_end
+        else:
+            rest_hours = (24 - shift1_end) + shift2_start
+    else:
+        # Shifts on same day
+        rest_hours = shift2_start - shift1_end
+
+    return rest_hours
+
+
 class UniversalShiftSchedulerCP:
     def __init__(self):
         self.model = cp_model.CpModel()
         self.solver = cp_model.CpSolver()
-
-    def _parse_time(self, time_str):
-        """Convert time format HH:MM:SS to hours"""
-        parts = time_str.split(':')
-        return int(parts[0]) + int(parts[1]) / 60
-
-    def _calculate_rest_hours(self, shift1, shift2, is_next_day=False):
-        """Calculate rest hours between two shifts"""
-        shift1_end = self._parse_time(shift1['start_time']) + shift1['duration']
-        shift2_start = self._parse_time(shift2['start_time'])
-
-        if is_next_day:
-            # Shifts on different days
-            if shift1_end > 24:  # Night shift extends to next day
-                shift1_end -= 24
-                rest_hours = shift2_start - shift1_end
-            else:
-                rest_hours = (24 - shift1_end) + shift2_start
-        else:
-            # Shifts on same day
-            rest_hours = shift2_start - shift1_end
-
-        return rest_hours
 
     def optimize_schedule(self, data):
         """Universal schedule optimization with all constraints support"""
@@ -104,9 +107,9 @@ class UniversalShiftSchedulerCP:
                 for position in positions:
                     pos_id = position['pos_id']
 
-                    # КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: создаем переменные ТОЛЬКО для позиции сотрудника
+                    # создаем переменные ТОЛЬКО для позиции сотрудника
                     if emp_position != pos_id:
-                        continue  # Пропускаем если позиция не совпадает
+                        continue  # если позиция не совпадает
 
                     pos_str = str(pos_id)
                     # Get valid shifts for this position
@@ -305,7 +308,7 @@ class UniversalShiftSchedulerCP:
                 for i, shift1 in enumerate(shifts):
                     for j, shift2 in enumerate(shifts):
                         if i < j:  # Only check different shifts
-                            rest_hours = self._calculate_rest_hours(shift1, shift2, False)
+                            rest_hours = _calculate_rest_hours(shift1, shift2, False)
 
                             if rest_hours < min_rest_between_shifts:
                                 # Cannot work both shifts
@@ -323,7 +326,7 @@ class UniversalShiftSchedulerCP:
             for day_idx in range(len(days) - 1):
                 for shift1 in shifts:
                     for shift2 in shifts:
-                        rest_hours = self._calculate_rest_hours(shift1, shift2, True)
+                        rest_hours = _calculate_rest_hours(shift1, shift2, True)
 
                         # Use appropriate rest requirement based on shift type
                         required_rest = min_rest_after_night if shift1.get('is_night_shift', False) else min_rest_after_regular

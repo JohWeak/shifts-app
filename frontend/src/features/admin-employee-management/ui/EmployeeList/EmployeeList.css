@@ -1,6 +1,6 @@
 /* frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.css */
 .list-card {
-    border: none;
+    /*border: none;*/
     border-radius: 0.5rem;
     background: var(--bs-white);
     overflow: hidden;

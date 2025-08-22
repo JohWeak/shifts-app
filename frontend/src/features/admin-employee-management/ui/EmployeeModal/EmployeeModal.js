@@ -478,7 +478,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                         {t('common.cancel')}
                     </Button>
                     <Button variant="primary" type="submit">
-                        <i className={`bi bi-${employee ? 'check' : 'plus'}-circle me-2`}></i>
+                        <i className={`bi bi-${employee ? 'check' : 'plus'}-circle me-1`}></i>
                         {employee ? t('common.save') : t('common.create')}
                     </Button>
                 </Modal.Footer>

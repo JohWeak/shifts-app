@@ -121,7 +121,7 @@ const PositionsTab = ({selectedSite}) => {
             setTimeout(() => {
                 setExpandedPositionId(null);
                 setIsClosingPositionId(null);
-            }, 300);
+            }, 250);
         } else {
             setExpandedPositionId(positionId);
         }

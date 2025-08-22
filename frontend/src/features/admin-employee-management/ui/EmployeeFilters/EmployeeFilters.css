@@ -5,9 +5,13 @@
 }
 .filters-accordion .accordion-item {
     border-radius: var(--radius-lg)!important;
+    border-color: var(--bs-gray-500)!important;
     border-bottom-left-radius: 0!important;
     border-bottom-right-radius: 0!important;
     overflow: hidden;
+}
+[data-theme="dark"] .filters-accordion .accordion-item {
+    border-color: transparent!important;
 }
 /* Стили для заголовка внутри кнопки аккордеона */
 .filters-accordion .accordion-header h6 {
@@ -26,7 +30,7 @@
 
 }
 .filters-accordion .accordion-button.collapsed {
-    border-bottom: none;
+    border-bottom: none!important;
 }
 [data-theme="dark"] .filters-accordion .accordion-button {
     background-color: var(--bs-gray-900);
