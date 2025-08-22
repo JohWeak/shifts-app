@@ -1,7 +1,8 @@
 // frontend/src/app/store/slices/scheduleSlice.js
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
-import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
+import {CACHE_DURATION as CHACHE_DURATION, CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
+import { classifySchedules } from 'shared/lib/utils/scheduleUtils';
 
 // --- Асинхронные экшены (Thunks) ---
 
@@ -193,35 +194,40 @@ export const preloadScheduleDetails = createAsyncThunk(
     async (_, { getState, dispatch }) => {
         const state = getState();
         const { schedules, scheduleDetailsCache, cacheExpiry } = state.schedule;
-        const now = Date.now();
 
-        // Get current schedules (not archived)
-        const currentSchedules = schedules.filter(s => s.status !== 'archived');
+        // Get active schedules using shared utility
+        const { activeSchedules } = classifySchedules(schedules);
 
-        // Load details for schedules not in cache or with expired cache
-        const promises = currentSchedules.map(schedule => {
-            const cached = scheduleDetailsCache[schedule.id];
-            const isExpired = !cached || (now - cached.timestamp) > cacheExpiry;
+        // Load details for active schedules not in cache or with expired cache
+        const promises = activeSchedules.map(schedule => {
 
-            if (isExpired) {
-                return dispatch(fetchScheduleDetailsForCache(schedule.id));
+            const isValid = isCacheValid(scheduleDetailsCache[schedule.id].timestamp, cacheExpiry)
+            if (isValid) {
+                return scheduleAPI.fetchScheduleDetails(schedule.id)
+                    .then(details => ({
+                        scheduleId: schedule.id,
+                        details
+                    }));
             }
-            return Promise.resolve();
+            return Promise.resolve(null);
         });
 
-        await Promise.all(promises);
+        const results = await Promise.all(promises);
+
+        // Store in cache
+        results.forEach(result => {
+            if (result) {
+                dispatch(updateScheduleCache({
+                    scheduleId: result.scheduleId,
+                    details: result.details
+                }));
+            }
+        });
+
         return true;
     }
 );
 
-// Separate action for cache loading (doesn't update current scheduleDetails)
-export const fetchScheduleDetailsForCache = createAsyncThunk(
-    'schedule/fetchScheduleDetailsForCache',
-    async (scheduleId) => {
-        const details = await scheduleAPI.getScheduleDetails(scheduleId);
-        return { scheduleId, details };
-    }
-);
 
 const scheduleSlice = createSlice({
     name: 'schedule',
@@ -255,7 +261,7 @@ const scheduleSlice = createSlice({
 
         // Cache for schedule details
         scheduleDetailsCache: {}, // { scheduleId: { data: scheduleDetails, timestamp: Date.now() } }
-        cacheExpiry: 30 * 60 * 1000,
+        cacheExpiry: CACHE_DURATION.LONG,
 
     },
     reducers: {
@@ -381,13 +387,12 @@ const scheduleSlice = createSlice({
             state.editingPositions = {};
             state.pendingChanges = {};
         },
-        clearScheduleCache(state, action) {
-            const scheduleId = action.payload;
-            if (scheduleId) {
-                delete state.scheduleDetailsCache[scheduleId];
-            } else {
-                state.scheduleDetailsCache = {};
-            }
+        updateScheduleCache(state, action) {
+            const { scheduleId, details } = action.payload;
+            state.scheduleDetailsCache[scheduleId] = {
+                data: details,
+                timestamp: Date.now()
+            };
         }
     },
     extraReducers: (builder) => {
@@ -633,7 +638,8 @@ export const {
     updateShiftColor,
     clearAutofilledStatus,
     addBatchPendingChanges,
-    applyPendingChanges
+    applyPendingChanges,
+    updateScheduleCache
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

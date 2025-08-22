@@ -7,7 +7,7 @@ import { parseISO, isAfter, startOfWeek, endOfWeek } from 'date-fns';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useSortableData } from 'shared/hooks/useSortableData';
 import { deleteSchedule, updateScheduleStatus } from '../../model/scheduleSlice';
-import { formatWeekRange } from "shared/lib/utils/scheduleUtils";
+import { formatWeekRange, classifySchedules } from "shared/lib/utils/scheduleUtils";
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import ScheduleTableList from './components/ScheduleTableList'; // <-- Новый импорт
 import './ScheduleList.css';
@@ -34,24 +34,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
 
     // --- DATA PREPARATION ---
     const { activeSchedules, inactiveSchedules, currentWeekScheduleIds } = useMemo(() => {
-        const today = new Date();
-        const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 }); // Assuming week starts on Monday
-        const currentWeekEnd = endOfWeek(today, { weekStartsOn: 1 });
-        const active = [], inactive = [], currentIds = new Set();
-
-        schedules.forEach(schedule => {
-            if (!schedule.end_date) return;
-            const endDate = parseISO(schedule.end_date);
-            if (parseISO(schedule.start_date) <= currentWeekEnd && endDate >= currentWeekStart) {
-                currentIds.add(schedule.id);
-            }
-            if (isAfter(endDate, today)) {
-                active.push(schedule);
-            } else {
-                inactive.push(schedule);
-            }
-        });
-        return { activeSchedules: active, inactiveSchedules: inactive, currentWeekScheduleIds: currentIds };
+        return classifySchedules(schedules);
     }, [schedules]);
 
     const sortAccessors = useMemo(() => ({

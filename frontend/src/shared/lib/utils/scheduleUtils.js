@@ -9,7 +9,7 @@ import {
     startOfMonth,
     endOfMonth,
     eachDayOfInterval,
-    isSameDay
+    isSameDay, isAfter
 } from 'date-fns';
 import { enUS, he, ru } from 'date-fns/locale';
 const dateFnsLocales = {
@@ -679,4 +679,39 @@ export const getCurrentWeekStart = () => {
     const weekStart = new Date(now.setDate(diff));
     weekStart.setHours(0, 0, 0, 0);
     return weekStart.toISOString().split('T')[0];
+};
+
+export const classifySchedules = (schedules) => {
+    const today = new Date();
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 0 }); // Sunday
+    const currentWeekEnd = endOfWeek(today, { weekStartsOn: 0 });
+
+    const active = [];
+    const inactive = [];
+    const currentIds = new Set();
+
+    schedules.forEach(schedule => {
+        if (!schedule.end_date) return;
+
+        const startDate = parseISO(schedule.start_date);
+        const endDate = parseISO(schedule.end_date);
+
+        // Check if schedule overlaps with current week
+        if (startDate <= currentWeekEnd && endDate >= currentWeekStart) {
+            currentIds.add(schedule.id);
+        }
+
+        // Check if schedule is active (ends after today)
+        if (isAfter(endDate, today)) {
+            active.push(schedule);
+        } else {
+            inactive.push(schedule);
+        }
+    });
+
+    return {
+        activeSchedules: active,
+        inactiveSchedules: inactive,
+        currentWeekScheduleIds: currentIds
+    };
 };

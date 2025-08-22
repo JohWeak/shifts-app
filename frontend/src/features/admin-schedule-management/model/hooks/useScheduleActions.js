@@ -10,6 +10,7 @@ import {
     updateScheduleAssignments
 } from '../scheduleSlice';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {addNotification} from "../../../../app/model/notificationsSlice";
 
 export const useScheduleActions = () => {
     const dispatch = useDispatch();
@@ -22,10 +23,32 @@ export const useScheduleActions = () => {
         setError(null);
         try {
             await dispatch(generateSchedule(settings)).unwrap();
+            dispatch(addNotification({
+                variant: 'success',
+                message: t('schedule.generationSuccess'),
+                duration: 5000
+            }));
             return { success: true };
         } catch (err) {
-            setError(err.message || t('errors.generateFailed'));
-            return { success: false, error: err.message };
+            const errorMessage = err.message || err;
+
+            if (errorMessage.includes('PUBLISHED_SCHEDULE_EXISTS')) {
+                dispatch(addNotification({
+                    variant: 'warning',
+                    message: t('schedule.publishedScheduleExists'),
+                    duration: 8000
+                }));
+                setError(t('schedule.publishedScheduleExists'));
+            } else {
+                dispatch(addNotification({
+                    variant: 'error',
+                    message: errorMessage || t('errors.generateFailed'),
+                    duration: 5000
+                }));
+                setError(errorMessage || t('errors.generateFailed'));
+            }
+
+            return { success: false, error: errorMessage };
         } finally {
             setLoading(false);
         }

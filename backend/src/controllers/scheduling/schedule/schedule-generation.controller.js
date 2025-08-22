@@ -34,6 +34,21 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
     try {
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
 
+        // First check if there's a published schedule
+        const publishedSchedule = await Schedule.findOne({
+            where: {
+                site_id: siteId,
+                start_date: {
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                },
+                status: 'published'
+            },
+            transaction
+        });
+
+        if (publishedSchedule) {
+            throw new Error('PUBLISHED_SCHEDULE_EXISTS');
+        }
 
         const deletedAssignments = await ScheduleAssignment.destroy({
             where: {
@@ -53,13 +68,14 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
             console.log(`[ScheduleController] Deleted ${deletedAssignments} orphaned assignments`);
         }
 
-        // 2. Найти и удалить существующие расписания
+        // Find and delete only draft schedules
         const existingSchedules = await Schedule.findAll({
             where: {
                 site_id: siteId,
                 start_date: {
                     [db.Sequelize.Op.between]: [weekStart, weekEnd]
-                }
+                },
+                status: 'draft' // Only delete draft schedules
             },
             transaction
         });
@@ -223,6 +239,15 @@ const generateNextWeekSchedule = async (req, res) => {
 
     } catch (error) {
         await transaction.rollback();
+
+        if (error.message === 'PUBLISHED_SCHEDULE_EXISTS') {
+            return res.status(409).json({
+                success: false,
+                error: 'PUBLISHED_SCHEDULE_EXISTS',
+                message: 'A published schedule already exists for this week. Please unpublish it first.'
+            });
+        }
+
         console.error('[ScheduleController] Error generating schedule:', error);
         res.status(500).json({
             success: false,
