@@ -96,25 +96,25 @@
 }
 /* Light theme styles */
 .global-alert-item.alert-success {
-    background: rgba(25, 135, 84, 0.95);
+    background: rgba(30, 163, 101, 0.9);
     color: white;
     box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
 }
 
 .global-alert-item.alert-danger {
-    background: rgba(220, 53, 69, 0.95);
+    background: rgba(253, 21, 84, 0.9);
     color: white;
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
 }
 
 .global-alert-item.alert-warning {
-    background: rgba(255, 193, 7, 0.95);
+    background: rgba(255, 193, 7, 0.9);
     color: #333;
     box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
 }
 
 .global-alert-item.alert-info {
-    background: rgba(13, 202, 240, 0.95);
+    background: rgba(13, 202, 240, 0.9);
     color: white;
     box-shadow: 0 4px 12px rgba(13, 202, 240, 0.25);
 }
