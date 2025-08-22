@@ -22,7 +22,7 @@ const WorkplaceToolbar = ({
 
     return (
         <Row className="mb-3 workplace-toolbar-row align-items-center">
-            <Col md={6}>
+            <Col md className="flex-grow-1">
                 <InputGroup>
                     <InputGroup.Text><i className="bi bi-search"></i></InputGroup.Text>
                     <Form.Control
@@ -45,7 +45,7 @@ const WorkplaceToolbar = ({
                     </Form.Select>
                 </Col>
             )}
-            <Col md={2} className="d-flex align-items-center justify-content-end">
+            <Col md="auto" className="d-flex align-items-center">
                 <Form.Check
                     type="switch"
                     id={inactiveSwitchId}

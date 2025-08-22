@@ -121,6 +121,9 @@
     margin-bottom: 1rem;
     opacity: 0.5;
 }
+.workplace-tab-content .card-body{
+    padding-bottom: 0.5rem;
+}
 .workplace-table > tbody > .worksite-row,
 .positions-table > tbody > .position-row {
     --bs-table-bg: transparent;
@@ -130,6 +133,11 @@
 .positions-table > tbody > .position-row > td{
     padding: 0.75rem;
 }
+.workplace-table > tbody > .worksite-row:last-of-type,
+.positions-table > tbody > .position-row:last-of-type{
+    border-bottom-color: transparent;
+}
+
 .workplace-table > tbody > .worksite-row:hover,
 .positions-table > tbody > .position-row:hover {
     --bs-table-hover-bg:  rgba(var(--bs-primary-rgb), 0.07);

@@ -189,6 +189,12 @@
 }
 
 /* Forms */
+[dir="rtl"] .input-group .input-group-text{
+    border-top-right-radius: var(--bs-border-radius)!important;
+    border-bottom-right-radius: var(--bs-border-radius)!important;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
 [dir="rtl"] .form-check {
     /*padding-right: 0.5em;*/
     /*padding-left: 0;*/
