@@ -1,8 +1,6 @@
 /* frontend/src/index.css */
 @import './app/design-system.css';
-/* === ГЛОБАЛЬНЫЕ СТИЛИ ДЛЯ СТАБИЛЬНОГО SCROLLBAR === */
 
-/* 1. Управляем поведением и резервируем место (решает проблему сдвига) */
 html {
     scrollbar-gutter: stable;
     scrollbar-width: thin;

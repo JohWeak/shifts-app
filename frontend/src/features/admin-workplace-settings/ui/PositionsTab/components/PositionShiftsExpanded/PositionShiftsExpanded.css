@@ -16,9 +16,11 @@
     background-color: var(--bs-primary);
     color: white;
 }
+
 [data-theme="dark"] .nav-pills .nav-link.active {
     background-color: var(--bs-primary);
 }
+
 .nav-pills .nav-link:not(.active):hover {
     background-color: var(--bs-gray-200);
 }
@@ -28,22 +30,25 @@
     color: var(--bs-white);
 }
 
-/*.position-shifts-expanded {*/
-/*    animation: expandRow 0.3s ease-out;*/
-/*}*/
-/*.position-shifts-expanded.closing {*/
-/*    animation: collapseRow 0.15s ease-in forwards;*/
-/*}*/
+.position-shifts-expanded {
+    animation: expandRow 0.25s ease-out;
+}
+
+.position-shifts-expanded.closing {
+    animation: collapseRow 0.25s ease-in forwards;
+}
+
 @keyframes expandRow {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(-20px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
+
 @keyframes collapseRow {
     from {
         opacity: 1;
@@ -63,8 +68,10 @@
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     position: relative;
     overflow: hidden;
-    border-radius: var(--radius-sm)!important;
+    border-radius: 0!important;
     border: 1px solid var(--bs-border-color);
+    border-top: none;
+    border-bottom: none;
 }
 
 .card-actions-toolbar {

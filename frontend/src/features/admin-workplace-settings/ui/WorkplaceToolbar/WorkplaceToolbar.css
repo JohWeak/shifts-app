@@ -20,6 +20,3 @@
 [data-theme="dark"] .workplace-toolbar-row .form-control {
     border: none;
 }
-.workplace-toolbar-row .form-control:focus {
-    box-shadow: 0 0 10px -6px var(--bs-primary);
-}

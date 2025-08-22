@@ -394,8 +394,8 @@
     border-color: transparent;
 }
 /* Smooth transitions */
-* {
-    transition-property: transform, width, background-color, color, border-color;
-    transition-duration: 250ms;
-    transition-timing-function: ease-in;
-}
+/** {*/
+/*    transition-property: transform, width, background-color, color, border-color;*/
+/*    transition-duration: 250ms;*/
+/*    transition-timing-function: ease-in;*/
+/*}*/

@@ -61,7 +61,7 @@ const PositionsTable = ({
     ], [t]);
 
     return (
-        <Table responsive hover className="positions-table">
+        <Table hover className="positions-table">
             <thead>
             <tr>
                 {positionTableHeaders.map(header => (
