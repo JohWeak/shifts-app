@@ -544,14 +544,16 @@ const scheduleSlice = createSlice({
             // Обработка fetchScheduleDetails
             .addCase(fetchScheduleDetails.pending, (state) => {
                 state.loading = 'pending';
-                state.scheduleDetails = null;
-                state.error = null;
+                //state.scheduleDetails = null;
+                if (!state.scheduleDetails) {
+                    state.error = null;
+                }
             })
             .addCase(fetchScheduleDetails.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                state.scheduleDetails = action.payload.data;
-                state.selectedScheduleId = action.payload.scheduleId;
-
+                if (state.selectedScheduleId === action.payload.scheduleId) {
+                    state.scheduleDetails = action.payload.data;
+                }
                 // Update cache only if fresh data
                 if (!action.payload.cached) {
                     setCacheEntry(state.cache.scheduleDetails, action.payload.scheduleId, action.payload.data);
@@ -742,15 +744,19 @@ const scheduleSlice = createSlice({
             })
             .addCase(updateScheduleStatus.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                const scheduleIndex = state.schedules.findIndex(s => s.id === action.meta.arg.scheduleId);
+                const { scheduleId, status } = action.meta.arg;
+
+
+                clearCacheEntry(state.cache.scheduleDetails, scheduleId);
+                const scheduleIndex = state.schedules.findIndex(s => s.id === scheduleId);
                 if (scheduleIndex !== -1) {
                     state.schedules[scheduleIndex] = {
                         ...state.schedules[scheduleIndex],
-                        status: action.meta.arg.status
+                        status: status
                     };
                 }
-                if (state.scheduleDetails?.schedule?.id === action.meta.arg.scheduleId) {
-                    state.scheduleDetails.schedule.status = action.meta.arg.status;
+                if (state.scheduleDetails?.schedule?.id === scheduleId) {
+                    state.scheduleDetails.schedule.status = status;
                 }
                 state.error = null;
             })

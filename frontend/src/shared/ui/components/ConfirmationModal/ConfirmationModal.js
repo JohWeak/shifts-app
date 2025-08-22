@@ -67,6 +67,7 @@ export const ConfirmationModal = ({
                     variant="outline-secondary"
                     onClick={onCancel}
                     disabled={loading}
+                    style={{ minWidth: '120px' }}
                 >
                     {finalCancelText}
                 </Button>

@@ -85,12 +85,15 @@
     width: 100%;
     max-width: 420px;
     border-radius: 8px;
-    border: none;
+    border: none!important;
     animation: slideInUp 0.3s ease-out forwards;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(2px);
+    text-align: start;
 }
-
+.global-alerts-container.rtl .alert-dismissible {
+    padding-right: 1rem!important;
+}
 /* Light theme styles */
 .global-alert-item.alert-success {
     background: rgba(25, 135, 84, 0.95);

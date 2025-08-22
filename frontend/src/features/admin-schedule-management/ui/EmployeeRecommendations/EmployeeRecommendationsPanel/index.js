@@ -89,6 +89,7 @@ const EmployeeRecommendationsPanel = ({
         return `${position?.pos_name || ''} - ${shift?.shift_name || ''} (${date})`;
     };
 
+    console.log('Is Panel Open?', isOpen, 'Panel width', panelWidth)
     return ReactDOM.createPortal(
         <div
             ref={panelRef}

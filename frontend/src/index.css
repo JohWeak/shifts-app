@@ -11,7 +11,7 @@ html {
 
 
 body.modal-open {
-    overflow: inherit !important;
+    /*overflow: inherit !important;*/
     padding-right: 0 !important;
 }
 body {

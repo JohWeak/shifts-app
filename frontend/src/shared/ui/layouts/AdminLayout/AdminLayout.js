@@ -23,6 +23,7 @@ import {
 } from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import './AdminLayout.css';
+import {addNotification} from "../../../../app/model/notificationsSlice";
 
 const AdminLayout = () => {
     const {t} = useI18n();
@@ -209,6 +210,50 @@ const AdminLayout = () => {
                     </div>
 
                     <div className="d-flex align-items-center gap-2">
+                        <Button
+                            variant="success"
+                            className="btn-sm"
+                            onClick={() => dispatch(addNotification({
+                                variant: 'success',
+                                message: 'successMessage',
+                            }))
+                        }
+                        >
+                            <i className="bi bi-bell-fill"></i>
+                        </Button>
+                        <Button
+                            variant="warning"
+                            className="btn-sm"
+                            onClick={() => dispatch(addNotification({
+                                variant: 'warning',
+                                message: 'warningMessage',
+                            }))
+                            }
+                        >
+                            <i className="bi bi-bell-fill"></i>
+                        </Button>
+                        <Button
+                            variant="danger"
+                            className="btn-sm"
+                            onClick={() => dispatch(addNotification({
+                                variant: 'danger',
+                                message: 'dangerMessage',
+                            }))
+                            }
+                        >
+                            <i className="bi bi-bell-fill"></i>
+                        </Button>
+                        <Button
+                            variant="info"
+                            className="btn-sm"
+                            onClick={() => dispatch(addNotification({
+                                variant: 'info',
+                                message: 'infoMessage',
+                            }))
+                            }
+                        >
+                            <i className="bi bi-bell-fill"></i>
+                        </Button>
                         <ThemeToggle variant="icon"/>
                         <LanguageSwitch/>
 

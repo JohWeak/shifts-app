@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 export const useScheduleUI = () => {
-    const { editingPositions, activeTab } = useSelector((state) => state.schedule);
+    const { editingPositions } = useSelector((state) => state.schedule);
 
     const [selectedCell, setSelectedCell] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -39,14 +39,6 @@ export const useScheduleUI = () => {
             setSelectedCell(null);
         }
     }, [editingPositions, isPanelOpen]);
-
-    // Закрывать панель, если ушли со страницы детального просмотра
-    useEffect(() => {
-        if (activeTab !== 'view' && isPanelOpen) {
-            setIsPanelOpen(false);
-            setSelectedCell(null);
-        }
-    }, [activeTab, isPanelOpen]);
 
     useEffect(() => {
         if(isSaving && isPanelOpen){

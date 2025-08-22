@@ -27,7 +27,14 @@ const ScheduleManagement = () => {
     const { t, direction } = useI18n();
     const dispatch = useDispatch();
 
-    const { selectedScheduleId, scheduleDetails, schedules, workSites, workSitesLoading } = useSelector((state) => state.schedule);
+    const {
+        selectedScheduleId,
+        scheduleDetails,
+        schedules,
+        workSites,
+        workSitesLoading
+    } = useSelector((state) => state.schedule);
+
     const { loading: actionsLoading, handleGenerate } = useScheduleActions();
     const { selectedCell, isPanelOpen, showEmployeeModal, isLargeScreen, handleCellClick, closeAllModals } = useScheduleUI();
     const [isGenerateFormVisible, setIsGenerateFormVisible] = useState(false);
