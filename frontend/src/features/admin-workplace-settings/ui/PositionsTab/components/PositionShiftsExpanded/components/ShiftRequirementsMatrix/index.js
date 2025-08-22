@@ -133,7 +133,6 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                 if (!originalShift) return;
                 const originalReq = originalShift.requirements[day.id];
 
-                // ИЗМЕНЕНО: Сохраняем если значение отличается ИЛИ если нет requirement_id но есть значение > 0
                 const needsUpdate = localReq.required_staff !== originalReq.required_staff;
                 const needsCreate = !originalReq.requirement_id && localReq.required_staff > 0;
 

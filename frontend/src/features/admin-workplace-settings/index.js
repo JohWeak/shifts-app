@@ -10,7 +10,7 @@ import WorkSitesTab from './ui/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab';
 
-import { fetchPositions, fetchWorkSites } from './model/workplaceSlice';
+import { preloadWorkplaceData } from './model/workplaceSlice';
 
 import './index.css';
 
@@ -19,12 +19,22 @@ const WorkplaceSettings = () => {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('worksites');
     const [selectedSite, setSelectedSite] = useState(null);
+    const [isPreloading, setIsPreloading] = useState(true);
     const { loading, workSites } = useSelector(state => state.workplace);
-    const hasData = workSites && workSites.length > 0;
+
 
     useEffect(() => {
-        dispatch(fetchWorkSites());
-        dispatch(fetchPositions());
+        // Preload all workplace data on mount
+        const loadData = async () => {
+            setIsPreloading(true);
+            try {
+                await dispatch(preloadWorkplaceData());
+            } finally {
+                setIsPreloading(false);
+            }
+        };
+
+        loadData();
     }, [dispatch]);
 
     const handleSiteSelection = (site) => {
@@ -39,7 +49,7 @@ const WorkplaceSettings = () => {
         }
     };
 
-    if (loading && !hasData) {
+    if (isPreloading) {
         return (
             <Container fluid>
                 <TopProgressBar />

@@ -1,7 +1,6 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/index.js
 import React, {useState, useEffect} from 'react';
 import {
-    Modal,
     Button,
     Table,
     Badge,
@@ -10,17 +9,16 @@ import {
     OverlayTrigger,
     Tooltip, Nav, Spinner
 } from 'react-bootstrap';
-import {useDispatch} from 'react-redux';
+import api from 'shared/api';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import ShiftForm from './components/ShiftForm';
 import ShiftRequirementsMatrix from './components/ShiftRequirementsMatrix';
-import api from 'shared/api';
+
 
 import './PositionShiftsExpanded.css';
 
-const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
+const PositionShiftsExpanded = ({position, isClosing}) => {
     const {t} = useI18n();
-    const dispatch = useDispatch();
 
     const [shifts, setShifts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -41,11 +39,11 @@ const PositionShiftsExpanded = ({position, onClose, isClosing}) => {
             const response = await api.get(`/api/positions/${position.pos_id}/shifts`, {
                 params: {includeRequirements: true}
             });
-            // response уже содержит массив благодаря interceptor
+
             setShifts(Array.isArray(response) ? response : []);
         } catch (err) {
             setError(err.message || 'Failed to load shifts');
-            setShifts([]); // Устанавливаем пустой массив при ошибке
+            setShifts([]);
         } finally {
             setLoading(false);
         }
