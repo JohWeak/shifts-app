@@ -11,50 +11,7 @@ import {
 } from 'shared/lib/cache/cacheUtils';
 import { classifySchedules } from 'shared/lib/utils/scheduleUtils';
 
-// Unified cache structure for all entities
-const initialState = {
-    // Data
-    schedules: [],
-    scheduleDetails: null,
-    workSites: [],
-    recommendations: {
-        available: [],
-        cross_position: [],
-        other_site: [],
-        unavailable_busy: [],
-        unavailable_hard: [],
-        unavailable_soft: [],
-        unavailable_permanent: []
-    },
-    autofilledChanges: {},
 
-    // Loading states
-    loading: 'idle',
-    workSitesLoading: 'idle',
-    recommendationsLoading: 'idle',
-
-    // Errors
-    error: null,
-
-    // UI States
-    selectedScheduleId: null,
-    editingPositions: {},
-    pendingChanges: {},
-
-    // Unified cache structure
-    cache: {
-        workSites: null, // { data: [], timestamp: Date.now() }
-        scheduleDetails: {}, // { [scheduleId]: { data: details, timestamp: Date.now() } }
-        recommendations: {} // { [cacheKey]: { data: recommendations, timestamp: Date.now() } }
-    },
-
-    // Cache durations for different data types
-    cacheDurations: {
-        workSites: CACHE_DURATION.EXTRA_LONG,
-        scheduleDetails: CACHE_DURATION.LONG,
-        recommendations: CACHE_DURATION.SHORT
-    }
-};
 
 // Fetch work sites with unified cache
 export const fetchWorkSites = createAsyncThunk(

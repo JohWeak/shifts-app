@@ -1,6 +1,6 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/components/WorkSitesTable/index.js
 
-import React from 'react';
+import React, {useMemo} from 'react';
 import { Table } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
@@ -14,63 +14,31 @@ const WorkSitesTable = ({
                         }) => {
     const { t } = useI18n();
 
+    const tableHeaders = useMemo(() => [
+        { key: 'name', label: t('workplace.worksites.name') },
+        { key: 'address', label: t('workplace.worksites.address') },
+        { key: 'phone', label: t('workplace.worksites.phone') },
+        { key: 'positions', label: t('workplace.worksites.positions') },
+        { key: 'employees', label: t('workplace.worksites.employees') },
+        { key: 'status', label: t('common.status') },
+        { label: t('common.actions'), isSortable: false, thProps: { className: 'sortable-header ps-5' } }
+    ], [t]);
+
     return (
         <Table responsive hover className="workplace-table">
             <thead>
             <tr>
-                <SortableHeader
-                    sortKey="name"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.worksites.name')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="address"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.worksites.address')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="phone"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.worksites.phone')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="positions"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.worksites.positions')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="employees"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.worksites.employees')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="status"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('common.status')}
-                </SortableHeader>
-
-                <SortableHeader
-                    className="sortable-header text-center px-4"
-                >
-                    {t('common.actions')}
-                </SortableHeader>
+                {tableHeaders.map(header => (
+                    <SortableHeader
+                        key={header.key || header.label}
+                        sortKey={header.key}
+                        onSort={header.isSortable === false ? null : requestSort}
+                        sortConfig={sortConfig}
+                        {...header.thProps}
+                    >
+                        {header.label}
+                    </SortableHeader>
+                ))}
             </tr>
             </thead>
             <tbody>

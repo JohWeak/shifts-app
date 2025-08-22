@@ -1,6 +1,6 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionsTable/index.js
 
-import React from 'react';
+import React, {useMemo} from 'react';
 import { Table } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
@@ -22,71 +22,59 @@ const PositionsTable = ({
                         }) => {
     const { t } = useI18n();
 
+    const positionTableHeaders = useMemo(() => [
+        {
+            key: 'name',
+            label: t('workplace.positions.name')
+        },
+        {
+            key: 'site',
+            label: t('workplace.worksites.title')
+        },
+        {
+            key: 'profession',
+            label: t('workplace.positions.profession')
+        },
+        {
+            key: 'defaultStaff',
+            label: t('workplace.positions.defaultStaff')
+        },
+        {
+            key: 'shifts',
+            label: t('workplace.positions.shifts')
+        },
+        {
+            key: 'employees',
+            label: t('workplace.positions.employees')
+        },
+        {
+            key: 'status',
+            label: t('common.status')
+        },
+        {
+            label: t('common.actions'),
+            isSortable: false,
+            thProps: {
+                className: 'sortable-header text-center px-4'
+            }
+        }
+    ], [t]);
+
     return (
         <Table responsive hover className="positions-table">
             <thead>
             <tr>
-                <SortableHeader
-                    sortKey="name"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.positions.name')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="site"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.worksites.title')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="profession"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.positions.profession')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="defaultStaff"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.positions.defaultStaff')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="shifts"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.positions.shifts')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="employees"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('workplace.positions.employees')}
-                </SortableHeader>
-
-                <SortableHeader
-                    sortKey="status"
-                    sortConfig={sortConfig}
-                    onSort={requestSort}
-                >
-                    {t('common.status')}
-                </SortableHeader>
-
-                <SortableHeader
-                    className="sortable-header text-center px-4"
-                >
-                    {t('common.actions')}
-                </SortableHeader>
+                {positionTableHeaders.map(header => (
+                    <SortableHeader
+                        key={header.key || header.label}
+                        sortKey={header.key}
+                        onSort={header.isSortable === false ? null : requestSort}
+                        sortConfig={sortConfig}
+                        {...header.thProps}
+                    >
+                        {header.label}
+                    </SortableHeader>
+                ))}
             </tr>
             </thead>
             <tbody>
