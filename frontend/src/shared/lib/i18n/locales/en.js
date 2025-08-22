@@ -261,6 +261,60 @@ export const en = {
         upcomingShifts: 'Upcoming Shifts',
         viewAll: 'View All',
         welcomeMessage: 'Welcome, {name}!',
+        subtitle: 'System Overview',
+        welcomeBack: 'Welcome back',
+
+        // Metric cards
+        metrics: {
+            totalEmployees: 'Total Employees',
+            activeEmployees: 'Active Employees',
+            totalWorkSites: 'Total Work Sites',
+            activeWorkSites: 'Active Sites',
+            totalPositions: 'Total Positions',
+            activePositions: 'Active Positions',
+            currentSchedules: 'Current Schedules',
+            publishedSchedules: 'Published',
+            pendingRequests: 'Pending Requests',
+            weeklyShifts: 'Weekly Shifts',
+            totalShifts: 'Total Shifts',
+            coveredShifts: 'Covered Shifts'
+        },
+
+        // Quick actions
+        quickActions: {
+            title: 'Quick Actions',
+            createSchedule: 'Create Schedule',
+            manageEmployees: 'Manage Employees',
+            viewReports: 'View Reports',
+            systemSettings: 'System Settings',
+            workplaceSettings: 'Workplace Settings',
+            algorithmSettings: 'Algorithm Settings'
+        },
+
+        // Recent activity
+        recentActivity: {
+            title: 'Recent Activity',
+            schedulePublished: 'Schedule published for {site}',
+            employeeAdded: 'New employee added: {name}',
+            requestApproved: 'Request approved for {name}',
+            positionUpdated: 'Position updated: {position}',
+            siteActivated: 'Work site activated: {site}',
+            viewAll: 'View All Activity'
+        },
+
+        // System status
+        systemStatus: {
+            title: 'System Status',
+            schedulingService: 'Scheduling Service',
+            database: 'Database',
+            algorithm: 'CP-SAT Algorithm',
+            apiServices: 'API Services',
+            online: 'Online',
+            offline: 'Offline',
+            available: 'Available',
+            connected: 'Connected',
+            lastUpdated: 'Last updated'
+        }
     },
     days: {
         months: {

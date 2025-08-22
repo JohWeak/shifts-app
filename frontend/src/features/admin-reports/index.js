@@ -17,9 +17,11 @@ import {worksiteAPI} from 'shared/api/apiService';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import {fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
+import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
 import {formatScheduleDate, formatWeekRange} from "../../shared/lib/utils/scheduleUtils";
 import './index.css';
+import {fetchEmployees} from "../admin-employee-management/model/employeeSlice";
+import {fetchSchedules} from "../admin-schedule-management/model/scheduleSlice";
 
 
 
@@ -37,10 +39,8 @@ const Reports = () => {
     });
 
     useEffect(() => {
-        if (!sites || (sites.length === 0 && !sitesLoading)) {
-            dispatch(fetchWorkSites({includeStats: false}));
-        }
-    }, [dispatch, sites, sitesLoading]);
+        dispatch(fetchWorkSites());
+    }, [dispatch]);
 
     useEffect(() => {
         if (sites && sites.length > 0 && !selectedSite) {

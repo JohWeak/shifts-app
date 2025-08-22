@@ -203,5 +203,7 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+//export default AdminDashboard;
 
+export { default } from './AdminDashboard';
+export { default as MetricCard } from './components/MetricCard/MetricCard';

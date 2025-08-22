@@ -1,0 +1,158 @@
+/* frontend/src/features/admin-dashboard/components/MetricCard/MetricCard.css */
+.metric-card {
+    border: none;
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+}
+
+.metric-card.clickable {
+    cursor: pointer;
+}
+
+.metric-card.clickable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.metric-card.loading {
+    opacity: 0.7;
+}
+
+.metric-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Icon styling */
+.metric-icon-wrapper {
+    margin-inline-end: 1.25rem;
+}
+
+.metric-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--bs-border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Content styling */
+.metric-content {
+    min-width: 0;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--bs-emphasis-color);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.metric-trend {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.metric-trend i {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+/* Arrow indicator */
+.metric-arrow {
+    color: var(--bs-secondary);
+    font-size: 1.25rem;
+    margin-inline-start: auto;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.metric-card:hover .metric-arrow {
+    opacity: 1;
+}
+
+/* Color variants with left border */
+.metric-card.metric-primary {
+    border-inline-start: 3px solid var(--bs-primary);
+}
+
+.metric-card.metric-success {
+    border-inline-start: 3px solid var(--bs-success);
+}
+
+.metric-card.metric-warning {
+    border-inline-start: 3px solid var(--bs-warning);
+}
+
+.metric-card.metric-danger {
+    border-inline-start: 3px solid var(--bs-danger);
+}
+
+.metric-card.metric-info {
+    border-inline-start: 3px solid var(--bs-info);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .metric-card {
+    background-color: var(--bs-dark);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .metric-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .metric-label {
+    color: var(--bs-gray-500);
+}
+
+[data-theme="dark"] .metric-arrow {
+    color: var(--bs-gray-600);
+}
+
+/* RTL support */
+[dir="rtl"] .metric-icon-wrapper {
+    margin-inline-start: 1.25rem;
+    margin-inline-end: 0;
+}
+
+[dir="rtl"] .metric-arrow {
+    transform: scaleX(-1);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .metric-card .card-body {
+        padding: 1rem;
+    }
+
+    .metric-icon {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.25rem;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+    }
+
+    .metric-label {
+        font-size: 0.75rem;
+    }
+}
