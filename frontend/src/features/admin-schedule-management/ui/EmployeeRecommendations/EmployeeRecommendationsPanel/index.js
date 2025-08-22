@@ -1,5 +1,5 @@
 // frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/EmployeeRecommendationsPanel.js
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import ReactDOM from 'react-dom';
 import {Button} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -18,32 +18,43 @@ const EmployeeRecommendationsPanel = ({
     const {t, direction} = useI18n();
     const [isResizing, setIsResizing] = useState(false);
     const panelRef = useRef(null);
-    const startXRef = useRef(0);
-    const startWidthRef = useRef(0);
+    const resizeData = useRef({
+        startX: 0,
+        startWidthPercent: 0,
+    });
+    const throttleTimer = useRef(null);
+    const throttledOnWidthChange = useCallback((newWidth) => {
+        if (throttleTimer.current) return;
+
+        onWidthChange(newWidth);
+
+        throttleTimer.current = setTimeout(() => {
+            throttleTimer.current = null;
+        }, 16); // 60fps
+
+    }, [onWidthChange]);
 
     // Handle resize
     const handleMouseDown = (e) => {
+        resizeData.current.startX = e.pageX;
+        resizeData.current.startWidthPercent = panelWidth;
         setIsResizing(true);
-        startXRef.current = e.pageX;
-        startWidthRef.current = panelWidth;
         e.preventDefault();
     };
 
     useEffect(() => {
         const handleMouseMove = (e) => {
-            if (!isResizing) return;
+            const containerWidth = window.innerWidth;
+            const isRTL = direction === 'rtl';
 
-            requestAnimationFrame(() => {
-                const containerWidth = window.innerWidth;
-                const isRTL = direction === 'rtl';
+            const diff = isRTL
+                ? resizeData.current.startX - e.pageX
+                : e.pageX - resizeData.current.startX;
 
-                let diff = isRTL ? startXRef.current - e.pageX : e.pageX - startXRef.current;
-                let newWidthPercent = startWidthRef.current - (diff / containerWidth * 100);
+            let newWidthPercent = resizeData.current.startWidthPercent - (diff / containerWidth * 100);
 
-                newWidthPercent = Math.max(20, Math.min(50, newWidthPercent)); // Ограничения
-
-                onWidthChange(newWidthPercent);
-            });
+            newWidthPercent = Math.max(20, Math.min(30, newWidthPercent));
+            throttledOnWidthChange(newWidthPercent);
         };
 
         const handleMouseUp = () => {
@@ -62,8 +73,12 @@ const EmployeeRecommendationsPanel = ({
             document.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
+            if (throttleTimer.current) {
+                clearTimeout(throttleTimer.current);
+                throttleTimer.current = null;
+            }
         };
-    }, [isResizing, onWidthChange]);
+    }, [isResizing, throttledOnWidthChange, direction]);
 
 
     // Keyboard shortcuts
@@ -89,7 +104,6 @@ const EmployeeRecommendationsPanel = ({
         return `${position?.pos_name || ''} - ${shift?.shift_name || ''} (${date})`;
     };
 
-    console.log('Is Panel Open?', isOpen, 'Panel width', panelWidth)
     return ReactDOM.createPortal(
         <div
             ref={panelRef}

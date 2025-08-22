@@ -1,0 +1,37 @@
+/* frontend/src/shared/ui/components/TopProgressBar/TopProgressBar.css */
+
+.top-progress-bar {
+    position: fixed;
+    top: var(--app-navbar-height);
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: transparent;
+    overflow: hidden;
+    z-index: 10000;
+}
+
+.top-progress-bar-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-image: linear-gradient(
+            to right,
+            rgba(var(--bs-primary-rgb), 0),
+            rgba(var(--bs-primary-rgb), 0.8),
+            rgba(var(--bs-primary-rgb), 0)
+    );
+
+    animation: indeterminate-progress-animation 2s infinite ease-in-out;
+}
+
+@keyframes indeterminate-progress-animation {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}

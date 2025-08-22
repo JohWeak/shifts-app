@@ -152,27 +152,27 @@ const ScheduleActionButtons = ({
             <div className={`schedule-action-buttons ${className}`}>
                 {/* Status action button */}
                 <div className="status-action">
-                    {hasUnsavedChanges &&(
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={onAutofill}
-                            disabled={isAutofilling}
-                            className="autofill-all-btn me-2"
-                        >
-                            {isAutofilling ? (
-                                <>
-                                    <Spinner size="sm" className="me-1"/>
-                                    {t('schedule.autofillInProgress')}
-                                </>
-                            ) : (
-                                <>
-                                    <i className="bi bi-magic me-1"></i>
-                                    {t('schedule.autofillSchedule')}
-                                </>
-                            )}
-                        </Button>
-                    )}
+                    {/*{hasUnsavedChanges && onAutofill && (*/}
+                    {/*    <Button*/}
+                    {/*        variant="primary"*/}
+                    {/*        size="sm"*/}
+                    {/*        onClick={onAutofill}*/}
+                    {/*        disabled={isAutofilling}*/}
+                    {/*        className="autofill-all-btn me-2"*/}
+                    {/*    >*/}
+                    {/*        {isAutofilling ? (*/}
+                    {/*            <>*/}
+                    {/*                <Spinner size="sm" className="me-1"/>*/}
+                    {/*                {t('schedule.autofillInProgress')}*/}
+                    {/*            </>*/}
+                    {/*        ) : (*/}
+                    {/*            <>*/}
+                    {/*                <i className="bi bi-magic me-1"></i>*/}
+                    {/*                {t('schedule.autofillSchedule')}*/}
+                    {/*            </>*/}
+                    {/*        )}*/}
+                    {/*    </Button>*/}
+                    {/*)}*/}
                     {canPublish && onPublish && (
                         hasUnsavedChanges ? (
                             <OverlayTrigger

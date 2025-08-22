@@ -56,58 +56,55 @@
     }
 }
 
-/* Loading Overlay */
-.schedule-details .loading-overlay {
+
+
+
+/* --- 1. Content Overlay --- */
+/* Этот контейнер будет оберткой для контента в ScheduleView.js */
+.schedule-view-content-wrapper {
     position: relative;
 }
 
-.schedule-details .loading-overlay::after {
-    content: '';
+.schedule-view-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8);
+    inset:0;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(1px);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-lg);
-    z-index: 100;
+    z-index: 9990;
+    border-radius: var(--bs-card-border-radius);
+    transition: opacity 0.2s ease-in-out;
 }
 
-[data-theme="dark"] .schedule-details .loading-overlay::after {
-    background-color: rgba(0, 0, 0, 0.8);
+.schedule-view-overlay .spinner-border {
+    /* Делаем спиннер чуть больше */
+    width: 2.5rem;
+    height: 2.5rem;
 }
 
-/* Processing overlay */
-.schedule-processing-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.processing-spinner {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.processing-spinner p {
+.schedule-view-overlay p {
     margin-top: 1rem;
     font-weight: 500;
+    font-size: 1rem;
+    color: var(--bs-body-color);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
 }
 
-/* Disabled card during processing */
+/* --- Dark Theme --- */
+[data-theme="dark"] .schedule-view-overlay {
+    background-color: rgba(33, 37, 41, 0.6);
+}
+
+[data-theme="dark"] .schedule-view-overlay p {
+    background-color: rgba(50, 55, 60, 0.8);
+    color: var(--bs-light);
+}
+
 .disabled-card {
     pointer-events: none;
     opacity: 0.7;
