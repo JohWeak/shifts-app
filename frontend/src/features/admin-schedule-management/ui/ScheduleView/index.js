@@ -96,7 +96,9 @@ const ScheduleView = ({
     };
 
     if (loading === 'pending' && !scheduleDetails) {
-        return <LoadingState size="lg" message={t('common.loading')}/>;
+        return (
+            <TopProgressBar/>
+        );
     }
     if (!scheduleDetails) {
         return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')}/>;
@@ -107,13 +109,9 @@ const ScheduleView = ({
     return (
         <>
 
-            {/* 1. Показываем прогресс-бар, если UI заблокирован */}
             {isUIBlocked && <TopProgressBar/>}
 
-            {/* 2. Оборачиваем весь контент в новый контейнер */}
             <div className="schedule-view-content-wrapper">
-
-                {/* 3. Показываем оверлей поверх контента */}
                 {isUIBlocked &&
                     <div className="schedule-view-overlay">
                         <Spinner

@@ -57,10 +57,7 @@
 }
 
 
-
-
 /* --- 1. Content Overlay --- */
-/* Этот контейнер будет оберткой для контента в ScheduleView.js */
 .schedule-view-content-wrapper {
     position: relative;
 }
@@ -80,7 +77,6 @@
 }
 
 .schedule-view-overlay .spinner-border {
-    /* Делаем спиннер чуть больше */
     width: 2.5rem;
     height: 2.5rem;
 }
