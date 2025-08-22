@@ -3,7 +3,9 @@ import React from 'react';
 import './SortableHeader.css';
 
 const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) => {
-    const isSorted = sortConfig.field === sortKey;
+
+    const isSortable = !!onSort;
+    const isSorted = isSortable && sortConfig?.field === sortKey;
 
     const getIconClass = () => {
         if (!isSorted) {
@@ -11,16 +13,28 @@ const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) =
         }
         return sortConfig.order === 'ASC' ? 'bi-arrow-up' : 'bi-arrow-down';
     };
+    const handleClick = () => {
+        if (isSortable) {
+            onSort(sortKey);
+        }
+    };
+    const headerClasses = [
+        'sortable-header',
+        isSortable ? 'is-sortable' : '',
+        isSorted ? 'sorted' : ''
+    ].join(' ').trim();
 
     return (
         <th
-            className={`sortable-header ${isSorted ? 'sorted' : ''}`}
-            onClick={() => onSort(sortKey)}
+            className={headerClasses}
+            onClick={handleClick}
             {...thProps}
         >
             <div className="header-content">
                 <span>{children}</span>
-                <i className={`bi ${getIconClass()} sort-icon`}></i>
+                {isSortable &&
+                    <i className={`bi ${getIconClass()} sort-icon`}></i>
+                }
             </div>
         </th>
     );

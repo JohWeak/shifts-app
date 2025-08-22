@@ -9,6 +9,7 @@
 .nav-pills .nav-link {
     color: var(--bs-body-color);
     background: transparent;
+    margin-inline-end: 0.5rem;
 }
 
 .nav-pills .nav-link.active {

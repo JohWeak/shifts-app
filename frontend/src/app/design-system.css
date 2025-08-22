@@ -388,7 +388,11 @@
     margin-right: 0.25rem;
     margin-left: 0.25rem;
 }
-
+.form-select:focus,
+.form-control:focus {
+    box-shadow: 0 0 12px -6px var(--bs-primary);
+    border-color: transparent;
+}
 /* Smooth transitions */
 * {
     transition-property: width, background-color, color, border-color;

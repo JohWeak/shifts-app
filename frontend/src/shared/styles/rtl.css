@@ -195,6 +195,12 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+[dir="rtl"] .input-group .form-control{
+    border-top-right-radius: var(--bs-border-radius)!important;
+    border-bottom-right-radius: var(--bs-border-radius)!important;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
 [dir="rtl"] .form-check {
     /*padding-right: 0.5em;*/
     /*padding-left: 0;*/
@@ -218,6 +224,12 @@
 
 [dir="rtl"] .input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
     border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+}
+
+/* Modals*/
+[dir="rtl"] .modal-header .btn-close {
+    margin-right: auto;
+    margin-left: calc(-.5 * var(--bs-modal-header-padding-x));
 }
 
 

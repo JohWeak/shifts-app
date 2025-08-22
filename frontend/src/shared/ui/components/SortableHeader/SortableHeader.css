@@ -2,11 +2,11 @@
 
 
 .sortable-header {
-    --icon-color-default: var(--bs-secondary-color); /* Цвет иконки для неактивных колонок */
-    --icon-color-active: var(--bs-body-color);      /* Цвет иконки для активной колонки */
-    --bg-hover: var(--bs-gray-100);              /* Фон при наведении */
+    --icon-color-default: var(--bs-secondary-color);
+    --icon-color-active: var(--bs-body-color);
+    --bg-hover: var(--bs-gray-100);
 
-    position: relative; /* для позиционирования псевдо-элементов*/
+    position: relative;
     transition: background-color 0.2s ease-in-out;
     background-color: var(--bs-gray-100)!important;
 }
@@ -14,15 +14,16 @@
     background-color: var(--bs-gray-900) !important;
 }
 
-/* При наведении подсвечиваем фон цветом, который адаптируется под тему */
 .sortable-header:hover {
     background-color: var(--bs-gray-200) !important;
 }
 [data-theme="dark"] .sortable-header:hover {
     background-color: var(--bs-gray-800) !important;
 }
-
-/* Контейнер для выравнивания текста и иконки */
+.sortable-header.is-sortable {
+    cursor: pointer;
+    user-select: none;
+}
 .header-content {
     display: flex;
     justify-content: start;
@@ -42,10 +43,8 @@
 
 .sort-icon {
     font-size: 0.75rem!important;
-    /* По умолчанию иконка полупрозрачная и имеет вторичный цвет текста */
     opacity: 0.4;
     color: var(--icon-color-default);
-    /* Анимируем только прозрачность для плавного появления */
     transition: all 0.2s ease-in-out, color 0.2s ease-out;
 }
 

@@ -66,11 +66,11 @@ const WorkSitesTable = ({
                     {t('common.status')}
                 </SortableHeader>
 
-                <th
-                    className="text-muted text-center"
+                <SortableHeader
+                    className="sortable-header text-center px-4"
                 >
                     {t('common.actions')}
-                </th>
+                </SortableHeader>
             </tr>
             </thead>
             <tbody>
