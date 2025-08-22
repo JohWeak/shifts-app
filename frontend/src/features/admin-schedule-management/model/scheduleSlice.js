@@ -25,15 +25,19 @@ export const fetchSchedules = createAsyncThunk(
 // Получение деталей конкретного расписания
 export const fetchScheduleDetails = createAsyncThunk(
     'schedule/fetchScheduleDetails',
-    async (scheduleId, { rejectWithValue }) => {
-        try {
-            const response = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            console.log('Schedule details response:', response);
+    async (scheduleId, { getState }) => {
+        const state = getState();
+        const { scheduleDetailsCache, cacheExpiry } = state.schedule;
+        const cached = scheduleDetailsCache[scheduleId];
+        const now = Date.now();
 
-            return response;
-        } catch (error) {
-            return rejectWithValue(error.message);
+        // Use cache if valid
+        if (cached && (now - cached.timestamp) < cacheExpiry) {
+            return cached.data;
         }
+
+        // Otherwise fetch fresh data
+        return await scheduleAPI.fetchScheduleDetails(scheduleId);
     }
 );
 
@@ -184,6 +188,40 @@ export const fetchRecommendations = createAsyncThunk(
     }
 );
 
+export const preloadScheduleDetails = createAsyncThunk(
+    'schedule/preloadScheduleDetails',
+    async (_, { getState, dispatch }) => {
+        const state = getState();
+        const { schedules, scheduleDetailsCache, cacheExpiry } = state.schedule;
+        const now = Date.now();
+
+        // Get current schedules (not archived)
+        const currentSchedules = schedules.filter(s => s.status !== 'archived');
+
+        // Load details for schedules not in cache or with expired cache
+        const promises = currentSchedules.map(schedule => {
+            const cached = scheduleDetailsCache[schedule.id];
+            const isExpired = !cached || (now - cached.timestamp) > cacheExpiry;
+
+            if (isExpired) {
+                return dispatch(fetchScheduleDetailsForCache(schedule.id));
+            }
+            return Promise.resolve();
+        });
+
+        await Promise.all(promises);
+        return true;
+    }
+);
+
+// Separate action for cache loading (doesn't update current scheduleDetails)
+export const fetchScheduleDetailsForCache = createAsyncThunk(
+    'schedule/fetchScheduleDetailsForCache',
+    async (scheduleId) => {
+        const details = await scheduleAPI.getScheduleDetails(scheduleId);
+        return { scheduleId, details };
+    }
+);
 
 const scheduleSlice = createSlice({
     name: 'schedule',
@@ -214,6 +252,10 @@ const scheduleSlice = createSlice({
         editingPositions: {},
         pendingChanges: {},
         workSitesLastFetched: null,
+
+        // Cache for schedule details
+        scheduleDetailsCache: {}, // { scheduleId: { data: scheduleDetails, timestamp: Date.now() } }
+        cacheExpiry: 30 * 60 * 1000,
 
     },
     reducers: {
@@ -338,6 +380,14 @@ const scheduleSlice = createSlice({
             state.scheduleDetails = null;
             state.editingPositions = {};
             state.pendingChanges = {};
+        },
+        clearScheduleCache(state, action) {
+            const scheduleId = action.payload;
+            if (scheduleId) {
+                delete state.scheduleDetailsCache[scheduleId];
+            } else {
+                state.scheduleDetailsCache = {};
+            }
         }
     },
     extraReducers: (builder) => {
@@ -367,6 +417,12 @@ const scheduleSlice = createSlice({
                 state.loading = 'idle';
                 state.scheduleDetails = action.payload;
                 state.selectedScheduleId = action.payload?.schedule?.id;
+
+                // Store in cache
+                state.scheduleDetailsCache[action.meta.arg] = {
+                    data: action.payload,
+                    timestamp: Date.now()
+                };
             })
             .addCase(fetchScheduleDetails.rejected, (state, action) => {
                 state.loading = 'failed';
@@ -557,7 +613,13 @@ const scheduleSlice = createSlice({
                 state.loading = 'failed';
                 state.error = action.payload;
             })
-
+            .addCase(fetchScheduleDetailsForCache.fulfilled, (state, action) => {
+                const { scheduleId, details } = action.payload;
+                state.scheduleDetailsCache[scheduleId] = {
+                    data: details,
+                    timestamp: Date.now()
+                };
+            });
     },
 });
 

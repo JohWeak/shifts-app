@@ -20,7 +20,8 @@ import {
     fetchScheduleDetails,
     setSelectedScheduleId,
     fetchWorkSites,
-    addPendingChange
+    addPendingChange,
+    preloadScheduleDetails
 } from './model/scheduleSlice';
 import './index.css';
 
@@ -41,7 +42,10 @@ const ScheduleManagement = () => {
     };
 
     useEffect(() => {
-        dispatch(fetchSchedules());
+        dispatch(fetchSchedules()).then(() => {
+            // Preload all schedule details after schedules are loaded
+            dispatch(preloadScheduleDetails());
+        });
     }, [dispatch]);
 
     const handleViewDetails = (scheduleId) => {

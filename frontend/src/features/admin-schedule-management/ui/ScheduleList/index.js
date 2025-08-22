@@ -1,3 +1,5 @@
+// frontend/src/features/admin-schedule-management/ui/ScheduleList/index.js
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Alert } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';

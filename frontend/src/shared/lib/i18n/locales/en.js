@@ -933,6 +933,8 @@ export const en = {
             published: 'Published',
             archived: 'Archived'
         },
+        publishError: 'Failed to publish schedule',
+        publishedScheduleExists: 'A published schedule already exists for these dates. Please unpublish it first.',
 
 
     },

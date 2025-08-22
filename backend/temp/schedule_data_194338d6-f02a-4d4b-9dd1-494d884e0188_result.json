@@ -1,0 +1,330 @@
+{
+  "success": true,
+  "schedule": [
+    {
+      "emp_id": 23,
+      "date": "2025-08-17",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 0
+    },
+    {
+      "emp_id": 23,
+      "date": "2025-08-18",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 1
+    },
+    {
+      "emp_id": 23,
+      "date": "2025-08-19",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 2
+    },
+    {
+      "emp_id": 23,
+      "date": "2025-08-21",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 3
+    },
+    {
+      "emp_id": 23,
+      "date": "2025-08-22",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 4
+    },
+    {
+      "emp_id": 23,
+      "date": "2025-08-23",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 5
+    },
+    {
+      "emp_id": 24,
+      "date": "2025-08-17",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 6
+    },
+    {
+      "emp_id": 24,
+      "date": "2025-08-18",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 7
+    },
+    {
+      "emp_id": 24,
+      "date": "2025-08-20",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 8
+    },
+    {
+      "emp_id": 24,
+      "date": "2025-08-21",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 9
+    },
+    {
+      "emp_id": 24,
+      "date": "2025-08-22",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 10
+    },
+    {
+      "emp_id": 24,
+      "date": "2025-08-23",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 11
+    },
+    {
+      "emp_id": 25,
+      "date": "2025-08-17",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 12
+    },
+    {
+      "emp_id": 25,
+      "date": "2025-08-18",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 13
+    },
+    {
+      "emp_id": 25,
+      "date": "2025-08-19",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 14
+    },
+    {
+      "emp_id": 25,
+      "date": "2025-08-20",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 15
+    },
+    {
+      "emp_id": 25,
+      "date": "2025-08-22",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 16
+    },
+    {
+      "emp_id": 25,
+      "date": "2025-08-23",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 17
+    },
+    {
+      "emp_id": 26,
+      "date": "2025-08-18",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 18
+    },
+    {
+      "emp_id": 26,
+      "date": "2025-08-19",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 19
+    },
+    {
+      "emp_id": 26,
+      "date": "2025-08-20",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 20
+    },
+    {
+      "emp_id": 26,
+      "date": "2025-08-21",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 21
+    },
+    {
+      "emp_id": 26,
+      "date": "2025-08-22",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 22
+    },
+    {
+      "emp_id": 26,
+      "date": "2025-08-23",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 23
+    },
+    {
+      "emp_id": 28,
+      "date": "2025-08-17",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 24
+    },
+    {
+      "emp_id": 28,
+      "date": "2025-08-19",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 25
+    },
+    {
+      "emp_id": 28,
+      "date": "2025-08-20",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 26
+    },
+    {
+      "emp_id": 28,
+      "date": "2025-08-21",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 27
+    },
+    {
+      "emp_id": 28,
+      "date": "2025-08-22",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 28
+    },
+    {
+      "emp_id": 28,
+      "date": "2025-08-23",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 29
+    },
+    {
+      "emp_id": 38,
+      "date": "2025-08-17",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 30
+    },
+    {
+      "emp_id": 38,
+      "date": "2025-08-18",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 31
+    },
+    {
+      "emp_id": 38,
+      "date": "2025-08-19",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 32
+    },
+    {
+      "emp_id": 38,
+      "date": "2025-08-20",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 33
+    },
+    {
+      "emp_id": 38,
+      "date": "2025-08-21",
+      "shift_id": 11,
+      "position_id": 6,
+      "assignment_index": 34
+    },
+    {
+      "emp_id": 38,
+      "date": "2025-08-22",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 35
+    },
+    {
+      "emp_id": 39,
+      "date": "2025-08-17",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 36
+    },
+    {
+      "emp_id": 39,
+      "date": "2025-08-18",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 37
+    },
+    {
+      "emp_id": 39,
+      "date": "2025-08-19",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 38
+    },
+    {
+      "emp_id": 39,
+      "date": "2025-08-20",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 39
+    },
+    {
+      "emp_id": 39,
+      "date": "2025-08-21",
+      "shift_id": 12,
+      "position_id": 6,
+      "assignment_index": 40
+    },
+    {
+      "emp_id": 39,
+      "date": "2025-08-23",
+      "shift_id": 10,
+      "position_id": 6,
+      "assignment_index": 41
+    }
+  ],
+  "stats": {
+    "total_assignments": 42,
+    "total_shortage": 0,
+    "position_matches": 42,
+    "hours_per_employee": {
+      "23": 48,
+      "24": 48,
+      "25": 48,
+      "26": 48,
+      "28": 48,
+      "38": 48,
+      "39": 48
+    },
+    "shifts_per_employee": {
+      "23": 6,
+      "24": 6,
+      "25": 6,
+      "26": 6,
+      "28": 6,
+      "38": 6,
+      "39": 6
+    },
+    "permanent_constraints_respected": 7,
+    "temporary_constraints_respected": 2,
+    "prefer_work_satisfied": 3,
+    "objective_value": 856.0
+  },
+  "status": "optimal",
+  "solve_time": 105.90930000000002,
+  "coverage_rate": 100.0,
+  "shortage_count": 0
+}
