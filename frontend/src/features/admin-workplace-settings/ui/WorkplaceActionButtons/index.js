@@ -24,7 +24,7 @@ const WorkplaceActionButtons = ({
     return (
         <div className="workplace-actions">
             <Button
-                variant="outline-primary"
+                variant="primary"
                 size="sm"
                 onClick={(e) => handleActionClick(e, onEdit)}
                 title={t('common.edit')}
@@ -34,7 +34,7 @@ const WorkplaceActionButtons = ({
 
             {onViewEmployees && (
                 <Button
-                    variant="outline-info"
+                    variant="info"
                     size="sm"
                     onClick={(e) => handleActionClick(e, onViewEmployees)}
                     title={t('workplace.positions.viewEmployees')}
@@ -45,7 +45,7 @@ const WorkplaceActionButtons = ({
 
             {item.is_active ? (
                 <Button
-                    variant="outline-danger"
+                    variant="danger"
                     size="sm"
                     onClick={(e) => handleActionClick(e, onDelete)}
                     title={t('common.delete')}
@@ -54,7 +54,7 @@ const WorkplaceActionButtons = ({
                 </Button>
             ) : (
                 <Button
-                    variant="outline-success"
+                    variant="success"
                     size="sm"
                     onClick={(e) => handleActionClick(e, onRestore)}
                     title={t('common.restore')}

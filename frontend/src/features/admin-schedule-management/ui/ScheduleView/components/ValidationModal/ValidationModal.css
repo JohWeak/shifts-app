@@ -1,9 +1,10 @@
 /* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ValidationModal/ValidationModal.css */
-
+.validation-modal {
+    margin-top: calc(var(--app-navbar-height) + 1rem);
+}
 .validation-modal .modal-dialog {
     max-width: 700px;
-    margin-inline-start: 0;
-    margin-inline-end: auto;
+
 }
 .validation-modal .modal-content {
     border-radius: var(--radius-lg);

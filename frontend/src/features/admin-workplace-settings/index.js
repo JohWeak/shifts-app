@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Nav, Tab, Card } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import TopProgressBar from "../../shared/ui/components/TopProgressBar/TopProgressBar";
 
-// Обновленные импорты
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import WorkSitesTab from './ui/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab';
@@ -42,7 +42,7 @@ const WorkplaceSettings = () => {
     if (loading && !hasData) {
         return (
             <Container fluid>
-                <LoadingState />
+                <TopProgressBar />
             </Container>
         );
     }

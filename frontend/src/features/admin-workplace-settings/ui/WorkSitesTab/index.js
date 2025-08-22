@@ -11,7 +11,7 @@ import {useWorkplaceActionHandler} from '../../model/hooks/useWorkplaceActionHan
 // UI Components
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import WorkSiteModal from './components/WorkSiteModal';
-import WorkSitesToolbar from './components/WorkSitesToolbar';
+import WorkPlaceToolbar from '../WorkplaceToolbar/';
 import WorkSitesTable from './components/WorkSitesTable';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 
@@ -31,7 +31,8 @@ const WorkSitesTab = ({onSelectSite}) => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('active');
+    const [showInactive, setShowInactive] = useState(() =>
+        localStorage.getItem('showInactiveWorkSites') === 'true');
 
     // --- ACTION HANDLERS using custom hook ---
     const {execute: confirmDelete, isLoading: isDeleting} = useWorkplaceActionHandler({
@@ -57,10 +58,12 @@ const WorkSitesTab = ({onSelectSite}) => {
     // --- DATA ---
     const filteredSites = useMemo(() => {
         if (!Array.isArray(workSites)) return [];
-        let filtered = workSites.filter(site => site.site_name?.toLowerCase().includes(searchTerm.toLowerCase()));
-        if (statusFilter === 'active') filtered = filtered.filter(site => site.is_active);
-        return filtered;
-    }, [workSites, searchTerm, statusFilter]);
+        return workSites.filter(site => {
+            const matchesSearch = site.site_name?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesActive = showInactive || site.is_active;
+            return matchesSearch && matchesActive;
+        });
+    }, [workSites, searchTerm, showInactive]);
 
     const sortingAccessors = useMemo(() => ({
         name: s => s.site_name,
@@ -107,8 +110,17 @@ const WorkSitesTab = ({onSelectSite}) => {
                     className="bi bi-plus-circle me-2"></i>{t('workplace.worksites.add')}</Button>
             </Card.Header>
             <Card.Body>
-                <WorkSitesToolbar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} statusFilter={statusFilter}
-                                  onStatusFilterChange={setStatusFilter}/>
+                <WorkPlaceToolbar
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
+                    showInactive={showInactive}
+                    onShowInactiveChange={(checked) => {
+                        setShowInactive(checked);
+                        localStorage.setItem('showInactiveWorkSites', checked.toString());
+                    }}
+                    inactiveSwitchId="show-inactive-sites"
+
+                />
                 {sortedSites.length === 0 ? (
                     <div className="workplace-empty"><i className="bi bi-building"></i>
                         <p>{t('workplace.worksites.noSitesFound')}</p></div>

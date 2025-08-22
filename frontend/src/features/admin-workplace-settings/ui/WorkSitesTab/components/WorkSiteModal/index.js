@@ -50,7 +50,6 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
             newErrors.site_name = t('validation.required');
         }
 
-        // Валидация телефона только если он заполнен
         if (formData.phone && formData.phone.trim()) {
             if (!/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
                 newErrors.phone = t('validation.invalidPhone');
@@ -93,7 +92,12 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg">
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"
+            className="workplace-modal"
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     {site

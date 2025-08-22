@@ -17,7 +17,7 @@ const WorkSitesTableRow = ({
 
     return (
         <tr
-            className={`clickable-row ${!site.is_active ? 'inactive-row' : ''}`}
+            className={`worksite-row clickable-row ${!site.is_active ? 'inactive-row' : ''}`}
             onClick={() => onRowClick(site)}
             style={{ cursor: 'pointer' }}
         >
@@ -25,8 +25,8 @@ const WorkSitesTableRow = ({
             <td>{site.address || '-'}</td>
             <td>{site.phone || '-'}</td>
 
-            <td className="text-center"><Badge bg={site.positionCount > 0 ? 'info' : 'secondary'} pill>{site.positionCount || 0}</Badge></td>
-            <td className="text-center"><Badge bg={site.employeeCount > 0 ? 'primary' : 'secondary'} pill>{site.employeeCount || 0}</Badge></td>
+            <td className="text-center"><Badge bg={site.positionCount > 0 ? 'info' : 'secondary'}>{site.positionCount || 0}</Badge></td>
+            <td className="text-center"><Badge bg={site.employeeCount > 0 ? 'primary' : 'secondary'}>{site.employeeCount || 0}</Badge></td>
             <td>
                 <Badge bg={site.is_active ? 'success' : 'secondary'}>
                     {site.is_active ? t('common.active') : t('common.inactive')}

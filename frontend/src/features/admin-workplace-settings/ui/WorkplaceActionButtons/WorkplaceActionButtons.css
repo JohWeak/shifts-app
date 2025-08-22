@@ -7,6 +7,22 @@
 }
 
 .workplace-actions .btn {
-    padding: 0.25rem 0.5rem;
+    padding: 0.375rem 0.375rem;
     line-height: 1;
+    border-radius: 25%;
+    color: var(--bs-white);
+}
+
+@media (max-width: 767px) {
+
+    .workplace-settings-container .workplace-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .workplace-settings-container .workplace-actions .btn {
+        width: 100%;
+        justify-content: center;
+
+    }
+
 }

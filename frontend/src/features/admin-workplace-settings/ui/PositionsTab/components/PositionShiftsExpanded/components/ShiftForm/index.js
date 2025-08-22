@@ -29,7 +29,6 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
-    // Предустановленные цвета для смен
     const presetColors = [
         { color: '#fbe9bd', name: 'Yellow' },
         { color: '#b4dbfb', name: 'Blue' },
@@ -76,7 +75,7 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
             newErrors.end_time = t('validation.required');
         }
 
-        // Проверка, что время окончания после времени начала для однодневных смен
+        // Verification that the end time is after the start time for single-day shifts
         if (formData.start_time && formData.end_time) {
             const [startHour, startMin] = formData.start_time.split(':').map(Number);
             const [endHour, endMin] = formData.end_time.split(':').map(Number);
@@ -170,7 +169,12 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg">
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"
+            className="workplace-modal"
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     {shift ? t('workplace.shifts.editShift') : t('workplace.shifts.addShift')}

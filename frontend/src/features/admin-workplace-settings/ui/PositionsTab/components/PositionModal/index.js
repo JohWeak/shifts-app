@@ -92,7 +92,12 @@ const PositionModal = ({ show, onHide, onSuccess, position, workSites, defaultSi
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg">
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"
+            className="workplace-modal"
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     {position

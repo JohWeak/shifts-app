@@ -22,7 +22,6 @@ export const useWorkplaceActionHandler = ({
         setIsLoading(true);
         const notificationId = nanoid();
 
-        // 1. Показываем начальное уведомление
         dispatch(addNotification({
             id: notificationId,
             message: t(messages.processing),
@@ -31,10 +30,8 @@ export const useWorkplaceActionHandler = ({
         }));
 
         try {
-            // 2. Выполняем основное действие
             const result = await dispatch(actionThunk(item.id)).unwrap();
 
-            // 3. Успех: формируем сообщение и обновляем уведомление
             const successMessage = getSuccessMessage
                 ? getSuccessMessage(result, t)
                 : t(messages.success);
@@ -46,11 +43,9 @@ export const useWorkplaceActionHandler = ({
                 duration: 4000
             }));
 
-            // 4. Обновляем список данных
             dispatch(refetchThunk());
 
         } catch (error) {
-            // 5. Ошибка: обновляем уведомление
             dispatch(updateNotification({
                 id: notificationId,
                 message: error.message || t(messages.error),
@@ -58,7 +53,6 @@ export const useWorkplaceActionHandler = ({
                 duration: 5000
             }));
         } finally {
-            // 6. Завершаем загрузку
             setIsLoading(false);
         }
     };

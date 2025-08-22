@@ -13,11 +13,12 @@ import { useWorkplaceActionHandler } from '../../model/hooks/useWorkplaceActionH
 // UI Components
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import PositionModal from './components/PositionModal';
-import PositionsToolbar from './components/PositionsToolbar';
+import WorkplaceToolbar from "../WorkplaceToolbar";
 import PositionsTable from './components/PositionsTable';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 
 import './PositionsTab.css';
+
 
 const PositionsTab = ({selectedSite}) => {
     const {t} = useI18n();
@@ -157,14 +158,18 @@ const PositionsTab = ({selectedSite}) => {
                     <Alert variant="info">{t('workplace.positions.noSitesWarning')}</Alert>
                 ) : (
                     <>
-                        <PositionsToolbar
-                            searchTerm={searchTerm} onSearchTermChange={setSearchTerm}
-                            filterSite={filterSite} onFilterSiteChange={setFilterSite}
-                            workSites={workSites} showInactive={showInactive}
+                        <WorkplaceToolbar
+                            searchTerm={searchTerm}
+                            onSearchTermChange={setSearchTerm}
+                            showInactive={showInactive}
                             onShowInactiveChange={(checked) => {
                                 setShowInactive(checked);
                                 localStorage.setItem('showInactivePositions', checked.toString());
                             }}
+                            siteFilter={filterSite}
+                            onSiteFilterChange={setFilterSite}
+                            sites={workSites}
+                            inactiveSwitchId="show-inactive-positions" 
                         />
                         {sortedPositions.length === 0 ? (
                             <div className="workplace-empty"><i className="bi bi-person-badge"></i><p
