@@ -35,16 +35,13 @@ const EmployeeDashboard = () => {
 
     // Эффект для расчета статистики, когда данные (расписание или ограничения) обновляются
     useEffect(() => {
-        // Пересчитываем статистику при обновлении расписания
-        if (personalSchedule) {
-            const stats = calculateDashboardStats(personalSchedule.current, constraints);
-            setDashboardStats(stats);
-        }
+
+            setDashboardStats(calculateDashboardStats(personalSchedule.current, constraints));
+
     }, [personalSchedule, constraints, setDashboardStats]);
 
-    // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ---
+
     const calculateDashboardStats = (scheduleData, constraintsResponse) => {
-        // Определяем, были ли отправлены ограничения, используя ПРАВИЛЬНЫЙ ПУТЬ
         const areConstraintsSubmitted = constraintsResponse?.constraints?.already_submitted || false;
 
         if (!scheduleData || !Array.isArray(scheduleData.schedule)) {
@@ -137,7 +134,7 @@ const EmployeeDashboard = () => {
         navigate(path);
     };
 
-    // Отображаем загрузку, пока не пришли данные И не посчитана статистика
+
     if (personalSchedule === null || dashboardStats === null) {
         return <LoadingState size="lg" message={t('common.loading')}/>;
     }
