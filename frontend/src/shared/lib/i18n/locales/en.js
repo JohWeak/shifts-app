@@ -537,6 +537,11 @@ export const en = {
         networkError: 'Network error. Please check your connection.',
         permissionDenied: 'You do not have permission to perform this action.',
         weekStartInvalid: 'Please select a {day} as the week start date',
+        publishFailed: 'Failed to publish schedule',
+        unpublishFailed: 'Failed to unpublish schedule',
+        exportFailed: 'Failed to export schedule',
+        saveFailed: 'Failed to save changes',
+        genericError: 'An error occurred. Please try again.',
     },
     modal: {
         colorPicker: {
@@ -935,6 +940,9 @@ export const en = {
         },
         publishError: 'Failed to publish schedule',
         publishedScheduleExists: 'A published schedule already exists for these dates. Please unpublish it first.',
+        generationSuccess: 'Schedule generated successfully',
+        saveFailed: 'Failed to save changes',
+
 
 
     },

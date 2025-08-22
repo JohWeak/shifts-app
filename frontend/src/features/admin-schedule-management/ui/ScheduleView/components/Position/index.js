@@ -10,7 +10,7 @@ import { useShiftColor } from 'shared/hooks/useShiftColor';
 import { useEmployeeHighlight } from '../../../../model/hooks/useEmployeeHighlight';
 import { useDragAndDrop } from '../../../../model/hooks/useDragAndDrop';
 import { usePositionScheduleData } from './hooks/usePositionScheduleData';
-import { useScheduleDetailsActions } from '../../../../model/hooks/useScheduleDetailsActions';
+import { useScheduleActions } from '../../../../model/hooks/useScheduleActions';
 
 import { addPendingChange, removePendingChange } from '../../../../model/scheduleSlice';
 import { addNotification } from "app/model/notificationsSlice";

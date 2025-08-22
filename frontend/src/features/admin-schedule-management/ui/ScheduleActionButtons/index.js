@@ -197,7 +197,7 @@ const ScheduleActionButtons = ({
                             <Button
                                 variant="success"
                                 size={size}
-                                onClick={onPublish}
+                                onClick={() => onUnpublish()}
                                 className="publish-btn"
                             >
                                 <i className="bi bi-check-circle me-2"></i>
@@ -209,7 +209,7 @@ const ScheduleActionButtons = ({
                         <Button
                             variant="warning"
                             size={size}
-                            onClick={onUnpublish}
+                            onClick={() => onPublish()}
                             className="unpublish-btn"
                         >
                             <i className="bi bi-pencil-square me-2"></i>

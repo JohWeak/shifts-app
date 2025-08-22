@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Button } from 'react-bootstrap';
-import { nanoid } from '@reduxjs/toolkit';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 // UI Components
@@ -14,7 +13,6 @@ import ScheduleContent from './ui/ScheduleContent';
 // Hooks & Actions
 import { useScheduleActions } from './model/hooks/useScheduleActions';
 import { useScheduleUI } from './model/hooks/useScheduleUI';
-import { addNotification } from 'app/model/notificationsSlice';
 import {
     fetchSchedules,
     fetchScheduleDetails,
@@ -75,12 +73,10 @@ const ScheduleManagement = () => {
             key: assignKey,
             change: { action: 'assign', positionId: selectedCell.positionId, date: selectedCell.date, shiftId: selectedCell.shiftId, empId: employee.emp_id, empName: `${employee.first_name} ${employee.last_name}`, isCrossPosition, isCrossSite, isFlexible }
         }));
-
         if (!isLargeScreen) closeAllModals();
     };
 
     const onScheduleDeleted = (deletedId) => {
-        dispatch(addNotification({ message: t('schedule.deleteSuccess'), variant: 'success' }));
         if (selectedScheduleId === deletedId) {
             dispatch(setSelectedScheduleId(null));
             closeAllModals();
@@ -88,14 +84,9 @@ const ScheduleManagement = () => {
     };
 
     const onGenerateSubmit = async (settings) => {
-        const notificationId = nanoid();
-        dispatch(addNotification({ id: notificationId, type: 'info', message: t('schedule.generatingSchedule'), persistent: true }));
         const result = await handleGenerate(settings);
         if (result.success) {
             setIsGenerateFormVisible(false);
-            dispatch(addNotification({ id: notificationId, type: 'success', message: t('schedule.generateSuccess') }));
-        } else {
-            dispatch(addNotification({ id: notificationId, type: 'error', message: result.error || t('errors.generateFailed') }));
         }
     };
 

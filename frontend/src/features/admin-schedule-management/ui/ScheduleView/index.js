@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Card, Alert, Spinner} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useScheduleValidation} from '../../model/hooks/useScheduleValidation';
-import {useScheduleDetailsActions} from '../../model/hooks/useScheduleDetailsActions';
+import {useScheduleActions} from '../../model/hooks/useScheduleActions';
 import {
     exportSchedule, toggleEditPosition,
     addPendingChange, removePendingChange,
@@ -47,22 +47,20 @@ const ScheduleView = ({
         confirmSaveWithViolations,
         validationViolations,
         showValidationModal,
-        setShowValidationModal
-    } = useScheduleDetailsActions(scheduleDetails?.schedule);
+        setShowValidationModal,
+        handleExport
+    } = useScheduleActions(scheduleDetails?.schedule);
 
     // --- LOCAL UI STATE ---
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
-    const [exportAlert, setExportAlert] = useState(null);
 
     // --- HOOKS FOR LOGIC ---
 
     const handleSaveChanges = async (positionId) => {
         setIsSaving(true);
-
         try {
             const result = await handleSavePosition(positionId);
-
             if (!result.showValidation) {
                 console.log('Position saved successfully');
             }
@@ -71,19 +69,15 @@ const ScheduleView = ({
         }
     };
 
-    const handleExport = async (format) => {
+    const handleExportClick = async (format) => {
         setIsExporting(true);
-        setExportAlert(null);
         try {
-            const result = await dispatch(exportSchedule({scheduleId: scheduleDetails.schedule.id, format})).unwrap();
-            setExportAlert({type: 'success', message: `${t('schedule.exportSuccess')}: ${result.filename}`});
-        } catch (error) {
-            setExportAlert({type: 'danger', message: `${t('common.error')}: ${error}`});
+            await handleExport(scheduleDetails.schedule.id, format);
         } finally {
             setIsExporting(false);
-            setTimeout(() => setExportAlert(null), 5000);
         }
     };
+
 
     const handleEmployeeRemove = (date, positionId, shiftId, empId, assignmentId = null) => {
         const key = `remove-${positionId}-${date}-${shiftId}-${empId}`;
@@ -131,21 +125,12 @@ const ScheduleView = ({
                         schedule={scheduleDetails.schedule}
                         onPublish={promptPublish}
                         onUnpublish={promptUnpublish}
-                        onExport={handleExport}
+                        onExport={handleExportClick}
                         isExporting={isExporting}
                         scheduleDetails={scheduleDetails}
                         onAutofill={promptAutofill}
                         isAutofilling={isAutofilling}
                     />
-                    {exportAlert &&
-                        <Alert
-                            variant={exportAlert.type}
-                            dismissible
-                            onClose={() => setExportAlert(null)}
-                        >
-                            {exportAlert.message}
-                        </Alert>
-                    }
                 </Card.Body>
             </Card>
 
