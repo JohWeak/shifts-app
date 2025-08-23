@@ -22,7 +22,7 @@ const RequestDetails = ({request, onBack, onEdit, onDelete}) => {
     const weekStartsOn = useSelector(state => state.settings?.systemSettings?.weekStartDay || 0);
 
     useEffect(() => {
-        loadShiftDetails();
+        void loadShiftDetails();
     }, []);
 
     const loadShiftDetails = async () => {
@@ -76,11 +76,9 @@ const RequestDetails = ({request, onBack, onEdit, onDelete}) => {
 
     return (
         <Container className="request-details-container py-3">
-
-
             <Card className="request-details-card">
-                <Card.Header className="bg-transparent">
-                    <div className="d-flex justify-content-between align-items-center">
+                <Card.Header className="request-details-header bg-transparent">
+                    <div className=" d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">{t('requests.requestDetails')}</h5>
                         <StatusBadge
                             status={request.status}

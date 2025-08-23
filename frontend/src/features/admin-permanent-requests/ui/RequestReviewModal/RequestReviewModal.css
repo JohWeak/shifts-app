@@ -182,7 +182,7 @@
         width: calc(50% - 0.5rem);
     }
 
-    .constraint-badge {
+    .request-review-modal .constraint-badge {
         transform: rotate(90deg);
         overflow: clip;
         align-items: center;
@@ -190,7 +190,7 @@
         padding: 0.125rem 0.5rem 0.25rem;
         font-size: 0.75rem;
     }
-    [dir="rtl"] .constraint-badge {
+    [dir="rtl"] .request-review-modal .constraint-badge {
         transform: rotate(-90deg);
     }
 

@@ -7,8 +7,11 @@
 .request-details-container .request-details-card {
     border: 1px solid var(--bs-border-color);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-lg);
 }
-
+.request-details-container .request-details-header{
+    padding: 1rem;
+}
 .request-details-container .request-metadata {
     background-color: var(--bs-gray-100);
     padding: 1rem;

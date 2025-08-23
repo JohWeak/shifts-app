@@ -37,17 +37,17 @@ const MetricCard = ({
             <Card.Body className="d-flex align-items-center">
                 <div className="metric-icon-wrapper">
                     <div className={`metric-icon bg-${color} bg-opacity-10`}>
-                        {loading ? (
-                            <div className="spinner-border spinner-border-sm text-primary" />
-                        ) : (
-                            <i className={`bi ${icon} text-${color}`} />
-                        )}
+                        <i className={`bi ${icon} text-${color}`} />
                     </div>
                 </div>
 
                 <div className="metric-content flex-grow-1">
                     <div className="metric-value">
-                        {loading ? '...' : value}
+                        {loading ? (
+                            <div className="spinner-border spinner-border-sm text-primary" />
+                        ) : (
+                            value
+                        )}
                     </div>
                     <div className="metric-label">
                         {label}

@@ -21,7 +21,6 @@
    ========================================================== */
 
 .custom-day-picker-wrapper {
-    /* Переопределяем переменные Bootstrap для Popover */
     --bs-popover-max-width: auto;
     --bs-popover-border-color: var(--bs-border-color);
     --bs-popover-border-radius: var(--radius-lg);
@@ -32,8 +31,8 @@
     --bs-popover-arrow-width: 0;
     --bs-popover-arrow-height: 0;
 
-    background-color: var(--bs-body-bg) !important;
-    border: 1px solid var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
 }
 
 

@@ -23,8 +23,8 @@ const AdminDashboard = () => {
     // Redux state
     const { user } = useSelector(state => state.auth);
     const { employees, loading: employeesLoading } = useSelector(state => state.employees);
-    const { workSites, schedules, loading: schedulesLoading } = useSelector(state => state.schedule);
-    const { positions, loading: positionsLoading } = useSelector(state => state.workplace);
+    const { schedules, loading: schedulesLoading } = useSelector(state => state.schedule);
+    const { positions, workSites, loading: positionsLoading } = useSelector(state => state.workplace);
 
     // Local state
     const [metrics, setMetrics] = useState({
