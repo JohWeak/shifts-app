@@ -18,6 +18,7 @@
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
+    "react-countup": "^6.5.3",
     "react-day-picker": "^9.7.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",

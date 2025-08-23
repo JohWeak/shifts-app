@@ -1,7 +1,8 @@
 // frontend/src/features/admin-dashboard/components/MetricCard/MetricCard.js
 import React from 'react';
-import { Card } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import {Card} from 'react-bootstrap';
+import {useNavigate} from 'react-router-dom';
+import CountUp from 'react-countup';
 import './MetricCard.css';
 
 /**
@@ -37,24 +38,25 @@ const MetricCard = ({
             <Card.Body className="d-flex align-items-center">
                 <div className="metric-icon-wrapper">
                     <div className={`metric-icon bg-${color} bg-opacity-10`}>
-                        <i className={`bi ${icon} text-${color}`} />
+                        <i className={`bi ${icon} text-${color}`}/>
                     </div>
                 </div>
 
                 <div className="metric-content flex-grow-1">
                     <div className="metric-value">
-                        {loading ? (
-                            <div className="spinner-border spinner-border-sm text-primary" />
-                        ) : (
-                            value
-                        )}
+                        <CountUp
+                            end={value}
+                            duration={1.5}
+                            separator=" "
+                            enableScrollSpy
+                        />
                     </div>
                     <div className="metric-label">
                         {label}
                     </div>
                     {trend && !loading && (
                         <div className={`metric-trend text-${trend > 0 ? 'success' : 'danger'}`}>
-                            <i className={`bi bi-arrow-${trend > 0 ? 'up' : 'down'}-short`} />
+                            <i className={`bi bi-arrow-${trend > 0 ? 'up' : 'down'}-short`}/>
                             <span>{Math.abs(trend)}%</span>
                         </div>
                     )}
@@ -62,7 +64,7 @@ const MetricCard = ({
 
                 {onClick && (
                     <div className="metric-arrow">
-                        <i className="bi bi-chevron-right" />
+                        <i className="bi bi-chevron-right"/>
                     </div>
                 )}
             </Card.Body>
