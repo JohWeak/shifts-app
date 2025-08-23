@@ -63,7 +63,18 @@ export const API_ENDPOINTS = {
         POSITION_SHIFT: '/api/positions/shifts/:id',
         SHIFT_REQUIREMENTS: '/api/positions/shifts/:id/requirements',
         SHIFT_REQUIREMENT: '/api/positions/requirements/:id',
-        POSITION_REQUIREMENTS_MATRIX: '/api/positions/:id/requirements-matrix'
+        POSITION_REQUIREMENTS_MATRIX: '/api/positions/:id/requirements-matrix',
+        SHIFTS: {
+            BASE: '/api/shifts',
+            BY_ID: (id) => `/api/shifts/${id}`,
+            BY_POSITION: (positionId) => `/api/positions/${positionId}/shifts`,
+            CREATE: (positionId) => `/api/positions/${positionId}/shifts`,
+            UPDATE: (id) => `/api/shifts/${id}`,
+            DELETE: (id) => `/api/shifts/${id}`,
+            UPDATE_COLOR: (id) => `/api/shifts/${id}/color`,
+            REQUIREMENTS: (shiftId) => `/api/shifts/${shiftId}/requirements`,
+            UPDATE_REQUIREMENT: (reqId) => `/api/requirements/${reqId}`
+        }
     },
     POSITIONS: {
         BY_SITE: (siteId) => `/api/sites/${siteId}/positions`,

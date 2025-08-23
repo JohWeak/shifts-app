@@ -715,3 +715,74 @@ export const classifySchedules = (schedules) => {
         currentWeekScheduleIds: currentIds
     };
 };
+
+/**
+ * Calculate shift duration based on start and end times
+ * @param {string} startTime - Start time in HH:mm format
+ * @param {string} endTime - End time in HH:mm format
+ * @returns {number} Duration in hours
+ */
+export const getShiftDuration = (startTime, endTime) => {
+    // Добавляем проверку типов и преобразование
+    if (!startTime || !endTime) return 0;
+
+    // Преобразуем в строку если это не строка
+    const start = typeof startTime === 'string' ? startTime : String(startTime);
+    const end = typeof endTime === 'string' ? endTime : String(endTime);
+
+    // Проверяем формат
+    if (!start.includes(':') || !end.includes(':')) {
+        console.error('Invalid time format:', { startTime, endTime });
+        return 0;
+    }
+
+    const [startHour, startMin] = start.split(':').map(Number);
+    const [endHour, endMin] = end.split(':').map(Number);
+
+    let startMinutes = startHour * 60 + startMin;
+    let endMinutes = endHour * 60 + endMin;
+
+    if (endMinutes < startMinutes) {
+        endMinutes += 24 * 60;
+    }
+
+    const durationMinutes = endMinutes - startMinutes;
+    return Math.round((durationMinutes / 60) * 10) / 10;
+};
+
+/**
+ * Format time for display
+ * @param {string} time - Time in HH:mm format
+ * @returns {string} Formatted time
+ */
+export const formatTime = (time) => {
+    if (!time) return '';
+    const [hour, minute] = time.split(':');
+    return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+};
+
+/**
+ * Validate time format
+ * @param {string} time - Time string to validate
+ * @returns {boolean} Is valid time format
+ */
+export const isValidTime = (time) => {
+    if (!time) return false;
+    const regex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return regex.test(time);
+};
+
+/**
+ * Check if shift is night shift (crosses midnight)
+ * @param {string} startTime - Start time in HH:mm format
+ * @param {string} endTime - End time in HH:mm format
+ * @returns {boolean} Is night shift
+ */
+export const isNightShift = (startTime, endTime) => {
+    if (!startTime || !endTime) return false;
+
+    const [startHour] = startTime.split(':').map(Number);
+    const [endHour] = endTime.split(':').map(Number);
+
+    return endHour < startHour || (startHour >= 22 || endHour <= 6);
+};

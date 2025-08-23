@@ -158,23 +158,23 @@ export const restorePosition = createAsyncThunk(
 // Fetch position shifts with cache
 export const fetchPositionShifts = createAsyncThunk(
     'workplace/fetchPositionShifts',
-    async ({positionId, forceRefresh = false}, {getState, rejectWithValue}) => {
+    async ({ positionId, forceRefresh = false }, { getState, rejectWithValue }) => {
         const state = getState();
-        const {cache, cacheDurations} = state.workplace;
+        const { cache, cacheDurations } = state.workplace;
         const cached = getCacheEntry(cache.positionShifts, positionId);
 
-        // Check cache
         if (!forceRefresh && cached && isCacheEntryValid(cached, cacheDurations.positionShifts)) {
             console.log(`[Cache] Using cached shifts for position ${positionId}`);
-            return {cached: true, positionId, data: cached.data};
+            return { cached: true, positionId, data: cached.data };
         }
 
         try {
             console.log(`[Cache] Fetching fresh shifts for position ${positionId}`);
+            // Используем правильный endpoint
             const response = await api.get(
-                API_ENDPOINTS.SETTINGS.POSITION_SHIFTS.replace(':id', positionId)
+                API_ENDPOINTS.SETTINGS.SHIFTS.BY_POSITION(positionId)
             );
-            return {cached: false, positionId, data: response};
+            return { cached: false, positionId, data: response };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch position shifts');
         }
@@ -183,13 +183,13 @@ export const fetchPositionShifts = createAsyncThunk(
 
 export const createPositionShift = createAsyncThunk(
     'workplace/createPositionShift',
-    async ({positionId, shiftData}, {rejectWithValue}) => {
+    async ({ positionId, shiftData }, { rejectWithValue }) => {
         try {
             const response = await api.post(
-                API_ENDPOINTS.SETTINGS.POSITION_SHIFTS.replace(':id', positionId),
+                API_ENDPOINTS.SETTINGS.SHIFTS.CREATE(positionId),
                 shiftData
             );
-            return response;
+            return { positionId, shift: response };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create shift');
         }
@@ -198,10 +198,10 @@ export const createPositionShift = createAsyncThunk(
 
 export const updatePositionShift = createAsyncThunk(
     'workplace/updatePositionShift',
-    async ({shiftId, shiftData}, {rejectWithValue}) => {
+    async ({ shiftId, shiftData }, { rejectWithValue }) => {
         try {
             const response = await api.put(
-                API_ENDPOINTS.SETTINGS.POSITION_SHIFT.replace(':id', shiftId),
+                API_ENDPOINTS.SETTINGS.SHIFTS.UPDATE(shiftId),
                 shiftData
             );
             return response;
@@ -213,11 +213,9 @@ export const updatePositionShift = createAsyncThunk(
 
 export const deletePositionShift = createAsyncThunk(
     'workplace/deletePositionShift',
-    async (shiftId, {rejectWithValue}) => {
+    async (shiftId, { rejectWithValue }) => {
         try {
-            await api.delete(
-                API_ENDPOINTS.SETTINGS.POSITION_SHIFT.replace(':id', shiftId)
-            );
+            await api.delete(API_ENDPOINTS.SETTINGS.SHIFTS.DELETE(shiftId));
             return shiftId;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to delete shift');
@@ -580,10 +578,15 @@ const workplaceSlice = createSlice({
             })
             .addCase(fetchPositionShifts.fulfilled, (state, action) => {
                 state.shiftsLoading = false;
-                state.positionShifts[action.payload.positionId] = action.payload.data;
-
-                if (!action.payload.cached) {
-                    setCacheEntry(state.cache.positionShifts, action.payload.positionId, action.payload.data);
+                let shifts;
+                if (action.payload.cached) {
+                    shifts = action.payload.data;
+                } else {
+                    shifts = action.payload.data;
+                }
+                state.positionShifts[action.payload.positionId] = shifts || [];
+                if (!action.payload.cached && shifts) {
+                    setCacheEntry(state.cache.positionShifts, action.payload.positionId, shifts);
                 }
             })
             .addCase(fetchPositionShifts.rejected, (state, action) => {
@@ -594,11 +597,17 @@ const workplaceSlice = createSlice({
             // Create shift
             .addCase(createPositionShift.fulfilled, (state, action) => {
                 state.shiftOperationStatus = 'success';
-                const positionId = action.meta.arg.positionId;
+                const { positionId, shift } = action.payload;
+
+                // Обновляем локальный список если он загружен
                 if (state.positionShifts[positionId]) {
-                    state.positionShifts[positionId].push(action.payload);
+                    state.positionShifts[positionId].push(shift);
                 }
-                state.cache.positionShifts = null;
+
+                // Очищаем кэш для этой позиции
+                if (state.cache.positionShifts[positionId]) {
+                    state.cache.positionShifts[positionId] = null;
+                }
             })
             .addCase(createPositionShift.rejected, (state, action) => {
                 state.error = action.payload;
