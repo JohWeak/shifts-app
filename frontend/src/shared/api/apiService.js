@@ -160,9 +160,10 @@ export const constraintAPI = {
 
 export const positionAPI = {
     fetchPositions: (siteId) => api.get(API_ENDPOINTS.POSITIONS.BY_SITE(siteId)),
-    // Принимает объект должности, извлекает ID для URL, и отправляет весь объект в теле запроса
     updatePosition: (positionData) => api.put(API_ENDPOINTS.POSITIONS.DETAILS(positionData.pos_id), positionData),
     fetchPositionShifts: (positionId) => api.get(API_ENDPOINTS.POSITIONS.SHIFTS(positionId)),
+    createPositionShift: (positionId, shiftData) =>
+        api.post(API_ENDPOINTS.POSITIONS.SHIFTS(positionId), shiftData),
 };
 
 export const settingsAPI = {

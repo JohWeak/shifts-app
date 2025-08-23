@@ -9,6 +9,7 @@ import {
     setCacheEntry,
     clearCacheEntry
 } from 'shared/lib/cache/cacheUtils';
+import apiService from "../../../shared/api/apiService";
 
 // Fetch work sites with cache
 export const fetchWorkSites = createAsyncThunk(
@@ -186,10 +187,7 @@ export const createPositionShift = createAsyncThunk(
     'workplace/createPositionShift',
     async ({ positionId, shiftData }, { rejectWithValue }) => {
         try {
-            const response = await api.post(
-                `/api/positions/${positionId}/shifts`,
-                shiftData
-            );
+            const response = await apiService.position.createPositionShift(positionId, shiftData);
             return { positionId, shift: response };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create shift');
