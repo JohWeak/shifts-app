@@ -9,7 +9,10 @@
 .workplace-actions .btn {
     padding: 0.375rem 0.375rem;
     line-height: 1;
-    border-radius: 25%;
+    border-radius: 15%;
+    color: var(--bs-white);
+}
+.workplace-actions .btn:hover {
     color: var(--bs-white);
 }
 

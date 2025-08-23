@@ -172,7 +172,7 @@ export const fetchPositionShifts = createAsyncThunk(
             console.log(`[Cache] Fetching fresh shifts for position ${positionId}`);
             // Используем правильный endpoint
             const response = await api.get(
-                API_ENDPOINTS.SETTINGS.SHIFTS.BY_POSITION(positionId)
+                API_ENDPOINTS.POSITIONS.SHIFTS(positionId)
             );
             return { cached: false, positionId, data: response };
         } catch (error) {
@@ -181,12 +181,13 @@ export const fetchPositionShifts = createAsyncThunk(
     }
 );
 
+
 export const createPositionShift = createAsyncThunk(
     'workplace/createPositionShift',
     async ({ positionId, shiftData }, { rejectWithValue }) => {
         try {
             const response = await api.post(
-                API_ENDPOINTS.SETTINGS.SHIFTS.CREATE(positionId),
+                `/api/positions/${positionId}/shifts`,
                 shiftData
             );
             return { positionId, shift: response };
@@ -201,7 +202,7 @@ export const updatePositionShift = createAsyncThunk(
     async ({ shiftId, shiftData }, { rejectWithValue }) => {
         try {
             const response = await api.put(
-                API_ENDPOINTS.SETTINGS.SHIFTS.UPDATE(shiftId),
+                `/api/positions/shifts/${shiftId}`,
                 shiftData
             );
             return response;
@@ -215,7 +216,7 @@ export const deletePositionShift = createAsyncThunk(
     'workplace/deletePositionShift',
     async (shiftId, { rejectWithValue }) => {
         try {
-            await api.delete(API_ENDPOINTS.SETTINGS.SHIFTS.DELETE(shiftId));
+            await api.delete(`/api/positions/shifts/${shiftId}`);
             return shiftId;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to delete shift');

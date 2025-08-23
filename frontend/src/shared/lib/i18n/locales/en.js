@@ -1071,6 +1071,7 @@ export const en = {
         day: 'Day',
         morning: 'Morning',
         night: 'Night',
+
     },
     status: {
         active: 'Active',
@@ -1251,6 +1252,13 @@ export const en = {
             time: 'Time',
             titleFor: 'Shifts for {position}',
             type: 'Type',
+            deleteSuccess: 'Delete successful',
+            editShiftTitle: 'Edit Shift',
+            newShift: 'New Shift',
+            newShiftTitle: 'New Shift',
+            shiftColor: 'Shift Color',
+            shiftColorHint: 'Shift color',
+            shiftColorPlaceholder: 'Select a color',
         },
         subtitle: 'Manage work sites and positions',
         title: 'Workplace Settings',

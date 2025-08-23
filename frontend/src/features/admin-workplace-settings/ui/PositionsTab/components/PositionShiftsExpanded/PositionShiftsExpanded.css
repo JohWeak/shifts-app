@@ -31,33 +31,33 @@
 }
 
 .position-shifts-expanded {
-    animation: expandRow 0.25s ease-out;
-
+    overflow: hidden;
+    animation: expandRow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .position-shifts-expanded.closing {
-    animation: collapseRow 0.25s ease-in forwards;
+    animation: collapseRow 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes expandRow {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        max-height: 0;
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        max-height: 1500px;
     }
 }
 
 @keyframes collapseRow {
     from {
         opacity: 1;
-        transform: translateY(0);
+        max-height: 1500px;
     }
     to {
         opacity: 0;
-        transform: translateY(-10px);
+        max-height: 0;
     }
 }
 
@@ -70,11 +70,9 @@
     overflow: hidden;
     border-top: none;
     border-radius: 0!important;
-    border-bottom: 0;
 }
 
 .position-shifts-col{
-    border-radius: var(--radius-lg)!important;
     border-bottom: none;
 }
 .card-actions-toolbar {
@@ -88,7 +86,6 @@
     z-index: 2;
 }
 
-/* Видимое состояние */
 .card-actions-toolbar.visible {
     transform: translateX(0);
 }

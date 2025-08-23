@@ -14,7 +14,7 @@
 
 .nav-tabs-custom .nav-link {
     color: var(--bs-gray-600);
-    border-bottom: 2px solid transparent;
+    border-bottom: 2px solid transparent!important;
     padding: 1rem 1.5rem;
     font-weight: 500;
     transition: all 0.2s ease;
@@ -31,7 +31,8 @@
     color: var(--bs-primary);
     background-color: var(--bs-gray-50);
     border-color: transparent;
-    border-bottom: 2px solid var(--bs-primary);
+    border-bottom-color: var(--bs-primary)!important;
+    box-shadow: var(--shadow-sm);
 }
 [data-theme="dark"] .workplace-settings-container .nav-tabs-custom .nav-link.active {
     background-color: rgba(0, 0, 0, 0.2);

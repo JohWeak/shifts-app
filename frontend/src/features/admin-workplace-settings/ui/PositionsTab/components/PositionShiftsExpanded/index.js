@@ -119,11 +119,15 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
         if (activeView === 'shifts') {
             if (shifts?.length === 0) {
                 return (
-                    <Card className="text-center py-5">
+                    <Card className="text-center border-0 py-5">
                         <Card.Body>
                             <i className="bi bi-clock display-4 text-muted mb-3"></i>
                             <p className="text-muted">{t('workplace.shifts.noShifts')}</p>
-                            <Button variant="primary" onClick={handleAddShift}>
+                            <Button
+                                variant="primary"
+                                onClick={handleAddShift}
+                                className="p-3 rounded-3"
+                            >
                                 <i className="bi bi-plus-circle me-2"></i>
                                 {t('workplace.shifts.createFirst')}
                             </Button>
@@ -284,7 +288,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                             {/* --- THE CONTENT --- */}
                         </Card.Body>
                         <div className="position-shifts-expanded-footer d-flex ms-3 mb-3 mt-0">
-                            {activeView === 'shifts' && shifts && (
+                            {activeView === 'shifts' && shifts && !(shifts.length === 0) && (
                                 <Button className={"mt-2 p-2 rounded-2"} variant="primary" size="sm"
                                         onClick={handleAddShift}>
                                     <i className="bi bi-plus-circle me-2"></i>

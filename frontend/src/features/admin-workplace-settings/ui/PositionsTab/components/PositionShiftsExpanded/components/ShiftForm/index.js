@@ -201,8 +201,9 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
             }
             onSuccess();
         } catch (error) {
+            const errorMessage = error.message || t('common.error');
             setErrors({
-                submit: error || t('common.error')
+                submit: errorMessage
             });
         } finally {
             setLoading(false);
