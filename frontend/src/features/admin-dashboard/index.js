@@ -1,169 +1,208 @@
-// frontend/src/CompareAlgorithmsModal.js/admin/Dashboard.js
-import React, { useState, useEffect } from 'react';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
-
-import { Container, Card, Row, Col, Badge, Button } from 'react-bootstrap';
+// frontend/src/features/admin-dashboard/index.js
+import React, { useEffect, useState } from 'react';
+import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import {useI18n} from "shared/lib/i18n/i18nProvider";
+import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import MetricCard from './components/MetricCard/MetricCard';
+import { fetchEmployees } from 'features/admin-employee-management/model/employeeSlice';
+import { fetchSchedules } from 'features/admin-schedule-management/model/scheduleSlice';
+import { fetchWorkSites, fetchPositions } from 'features/admin-workplace-settings/model/workplaceSlice';
+import './AdminDashboard.css';
+import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 
-
-import './index.css';
-
+/**
+ * Admin Dashboard Component
+ * Provides system overview with metrics, quick actions and status
+ */
 const AdminDashboard = () => {
-
-    const navigate = useNavigate();
-    const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
     const { t } = useI18n();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
+    // Redux state
+    const { user } = useSelector(state => state.auth);
+    const { employees, loading: employeesLoading } = useSelector(state => state.employees);
+    const { workSites, schedules, loading: schedulesLoading } = useSelector(state => state.schedule);
+    const { positions, loading: positionsLoading } = useSelector(state => state.workplace);
+
+    // Local state
+    const [metrics, setMetrics] = useState({
+        totalEmployees: 0,
+        activeEmployees: 0,
+        totalWorkSites: 0,
+        activeWorkSites: 0,
+        totalPositions: 0,
+        activePositions: 0,
+        publishedSchedules: 0,
+        pendingRequests: 0
+    });
+
+    const [systemStatus, setSystemStatus] = useState({
+        schedulingService: 'online',
+        database: 'connected',
+        algorithm: 'available',
+        apiServices: 'online'
+    });
+
+    // Load data on mount
     useEffect(() => {
-        fetchStats();
-    }, []);
+        dispatch(fetchEmployees());
+        dispatch(fetchWorkSites());
+        dispatch(fetchPositions());
+        dispatch(fetchSchedules());
+    }, [dispatch]);
 
+    // Calculate metrics when data changes
+    useEffect(() => {
+        setMetrics({
+            totalEmployees: employees?.length || 0,
+            activeEmployees: employees?.filter(e => e.status === 'active').length || 0,
+            totalWorkSites: workSites?.length || 0,
+            activeWorkSites: workSites?.filter(s => s.is_active).length || 0,
+            totalPositions: positions?.length || 0,
+            activePositions: positions?.filter(p => p.is_active).length || 0,
+            publishedSchedules: schedules?.filter(s => s.status === 'published').length || 0,
+            pendingRequests: 0
+        });
+    }, [employees, workSites, positions, schedules]);
 
-    const fetchStats = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/schedules/stats/overview', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                setStats(result.data);
-            }
-        } catch (error) {
-            console.error('Error fetching stats:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const isLoading = employeesLoading //|| schedulesLoading || positionsLoading;
 
     return (
-            <Container fluid className="admin-dashboard p-2">
-                <PageHeader
-                    icon="speedometer2"
-                    title={t('dashboard.dashboardTitle')}
-                    subtitle={t('dashboard.dashboardDesc')}
-                />
-
-                <Row >
-                    {/* 1. Карточка "Total Schedules" */}
-                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
-                        <Card className="dashboard-metric-card">
-                            <Card.Body>
-                                <div className="d-flex align-items-center">
-                                    <div className="metric-icon bg-primary bg-opacity-10 me-3">
-                                        <i className="bi bi-calendar-week text-primary fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <div className="metric-label">{t('navigation.schedules')}</div>
-                                        <div className="metric-value">{stats?.overview.total_schedules || 0}</div>
-                                    </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-
-                    {/* 2. Карточка "Published" */}
-                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
-                        <Card className="dashboard-metric-card metric-success">
-                            <Card.Body>
-                                <div className="d-flex align-items-center">
-                                    <div className="metric-icon bg-success bg-opacity-10 me-3">
-                                        <i className="bi bi-check-circle text-success fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <div className="metric-label">{t('schedule.published')}</div>
-                                        <div className="metric-value">{stats?.overview.published_schedules || 0}</div>
-                                    </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-
-                    {/* 3. Карточка "Draft" */}
-                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4 ">
-                        <Card className="dashboard-metric-card metric-warning">
-                            <Card.Body>
-                                <div className="d-flex align-items-center">
-                                    <div className="metric-icon bg-warning bg-opacity-10 me-3">
-                                        <i className="bi bi-file-earmark text-warning fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <div className="metric-label">{t('schedule.draft')}</div>
-                                        <div className="metric-value">{stats?.overview.draft_schedules || 0}</div>
-                                    </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-
-                    {/* 4. Карточка "Total Assignments" */}
-                    <Col lg={3} md={6} xs={3} className="mb-3 mb-lg-4">
-                        <Card className="dashboard-metric-card metric-info">
-                            <Card.Body>
-                                <div className="d-flex align-items-center">
-                                    <div className="metric-icon bg-info bg-opacity-10 me-3">
-                                        <i className="bi bi-people text-info fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <div className="metric-label">{t('employee.assignments')}</div>
-                                        <div className="metric-value">{stats?.overview.total_assignments || 0}</div>
-                                    </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
+        <div className="admin-dashboard">
+            <Container fluid >
+                {/* Header */}
+                <Row className="mb-2">
+                    <Col>
+                        <PageHeader
+                            icon="speedometer2"
+                            title={`${t('dashboard.welcomeBack')}, ${user?.first_name || 'Admin'}!`}
+                            subtitle={t('dashboard.dashboardDesc')}
+                        />
                     </Col>
                 </Row>
 
-                <Row>
-                    <Col lg={8} className="mb-4">
-                        <Card className="border-0 shadow-sm ">
-                            <Card.Header >
-                                <h5 className="mb-0">{t('common.quickActions')}</h5>
+                {/* Metrics Grid */}
+                <Row className="g-3 mb-4">
+                    <Col xs={6} md={4} lg={3}>
+                        <MetricCard
+                            icon="bi-people-fill"
+                            value={metrics.activeEmployees}
+                            label={t('dashboard.metrics.activeEmployees')}
+                            color="primary"
+                            onClick="/admin/employees"
+                            loading={isLoading}
+                        />
+                    </Col>
+                    <Col xs={6} md={4} lg={3}>
+                        <MetricCard
+                            icon="bi-building"
+                            value={metrics.activeWorkSites}
+                            label={t('dashboard.metrics.activeWorkSites')}
+                            color="success"
+                            onClick="/admin/workplace"
+                            loading={isLoading}
+                        />
+                    </Col>
+                    <Col xs={6} md={4} lg={3}>
+                        <MetricCard
+                            icon="bi-briefcase-fill"
+                            value={metrics.activePositions}
+                            label={t('dashboard.metrics.activePositions')}
+                            color="info"
+                            onClick="/admin/workplace"
+                            loading={isLoading}
+                        />
+                    </Col>
+                    <Col xs={6} md={4} lg={3}>
+                        <MetricCard
+                            icon="bi-calendar-check-fill"
+                            value={metrics.publishedSchedules}
+                            label={t('dashboard.metrics.publishedSchedules')}
+                            color="warning"
+                            onClick="/admin/schedules"
+                            loading={isLoading}
+                        />
+                    </Col>
+                </Row>
+
+                <Row className="g-3">
+                    {/* Quick Actions */}
+                    <Col lg={8}>
+                        <Card className="action-card h-100">
+                            <Card.Header className="bg-transparent">
+                                <h5 className="mb-0">
+                                    <i className="bi bi-lightning-charge-fill me-2 text-primary" />
+                                    {t('dashboard.quickActions.title')}
+                                </h5>
                             </Card.Header>
                             <Card.Body>
-                                <Row>
-                                    <Col md={6} className="mb-3">
+                                <Row className="g-3">
+                                    <Col sm={6} md={4}>
                                         <Button
                                             variant="primary"
-                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            size="lg"
+                                            className="w-100 action-button"
                                             onClick={() => navigate('/admin/schedules')}
                                         >
-                                            <i className="bi bi-calendar-week me-2"></i>
-                                            {t('schedule.manageSchedules')}
+                                            <i className="bi bi-calendar-plus" />
+                                            <span>{t('dashboard.quickActions.createSchedule')}</span>
                                         </Button>
                                     </Col>
-                                    <Col md={6} className="mb-3">
+                                    <Col sm={6} md={4}>
                                         <Button
                                             variant="outline-primary"
-                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            size="lg"
+                                            className="w-100 action-button"
                                             onClick={() => navigate('/admin/employees')}
                                         >
-                                            <i className="bi bi-people me-2"></i>
-                                            {t('employee.manageEmployees')}                                        </Button>
+                                            <i className="bi bi-person-plus" />
+                                            <span>{t('dashboard.quickActions.manageEmployees')}</span>
+                                        </Button>
                                     </Col>
-                                    <Col md={6} className="mb-3">
+                                    <Col sm={6} md={4}>
                                         <Button
                                             variant="outline-success"
-                                            className="w-100 d-flex align-items-center justify-content-center"
-                                            onClick={() => navigate('/admin/algorithms')}
-                                        >
-                                            <i className="bi bi-cpu me-2"></i>
-                                            {t('navigation.algorithms')}                                        </Button>
-                                    </Col>
-                                    <Col md={6} className="mb-3">
-                                        <Button
-                                            variant="outline-info"
-                                            className="w-100 d-flex align-items-center justify-content-center"
+                                            size="lg"
+                                            className="w-100 action-button"
                                             onClick={() => navigate('/admin/reports')}
                                         >
-                                            <i className="bi bi-graph-up me-2"></i>
-                                            {t('reports.viewReports')}
+                                            <i className="bi bi-graph-up" />
+                                            <span>{t('dashboard.quickActions.viewReports')}</span>
+                                        </Button>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                        <Button
+                                            variant="outline-info"
+                                            size="lg"
+                                            className="w-100 action-button"
+                                            onClick={() => navigate('/admin/workplace')}
+                                        >
+                                            <i className="bi bi-building-gear" />
+                                            <span>{t('dashboard.quickActions.workplaceSettings')}</span>
+                                        </Button>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                        <Button
+                                            variant="outline-warning"
+                                            size="lg"
+                                            className="w-100 action-button"
+                                            onClick={() => navigate('/admin/algorithms')}
+                                        >
+                                            <i className="bi bi-cpu" />
+                                            <span>{t('dashboard.quickActions.algorithmSettings')}</span>
+                                        </Button>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                        <Button
+                                            variant="outline-secondary"
+                                            size="lg"
+                                            className="w-100 action-button"
+                                            onClick={() => navigate('/admin/settings')}
+                                        >
+                                            <i className="bi bi-gear" />
+                                            <span>{t('dashboard.quickActions.systemSettings')}</span>
                                         </Button>
                                     </Col>
                                 </Row>
@@ -171,39 +210,60 @@ const AdminDashboard = () => {
                         </Card>
                     </Col>
 
-                    <Col lg={4} className="mb-4">
-                        <Card className="border-0 shadow-sm h-100">
-                            <Card.Header >
-                                <h5 className="mb-0">System Status</h5>
+                    {/* System Status */}
+                    <Col lg={4}>
+                        <Card className="status-card h-100">
+                            <Card.Header className="bg-transparent">
+                                <h5 className="mb-0">
+                                    <i className="bi bi-activity me-2 text-success" />
+                                    {t('dashboard.systemStatus.title')}
+                                </h5>
                             </Card.Header>
                             <Card.Body>
-                                <div className="mb-3">
-                                    <div className="d-flex justify-content-between align-items-center mb-1">
-                                        <span className="small">Scheduling Service</span>
-                                        <Badge bg="success">Online</Badge>
+                                <div className="status-list">
+                                    <div className="status-item">
+                                        <span className="status-label">
+                                            {t('dashboard.systemStatus.schedulingService')}
+                                        </span>
+                                        <Badge bg="success" className="status-badge">
+                                            {t('dashboard.systemStatus.online')}
+                                        </Badge>
+                                    </div>
+                                    <div className="status-item">
+                                        <span className="status-label">
+                                            {t('dashboard.systemStatus.algorithm')}
+                                        </span>
+                                        <Badge bg="success" className="status-badge">
+                                            {t('dashboard.systemStatus.available')}
+                                        </Badge>
+                                    </div>
+                                    <div className="status-item">
+                                        <span className="status-label">
+                                            {t('dashboard.systemStatus.database')}
+                                        </span>
+                                        <Badge bg="success" className="status-badge">
+                                            {t('dashboard.systemStatus.connected')}
+                                        </Badge>
+                                    </div>
+                                    <div className="status-item">
+                                        <span className="status-label">
+                                            {t('dashboard.systemStatus.apiServices')}
+                                        </span>
+                                        <Badge bg="success" className="status-badge">
+                                            {t('dashboard.systemStatus.online')}
+                                        </Badge>
                                     </div>
                                 </div>
-                                <div className="mb-3">
-                                    <div className="d-flex justify-content-between align-items-center mb-1">
-                                        <span className="small">CP-SAT Algorithm</span>
-                                        <Badge bg="success">Available</Badge>
-                                    </div>
-                                </div>
-                                <div className="mb-3">
-                                    <div className="d-flex justify-content-between align-items-center mb-1">
-                                        <span className="small">Database</span>
-                                        <Badge bg="success">Connected</Badge>
-                                    </div>
-                                </div>
+                                {/*<div className="text-muted small mt-2">*/}
+                                {/*    {t('dashboard.systemStatus.lastUpdated')}: {new Date().toLocaleTimeString()}*/}
+                                {/*</div>*/}
                             </Card.Body>
                         </Card>
                     </Col>
                 </Row>
             </Container>
+        </div>
     );
 };
 
-//export default AdminDashboard;
-
-export { default } from './AdminDashboard';
-export { default as MetricCard } from './components/MetricCard/MetricCard';
+export default AdminDashboard;
