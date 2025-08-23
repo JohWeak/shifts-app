@@ -82,8 +82,6 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
             const [startHour, startMin] = formData.start_time.split(':').map(Number);
             const [endHour, endMin] = formData.end_time.split(':').map(Number);
 
-            // Если смена заканчивается раньше, чем начинается, это ночная смена - это ок
-            // Но если время одинаковое, это ошибка
             if (startHour === endHour && startMin === endMin) {
                 newErrors.end_time = t('workplace.shifts.invalidTimeRange');
             }
@@ -100,9 +98,6 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
         }
     };
     const handleTimeChange = (field, newValue) => {
-        console.log(`[handleTimeChange] Поле: ${field}, Полученное значение:`, newValue, `, Тип: ${typeof newValue}`);
-        // ------------------------------------
-
         if (typeof newValue !== 'object' || !newValue) {
             if (newValue === '') {
                 handleChange(field, '');
