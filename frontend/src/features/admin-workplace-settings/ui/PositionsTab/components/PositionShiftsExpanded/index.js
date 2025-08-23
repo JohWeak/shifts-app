@@ -1,53 +1,40 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/index.js
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button, Table, Badge, Alert, Card, OverlayTrigger, Tooltip, Nav, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {
-    Button,
-    Table,
-    Badge,
-    Alert,
-    Card,
-    OverlayTrigger,
-    Tooltip, Nav, Spinner
-} from 'react-bootstrap';
-import api from 'shared/api';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+    fetchPositionShifts,
+    createPositionShift,
+    updatePositionShift,
+    deletePositionShift
+} from '../../../../model/workplaceSlice';
+import { addNotification } from 'app/model/notificationsSlice';
 import ShiftForm from './components/ShiftForm';
 import ShiftRequirementsMatrix from './components/ShiftRequirementsMatrix';
-
-
+import { getShiftDuration } from 'shared/lib/utils/scheduleUtils';
 import './PositionShiftsExpanded.css';
 
 const PositionShiftsExpanded = ({position, isClosing}) => {
     const {t} = useI18n();
+    const dispatch = useDispatch();
 
-    const [shifts, setShifts] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showShiftForm, setShowShiftForm] = useState(false);
     const [selectedShift, setSelectedShift] = useState(null);
     const [activeView, setActiveView] = useState('shifts'); // 'shifts' or 'matrix'
 
+    const { positionShifts, shiftsLoading } = useSelector(state => state.workplace);
+    const shifts = positionShifts[position?.pos_id] || [];
+
     useEffect(() => {
-        if (position) {
-            fetchShifts();
+        if (position?.pos_id) {
+            dispatch(fetchPositionShifts({ positionId: position.pos_id }));
         }
-    }, [position]);
+    }, [dispatch, position?.pos_id]);
 
-    const fetchShifts = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await api.get(`/api/positions/${position.pos_id}/shifts`, {
-                params: {includeRequirements: true}
-            });
-
-            setShifts(Array.isArray(response) ? response : []);
-        } catch (err) {
-            setError(err.message || 'Failed to load shifts');
-            setShifts([]);
-        } finally {
-            setLoading(false);
-        }
+    const handleMatrixUpdate = () => {
+        dispatch(fetchPositionShifts({ positionId: position.pos_id, forceRefresh: true }));
     };
 
     const handleAddShift = () => {
@@ -64,10 +51,20 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
         if (!window.confirm(t('workplace.shifts.deleteConfirm'))) return;
 
         try {
-            await api.delete(`/api/positions/shifts/${shiftId}`);
-            await fetchShifts();
+            await dispatch(deletePositionShift(shiftId)).unwrap();
+            dispatch(addNotification({
+                variant: 'success',
+                message: t('workplace.shifts.deleteSuccess'),
+                duration: 3000
+            }));
+            // Refresh shifts
+            dispatch(fetchPositionShifts({ positionId: position.pos_id, forceRefresh: true }));
         } catch (err) {
-            setError(err.message || 'Failed to delete shift');
+            dispatch(addNotification({
+                variant: 'error',
+                message: err.message || t('workplace.shifts.deleteFailed'),
+                duration: 5000
+            }));
         }
     };
 
@@ -79,7 +76,8 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
     const handleShiftFormSuccess = () => {
         setShowShiftForm(false);
         setSelectedShift(null);
-        fetchShifts();
+        // Refresh shifts after save
+        dispatch(fetchPositionShifts({ positionId: position.pos_id, forceRefresh: true }));
     };
 
     const formatTime = (time) => {
@@ -214,7 +212,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                     <ShiftRequirementsMatrix
                         positionId={position.pos_id}
                         shifts={shifts}
-                        onUpdate={fetchShifts}
+                        onUpdate={handleMatrixUpdate}
                         renderActions={({isChanged, isSaving, handleSave, handleReset}) => (
                             <div className={`card-actions-toolbar ${isChanged ? 'visible' : ''}`}>
                                 <Button

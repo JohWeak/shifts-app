@@ -101,8 +101,19 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
     const calculateDuration = () => {
         if (!formData.start_time || !formData.end_time) return '';
 
-        const [startHour, startMin] = formData.start_time.split(':').map(Number);
-        const [endHour, endMin] = formData.end_time.split(':').map(Number);
+        // Преобразуем в строку и проверяем формат
+        const startStr = String(formData.start_time);
+        const endStr = String(formData.end_time);
+
+        if (!startStr.includes(':') || !endStr.includes(':')) return '';
+
+        const [startHour, startMin] = startStr.split(':').map(Number);
+        const [endHour, endMin] = endStr.split(':').map(Number);
+
+        // Проверяем на NaN
+        if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
+            return '';
+        }
 
         let duration;
         if (endHour >= startHour) {

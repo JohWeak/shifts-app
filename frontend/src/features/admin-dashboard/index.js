@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import MetricCard from './components/MetricCard/MetricCard';
+import MetricCard from './components/MetricCard';
 import { fetchEmployees } from 'features/admin-employee-management/model/employeeSlice';
 import { fetchSchedules } from 'features/admin-schedule-management/model/scheduleSlice';
 import { fetchWorkSites, fetchPositions } from 'features/admin-workplace-settings/model/workplaceSlice';
