@@ -65,7 +65,6 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
 
     useEffect(() => {
         if (localMatrix && reduxMatrix) {
-            // Способ сравнить вложенные объекты
             setIsChanged(!isEqual(localMatrix, reduxMatrix));
         } else {
             setIsChanged(false);
@@ -166,6 +165,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
             console.error('Failed to save changes:', err);
         } finally {
             setIsSaving(false);
+            setIsChanged(false);
         }
     };
 
@@ -226,7 +226,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                 <Button
                     variant="link"
                     size="sm"
-                    onClick={() => dispatch(fetchRequirementsMatrix(positionId))}
+                    onClick={onUpdate}
                     className="ms-2"
                 >
                     {t('common.retry')}

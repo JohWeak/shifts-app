@@ -14,6 +14,7 @@ import ShiftForm from './components/ShiftForm';
 import ShiftRequirementsMatrix from './components/ShiftRequirementsMatrix';
 import { getShiftDuration } from 'shared/lib/utils/scheduleUtils';
 import './PositionShiftsExpanded.css';
+import WorkplaceActionButtons from "../../../WorkplaceActionButtons";
 
 const PositionShiftsExpanded = ({position, isClosing}) => {
     const {t} = useI18n();
@@ -67,6 +68,13 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
             }));
         }
     };
+    const handleRestoreShift = async (shiftId) => {
+        dispatch(addNotification({
+            variant: 'error',
+            message: t('workplace.shifts.deleteFailed'),
+            duration: 1000
+        }));
+    }
 
     const handleShiftFormClose = () => {
         setShowShiftForm(false);
@@ -76,7 +84,6 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
     const handleShiftFormSuccess = () => {
         setShowShiftForm(false);
         setSelectedShift(null);
-        // Refresh shifts after save
         dispatch(fetchPositionShifts({ positionId: position.pos_id, forceRefresh: true }));
     };
 
@@ -181,22 +188,13 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                     </OverlayTrigger>
                                 </td>
                                 <td>
-                                    <div className="d-flex justify-content-end gap-2">
-                                        <Button
-                                            variant="outline-primary"
-                                            size="sm"
-                                            onClick={() => handleEditShift(shift)}
-                                        >
-                                            <i className="bi bi-pencil"></i>
-                                        </Button>
-                                        <Button
-                                            variant="outline-danger"
-                                            size="sm"
-                                            onClick={() => handleDeleteShift(shift.id)}
-                                        >
-                                            <i className="bi bi-trash"></i>
-                                        </Button>
-                                    </div>
+                                        <WorkplaceActionButtons
+                                            item={shift}
+                                            onEdit={() => handleEditShift(shift)}
+                                            onDelete={() => handleDeleteShift(shift.id)}
+                                            onRestore={handleRestoreShift}
+                                        />
+
                                 </td>
                             </tr>
                         ))}

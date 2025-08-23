@@ -16,3 +16,7 @@
     border-color: var(--bs-primary);
     box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
 }
+
+[data-radix-popper-content-wrapper] {
+    z-index: 1060 !important;
+}

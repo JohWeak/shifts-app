@@ -9,9 +9,12 @@ import {
     Alert,
     InputGroup
 } from 'react-bootstrap';
+import { TimePicker } from 'react-accessible-time-picker';
 import { useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { createPositionShift, updatePositionShift } from '../../../../../../model/workplaceSlice';
+import { getShiftDuration, isNightShift } from 'shared/lib/utils/scheduleUtils';
+
 import './ShiftForm.css';
 
 const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
@@ -25,7 +28,6 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
         color: '#6c757d',
         sort_order: 0
     });
-
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
@@ -97,6 +99,35 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
             setErrors(prev => ({ ...prev, [field]: null }));
         }
     };
+    const handleTimeChange = (field, newValue) => {
+        console.log(`[handleTimeChange] Поле: ${field}, Полученное значение:`, newValue, `, Тип: ${typeof newValue}`);
+        // ------------------------------------
+
+        if (typeof newValue !== 'object' || !newValue) {
+            if (newValue === '') {
+                handleChange(field, '');
+            }
+            return;
+        }
+
+        const currentTime = formData[field] || '00:00';
+        const [currentHour, currentMinute] = currentTime.split(':');
+
+        const newHour = newValue.hour || currentHour;
+        const newMinute = newValue.minute || currentMinute;
+
+        const formattedTime = `${String(newHour).padStart(2, '0')}:${String(newMinute).padStart(2, '0')}`;
+
+        handleChange(field, formattedTime);
+    };
+
+    const timeStringToObject = (timeString) => {
+        if (!timeString || typeof timeString !== 'string' || !timeString.includes(':')) {
+            return { hour: '', minute: '' };
+        }
+        const [hour, minute] = timeString.split(':');
+        return { hour, minute };
+    };
 
     const calculateDuration = () => {
         if (!formData.start_time || !formData.end_time) return '';
@@ -132,8 +163,8 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
 
     const suggestShiftName = () => {
         if (!formData.start_time) return;
-
-        const hour = parseInt(formData.start_time.split(':')[0]);
+        const startStr = String(formData.start_time);
+        const hour = parseInt(startStr.split(':')[0]);
         let suggestion = '';
 
         if (hour >= 5 && hour < 12) {
@@ -168,7 +199,6 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                     shiftData: formData
                 })).unwrap();
             }
-
             onSuccess();
         } catch (error) {
             setErrors({
@@ -184,6 +214,7 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
             show={show}
             onHide={onHide}
             size="lg"
+            enforceFocus={false}
             className="workplace-modal"
         >
             <Modal.Header closeButton>
@@ -216,10 +247,11 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                                         placeholder={t('workplace.shifts.namePlaceholder')}
                                     />
                                     <Button
-                                        variant="outline-secondary"
+                                        variant="warning"
                                         onClick={suggestShiftName}
                                         disabled={!formData.start_time}
                                         title={t('workplace.shifts.suggestName')}
+                                        className="rounded-1"
                                     >
                                         <i className="bi bi-lightbulb"></i>
                                     </Button>
@@ -249,37 +281,36 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                     <Row>
                         <Col md={4}>
                             <Form.Group className="mb-3">
-                                <Form.Label>
-                                    {t('workplace.shifts.startTime')}
-                                    <span className="text-danger">*</span>
-                                </Form.Label>
-                                <Form.Control
-                                    type="time"
-                                    value={formData.start_time}
-                                    onChange={(e) => handleChange('start_time', e.target.value)}
-                                    isInvalid={!!errors.start_time}
-                                />
-                                <Form.Control.Feedback type="invalid">
-                                    {errors.start_time}
-                                </Form.Control.Feedback>
+                                    <TimePicker
+                                        label={t('workplace.shifts.startTime')}
+                                        value={timeStringToObject(formData.start_time)}
+                                        onChange={(time) => handleTimeChange('start_time', time)}
+                                        className={errors.start_time ? 'is-invalid' : ''}
+                                        is24Hour={true}
+                                    />
+
+                                {errors.start_time && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.start_time}
+                                    </div>
+                                )}
                             </Form.Group>
                         </Col>
 
                         <Col md={4}>
                             <Form.Group className="mb-3">
-                                <Form.Label>
-                                    {t('workplace.shifts.endTime')}
-                                    <span className="text-danger">*</span>
-                                </Form.Label>
-                                <Form.Control
-                                    type="time"
-                                    value={formData.end_time}
-                                    onChange={(e) => handleChange('end_time', e.target.value)}
-                                    isInvalid={!!errors.end_time}
+                                <TimePicker
+                                    label={t('workplace.shifts.endTime')}
+                                    value={timeStringToObject(formData.end_time)}
+                                    onChange={(time) => handleTimeChange('end_time', time)}
+                                    className={errors.end_time ? 'is-invalid' : ''}
+                                    is24Hour={true}
                                 />
-                                <Form.Control.Feedback type="invalid">
-                                    {errors.end_time}
-                                </Form.Control.Feedback>
+                                {errors.end_time && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.end_time}
+                                    </div>
+                                )}
                             </Form.Group>
                         </Col>
 
@@ -290,7 +321,6 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                                     type="text"
                                     value={calculateDuration()}
                                     readOnly
-                                    className="bg-light"
                                 />
                             </Form.Group>
                         </Col>
@@ -323,15 +353,15 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                         </Form.Text>
                     </Form.Group>
 
-                    {formData.start_time && formData.end_time && (
-                        <Alert variant="info">
-                            <i className="bi bi-info-circle me-2"></i>
-                            {parseInt(formData.end_time) < parseInt(formData.start_time)
-                                ? t('workplace.shifts.overnightShiftNotice')
-                                : t('workplace.shifts.regularShiftNotice')
-                            }
-                        </Alert>
-                    )}
+                    {/*{formData.start_time && formData.end_time && (*/}
+                    {/*    <Alert variant="info">*/}
+                    {/*        <i className="bi bi-info-circle me-2"></i>*/}
+                    {/*        {parseInt(formData.end_time) < parseInt(formData.start_time)*/}
+                    {/*            ? t('workplace.shifts.overnightShiftNotice')*/}
+                    {/*            : t('workplace.shifts.regularShiftNotice')*/}
+                    {/*        }*/}
+                    {/*    </Alert>*/}
+                    {/*)}*/}
                 </Modal.Body>
 
                 <Modal.Footer>
