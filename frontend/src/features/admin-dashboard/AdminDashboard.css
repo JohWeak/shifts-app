@@ -51,6 +51,7 @@
     transition: all 0.3s ease;
 }
 .admin-dashboard .action-card {
+    border-inline-start: 3px solid var(--bs-primary);
 }
 
 .admin-dashboard .action-card .card-header,

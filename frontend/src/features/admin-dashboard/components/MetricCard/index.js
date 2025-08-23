@@ -1,4 +1,4 @@
-// frontend/src/features/admin-dashboard/components/MetricCard/MetricCard.js
+// frontend/src/features/admin-dashboard/components/MetricCard/index.js
 import React from 'react';
 import {Card} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
