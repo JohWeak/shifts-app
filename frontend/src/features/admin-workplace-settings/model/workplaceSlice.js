@@ -598,17 +598,8 @@ const workplaceSlice = createSlice({
             // Create shift
             .addCase(createPositionShift.fulfilled, (state, action) => {
                 state.shiftOperationStatus = 'success';
-                const { positionId, shift } = action.payload;
-
-                // Обновляем локальный список если он загружен
-                if (state.positionShifts[positionId]) {
-                    state.positionShifts[positionId].push(shift);
-                }
-
-                // Очищаем кэш для этой позиции
-                if (state.cache.positionShifts[positionId]) {
-                    state.cache.positionShifts[positionId] = null;
-                }
+                const { positionId } = action.payload;
+                clearCacheEntry(state.cache.positionShifts, positionId);
             })
             .addCase(createPositionShift.rejected, (state, action) => {
                 state.error = action.payload;
