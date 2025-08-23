@@ -14,18 +14,14 @@ const ShiftDetailsPanel = ({shift, selectedDate, getShiftColor}) => {
     return (
         <Card className="shift-details-panel">
             <Card.Header
-                // Стиль применяется только если есть shiftColor
                 style={shiftColor ? {
                     backgroundColor: shiftColor,
                     color: getContrastTextColor(shiftColor)
                 } : {}}
-                // Динамически добавляем класс для выравнивания
                 className={`shift-details-header d-flex align-items-center ${shift ? 'justify-content-between' : ''}`}
             >
-                {/* --- Левый блок (всегда видимый контейнер) --- */}
                 <div className="d-flex align-items-center gap-2">
                     <Clock size={20} className="detail-icon opacity-50 "/>
-                    {/* Дополнительная информация появляется только при наличии смены */}
                     {shift ? (
                         <div className="detail-item">
                             <span className="detail-label">{formatShiftTime(shift.start_time, shift.end_time)}</span>
@@ -39,7 +35,6 @@ const ShiftDetailsPanel = ({shift, selectedDate, getShiftColor}) => {
                     )}
                 </div>
 
-                {/* --- Правый блок (появляется только при наличии смены) --- */}
                 {shift && (
                     <div className="detail-item">
                         <span>{shift.duration_hours} {t('common.hours')}</span>
@@ -69,8 +64,6 @@ const ShiftDetailsPanel = ({shift, selectedDate, getShiftColor}) => {
                             </div>
                         )}
                     </div>
-
-
                 )}
 
             </Card.Body>

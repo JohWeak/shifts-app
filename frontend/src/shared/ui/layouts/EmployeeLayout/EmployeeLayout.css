@@ -18,7 +18,9 @@
 .app-name i.bi-calendar-check{
     font-size: 1rem;
 }
-
+.employee-navbar .theme-toggle-icon .bi-moon-stars{
+    color: white;
+}
 /* User Menu */
 .employee-navbar .user-menu-toggle, .app-name {
     background: rgba(255, 255, 255, 0.1);

@@ -464,12 +464,14 @@ export const getShiftForDate = (date, shifts) => {
 };
 
 /**
- * Форматирует месяц и год
- * @param {Date} date - Дата
- * @returns {string} - Отформатированный месяц и год
+ * Formats the month and year
+ * @param {Date} date - Date object
+ * @param {string} currentLocale - Current locale code ('en', 'he', 'ru')
+ * @returns {string} - Formatted month and year
  */
-export const formatMonthYear = (date) => {
-    return format(date, 'MMMM yyyy');
+export const formatMonthYear = (date, currentLocale) => {
+    const locale = dateFnsLocales[currentLocale] || enUS;
+    return format(date, 'MMMM yyyy', {locale});
 };
 
 /**
@@ -551,7 +553,7 @@ export const isToday = (date) => {
  */
 export const isSameDate = (dateLeft, dateRight) => {
     if (!dateLeft || !dateRight) return false;
-    // Используем isSameDay из date-fns для надежного сравнения
+    
     return isSameDay(dateLeft, dateRight);
 };
 
@@ -683,7 +685,7 @@ export const getCurrentWeekStart = () => {
 
 export const classifySchedules = (schedules) => {
     const today = new Date();
-    const currentWeekStart = startOfWeek(today, { weekStartsOn: 0 }); // Sunday
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 0 });
     const currentWeekEnd = endOfWeek(today, { weekStartsOn: 0 });
 
     const active = [];
@@ -702,7 +704,7 @@ export const classifySchedules = (schedules) => {
         }
 
         // Check if schedule is active (ends after today)
-        if (isAfter(endDate, today)) {
+        if (isAfter(endDate, today) || isSameDay(endDate, today)) {
             active.push(schedule);
         } else {
             inactive.push(schedule);

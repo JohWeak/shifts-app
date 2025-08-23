@@ -3,10 +3,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { scheduleAPI, constraintAPI } from 'shared/api/apiService';
 import { addNotification } from 'app/model/notificationsSlice';
 import { parseISO, addWeeks, format } from 'date-fns';
-
+import { CACHE_DURATION } from "../../../shared/lib/cache/cacheUtils";
 // Cache duration in milliseconds
-const CACHE_DURATION_SHORT = 10 * 60 * 1000; // 10 минут
-const CACHE_DURATION_LONG = 30 * 60 * 1000; // 30 минут
+const CACHE_DURATION_SHORT = CACHE_DURATION.SHORT;
+const CACHE_DURATION_LONG = CACHE_DURATION.LONG;
 
 
 // Helper to check cache validity

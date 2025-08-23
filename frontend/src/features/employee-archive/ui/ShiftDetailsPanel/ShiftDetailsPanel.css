@@ -1,6 +1,6 @@
 /* frontend/src/features/employee-archive/ui/ShiftDetailsPanel/ShiftDetailsPanel.css */
 .shift-details-panel {
-    margin-bottom: 58px;
+    /*margin-bottom: 58px;*/
     border-radius: var(--radius-lg)!important;
     box-shadow: var(--shadow-lg);
     border-color: var(--bs-gray-300)!important;
@@ -32,7 +32,7 @@
     opacity: 0.8;
 }
 .shift-details-header .no-shift{
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .detail-icon {
@@ -43,7 +43,7 @@
 }
 
 .detail-label {
-    font-weight: 600;
+    font-weight: 500;
 }
 
 @media (max-width: 576px) {

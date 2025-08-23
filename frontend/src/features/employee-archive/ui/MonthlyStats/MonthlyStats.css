@@ -1,6 +1,6 @@
 /* frontend/src/features/employee-archive/ui/MonthlyStats/MonthlyStats.css */
 .monthly-stats .card-body {
-    padding: 0;
+    padding: 0.5rem;
 }
 [data-theme="dark"] .monthly-stats.card{
     border-color: var(--bs-gray-900)!important;
@@ -35,10 +35,13 @@
 
 @media (max-width: 768px) {
     .stat-value {
-        font-size: 1rem;
+        font-size: 1.25rem;
     }
 
     .stat-label {
         font-size: 0.75rem;
+    }
+    .monthly-stats .card-body {
+        padding: 0;
     }
 }

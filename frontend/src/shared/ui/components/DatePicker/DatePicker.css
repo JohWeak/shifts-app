@@ -40,10 +40,7 @@
 /* ==========================================================
     ЧАСТЬ 3: СТИЛИ ДЛЯ DAYPICKER (внутри Popover)
    ========================================================== */
-/*
-   Теперь все селекторы для DayPicker тоже будут начинаться с .custom-day-picker-wrapper,
-   чтобы гарантировать их применение.
-*/
+
 .rdp-root{
     justify-self: center !important;
     padding: 0.5rem;
@@ -55,7 +52,7 @@
     color: var(--bs-body-color) !important;
 }
 
-/* Отключаем анимацию */
+
 .custom-day-picker-wrapper .rdp-month,
 .custom-day-picker-wrapper .rdp-table {
     transition: none !important;
@@ -148,7 +145,6 @@
 .custom-day-picker-wrapper .rdp-button_next svg {
     width: 16px !important;
     height: 16px !important;
-    /* ИСПОЛЬЗУЕМ FILL ВМЕСТО COLOR */
     fill: var(--bs-body-color) !important;
 }
 
@@ -194,27 +190,23 @@
     ЧАСТЬ 4: СТИЛИ ДЛЯ ВЫДЕЛЕНИЯ НЕДЕЛИ (ВЕРСИЯ "КАПСУЛА")
    ======================================================================== */
 
-/* --- 1. СТИЛЬ ДЛЯ НАВЕДЕНИЯ (hover) --- */
-/* При наведении вся неделя становится светло-синей "капсулой" */
-
 .custom-day-picker-wrapper .rdp-day_modifier--hovered_week .rdp-day_button {
     background-color: var(--bs-primary-bg-subtle) !important;
     color: var(--bs-gray-900) !important;
 }
 
 
-/* --- 2. СТИЛЬ ДЛЯ ВЫБРАННОЙ НЕДЕЛИ (selected) --- */
-/* Дни МЕЖДУ началом и концом недели имеют светло-синий фон */
 
 .custom-day-picker-wrapper .rdp-day_modifier--selected_week .rdp-day_button {
     background-color: var(--bs-primary-bg-subtle) !important;
-    /*border-radius: 0 !important; !* Убираем скругление у серединки *!*/
     color: var(--bs-gray-900) !important;
 }
+.custom-day-picker-wrapper .rdp-day_today .rdp-day_button {
+    font-weight: 700 !important;
+    color: var(--bs-primary)!important;
+    border: 1px solid var(--bs-primary) !important;
+}
 
-
-/* --- 3. АКЦЕНТЫ НА НАЧАЛО И КОНЕЦ ВЫБРАННОЙ НЕДЕЛИ --- */
-/* Начало и конец выбранной недели - ЯРКО-СИНИЕ КРУГИ */
 
 .custom-day-picker-wrapper .rdp-day_modifier--selected_week_start .rdp-day_button,
 .custom-day-picker-wrapper .rdp-day_modifier--selected_week_end .rdp-day_button {
@@ -224,10 +216,5 @@
 }
 
 
-/* --- 4. СТИЛЬ ДЛЯ СЕГОДНЯШНЕГО ДНЯ (today) --- */
-.custom-day-picker-wrapper .rdp-day_today .rdp-day_button {
-    font-weight: 700 !important;
-    color: var(--bs-primary) !important;
-    border: 1px solid var(--bs-primary) !important;
-}
+
 

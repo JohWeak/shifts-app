@@ -17,11 +17,12 @@ import {
     fetchSchedules,
     fetchScheduleDetails,
     setSelectedScheduleId,
-    fetchWorkSites,
     addPendingChange,
-    preloadScheduleDetails
+    preloadScheduleDetails, fetchWorkSites
 } from './model/scheduleSlice';
+
 import './index.css';
+import {fetchPositions} from "../admin-workplace-settings/model/workplaceSlice";
 
 const ScheduleManagement = () => {
     const { t, direction } = useI18n();
@@ -48,6 +49,8 @@ const ScheduleManagement = () => {
 
     useEffect(() => {
         dispatch(fetchSchedules());
+        dispatch(fetchWorkSites())
+        dispatch(fetchPositions())
     }, [dispatch]);
 
     useEffect(() => {

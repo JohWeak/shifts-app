@@ -25,7 +25,7 @@ const CalendarView = ({
                           availableMonths,
                           getShiftColor
                       }) => {
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
 
     const handlePreviousMonth = () => {
         const newMonth = new Date(selectedMonth);
@@ -45,7 +45,7 @@ const CalendarView = ({
         return (
             <Dropdown>
                 <Dropdown.Toggle variant="link" className="month-selector">
-                    {formatMonthYear(selectedMonth)}
+                    {formatMonthYear(selectedMonth, locale)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="month-dropdown-menu">
                     {availableMonths.map(monthStr => {

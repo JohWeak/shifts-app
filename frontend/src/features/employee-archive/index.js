@@ -10,8 +10,7 @@ import MonthlyStats from './ui/MonthlyStats/MonthlyStats';
 import ShiftDetailsPanel from './ui/ShiftDetailsPanel/ShiftDetailsPanel';
 import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
-import { fetchEmployeeArchiveMonth } from 'features/employee-dashboard/model/employeeDataSlice';
-import { scheduleAPI } from 'shared/api/apiService';
+import { fetchEmployeeArchiveMonth, fetchEmployeeArchiveSummary } from 'features/employee-dashboard/model/employeeDataSlice';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './index.css';
 
@@ -39,6 +38,9 @@ const EmployeeArchive = () => {
     const { getShiftColor } = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 768px)');
 
+    useEffect(() => {
+        fetchEmployeeArchiveSummary();
+    }, [dispatch]);
 
     // Загружаем данные для выбранного месяца
     useEffect(() => {

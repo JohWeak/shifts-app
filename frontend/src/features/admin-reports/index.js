@@ -1,3 +1,5 @@
+//frontend/src/features/admin-reports/index.js
+
 import React, {useState, useEffect, useMemo} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {format, subMonths} from 'date-fns';
@@ -17,11 +19,9 @@ import {worksiteAPI} from 'shared/api/apiService';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
+import { fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
 import {formatScheduleDate, formatWeekRange} from "../../shared/lib/utils/scheduleUtils";
 import './index.css';
-import {fetchEmployees} from "../admin-employee-management/model/employeeSlice";
-import {fetchSchedules} from "../admin-schedule-management/model/scheduleSlice";
 
 
 
@@ -46,7 +46,12 @@ const Reports = () => {
         if (sites && sites.length > 0 && !selectedSite) {
             setSelectedSite(sites[0].site_id);
         }
+
     }, [sites, selectedSite]);
+
+    useEffect(() => {
+        void handleFetchStats();
+    }, [sites, selectedSite, dateRange]);
 
     const handleFetchStats = async () => {
         if (!selectedSite) return;
