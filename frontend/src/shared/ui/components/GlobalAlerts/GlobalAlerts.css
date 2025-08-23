@@ -211,7 +211,7 @@
 /* Mobile responsiveness */
 @media (max-width: 480px) {
     .global-alerts-container {
-        bottom: 10px;
+        bottom: var(--app-navbar-height);
         width: calc(100vw - 20px);
     }
 

@@ -40,14 +40,14 @@ import './App.css';
  * Defines routing structure and authentication flow
  */
 const AppInitializer = ({ children }) => {
-    const dispatch = useDispatch();
-    useEffect(() => {
-        Promise.all([
-            dispatch(fetchSystemSettings()),
-            dispatch(fetchWorkSites()),
-            dispatch(fetchPositions())
-        ]);
-    }, [dispatch]);
+    // const dispatch = useDispatch();
+    // useEffect(() => {
+    //     Promise.all([
+    //         dispatch(fetchSystemSettings()),
+    //         dispatch(fetchWorkSites()),
+    //         dispatch(fetchPositions())
+    //     ]);
+    // }, [dispatch]);
     return children;
 };
 
@@ -58,7 +58,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute allowedRole="employee"><EmployeeLayout /></ProtectedRoute>,
         children: [
             { index: true, element: <Navigate to="/employee/dashboard" replace /> },
-            { path: "dashboard", element: <EmployeeDashboard /> }, // <-- ДОБАВЛЕННАЯ СТРОКА
+            { path: "dashboard", element: <EmployeeDashboard /> },
             { path: "schedule", element: <EmployeeSchedule /> },
             { path: "constraints", element: <EmployeeConstraints /> },
             { path: "requests", element: <EmployeeRequests /> },
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
             { path: "reports", element: <Reports /> },
             { path: "permanent-requests", element:<AdminPermanentRequests /> },
 
-            { path: "my-employee-profile", element: <EmployeeLayout /> }, // Админ как работник
+            { path: "my-employee-profile", element: <EmployeeLayout /> },
 
         ],
     },

@@ -11,14 +11,14 @@ const app = express();
 app.set('db', db);
 
 // Middleware
-// --- НАСТРОЙКА CORS ДЛЯ ЛОКАЛЬНОЙ РАЗРАБОТКИ ---
+// --- CORS settings for local development ---
 const allowedOrigins = [
     'http://localhost:3000',
-    `http://172.20.10.2:3000`
+    `http://172.20.10.2:3000`,
+    `http://192.168.1.111:3000`
 ];
 const corsOptions = {
     origin: (origin, callback) => {
-        // Разрешить запросы без origin (например, мобильные приложения или curl)
         if (!origin) return callback(null, true);
 
         if (allowedOrigins.indexOf(origin) === -1) {
@@ -42,7 +42,6 @@ app.get('/', (req, res) => {
     res.json({ message: 'Shifts API is running!' });
 });
 
-// Импортируем маршруты
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/employees', require('./routes/employee.routes'));
 app.use('/api/schedules', require('./routes/schedule.routes'));
@@ -64,10 +63,9 @@ app.use((error, req, res, next) => {
     });
 });
 
-// --- НАСТРОЙКА ДЛЯ ДЕПЛОЯ НА RAILWAY (добавь этот блок) ---
+// --- НАСТРОЙКА ДЛЯ ДЕПЛОЯ НА RAILWAY  ---
 
 // 1. Подавать статические файлы из собранной папки React
-// process.env.NODE_ENV === 'production' гарантирует, что это будет работать только на сервере, а не при локальной разработке
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../../frontend/build')));
 

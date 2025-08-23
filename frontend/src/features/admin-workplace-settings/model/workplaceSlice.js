@@ -350,67 +350,69 @@ const workplaceSlice = createSlice({
         shiftOperationStatus: null,
 
         // Nested data
-        positionShifts: {}, // { [positionId]: shifts[] }
-        requirementsMatrix: {}, // { [positionId]: matrix }
+        positionShifts: {},
+        requirementsMatrix: {},
 
         // Unified cache
         cache: {
-            workSites: null, // { data: [], timestamp: Date.now() }
-            positions: null, // { data: [], timestamp: Date.now() }
-            positionShifts: {}, // { [positionId]: { data: shifts[], timestamp: Date.now() } }
-            requirementsMatrix: {} // { [positionId]: { data: matrix, timestamp: Date.now() } }
+            workSites: null,
+            positions: null,
+            positionShifts: {},
+            requirementsMatrix: {}
         },
 
         // Cache durations
         cacheDurations: {
             workSites: CACHE_DURATION.LONG,
             positions: CACHE_DURATION.LONG,
-            positionShifts: CACHE_DURATION.LONG,
-            requirementsMatrix: CACHE_DURATION.LONG
-        },
-        reducers: {
-            clearOperationStatus: (state) => {
-                state.operationStatus = null;
-                state.error = null;
-            },
-            clearPositionOperationStatus: (state) => {
-                state.positionOperationStatus = null;
-                state.error = null;
-            },
-            clearShiftOperationStatus: (state) => {
-                state.shiftOperationStatus = null;
-            },
-            clearCache(state, action) {
-                const { type, key } = action.payload || {};
+            positionShifts: CACHE_DURATION.MEDIUM,
+            requirementsMatrix: CACHE_DURATION.MEDIUM
+        }
+        // НЕ ДОЛЖНО БЫТЬ 'reducers' в initialState!
+    },
+    reducers: {
+        // clearOperationStatus: (state) => {
+        //     state.operationStatus = null;
+        //     state.error = null;
+        // },
+        // clearPositionOperationStatus: (state) => {
+        //     state.positionOperationStatus = null;
+        //     state.error = null;
+        // },
+        // clearShiftOperationStatus: (state) => {
+        //     state.shiftOperationStatus = null;
+        // },
+        clearCache(state, action) {
+            const {type, key} = action.payload || {};
 
-                if (type === 'workSites') {
-                    state.cache.workSites = null;
-                } else if (type === 'positions') {
-                    state.cache.positions = null;
-                } else if (type === 'positionShifts') {
-                    if (key) {
-                        clearCacheEntry(state.cache.positionShifts, key);
-                    } else {
-                        state.cache.positionShifts = {};
-                    }
-                } else if (type === 'requirementsMatrix') {
-                    if (key) {
-                        clearCacheEntry(state.cache.requirementsMatrix, key);
-                    } else {
-                        state.cache.requirementsMatrix = {};
-                    }
+            if (type === 'workSites') {
+                state.cache.workSites = null;
+            } else if (type === 'positions') {
+                state.cache.positions = null;
+            } else if (type === 'positionShifts') {
+                if (key) {
+                    clearCacheEntry(state.cache.positionShifts, key);
                 } else {
-                    // Clear all
-                    state.cache = {
-                        workSites: null,
-                        positions: null,
-                        positionShifts: {},
-                        requirementsMatrix: {}
-                    };
+                    state.cache.positionShifts = {};
                 }
+            } else if (type === 'requirementsMatrix') {
+                if (key) {
+                    clearCacheEntry(state.cache.requirementsMatrix, key);
+                } else {
+                    state.cache.requirementsMatrix = {};
+                }
+            } else {
+                // Clear all
+                state.cache = {
+                    workSites: null,
+                    positions: null,
+                    positionShifts: {},
+                    requirementsMatrix: {}
+                };
             }
         }
     },
+
     extraReducers: (builder) => {
         // Fetch work sites
         builder

@@ -2,20 +2,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI } from 'shared/api/apiService';
 
-// --- Асинхронные экшены (Thunks) ---
+// --- (Thunks) ---
 export const login = createAsyncThunk(
     'auth/login',
     async ({ login: identifier, password }, { rejectWithValue }) => {
 
         try {
-            // Вызываем метод из нашего нового, чистого API
+
             const userData = await authAPI.loginUser({
                 login: identifier,
                 password,
             });
 
-            // userData - это уже ответ от сервера (например, { token, user: { id, name, role } })
-            // Сохраняем в localStorage
+            // userData -  { token, user: { id, name, role } })
             localStorage.setItem('token', userData.token);
             const user = {
                 id: userData.id,
@@ -34,24 +33,20 @@ export const login = createAsyncThunk(
     }
 );
 
-// --- Слайс (Slice) ---
-// Безопасно получаем и парсим данные пользователя
+// --- (Slice) ---
 const storedUserJSON = localStorage.getItem('user');
 let initialUser = null;
 try {
-    // Парсим, только если что-то есть
     if (storedUserJSON) {
         initialUser = JSON.parse(storedUserJSON);
     }
 } catch (error) {
     console.error("Failed to parse user from localStorage:", error);
-    // Если в localStorage поврежденный JSON, считаем, что пользователя нет
     initialUser = null;
 }
 
 const initialToken = localStorage.getItem('token');
 
-// Начальное состояние, которое 100% безопасное
 const initialState = {
     user: initialUser,
     token: initialToken,
@@ -64,7 +59,6 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        // Синхронный экшен для выхода
         logout(state) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -86,7 +80,6 @@ const authSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = 'succeeded';
                 state.isAuthenticated = true;
-                // action.payload теперь содержит весь объект, который вернул thunk
                 state.user = action.payload.user;
                 state.token = action.payload.token;
             })

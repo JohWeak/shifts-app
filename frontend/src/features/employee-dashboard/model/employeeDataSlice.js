@@ -162,14 +162,14 @@ export const checkScheduleUpdates = createAsyncThunk(
             if (newVersion && oldVersion && newVersion !== oldVersion) {
                 dispatch(addNotification({
                     id: 'schedule-update-notification',
-                    message: 'schedule.hasUpdates', // Ключ для перевода
+                    message: 'schedule.hasUpdates',
                     variant: 'info',
                     action: {
-                        label: 'common.refresh', // Ключ для перевода
-                        // Принудительно перезагружаем оба вида расписаний
+                        label: 'common.refresh',
+
                         handler: () => {
                             dispatch(fetchPersonalSchedule({ forceRefresh: true }));
-                            // Если у пользователя есть должность, обновляем и полное расписание
+
                             if (currentScheduleData?.employee?.position_id) {
                                 dispatch(fetchPositionSchedule({
                                     positionId: currentScheduleData.employee.position_id,
@@ -178,7 +178,7 @@ export const checkScheduleUpdates = createAsyncThunk(
                             }
                         }
                     },
-                    persistent: true // Уведомление не будет исчезать само
+                    persistent: true
                 }));
 
                 return { hasUpdates: true };
@@ -270,10 +270,10 @@ const employeeDataSlice = createSlice({
             })
             .addCase(fetchEmployeeSchedule.fulfilled, (state, action) => {
                 state.scheduleLoading = false;
-                // КЕШ: 6. Обновляем состояние, только если данные пришли не из кеша
+
                 if (!action.payload.fromCache) {
                     state.schedule = action.payload.data;
-                    state.scheduleLastFetched = Date.now(); // Обновляем временную метку
+                    state.scheduleLastFetched = Date.now();
                 }
                 state.hasUpdates = false;
             })

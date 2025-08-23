@@ -1,9 +1,19 @@
 /* frontend/src/features/employee-archive/ui/ShiftDetailsPanel/ShiftDetailsPanel.css */
 .shift-details-panel {
     margin-bottom: 58px;
+    border-radius: var(--radius-lg)!important;
+    box-shadow: var(--shadow-lg);
+    border-color: var(--bs-gray-300)!important;
+
+}
+
+[data-theme="dark"] .shift-details-panel {
+    border-color: var(--bs-gray-900)!important;
+
 }
 .no-shift-details-panel .card-body{
     padding: 0.25rem;
+    border-radius: var(--radius-lg)!important;
 
 }
 .detail-item {
@@ -12,6 +22,10 @@
     gap: 0.25rem;
     margin-bottom: 0.25rem;
 
+}
+.shift-details-header{
+    border-top-left-radius: var(--radius-lg)!important;
+    border-top-right-radius: var(--radius-lg)!important;
 }
 .shift-details-header .detail-item{
     margin-bottom: 0;

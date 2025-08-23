@@ -3,13 +3,14 @@
     padding: 0;
 }
 [data-theme="dark"] .monthly-stats.card{
-    border-color: var(--bs-gray-800)!important;
+    border-color: var(--bs-gray-900)!important;
 }
 .monthly-stats {
+    border-radius: var(--radius-lg)!important;
     border-bottom-left-radius: 0!important;
     border-bottom-right-radius: 0!important;
-    /*border-bottom: none!important;*/
     border-color: var(--bs-gray-300)!important;
+    box-shadow: var(--shadow-lg);
 }
 .stat-item {
     text-align: center;

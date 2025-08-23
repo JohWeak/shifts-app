@@ -36,7 +36,7 @@ const EmployeeDashboard = () => {
     // Эффект для расчета статистики, когда данные (расписание или ограничения) обновляются
     useEffect(() => {
 
-            setDashboardStats(calculateDashboardStats(personalSchedule.current, constraints));
+            setDashboardStats(calculateDashboardStats(personalSchedule?.current, constraints));
 
     }, [personalSchedule, constraints, setDashboardStats]);
 
