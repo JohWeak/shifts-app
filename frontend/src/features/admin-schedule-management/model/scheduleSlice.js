@@ -446,7 +446,7 @@ const scheduleSlice = createSlice({
                 });
             }
         },
-        // сброс при выходе из детального просмотра
+
         resetScheduleView(state) {
             state.selectedScheduleId = null;
             state.scheduleDetails = null;

@@ -18,11 +18,10 @@ import {
     fetchScheduleDetails,
     setSelectedScheduleId,
     addPendingChange,
-    preloadScheduleDetails, fetchWorkSites
+    preloadScheduleDetails,
 } from './model/scheduleSlice';
 
 import './index.css';
-import {fetchPositions} from "../admin-workplace-settings/model/workplaceSlice";
 
 const ScheduleManagement = () => {
     const { t, direction } = useI18n();
@@ -75,13 +74,33 @@ const ScheduleManagement = () => {
 
         if (selectedCell.employeeIdToReplace) {
             const removeKey = `remove-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${selectedCell.employeeIdToReplace}`;
-            dispatch(addPendingChange({ key: removeKey, change: { action: 'remove', positionId: selectedCell.positionId, date: selectedCell.date, shiftId: selectedCell.shiftId, empId: selectedCell.employeeIdToReplace, assignmentId: selectedCell.assignmentIdToReplace } }));
+            dispatch(addPendingChange({
+                key: removeKey,
+                change: {
+                    action: 'remove',
+                    positionId: selectedCell.positionId,
+                    date: selectedCell.date,
+                    shiftId: selectedCell.shiftId,
+                    empId: selectedCell.employeeIdToReplace,
+                    assignmentId: selectedCell.assignmentIdToReplace
+                }
+            }));
         }
 
         const assignKey = `assign-${selectedCell.positionId}-${selectedCell.date}-${selectedCell.shiftId}-${employee.emp_id}`;
         dispatch(addPendingChange({
             key: assignKey,
-            change: { action: 'assign', positionId: selectedCell.positionId, date: selectedCell.date, shiftId: selectedCell.shiftId, empId: employee.emp_id, empName: `${employee.first_name} ${employee.last_name}`, isCrossPosition, isCrossSite, isFlexible }
+            change: {
+                action: 'assign',
+                positionId: selectedCell.positionId,
+                date: selectedCell.date,
+                shiftId: selectedCell.shiftId,
+                empId: employee.emp_id,
+                empName: `${employee.first_name} ${employee.last_name}`,
+                isCrossPosition,
+                isCrossSite,
+                isFlexible
+            }
         }));
         if (!isLargeScreen) closeAllModals();
     };
