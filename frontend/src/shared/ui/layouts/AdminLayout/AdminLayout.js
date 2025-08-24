@@ -1,7 +1,6 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
 import React, {useState, useEffect, useRef} from 'react';
-import {Outlet, useNavigate, useLocation, Link} from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import {useOutlet, Outlet, useNavigate, useLocation, Link} from 'react-router-dom';
 import {
     Container,
     Navbar,
@@ -10,7 +9,6 @@ import {
     Button,
     Badge
 } from 'react-bootstrap';
-
 import {useDispatch, useSelector} from 'react-redux';
 import {logout} from 'features/auth/model/authSlice';
 import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
@@ -25,6 +23,7 @@ import {
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import './AdminLayout.css';
 import {addNotification} from "../../../../app/model/notificationsSlice";
+import {AnimatePresence, motion} from "motion/react";
 
 const AdminLayout = () => {
     const {t} = useI18n();
@@ -35,6 +34,19 @@ const AdminLayout = () => {
     const {pendingCount} = useSelector(state => state.adminRequests);
     const sidebarRef = useRef(null);
     const expandTimeoutRef = useRef(null);
+
+    const currentOutlet = useOutlet();
+    const [outlet, setOutlet] = useState(currentOutlet);
+    const [prevLocation, setPrevLocation] = useState(location);
+    useEffect(() => {
+        if (location.pathname !== prevLocation.pathname) {
+            setPrevLocation(location);
+            // Небольшая задержка для завершения exit анимации
+            setTimeout(() => {
+                setOutlet(currentOutlet);
+            }, 0);
+        }
+    }, [location, currentOutlet, prevLocation]);
 
     useEffect(() => {
         // Preload current week schedules on app init
@@ -314,12 +326,15 @@ const AdminLayout = () => {
                         <motion.main
                             key={location.pathname}
                             className="admin-main-content"
-                            initial={{ opacity: 0, y: -15 }}
+                            initial={{ opacity: 0.4, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            //exit={{ opacity: 0, y: 15 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            exit={{ opacity: 0, y: 80 }}
+                            transition={{
+                                duration: 0.1,
+                                ease: "easeInOut",
+                            }}
                         >
-                            <Outlet />
+                            {outlet}
                         </motion.main>
                     </AnimatePresence>
                 </div>
