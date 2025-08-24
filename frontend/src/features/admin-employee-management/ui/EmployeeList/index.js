@@ -25,7 +25,7 @@ const EmployeeList = ({
             isInitialMount.current = false;
         }, 0);
 
-        return () => clearTimeout(timer); // Очистка таймера
+        return () => clearTimeout(timer);
 
     }, [pagination.page]);
     const sortingAccessors = useMemo(() => ({
@@ -182,10 +182,9 @@ const EmployeeList = ({
                         <AnimatePresence mode="wait">
                             <motion.tbody
                                 key={pagination.page}
-                                initial={{opacity: 0, x: isInitialMount.current ? -30 : 0}}
-
+                                initial={{opacity: 0, x: isInitialMount.current ? 0 : -30}}
                                 animate={{opacity: 1, x: 0}}
-                                exit={{opacity: 0, x: 30}}
+                                exit={{opacity: 0, x: 160}}
                                 transition={{duration: 0.3, ease: "easeInOut"}}
                             >
                                 {sortedEmployees.map((employee) => (

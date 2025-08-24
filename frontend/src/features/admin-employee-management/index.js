@@ -1,5 +1,5 @@
 // frontend/src/features/admin-employee-management/index.js
-import React, { useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import store from "app/store/store";
@@ -51,6 +51,8 @@ const EmployeeManagement = () => {
         pagination = { page: 1, pageSize: 20, total: 0 }
     } = employeesState || {};
 
+    const isInitialMount = useRef(true);
+
     // Navigation filter processing
     useEffect(() => {
         if (location.state?.filters) {
@@ -77,7 +79,7 @@ const EmployeeManagement = () => {
     // Main employee loading
     useEffect(() => {
         // Creating a timeout for debouncing filter changes
-        const timeoutId = setTimeout(() => {
+        const fetchData = () => {
             dispatch(fetchEmployees({
                 ...filters,
                 page: pagination.page,
@@ -85,9 +87,15 @@ const EmployeeManagement = () => {
                 sortBy: sortConfig.field,
                 sortOrder: sortConfig.order
             }));
-        }, 50);
+        };
 
-        return () => clearTimeout(timeoutId);
+        if (isInitialMount.current) {
+            fetchData();
+            isInitialMount.current = false;
+        } else {
+            const timeoutId = setTimeout(fetchData, 300);
+            return () => clearTimeout(timeoutId);
+        }
     }, [
         dispatch,
         filters.status,
