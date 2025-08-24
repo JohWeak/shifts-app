@@ -1,6 +1,7 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
 import React, {useState, useEffect, useRef} from 'react';
-import {Outlet} from 'react-router-dom';
+import {Outlet, useNavigate, useLocation, Link} from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import {
     Container,
     Navbar,
@@ -9,7 +10,7 @@ import {
     Button,
     Badge
 } from 'react-bootstrap';
-import {useNavigate, useLocation, Link} from 'react-router-dom';
+
 import {useDispatch, useSelector} from 'react-redux';
 import {logout} from 'features/auth/model/authSlice';
 import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
@@ -18,8 +19,8 @@ import {useI18n} from "shared/lib/i18n/i18nProvider";
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import {
-    fetchSchedules, resetScheduleView,
-    setSelectedScheduleId
+    fetchSchedules,
+    resetScheduleView,
 } from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import './AdminLayout.css';
@@ -309,9 +310,18 @@ const AdminLayout = () => {
 
                 {/* Main Content Area */}
                 <div className={`admin-content-area ${isSidebarExpanded ? 'under-sidebar' : ''}`}>
-                    <main className="admin-main-content">
-                        <Outlet/>
-                    </main>
+                    <AnimatePresence mode="wait">
+                        <motion.main
+                            key={location.pathname}
+                            className="admin-main-content"
+                            initial={{ opacity: 0, y: -15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            //exit={{ opacity: 0, y: 15 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                            <Outlet />
+                        </motion.main>
+                    </AnimatePresence>
                 </div>
             </div>
 

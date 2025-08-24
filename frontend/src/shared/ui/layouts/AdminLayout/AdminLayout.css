@@ -77,9 +77,11 @@
 }
 .admin-layout .admin-main-content {
     padding: 1rem;
-    /*max-width: 1400px;*/
-    /*margin-left: auto;*/
-    /*margin-right: auto;*/
+    position: absolute; /* Анимируемый контент будет абсолютным */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .admin-layout .admin-main-content .card {
@@ -302,11 +304,13 @@
 
 /* CONTENT AREA */
 .admin-layout .admin-content-area {
-    flex: 1;
     background-color: var(--bs-gray-100);
-    /*margin-left: 80px;*/
-    transition: none; /* No transition since sidebar overlays */
+    position: relative;
+    flex: 1;
+    display: flex;
+
 }
+
 .admin-layout .admin-content-area.under-sidebar {
     margin-inline-start: var(--app-colapsed-sidebar-width);
 }

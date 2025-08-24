@@ -1,5 +1,5 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/index.js
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Card, Table, Button, Badge, Spinner, Pagination, Form} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {getStatusBadgeVariant} from "shared/lib/utils/scheduleUtils";
@@ -19,8 +19,15 @@ const EmployeeList = ({
                           onPageSizeChange,
                       }) => {
     const {t} = useI18n();
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            isInitialMount.current = false;
+        }, 0);
 
+        return () => clearTimeout(timer); // Очистка таймера
 
+    }, [pagination.page]);
     const sortingAccessors = useMemo(() => ({
         name: (employee) => `${employee.first_name} ${employee.last_name}`,
         workSite: (employee) => employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite'),
@@ -175,7 +182,8 @@ const EmployeeList = ({
                         <AnimatePresence mode="wait">
                             <motion.tbody
                                 key={pagination.page}
-                                initial={{opacity: 0, x: -30}}
+                                initial={{opacity: 0, x: isInitialMount.current ? -30 : 0}}
+
                                 animate={{opacity: 1, x: 0}}
                                 exit={{opacity: 0, x: 30}}
                                 transition={{duration: 0.3, ease: "easeInOut"}}

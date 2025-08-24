@@ -85,10 +85,20 @@ const EmployeeManagement = () => {
                 sortBy: sortConfig.field,
                 sortOrder: sortConfig.order
             }));
-        }, 300);
+        }, 50);
 
         return () => clearTimeout(timeoutId);
-    }, [dispatch, filters, pagination.page, pagination.pageSize, sortConfig]);
+    }, [
+        dispatch,
+        filters.status,
+        filters.position,
+        filters.search,
+        filters.work_site,
+        pagination.page,
+        pagination.pageSize,
+        sortConfig.field,
+        sortConfig.order
+    ]);
 
 
     const handleSort = (field, order) => {
