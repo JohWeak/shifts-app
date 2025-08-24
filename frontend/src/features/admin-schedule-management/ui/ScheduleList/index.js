@@ -21,7 +21,7 @@ const ScheduleList = ({ schedules, onViewDetails, onScheduleDeleted }) => {
     // --- STATE MANAGEMENT ---
     const [openStates, setOpenStates] = useState(() => {
         const saved = localStorage.getItem('schedulesOpenStates');
-        return saved ? JSON.parse(saved) : { active: true, inactive: true };
+        return saved ? JSON.parse(saved) : { active: true, inactive: false };
     });
 
     useEffect(() => {

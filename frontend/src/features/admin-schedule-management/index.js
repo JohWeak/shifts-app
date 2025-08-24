@@ -49,8 +49,8 @@ const ScheduleManagement = () => {
 
     useEffect(() => {
         dispatch(fetchSchedules());
-        dispatch(fetchWorkSites())
-        dispatch(fetchPositions())
+        //dispatch(fetchWorkSites())
+        //dispatch(fetchPositions())
     }, [dispatch]);
 
     useEffect(() => {

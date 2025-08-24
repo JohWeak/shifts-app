@@ -1,6 +1,6 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
 import React, {useState, useEffect, useRef} from 'react';
-import {useOutlet, Outlet, useNavigate, useLocation, Link} from 'react-router-dom';
+import {useOutlet, useNavigate, useLocation, Link} from 'react-router-dom';
 import {
     Container,
     Navbar,
@@ -13,7 +13,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {logout} from 'features/auth/model/authSlice';
 import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
-
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
 import {
@@ -21,9 +20,10 @@ import {
     resetScheduleView,
 } from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
-import './AdminLayout.css';
 import {addNotification} from "../../../../app/model/notificationsSlice";
 import {AnimatePresence, motion} from "motion/react";
+
+import './AdminLayout.css';
 
 const AdminLayout = () => {
     const {t} = useI18n();
@@ -41,10 +41,7 @@ const AdminLayout = () => {
     useEffect(() => {
         if (location.pathname !== prevLocation.pathname) {
             setPrevLocation(location);
-            // Небольшая задержка для завершения exit анимации
-            setTimeout(() => {
-                setOutlet(currentOutlet);
-            }, 0);
+            setOutlet(currentOutlet);
         }
     }, [location, currentOutlet, prevLocation]);
 
@@ -326,9 +323,9 @@ const AdminLayout = () => {
                         <motion.main
                             key={location.pathname}
                             className="admin-main-content"
-                            initial={{ opacity: 0.4, y: -20 }}
+                            initial={{ opacity: 0.4, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 80 }}
+                            exit={{ opacity: 0, y: 10 }}
                             transition={{
                                 duration: 0.1,
                                 ease: "easeInOut",

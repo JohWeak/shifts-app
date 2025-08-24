@@ -53,7 +53,7 @@
     transition: transform 0.3s ease;
 }
 
-/* Поворачиваем иконку, когда блок закрыт */
+
 .schedule-list-header .accordion-icon.closed {
     transform: rotate(-90deg);
 }
