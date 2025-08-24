@@ -20,21 +20,19 @@ const EmployeeList = ({
                       }) => {
     const { t } = useI18n();
 
-    // 1. Создаем объект с функциями-аксессорами
-    //    Оборачиваем в useMemo, чтобы объект не создавался заново на каждый рендер
+
     const sortingAccessors = useMemo(() => ({
         name: (employee) => `${employee.first_name} ${employee.last_name}`,
         workSite: (employee) => employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite'),
         position: (employee) => employee.position_name || employee.defaultPosition?.pos_name || '-',
-        // Для status аксессор не обязателен, т.к. employee.status и так работает, но для единообразия можно добавить
         status: (employee) => employee.status,
-    }), [t]); // t - зависимость, если язык изменится
+    }), [t]);
 
 
     const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
         employees,
-        { field: 'name', order: 'ASC' }, // Начальная сортировка
-        sortingAccessors // 2. Передаем аксессоры в хук
+        { field: 'name', order: 'ASC' },
+        sortingAccessors
     );
 
     const totalPages = Math.ceil(pagination.total / pagination.pageSize);

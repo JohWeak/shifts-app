@@ -2,15 +2,37 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from 'shared/api';
 import { API_ENDPOINTS } from 'shared/config/apiEndpoints';
+import {
+    CACHE_DURATION,
+    isCacheEntryValid,
+    getCacheEntry,
+    setCacheEntry
+} from 'shared/lib/cache/cacheUtils';
 
 // Async thunks
 export const fetchEmployees = createAsyncThunk(
     'employees/fetchAll',
-    async (filters = {}, { rejectWithValue }) => {
+    async (filters = {}, { getState, rejectWithValue }) => {
         try {
+            const state = getState();
+            const { cache, cacheDuration } = state.employees;
+
+            // Generate cache key from filters
+            const cacheKey = JSON.stringify(filters);
+            const cached = getCacheEntry(cache.pages, cacheKey);
+
+            // Check cache validity
+            if (cached && isCacheEntryValid(cached, cacheDuration)) {
+                console.log('[Cache] Using cached employees');
+                return { ...cached.data, fromCache: true };
+            }
+
+            console.log('[Cache] Fetching fresh employees');
             const response = await api.get(API_ENDPOINTS.EMPLOYEES.BASE, { params: filters });
-            console.log('fetchEmployees response:', response); // Для отладки
-            return response; // response уже содержит { success, data, pagination }
+
+            // Store in cache
+            const cacheData = { ...response, cacheKey };
+            return cacheData;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -81,7 +103,12 @@ const initialState = {
         page: 1,
         pageSize: 20,
         total: 0
-    }
+    },
+    // Cache system
+    cache: {
+        pages: {}, // { [cacheKey]: { data: response, timestamp } }
+    },
+    cacheDuration: CACHE_DURATION.SHORT // 5 minutes for employee data
 };
 
 // Slice
@@ -98,6 +125,9 @@ const employeeSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        clearCache: (state) => {
+            state.cache.pages = {};
         }
     },
     extraReducers: (builder) => {
@@ -109,9 +139,6 @@ const employeeSlice = createSlice({
             })
             .addCase(fetchEmployees.fulfilled, (state, action) => {
                 state.loading = false;
-                console.log('fetchEmployees.fulfilled payload:', action.payload); // Для отладки
-
-                // action.payload уже содержит { success, data, pagination }
                 if (action.payload && action.payload.success) {
                     state.employees = action.payload.data || [];
                     if (action.payload.pagination) {
@@ -119,6 +146,10 @@ const employeeSlice = createSlice({
                             ...state.pagination,
                             ...action.payload.pagination
                         };
+                    }
+                    // Update cache if not from cache
+                    if (!action.payload.fromCache && action.payload.cacheKey) {
+                        setCacheEntry(state.cache.pages, action.payload.cacheKey, action.payload);
                     }
                 } else {
                     state.employees = [];
@@ -129,22 +160,22 @@ const employeeSlice = createSlice({
                 state.error = action.payload || 'Failed to fetch employees';
                 state.employees = [];
             })
+
             // Create employee
-            .addCase(createEmployee.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
             .addCase(createEmployee.fulfilled, (state, action) => {
                 state.loading = false;
                 if (action.payload && action.payload.success && action.payload.data) {
                     state.employees.unshift(action.payload.data);
                     state.pagination.total += 1;
+                    // Clear cache after creating
+                    state.cache.pages = {};
                 }
             })
             .addCase(createEmployee.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Failed to create employee';
             })
+
             // Update employee
             .addCase(updateEmployee.pending, (state) => {
                 state.loading = true;
@@ -159,12 +190,14 @@ const employeeSlice = createSlice({
                     if (index !== -1) {
                         state.employees[index] = action.payload.data;
                     }
+                    state.cache.pages = {};
                 }
             })
             .addCase(updateEmployee.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Failed to update employee';
             })
+
             // Delete employee
             .addCase(deleteEmployee.pending, (state) => {
                 state.loading = true;
@@ -177,6 +210,7 @@ const employeeSlice = createSlice({
                         emp => emp.emp_id !== action.payload.employeeId
                     );
                     state.pagination.total = Math.max(0, state.pagination.total - 1);
+                    state.cache.pages = {};
                 }
             })
             .addCase(deleteEmployee.rejected, (state, action) => {
@@ -186,5 +220,10 @@ const employeeSlice = createSlice({
     }
 });
 
-export const { setFilters, setPagination, clearError } = employeeSlice.actions;
+export const {
+    setFilters,
+    setPagination,
+    clearError,
+    clearCache
+} = employeeSlice.actions;
 export default employeeSlice.reducer;

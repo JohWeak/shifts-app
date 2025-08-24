@@ -57,24 +57,23 @@ const findAll = async (req, res) => {
     try {
         const {
             page = 1,
-            pageSize = 20, // Увеличиваем дефолтный размер
+            pageSize = 50,
             status,
             position,
             search,
             work_site,
             sortBy = 'createdAt',
             sortOrder = 'DESC',
-            fields // Новый параметр для выборочной загрузки полей
+            fields
         } = req.query;
 
-        // Определяем какие поля загружать
         const attributes = fields
             ? fields.split(',').filter(f => f !== 'password')
             : [
                 'emp_id', 'first_name', 'last_name', 'email', 'phone',
                 'status', 'role', 'default_position_id', 'work_site_id',
-                'login', 'createdAt', 'updatedAt'
-                // Не загружаем password, country, city, address по умолчанию
+                'login', 'createdAt', 'updatedAt', 'country', 'city', 'address'
+                // No password
             ];
 
         // Build where clause
@@ -93,20 +92,19 @@ const findAll = async (req, res) => {
             }
         }
 
-        // Оптимизированный поиск с использованием индексов
         if (search) {
             const searchLower = search.toLowerCase();
             where[Op.or] = [
-                sequelize.where(
-                    sequelize.fn('LOWER', sequelize.col('first_name')),
+                db.Sequelize.where(
+                    db.Sequelize.fn('LOWER', db.Sequelize.col('first_name')),
                     { [Op.like]: `%${searchLower}%` }
                 ),
-                sequelize.where(
-                    sequelize.fn('LOWER', sequelize.col('last_name')),
+                db.Sequelize.where(
+                    db.Sequelize.fn('LOWER', db.Sequelize.col('last_name')),
                     { [Op.like]: `%${searchLower}%` }
                 ),
-                sequelize.where(
-                    sequelize.fn('LOWER', sequelize.col('email')),
+                db.Sequelize.where(
+                    db.Sequelize.fn('LOWER', db.Sequelize.col('email')),
                     { [Op.like]: `%${searchLower}%` }
                 ),
                 { phone: { [Op.like]: `%${search}%` } }

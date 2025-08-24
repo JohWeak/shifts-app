@@ -1,7 +1,9 @@
 /* frontend/src/features/admin-employee-management/ui/EmployeeModal/EmployeeModal.css */
 
 /* Modal customization */
-
+.employee-modal .modal-dialog {
+    margin-bottom: 50px;
+}
 .employee-modal .modal-content {
     margin-top: calc(var(--app-navbar-height) + 1rem);
     border: none;

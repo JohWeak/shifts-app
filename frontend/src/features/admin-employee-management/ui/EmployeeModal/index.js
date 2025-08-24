@@ -1,4 +1,4 @@
-// frontend/src/features/admin-employee-management/ui/EmployeeModal/EmployeeModal.js
+// frontend/src/features/admin-employee-management/ui/EmployeeModal/index.js
 import React, { useState, useEffect } from 'react';
 import {Modal, Form, Button, Row, Col, Alert, Card} from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
@@ -182,7 +182,12 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     };
 
     return (
-        <Modal show={show} onHide={onHide} size="lg" className="employee-modal">
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="xl"
+            className="employee-modal"
+        >
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
                     <Modal.Title>
