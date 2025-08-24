@@ -1,12 +1,12 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/index.js
 import React, {useMemo, useState} from 'react';
-import { Card, Table, Button, Badge, Spinner, Pagination, Form } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import './EmployeeList.css';
+import {Card, Table, Button, Badge, Spinner, Pagination, Form} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {getStatusBadgeVariant} from "shared/lib/utils/scheduleUtils";
-
-import { useSortableData } from 'shared/hooks/useSortableData';
+import {useSortableData} from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
+import {motion, AnimatePresence} from "motion/react";
+import './EmployeeList.css';
 
 const EmployeeList = ({
                           employees,
@@ -18,7 +18,7 @@ const EmployeeList = ({
                           onPageChange,
                           onPageSizeChange,
                       }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
 
 
     const sortingAccessors = useMemo(() => ({
@@ -29,9 +29,9 @@ const EmployeeList = ({
     }), [t]);
 
 
-    const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
+    const {sortedItems: sortedEmployees, requestSort, sortConfig} = useSortableData(
         employees,
-        { field: 'name', order: 'ASC' },
+        {field: 'name', order: 'ASC'},
         sortingAccessors
     );
 
@@ -84,7 +84,7 @@ const EmployeeList = ({
                                 );
                             }
                             if (page === pagination.page - 2 || page === pagination.page + 2) {
-                                return <Pagination.Ellipsis key={page} disabled />;
+                                return <Pagination.Ellipsis key={page} disabled/>;
                             }
                             return null;
                         })}
@@ -172,72 +172,80 @@ const EmployeeList = ({
                             <th className="text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        {sortedEmployees.map((employee) => (
-                            <tr
-                                key={employee.emp_id}
-                                className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
-                                onClick={() => onEdit(employee)}
-                                style={{ cursor: 'pointer' }}
+                        <AnimatePresence mode="wait">
+                            <motion.tbody
+                                key={pagination.page}
+                                initial={{opacity: 0, x: -30}}
+                                animate={{opacity: 1, x: 0}}
+                                exit={{opacity: 0, x: 30}}
+                                transition={{duration: 0.3, ease: "easeInOut"}}
                             >
-                                <td>
-                                    <div className="d-flex align-items-center">
-                                        <div
-                                            className="employee-avatar me-3"
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (employee.phone && window.confirm(t('employee.confirmCall', {
-                                                    name: `${employee.first_name} ${employee.last_name}`,
-                                                    phone: employee.phone
-                                                }))) {
-                                                    window.location.href = `tel:${employee.phone}`;
-                                                } else if (!employee.phone) {
-                                                    alert(t('employee.noPhoneNumber'));
-                                                }
-                                            }}
-                                            title={employee.phone ? t('employee.clickToCall') : t('employee.noPhoneNumber')}
-                                        >
-                                            {employee.first_name[0]}{employee.last_name[0]}
-                                        </div>
-                                        <div>
-                                            <div className="fw-semibold">
-                                                {employee.first_name} {employee.last_name}
-                                            </div>
-                                            {employee.phone && (
-                                                <small className="text-muted d-flex align-items-center">
-                                                    <i className="bi bi-telephone me-1"></i>
-                                                    {employee.phone}
-                                                </small>
-                                            )}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    {employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite')}
-                                </td>
-                                <td>
-                                    {employee.position_name || employee.defaultPosition?.pos_name || '-'}
-                                </td>
-                                <td>
-                                    <Badge bg={getStatusBadgeVariant(employee.status)}>
-                                        {t(`status.${employee.status}`)}
-                                    </Badge>
-                                </td>
-                                <td onClick={(e) => e.stopPropagation()} className="text-center">
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="p-1 text-danger"
-                                        onClick={() => employee.status === 'active' ? onDelete(employee) : onRestore(employee)}
-                                        title={employee.status === ('active' || 'admin') ? t('employee.deactivate') : t('employee.restore')}
+                                {sortedEmployees.map((employee) => (
+                                    <tr
+                                        key={employee.emp_id}
+                                        className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
+                                        onClick={() => onEdit(employee)}
+                                        style={{cursor: 'pointer'}}
                                     >
-                                        <i className={`bi bi-${employee.status === ('active' || 'admin') ? 'trash' : 'arrow-clockwise'}`}></i>
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
+                                        <td>
+                                            <div className="d-flex align-items-center">
+                                                <div
+                                                    className="employee-avatar me-3"
+                                                    style={{cursor: 'pointer'}}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (employee.phone && window.confirm(t('employee.confirmCall', {
+                                                            name: `${employee.first_name} ${employee.last_name}`,
+                                                            phone: employee.phone
+                                                        }))) {
+                                                            window.location.href = `tel:${employee.phone}`;
+                                                        } else if (!employee.phone) {
+                                                            alert(t('employee.noPhoneNumber'));
+                                                        }
+                                                    }}
+                                                    title={employee.phone ? t('employee.clickToCall') : t('employee.noPhoneNumber')}
+                                                >
+                                                    {employee.first_name[0]}{employee.last_name[0]}
+                                                </div>
+                                                <div>
+                                                    <div className="fw-semibold">
+                                                        {employee.first_name} {employee.last_name}
+                                                    </div>
+                                                    {employee.phone && (
+                                                        <small className="text-muted d-flex align-items-center">
+                                                            <i className="bi bi-telephone me-1"></i>
+                                                            {employee.phone}
+                                                        </small>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite')}
+                                        </td>
+                                        <td>
+                                            {employee.position_name || employee.defaultPosition?.pos_name || '-'}
+                                        </td>
+                                        <td>
+                                            <Badge bg={getStatusBadgeVariant(employee.status)}>
+                                                {t(`status.${employee.status}`)}
+                                            </Badge>
+                                        </td>
+                                        <td onClick={(e) => e.stopPropagation()} className="text-center">
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                className="p-1 text-danger"
+                                                onClick={() => employee.status === 'active' ? onDelete(employee) : onRestore(employee)}
+                                                title={employee.status === ('active' || 'admin') ? t('employee.deactivate') : t('employee.restore')}
+                                            >
+                                                <i className={`bi bi-${employee.status === ('active' || 'admin') ? 'trash' : 'arrow-clockwise'}`}></i>
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </motion.tbody>
+                        </AnimatePresence>
                     </Table>
                 </div>
             </Card.Body>

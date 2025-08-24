@@ -55,7 +55,7 @@ const EmployeeManagement = () => {
     useEffect(() => {
         if (location.state?.filters) {
             dispatch(setFilters(location.state.filters));
-            // Очищаем state после применения фильтров
+
             window.history.replaceState({}, document.title);
         }
     }, [location.state, dispatch]);
@@ -122,7 +122,7 @@ const EmployeeManagement = () => {
                 data: updatedData
             }));
 
-            // Если обновление успешно, перезагружаем список
+
             if (updateEmployee.fulfilled.match(result)) {
                 dispatch(fetchEmployees({
                     ...filters,
@@ -155,7 +155,6 @@ const EmployeeManagement = () => {
                 data: updatedData
             }));
 
-            // Если обновление успешно, перезагружаем список
             if (updateEmployee.fulfilled.match(result)) {
                 dispatch(fetchEmployees({
                     ...filters,
