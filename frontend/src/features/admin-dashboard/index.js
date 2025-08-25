@@ -23,8 +23,8 @@ const AdminDashboard = () => {
     // Redux state
     const { user } = useSelector(state => state.auth);
     const { employees, loading: employeesLoading } = useSelector(state => state.employees);
-    const { schedules, loading: schedulesLoading } = useSelector(state => state.schedule);
-    const { positions, workSites, loading: positionsLoading } = useSelector(state => state.workplace);
+    const { schedules } = useSelector(state => state.schedule);
+    const { positions, workSites } = useSelector(state => state.workplace);
 
     // Local state
     const [metrics, setMetrics] = useState({
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
         });
     }, [employees, workSites, positions, schedules]);
 
-    const isLoading = employeesLoading //|| schedulesLoading || positionsLoading;
+    const isLoading = employeesLoading;
 
     return (
         <div className="admin-dashboard">
@@ -254,9 +254,6 @@ const AdminDashboard = () => {
                                         </Badge>
                                     </div>
                                 </div>
-                                {/*<div className="text-muted small mt-2">*/}
-                                {/*    {t('dashboard.systemStatus.lastUpdated')}: {new Date().toLocaleTimeString()}*/}
-                                {/*</div>*/}
                             </Card.Body>
                         </Card>
                     </Col>

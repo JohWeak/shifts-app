@@ -2,7 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {Container, Navbar, Nav, Spinner, Dropdown, Badge} from 'react-bootstrap';
+import {Container, Navbar, Nav, Spinner, Dropdown} from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
@@ -16,7 +16,7 @@ import {
     fetchEmployeeConstraints,
 } from "features/employee-dashboard/model/employeeDataSlice";
 import { selectNewUpdatesCount, fetchMyRequests } from 'features/employee-requests/model/requestsSlice';
-import DebugReduxState from "../../components/DebugReduxState";
+//import DebugReduxState from "../../components/DebugReduxState";
 
 import './EmployeeLayout.css';
 
@@ -31,14 +31,10 @@ const EmployeeLayout = () => {
     useEffect(() => {
         const initialLoad = async () => {
             try {
-                // --- ЭТАП 1: Загружаем критически важные данные ---
                 const scheduleAction = await dispatch(fetchPersonalSchedule({})).unwrap();
-                console.log('[Data Preload] Загрузка персонального расписания...', scheduleAction);
-
-
                 const weekStart = scheduleAction.data.current?.week?.start;
+
                 if (weekStart) {
-                    console.log('[Data Preload] Загрузка ограничений...');
                     dispatch(fetchEmployeeConstraints({ weekStart }));
                 }
                 const positionId = scheduleAction.data.current?.employee?.position_id;
@@ -46,21 +42,14 @@ const EmployeeLayout = () => {
                     dispatch(fetchPositionSchedule({ positionId }));
                 }
 
-                // --- ЭТАП 2: В фоне загружаем важные, но не критические данные ---
-
                 dispatch(fetchEmployeeArchiveSummary());
-
-
-                // Загружаем запросы для подсчета новых обновлений
-                console.log('[Data Preload] Загрузка запросов...');
                 dispatch(fetchMyRequests());
-
             } catch (error) {
-                console.error("Ошибка при первоначальной загрузке данных:", error);
+                console.error("Error: ", error);
             }
         };
 
-        initialLoad();
+        void initialLoad();
 
         const intervalId = setInterval(() => {
             dispatch(checkScheduleUpdates());
@@ -90,18 +79,12 @@ const EmployeeLayout = () => {
     ];
 
     const handleNavigation = (path) => {
-        // Если мы уже на этой странице, ничего не делаем
         if (location.pathname === path) return;
-
-        // 1. Запускаем анимацию "исчезновения"
         setIsAnimating(true);
-
-        // 2. Ждем завершения анимации и только потом меняем маршрут
         setTimeout(() => {
             navigate(path);
-            // 3. Сбрасываем флаг анимации после перерисовки
             setIsAnimating(false);
-        }, 200); // Это время должно совпадать с длительностью анимации в CSS
+        }, 200);
     };
 
     const handleLogoClick = () => {
@@ -154,10 +137,8 @@ const EmployeeLayout = () => {
                     </Navbar.Brand>
 
                     <div className="d-flex align-items-center gap-2">
-                        {/* Theme Toggle */}
-                        <ThemeToggle variant='icon' />
 
-                        {/* Language Switch */}
+                        <ThemeToggle variant='icon' />
                         <LanguageSwitch />
 
                         {/* User Menu */}

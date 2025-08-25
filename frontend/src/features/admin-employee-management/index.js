@@ -1,18 +1,18 @@
 // frontend/src/features/admin-employee-management/index.js
 import React, {useEffect, useRef, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {useLocation} from 'react-router-dom';
 import store from "app/store/store";
 import {fetchSystemSettings} from "../admin-system-settings/model/settingsSlice";
 import {fetchWorkSites} from "../admin-schedule-management/model/scheduleSlice";
-import { Container, Button, Row, Col, Alert } from 'react-bootstrap';
+import {Container, Button, Row, Col, Alert} from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import EmployeeList from './ui/EmployeeList';
 import EmployeeModal from './ui/EmployeeModal';
 import EmployeeFilters from './ui/EmployeeFilters';
 import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
 
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     fetchEmployees,
     createEmployee,
@@ -26,7 +26,7 @@ import './index.css';
 
 
 const EmployeeManagement = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const location = useLocation();
 
@@ -40,15 +40,15 @@ const EmployeeManagement = () => {
 
 
     const employeesState = useSelector((state) => state.employees);
-    const [sortConfig, setSortConfig] = useState({ field: 'createdAt', order: 'DESC' });
+    const [sortConfig, setSortConfig] = useState({field: 'createdAt', order: 'DESC'});
 
 
     const {
         employees = [],
         loading = false,
         error = null,
-        filters = { status: 'active', position: 'all', search: '', work_site: 'all' },
-        pagination = { page: 1, pageSize: 20, total: 0 }
+        filters = {status: 'active', position: 'all', search: '', work_site: 'all'},
+        pagination = {page: 1, pageSize: 20, total: 0}
     } = employeesState || {};
 
     const isInitialMount = useRef(true);
@@ -65,8 +65,8 @@ const EmployeeManagement = () => {
 
     // Settings
     useEffect(() => {
-        const { systemSettings } = store.getState().settings;
-        const { workSites } = store.getState().schedule;
+        const {systemSettings} = store.getState().settings;
+        const {workSites} = store.getState().schedule;
 
         if (!systemSettings?.positions?.length) {
             dispatch(fetchSystemSettings());
@@ -98,19 +98,15 @@ const EmployeeManagement = () => {
         }
     }, [
         dispatch,
-        filters.status,
-        filters.position,
-        filters.search,
-        filters.work_site,
-        pagination.page,
-        pagination.pageSize,
+        filters,
+        pagination,
         sortConfig.field,
         sortConfig.order
     ]);
 
 
     const handleSort = (field, order) => {
-        setSortConfig({ field, order });
+        setSortConfig({field, order});
     };
 
     const handleCreateEmployee = () => {
@@ -201,119 +197,117 @@ const EmployeeManagement = () => {
     };
 
     const handlePageChange = (page) => {
-        dispatch(setPagination({ page }));
+        dispatch(setPagination({page}));
     };
 
     const handlePageSizeChange = (pageSize) => {
-        dispatch(setPagination({ pageSize, page: 1 }));
+        dispatch(setPagination({pageSize, page: 1}));
     };
 
     return (
-            <div className="employee-management">
-                <PageHeader
-                    title={t('employee.management')}
-                    description={t('employee.managementDescription')}
-                    breadcrumbs={[
-                        { text: t('navigation.dashboard'), to: '/admin' },
-                        { text: t('employee.management') }
-                    ]}
-                    actions={
-                        <div className="d-flex gap-2">
-                            <Button
-                                variant="outline-secondary"
-                                onClick={() => {
-                                    dispatch(clearCache());
-                                    dispatch(fetchEmployees({
-                                        ...filters,
-                                        page: pagination.page,
-                                        pageSize: pagination.pageSize,
-                                        sortBy: sortConfig.field,
-                                        sortOrder: sortConfig.order
-                                    }));
-                                }}
-                                disabled={loading}
-                                title={t('common.refresh')}
-                            >
-                                <i className="bi bi-arrow-clockwise"></i>
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={handleCreateEmployee}
-                                className="create-button"
-                            >
-                                <i className="bi bi-plus-circle me-2"></i>
-                                {t('employee.addNew')}
-                            </Button>
-                        </div>
-                    }
-                />
-
-                {error && (
-
-                        <Alert
-                            variant="danger"
-                            dismissible
-                            onClose={() => dispatch(clearError())}
+        <div className="employee-management">
+            <PageHeader
+                title={t('employee.management')}
+                description={t('employee.managementDescription')}
+                breadcrumbs={[
+                    {text: t('navigation.dashboard'), to: '/admin'},
+                    {text: t('employee.management')}
+                ]}
+                actions={
+                    <div className="d-flex gap-2">
+                        <Button
+                            variant="outline-secondary"
+                            onClick={() => {
+                                dispatch(clearCache());
+                                dispatch(fetchEmployees({
+                                    ...filters,
+                                    page: pagination.page,
+                                    pageSize: pagination.pageSize,
+                                    sortBy: sortConfig.field,
+                                    sortOrder: sortConfig.order
+                                }));
+                            }}
+                            disabled={loading}
+                            title={t('common.refresh')}
                         >
-                            {error}
-                        </Alert>
+                            <i className="bi bi-arrow-clockwise"></i>
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={handleCreateEmployee}
+                            className="create-button"
+                        >
+                            <i className="bi bi-plus-circle me-2"></i>
+                            {t('employee.addNew')}
+                        </Button>
+                    </div>
+                }
+            />
 
-                )}
+            {error && (
+                <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => dispatch(clearError())}
+                >
+                    {error}
+                </Alert>
+            )}
 
-                <Container fluid className="p-0 mt-3">
-                    <Row className="">
-                        <Col xs={12}>
-                            <EmployeeFilters />
-                        </Col>
-                        <Col xs={12}>
-                            <EmployeeList
-                                employees={employees}
-                                loading={loading}
-                                onEdit={handleEditEmployee}
-                                onDelete={handleDeleteClick}
-                                onRestore={handleRestoreClick}
-                                pagination={pagination}
-                                onPageChange={handlePageChange}
-                                onPageSizeChange={handlePageSizeChange}
-                                onSort={handleSort}
-                                currentSort={sortConfig}
-                            />
-                        </Col>
-                    </Row>
-                </Container>
+            <Container fluid className="p-0 mt-3">
+                <Row className="">
+                    <Col xs={12}>
+                        <EmployeeFilters/>
+                    </Col>
+                    <Col xs={12}>
+                        <EmployeeList
+                            employees={employees}
+                            loading={loading}
+                            onEdit={handleEditEmployee}
+                            onDelete={handleDeleteClick}
+                            onRestore={handleRestoreClick}
+                            pagination={pagination}
+                            onPageChange={handlePageChange}
+                            onPageSizeChange={handlePageSizeChange}
+                            onSort={handleSort}
+                            currentSort={sortConfig}
+                        />
+                    </Col>
+                </Row>
+            </Container>
 
-                <EmployeeModal
-                    show={showModal}
-                    onHide={() => setShowModal(false)}
-                    onSave={handleSaveEmployee}
-                    employee={selectedEmployee}
-                />
+            <EmployeeModal
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                onSave={handleSaveEmployee}
+                employee={selectedEmployee}
+            />
 
-                <ConfirmationModal
-                    show={showDeleteConfirm}
-                    onHide={() => setShowDeleteConfirm(false)}
-                    onConfirm={handleDeleteEmployee}
-                    title={t('employee.deleteConfirmTitle')}
-                    message={t('employee.deactivateConfirmMessage', {
-                        name: employeeToDelete ?
-                            `${employeeToDelete.first_name} ${employeeToDelete.last_name}` : ''
-                    })}
-                    confirmVariant="warning"
-                    confirmText={t('employee.deactivate')}
-                />
-                <ConfirmationModal
-                    show={showRestoreConfirm}
-                    onHide={() => setShowRestoreConfirm(false)}
-                    onConfirm={handleRestoreEmployee}
-                    title={t('employee.restoreConfirmTitle')}
-                    message={t('employee.restoreConfirmMessage', {
-                        name: employeeToRestore ?
-                            `${employeeToRestore.first_name} ${employeeToRestore.last_name}` : ''
-                    })}
-                    confirmVariant="success"
-                    confirmText={t('employee.restore')}
-                />
-            </div>
+            <ConfirmationModal
+                show={showDeleteConfirm}
+                onHide={() => setShowDeleteConfirm(false)}
+                onConfirm={handleDeleteEmployee}
+                title={t('employee.deleteConfirmTitle')}
+                message={t('employee.deactivateConfirmMessage', {
+                    name: employeeToDelete ?
+                        `${employeeToDelete.first_name} ${employeeToDelete.last_name}` : ''
+                })}
+                confirmVariant="warning"
+                confirmText={t('employee.deactivate')}
+            />
+            <ConfirmationModal
+                show={showRestoreConfirm}
+                onHide={() => setShowRestoreConfirm(false)}
+                onConfirm={handleRestoreEmployee}
+                title={t('employee.restoreConfirmTitle')}
+                message={t('employee.restoreConfirmMessage', {
+                    name: employeeToRestore ?
+                        `${employeeToRestore.first_name} ${employeeToRestore.last_name}` : ''
+                })}
+                confirmVariant="success"
+                confirmText={t('employee.restore')}
+            />
+        </div>
     );
 };
 

@@ -1,17 +1,14 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
     createBrowserRouter,
     RouterProvider,
     Navigate,
-    Outlet
 } from 'react-router-dom';
-import {Provider, useDispatch} from 'react-redux';
+import {Provider} from 'react-redux';
 import store from 'app/store/store';
 import {I18nProvider} from 'shared/lib/i18n/i18nProvider';
 import {ErrorBoundary} from 'shared/ui/components/ErrorBoundary/ErrorBoundary';
-import {fetchSystemSettings} from 'features/admin-system-settings/model/settingsSlice';
-import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleSlice';
-import {fetchPositions} from "features/admin-workplace-settings/model/workplaceSlice";
+
 
 // Pages
 import Login from '../features/auth';
@@ -28,7 +25,7 @@ import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
 import AlgorithmSettings from '../features/admin-algorithm-settings';
-import SystemSettings from '../features/admin-system-settings';
+//import SystemSettings from '../features/admin-system-settings';
 import WorkplaceSettings from '../features/admin-workplace-settings';
 import Reports from '../features/admin-reports';
 import AdminPermanentRequests from '../features/admin-permanent-requests';
@@ -40,14 +37,7 @@ import './App.css';
  * Defines routing structure and authentication flow
  */
 const AppInitializer = ({ children }) => {
-    // const dispatch = useDispatch();
-    // useEffect(() => {
-    //     Promise.all([
-    //         dispatch(fetchSystemSettings()),
-    //         dispatch(fetchWorkSites()),
-    //         dispatch(fetchPositions())
-    //     ]);
-    // }, [dispatch]);
+
     return children;
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Nav, Tab, Card } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'motion/react';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import TopProgressBar from "../../shared/ui/components/TopProgressBar/TopProgressBar";
 
@@ -20,11 +21,8 @@ const WorkplaceSettings = () => {
     const [activeTab, setActiveTab] = useState('worksites');
     const [selectedSite, setSelectedSite] = useState(null);
     const [isPreloading, setIsPreloading] = useState(true);
-    const { loading, workSites } = useSelector(state => state.workplace);
-
 
     useEffect(() => {
-        // Preload all workplace data on mount
         const loadData = async () => {
             setIsPreloading(true);
             try {
@@ -34,7 +32,7 @@ const WorkplaceSettings = () => {
             }
         };
 
-        loadData();
+        void loadData();
     }, [dispatch]);
 
     const handleSiteSelection = (site) => {
@@ -49,10 +47,34 @@ const WorkplaceSettings = () => {
         }
     };
 
+    const tabAnimationVariants = {
+        initial: {
+            opacity: 0,
+            x: 15
+        },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.25,
+                ease: 'easeOut'
+            }
+        },
+        exit: {
+            opacity: 0,
+            x: -15,
+            transition: {
+                duration: 0.15,
+                ease: 'easeIn'
+            }
+        }
+    };
+
     if (isPreloading) {
         return (
             <Container fluid>
                 <TopProgressBar />
+                <LoadingState />
             </Container>
         );
     }
@@ -75,17 +97,22 @@ const WorkplaceSettings = () => {
                         </Nav>
                     </Card.Header>
                     <Card.Body className="p-0 workplace-card-body">
-                        <Tab.Content>
-                            <Tab.Pane eventKey="worksites" unmountOnExit={false}>
-                                <WorkSitesTab onSelectSite={handleSiteSelection} />
-                            </Tab.Pane>
-                            <Tab.Pane eventKey="positions" unmountOnExit={false}>
-                                <PositionsTab selectedSite={selectedSite} />
-                            </Tab.Pane>
-                            <Tab.Pane eventKey="display" unmountOnExit={false}>
-                                <DisplaySettingsTab />
-                            </Tab.Pane>
-                        </Tab.Content>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                variants={tabAnimationVariants}
+                                initial="initial"
+                                animate="animate"
+                                exit="exit"
+                            >
+                                {activeTab === 'worksites' &&
+                                    <WorkSitesTab onSelectSite={handleSiteSelection} />}
+                                {activeTab === 'positions' &&
+                                    <PositionsTab selectedSite={selectedSite} />}
+                                {activeTab === 'display' &&
+                                    <DisplaySettingsTab />}
+                            </motion.div>
+                        </AnimatePresence>
                     </Card.Body>
                 </Tab.Container>
             </Card>
