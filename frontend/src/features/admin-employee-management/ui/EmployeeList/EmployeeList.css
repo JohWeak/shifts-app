@@ -4,7 +4,9 @@
     border-radius: 0.5rem;
     background: var(--bs-white);
     overflow: hidden;
+
 }
+
 
 [data-theme="dark"] .list-card {
     background: var(--bs-gray-800);
@@ -25,6 +27,7 @@
 .list-card .data-table {
     margin: 0;
     font-size: 0.875rem;
+
 }
 
 .list-card .data-table thead th {

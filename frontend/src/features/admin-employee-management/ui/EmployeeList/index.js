@@ -20,11 +20,24 @@ const EmployeeList = ({
                       }) => {
     const {t} = useI18n();
     const isInitialMount = useRef(true);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const animationTimeout = 5000;
+    const previousEmployees = useRef(employees);
+
     useEffect(() => {
         if (isInitialMount.current && !loading) {
             isInitialMount.current = false;
         }
     }, [loading]);
+
+    useEffect(() => {
+        if (employees && employees.length > 0) {
+            previousEmployees.current = employees;
+        }
+    }, [employees]);
+
+    const dataToRender = (employees && employees.length > 0) ? employees : previousEmployees.current;
+
 
     const sortingAccessors = useMemo(() => ({
         name: (employee) => `${employee.first_name} ${employee.last_name}`,
@@ -35,16 +48,11 @@ const EmployeeList = ({
 
 
     const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
-        employees,
+        dataToRender,
         { field: 'name', order: 'ASC' },
         sortingAccessors
     );
-    const employeeDataKey = useMemo(() => {
-        if (!employees || employees.length === 0) {
-            return `page-${pagination.page}`;
-        }
-        return employees.slice(0, 5).map(e => e.emp_id).join('-');
-    }, [employees, pagination.page]);
+
 
     const totalPages = Math.ceil(pagination.total / pagination.pageSize);
     const showPagination = totalPages > 1;
@@ -53,19 +61,18 @@ const EmployeeList = ({
     const tableBodyVariants = {
         hidden: {
             opacity: 0,
-            transition: { duration: 0.1 }
+            transition: { duration: 0.15 }
         },
         visible: {
             opacity: 1,
-            transition: { duration: 0.1, staggerChildren: 0.03 }
+            transition: { duration: 0.15, staggerChildren: 0.04 }
         }
     };
 
     const rowVariants = {
         hidden: {
             opacity: 0,
-            y: 20,
-            transition: { duration: 0.1 }
+            y: 40,
         },
         visible: {
             opacity: 1,
@@ -74,7 +81,17 @@ const EmployeeList = ({
         },
     };
 
+    const handlePageChange = (page) => {
+        setIsAnimating(true);
+        onPageChange(page);
+        setTimeout(() => setIsAnimating(false), animationTimeout);
+    };
 
+    const handlePageSizeChange = (size) => {
+        setIsAnimating(true);
+        onPageSizeChange(size);
+        setTimeout(() => setIsAnimating(false), animationTimeout);
+    };
 
     const renderPaginationControls = () => {
         return (
@@ -84,7 +101,7 @@ const EmployeeList = ({
                     <Form.Select
                         size="sm"
                         value={pagination.pageSize}
-                        onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
+                        onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
                         className="page-size-select"
                     >
                         <option value="10">10</option>
@@ -96,11 +113,11 @@ const EmployeeList = ({
                 {showPagination && (
                     <Pagination size="sm" className="mb-0">
                         <Pagination.First
-                            onClick={() => onPageChange(1)}
+                            onClick={() => handlePageChange(1)}
                             disabled={pagination.page === 1}
                         />
                         <Pagination.Prev
-                            onClick={() => onPageChange(pagination.page - 1)}
+                            onClick={() => handlePageChange(pagination.page - 1)}
                             disabled={pagination.page === 1}
                         />
 
@@ -115,7 +132,7 @@ const EmployeeList = ({
                                     <Pagination.Item
                                         key={page}
                                         active={page === pagination.page}
-                                        onClick={() => onPageChange(page)}
+                                        onClick={() => handlePageChange(page)}
                                     >
                                         {page}
                                     </Pagination.Item>
@@ -128,11 +145,11 @@ const EmployeeList = ({
                         })}
 
                         <Pagination.Next
-                            onClick={() => onPageChange(pagination.page + 1)}
+                            onClick={() => handlePageChange(pagination.page + 1)}
                             disabled={pagination.page === totalPages}
                         />
                         <Pagination.Last
-                            onClick={() => onPageChange(totalPages)}
+                            onClick={() => handlePageChange(totalPages)}
                             disabled={pagination.page === totalPages}
                         />
                     </Pagination>
@@ -189,7 +206,10 @@ const EmployeeList = ({
                     )}
                 </AnimatePresence>
 
-                <div className="table-responsive">
+                <div
+                    className="table-responsive"
+                    style={{ overflowY: isAnimating ? 'hidden' : 'auto' }}
+                >
                     <Table hover className="data-table mb-0">
                         <thead>
                         <tr>
@@ -226,7 +246,7 @@ const EmployeeList = ({
                         </thead>
                         <AnimatePresence mode="wait">
                             <motion.tbody
-                                key={employeeDataKey}
+                                key={pagination.page}
                                 variants={tableBodyVariants}
                                 initial="hidden"
                                 animate="visible"
