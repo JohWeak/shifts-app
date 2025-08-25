@@ -63,14 +63,6 @@ const AdminLayout = () => {
         navigate('/login');
     };
 
-    // Handle mouse enter/leave for sidebar expansion (only on button)
-    const handleButtonMouseEnter = () => {
-        clearTimeout(expandTimeoutRef.current);
-        expandTimeoutRef.current = setTimeout(() => {
-            setIsSidebarExpanded(true);
-        }, 100);
-    };
-
     const handleSidebarMouseLeave = () => {
         clearTimeout(expandTimeoutRef.current);
         setIsSidebarExpanded(false);
@@ -327,7 +319,7 @@ const AdminLayout = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
                             transition={{
-                                duration: 0.1,
+                                duration: 0.2,
                                 ease: "easeInOut",
                             }}
                         >

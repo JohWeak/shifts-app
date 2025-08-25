@@ -449,9 +449,6 @@ const scheduleSlice = createSlice({
 
         resetScheduleView(state) {
             state.selectedScheduleId = null;
-            state.scheduleDetails = null;
-            state.editingPositions = {};
-            state.pendingChanges = {};
         },
 
         clearCache(state, action) {

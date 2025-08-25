@@ -36,15 +36,15 @@ const AdminPermanentRequests = () => {
         console.log('[AdminPermanentRequests] Inactive:', inactiveRequests.length);
     }, [requests]);
 
-    // Разделяем запросы на pending и processed
+
     const pendingRequests = requests.filter(r => r.status === 'pending');
 
-    // Активные обработанные - это approved с is_active === true
+
     const activeProcessedRequests = requests.filter(r =>
         r.status === 'approved' && r.is_active === true
     );
 
-    // Неактивные - это rejected ИЛИ approved с is_active === false
+
     const inactiveRequests = requests.filter(r =>
         r.status === 'rejected' || (r.status === 'approved' && r.is_active === false)
     );
@@ -54,7 +54,7 @@ const AdminPermanentRequests = () => {
         'employee.defaultPosition.pos_name': (item) => item.employee?.defaultPosition?.pos_name || '',
         'employee.workSite.site_name': (item) => item.employee?.workSite?.site_name || ''
     };
-    // Сортировка для каждой группы
+
     const {
         sortedItems: sortedPendingRequests,
         requestSort: requestPendingSort,
@@ -230,13 +230,12 @@ const AdminPermanentRequests = () => {
 
             {activeProcessedRequests.length > 0 && (
                 <Card className="mb-3">
-                    <Card.Header className="bg-success bg-opacity-10">
+                    <Card.Header className="bg-success bg-opacity-10 card-header">
                         <h5 className="mb-0 justify-content-between d-flex align-items-center">
                             {t('admin.requests.activeRequests')}
                             <Badge
                                 bg="success"
-                                className="ms-2 rounded-pill bg-opacity-50"
-
+                                className="badge ms-2 bg-opacity-50"
                             >
                                 {activeProcessedRequests.length}
                             </Badge>
@@ -255,13 +254,12 @@ const AdminPermanentRequests = () => {
 
             {inactiveRequests.length > 0 && (
                 <Card className="mt-3">
-                    <Card.Header className="bg-secondary bg-opacity-10">
+                    <Card.Header className="bg-secondary bg-opacity-10 card-header">
                         <h5 className="mb-0 justify-content-between d-flex align-items-center">
                             {t('admin.requests.inactiveRequests')}
                             <Badge
                                 bg="secondary"
-                                className="ms-2 rounded-pill bg-opacity-50"
-
+                                className="badge ms-2 bg-opacity-50"
                             >
                                 {inactiveRequests.length}
                             </Badge>

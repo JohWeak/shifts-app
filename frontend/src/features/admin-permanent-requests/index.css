@@ -21,6 +21,9 @@
     border-left: 2px solid transparent;
     border-right: 2px solid transparent;
 }
+.admin-permanent-requests .card-header .badge{
+    font-size: 0.75rem;
+}
 
 .admin-permanent-requests .card-header.bg-warning {
     border-left-color: var(--bs-warning);

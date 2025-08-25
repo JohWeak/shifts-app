@@ -179,14 +179,7 @@ const EmployeeList = ({
                             <th className="text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
-                        <AnimatePresence mode="wait">
-                            <motion.tbody
-                                key={pagination.page}
-                                initial={{opacity: 0, x: isInitialMount.current ? 0 : -30}}
-                                animate={{opacity: 1, x: 0}}
-                                exit={{opacity: 0, x: 160}}
-                                transition={{duration: 0.3, ease: "easeInOut"}}
-                            >
+                            <tbody>
                                 {sortedEmployees.map((employee) => (
                                     <tr
                                         key={employee.emp_id}
@@ -251,8 +244,8 @@ const EmployeeList = ({
                                         </td>
                                     </tr>
                                 ))}
-                            </motion.tbody>
-                        </AnimatePresence>
+                            </tbody>
+
                     </Table>
                 </div>
             </Card.Body>

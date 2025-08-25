@@ -18,7 +18,7 @@ import {
     fetchScheduleDetails,
     setSelectedScheduleId,
     addPendingChange,
-    preloadScheduleDetails,
+    preloadScheduleDetails, fetchWorkSites,
 } from './model/scheduleSlice';
 
 import './index.css';
@@ -48,7 +48,7 @@ const ScheduleManagement = () => {
 
     useEffect(() => {
         dispatch(fetchSchedules());
-        //dispatch(fetchWorkSites())
+        dispatch(fetchWorkSites())
         //dispatch(fetchPositions())
     }, [dispatch]);
 

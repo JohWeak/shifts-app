@@ -21,6 +21,7 @@ import TopProgressBar from 'shared/ui/components/TopProgressBar/TopProgressBar';
 import './ScheduleView.css';
 
 const ScheduleView = ({
+                          schedule,
                           onCellClick,
                           selectedCell,
                           onEmployeeSelect,
@@ -100,7 +101,7 @@ const ScheduleView = ({
             <TopProgressBar/>
         );
     }
-    if (!scheduleDetails) {
+    if (!schedule) {
         return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')}/>;
     }
 
