@@ -1,10 +1,10 @@
 // frontend/src/shared/lib/cache/cacheUtils.js
 
 export const CACHE_DURATION = {
-    SHORT: 5 * 60 * 1000,      // 5 минут
-    MEDIUM: 15 * 60 * 1000,    // 15 минут
-    LONG: 30 * 60 * 1000,      // 30 минут
-    EXTRA_LONG: 60 * 60 * 1000, // 1 час
+    SHORT: 5 * 60 * 1000,
+    MEDIUM: 15 * 60 * 1000,
+    LONG: 30 * 60 * 1000,
+    EXTRA_LONG: 60 * 60 * 1000, // 1h
 };
 
 export const isCacheValid = (timestamp, duration = CACHE_DURATION.MEDIUM) => {

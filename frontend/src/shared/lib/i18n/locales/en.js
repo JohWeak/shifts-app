@@ -841,7 +841,7 @@ export const en = {
         employeesUsed: 'Employees Used',
     },
     role: {
-        admin: 'Administrator',
+        admin: 'Admin',
         employee: 'Employee',
         manager: 'Manager',
         supervisor: 'Supervisor',

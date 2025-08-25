@@ -249,7 +249,7 @@ const EmployeeManagement = () => {
                 />
 
                 {error && (
-                    <Container className="mt-3">
+
                         <Alert
                             variant="danger"
                             dismissible
@@ -257,7 +257,7 @@ const EmployeeManagement = () => {
                         >
                             {error}
                         </Alert>
-                    </Container>
+
                 )}
 
                 <Container fluid className="p-0 mt-3">

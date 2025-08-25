@@ -20,14 +20,12 @@ const EmployeeList = ({
                       }) => {
     const {t} = useI18n();
     const isInitialMount = useRef(true);
-    useEffect(() => {
-        const timer = setTimeout(() => {
+    React.useEffect(() => {
+        if (isInitialMount.current && !loading) {
             isInitialMount.current = false;
-        }, 0);
+        }
+    }, [loading]);
 
-        return () => clearTimeout(timer);
-
-    }, [pagination.page]);
     const sortingAccessors = useMemo(() => ({
         name: (employee) => `${employee.first_name} ${employee.last_name}`,
         workSite: (employee) => employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite'),
@@ -36,14 +34,47 @@ const EmployeeList = ({
     }), [t]);
 
 
-    const {sortedItems: sortedEmployees, requestSort, sortConfig} = useSortableData(
+    const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
         employees,
-        {field: 'name', order: 'ASC'},
+        { field: 'name', order: 'ASC' },
         sortingAccessors
     );
+    const employeeDataKey = useMemo(() => {
+        if (!employees || employees.length === 0) {
+            return `page-${pagination.page}`;
+        }
+        return employees.slice(0, 5).map(e => e.emp_id).join('-');
+    }, [employees, pagination.page]);
 
     const totalPages = Math.ceil(pagination.total / pagination.pageSize);
     const showPagination = totalPages > 1;
+
+    // Animation variants
+    const tableBodyVariants = {
+        hidden: {
+            opacity: 0,
+            transition: { duration: 0.1 }
+        },
+        visible: {
+            opacity: 1,
+            transition: { duration: 0.1, staggerChildren: 0.03 }
+        }
+    };
+
+    const rowVariants = {
+        hidden: {
+            opacity: 0,
+            y: 20,
+            transition: { duration: 0.1 }
+        },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { ease: "easeOut", duration: 0.15 }
+        },
+    };
+
+
 
     const renderPaginationControls = () => {
         return (
@@ -114,7 +145,7 @@ const EmployeeList = ({
         );
     };
 
-    if (loading) {
+    if (loading && isInitialMount.current) {
         return (
             <Card className="list-card shadow-sm">
                 <Card.Body className="text-center py-5">
@@ -143,7 +174,21 @@ const EmployeeList = ({
                 {renderPaginationControls()}
             </Card.Header>
 
-            <Card.Body className="p-0">
+            <Card.Body className="p-0 position-relative">
+                <AnimatePresence>
+                    {loading && !isInitialMount.current && (
+                        <motion.div
+                            className="loading-overlay"
+                            initial={{opacity: 0}}
+                            animate={{opacity: 1}}
+                            exit={{opacity: 0}}
+                            transition={{duration: 0.2}}
+                        >
+                            <Spinner animation="border" variant="primary"/>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div className="table-responsive">
                     <Table hover className="data-table mb-0">
                         <thead>
@@ -179,11 +224,19 @@ const EmployeeList = ({
                             <th className="text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
-                            <tbody>
+                        <AnimatePresence mode="wait">
+                            <motion.tbody
+                                key={employeeDataKey}
+                                variants={tableBodyVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                            >
                                 {sortedEmployees.map((employee) => (
-                                    <tr
+                                    <motion.tr
                                         key={employee.emp_id}
                                         className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
+                                        variants={rowVariants}
                                         onClick={() => onEdit(employee)}
                                         style={{cursor: 'pointer'}}
                                     >
@@ -227,8 +280,12 @@ const EmployeeList = ({
                                             {employee.position_name || employee.defaultPosition?.pos_name || '-'}
                                         </td>
                                         <td>
-                                            <Badge bg={getStatusBadgeVariant(employee.status)}>
-                                                {t(`status.${employee.status}`)}
+                                            <Badge
+                                                bg={getStatusBadgeVariant(employee.role === 'admin' ? 'admin' : employee.status)}>
+                                                {employee.role === 'admin'
+                                                    ? t(`role.${employee.role}`)
+                                                    : t(`status.${employee.status}`)
+                                                }
                                             </Badge>
                                         </td>
                                         <td onClick={(e) => e.stopPropagation()} className="text-center">
@@ -242,10 +299,10 @@ const EmployeeList = ({
                                                 <i className={`bi bi-${employee.status === ('active' || 'admin') ? 'trash' : 'arrow-clockwise'}`}></i>
                                             </Button>
                                         </td>
-                                    </tr>
+                                    </motion.tr>
                                 ))}
-                            </tbody>
-
+                            </motion.tbody>
+                        </AnimatePresence>
                     </Table>
                 </div>
             </Card.Body>
