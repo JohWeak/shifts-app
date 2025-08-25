@@ -20,7 +20,7 @@ const EmployeeList = ({
                       }) => {
     const {t} = useI18n();
     const isInitialMount = useRef(true);
-    React.useEffect(() => {
+    useEffect(() => {
         if (isInitialMount.current && !loading) {
             isInitialMount.current = false;
         }
