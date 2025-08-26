@@ -1,7 +1,7 @@
 // frontend/src/features/employee-schedule/index.js
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Container, Form, Alert, Button} from 'react-bootstrap';
+import {Container, Form, Alert} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
 
@@ -74,16 +74,15 @@ const EmployeeSchedule = () => {
     const hasDataForView = (data) => {
         if (!data?.current && !data?.next) return false;
         if (showFullSchedule) {
-            return data.current.days && data.current.days.length > 0 ||
-                data.next.days && data.next.days.length > 0;
+            return ((data.current.days && data.current.days.length > 0) ||
+                (data.next.days && data.next.days.length > 0));
         }
-        return data.current.schedule && data.current.schedule.length > 0 ||
-            data.next.schedule && data.next.schedule.length > 0;
+        return ((data.current.schedule && data.current.schedule.length > 0) ||
+            (data.next.schedule && data.next.schedule.length > 0));
     };
     const hasAnyData = hasDataForView(scheduleData);
 
 
-    // --- Условный рендеринг ---
     const renderContent = () => {
         if (isLoading && !scheduleData) {
             return <LoadingState message={t('common.loading')} />;

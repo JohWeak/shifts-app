@@ -3,8 +3,6 @@ from ortools.sat.python import cp_model
 import json
 import sys
 import argparse
-from datetime import datetime, timedelta
-
 
 def _parse_time(time_str):
     """Convert time format HH:MM:SS to hours"""

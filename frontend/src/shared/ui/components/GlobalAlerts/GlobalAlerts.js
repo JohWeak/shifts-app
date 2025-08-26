@@ -7,7 +7,6 @@ import { removeNotification } from 'app/model/notificationsSlice';
 import './GlobalAlerts.css';
 
 const GlobalAlerts = () => {
-    const dispatch = useDispatch();
     const notifications = useSelector((state) => state.notifications.notifications);
     const { locale } = useI18n();
     const isRTL = locale === 'he';
