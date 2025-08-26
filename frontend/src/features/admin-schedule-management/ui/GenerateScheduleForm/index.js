@@ -21,7 +21,7 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
         algorithm: 'auto',
         position_ids: []
     });
-    const [formError, setFormError] = useState('');
+    const [formError,setFormError] = useState('');
 
     const safeWorkSites = useMemo(() => workSites || [], [workSites]);
     const safeAlgorithmTypes = useMemo(() => ALGORITHM_TYPES || [], []);

@@ -38,13 +38,6 @@ const AdminDashboard = () => {
         pendingRequests: 0
     });
 
-    const [systemStatus, setSystemStatus] = useState({
-        schedulingService: 'online',
-        database: 'connected',
-        algorithm: 'available',
-        apiServices: 'online'
-    });
-
     // Load data on mount
     useEffect(() => {
         dispatch(fetchEmployees());

@@ -7,11 +7,15 @@
     "frontend-dev": "cd frontend && npm start",
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm install && npm run build",
-    "postinstall": "npm run install-all && npm run build"
+    "postinstall": "npm run install-all && npm run build",
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "nodemon": "^3.1.10"
   }
 }
