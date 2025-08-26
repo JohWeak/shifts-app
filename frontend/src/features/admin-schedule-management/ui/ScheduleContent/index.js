@@ -1,14 +1,16 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleContent/index.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Spinner } from 'react-bootstrap';
 import ScheduleList from '../ScheduleList';
 import ScheduleView from '../ScheduleView';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 
 const ScheduleContent = ({ onScheduleDeleted, handleViewDetails, ...viewProps }) => {
-    const { schedules, selectedScheduleId, scheduleDetails, loading } = useSelector((state) => state.schedule);
+    const { schedules, selectedScheduleId, scheduleDetails, loading } = useSelector(
+        (state) => state.schedule
+    );
     const [displayedSchedule, setDisplayedSchedule] = useState(scheduleDetails);
     useEffect(() => {
         if (scheduleDetails) {
@@ -30,21 +32,20 @@ const ScheduleContent = ({ onScheduleDeleted, handleViewDetails, ...viewProps })
             {selectedScheduleId && displayedSchedule ? (
                 <motion.div
                     key={selectedScheduleId}
-                    initial={{ opacity: 0, y: -10}}
-                    animate={{ opacity: 1, y: 0}}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 30 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
                     <ScheduleView {...viewProps} schedule={displayedSchedule} />
                 </motion.div>
             ) : (
-
                 <motion.div
                     key="schedule-list"
-                    initial={{opacity: 0.5}}
-                    animate={{ opacity: 1, y: 0, x:0 }}
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
                     exit={{ opacity: 0, y: 50 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
                     <ScheduleList
                         schedules={schedules}

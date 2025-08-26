@@ -1,18 +1,11 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ValidationModal/index.js
-import React, {useState} from 'react';
-import {Modal, Button, Alert, ListGroup, Badge, Spinner} from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Alert, Badge, Button, ListGroup, Modal, Spinner } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { formatDate } from 'shared/lib/utils/scheduleUtils'
+import { formatDate } from 'shared/lib/utils/scheduleUtils';
 import './ValidationModal.css';
 
-const ValidationModal = ({
-                             show,
-                             onHide,
-                             onConfirm,
-                             violations,
-                             title,
-                             isConfirming = false
-                         }) => {
+const ValidationModal = ({ show, onHide, onConfirm, violations, title, isConfirming = false }) => {
     const { t } = useI18n();
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -27,9 +20,10 @@ const ValidationModal = ({
 
     const groupedViolations = violations.reduce((acc, violation) => {
         // Use type for grouping (rest_violation, weekly_hours_violation, etc.)
-        const groupType = violation.type === 'before' || violation.type === 'after'
-            ? 'rest_violation'
-            : violation.type;
+        const groupType =
+            violation.type === 'before' || violation.type === 'after'
+                ? 'rest_violation'
+                : violation.type;
 
         if (!acc[groupType]) {
             acc[groupType] = [];
@@ -63,7 +57,11 @@ const ValidationModal = ({
                         </h6>
                         <ListGroup>
                             {violations.map((violation, idx) => (
-                                <ListGroup.Item key={idx} variant="warning" className="violation-item">
+                                <ListGroup.Item
+                                    key={idx}
+                                    variant="warning"
+                                    className="violation-item"
+                                >
                                     <div className="d-flex justify-content-between align-items-start">
                                         <div className="violation-details">
                                             <strong className="employee-name">
@@ -75,31 +73,50 @@ const ValidationModal = ({
                                                 <div className="mt-2">
                                                     {violation.type === 'before' && (
                                                         <span className="text-muted">
-                                                            {t('validation.rest_violation.beforeDetail', {
-                                                                date: formatDate(violation.date),
-                                                                nextShift: violation.nextShift,
-                                                                restHours: violation.restHours,
-                                                                requiredRest: violation.requiredRest
-                                                            })}
+                                                            {t(
+                                                                'validation.rest_violation.beforeDetail',
+                                                                {
+                                                                    date: formatDate(
+                                                                        violation.date
+                                                                    ),
+                                                                    nextShift: violation.nextShift,
+                                                                    restHours: violation.restHours,
+                                                                    requiredRest:
+                                                                        violation.requiredRest,
+                                                                }
+                                                            )}
                                                         </span>
                                                     )}
                                                     {violation.type === 'after' && (
                                                         <span className="text-muted">
-                                                            {t('validation.rest_violation.afterDetail', {
-                                                                date: formatDate(violation.date),
-                                                                previousShift: violation.previousShift,
-                                                                restHours: violation.restHours,
-                                                                requiredRest: violation.requiredRest
-                                                            })}
+                                                            {t(
+                                                                'validation.rest_violation.afterDetail',
+                                                                {
+                                                                    date: formatDate(
+                                                                        violation.date
+                                                                    ),
+                                                                    previousShift:
+                                                                        violation.previousShift,
+                                                                    restHours: violation.restHours,
+                                                                    requiredRest:
+                                                                        violation.requiredRest,
+                                                                }
+                                                            )}
                                                         </span>
                                                     )}
                                                     {!violation.type && (
                                                         <span className="text-muted">
-                                                            {t('validation.rest_violation.generalDetail', {
-                                                                date: formatDate(violation.date),
-                                                                restHours: violation.restHours,
-                                                                requiredRest: violation.requiredRest
-                                                            })}
+                                                            {t(
+                                                                'validation.rest_violation.generalDetail',
+                                                                {
+                                                                    date: formatDate(
+                                                                        violation.date
+                                                                    ),
+                                                                    restHours: violation.restHours,
+                                                                    requiredRest:
+                                                                        violation.requiredRest,
+                                                                }
+                                                            )}
                                                         </span>
                                                     )}
                                                 </div>
@@ -109,10 +126,13 @@ const ValidationModal = ({
                                             {groupType === 'weekly_hours_violation' && (
                                                 <div className="mt-2">
                                                     <span className="text-muted">
-                                                        {t('validation.weekly_hours_violation.detail', {
-                                                            totalHours: violation.totalHours,
-                                                            maxHours: violation.maxHours
-                                                        })}
+                                                        {t(
+                                                            'validation.weekly_hours_violation.detail',
+                                                            {
+                                                                totalHours: violation.totalHours,
+                                                                maxHours: violation.maxHours,
+                                                            }
+                                                        )}
                                                     </span>
                                                 </div>
                                             )}
@@ -121,11 +141,14 @@ const ValidationModal = ({
                                             {groupType === 'daily_hours_violation' && (
                                                 <div className="mt-2">
                                                     <span className="text-muted">
-                                                        {t('validation.daily_hours_violation.detail', {
-                                                            date: formatDate(violation.date),
-                                                            totalHours: violation.totalHours,
-                                                            maxHours: violation.maxHours
-                                                        })}
+                                                        {t(
+                                                            'validation.daily_hours_violation.detail',
+                                                            {
+                                                                date: formatDate(violation.date),
+                                                                totalHours: violation.totalHours,
+                                                                maxHours: violation.maxHours,
+                                                            }
+                                                        )}
                                                     </span>
                                                 </div>
                                             )}
@@ -134,10 +157,14 @@ const ValidationModal = ({
                                             {groupType === 'consecutive_shifts_violation' && (
                                                 <div className="mt-2">
                                                     <span className="text-muted">
-                                                        {t('validation.consecutive_shifts_violation.detail', {
-                                                            consecutiveDays: violation.consecutiveDays,
-                                                            maxDays: violation.maxDays
-                                                        })}
+                                                        {t(
+                                                            'validation.consecutive_shifts_violation.detail',
+                                                            {
+                                                                consecutiveDays:
+                                                                    violation.consecutiveDays,
+                                                                maxDays: violation.maxDays,
+                                                            }
+                                                        )}
                                                     </span>
                                                 </div>
                                             )}
@@ -145,7 +172,9 @@ const ValidationModal = ({
 
                                         <div className="violation-severity">
                                             <Badge bg={getSeverityVariant(violation)}>
-                                                {t(`validation.severity.${getSeverityLevel(violation)}`)}
+                                                {t(
+                                                    `validation.severity.${getSeverityLevel(violation)}`
+                                                )}
                                             </Badge>
                                         </div>
                                     </div>
@@ -157,18 +186,10 @@ const ValidationModal = ({
             </Modal.Body>
 
             <Modal.Footer>
-                <Button
-                    variant="secondary"
-                    onClick={onHide}
-                    disabled={isProcessing}
-                >
+                <Button variant="secondary" onClick={onHide} disabled={isProcessing}>
                     {t('common.cancel')}
                 </Button>
-                <Button
-                    variant="warning"
-                    onClick={handleConfirm}
-                    disabled={isProcessing}
-                >
+                <Button variant="warning" onClick={handleConfirm} disabled={isProcessing}>
                     {isProcessing ? (
                         <>
                             <Spinner
@@ -196,17 +217,18 @@ const ValidationModal = ({
 // Helper functions
 const getIconForViolationType = (type) => {
     const icons = {
-        'rest_violation': 'bi-clock-history',
-        'weekly_hours_violation': 'bi-calendar-week',
-        'daily_hours_violation': 'bi-calendar-day',
-        'consecutive_shifts_violation': 'bi-arrow-repeat'
+        rest_violation: 'bi-clock-history',
+        weekly_hours_violation: 'bi-calendar-week',
+        daily_hours_violation: 'bi-calendar-day',
+        consecutive_shifts_violation: 'bi-arrow-repeat',
     };
     return icons[type] || 'bi-exclamation-circle';
 };
 
 const getSeverityLevel = (violation) => {
     // Determine severity based on how much the constraint is violated
-    if (violation.type === 'rest_violation' || 'before' || 'after' ) {
+    // eslint-disable-next-line no-constant-condition
+    if (violation.type === 'rest_violation' || 'before' || 'after') {
         const deficit = violation.requiredRest - violation.restHours;
         if (deficit >= 5) return 'critical';
         if (deficit >= 1) return 'high';
@@ -228,9 +250,9 @@ const getSeverityLevel = (violation) => {
 const getSeverityVariant = (violation) => {
     const level = getSeverityLevel(violation);
     const variants = {
-        'critical': 'danger',
-        'high': 'warning',
-        'medium': 'info'
+        critical: 'danger',
+        high: 'warning',
+        medium: 'info',
     };
     return variants[level] || 'warning';
 };
