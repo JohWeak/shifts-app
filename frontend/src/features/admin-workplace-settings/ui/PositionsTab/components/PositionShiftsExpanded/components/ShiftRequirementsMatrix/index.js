@@ -190,10 +190,6 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
         }, 0);
     };
 
-    const handleConfirmCancel = () => {
-        setShowConfirmModal(false);
-        blocker.reset(); // Отменяем переход
-    };
 
     const getTotalForDay = (dayOfWeek) => {
         if (!localMatrix) return 0;

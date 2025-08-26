@@ -1,6 +1,6 @@
 // backend/src/controllers/schedule/schedule-generation.controller.js
 const dayjs = require('dayjs');
-const { formatComparisonResult } = require('./helpers/date-helpers');
+
 const db = require('../../../models');
 const { Schedule, WorkSite, ScheduleAssignment } = db;
 

@@ -5,7 +5,7 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { formatDate } from 'shared/lib/utils/scheduleUtils';
 import './ValidationModal.css';
 
-const ValidationModal = ({ show, onHide, onConfirm, violations, title, isConfirming = false }) => {
+const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
     const { t } = useI18n();
     const [isProcessing, setIsProcessing] = useState(false);
 

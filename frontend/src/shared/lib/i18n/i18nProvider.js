@@ -3,7 +3,7 @@ import { en } from './locales/en';
 import { he } from './locales/he';
 import { ru } from './locales/ru';
 
-const I18nContext = createContext();
+const I18nContext = createContext(undefined);
 
 const translations = { en, he, ru };
 

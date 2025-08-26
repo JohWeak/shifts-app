@@ -71,8 +71,7 @@ class CPSATBridge {
             ShiftRequirement,
             EmployeeConstraint,
             PermanentConstraint,
-            LegalConstraint,
-            ScheduleAssignment
+            LegalConstraint
         } = this.db;
 
         try {
@@ -743,7 +742,7 @@ class CPSATBridge {
             // Count actual assignments
             const assignmentsByEmployee = {};
             const assignmentsByShift = {};
-            const assignmentsByPosition = {};
+
 
             assignments.forEach(assignment => {
                 // By day
@@ -822,7 +821,7 @@ class CPSATBridge {
             });
 
             // Check for understaffed positions
-            Object.entries(requirementsByPosition).forEach(([posId, data]) => {
+            Object.entries(requirementsByPosition).forEach(([, data]) => {
                 if (data.coverage < 100) {
                     issues.push({
                         type: 'understaffed_position',
@@ -834,7 +833,7 @@ class CPSATBridge {
             });
 
             // Check for overworked employees
-            Object.entries(assignmentsByEmployee).forEach(([empId, data]) => {
+            Object.entries(assignmentsByEmployee).forEach(([, data]) => {
                 if (data.hours > 48) {
                     issues.push({
                         type: 'overworked_employee',

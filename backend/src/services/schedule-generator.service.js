@@ -51,8 +51,7 @@ class ScheduleGeneratorService {
             ShiftRequirement,
             ScheduleSettings,
             EmployeeConstraint,
-            PermanentConstraint, // Add permanent constraints
-            WorkSite
+            PermanentConstraint
         } = this.db;
 
         try {
@@ -168,20 +167,6 @@ class ScheduleGeneratorService {
         }
     }
 
-    calculateDuration(startTime, endTime) {
-        const [startHour, startMin] = startTime.split(':').map(Number);
-        const [endHour, endMin] = endTime.split(':').map(Number);
-
-        let duration;
-        if (endHour >= startHour) {
-            duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-        } else {
-            // Overnight shift
-            duration = (24 * 60 - (startHour * 60 + startMin)) + (endHour * 60 + endMin);
-        }
-
-        return duration / 60; // Return hours
-    }
 
     async processConstraints(employees, days) {
         const cannotWork = [];
@@ -263,7 +248,6 @@ class ScheduleGeneratorService {
 
     async generateOptimalSchedule(data) {
         const {
-            weekStart,
             employees,
             shifts,
             positions,

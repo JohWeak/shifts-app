@@ -24,7 +24,7 @@ export const useScheduleActions = (schedule = null) => {
     const { t, locale } = useI18n();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [actionTarget, setActionTarget] = useState(null);
+
 
     // For detail actions
     const { editingPositions, scheduleDetails, pendingChanges } = useSelector(state => state.schedule);

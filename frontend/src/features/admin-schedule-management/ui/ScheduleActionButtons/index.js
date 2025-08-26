@@ -24,8 +24,6 @@ const ScheduleActionButtons = ({
                                    isExporting = false,
                                    hasUnsavedChanges = false,
                                    className = '',
-                                   onAutofill,
-                                   isAutofilling,
                                }) => {
     const {t, direction} = useI18n();
     const dropdownRef = useRef(null);

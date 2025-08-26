@@ -10,14 +10,3 @@ export const DEFAULT_GENERATION_SETTINGS = {
     algorithm: 'auto'
 };
 
-export const SCHEDULE_STATUS = {
-    DRAFT: 'draft',
-    PUBLISHED: 'published',
-    ARCHIVED: 'archived'
-};
-
-export const SHIFT_TYPES = {
-    MORNING: 'morning',
-    DAY: 'day',
-    NIGHT: 'night'
-};

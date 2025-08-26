@@ -374,14 +374,7 @@ const scheduleSlice = createSlice({
             console.log('Removed pending change:', key);
             console.log('Remaining pending changes:', state.pendingChanges);
         },
-        clearPositionChanges(state, action) {
-            const positionId = action.payload;
-            Object.keys(state.pendingChanges).forEach(key => {
-                if (state.pendingChanges[key].positionId === positionId) {
-                    delete state.pendingChanges[key];
-                }
-            });
-        },
+
         clearAutofilledStatus(state, action) {
             const keys = action.payload;
             if (keys && Array.isArray(keys)) {

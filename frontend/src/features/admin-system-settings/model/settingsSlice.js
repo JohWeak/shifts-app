@@ -111,5 +111,4 @@ const settingsSlice = createSlice({
     },
 });
 
-export const { updateLocalSettings, invalidateCache   } = settingsSlice.actions;
 export default settingsSlice.reducer;

@@ -47,9 +47,6 @@ const defineAssociations = () => {
         EmployeeQualification,
         PositionShift,
         ShiftRequirement,
-        LegalConstraint,
-        SchedulePeriod,
-        Workday,
         PermanentConstraintRequest,
         PermanentConstraint
     } = db;

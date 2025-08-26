@@ -5,7 +5,7 @@ const { Position, WorkSite, Employee, PositionShift } = db;
 // Get all positions with statistics
 const getAllPositions = async (req, res) => {
     try {
-        const { site_id, includeStats } = req.query;
+        const { site_id } = req.query;
         const where = {};
         if (site_id) where.site_id = site_id;
 

@@ -1,7 +1,7 @@
 // backend/src/services/EmployeeRecommendations.service.js
 // noinspection ExceptionCaughtLocallyJS
 
-const {Op} = require('sequelize');
+
 const dayjs = require('dayjs');
 const {EmployeeScorer, SCORING_CONFIG} = require('./employee-recommendation-scoring');
 
@@ -601,21 +601,12 @@ class EmployeeRecommendationService {
         const constraints = require('../config/scheduling-constraints');
         const targetDate = dayjs(date);
 
-        // Фильтруем назначения работника на соседние дни
         const relevantAssignments = employeeAssignments.filter(a => {
             const assignmentDate = dayjs(a.work_date);
             const dayDiff = Math.abs(assignmentDate.diff(targetDate, 'day'));
-            return dayDiff === 1; // Только вчера или завтра
+            return dayDiff === 1;
         });
 
-        // console.log(`[RestViolation] Checking for emp ${empId} on ${date}:`, {
-        //     targetShift: targetShift.shift_name,
-        //     relevantAssignments: relevantAssignments.length,
-        //     assignments: relevantAssignments.map(a => ({
-        //         date: a.work_date,
-        //         shift: a.shift?.shift_name
-        //     }))
-        // });
 
         for (const assignment of relevantAssignments) {
             if (!assignment.shift) {
@@ -629,17 +620,13 @@ class EmployeeRecommendationService {
             let violationType;
 
             if (assignmentDate.isBefore(targetDate)) {
-                // Previous day assignment (вчерашняя смена)
                 const prevShiftStart = parseInt(assignment.shift.start_time.split(':')[0]);
                 const prevShiftDuration = assignment.shift.duration_hours || 8;
 
-                // Рассчитываем когда закончилась вчерашняя смена
                 let prevShiftEndHour = prevShiftStart + prevShiftDuration;
 
-                // Если смена заканчивается после полуночи
                 if (prevShiftEndHour >= 24) {
                     prevShiftEndHour = prevShiftEndHour - 24;
-                    // Смена перешла на сегодня
                     const targetShiftStartHour = parseInt(targetShift.start_time.split(':')[0]);
                     restHours = targetShiftStartHour - prevShiftEndHour;
                 } else {
@@ -653,16 +640,6 @@ class EmployeeRecommendationService {
                     : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'after';
 
-                // console.log(`[RestViolation] Previous day check:`, {
-                //     prevShift: assignment.shift.shift_name,
-                //     prevStart: assignment.shift.start_time,
-                //     prevDuration: prevShiftDuration,
-                //     prevEndHour: prevShiftStart + prevShiftDuration,
-                //     targetStart: targetShift.start_time,
-                //     restHours,
-                //     requiredRest,
-                //     isViolation: restHours < requiredRest
-                // });
 
                 if (restHours < requiredRest) {
                     return {
@@ -674,21 +651,17 @@ class EmployeeRecommendationService {
                     };
                 }
             } else {
-                // Next day assignment (завтрашняя смена)
                 const targetShiftStart = parseInt(targetShift.start_time.split(':')[0]);
                 const targetShiftDuration = targetShift.duration_hours || 8;
 
-                // Рассчитываем когда закончится сегодняшняя смена
                 let targetShiftEndHour = targetShiftStart + targetShiftDuration;
 
                 const nextShiftStartHour = parseInt(assignment.shift.start_time.split(':')[0]);
 
                 if (targetShiftEndHour >= 24) {
-                    // Сегодняшняя смена заканчивается завтра
                     targetShiftEndHour = targetShiftEndHour - 24;
                     restHours = nextShiftStartHour - targetShiftEndHour;
                 } else {
-                    // Сегодняшняя смена заканчивается сегодня
                     restHours = (24 - targetShiftEndHour) + nextShiftStartHour;
                 }
 
@@ -697,17 +670,6 @@ class EmployeeRecommendationService {
                     : constraints.HARD_CONSTRAINTS.MIN_REST_AFTER_REGULAR_SHIFT;
                 violationType = 'before';
 
-                // console.log(`[RestViolation] Next day check:`, {
-                //     targetShift: targetShift.shift_name,
-                //     targetStart: targetShift.start_time,
-                //     targetDuration: targetShiftDuration,
-                //     targetEndHour: targetShiftStart + targetShiftDuration,
-                //     nextShift: assignment.shift.shift_name,
-                //     nextStart: assignment.shift.start_time,
-                //     restHours,
-                //     requiredRest,
-                //     isViolation: restHours < requiredRest
-                // });
 
                 if (restHours < requiredRest) {
                     return {

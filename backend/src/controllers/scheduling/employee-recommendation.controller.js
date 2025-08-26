@@ -7,7 +7,6 @@ class EmployeeRecommendationController {
         try {
             const { position_id, shift_id, date, schedule_id } = req.query;
 
-            // Для POST запросов virtualChanges в body, для GET - в query
             let virtualChanges;
             if (req.method === 'POST') {
                 virtualChanges = req.body?.virtualChanges || [];

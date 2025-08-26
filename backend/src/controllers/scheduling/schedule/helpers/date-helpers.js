@@ -108,7 +108,7 @@ function formatDisplayDate(dateStr) {
 /**
  * Format comparison result for response
  */
-function formatComparisonResult(result, algorithmName) {
+function formatComparisonResult(result) {
     if (result.status === 'fulfilled' && result.value?.success) {
         return {
             status: 'success',

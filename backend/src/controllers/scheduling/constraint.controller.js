@@ -6,11 +6,9 @@ const {
     PositionShift,
     ScheduleSettings,
     Position,
-    ShiftRequirement,
     WorkSite,
     PermanentConstraintRequest,
     PermanentConstraint,
-    Workday,
 } = db;
 
 const {Op} = require('sequelize');

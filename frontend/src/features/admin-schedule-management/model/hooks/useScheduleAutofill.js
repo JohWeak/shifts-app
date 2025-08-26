@@ -12,20 +12,15 @@ export const useScheduleAutofill = () => {
     const [isAutofilling, setIsAutofilling] = useState(false);
     const [autofilledChanges, setAutofilledChanges] = useState(new Set());
     const [isProcessing, setIsProcessing] = useState(false); // Separate flag for UI updates
-    const animationTimeoutRef = useRef(null);
+    useRef(null);
     const {scheduleDetails, pendingChanges} = useSelector(state => state.schedule);
-    /**
-     * Get required staff count for specific shift and day
-     */
-    const getRequiredStaffCount = useCallback((shift, dayOfWeek) => {
-        // First check if we have requirements array with day_of_week
+    useCallback((shift, dayOfWeek) => {
         if (shift.requirements && Array.isArray(shift.requirements)) {
             const dayRequirement = shift.requirements.find(req => req.day_of_week === dayOfWeek);
             if (dayRequirement !== undefined) {
                 return dayRequirement.required_staff_count || 0;
             }
         }
-
         // If no specific requirement found, return 0 (no staff needed)
         return 0;
     }, []);
@@ -176,7 +171,7 @@ export const useScheduleAutofill = () => {
         for (const recData of allRecommendations) {
             if (!recData) continue;
 
-            const {shiftKey, recommendations, positionId, shiftId, date, missing} = recData;
+            const {recommendations, positionId, shiftId, date, missing} = recData;
             totalNeeded += missing;
 
             // Initialize date tracking

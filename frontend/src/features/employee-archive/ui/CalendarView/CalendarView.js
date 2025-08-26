@@ -58,7 +58,7 @@ const CalendarView = ({
                                 active={monthStr === currentMonthStr}
                                 onClick={() => onMonthChange(date)}
                             >
-                                {formatMonthYear(date)}
+                                {formatMonthYear(date, locale)}
                             </Dropdown.Item>
                         );
                     })}

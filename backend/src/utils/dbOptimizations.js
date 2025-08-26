@@ -2,7 +2,6 @@
 const { QueryTypes } = require('sequelize');
 const sequelize = require('../config/db.config');
 
-// Функция для выполнения сырых запросов с оптимизацией
 const executeOptimizedQuery = async (query, options = {}) => {
     const defaultOptions = {
         type: QueryTypes.SELECT,

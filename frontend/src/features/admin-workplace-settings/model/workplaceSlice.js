@@ -286,7 +286,7 @@ export const preloadWorkplaceData = createAsyncThunk(
         console.log('[Cache] Preloading workplace data...');
 
         // Load work sites and positions in parallel
-        const [workSitesResult, positionsResult] = await Promise.all([
+        await Promise.all([
             dispatch(fetchWorkSites()),
             dispatch(fetchPositions())
         ]);
@@ -673,10 +673,4 @@ const workplaceSlice = createSlice({
     }
 });
 
-export const {
-    clearOperationStatus,
-    clearPositionOperationStatus,
-    clearShiftOperationStatus,
-    clearCache
-} = workplaceSlice.actions;
 export default workplaceSlice.reducer;

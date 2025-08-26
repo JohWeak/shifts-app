@@ -13,9 +13,8 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const { systemSettings } = useSelector((state) => state.settings || {});
     const { workSites } = useSelector((state) => state.schedule || {});
-    const { positions } = useSelector((state) => state.workplace || {}); // Берем из workplace, а не settings
+    const { positions } = useSelector((state) => state.workplace || {});
 
     const [formData, setFormData] = useState({
         first_name: '',

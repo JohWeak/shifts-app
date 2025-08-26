@@ -95,7 +95,7 @@ const requestsSlice = createSlice({
             .addCase(deleteRequest.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload);
             })
-            .addCase(fetchMyPermanentConstraints.pending, (state) => {
+            .addCase(fetchMyPermanentConstraints.pending, () => {
                 console.log('[requestsSlice] Fetching permanent constraints...');
             })
             .addCase(fetchMyPermanentConstraints.fulfilled, (state, action) => {

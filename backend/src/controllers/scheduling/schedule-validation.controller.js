@@ -1,6 +1,6 @@
 // backend/src/controllers/scheduling/schedule-validation.controller.js
 const { Op } = require('sequelize');
-const dayjs = require('dayjs');
+require('dayjs');
 const db = require('../../models');
 const EmployeeRecommendationService = require('../../services/employee-recommendation.service');
 const constraints = require('../../config/scheduling-constraints');

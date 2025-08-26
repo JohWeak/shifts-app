@@ -9,7 +9,6 @@ export const fetchAllRequests = createAsyncThunk(
             const response = await constraintAPI.getAllPermanentRequests();
             console.log('[fetchAllRequests] Response:', response);
 
-            // Обрабатываем разные форматы ответа
             if (Array.isArray(response)) {
                 return response;
             } else if (response && response.data) {
@@ -75,5 +74,5 @@ const adminRequestsSlice = createSlice({
     }
 });
 
-export const { updatePendingCount } = adminRequestsSlice.actions;
+
 export default adminRequestsSlice.reducer;

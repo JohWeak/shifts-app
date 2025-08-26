@@ -11,7 +11,6 @@ import {formatWeekRange, formatDate as formatDateUtil } from "shared/lib/utils/s
 
 const ScheduleInfo = ({
                           schedule,
-                          positions = [],
                           onPublish,
                           onUnpublish,
                           onExport,

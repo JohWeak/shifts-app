@@ -21,10 +21,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(50),
             allowNull: true,
             validate: {
-                // Убираем is валидатор или делаем его опциональным
                 isValidPhone(value) {
-                    if (!value || value === '') return true; // Пустое значение разрешено
-                    // Базовая проверка формата телефона
+                    if (!value || value === '') return true;
                     const phoneRegex = /^[\d\s\-\+\(\)]+$/;
                     if (!phoneRegex.test(value)) {
                         throw new Error('Invalid phone format');

@@ -322,7 +322,7 @@ const updateScheduleStatus = async (req, res) => {
             {where: {id: scheduleId}}
         );
         // Возвращаем обновленное расписание с связями
-        const updatedSchedule = await Schedule.findByPk(scheduleId, {
+        await Schedule.findByPk(scheduleId, {
             include: [
                 {
                     model: WorkSite,

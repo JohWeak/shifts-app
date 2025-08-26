@@ -43,7 +43,7 @@ const CompareAlgorithmsModal = ({
 
                 <Row className="justify-content-center">
                     {Object.entries(comparison)
-                        .filter(([algorithm, result]) => algorithm !== 'recommended')
+                        .filter(([algorithm]) => algorithm !== 'recommended')
                         .map(([algorithm, result]) => (
                             <Col md={6} lg={5} key={algorithm} className="mb-4">
                                 <Card className={`h-100 ${best_algorithm === algorithm ? 'border-success' : ''}`}>

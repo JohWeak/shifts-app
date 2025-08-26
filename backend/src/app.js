@@ -55,7 +55,7 @@ app.use('/api/settings', require('./routes/settings.routes'));
 app.use('/api/test', require('./routes/test.routes'));
 
 // Error handling middleware
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
     console.error('SERVER ERROR:', error);
     res.status(500).json({
         message: 'Internal server error',

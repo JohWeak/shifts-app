@@ -1,7 +1,7 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/index.js
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Button, Table, Badge, Alert, Card, OverlayTrigger, Tooltip, Nav, Spinner, Tab} from 'react-bootstrap';
+import {Button, Table, Badge, Card, OverlayTrigger, Tooltip, Nav, Spinner, Tab} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {AnimatePresence} from 'motion/react';
 import * as motion from "motion/react-client"
@@ -67,13 +67,6 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
             }));
         }
     };
-    const handleRestoreShift = async (shiftId) => {
-        dispatch(addNotification({
-            variant: 'error',
-            message: t('workplace.shifts.deleteFailed'),
-            duration: 1000
-        }));
-    }
 
     const handleShiftFormClose = () => {
         setShowShiftForm(false);
@@ -224,7 +217,6 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                                                         item={shift}
                                                                         onEdit={() => handleEditShift(shift)}
                                                                         onDelete={() => handleDeleteShift(shift.id)}
-                                                                        onRestore={handleRestoreShift}
                                                                     />
 
                                                                 </td>

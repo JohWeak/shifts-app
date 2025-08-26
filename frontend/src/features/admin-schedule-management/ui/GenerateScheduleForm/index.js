@@ -1,6 +1,6 @@
 //frontend/src/features/admin-schedule-management/ui/generate-schedule/index.js
 import React, {useState, useEffect, useMemo} from 'react';
-import {Form, Button, Row, Col, Spinner, Card} from 'react-bootstrap';
+import {Form, Button, Spinner, Card} from 'react-bootstrap';
 import {useSelector} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {getNextWeekStart} from 'shared/lib/utils/scheduleUtils';
@@ -21,10 +21,10 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
         algorithm: 'auto',
         position_ids: []
     });
-    const [formError,setFormError] = useState('');
+
 
     const safeWorkSites = useMemo(() => workSites || [], [workSites]);
-    const safeAlgorithmTypes = useMemo(() => ALGORITHM_TYPES || [], []);
+    useMemo(() => ALGORITHM_TYPES || [], []);
 
     const availablePositions = useMemo(() => {
         if (!settings.site_id || !allPositions) return [];

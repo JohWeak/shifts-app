@@ -199,26 +199,7 @@ const findAll = async (req, res) => {
     }
 };
 
-const findAllBasic = async (req, res) => {
-    try {
-        const employees = await Employee.findAll({
-            attributes: ['emp_id', 'first_name', 'last_name', 'default_position_id', 'work_site_id'],
-            where: { status: 'active' },
-            order: [['first_name', 'ASC'], ['last_name', 'ASC']]
-        });
 
-        res.json({
-            success: true,
-            data: employees
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching employees',
-            error: error.message
-        });
-    }
-};
 
 // Get employee by ID
 const findOne = async (req, res) => {

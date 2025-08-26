@@ -1,5 +1,5 @@
 // frontend/src/features/employee-archive/index.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -17,12 +17,9 @@ import './index.css';
 
 const EmployeeArchive = () => {
     const { t } = useI18n();
-    const { user } = useSelector(state => state.auth);
-
     const dispatch = useDispatch();
 
 
-    // --- Данные получаем из Redux ---
     const {
         archiveSummary,
         archiveSummaryLoading,

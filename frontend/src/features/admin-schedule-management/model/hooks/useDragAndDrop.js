@@ -4,9 +4,9 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
     const [draggedItem, setDraggedItem] = useState(null);
     const [dragOverEmployeeId, setDragOverEmployeeId] = useState(null);
 
-    // Вспомогательная функция для проверки с временными изменениями
+
     const checkEmployeeInCellWithTempChanges = useCallback((empId, cell, tempChanges) => {
-        // Сначала проверяем pending removals в временных изменениях
+
         const hasPendingRemoval = Object.values(tempChanges).some(change => {
             return change.action === 'remove' &&
                 change.empId === empId &&
@@ -16,10 +16,8 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         });
 
         if (hasPendingRemoval) {
-            return false; // Можно добавлять
+            return false;
         }
-
-        // Затем проверяем существующие назначения
         const existingInCell = assignments.some(emp => {
             return emp.emp_id === empId &&
                 emp.work_date === cell.date &&
@@ -31,20 +29,16 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             return true;
         }
 
-        // Проверяем pending additions
-        const hasPendingAddition = Object.values(tempChanges).some(change => {
+        return Object.values(tempChanges).some(change => {
             return change.action === 'assign' &&
                 change.empId === empId &&
                 change.date === cell.date &&
                 change.shiftId === cell.shiftId &&
                 change.positionId === cell.positionId;
         });
-
-        return hasPendingAddition;
     }, [assignments]);
 
     const checkEmployeeInCell = useCallback((empId, cell) => {
-        // Защита от undefined
         if (!cell || cell.date === undefined || cell.shiftId === undefined || cell.positionId === undefined) {
             console.error('Invalid cell data:', cell);
             return false;
@@ -55,7 +49,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             return false;
         }
 
-        // Если сотрудник удален из этой ячейки временно, его МОЖНО добавить обратно
         const hasPendingRemoval = Object.values(pendingChanges).some(change => {
             return change.action === 'remove' &&
                 change.empId === empId &&
@@ -65,12 +58,10 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         });
 
         if (hasPendingRemoval) {
-            // Сотрудник временно удален из этой ячейки - можно добавлять обратно
             console.log('Employee has pending removal from this cell, can be re-added');
             return false;
         }
 
-        // Проверяем существующие назначения (только если НЕТ pending removal)
         const existingInCell = assignments.some(emp => {
             return emp.emp_id === empId &&
                 emp.work_date === cell.date &&
@@ -79,13 +70,11 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         });
 
         if (existingInCell) {
-            // Сотрудник уже есть в ячейке И не удален временно
+
             console.log('Employee exists in cell without pending removal');
             return true;
         }
 
-
-        // 3. Проверяем в pending additions
         const hasPendingAddition = Object.values(pendingChanges).some(change => {
             return change.action === 'assign' &&
                 change.empId === empId &&
@@ -103,11 +92,9 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
     }, [pendingChanges, assignments]);
 
     const checkForDuplicateOnSwap = useCallback((draggedEmp, fromCell, targetEmp, targetCell) => {
-        // Создаем временные изменения
         const tempChanges = { ...pendingChanges };
         const timestamp = Date.now();
 
-        // Временно "удаляем" обоих
         tempChanges[`temp-${timestamp}-1`] = {
             action: 'remove',
             empId: draggedEmp.empId,
@@ -124,7 +111,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             positionId: targetCell.positionId
         };
 
-        // Проверяем будут ли дубликаты
         const draggedWillDuplicate = checkEmployeeInCellWithTempChanges(
             draggedEmp.empId,
             targetCell,
@@ -164,11 +150,9 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         const targetEmployeeData = targetEmployeeEl ?
             JSON.parse(targetEmployeeEl.dataset.employeeData || '{}') : null;
 
-        // Устанавливаем подсветку сотрудника при наведении
         if (targetEmployeeData && targetEmployeeData.empId) {
             setDragOverEmployeeId(targetEmployeeData.empId);
 
-            // Проверяем, будет ли дубликат при свапе
             if (draggedItem.employee.empId !== targetEmployeeData.empId) {
                 const wouldCreateDuplicate = checkForDuplicateOnSwap(
                     draggedItem.employee,
@@ -188,7 +172,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         } else {
             setDragOverEmployeeId(null);
 
-            // Проверяем дубликат для пустой ячейки
             const wouldCreateDuplicate = checkEmployeeInCell(
                 draggedItem.employee.empId,
                 targetCell
@@ -203,18 +186,15 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             }
         }
 
-        // Добавляем базовый класс drag-over
         e.currentTarget.classList.add('drag-over');
     }, [isEditMode, draggedItem, checkEmployeeInCell, checkForDuplicateOnSwap]);
 
     const handleDragLeave = useCallback((e) => {
         if (!isEditMode) return;
 
-        // Убираем классы только если действительно покидаем элемент
         if (!e.currentTarget.contains(e.relatedTarget)) {
             e.currentTarget.classList.remove('drag-over', 'has-duplicate');
 
-            // Убираем подсветку с сотрудников
             const employees = e.currentTarget.querySelectorAll('.draggable-employee');
             employees.forEach(el => el.classList.remove('is-duplicate', 'drag-over'));
 
@@ -231,8 +211,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
     const handleDragLeaveEmployee = useCallback(() => {
         setDragOverEmployeeId(null);
     }, []);
-
-
 
 
     const createChangesOnDrop = useCallback((targetCell, targetEmployee = null) => {
@@ -257,7 +235,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         const timestamp = Date.now();
 
 
-        // Проверяем, не пытаемся ли мы дропнуть в то же место
+
         if (fromCell.date === targetCell.date &&
             fromCell.shiftId === targetCell.shiftId &&
             fromCell.positionId === targetCell.positionId) {
@@ -265,12 +243,12 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             return [];
         }
 
-        // SWAP - меняем местами
+        // SWAP
         if (targetEmployee && targetEmployee.empId !== dragged.empId) {
             console.log('SWAP operation detected');
 
 
-            // Создаем временные изменения для проверки
+
             const tempPendingChanges = {...pendingChanges};
 
             tempPendingChanges[`temp-${timestamp}-1`] = {
@@ -289,7 +267,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                 positionId: targetCell.positionId
             };
 
-            // Теперь проверяем с учетом временных удалений
             const draggedWillDuplicate = checkEmployeeInCellWithTempChanges(
                 dragged.empId,
                 targetCell,
@@ -312,10 +289,8 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
             console.log('SWAP is valid, creating changes');
 
-            // Создаем изменения для swap
-            // 1. Удаляем перетаскиваемого из исходной ячейки
+
             if (!draggedWillDuplicate && !targetWillDuplicate) {
-                // 1. Удаляем dragged из исходной
                 if (dragged.isPending && dragged.pendingKey) {
                     changes.push({
                         action: 'removePending',
@@ -335,7 +310,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                     });
                 }
 
-                // 2. Удаляем target из целевой
                 if (targetEmployee.isPending && targetEmployee.pendingKey) {
                     changes.push({
                         action: 'removePending',
@@ -355,7 +329,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                     });
                 }
 
-                // 3. Добавляем dragged в целевую
                 changes.push({
                     key: `assign-${dragged.empId}-${timestamp}-to-target`,
                     change: {
@@ -368,7 +341,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                     }
                 });
 
-                // 4. Добавляем target в исходную
                 changes.push({
                     key: `assign-${targetEmployee.empId}-${timestamp}-to-from`,
                     change: {
@@ -382,13 +354,11 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                 });
             }
         }
-        // MOVE - простое перемещение
         else if (!targetEmployee) {
             console.log('MOVE operation detected');
 
             const tempPendingChanges = { ...pendingChanges };
 
-            // Добавляем временное удаление из исходной ячейки
             if (!dragged.isPending) {
                 tempPendingChanges[`temp-${timestamp}`] = {
                     action: 'remove',
@@ -398,7 +368,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                     positionId: fromCell.positionId
                 };
             }
-            // Проверяем, нет ли уже этого сотрудника в целевой ячейке
             const alreadyInTarget = checkEmployeeInCellWithTempChanges(
                 dragged.empId,
                 targetCell,
@@ -415,7 +384,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
             console.log('MOVE is valid, creating changes');
 
-            // 1. Удаляем из старого места
             if (dragged.isPending && dragged.pendingKey) {
                 changes.push({
                     action: 'removePending',
@@ -460,7 +428,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         handleDragStart,
         handleDragEnd,
         handleDragOver,
-        handleDragEnter: (e) => e.currentTarget.classList.add('drag-over'),
         handleDragLeave,
         handleDragEnterEmployee,
         handleDragLeaveEmployee,

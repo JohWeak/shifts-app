@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/index.js
 import React, {useState, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Card, Container, Toast, ToastContainer, Button} from 'react-bootstrap';
+import {Card, Container, Toast, ToastContainer} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
@@ -24,14 +24,12 @@ import {
     submitWeeklyConstraints,
     updateConstraint,
     setCurrentMode,
-    clearSubmitStatus,
     enableEditing,
     resetConstraints,
     cancelEditing,
     submissionInitiated
 } from './model/constraintSlice';
 
-import {formatEmployeeName} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
 import './index.css';
 
@@ -103,7 +101,6 @@ const ConstraintsSchedule = () => {
         weeklyTemplate,
         weeklyConstraints,
         submitting,
-        submitStatus,
         currentMode,
         loading,
         error,
@@ -330,7 +327,6 @@ const ConstraintsSchedule = () => {
         cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
         preferWork: weeklyTemplate.constraints.limits.prefer_work_days
     };
-    const employeeName = formatEmployeeName(weeklyTemplate.employee);
 
     return (
         <Container fluid className="employee-constraints-container position-relative">
@@ -345,8 +341,6 @@ const ConstraintsSchedule = () => {
                     className="mb-1"
                     title={t('schedule.nextWeek')}
                     week={weeklyTemplate.weekStart}
-                    // position={weeklyTemplate.employee?.position}
-                    // empName={employeeName}
                 />
                 <ConstraintGrid
                     template={weeklyTemplate.constraints.template}

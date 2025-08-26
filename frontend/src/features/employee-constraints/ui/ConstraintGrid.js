@@ -53,8 +53,7 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => 
 };
 
 
-// Компонент для отрисовки заголовка смены (может быть как <th>, так и <td>)
-const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th', isMobile = false}) => {
+const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th'}) => {
     const canonicalType = getCanonicalShiftType(shift.shift_name);
     const icon = getShiftIcon(canonicalType);
 

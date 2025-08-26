@@ -5,7 +5,6 @@ import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { scheduleAPI } from 'shared/api/apiService';
 
 export const useScheduleValidation = () => {
-    const { t } = useI18n();
     const { scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
 
     /**

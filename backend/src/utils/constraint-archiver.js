@@ -22,7 +22,7 @@ const archiveOldConstraints = async () => {
         });
 
         if (oldConstraints.length > 0) {
-            // Create archive records (you'll need to create this table)
+            // Create archive records (need to create this table)
             const archiveData = oldConstraints.map(c => ({
                 original_id: c.id,
                 data: JSON.stringify(c.toJSON()),
