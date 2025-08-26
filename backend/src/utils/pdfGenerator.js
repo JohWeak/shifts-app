@@ -109,7 +109,7 @@ class PDFGenerator {
 
         return `
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
             <meta charset="utf-8">
             <title>${this.messages.WORK_SCHEDULE_TITLE} - ${data.schedule.site}</title>
