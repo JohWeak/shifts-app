@@ -1,14 +1,14 @@
 // backend/src/routes/employee.routes.js
 const express = require('express');
 const employeeController = require('../controllers/core/employee.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
 const EmployeeRecommendationController = require('../controllers/scheduling/employee-recommendation.controller');
 
 const router = express.Router();
 
 router.get('/my-shifts', verifyToken, employeeController.getMyShifts);
 
-// Employee recommendations route - ПЕРЕД /:id маршрутами!
+// Employee recommendations route
 router.get('/recommendations', verifyToken, EmployeeRecommendationController.getRecommendations);
 router.post('/recommendations', verifyToken, EmployeeRecommendationController.getRecommendations);
 
@@ -25,7 +25,6 @@ router.get('/:id/constraints', verifyToken, employeeController.getConstraints);
 // Employee qualifications routes
 router.get('/:id/qualifications', verifyToken, employeeController.getQualifications);
 router.post('/:id/qualifications', ...[verifyToken, isAdmin], employeeController.addQualification);
-
 
 
 module.exports = router;

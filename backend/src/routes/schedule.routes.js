@@ -1,6 +1,6 @@
 // backend/src/routes/schedule.routes.js
 const express = require('express');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
 
 // Импортируем контроллеры напрямую
 const scheduleController = require('../controllers/scheduling/schedule/schedule.controller');
@@ -33,13 +33,6 @@ router.put('/:scheduleId/status', ...[verifyToken, isAdmin], scheduleController.
 router.put('/:scheduleId/update-assignments', ...[verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
 router.delete('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.deleteSchedule);
 router.get('/admin/weekly', ...[verifyToken, isAdmin], employeeController.getAdminWeeklySchedule);
-
-router.get('/schedules/validation-check', (req, res) => {
-    res.json({
-        message: 'Validation endpoint is available',
-        path: '/api/schedules/:id/validate'
-    });
-});
 
 
 module.exports = router;

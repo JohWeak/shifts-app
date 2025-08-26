@@ -5,7 +5,7 @@ module.exports = {
     db: {
         host: process.env.DB_HOST,
         database: process.env.DB_NAME,
-        // ...
+
     },
     jwt: {
         secret: process.env.JWT_SECRET,

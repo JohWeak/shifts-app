@@ -101,15 +101,15 @@ class UniversalShiftSchedulerCP:
         assignments = {}
         for emp in employees:
             emp_id = emp['emp_id']
-            emp_position = emp.get('default_position_id')  # Получаем позицию сотрудника
+            emp_position = emp.get('default_position_id')
 
             for day_idx, day in enumerate(days):
                 for position in positions:
                     pos_id = position['pos_id']
 
-                    # создаем переменные ТОЛЬКО для позиции сотрудника
+                    # Create variables ONLY for the employee position.
                     if emp_position != pos_id:
-                        continue  # если позиция не совпадает
+                        continue
 
                     pos_str = str(pos_id)
                     # Get valid shifts for this position
@@ -126,7 +126,7 @@ class UniversalShiftSchedulerCP:
 
         # 1. APPLY ALL CONSTRAINTS IN ORDER OF PRIORITY
 
-        # 1.1 PERMANENT CONSTRAINTS (highest priority - absolutely cannot be violated)
+        # 1.1 PERMANENT CONSTRAINTS (the highest priority - absolutely cannot be violated)
         applied_permanent = 0
         blocked_assignments = set()  # Track what we've blocked
 
@@ -137,7 +137,7 @@ class UniversalShiftSchedulerCP:
 
             print(f"[CP-SAT] Applying permanent constraint: emp={emp_id}, day={day_idx}, shift={shift_id}")
 
-            # Find employee's position
+            # Find an employee's position
             emp = next((e for e in employees if e['emp_id'] == emp_id), None)
             if not emp:
                 continue
@@ -153,7 +153,7 @@ class UniversalShiftSchedulerCP:
                     applied_permanent += 1
                     print(f"[CP-SAT] Blocked: emp {emp_id} on day {day_idx} shift {shift_id}")
             else:
-                # All shifts on this day - block ALL shifts for this employee
+                # All shifts on this day - block ALL shift for this employee
                 blocked_count = 0
                 for shift in shifts:
                     key = (emp_id, day_idx, shift['shift_id'], emp_position_id)
@@ -196,7 +196,7 @@ class UniversalShiftSchedulerCP:
         shortage_vars = []
         shift_requirements = data.get('shift_requirements', {})
 
-        # ВАЖНО: Создаем ограничения ТОЛЬКО для существующих требований
+        # Create limitations ONLY for existing requirements.
         for day_idx, day in enumerate(days):
             date_str = day['date']
 
@@ -212,7 +212,7 @@ class UniversalShiftSchedulerCP:
                     requirement_key = f"{pos_id}-{shift_id}-{date_str}"
                     requirement = shift_requirements.get(requirement_key)
 
-                    # КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Обрабатываем ТОЛЬКО если есть требование
+                    # Process ONLY if there is a requirement.
                     if requirement and requirement.get('required_staff', 0) > 0:
                         required_employees = requirement.get('required_staff')
 
@@ -254,12 +254,12 @@ class UniversalShiftSchedulerCP:
                                 print(
                                     f"[CP-SAT] Warning: Only {len(assignment_vars)} candidates for {required_employees} required")
                     else:
-                        # НЕТ ТРЕБОВАНИЯ = ЗАПРЕЩАЕМ назначения на этот день/смену/позицию
+                        # NO REQUIREMENT = we prohibit assignments for this day/shift/position
                         for emp in employees:
                             if emp.get('default_position_id') == pos_id:
                                 key = (emp['emp_id'], day_idx, shift_id, pos_id)
                                 if key in assignments:
-                                    # ВАЖНО: Запрещаем назначение если нет требования
+                                    # Assignment is prohibited if there is no requirement.
                                     self.model.Add(assignments[key] == 0)
 
         print(f"[CP-SAT] Total shortage variables: {len(shortage_vars)}")
@@ -389,7 +389,7 @@ class UniversalShiftSchedulerCP:
 
         # 5. OPTIMIZATION OBJECTIVE (using pre-initialized objective_terms)
 
-        # 5.1 Minimize shortage (highest priority - but should be 0 if we have enough employees)
+        # 5.1 Minimize shortage (the highest priority - but should be 0 if we have enough employees)
         for shortage_var in shortage_vars:
             objective_terms.append(shortage_var * -shortage_penalty)
 
@@ -430,9 +430,9 @@ class UniversalShiftSchedulerCP:
                             )
 
         # 5.4 REMOVE workload balancing - we don't want to spread work equally
-        # We want to use minimum number of employees needed
+        # We want to use the minimum number of employees needed
 
-        # 5.5 Add small penalty for using too many different employees
+        # 5.5 Add a small penalty for using too many different employees
         # This encourages using fewer employees more consistently
         unique_employees_working = []
         for emp in employees:
@@ -483,7 +483,7 @@ class UniversalShiftSchedulerCP:
                 'objective_value': self.solver.ObjectiveValue()
             }
 
-            # Check prefer work satisfaction
+            # Check prefers work satisfaction
             for constraint in prefer_work:
                 emp_id = constraint['emp_id']
                 day_idx = constraint['day_index']
@@ -554,7 +554,7 @@ class UniversalShiftSchedulerCP:
                 'schedule': schedule,
                 'stats': stats,
                 'status': 'optimal' if status == cp_model.OPTIMAL else 'feasible',
-                'solve_time': self.solver.WallTime() * 1000,  # Convert to ms
+                'solve_time': self.solver.WallTime() * 1000,
                 'coverage_rate': (1 - stats['total_shortage'] / max(1, len(shortage_vars))) * 100,
                 'shortage_count': stats['total_shortage']
             }

@@ -1,10 +1,10 @@
 // backend/src/services/cp-sat-bridge.service.js
-const { spawn } = require('child_process');
+const {spawn} = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
 const db = require('../models');
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const CONSTRAINTS = require('../config/scheduling-constraints');
 
 class CPSATBridge {
@@ -12,7 +12,7 @@ class CPSATBridge {
         this.db = database || db;
     }
 
-     async generateOptimalSchedule(siteId, weekStart, transaction = null) {
+    async generateOptimalSchedule(siteId, weekStart, transaction = null) {
 
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
@@ -877,6 +877,7 @@ class CPSATBridge {
             };
         }
     }
+
     /**
      * Calculate schedule statistics
      */
@@ -901,7 +902,7 @@ class CPSATBridge {
     }
 
     /**
-     * Get schedule statistics for dashboard (public method)
+     * Get schedule statistics for the dashboard
      */
     async getScheduleStatistics(scheduleId) {
         const {ScheduleAssignment, Schedule} = this.db;
@@ -931,5 +932,6 @@ class CPSATBridge {
         }
     }
 }
+
 const cpSatBridge = new CPSATBridge(db);
 module.exports = cpSatBridge;

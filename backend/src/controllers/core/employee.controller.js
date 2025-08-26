@@ -379,7 +379,7 @@ const addQualification = async (req, res) => {
 };
 const getMyShifts = async (req, res) => {
     try {
-        const empId = req.userId; // Из токена авторизации
+        const empId = req.userId;
 
         const employee = await Employee.findByPk(empId, {
             include: [{
