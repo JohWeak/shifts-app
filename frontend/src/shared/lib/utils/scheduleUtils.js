@@ -1,38 +1,40 @@
 // frontend/src/shared/lib/utils/scheduleUtils.js
 import {
-    format,
     addDays,
-    parseISO,
-    isValid,
-    startOfWeek,
-    endOfWeek,
-    startOfMonth,
-    endOfMonth,
     eachDayOfInterval,
-    isSameDay, isAfter
+    endOfMonth,
+    endOfWeek,
+    format,
+    isAfter,
+    isSameDay,
+    isValid,
+    parseISO,
+    startOfMonth,
+    startOfWeek
 } from 'date-fns';
-import { enUS, he, ru } from 'date-fns/locale';
+import {enUS, he, ru} from 'date-fns/locale';
+
 const dateFnsLocales = {
     en: enUS,
     he: he,
     ru: ru
 };
 /**
- * Форматирует дату в заданный строковый формат, поддерживая числовые и текстовые значения.
+ * Formats a date into a specified string format, supporting numeric and text values.
  *
- * Плейсхолдеры:
- * - Год:   YYYY (2025), YY (25)
- * - Месяц: MMMM (August), MMM (Aug), MM (08), M (8)
- * - День:  DD (05), D (5)
- * - День недели:
- *   - dddd: Полное название (e.g., Wednesday)
- *   - ddd:  Короткое название (e.g., Wed)
- *   - dd:   Самое короткое название (e.g., W)
+ * Placeholders:
+ * - Year:   YYYY (2025), YY (25)
+ * - Month:  MMMM (August), MMM (Aug), MM (08), M (8)
+ * - Day:    DD (05), D (5)
+ * - Day of the week:
+ *   - dddd: Full name (e.g., Wednesday)
+ *   - ddd:  Short name (e.g., Wed)
+ *   - dd:   Shortest name (e.g., W)
  *
- * @param {string | Date} dateInput - Входная дата в виде строки или объекта Date.
- * @param {string} format - Строка формата, например 'dddd, D MMMM YYYY'.
- * @param {string} [locale='en-US'] - Локаль для названий месяцев и дней недели (e.g., 'ru-RU').
- * @returns {string} - Отформатированная строка даты или пустая строка при ошибке.
+ * @param {string | Date} dateInput - The input date as a string or Date object.
+ * @param {string} format - The format string, e.g., 'dddd, D MMMM YYYY'.
+ * @param {string} [locale='en-US'] - The locale for month and day names (e.g., 'ru-RU').
+ * @returns {string} - The formatted date string or an empty string on error.
  */
 export const formatDate = (dateInput, format = 'DD.MM.YYYY', locale = 'en-US') => {
     const date = new Date(dateInput);
@@ -49,16 +51,16 @@ export const formatDate = (dateInput, format = 'DD.MM.YYYY', locale = 'en-US') =
     const replacements = {
         YYYY: year,
         YY: String(year).slice(-2),
-        MMMM: new Intl.DateTimeFormat(locale, { month: 'long' }).format(date),
-        MMM: new Intl.DateTimeFormat(locale, { month: 'short' }).format(date),
+        MMMM: new Intl.DateTimeFormat(locale, {month: 'long'}).format(date),
+        MMM: new Intl.DateTimeFormat(locale, {month: 'short'}).format(date),
         MM: String(month).padStart(2, '0'),
         M: month,
         DD: String(day).padStart(2, '0'),
         D: day,
 
-        dddd: new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date),
-        ddd: new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date),
-        dd: new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(date),
+        dddd: new Intl.DateTimeFormat(locale, {weekday: 'long'}).format(date),
+        ddd: new Intl.DateTimeFormat(locale, {weekday: 'short'}).format(date),
+        dd: new Intl.DateTimeFormat(locale, {weekday: 'narrow'}).format(date),
     };
 
 
@@ -69,7 +71,11 @@ export const formatDate = (dateInput, format = 'DD.MM.YYYY', locale = 'en-US') =
 
 
 /**
- * Получает дату начала следующей недели
+ * Calculates the date of the start of the next week based on a given starting day.
+ *
+ * @param {number} [weekStartDay=0] - The first day of the week (0 for Sunday, 1 for Monday, etc.).
+ * Defaults to Sunday if not provided.
+ * @returns {Date} The date of the next week's starting day.
  */
 export const getNextWeekStart = (weekStartDay = 0) => {
     const today = new Date();
@@ -77,7 +83,7 @@ export const getNextWeekStart = (weekStartDay = 0) => {
 
     let daysUntilStart;
     if (currentDay === weekStartDay) {
-        daysUntilStart = 7; // Следующая неделя
+        daysUntilStart = 7; // Next week
     } else {
         daysUntilStart = (weekStartDay - currentDay + 7) % 7;
     }
@@ -90,7 +96,13 @@ export const getNextWeekStart = (weekStartDay = 0) => {
 };
 
 /**
- * Получает массив дат для недели
+ * Generates an array of date objects for a week starting from a specified date.
+ *
+ * @param {string} startDate - The start date as a string in ISO format (e.g., "YYYY-MM-DD").
+ * @param {number} [weekStartDay=0] - The first day of the week (default is 0 for Sunday).
+ *                                     Accepts values from 0 (Sunday) to 6 (Saturday).
+ * @returns {Date[]} An array containing 7 date objects, each representing a day
+ *                   within the week that starts on the specified weekStartDay.
  */
 export const getWeekDates = (startDate, weekStartDay = 0) => {
     const start = parseISO(startDate);
@@ -110,7 +122,15 @@ export const getWeekDates = (startDate, weekStartDay = 0) => {
 };
 
 /**
- * Форматирует диапазон дат расписания
+ * Formats the schedule date from a given start date and an optional end date.
+ *
+ * If the start date is provided, it formats the range as "dd/MM - dd/MM, yyyy".
+ * If an end date is not provided, it calculates the end date as 6 days from the start date.
+ * If the input is invalid or an error occurs, it returns the original start date.
+ *
+ * @param {string} startDate - The starting date of the schedule, in ISO format.
+ * @param {string|null} [endDate=null] - The optional ending date of the schedule, in ISO format.
+ * @returns {string} A formatted date range if valid, or the original startDate if invalid.
  */
 export const formatScheduleDate = (startDate, endDate = null) => {
     if (!startDate) return '-';
@@ -118,10 +138,9 @@ export const formatScheduleDate = (startDate, endDate = null) => {
     try {
         const start = parseISO(startDate);
         if (!endDate) {
-             end = addDays(start, 6);
-        }
-        else {
-             end = parseISO(endDate);
+            end = addDays(start, 6);
+        } else {
+            end = parseISO(endDate);
         }
 
         return `${format(start, 'dd/MM')} - ${format(end, 'dd/MM, yyyy')}`;
@@ -131,39 +150,38 @@ export const formatScheduleDate = (startDate, endDate = null) => {
 };
 
 /**
- * Форматирует диапазон времени смены (например: "06:00-14:00").
- * Может принимать либо длительность, либо время окончания.
- * @param {string} startTime - Время начала в формате "HH:MM:SS".
- * @param {number | string} endOrDuration - Длительность в часах (number) ИЛИ время окончания в формате "HH:MM:SS" (string).
- * @returns {string} - Отформатированное время.
+ * Formats a shift time range (e.g., "06:00-14:00").
+ * Can accept either a duration or an end time.
+ * @param {string} startTime - The start time in "HH:MM:SS" format.
+ * @param {number | string} endOrDuration - The duration in hours (number) OR the end time in "HH:MM:SS" format (string).
+ * @returns {string} - The formatted time string.
  */
 export const formatShiftTime = (startTime, endOrDuration) => {
-    // Проверка на наличие базовых данных
+    // Check for basic data
     if (!startTime || !endOrDuration) return '';
 
     try {
-        // Форматируем время начала (всегда нужно)
+        // Format the start time (always needed)
         const cleanStart = startTime.substring(0, 5);
         let cleanEnd;
 
 
         if (typeof endOrDuration === 'string' && endOrDuration.includes(':')) {
-            // --- Сценарий 1: Передано startTime + endTime ---
-            const endTime = endOrDuration;
-            cleanEnd = endTime.substring(0, 5);
+            // --- Scenario 1: startTime + endTime provided ---
+            cleanEnd = endOrDuration.substring(0, 5);
 
         } else {
-            // --- Сценарий 2: Передано startTime + duration ---
+            // --- Scenario 2: startTime + duration provided ---
             const duration = typeof endOrDuration === 'number'
                 ? endOrDuration
                 : parseFloat(endOrDuration);
 
             if (isNaN(duration)) {
-                console.warn('Некорректная длительность в formatShiftTime:', endOrDuration);
+                console.warn('Invalid duration in formatShiftTime:', endOrDuration);
                 return cleanStart;
             }
 
-            // Ваша оригинальная, рабочая логика для вычисления времени окончания
+            // Your original, working logic for calculating the end time
             const [hours, minutes] = startTime.split(':').map(Number);
             const startMinutes = hours * 60 + minutes;
             const endMinutes = startMinutes + (duration * 60);
@@ -176,25 +194,25 @@ export const formatShiftTime = (startTime, endOrDuration) => {
         return `${cleanStart}-${cleanEnd}`;
 
     } catch (error) {
-        console.error("Ошибка при форматировании времени смены:", error);
+        console.error("Error formatting shift time:", error);
         return startTime;
     }
 };
 
 /**
- * Форматирует дату для заголовка расписания
- * @param {Date} date - Дата
- * @returns {string} - Отформатированная дата
+ * Formats the date for a schedule header.
+ * @param {Date} date - The date object.
+ * @returns {string} - The formatted date.
  */
 export const formatTableHeaderDate = (date) => {
-    return format(date,  'dd/MM');
+    return format(date, 'dd/MM');
 };
 
 /**
- * Получает локализованные названия дней недели
- * @param {function} t - Функция перевода
- * @param {boolean} short - Использовать короткие названия
- * @returns {string[]} - Массив названий дней
+ * Gets localized names of the days of the week.
+ * @param {function} t - The translation function.
+ * @param {boolean} short - Whether to use short names.
+ * @returns {string[]} - An array of day names.
  */
 export const getDayNames = (t, short = false) => {
     const prefix = short ? 'days.short.' : 'days.';
@@ -210,17 +228,27 @@ export const getDayNames = (t, short = false) => {
 };
 
 /**
- * Получает название дня по индексу
- * @param {number} dayIndex - Индекс дня (0-6)
- * @param {function} t - Функция перевода
- * @param {boolean} short - Использовать короткое название
- * @returns {string} - Название дня
+ * Gets the name of a day by its index.
+ * @param {number} dayIndex - The day index (0-6).
+ * @param {function} t - The translation function.
+ * @param {boolean} short - Whether to use the short name.
+ * @returns {string} - The name of the day.
  */
 export const getDayName = (dayIndex, t, short = false) => {
     const dayNames = getDayNames(t, short);
     return dayNames[dayIndex] || '';
 };
 
+/**
+ * Determines the badge variant based on the provided status.
+ *
+ * The function returns a string that represents the badge variant for a given status.
+ * The mappings of statuses to badge variants are predefined in the function's internal object.
+ * If the provided status does not match any of the predefined statuses, the function returns 'secondary' as the default variant.
+ *
+ * @param {string} status - The current status for which the badge variant is determined.
+ * @returns {string} The corresponding badge variant ('success', 'warning', 'secondary', 'danger') for the given status.
+ */
 export const getStatusBadgeVariant = (status) => {
     const variants = {
         published: 'success',
@@ -233,9 +261,9 @@ export const getStatusBadgeVariant = (status) => {
 };
 
 /**
- * Превращает первую букву строки в заглавную.
- * @param {string} str - Входящая строка.
- * @returns {string} - Строка с заглавной первой буквой.
+ * Capitalizes the first letter of a string.
+ * @param {string} str - The input string.
+ * @returns {string} - The string with the first letter capitalized.
  */
 export const capitalizeFirstLetter = (str) => {
     if (!str) return '';
@@ -243,100 +271,141 @@ export const capitalizeFirstLetter = (str) => {
 };
 
 /**
- * Форматирует полную дату
- * @param {Date} date - Дата
- * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
- * @returns {string} - Полная дата
+ * Formats a full date.
+ * @param {Date} date - The date object.
+ * @param {string} currentLocale - The current language string ('en', 'he', 'ru').
+ * @returns {string} - The full date string.
  */
-export const formatFullDate = (date, currentLocale ='en') => {
+export const formatFullDate = (date, currentLocale = 'en') => {
     const locale = dateFnsLocales[currentLocale] || enUS;
-    return capitalizeFirstLetter(format(date, 'EEEE, d MMMM, yyyy', { locale }));
+    return capitalizeFirstLetter(format(date, 'EEEE, d MMMM, yyyy', {locale}));
 };
 
 /**
- * Форматирует диапазон дат недели с учетом локализации.
- * @param {object|string} weekOrStartDate - Объект недели с { start, end } ИЛИ строка с датой начала недели ('YYYY-MM-DD').
- * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
- * @returns {string} - Отформатированная строка.
+ * Formats a week's date range, taking localization into account.
+ * @param {object|string} weekOrStartDate - A week object with { start, end } OR a start date string ('YYYY-MM-DD').
+ * @param {string} currentLocale - The current language string ('en', 'he', 'ru').
+ * @returns {string} - The formatted string.
  */
 export const formatWeekRange = (weekOrStartDate, currentLocale = 'en') => {
-    // --- НАЧАЛО ИЗМЕНЕНИЙ ---
     let week;
 
     if (typeof weekOrStartDate === 'string') {
-        // Если на вход пришла строка, считаем ее датой начала
-        // и вычисляем конец недели (+6 дней)
+        // If a string is passed, consider it the start date
+        // and calculate the end of the week (+6 days)
         try {
             const start = parseISO(weekOrStartDate);
             const end = addDays(start, 6);
-            week = { start, end };
+            week = {start, end};
         } catch {
-            return ''; // Возвращаем пустоту в случае невалидной даты
+            return ''; // Return empty for an invalid date
         }
     } else if (weekOrStartDate && weekOrStartDate.start && weekOrStartDate.end) {
-        // Если это объект, используем его как есть
+        // If it's an object, use it as is
         week = weekOrStartDate;
     } else {
-        // Если входные данные некорректны
+        // If the input is invalid
         return '';
     }
 
     const locale = dateFnsLocales[currentLocale] || enUS;
 
     try {
-        // Теперь мы можем быть уверены, что week.start и week.end существуют
+        // Now we can be sure that week.start and week.end exist
         const start = (week.start instanceof Date) ? week.start : parseISO(week.start);
         const end = (week.end instanceof Date) ? week.end : parseISO(week.end);
 
         if (!isValid(start) || !isValid(end)) return '';
 
-        // Логика форматирования остается прежней
+        // Formatting logic remains the same
         if (start.getFullYear() === end.getFullYear()) {
-            const startFormatted = capitalizeFirstLetter(format(start, 'd MMMM', { locale }));
-            const endFormatted = format(end, 'd MMMM, yyyy', { locale });
+            const startFormatted = capitalizeFirstLetter(format(start, 'd MMMM', {locale}));
+            const endFormatted = format(end, 'd MMMM, yyyy', {locale});
             return `${startFormatted} - ${endFormatted}`;
         } else {
-            const startFormatted = format(start, 'd MMMM, yyyy', { locale });
-            const endFormatted = format(end, 'd MMMM, yyyy', { locale });
+            const startFormatted = format(start, 'd MMMM, yyyy', {locale});
+            const endFormatted = format(end, 'd MMMM, yyyy', {locale});
             return `${startFormatted} - ${endFormatted}`;
         }
     } catch {
-        // Безопасный фолбэк
+        // Safe fallback
         const startStr = (week.start instanceof Date) ? format(week.start, 'yyyy-MM-dd') : week.start;
         const endStr = (week.end instanceof Date) ? format(week.end, 'yyyy-MM-dd') : week.end;
         return `${startStr} - ${endStr}`;
     }
 };
 
+/**
+ * Determines whether a schedule can be deleted based on its status.
+ *
+ * The function evaluates the given schedule object and returns a boolean indicating
+ * whether the schedule is eligible for deletion. A schedule can be deleted if:
+ * - It exists (is not null or undefined).
+ * - Its status matches 'draft' or 'unpublished' (case-insensitive).
+ *
+ * @param {Object} schedule - The schedule object to evaluate.
+ * @param {string} schedule.status - The current status of the schedule.
+ * @returns {boolean} True if the schedule can be deleted; otherwise, false.
+ */
 export const canDeleteSchedule = (schedule) => {
     if (!schedule) return false;
     return ['draft', 'unpublished'].includes(schedule.status?.toLowerCase());
 };
 
+/**
+ * Determines whether a schedule can be published.
+ *
+ * The function accepts a schedule object and checks if the schedule
+ * is eligible for publication. A schedule can be published only if it
+ * exists and its status is marked as 'draft'.
+ *
+ * @param {Object} schedule - The schedule object to evaluate.
+ * @returns {boolean} Returns true if the schedule is eligible for publication, otherwise false.
+ */
 export const canPublishSchedule = (schedule) => {
     if (!schedule) return false;
     return schedule.status === 'draft';
 };
 
+/**
+ * Determines whether a schedule can be unpublished.
+ *
+ * This function checks the provided schedule object to determine
+ * if its status allows it to be unpublished. A schedule can only
+ * be unpublished if it exists and its status is set to 'published'.
+ *
+ * @param {Object} schedule - The schedule object to be checked.
+ * @param {string} schedule.status - The current status of the schedule.
+ * @returns {boolean} Returns true if the schedule can be unpublished, otherwise false.
+ */
 export const canUnpublishSchedule = (schedule) => {
     if (!schedule) return false;
     return schedule.status === 'published';
 };
 
+/**
+ * Determines whether the current schedule can be edited.
+ *
+ * @function
+ * @name canEditSchedule
+ * @param {Object} schedule - The schedule object to evaluate.
+ * @param {string} schedule.status - The status of the schedule. Typically checked for 'draft' status to determine editability.
+ * @returns {boolean} Returns true if the schedule can be edited (i.e., if its status is 'draft'); otherwise, false.
+ */
 export const canEditSchedule = (schedule) => {
     if (!schedule) return false;
     return schedule.status === 'draft';
 };
 /**
- * Форматирует имя сотрудника с учетом различных опций.
- * @param {object | string} employeeOrFirstName - Объект сотрудника или имя.
- * @param {object | string} [optionsOrLastName] - Объект опций или фамилия.
- * @param {boolean} [legacyShowFullName] - (Для совместимости) Флаг полного имени.
- * @returns {string} - Отформатированное имя.
+ * Formats an employee's name with various options.
+ * @param {object | string} employeeOrFirstName - The employee object or first name.
+ * @param {object | string} [optionsOrLastName] - An options object or the last name.
+ * @param {boolean} [legacyShowFullName] - (For compatibility) A flag for showing the full name.
+ * @returns {string} - The formatted name.
  */
 export const formatEmployeeName = (employeeOrFirstName, optionsOrLastName = {}, legacyShowFullName = false) => {
     if (typeof employeeOrFirstName === 'string') {
-        // --- РЕЖИМ ОБРАТНОЙ СОВМЕСТИМОСТИ ---
+        // --- BACKWARDS COMPATIBILITY MODE ---
         const firstName = employeeOrFirstName;
         const lastName = typeof optionsOrLastName === 'string' ? optionsOrLastName : '';
         const showFullName = legacyShowFullName;
@@ -348,7 +417,7 @@ export const formatEmployeeName = (employeeOrFirstName, optionsOrLastName = {}, 
         return firstName || lastName || '-';
     }
 
-    // --- НОВЫЙ РЕЖИМ РАБОТЫ С ОБЪЕКТАМИ ---
+    // --- NEW OBJECT-BASED MODE ---
     const employee = employeeOrFirstName;
     const {
         showFullName = false,
@@ -358,20 +427,20 @@ export const formatEmployeeName = (employeeOrFirstName, optionsOrLastName = {}, 
 
     if (!employee) return '-';
 
-    // Извлекаем имена из разных возможных полей
+    // Extract names from various possible fields
     const fullName = employee.employee_name || `${employee.first_name || ''} ${employee.last_name || ''}`.trim();
     const firstName = employee.first_name || fullName.split(' ')[0] || '';
     const lastName = employee.last_name || fullName.split(' ').slice(1).join(' ') || '';
 
     if (!firstName && !lastName) return '-';
 
-    // Если нужно полное имя, возвращаем его
+    // If full name is needed, return it
     if (showFullName) {
         return fullName;
     }
 
-    // --- ЛОГИКА ПРОВЕРКИ ДУБЛИКАТОВ ---
-    // Она сработает, только если переданы нужные опции
+    // --- DUPLICATE CHECKING LOGIC ---
+    // This will only trigger if the required options are passed
     if (checkDuplicates && contextEmployees.length > 0) {
         const duplicateNames = contextEmployees.filter(emp =>
             (emp.first_name || emp.employee_name?.split(' ')[0]) === firstName
@@ -382,14 +451,14 @@ export const formatEmployeeName = (employeeOrFirstName, optionsOrLastName = {}, 
         }
     }
 
-    // По умолчанию возвращаем только имя
+    // By default, return only the first name
     return firstName;
 };
 
 /**
- * Форматирует часы из минут в формат ЧЧ:ММ
- * @param {number} minutes - Количество минут
- * @returns {string} - Отформатированное время
+ * Formats minutes into HH:MM format.
+ * @param {number} minutes - The number of minutes.
+ * @returns {string} - The formatted time.
  */
 export const formatMinutesToHours = (minutes) => {
     const hours = Math.floor(minutes / 60);
@@ -398,10 +467,10 @@ export const formatMinutesToHours = (minutes) => {
 };
 
 /**
- * Проверяет, есть ли у даты смена
- * @param {Date} date - Дата для проверки
- * @param {Array} shifts - Массив смен
- * @returns {Object|null} - Объект смены или null
+ * Checks if a date has a shift.
+ * @param {Date} date - The date to check.
+ * @param {Array} shifts - An array of shifts.
+ * @returns {Object|null} - The shift object or null.
  */
 export const getShiftForDate = (date, shifts) => {
     if (!shifts || !Array.isArray(shifts)) return null;
@@ -410,10 +479,10 @@ export const getShiftForDate = (date, shifts) => {
 };
 
 /**
- * Formats the month and year
- * @param {Date} date - Date object
- * @param {string} currentLocale - Current locale code ('en', 'he', 'ru')
- * @returns {string} - Formatted month and year
+ * Formats the month and year.
+ * @param {Date} date - Date object.
+ * @param {string} currentLocale - Current locale code ('en', 'he', 'ru').
+ * @returns {string} - Formatted month and year.
  */
 export const formatMonthYear = (date, currentLocale) => {
     const locale = dateFnsLocales[currentLocale] || enUS;
@@ -421,66 +490,66 @@ export const formatMonthYear = (date, currentLocale) => {
 };
 
 /**
- * Получает все дни месяца
- * @param {Date} date - Любая дата в месяце
- * @returns {Array<Date>} - Массив дат месяца
+ * Gets all days of a month.
+ * @param {Date} date - Any date within the month.
+ * @returns {Array<Date>} - An array of dates for the month.
  */
 export const getMonthDays = (date) => {
     const start = startOfMonth(date);
     const end = endOfMonth(date);
-    return eachDayOfInterval({ start, end });
+    return eachDayOfInterval({start, end});
 };
 
 /**
- * Форматирует число дня
- * @param {Date} date - Дата
- * @returns {string} - Число дня
+ * Formats the day number.
+ * @param {Date} date - The date object.
+ * @returns {string} - The day number.
  */
 export const formatDayNumber = (date) => {
     return format(date, 'd');
 };
 
 /**
- * Форматирует дату и время с учетом локализации.
- * Возвращает строку вида "Month Day, Year, HH:MM".
- * @param {Date | string | number} dateInput - Входящая дата (объект Date, строка ISO, или timestamp).
- * @param {string} currentLocale - Строка текущего языка ('en', 'he', 'ru').
- * @returns {string} - Отформатированная строка или пустая строка в случае ошибки.
+ * Formats a date and time with localization.
+ * Returns a string like "Month Day, Year, HH:MM".
+ * @param {Date | string | number} dateInput - The input date (Date object, ISO string, or timestamp).
+ * @param {string} currentLocale - The current language string ('en', 'he', 'ru').
+ * @returns {string} - The formatted string or an empty string on error.
  */
 export const formatDateTime = (dateInput, currentLocale = 'en') => {
-    // 1. Безопасная валидация входных данных
+    // 1. Safely validate the input
     if (!dateInput) return '';
 
     try {
-        // Превращаем любой входной формат в надежный объект Date
+        // Convert any input format to a reliable Date object
         const date = (dateInput instanceof Date) ? dateInput : parseISO(dateInput);
 
-        // Проверяем, что дата валидна после парсинга
+        // Check if the date is valid after parsing
         if (!isValid(date)) {
             console.warn('Invalid date passed to formatDateTime:', dateInput);
             return '';
         }
 
-        // 2. Получаем объект локали из нашего существующего хранилища
+        // 2. Get the locale object from our existing store
         const locale = dateFnsLocales[currentLocale] || enUS;
 
-        // 3. Собираем строку формата
-        // 'PP' - это специальный токен в date-fns, который дает локализованную дату (напр., "Jul 28, 2025")
-        // 'HH:mm' - это универсальный формат для времени
+        // 3. Assemble the format string
+        // 'PP' is a special token in date-fns that gives a localized date (e.g., "Jul 28, 2025")
+        // 'HH:mm' is a universal format for time
         const formatString = 'PP, HH:mm';
 
-        // 4. Форматируем и возвращаем результат
-        return format(date, formatString, { locale });
+        // 4. Format and return the result
+        return format(date, formatString, {locale});
 
     } catch (error) {
         console.error('Error formatting date/time:', error);
-        return ''; // Возвращаем пустую строку в случае любой ошибки
+        return ''; // Return an empty string in case of any error
     }
 };
 
 /**
- * Проверяет, является ли дата сегодняшним днем
- * @param {Date} date - Дата для проверки
+ * Checks if a date is today.
+ * @param {Date} date - The date to check.
  * @returns {boolean}
  */
 export const isToday = (date) => {
@@ -491,31 +560,31 @@ export const isToday = (date) => {
 };
 
 /**
- * Проверяет, что две даты являются одним и тем же календарным днем.
- * Безопасно обрабатывает null/undefined.
- * @param {Date | null} dateLeft - Первая дата
- * @param {Date | null} dateRight - Вторая дата
+ * Checks if two dates are the same calendar day.
+ * Safely handles null/undefined values.
+ * @param {Date | null} dateLeft - The first date.
+ * @param {Date | null} dateRight - The second date.
  * @returns {boolean}
  */
 export const isSameDate = (dateLeft, dateRight) => {
     if (!dateLeft || !dateRight) return false;
-    
+
     return isSameDay(dateLeft, dateRight);
 };
 
 /**
- * Форматирует дату в строку 'ГГГГ-ММ-ДД' (ISO Date).
- * @param {Date} date - Дата
- * @returns {string} - Отформатированная дата
+ * Formats a date into a 'YYYY-MM-DD' string (ISO Date).
+ * @param {Date} date - The date object.
+ * @returns {string} - The formatted date.
  */
 export const formatToIsoDate = (date) => {
     return format(date, 'yyyy-MM-dd');
 };
 
 /**
- * Форматирует дату в строку 'ГГГГ-ММ'.
- * @param {Date} date - Дата
- * @returns {string} - Отформатированный год и месяц
+ * Formats a date into a 'YYYY-MM' string.
+ * @param {Date} date - The date object.
+ * @returns {string} - The formatted year and month.
  */
 export const formatToYearMonth = (date) => {
     return format(date, 'yyyy-MM');
@@ -523,19 +592,19 @@ export const formatToYearMonth = (date) => {
 
 
 /**
- * Карта ключевых слов для определения типа смены на разных языках.
- * Все слова должны быть в нижнем регистре.
+ * Map of keywords to determine the shift type in different languages.
+ * All words must be in lowercase.
  */
 const SHIFT_TYPE_KEYWORDS_MAP = {
     morning: ['morning', 'утро', 'утренняя', 'בוקר'],
-    day: ['day', 'evening', 'afternoon', 'день', 'дневная', 'вечер', 'вечерняя', 'צהריים','יום','ערב'],
+    day: ['day', 'evening', 'afternoon', 'день', 'дневная', 'вечер', 'вечерняя', 'צהריים', 'יום', 'ערב'],
     night: ['night', 'ночь', 'ночная', 'לילה']
 };
 /**
- * Определяет канонический тип смены ('morning', 'day', 'night') по ее названию.
- * Функция универсальна и не зависит от текущего языка интерфейса.
- * @param {string} shiftName - Название смены (e.g., 'משמרת בוקר', 'Night Shift').
- * @returns {string|null} - Канонический тип смены или null, если тип не определен.
+ * Determines the canonical shift type ('morning', 'day', 'night') by its name.
+ * The function is universal and does not depend on the current interface language.
+ * @param {string} shiftName - The name of the shift (e.g., 'משמרת בוקר', 'Night Shift').
+ * @returns {string|null} - The canonical shift type or null if the type cannot be determined.
  */
 export const getCanonicalShiftType = (shiftName) => {
     if (!shiftName) {
@@ -544,20 +613,20 @@ export const getCanonicalShiftType = (shiftName) => {
 
     const lowerCaseName = shiftName.toLowerCase();
 
-    // Object.entries превращает { morning: [...] } в [['morning', [...]]]
+    // Object.entries turns { morning: [...] } into [['morning', [...]]]
     for (const [type, keywords] of Object.entries(SHIFT_TYPE_KEYWORDS_MAP)) {
-        // Проверяем, включает ли название смены хотя бы одно из ключевых слов для данного типа
+        // Check if the shift name includes at least one of the keywords for this type
         if (keywords.some(keyword => lowerCaseName.includes(keyword))) {
-            return type; // Возвращаем канонический тип: 'morning', 'day' или 'night'
+            return type; // Return the canonical type: 'morning', 'day', or 'night'
         }
     }
 
     return null;
 };
 /**
- * Возвращает React-компонент иконки для канонического типа смены.
- * @param {string|null} shiftType - Канонический тип ('morning', 'day', 'night') или null.
- * @returns {JSX.Element|null} - Компонент иконки или null.
+ * Returns a React icon component for a canonical shift type.
+ * @param {string|null} shiftType - The canonical type ('morning', 'day', 'night') or null.
+ * @returns {JSX.Element|null} - The icon component or null.
  */
 export const getShiftIcon = (shiftType) => {
     if (!shiftType) {
@@ -577,10 +646,23 @@ export const getShiftIcon = (shiftType) => {
 };
 
 
+/**
+ * Classifies a list of schedules into active, inactive, and schedules overlapping with the current week.
+ *
+ * @param {Array<Object>} schedules - An array of schedule objects to be classified.
+ * @param {string} schedules[].id - The unique identifier of the schedule.
+ * @param {string} schedules[].start_date - The start date of the schedule in ISO 8601 format.
+ * @param {string} schedules[].end_date - The end date of the schedule in ISO 8601 format.
+ *
+ * @returns {Object} An object containing the classified schedules and overlapping schedule IDs.
+ * @returns {Array<Object>} return.activeSchedules - An array of schedules still active as of the current day.
+ * @returns {Array<Object>} return.inactiveSchedules - An array of schedules that have ended before the current day.
+ * @returns {Set<string>} return.currentWeekScheduleIds - A set of IDs for schedules that overlap with the current week.
+ */
 export const classifySchedules = (schedules) => {
     const today = new Date();
-    const currentWeekStart = startOfWeek(today, { weekStartsOn: 0 });
-    const currentWeekEnd = endOfWeek(today, { weekStartsOn: 0 });
+    const currentWeekStart = startOfWeek(today, {weekStartsOn: 0});
+    const currentWeekEnd = endOfWeek(today, {weekStartsOn: 0});
 
     const active = [];
     const inactive = [];
@@ -612,51 +694,4 @@ export const classifySchedules = (schedules) => {
     };
 };
 
-/**
- * Calculate shift duration based on start and end times
- * @param {string} startTime - Start time in HH:mm format
- * @param {string} endTime - End time in HH:mm format
- * @returns {number} Duration in hours
- */
-export const getShiftDuration = (startTime, endTime) => {
-    if (!startTime || !endTime) return 0;
 
-    const start = typeof startTime === 'string' ? startTime : String(startTime);
-    const end = typeof endTime === 'string' ? endTime : String(endTime);
-
-    // Проверяем формат
-    if (!start.includes(':') || !end.includes(':')) {
-        console.error('Invalid time format:', { startTime, endTime });
-        return 0;
-    }
-
-    const [startHour, startMin] = start.split(':').map(Number);
-    const [endHour, endMin] = end.split(':').map(Number);
-
-    let startMinutes = startHour * 60 + startMin;
-    let endMinutes = endHour * 60 + endMin;
-
-    if (endMinutes < startMinutes) {
-        endMinutes += 24 * 60;
-    }
-
-    const durationMinutes = endMinutes - startMinutes;
-    return Math.round((durationMinutes / 60) * 10) / 10;
-};
-
-
-
-/**
- * Check if shift is night shift (crosses midnight)
- * @param {string} startTime - Start time in HH:mm format
- * @param {string} endTime - End time in HH:mm format
- * @returns {boolean} Is night shift
- */
-export const isNightShift = (startTime, endTime) => {
-    if (!startTime || !endTime) return false;
-
-    const [startHour] = startTime.split(':').map(Number);
-    const [endHour] = endTime.split(':').map(Number);
-
-    return endHour < startHour || (startHour >= 22 || endHour <= 6);
-};

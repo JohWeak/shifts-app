@@ -13,28 +13,27 @@ function loadModelsRecursive(directory) {
         const fullPath = path.join(directory, entry.name);
 
         if (entry.isDirectory()) {
-            // Если это папка, вызываем эту же функцию для неё
+            // if this is a folder, we call the same function for it
             loadModelsRecursive(fullPath);
         } else if (entry.isFile() && entry.name.endsWith('.model.js')) {
-            // Если это файл модели, импортируем его
             const model = require(fullPath)(sequelize, Sequelize.DataTypes);
             db[model.name] = model;
 
-            // Логирование для наглядности (путь от папки 'models')
+            // Logging for clarity (the path from the 'Models' folder)
             const relativePath = path.relative(__dirname, fullPath);
             console.log(`✅ Loaded model: ${model.name} from /${relativePath}`);
         }
     }
 }
 
-// Запускаем рекурсивный обход, начиная с текущей директории (__dirname)
+// launch a recursive bypass, starting with the current directory (__dirname)
 loadModelsRecursive(__dirname);
 
-// Добавляем Sequelize в db объект
+// addSequelizeToDBObject
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// Определяем все ассоциации здесь
+// determine all associations here
 const defineAssociations = () => {
     const {
         Employee,

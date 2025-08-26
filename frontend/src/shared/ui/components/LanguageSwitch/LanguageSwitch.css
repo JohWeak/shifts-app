@@ -1,4 +1,4 @@
-/* Language Switch - обновленные стили */
+/* Language Switch  */
 
 .language-switch .dropdown-toggle {
     display: flex;
@@ -10,23 +10,9 @@
     background-color: transparent;
     color: var(--bs-body-color);
     transition: all 0.2s ease;
-    /*margin-right: 1rem;*/
-    /*margin-left: 0.5rem;*/
     border-radius: 0.5rem;
-    /*max-width: 56px;*/
 
 }
-
-/*.language-switch .dropdown-toggle:hover {*/
-/*    background-color: var(--bs-gray-100);*/
-/*    border-color: var(--bs-primary);*/
-/*    color: var(--bs-primary);*/
-/*}*/
-
-/*.language-switch .dropdown-toggle .btn-check:checked+.btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check)+.btn:active{*/
-/*    background-color: var(--bs-gray-200)!important;*/
-/*    color:black!important;*/
-/*}*/
 
 [data-theme="dark"] .language-switch .dropdown-toggle {
     border-color: var(--bs-gray-600);
@@ -41,7 +27,6 @@
 }
 
 .language-switch .dropdown-menu {
-    /*min-width: 140px;*/
     border: 1px solid var(--bs-border-color);
     box-shadow: var(--bs-box-shadow);
     z-index: 1065;

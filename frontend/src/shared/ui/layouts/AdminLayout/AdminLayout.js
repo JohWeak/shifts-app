@@ -67,6 +67,7 @@ const AdminLayout = () => {
     useEffect(() => {
         return () => {
             if (expandTimeoutRef.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
                 clearTimeout(expandTimeoutRef.current);
             }
         };

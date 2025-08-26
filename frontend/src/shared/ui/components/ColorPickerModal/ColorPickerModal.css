@@ -21,32 +21,31 @@
     left: 0;
     right: 0;
     box-shadow: var(--bs-box-shadow);
-    margin: 0 auto 1rem auto; /* Центрируем и добавляем отступ снизу */
+    margin: 0 auto 1rem auto;
     width: 90%;
     max-width: 480px;
-    border-radius: 1rem; /* Скругляем все углы на десктопе */
+    border-radius: 1rem;
 
     transform: translateY(100%) !important;
     transition: transform 0.3s ease-out;
 }
 
 .modal.show .bottom-sheet.modal-dialog {
-    transform: translateY(0) !important; /* Конечное положение */
+    transform: translateY(0) !important;
 }
 
 .bottom-sheet .modal-content {
-    border-radius: 1rem !important; /* Важно, чтобы и контент имел такие же скругления */
+    border-radius: 1rem !important;
 }
 
 .bottom-sheet-backdrop.modal-backdrop {
-    /* Убираем затемнение, делая фон прозрачным */
     background-color: transparent;
 }
 
 .preset-colors-wrapper {
     display: flex;
     gap: 0.5rem;
-    overflow-x: auto; /* Включаем горизонтальную прокрутку */
+    overflow-x: auto;
 
 }
 
@@ -74,7 +73,7 @@
     display: inline-block;
 }
 
-/* Стили для кнопки-крестика */
+
 .color-picker-modal .btn.rounded-circle {
     width: 30px;
     height: 30px;
@@ -88,7 +87,7 @@
     font-size: 0.75rem !important;
 }
 
-/* --- Стили для слайдера яркости --- */
+
 .brightness-slider-container {
     background-color: transparent !important;
 }
@@ -106,17 +105,15 @@
     cursor: pointer;
 }
 
-/* 2. Стилизуем "полоску" (трек) для WebKit браузеров */
+
 .brightness-slider::-webkit-slider-runnable-track {
     height: 12px !important;
 }
 
-
-/* 3. Стилизуем "бегунок" (thumb) для WebKit браузеров */
 .brightness-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; /* Обязательно для кастомизации */
-    height: 18px !important; /* Высота бегунка */
-    width: 28px !important; /* <<<< ВАШЕ ТРЕБОВАНИЕ: делаем бегунок шире */
+    -webkit-appearance: none;
+    height: 18px !important;
+    width: 28px !important;
     background: var(--bs-primary) !important;
     margin-top: -3px !important;
     transition: background-color 0.2s ease, transform 0.2s ease;
@@ -161,7 +158,6 @@
         scrollbar-width: none; /* Firefox */
     }
 
-    /* Скрываем скроллбар в Chrome, Safari */
     .preset-colors-wrapper::-webkit-scrollbar {
         display: none;
     }

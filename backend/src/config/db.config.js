@@ -1,18 +1,8 @@
-const { Sequelize } = require('sequelize');
+const {Sequelize} = require('sequelize');
 require('dotenv').config();
 
-// Initialize Sequelize with database parameters from environment variables
-// const sequelize = new Sequelize(
-//     process.env.DB_NAME,
-//     process.env.DB_USER,
-//     process.env.DB_PASSWORD,
-//     {
-//         host: process.env.DB_HOST,
-//         dialect: 'mysql',
-//         logging: false // Disable logging in production
-//     }
-// );
-// Определение оптимальных параметров для Railway
+
+// Definition of optimal parameters for Railway
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -20,7 +10,7 @@ console.log('🔍 Database Configuration:');
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
-// Используем DATABASE_URL если она есть
+
 const sequelize = process.env.DATABASE_URL
     ? new Sequelize(process.env.DATABASE_URL, {
         dialect: 'mysql',
@@ -62,7 +52,7 @@ const sequelize = process.env.DATABASE_URL
         }
     );
 
-// Тестируем подключение
+
 sequelize.authenticate()
     .then(() => {
         console.log('✅ Database connection has been established successfully.');

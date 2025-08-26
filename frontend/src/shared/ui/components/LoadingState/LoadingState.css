@@ -7,9 +7,20 @@
     padding: 2rem;
 }
 
-.loading-state-sm { padding: 1rem; min-height: 100px; }
-.loading-state-md { padding: 2rem; min-height: 200px; }
-.loading-state-lg { padding: 3rem; min-height: 300px; }
+.loading-state-sm {
+    padding: 1rem;
+    min-height: 100px;
+}
+
+.loading-state-md {
+    padding: 2rem;
+    min-height: 200px;
+}
+
+.loading-state-lg {
+    padding: 3rem;
+    min-height: 300px;
+}
 
 .loading-state-message {
     color: var(--bs-secondary);
@@ -17,7 +28,7 @@
     margin-top: 1rem;
 }
 
-/* Стили для нового прогресс-бара */
+
 .progress-bar-container {
     width: 100%;
     max-width: 300px;
@@ -35,6 +46,10 @@
 }
 
 @keyframes indeterminate-progress {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
 }

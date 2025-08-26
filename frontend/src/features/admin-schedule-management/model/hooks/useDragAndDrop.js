@@ -92,7 +92,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
     }, [pendingChanges, assignments]);
 
     const checkForDuplicateOnSwap = useCallback((draggedEmp, fromCell, targetEmp, targetCell) => {
-        const tempChanges = { ...pendingChanges };
+        const tempChanges = {...pendingChanges};
         const timestamp = Date.now();
 
         tempChanges[`temp-${timestamp}-1`] = {
@@ -128,7 +128,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
     const handleDragStart = useCallback((e, employee, fromCell) => {
         if (!isEditMode) return;
-        setDraggedItem({ employee, fromCell });
+        setDraggedItem({employee, fromCell});
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', employee.empId);
         e.currentTarget.classList.add('dragging');
@@ -224,7 +224,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
             return [];
         }
 
-        const { employee: dragged, fromCell } = draggedItem;
+        const {employee: dragged, fromCell} = draggedItem;
 
         if (!fromCell || !fromCell.date || fromCell.shiftId === undefined || fromCell.positionId === undefined) {
             console.error('Invalid from cell:', fromCell);
@@ -233,7 +233,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
         const changes = [];
         const timestamp = Date.now();
-
 
 
         if (fromCell.date === targetCell.date &&
@@ -246,7 +245,6 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         // SWAP
         if (targetEmployee && targetEmployee.empId !== dragged.empId) {
             console.log('SWAP operation detected');
-
 
 
             const tempPendingChanges = {...pendingChanges};
@@ -353,11 +351,10 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                     }
                 });
             }
-        }
-        else if (!targetEmployee) {
+        } else if (!targetEmployee) {
             console.log('MOVE operation detected');
 
-            const tempPendingChanges = { ...pendingChanges };
+            const tempPendingChanges = {...pendingChanges};
 
             if (!dragged.isPending) {
                 tempPendingChanges[`temp-${timestamp}`] = {
@@ -419,8 +416,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
         console.log('Created changes:', changes);
         return changes;
-    }, [draggedItem, pendingChanges, assignments]);
-
+    }, [draggedItem, pendingChanges, checkEmployeeInCellWithTempChanges]);
 
 
     return {

@@ -2,7 +2,7 @@
 const dayjs = require('dayjs');
 
 const db = require('../../../models');
-const { Schedule, WorkSite, ScheduleAssignment } = db;
+const {Schedule, WorkSite, ScheduleAssignment} = db;
 
 const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
 const cpSatBridge = require('../../../services/cp-sat-bridge.service');
@@ -10,7 +10,7 @@ const cpSatBridge = require('../../../services/cp-sat-bridge.service');
  * Check Python availability
  */
 const checkPythonAvailability = async () => {
-    const { spawn } = require('child_process');
+    const {spawn} = require('child_process');
 
     return new Promise((resolve) => {
         const pythonProcess = spawn('python', ['--version']);
@@ -86,12 +86,12 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
 
             // Удалить связанные assignments (если остались)
             await ScheduleAssignment.destroy({
-                where: { schedule_id: schedule.id },
+                where: {schedule_id: schedule.id},
                 transaction
             });
 
             // Удалить само расписание
-            await schedule.destroy({ transaction });
+            await schedule.destroy({transaction});
         }
 
         console.log(`[ScheduleController] Cleaned up ${existingSchedules.length} schedules`);
@@ -131,8 +131,8 @@ const generateNextWeekSchedule = async (req, res) => {
 
         console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
 
-        // Проверим существование сайта
-        const workSite = await WorkSite.findByPk(siteId, { transaction });
+        // Check the existence of the site
+        const workSite = await WorkSite.findByPk(siteId, {transaction});
         if (!workSite) {
             return res.status(400).json({
                 success: false,
@@ -149,20 +149,20 @@ const generateNextWeekSchedule = async (req, res) => {
             console.log(`[ScheduleController] Auto-selected algorithm: ${selectedAlgorithm}`);
         }
 
-        // Выполнение планирования
+        // Planning
         switch (selectedAlgorithm) {
             case 'cp-sat':
                 try {
                     console.log('[ScheduleController] Attempting CP-SAT generation...');
                     result = await cpSatBridge.generateOptimalSchedule(siteId, weekStart, transaction);
 
-                    // Добавляем детальную статистику
+
                     if (result.success && result.schedule) {
                         result.statistics = await cpSatBridge.calculateDetailedStats(
                             result.schedule.schedule_id,
                             siteId,
                             weekStart,
-                            [], // assignments будут загружены внутри метода
+                            [], // assignments
                             transaction
                         );
                     }
@@ -193,7 +193,7 @@ const generateNextWeekSchedule = async (req, res) => {
 
         await transaction.commit();
 
-        // Формирование ответа
+
         if (result && result.success) {
             let fullSchedule = null;
             if (result.schedule && (result.schedule.schedule_id || result.schedule.id)) {
@@ -272,7 +272,6 @@ const compareAllAlgorithms = async (req, res) => {
             'cp-sat': null
         };
 
-        // Тест Simple Algorithm (БЕЗ сохранения)
         try {
             const simpleService = new ScheduleGeneratorService(db);
             const data = await simpleService.prepareData(siteId, weekStart);
@@ -291,7 +290,6 @@ const compareAllAlgorithms = async (req, res) => {
             };
         }
 
-        // Тест CP-SAT (БЕЗ сохранения)
         const pythonAvailable = await checkPythonAvailability();
         if (pythonAvailable) {
             try {
@@ -330,7 +328,6 @@ const compareAllAlgorithms = async (req, res) => {
         });
     }
 };
-
 
 
 /**

@@ -1,5 +1,4 @@
-/* Page Header - гибридный подход */
-
+/* Page Header  */
 
 
 .page-header-content {
@@ -11,18 +10,21 @@
     padding-left: var(--space-2);
     padding-right: var(--space-2);
 }
+
 .page-header-card {
-    border-color: var(--bs-gray-200)!important;
+    border-color: var(--bs-gray-200) !important;
     box-shadow: var(--bs-box-shadow-sm);
-    border-radius: var(--radius-lg)!important;
+    border-radius: var(--radius-lg) !important;
 }
+
 .page-header-text {
-    min-width: 0; /* Позволяет тексту сжиматься */
-    /*align-content: start;*/
+    min-width: 0;
 }
-.page-header-badge{
-    font-size: 1rem!important;
+
+.page-header-badge {
+    font-size: 1rem !important;
 }
+
 .page-header h1 {
     display: flex;
     align-items: center;
@@ -51,7 +53,7 @@
 
 [data-theme="dark"] .page-header-card {
     background-color: var(--bs-gray-900);
-    border-color: var(--bs-gray-900)!important;
+    border-color: var(--bs-gray-900) !important;
 
 
 }
@@ -73,14 +75,17 @@
     .page-header-actions {
         justify-content: flex-start;
     }
+
     .page-header {
-        padding: 0!important;
+        padding: 0 !important;
     }
+
     .page-header-card {
-        margin-bottom: 0.5rem!important;
+        margin-bottom: 0.5rem !important;
     }
-    .page-header-badge{
-        font-size: 0.75rem!important;
+
+    .page-header-badge {
+        font-size: 0.75rem !important;
     }
 
     .page-header .page-header-text .h3 {
@@ -88,7 +93,7 @@
         margin-bottom: 0.2rem !important;
     }
 
-     .page-header-card .card-body {
+    .page-header-card .card-body {
         padding: 0.5rem 0.75rem;
         /*display: flex;*/
         justify-content: center;

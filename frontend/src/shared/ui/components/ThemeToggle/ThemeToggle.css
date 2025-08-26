@@ -1,6 +1,5 @@
-/* Theme Toggle - обновленные стили */
+/* Theme Toggle  */
 
-/* Вариант 1: Кнопка с рамкой (как у языка) */
 .theme-toggle-btn {
     min-width: 100px;
     display: flex;
@@ -33,7 +32,6 @@
     box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
-/* Вариант 2: Только иконка без рамки */
 .theme-toggle-icon {
     width: 28px;
     height: 28px;
@@ -58,7 +56,7 @@
     transform: scale(0.95);
 }
 
-/* Анимация иконок */
+
 .theme-toggle-btn i,
 .theme-toggle-icon i {
     font-size: 1.1rem;
@@ -70,7 +68,6 @@
     transform: rotate(90deg);
 }
 
-/* Цвета иконок */
 .bi-moon-stars {
     color: rgba(133, 63, 244, 0.99);
 }

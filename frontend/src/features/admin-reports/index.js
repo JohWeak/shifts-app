@@ -41,7 +41,8 @@ const Reports = () => {
 
     useEffect(() => {
         void handleFetchStats();
-    }, [sites, selectedSite, dateRange]);
+        // eslint-disable-next-line no-use-before-define
+    }, [sites, selectedSite, dateRange, handleFetchStats]);
 
     const handleFetchStats = async () => {
         if (!selectedSite) return;

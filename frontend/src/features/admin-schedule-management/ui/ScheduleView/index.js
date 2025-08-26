@@ -3,12 +3,8 @@ import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Card, Spinner} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useScheduleValidation} from '../../model/hooks/useScheduleValidation';
 import {useScheduleActions} from '../../model/hooks/useScheduleActions';
-import {
-    toggleEditPosition,
-    addPendingChange, removePendingChange,
-} from '../../model/scheduleSlice';
+import {addPendingChange, removePendingChange, toggleEditPosition,} from '../../model/scheduleSlice';
 import PositionEditor from './components/Position';
 import ScheduleInfo from './components/ScheduleInfo';
 import ValidationModal from './components/ValidationModal';

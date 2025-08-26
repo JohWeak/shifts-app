@@ -1,35 +1,35 @@
 // frontend/src/features/admin-schedule-management/model/hooks/useScheduleActions.js
 
-import React, { useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useCallback, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
-    generateSchedule,
+    applyPendingChanges,
+    clearAutofilledStatus,
     deleteSchedule,
-    updateScheduleStatus,
     exportSchedule,
     fetchScheduleDetails,
+    generateSchedule,
     updateScheduleAssignments,
-    clearAutofilledStatus,
-    applyPendingChanges
+    updateScheduleStatus
 } from '../scheduleSlice';
-import { addNotification } from 'app/model/notificationsSlice';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useScheduleAutofill } from './useScheduleAutofill';
-import { useScheduleValidation } from './useScheduleValidation';
+import {addNotification} from 'app/model/notificationsSlice';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useScheduleAutofill} from './useScheduleAutofill';
+import {useScheduleValidation} from './useScheduleValidation';
 import ConfirmationModal from "../../../../shared/ui/components/ConfirmationModal/ConfirmationModal";
 import {formatWeekRange} from "../../../../shared/lib/utils/scheduleUtils";
 
 export const useScheduleActions = (schedule = null) => {
     const dispatch = useDispatch();
-    const { t, locale } = useI18n();
+    const {t, locale} = useI18n();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
 
     // For detail actions
-    const { editingPositions, scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
-    const { autofillAllEditingPositions, isAutofilling } = useScheduleAutofill();
-    const { validatePositionChanges } = useScheduleValidation();
+    const {editingPositions, scheduleDetails, pendingChanges} = useSelector(state => state.schedule);
+    const {autofillAllEditingPositions, isAutofilling} = useScheduleAutofill();
+    const {validatePositionChanges} = useScheduleValidation();
 
 
     const [scheduleToPublish, setScheduleToPublish] = useState(null);
@@ -71,7 +71,7 @@ export const useScheduleActions = (schedule = null) => {
                 await options.onSuccess(result);
             }
 
-            return { success: true, data: result };
+            return {success: true, data: result};
 
         } catch (err) {
             const errorMsg = err?.message || err || errorMessage || t('errors.genericError');
@@ -96,7 +96,7 @@ export const useScheduleActions = (schedule = null) => {
                 await options.onError(err);
             }
 
-            return { success: false, error: errorMsg };
+            return {success: false, error: errorMsg};
 
         } finally {
             setLoading(false);
@@ -116,7 +116,7 @@ export const useScheduleActions = (schedule = null) => {
     const handleExport = useCallback((scheduleId, format) =>
         handleAction(
             'export',
-            exportSchedule({ scheduleId, format }),
+            exportSchedule({scheduleId, format}),
             'schedule.exportSuccess',
             'errors.exportFailed'
         ), [handleAction]);
@@ -128,7 +128,7 @@ export const useScheduleActions = (schedule = null) => {
         setIsUpdating(true);
         await handleAction(
             'publish',
-            updateScheduleStatus({ scheduleId: scheduleToPublish.id, status: 'published' }),
+            updateScheduleStatus({scheduleId: scheduleToPublish.id, status: 'published'}),
             'schedule.publishSuccess',
             'errors.publishFailed',
             {
@@ -147,7 +147,7 @@ export const useScheduleActions = (schedule = null) => {
         setIsUpdating(true);
         await handleAction(
             'unpublish',
-            updateScheduleStatus({ scheduleId: scheduleToUnpublish.id, status: 'draft' }),
+            updateScheduleStatus({scheduleId: scheduleToUnpublish.id, status: 'draft'}),
             'schedule.unpublishSuccess',
             'errors.unpublishFailed',
             {
@@ -180,7 +180,7 @@ export const useScheduleActions = (schedule = null) => {
             }
         );
         setIsUpdating(false);
-    }, [scheduleToDelete, handleAction, dispatch]);
+    }, [scheduleToDelete, handleAction]);
 
     const handleAutofill = useCallback(async () => {
         try {
@@ -207,7 +207,7 @@ export const useScheduleActions = (schedule = null) => {
         );
 
         if (positionChanges.length === 0) {
-            return { success: true, noChanges: true };
+            return {success: true, noChanges: true};
         }
 
         try {
@@ -217,7 +217,7 @@ export const useScheduleActions = (schedule = null) => {
                 setValidationViolations(violations);
                 setPendingSavePositionId(positionId);
                 setShowValidationModal(true);
-                return { showValidation: true, violations };
+                return {showValidation: true, violations};
             }
 
             return await performSave(positionId);
@@ -227,16 +227,17 @@ export const useScheduleActions = (schedule = null) => {
                 message: 'schedule.saveFailed',
                 duration: 5000
             }));
-            return { success: false, error };
+            return {success: false, error};
         }
-    }, [pendingChanges, validatePositionChanges, dispatch]);
+        // eslint-disable-next-line no-use-before-define
+    }, [pendingChanges, validatePositionChanges, performSave, dispatch]);
 
     const performSave = useCallback(async (positionId) => {
         const positionChanges = Object.values(pendingChanges).filter(
             c => c.positionId === positionId && !c.isApplied
         );
 
-        const result = await handleAction(
+        return await handleAction(
             'save',
             updateScheduleAssignments({
                 scheduleId: scheduleDetails.schedule.id,
@@ -261,8 +262,6 @@ export const useScheduleActions = (schedule = null) => {
                 }
             }
         );
-
-        return result;
     }, [pendingChanges, scheduleDetails, handleAction, dispatch]);
 
     const confirmSaveWithViolations = useCallback(async () => {
@@ -285,7 +284,7 @@ export const useScheduleActions = (schedule = null) => {
     const promptDelete = (scheduleOverride, options = {}) => {
         const target = scheduleOverride || schedule;
         if (target) {
-            setScheduleToDelete({ schedule: target, onSuccess: options.onSuccess });
+            setScheduleToDelete({schedule: target, onSuccess: options.onSuccess});
         }
     };
 

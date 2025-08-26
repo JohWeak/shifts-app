@@ -6,10 +6,12 @@
 .custom-datepicker .datepicker-input {
     border-right: none;
 }
+
 .custom-datepicker .datepicker-input:focus {
     box-shadow: none;
     border-color: var(--bs-border-color);
 }
+
 .custom-datepicker .input-group-text {
     background-color: var(--bs-body-bg);
     border-left: none;
@@ -40,11 +42,11 @@
     ЧАСТЬ 3: СТИЛИ ДЛЯ DAYPICKER (внутри Popover)
    ========================================================== */
 
-.rdp-root{
+.rdp-root {
     justify-self: center !important;
     padding: 0.5rem;
 }
-/* Общий контейнер календаря */
+
 .custom-day-picker-wrapper .rdp {
     margin: 0 !important;
     font-family: var(--bs-body-font-family), serif !important;
@@ -57,7 +59,7 @@
     transition: none !important;
 }
 
-/* --- Стили для кнопок-дней --- */
+
 .custom-day-picker-wrapper .rdp-day_button {
     width: 38px !important;
     height: 38px !important;
@@ -86,7 +88,8 @@
 .custom-datepicker-inline .rdp {
     margin: 0;
 }
-/* --- Стили для заголовка и навигации --- */
+
+/* ---Styles for title and navigation--- */
 
 .custom-day-picker-wrapper .rdp-caption {
     display: flex;
@@ -95,11 +98,13 @@
     margin-bottom: var(--space-3);
     padding: 0 var(--space-1);
 }
+
 .custom-day-picker-wrapper .rdp-nav {
     display: flex;
     justify-content: space-between;
     gap: var(--space-1);
 }
+
 .custom-day-picker-wrapper .rdp-button_previous,
 .custom-day-picker-wrapper .rdp-button_next {
     width: 130px !important;
@@ -110,36 +115,40 @@
     border-radius: var(--radius-base) !important;
     display: flex;
     align-items: center;
-    /*justify-content: center;*/
+
 }
-.custom-day-picker-wrapper .rdp-button_previous{
+
+.custom-day-picker-wrapper .rdp-button_previous {
     justify-content: start;
 }
+
 .custom-day-picker-wrapper .rdp-button_next {
     justify-content: end;
 }
+
 .custom-day-picker-wrapper .rdp-button_previous:hover,
 .custom-day-picker-wrapper .rdp-button_next:hover {
     background-color: var(--bs-gray-200) !important;
 }
+
 [data-theme='dark'] .custom-day-picker-wrapper .rdp-button_previous:hover,
 [data-theme='dark'] .custom-day-picker-wrapper .rdp-button_next:hover {
     background-color: var(--bs-gray-800) !important;
 }
+
 [dir="rtl"] .custom-day-picker-wrapper .rdp-button_previous svg,
 [dir="rtl"] .custom-day-picker-wrapper .rdp-button_next svg {
     transform: rotate(180deg);
 }
-.custom-day-picker-wrapper .rdp-month_caption{
+
+.custom-day-picker-wrapper .rdp-month_caption {
     padding: 0.5rem;
 }
-.custom-day-picker-wrapper .rdp-weekday{
+
+.custom-day-picker-wrapper .rdp-weekday {
     text-align: center;
 }
-/*
 
-  Уменьшаем размер SVG иконки внутри кнопок навигации
-*/
 .custom-day-picker-wrapper .rdp-button_previous svg,
 .custom-day-picker-wrapper .rdp-button_next svg {
     width: 16px !important;
@@ -153,20 +162,22 @@
     font-weight: 500 !important;
     font-size: 0.8em !important;
 }
+
 .custom-day-picker-wrapper .rdp-head_cell {
     color: var(--bs-secondary) !important;
     font-weight: 500 !important;
     font-size: 0.8em !important;
 }
 
-/* Выпадающие списки */
 .custom-day-picker-wrapper .rdp-dropdowns {
     display: flex;
     gap: var(--space-2);
 }
+
 .custom-day-picker-wrapper .rdp-vhidden {
     display: none;
 }
+
 .custom-day-picker-wrapper .rdp-dropdown {
     -webkit-appearance: none;
     appearance: none;
@@ -182,11 +193,11 @@
     line-height: var(--bs-form-select-line-height) !important;
     color: var(--bs-form-select-color) !important;
     background-color: var(--bs-form-select-bg) !important;
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
 /* ========================================================================
-    ЧАСТЬ 4: СТИЛИ ДЛЯ ВЫДЕЛЕНИЯ НЕДЕЛИ (ВЕРСИЯ "КАПСУЛА")
+    ЧАСТЬ 4: Styles for highlighting the week (version "capsule")
    ======================================================================== */
 
 .custom-day-picker-wrapper .rdp-day_modifier--hovered_week .rdp-day_button {
@@ -195,14 +206,14 @@
 }
 
 
-
 .custom-day-picker-wrapper .rdp-day_modifier--selected_week .rdp-day_button {
     background-color: var(--bs-primary-bg-subtle) !important;
     color: var(--bs-gray-900) !important;
 }
+
 .custom-day-picker-wrapper .rdp-day_today .rdp-day_button {
     font-weight: 700 !important;
-    color: var(--bs-primary)!important;
+    color: var(--bs-primary) !important;
     border: 1px solid var(--bs-primary) !important;
 }
 

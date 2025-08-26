@@ -90,7 +90,6 @@
     --bs-btn-outline-dark-hover-bg: var(--bs-dark);
     --bs-btn-outline-dark-hover-color: #fff;
 
-    /* Дополнительные переменные */
     --app-sidebar-width: 260px;
     --app-navbar-height: 64px;
     --app-colapsed-sidebar-width: 80px;
@@ -160,7 +159,6 @@
     --bs-border-width: 1px;
     --bs-border-radius: var(--radius-base);
     --bs-popover-max-width: 350px;
-
 
 
     /* --- ОСНОВНЫЕ ЦВЕТА СТАТУСОВ --- */
@@ -388,11 +386,13 @@
     margin-right: 0.25rem;
     margin-left: 0.25rem;
 }
+
 .form-select:focus,
 .form-control:focus {
     box-shadow: 0 0 12px -6px var(--bs-primary);
     border-color: transparent;
 }
+
 /* Smooth transitions */
 /** {*/
 /*    transition-property: transform, width, background-color, color, border-color;*/

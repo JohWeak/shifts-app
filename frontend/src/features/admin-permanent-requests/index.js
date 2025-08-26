@@ -1,7 +1,7 @@
 // frontend/src/features/admin-permanent-requests/index.js
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Container, Card, Table, Badge} from 'react-bootstrap';
+import {Badge, Card, Container, Table} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {fetchAllRequests} from './model/adminRequestsSlice';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -34,7 +34,8 @@ const AdminPermanentRequests = () => {
         console.log('[AdminPermanentRequests] Pending:', pendingRequests.length);
         console.log('[AdminPermanentRequests] Active processed:', activeProcessedRequests.length);
         console.log('[AdminPermanentRequests] Inactive:', inactiveRequests.length);
-    }, [requests]);
+        // eslint-disable-next-line no-use-before-define
+    }, [activeProcessedRequests.length, inactiveRequests.length, pendingRequests.length, requests]);
 
 
     const pendingRequests = requests.filter(r => r.status === 'pending');

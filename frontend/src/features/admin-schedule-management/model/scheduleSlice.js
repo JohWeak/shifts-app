@@ -217,6 +217,7 @@ export const preloadScheduleDetails = createAsyncThunk(
         for (let i = 0; i < activeSchedules.length; i += batchSize) {
             const batch = activeSchedules.slice(i, i + batchSize);
 
+            // eslint-disable-next-line no-loop-func
             const batchPromises = batch.map(async (schedule) => {
                 const cached = getCacheEntry(cache.scheduleDetails, schedule.id);
 

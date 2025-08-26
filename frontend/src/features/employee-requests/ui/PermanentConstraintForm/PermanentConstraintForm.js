@@ -137,7 +137,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
 
     // Load employee shifts
     useEffect(() => {
-        loadEmployeeShifts();
+        void loadEmployeeShifts();
     }, []);
 
     const loadEmployeeShifts = async () => {

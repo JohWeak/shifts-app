@@ -40,8 +40,10 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
         } else if (show && request) {
             setLoadingShifts(false);
         }
-    }, [show, request]);
+        // eslint-disable-next-line no-use-before-define
+    }, [show, request, loadShiftDetails]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const loadShiftDetails = async () => {
         try {
             setLoadingShifts(true);

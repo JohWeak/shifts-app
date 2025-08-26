@@ -1,4 +1,4 @@
-/* Action Buttons - гибридный подход */
+/* Action Buttons  */
 
 .btn-group {
     position: relative;
@@ -14,9 +14,11 @@
 .btn-group .dropdown-menu {
     border-radius: var(--radius-md);
 }
-.btn-group .dropdown-toggle-split{
+
+.btn-group .dropdown-toggle-split {
     background: transparent;
 }
+
 /* Dropdown item styling */
 .btn-group .dropdown-item {
     transition: var(--transition-base);

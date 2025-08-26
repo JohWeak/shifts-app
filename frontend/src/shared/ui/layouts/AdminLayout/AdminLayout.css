@@ -1,10 +1,11 @@
-/* AdminLayout.css - совмещаем Bootstrap переменные с кастомными стилями */
+/* AdminLayout.css  */
 
 .admin-layout {
     min-height: 100vh;
     background-color: var(--bs-gray-100);
     font-family: var(--bs-body-font-family), serif;
 }
+
 [data-theme="dark"] .admin-layout {
     background-color: var(--bs-black);
 }
@@ -31,6 +32,7 @@
 .admin-layout .brand-logo:hover {
     color: var(--bs-primary);
 }
+
 .admin-layout .brand-badge {
     font-size: 0.75rem;
     align-self: center;
@@ -44,7 +46,6 @@
     padding: 0.5rem 1rem;
     transition: all 0.2s ease-in-out;
 }
-
 
 
 /* USER DROPDOWN */
@@ -75,9 +76,10 @@
 
 
 }
+
 .admin-layout .admin-main-content {
     padding: 1rem;
-    position: absolute; /* Анимируемый контент будет абсолютным */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -92,7 +94,7 @@
 /*                  SIDEBAR          */
 /* ======================================================== */
 
-/* 1. Общие стили для самого сайдбара. */
+
 /* Compact Sidebar (Default) */
 .admin-layout .admin-sidebar-desktop {
     width: var(--app-colapsed-sidebar-width);
@@ -110,6 +112,7 @@
     border-right: none;
     border-left: 1px solid var(--bs-border-color);
 }
+
 /* Expanded Sidebar (On Hover/Click) */
 .admin-layout .admin-sidebar-desktop.expanded {
     width: var(--app-sidebar-width);
@@ -122,7 +125,6 @@
     overflow-x: hidden;
     transition: width 0.3s ease;
 }
-
 
 
 [dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded {
@@ -166,14 +168,6 @@
 
 }
 
-
-
-[dir="rtl"] .admin-layout .admin-nav {
-    /*padding-left: 0.5rem;*/
-    /*padding-right: 0;*/
-}
-
-/* 2. Общий стиль для ссылок с ПОВЫШЕННОЙ СПЕЦИФИЧНОСТЬЮ. */
 .admin-layout .admin-nav .admin-nav-link {
     display: flex;
     align-items: center;
@@ -186,6 +180,7 @@
     transition: all 0.2s ease-in-out;
 
 }
+
 /* Compact Mode Navigation Items */
 .admin-layout .admin-sidebar-desktop.compact .admin-nav .admin-nav-link {
     flex-direction: column;
@@ -204,10 +199,8 @@
 }
 
 .admin-layout .admin-sidebar-desktop.expanded .nav-icon {
-    /*font-size: 1.25rem;*/
     margin: 0;
     margin-inline-end: 0.5rem;
-    /*width: 20px;*/
 }
 
 /* Label Styles */
@@ -251,7 +244,7 @@
 
 /* Hover Effects */
 .admin-layout .admin-sidebar-desktop.compact .admin-nav-link:hover {
-    transform: translate(-1px); /* No transform in compact mode */
+    transform: translate(-1px);
 }
 
 .admin-layout .admin-sidebar-desktop.expanded .admin-nav-link:hover {
@@ -298,10 +291,6 @@
 }
 
 
-
-
-
-
 /* CONTENT AREA */
 .admin-layout .admin-content-area {
     background-color: var(--bs-gray-100);
@@ -325,41 +314,59 @@
 }
 
 
-
-
-
-
-/* Анимации */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
 }
 
 @keyframes sideBarSlideIn {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
 }
 
 @keyframes slideOut {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
 }
 
 @keyframes slideInRTL {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
 }
 
 @keyframes slideOutRTL {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
 }
-
 
 
 /* RESPONSIVE */
@@ -374,13 +381,15 @@
     .admin-layout .admin-main-content {
         padding: 0.75rem;
     }
+
     .admin-layout .admin-sidebar-desktop.expanded {
         width: 250px;
     }
 
 }
+
 @media (max-width: 400px) {
-    .admin-layout .admin-navbar .badge{
+    .admin-layout .admin-navbar .badge {
         visibility: hidden;
         font-size: 0;
     }

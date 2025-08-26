@@ -1,21 +1,20 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
-import React, { useEffect, useState } from 'react';
-import {Form, Button, Col, Row, Accordion} from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useMemo } from 'react';
-import { debounce } from 'lodash';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { setFilters } from '../../model/employeeSlice';
-import { fetchSystemSettings } from 'features/admin-system-settings/model/settingsSlice';
-import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Accordion, Button, Col, Form, Row} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {debounce} from 'lodash';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {setFilters} from '../../model/employeeSlice';
+import {fetchSystemSettings} from 'features/admin-system-settings/model/settingsSlice';
+import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleSlice';
 import './EmployeeFilters.css';
 
 const EmployeeFilters = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { filters, employees } = useSelector((state) => state.employees);
-    const { systemSettings } = useSelector((state) => state.settings || {});
-    const { workSites } = useSelector((state) => state.schedule || {});
+    const {filters, employees} = useSelector((state) => state.employees);
+    const {systemSettings} = useSelector((state) => state.settings || {});
+    const {workSites} = useSelector((state) => state.schedule || {});
 
     const [selectedWorkSite, setSelectedWorkSite] = useState(filters.work_site || 'all');
 
@@ -29,8 +28,7 @@ const EmployeeFilters = () => {
     const debouncedSearch = useMemo(
         () => debounce((value) => {
             handleFilterChange('search', value);
-        }, 50),
-        []
+        }, 50), []
     );
 
     const getFilteredPositions = () => {
@@ -74,19 +72,19 @@ const EmployeeFilters = () => {
         if (!workSites || workSites.length === 0) {
             dispatch(fetchWorkSites());
         }
-    }, [dispatch]);
+    }, [dispatch, systemSettings, workSites]);
 
     const handleFilterChange = (field, value) => {
         if (field === 'position' && selectedWorkSite === 'all' && value !== 'all') {
             const position = filteredPositions.find(p => p.pos_id === value);
             if (position && position.actual_ids) {
 
-                dispatch(setFilters({ [field]: value }));
+                dispatch(setFilters({[field]: value}));
             } else {
-                dispatch(setFilters({ [field]: value }));
+                dispatch(setFilters({[field]: value}));
             }
         } else {
-            dispatch(setFilters({ [field]: value }));
+            dispatch(setFilters({[field]: value}));
         }
     };
 

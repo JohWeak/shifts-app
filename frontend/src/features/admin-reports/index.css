@@ -22,18 +22,34 @@
     border-color: transparent;
 }
 
-.reports-page .summary-card.border-primary { border-left-color: var(--bs-primary); }
-.reports-page .summary-card.border-success { border-left-color: var(--bs-success); }
-.reports-page .summary-card.border-danger  { border-left-color: var(--bs-danger); }
+.reports-page .summary-card.border-primary {
+    border-left-color: var(--bs-primary);
+}
+
+.reports-page .summary-card.border-success {
+    border-left-color: var(--bs-success);
+}
+
+.reports-page .summary-card.border-danger {
+    border-left-color: var(--bs-danger);
+}
 
 [dir="rtl"] .reports-page .summary-card {
     border-left: none;
     border-right: 3px solid var(--bs-border-color);
 }
 
-[dir="rtl"] .reports-page .summary-card.border-primary { border-right-color: var(--bs-primary); }
-[dir="rtl"] .reports-page .summary-card.border-success { border-right-color: var(--bs-success); }
-[dir="rtl"] .reports-page .summary-card.border-danger  { border-right-color: var(--bs-danger); }
+[dir="rtl"] .reports-page .summary-card.border-primary {
+    border-right-color: var(--bs-primary);
+}
+
+[dir="rtl"] .reports-page .summary-card.border-success {
+    border-right-color: var(--bs-success);
+}
+
+[dir="rtl"] .reports-page .summary-card.border-danger {
+    border-right-color: var(--bs-danger);
+}
 
 .reports-page .summary-card .metric-value {
     font-size: 1.75rem;
@@ -49,6 +65,6 @@
 }
 
 .reports-page .chart-wrapper {
-    height: 450px; /* Даем Nivo достаточно места */
+    height: 450px;
     width: 100%;
 }

@@ -1,31 +1,31 @@
 // frontend/src/shared/lib/utils/colorUtils.js
 
 /**
- * Определяет контрастный цвет текста для заданного фона
- * @param {string} backgroundColor - HEX цвет фона
- * @param {boolean} isDarkTheme - Используется ли тёмная тема
- * @returns {string} - '#000000' или '#ffffff'
+ * Determines a contrasting text color for a given background color.
+ * @param {string} backgroundColor - The background color in HEX format.
+ * @param {boolean} isDarkTheme - Whether a dark theme is being used.
+ * @returns {string} - '#000000' or '#ffffff'.
  */
 export const getContrastTextColor = (backgroundColor, isDarkTheme = false) => {
     if (!backgroundColor) return isDarkTheme ? '#ffffff' : '#000000';
 
     const hex = backgroundColor.replace('#', '');
 
-    // Конвертируем в RGB
+    // Convert to RGB
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
 
-    // Вычисляем яркость по формуле
+    // Calculate brightness using the formula
     const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
 
-    // Для тёмной темы порог яркости другой
+    // The brightness threshold is different for a dark theme
     const threshold = isDarkTheme ? 150 : 128;
     return brightness > threshold ? '#000000' : '#ffffff';
 };
 
 /**
- * Проверяет, используется ли тёмная тема
+ * Checks if a dark theme is being used.
  * @returns {boolean}
  */
 export const isDarkTheme = () => {
@@ -33,14 +33,14 @@ export const isDarkTheme = () => {
 };
 
 /**
- * Конвертирует HEX цвет в RGBA формат.
- * @param {string} hex - Цвет в формате #RRGGBB.
- * @param {number} alpha - Прозрачность от 0 до 1.
- * @returns {string} - Цвет в формате rgba(r, g, b, a).
+ * Converts a HEX color to RGBA format.
+ * @param {string} hex - The color in #RRGGBB format.
+ * @param {number} alpha - The opacity, from 0 to 1.
+ * @returns {string} - The color in rgba(r, g, b, a) format.
  */
 export const hexToRgba = (hex, alpha) => {
     if (!hex || !/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-        return ''; // Возвращаем пустую строку при некорректном hex
+        return ''; // Return an empty string for an invalid hex value
     }
     let c = hex.substring(1).split('');
     if (c.length === 3) {
@@ -56,9 +56,9 @@ export const hexToRgba = (hex, alpha) => {
 
 
 /**
- * Преобразует HEX цвет в HSL.
- * @param {string} hex - Цвет в формате HEX (например, '#ff0000').
- * @returns {Array<number>} Массив [hue, saturation, lightness].
+ * Converts a HEX color to HSL.
+ * @param {string} hex - The color in HEX format (e.g., '#ff0000').
+ * @returns {Array<number>} An array [hue, saturation, lightness].
  */
 export const hexToHsl = (hex) => {
     if (!hex) return [0, 0, 0];
@@ -73,10 +73,17 @@ export const hexToHsl = (hex) => {
     } else {
         let d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        // eslint-disable-next-line default-case
         switch (max) {
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
         }
         h /= 6;
     }
@@ -84,11 +91,11 @@ export const hexToHsl = (hex) => {
 };
 
 /**
- * Преобразует HSL цвет в HEX.
- * @param {number} h - Hue (от 0 до 1).
- * @param {number} s - Saturation (от 0 до 1).
- * @param {number} l - Lightness (от 0 до 1).
- * @returns {string} Цвет в формате HEX.
+ * Converts an HSL color to HEX.
+ * @param {number} h - Hue (from 0 to 1).
+ * @param {number} s - Saturation (from 0 to 1).
+ * @param {number} l - Lightness (from 0 to 1).
+ * @returns {string} The color in HEX format.
  */
 export const hslToHex = (h, s, l) => {
     let r, g, b;
@@ -115,4 +122,3 @@ export const hslToHex = (h, s, l) => {
     };
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
-

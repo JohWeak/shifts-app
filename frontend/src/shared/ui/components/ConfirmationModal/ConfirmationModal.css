@@ -2,6 +2,7 @@
 .confirmation-modal .modal-dialog {
 
 }
+
 .confirmation-modal .modal-content {
     border: none;
     border-radius: var(--radius-lg);
@@ -37,13 +38,14 @@
     border-top: 1px solid var(--bs-border-color);
     padding: var(--space-3) var(--space-4);
 }
-.confirmation-modal .modal-footer button{
+
+.confirmation-modal .modal-footer button {
     min-width: 120px;
 }
 
-/* Стили для темной темы */
+
 [data-theme="dark"] .confirmation-modal .modal-content {
-    background-color: var(--bs-card-bg); /* Используем цвет фона карточек */
+    background-color: var(--bs-card-bg);
 }
 
 [data-theme="dark"] .confirmation-modal .modal-header {
@@ -56,10 +58,11 @@
 }
 
 @media (max-width: 768px) {
-    .confirmation-modal .modal-footer button{
+    .confirmation-modal .modal-footer button {
         width: calc(50% - 0.5rem);
         border-radius: var(--radius-lg);
     }
+
     .confirmation-modal .modal-dialog {
 
 

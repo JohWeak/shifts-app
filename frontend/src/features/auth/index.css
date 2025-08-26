@@ -1,4 +1,4 @@
-/* Auth - стили для страницы авторизации */
+/* Auth */
 
 .auth-container {
     min-height: 100vh;
@@ -155,17 +155,21 @@
     z-index: 100;
     justify-content: space-between;
 }
-.auth-form .form-floating >button{
+
+.auth-form .form-floating > button {
     border-color: var(--bs-primary);
 }
-div.auth-body > form > div.mb-3.input-group > button{
+
+div.auth-body > form > div.mb-3.input-group > button {
     border-color: var(--bs-gray-200);
     background-color: var(--bs-gray-50);
     border-left: none;
 }
+
 div.auth-body > form > div.mb-3.input-group > button:hover {
     color: var(--bs-primary);
 }
+
 .auth-container .language-switch .dropdown-toggle:hover {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
@@ -173,15 +177,15 @@ div.auth-body > form > div.mb-3.input-group > button:hover {
 }
 
 
-[data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button{
+[data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button {
     border-color: var(--bs-gray-800);
     background-color: var(--bs-gray-900);
 }
+
 [data-theme="dark"] div.auth-body > form > div.mb-3.input-group > button:hover {
     background-color: var(--bs-gray-900);
 
 }
-
 
 
 [dir="rtl"] .auth-controls {
@@ -189,11 +193,12 @@ div.auth-body > form > div.mb-3.input-group > button:hover {
     left: 1rem;
 }
 
-[data-theme="dark"] .auth-container .form-floating>.form-control:focus~label,
-[data-theme="dark"] .auth-container .form-floating>.form-control:not(:placeholder-shown)~label{
+[data-theme="dark"] .auth-container .form-floating > .form-control:focus ~ label,
+[data-theme="dark"] .auth-container .form-floating > .form-control:not(:placeholder-shown) ~ label {
     color: var(--bs-gray-500);
 }
-[data-theme="dark"] .form-floating>label {
+
+[data-theme="dark"] .form-floating > label {
     color: var(--bs-gray-300);
 }
 
