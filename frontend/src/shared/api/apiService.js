@@ -1,23 +1,21 @@
 // frontend/src/shared/api/apiService.js
 import api from './index';
-import { API_ENDPOINTS } from '../config/apiEndpoints';
+import {API_ENDPOINTS} from '../config/apiEndpoints';
 
 
 export const authAPI = {
     loginUser: (credentials) => api.post(API_ENDPOINTS.AUTH.LOGIN, credentials),
-    fetchUserProfile: () => api.get(API_ENDPOINTS.AUTH.PROFILE)
+    //fetchUserProfile: () => api.get(API_ENDPOINTS.AUTH.PROFILE)
 };
 
 export const scheduleAPI = {
     fetchSchedules: () => api.get(API_ENDPOINTS.SCHEDULES.BASE),
     fetchScheduleDetails: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
-    fetchAdminWeeklySchedule: () => api.get(API_ENDPOINTS.SCHEDULES.ADMIN.WEEKLY),
     fetchWeeklySchedule: async (weekStart) => {
         try {
-            const response = await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
-                params: weekStart ? { date: weekStart } : {}
+            return await api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
+                params: weekStart ? {date: weekStart} : {}
             });
-            return response;
         } catch (error) {
             throw error;
         }
@@ -116,46 +114,33 @@ export const employeeAPI = {
 };
 
 export const constraintAPI = {
-    // Get weekly constraints grid
     getWeeklyConstraints: (params) =>
         api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY, { params }),
 
-    // Submit weekly constraints
     submitWeeklyConstraints: (data) =>
         api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT, data),
 
-    // Get my permanent constraint requests (for employee)
     getMyPermanentRequests: () =>
         api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS_MY),
 
-    // Submit permanent constraint request
     submitPermanentRequest: (data) =>
         api.post(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUEST, data),
 
     getMyPermanentConstraints: () =>
         api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_CONSTRAINTS_MY),
 
-    // Admin: get all permanent requests (with optional status filter)
     getAllPermanentRequests: (params = {}) =>
         api.get(API_ENDPOINTS.CONSTRAINTS.PERMANENT_REQUESTS_ALL, { params }),
 
-    // Admin: get pending requests count
-    getPendingRequestsCount: () =>
-        api.get(API_ENDPOINTS.CONSTRAINTS.PENDING_COUNT),
-
-    // Admin: approve/reject request
     reviewRequest: (requestId, data) =>
         api.put(API_ENDPOINTS.CONSTRAINTS.REVIEW_REQUEST(requestId), data),
 
-    // Get employee shifts for constraint form
     getEmployeeShifts: () =>
         api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS),
 
     deletePermanentRequest: (requestId) =>
         api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_REQUEST(requestId)),
 
-    getPositionShifts: (positionId) =>
-        api.get(API_ENDPOINTS.POSITIONS.SHIFTS(positionId)),
 };
 
 export const positionAPI = {
@@ -168,12 +153,10 @@ export const positionAPI = {
 
 export const settingsAPI = {
     fetchSystemSettings: async () => {
-        const response = await api.get(API_ENDPOINTS.SETTINGS.SYSTEM);
-        return response; // Axios уже возвращает response.data
+        return await api.get(API_ENDPOINTS.SETTINGS.SYSTEM); // response.data
     },
     updateSystemSettings: async (settings) => {
-        const response = await api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings);
-        return response;
+        return await api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings);
     }
 };
 

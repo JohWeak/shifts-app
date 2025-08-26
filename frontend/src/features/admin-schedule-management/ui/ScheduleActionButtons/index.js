@@ -1,6 +1,6 @@
 // frontend/src/features/admin-schedule-management/ui/ActionButtons/index.js
 import React, {useRef, useState, useEffect} from 'react';
-import {Button, Dropdown, OverlayTrigger, Spinner, Tooltip} from 'react-bootstrap';
+import {Button, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {

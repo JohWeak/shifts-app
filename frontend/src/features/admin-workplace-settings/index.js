@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Nav, Tab, Card } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'motion/react';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import TopProgressBar from "../../shared/ui/components/TopProgressBar/TopProgressBar";
@@ -91,9 +91,26 @@ const WorkplaceSettings = () => {
                 <Tab.Container activeKey={activeTab} onSelect={handleTabChange}>
                     <Card.Header className="workplace-card-header border-bottom bg-none">
                         <Nav variant="tabs" className="nav-tabs-custom">
-                            <Nav.Item><Nav.Link eventKey="worksites"><i className="bi bi-building me-2"></i>{t('workplace.worksites.title')}</Nav.Link></Nav.Item>
-                            <Nav.Item><Nav.Link eventKey="positions"><i className="bi bi-person-badge me-2"></i>{t('workplace.positions.title')}</Nav.Link></Nav.Item>
-                            <Nav.Item><Nav.Link eventKey="display"><i className="bi bi-display me-2"></i>{t('workplace.displaySettings.title')}</Nav.Link></Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link
+                                    eventKey="worksites">
+                                    <i className="bi bi-building me-2">
+                                    </i>{t('workplace.worksites.title')}
+                                </Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link
+                                    eventKey="positions">
+                                    <i className="bi bi-person-badge me-2">
+                                    </i>{t('workplace.positions.title')}
+                                </Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="display">
+                                    <i className="bi bi-display me-2">
+                                    </i>{t('workplace.displaySettings.title')}
+                                </Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </Card.Header>
                     <Card.Body className="p-0 workplace-card-body">

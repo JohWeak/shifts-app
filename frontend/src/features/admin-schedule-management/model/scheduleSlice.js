@@ -1,16 +1,14 @@
 // frontend/src/app/store/slices/scheduleSlice.js
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { employeeAPI, scheduleAPI, worksiteAPI } from 'shared/api/apiService';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
 import {
     CACHE_DURATION,
-    isCacheValid,
-    isCacheEntryValid,
+    clearCacheEntry,
     getCacheEntry,
-    setCacheEntry,
-    clearCacheEntry
+    isCacheEntryValid,
+    setCacheEntry
 } from 'shared/lib/cache/cacheUtils';
-import { classifySchedules } from 'shared/lib/utils/scheduleUtils';
-
+import {classifySchedules} from 'shared/lib/utils/scheduleUtils';
 
 
 // Fetch work sites with unified cache
@@ -101,61 +99,57 @@ export const updateScheduleStatus = createAsyncThunk(
     'schedule/updateScheduleStatus',
     async ({ scheduleId, status }, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.updateScheduleStatus(scheduleId, status);
-            return response; // Возвращаем только data
+            return await scheduleAPI.updateScheduleStatus(scheduleId, status); // Возвращаем только data
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
 
-// Сравнение алгоритмов
+
 export const compareAlgorithms = createAsyncThunk(
     'schedule/compareAlgorithms',
     async (settings, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.compareAlgorithms(settings);
-            return response; // Возвращаем только data
+            return await scheduleAPI.compareAlgorithms(settings);
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
 
-// Удаление расписания
+
 export const deleteSchedule = createAsyncThunk(
     'schedule/deleteSchedule',
     async (scheduleId, { rejectWithValue }) => {
         try {
             await scheduleAPI.deleteSchedule(scheduleId);
-            return scheduleId; // Возвращаем ID для удаления из state
+            return scheduleId;
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
 
-// Обновление назначений
+
 export const updateScheduleAssignments = createAsyncThunk(
     'schedule/updateScheduleAssignments',
-    async ({ scheduleId, changes }, { dispatch, rejectWithValue }) => {
+    async ({ scheduleId, changes }, { rejectWithValue }) => {
         try {
-            const response = await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
-
-            return response;
+            return await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
 
-// Export schedule
+
 export const exportSchedule = createAsyncThunk(
     'schedule/exportSchedule',
     async ({ scheduleId, format }, { rejectWithValue }) => {
         try {
             await scheduleAPI.exportSchedule(scheduleId, format);
-            return { success: true }; // Возвращаем простой объект
+            return { success: true };
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -163,43 +157,7 @@ export const exportSchedule = createAsyncThunk(
 );
 
 
-// export const fetchRecommendations = createAsyncThunk(
-//     'schedule/fetchRecommendations',
-//     async ({ positionId, shiftId, date, scheduleId }, { getState, rejectWithValue }) => {
-//         try {
-//             const state = getState();
-//             const pendingChanges = state.schedule.pendingChanges;
-//
-//             const virtualChanges = Object.values(pendingChanges || {}).map(change => ({
-//                 action: change.action,
-//                 emp_id: change.empId,
-//                 position_id: change.positionId,
-//                 shift_id: change.shiftId,
-//                 date: change.date
-//             }));
-//
-//             console.log('fetchRecommendations thunk: calling API');
-//
-//             const response = await employeeAPI.fetchRecommendations(
-//                 scheduleId,
-//                 positionId,
-//                 shiftId,
-//                 date,
-//                 virtualChanges.length > 0 ? virtualChanges : null
-//             );
-//
-//             console.log('fetchRecommendations thunk: API response:', response);
-//             console.log('fetchRecommendations thunk: returning data:', response.data);
-//
-//             return response;
-//         } catch (error) {
-//             console.error('fetchRecommendations thunk error:', error);
-//             return rejectWithValue(error.response?.message || 'Failed to fetch recommendations');
-//         }
-//     }
-// );
 
-// Fetch recommendations with unified cache
 export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
     async ({ positionId, shiftId, date, scheduleId }, { getState, rejectWithValue }) => {
@@ -728,12 +686,10 @@ export const {
     toggleEditPosition,
     addPendingChange,
     removePendingChange,
-    clearPositionChanges,
     updateShiftColor,
     clearAutofilledStatus,
     addBatchPendingChanges,
     applyPendingChanges,
-    clearCache
 } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

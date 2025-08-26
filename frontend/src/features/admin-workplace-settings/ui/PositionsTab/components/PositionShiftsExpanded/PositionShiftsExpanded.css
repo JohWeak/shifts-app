@@ -46,14 +46,14 @@
     }
     to {
         opacity: 1;
-        max-height: 1500px;
+        max-height: 1200px;
     }
 }
 
 @keyframes collapseRow {
     from {
         opacity: 1;
-        max-height: 1500px;
+        max-height: 1200px;
     }
     to {
         opacity: 0;

@@ -1,6 +1,7 @@
 // backend/src/models/workplace/position.model.js
 module.exports = (sequelize, DataTypes) => {
-    const Position = sequelize.define('Position', {
+    let Position;
+    Position = sequelize.define('Position', {
         pos_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,

@@ -8,13 +8,16 @@
 }
 .nav-tabs-custom {
     background-color: transparent;
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 .nav-tabs-custom .nav-link {
     color: var(--bs-gray-600);
     background-color: var(--bs-gray-100);
+    border-top-left-radius: var(--radius-lg)!important;
+    border-top-right-radius: var(--radius-lg)!important;
     border-bottom: 2px solid transparent!important;
     padding: 1rem 1.5rem;
     font-weight: 500;

@@ -1,6 +1,7 @@
 // backend/src/models/scheduling/position-shift.model.js
 module.exports = (sequelize, DataTypes) => {
-    const PositionShift = sequelize.define('PositionShift', {
+    let PositionShift;
+    PositionShift = sequelize.define('PositionShift', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,

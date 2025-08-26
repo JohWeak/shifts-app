@@ -69,34 +69,6 @@ export const formatDate = (dateInput, format = 'DD.MM.YYYY', locale = 'en-US') =
 
 
 /**
- * Получает день начала недели из настроек системы
- */
-export const getWeekStartDay = (systemSettings) => {
-    return systemSettings?.weekStartDay ?? 0;
-};
-
-/**
- * Получает дату начала следующей недели на основе текущей даты
- * @param {string} currentWeekStartDate - Дата начала текущей недели в формате ISO
- * @returns {string} - Дата начала следующей недели в формате 'YYYY-MM-DD'
- */
-export const getNextWeekStartDate = (currentWeekStartDate) => {
-    const date = parseISO(currentWeekStartDate);
-    const nextWeekDate = addDays(date, 7);
-    return format(nextWeekDate, 'yyyy-MM-dd'); // Возвращаем в нужном для API формате
-};
-
-/**
- * Проверяет, является ли дата началом недели
- */
-export const isValidWeekStartDate = (date, weekStartDay = 0) => {
-    if (!date) return false;
-    const dateObj = date instanceof Date ? date : new Date(date);
-    if (!isValid(dateObj)) return false;
-    return dateObj.getDay() === weekStartDay;
-};
-
-/**
  * Получает дату начала следующей недели
  */
 export const getNextWeekStart = (weekStartDay = 0) => {
@@ -426,32 +398,6 @@ export const formatMinutesToHours = (minutes) => {
 };
 
 /**
- * Получает список месяцев между двумя датами
- * @param {Date|string} startDate - Начальная дата
- * @param {Date|string} endDate - Конечная дата
- * @returns {Array} - Массив объектов с информацией о месяцах
- */
-export const getMonthsBetweenDates = (startDate, endDate) => {
-    const start = startDate instanceof Date ? startDate : parseISO(startDate);
-    const end = endDate instanceof Date ? endDate : parseISO(endDate);
-
-    const months = [];
-    let current = new Date(start.getFullYear(), start.getMonth(), 1);
-    const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
-
-    while (current <= endMonth) {
-        months.push({
-            date: new Date(current),
-            value: format(current, 'yyyy-MM'),
-            label: format(current, 'MMMM yyyy')
-        });
-        current.setMonth(current.getMonth() + 1);
-    }
-
-    return months;
-};
-
-/**
  * Проверяет, есть ли у даты смена
  * @param {Date} date - Дата для проверки
  * @param {Array} shifts - Массив смен
@@ -575,50 +521,6 @@ export const formatToYearMonth = (date) => {
     return format(date, 'yyyy-MM');
 };
 
-/**
- * Определяет тип смены ('morning', 'day', 'night') на основе времени начала и длительности.
- * Правило для ночной смены: если минимум 2 часа смены попадают в интервал [22:00-06:00], это 'night'.
- * @param {string} startTime - Время начала в формате "HH:MM:SS".
- * @param {number} duration - Длительность смены в часах.
- * @returns {string} - Тип смены: 'morning', 'day' или 'night'.
- */
-export const getShiftTypeByTime = (startTime, duration) => {
-    if (!startTime || duration === undefined) return 'unknown';
-
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-
-    // Переводим всё в минуты от начала дня для удобства расчетов
-    const totalMinutesInDay = 24 * 60;
-    const startTotalMinutes = startHour * 60 + startMinute;
-
-    // Ночной интервал: с 22:00 (1320 мин) до 06:00 (360 мин)
-    const nightStart = 22 * 60; // 1320
-    const nightEnd = 6 * 60;   // 360
-
-    let minutesInNight = 0;
-    for (let i = 0; i < duration * 60; i++) {
-        const currentMinute = (startTotalMinutes + i) % totalMinutesInDay;
-
-        // Проверяем, попадает ли текущая минута в ночной интервал
-        // Интервал пересекает полночь, поэтому условие состоит из двух частей
-        if (currentMinute >= nightStart || currentMinute < nightEnd) {
-            minutesInNight++;
-        }
-    }
-
-    // Если в ночном интервале набралось 2 часа (120 минут) или больше
-    if (minutesInNight >= 120) {
-        return 'night';
-    }
-
-    // Если это не ночная смена, определяем по времени начала
-    if (startHour >= 5 && startHour < 12) {
-        return 'morning';
-    }
-
-    // Все остальные дневные/вечерние смены
-    return 'day';
-};
 
 /**
  * Карта ключевых слов для определения типа смены на разных языках.
@@ -650,7 +552,7 @@ export const getCanonicalShiftType = (shiftName) => {
         }
     }
 
-    return null; // Если ни одно совпадение не найдено
+    return null;
 };
 /**
  * Возвращает React-компонент иконки для канонического типа смены.
@@ -674,14 +576,6 @@ export const getShiftIcon = (shiftType) => {
     }
 };
 
-export const getCurrentWeekStart = () => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const diff = now.getDate() - dayOfWeek; // Sunday = 0
-    const weekStart = new Date(now.setDate(diff));
-    weekStart.setHours(0, 0, 0, 0);
-    return weekStart.toISOString().split('T')[0];
-};
 
 export const classifySchedules = (schedules) => {
     const today = new Date();
@@ -725,10 +619,8 @@ export const classifySchedules = (schedules) => {
  * @returns {number} Duration in hours
  */
 export const getShiftDuration = (startTime, endTime) => {
-    // Добавляем проверку типов и преобразование
     if (!startTime || !endTime) return 0;
 
-    // Преобразуем в строку если это не строка
     const start = typeof startTime === 'string' ? startTime : String(startTime);
     const end = typeof endTime === 'string' ? endTime : String(endTime);
 
@@ -752,27 +644,7 @@ export const getShiftDuration = (startTime, endTime) => {
     return Math.round((durationMinutes / 60) * 10) / 10;
 };
 
-/**
- * Format time for display
- * @param {string} time - Time in HH:mm format
- * @returns {string} Formatted time
- */
-export const formatTime = (time) => {
-    if (!time) return '';
-    const [hour, minute] = time.split(':');
-    return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-};
 
-/**
- * Validate time format
- * @param {string} time - Time string to validate
- * @returns {boolean} Is valid time format
- */
-export const isValidTime = (time) => {
-    if (!time) return false;
-    const regex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    return regex.test(time);
-};
 
 /**
  * Check if shift is night shift (crosses midnight)

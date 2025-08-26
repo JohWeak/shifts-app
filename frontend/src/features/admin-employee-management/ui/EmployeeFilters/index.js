@@ -1,6 +1,6 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
 import React, { useEffect, useState } from 'react';
-import {Card, Form, Button, Col, Row, Accordion} from 'react-bootstrap';
+import {Form, Button, Col, Row, Accordion} from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { debounce } from 'lodash';

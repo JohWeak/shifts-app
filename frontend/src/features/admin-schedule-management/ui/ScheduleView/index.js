@@ -6,13 +6,12 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useScheduleValidation} from '../../model/hooks/useScheduleValidation';
 import {useScheduleActions} from '../../model/hooks/useScheduleActions';
 import {
-    exportSchedule, toggleEditPosition,
+    toggleEditPosition,
     addPendingChange, removePendingChange,
 } from '../../model/scheduleSlice';
 import PositionEditor from './components/Position';
 import ScheduleInfo from './components/ScheduleInfo';
 import ValidationModal from './components/ValidationModal';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import {useScheduleAutofill} from '../../model/hooks/useScheduleAutofill';
 import EmployeeRecommendationsPanel from '../EmployeeRecommendations/EmployeeRecommendationsPanel';

@@ -504,6 +504,7 @@ class CPSATBridge {
                     await fs.access(tempFilePath);
                     console.log(`[CP-SAT Bridge] File created successfully`);
                 } catch (err) {
+                    // noinspection ExceptionCaughtLocallyJS
                     throw new Error(`Failed to create temp file: ${err.message}`);
                 }
 
@@ -545,12 +546,14 @@ class CPSATBridge {
 
                     try {
                         if (code !== 0) {
+                            // noinspection ExceptionCaughtLocallyJS
                             throw new Error(`Python process exited with code ${code}: ${errorData}`);
                         }
 
                         // Найдём JSON в выводе Python
                         const jsonMatch = outputData.match(/\{[^{}]*"success"[^{}]*\}/);
                         if (!jsonMatch) {
+                            // noinspection ExceptionCaughtLocallyJS
                             throw new Error('No JSON found in Python output');
                         }
 
@@ -568,9 +571,11 @@ class CPSATBridge {
                                 resolve(result);
                             } catch (fileError) {
                                 console.error('[CP-SAT Bridge] Error reading result file:', fileError);
+                                // noinspection ExceptionCaughtLocallyJS
                                 throw new Error(`Could not read result file: ${fileError.message}`);
                             }
                         } else {
+                            // noinspection ExceptionCaughtLocallyJS
                             throw new Error('Python optimizer reported failure');
                         }
                     } catch (error) {
@@ -905,6 +910,7 @@ class CPSATBridge {
         try {
             const schedule = await Schedule.findByPk(scheduleId);
             if (!schedule) {
+                // noinspection ExceptionCaughtLocallyJS
                 throw new Error('Schedule not found');
             }
 

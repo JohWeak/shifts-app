@@ -1,4 +1,6 @@
 // backend/src/services/EmployeeRecommendations.service.js
+// noinspection ExceptionCaughtLocallyJS
+
 const {Op} = require('sequelize');
 const dayjs = require('dayjs');
 const {EmployeeScorer, SCORING_CONFIG} = require('./employee-recommendation-scoring');
@@ -534,7 +536,7 @@ class EmployeeRecommendationService {
         const processedReasons = new Set();
 
         scoringResult.reasons.forEach(reason => {
-            let reasonKey = '';
+            let reasonKey;
             switch(reason.type) {
                 case 'primary_position':
                     reasonKey = 'primary_position_match';
@@ -567,7 +569,7 @@ class EmployeeRecommendationService {
         const processedWarnings = new Set();
 
         scoringResult.penalties.forEach(penalty => {
-            let warningKey = '';
+            let warningKey;
             switch(penalty.type) {
                 case 'cross_position':
                     warningKey = 'cross_position_assignment';

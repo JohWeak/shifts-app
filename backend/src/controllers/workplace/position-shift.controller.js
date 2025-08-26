@@ -10,7 +10,7 @@ const getPositionShifts = async (req, res) => {
         const { includeRequirements = false } = req.query;
 
         const includeOptions = [];
-        if (includeRequirements === 'true') {
+        if (includeRequirements) {
             includeOptions.push({
                 model: ShiftRequirement,
                 as: 'requirements',

@@ -47,6 +47,7 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
         });
 
         if (publishedSchedule) {
+            // noinspection ExceptionCaughtLocallyJS
             throw new Error('PUBLISHED_SCHEDULE_EXISTS');
         }
 
@@ -157,14 +158,13 @@ const generateNextWeekSchedule = async (req, res) => {
 
                     // Добавляем детальную статистику
                     if (result.success && result.schedule) {
-                        const detailedStats = await cpSatBridge.calculateDetailedStats(
+                        result.statistics = await cpSatBridge.calculateDetailedStats(
                             result.schedule.schedule_id,
                             siteId,
                             weekStart,
                             [], // assignments будут загружены внутри метода
                             transaction
                         );
-                        result.statistics = detailedStats;
                     }
 
                     if (!result.success) {

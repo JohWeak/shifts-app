@@ -1,5 +1,5 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/index.js
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useMemo} from 'react';
 import {Card, Button} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
