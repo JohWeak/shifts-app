@@ -23,7 +23,7 @@ const create = async (req, res) => {
 
         // Загружаем созданного сотрудника с ассоциациями
         const employeeWithAssociations = await Employee.findByPk(employee.emp_id, {
-            attributes: { exclude: ['password'] },
+            attributes: {exclude: ['password']},
             include: [
                 {
                     model: Position,
@@ -97,17 +97,17 @@ const findAll = async (req, res) => {
             where[Op.or] = [
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('first_name')),
-                    { [Op.like]: `%${searchLower}%` }
+                    {[Op.like]: `%${searchLower}%`}
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('last_name')),
-                    { [Op.like]: `%${searchLower}%` }
+                    {[Op.like]: `%${searchLower}%`}
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('email')),
-                    { [Op.like]: `%${searchLower}%` }
+                    {[Op.like]: `%${searchLower}%`}
                 ),
-                { phone: { [Op.like]: `%${search}%` } }
+                {phone: {[Op.like]: `%${search}%`}}
             ];
         }
 
@@ -121,16 +121,16 @@ const findAll = async (req, res) => {
         }
 
         // Build order clause
-        let order = [];
+        let order;
         switch (sortBy) {
             case 'name':
                 order = [['first_name', sortOrder], ['last_name', sortOrder]];
                 break;
             case 'workSite':
-                order = [[{ model: WorkSite, as: 'workSite' }, 'site_name', sortOrder]];
+                order = [[{model: WorkSite, as: 'workSite'}, 'site_name', sortOrder]];
                 break;
             case 'position':
-                order = [[{ model: Position, as: 'defaultPosition' }, 'pos_name', sortOrder]];
+                order = [[{model: Position, as: 'defaultPosition'}, 'pos_name', sortOrder]];
                 break;
             case 'status':
                 order = [['status', sortOrder]];
@@ -143,7 +143,7 @@ const findAll = async (req, res) => {
         const offset = (page - 1) * pageSize;
 
         // Оптимизированный запрос с ограниченным набором полей
-        const { count, rows } = await Employee.findAndCountAll({
+        const {count, rows} = await Employee.findAndCountAll({
             where,
             attributes,
             include: [
@@ -200,7 +200,6 @@ const findAll = async (req, res) => {
 };
 
 
-
 // Get employee by ID
 const findOne = async (req, res) => {
     try {
@@ -241,7 +240,7 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const { password, ...updateData } = req.body;
+        const {password, ...updateData} = req.body;
 
         // Hash password if provided
         if (password) {
@@ -252,7 +251,7 @@ const update = async (req, res) => {
         }
         // Обновляем только переданные поля
         const [updated] = await Employee.update(updateData, {
-            where: { emp_id: req.params.id }
+            where: {emp_id: req.params.id}
         });
 
         if (!updated) {
@@ -264,7 +263,7 @@ const update = async (req, res) => {
 
         // Возвращаем полные данные сотрудника с включенными ассоциациями
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] },
+            attributes: {exclude: ['password']},
             include: [
                 {
                     model: Position,

@@ -1,6 +1,6 @@
 // frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.js
-import React, {useState, useEffect} from 'react';
-import {Modal, Button, Form, Alert, Spinner} from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Form, Modal, Spinner} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {reviewRequest} from '../../model/adminRequestsSlice';
@@ -9,7 +9,7 @@ import {positionAPI} from 'shared/api/apiService';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {formatDateTime, getDayName} from 'shared/lib/utils/scheduleUtils';
-import {groupConstraintsByDay, getDayIndex} from 'shared/lib/utils/constraintUtils';
+import {getDayIndex, groupConstraintsByDay} from 'shared/lib/utils/constraintUtils';
 import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
 import {useMediaQuery} from "shared/hooks/useMediaQuery";
 import './RequestReviewModal.css';
@@ -36,7 +36,7 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
 
     useEffect(() => {
         if (show && request && request.employee?.defaultPosition?.pos_id) {
-            loadShiftDetails();
+            void loadShiftDetails();
         } else if (show && request) {
             setLoadingShifts(false);
         }

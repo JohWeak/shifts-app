@@ -1,21 +1,15 @@
 // frontend/src/features/employee-schedule/ui/FullScheduleView.js
-import React, {useState, useRef} from 'react';
-import {Table, Card, Badge, Button} from 'react-bootstrap';
+import React, {useRef, useState} from 'react';
+import {Badge, Button, Card, Table} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {
-    formatShiftTime,
-    getDayName,
-    formatTableHeaderDate,
-    formatEmployeeName,
-    formatWeekRange
-} from 'shared/lib/utils/scheduleUtils';
+import {formatEmployeeName, formatShiftTime, formatTableHeaderDate, getDayName,} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './FullScheduleView.css';
 
-const FullScheduleView = ({ user, scheduleData, employeeData, getShiftColor, openColorPicker }) => {
-    const {t, locale} = useI18n();
+const FullScheduleView = ({user, scheduleData, employeeData, getShiftColor, openColorPicker}) => {
+    const {t} = useI18n();
     const tableRef = useRef(null);
 
     const currentWeekData = scheduleData?.current;
@@ -94,10 +88,12 @@ const FullScheduleView = ({ user, scheduleData, employeeData, getShiftColor, ope
                                     const dateObj = parseISO(day.date);
                                     const isToday = new Date().toDateString() === dateObj.toDateString();
                                     return (
-                                        <th key={day.date} className={`day-header-cell ${isToday ? 'today-column' : ''}`}>
+                                        <th key={day.date}
+                                            className={`day-header-cell ${isToday ? 'today-column' : ''}`}>
                                             <div className="day-name">{getDayName(dateObj.getDay(), t)}</div>
                                             {isToday ? (
-                                                <Badge bg="primary" className="today-badge mt-1">{formatTableHeaderDate(dateObj)}</Badge>
+                                                <Badge bg="primary"
+                                                       className="today-badge mt-1">{formatTableHeaderDate(dateObj)}</Badge>
                                             ) : (
                                                 <div className="day-date">{formatTableHeaderDate(dateObj)}</div>
                                             )}
@@ -114,18 +110,25 @@ const FullScheduleView = ({ user, scheduleData, employeeData, getShiftColor, ope
                                             className="shift-header-info"
                                             style={{
                                                 backgroundColor: getShiftColor({...shift, shift_id: shift.id}),
-                                                color: getContrastTextColor(getShiftColor({...shift, shift_id: shift.id}))
+                                                color: getContrastTextColor(getShiftColor({
+                                                    ...shift,
+                                                    shift_id: shift.id
+                                                }))
                                             }}
                                         >
                                             <span className="shift-header-name">{shift.shift_name}</span>
-                                            <span className="shift-header-time">{formatShiftTime(shift.start_time, shift.duration)}</span>
+                                            <span
+                                                className="shift-header-time">{formatShiftTime(shift.start_time, shift.duration)}</span>
                                             <Button
                                                 variant="link"
                                                 size="sm"
                                                 className="color-picker-btn p-1"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    openColorPicker(shift.id, getShiftColor({...shift, shift_id: shift.id}), shift);
+                                                    openColorPicker(shift.id, getShiftColor({
+                                                        ...shift,
+                                                        shift_id: shift.id
+                                                    }), shift);
                                                 }}
                                                 title={t('shift.editColor')}
                                             >

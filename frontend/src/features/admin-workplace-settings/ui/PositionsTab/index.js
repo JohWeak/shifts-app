@@ -1,14 +1,14 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/index.js
-import React, {useState, useEffect, useMemo} from 'react';
-import {Card, Button, Alert} from 'react-bootstrap';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Alert, Button, Card} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import {useSortableData} from 'shared/hooks/useSortableData';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 
 // Slices & Actions
-import {fetchPositions, deletePosition, restorePosition, fetchWorkSites} from '../../model/workplaceSlice';
-import { useWorkplaceActionHandler } from '../../model/hooks/useWorkplaceActionHandler';
+import {deletePosition, fetchPositions, restorePosition} from '../../model/workplaceSlice';
+import {useWorkplaceActionHandler} from '../../model/hooks/useWorkplaceActionHandler';
 
 // UI Components
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
@@ -25,7 +25,7 @@ const PositionsTab = ({selectedSite}) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { positions = [], workSites = [], loading } = useSelector(state => state.workplace || {});
+    const {positions = [], workSites = [], loading} = useSelector(state => state.workplace || {});
 
     // --- STATE MANAGEMENT ---
     const [showModal, setShowModal] = useState(false);
@@ -41,7 +41,7 @@ const PositionsTab = ({selectedSite}) => {
     const [isClosingPositionId, setIsClosingPositionId] = useState(null);
 
     // --- ACTION HANDLERS using custom hook ---
-    const { execute: confirmDelete, isLoading: isDeleting } = useWorkplaceActionHandler({
+    const {execute: confirmDelete, isLoading: isDeleting} = useWorkplaceActionHandler({
         actionThunk: (id) => deletePosition(id),
         refetchThunk: fetchPositions,
         messages: {
@@ -51,7 +51,7 @@ const PositionsTab = ({selectedSite}) => {
         }
     });
 
-    const { execute: confirmRestore, isLoading: isRestoring } = useWorkplaceActionHandler({
+    const {execute: confirmRestore, isLoading: isRestoring} = useWorkplaceActionHandler({
         actionThunk: (id) => restorePosition(id),
         refetchThunk: fetchPositions,
         messages: {
@@ -169,7 +169,7 @@ const PositionsTab = ({selectedSite}) => {
                             siteFilter={filterSite}
                             onSiteFilterChange={setFilterSite}
                             sites={workSites}
-                            inactiveSwitchId="show-inactive-positions" 
+                            inactiveSwitchId="show-inactive-positions"
                         />
                         {sortedPositions.length === 0 ? (
                             <div className="workplace-empty"><i className="bi bi-person-badge"></i><p
@@ -212,7 +212,8 @@ const PositionsTab = ({selectedSite}) => {
                 onHide={() => setShowDeleteConfirm(false)}
                 onConfirm={() => {
                     confirmDelete({
-                        id: positionToProcess.pos_id });
+                        id: positionToProcess.pos_id
+                    });
                     setShowDeleteConfirm(false);
                 }}
                 title={t('common.confirm')}
@@ -225,7 +226,8 @@ const PositionsTab = ({selectedSite}) => {
                 onHide={() => setShowRestoreConfirm(false)}
                 onConfirm={() => {
                     confirmRestore({
-                        id: positionToProcess.pos_id });
+                        id: positionToProcess.pos_id
+                    });
                     setShowRestoreConfirm(false);
                 }}
                 title={t('common.confirm')}

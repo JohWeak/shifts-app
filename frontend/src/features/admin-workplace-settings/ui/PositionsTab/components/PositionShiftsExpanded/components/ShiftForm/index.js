@@ -1,24 +1,15 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftForm/index.js
-import React, { useState, useEffect } from 'react';
-import {
-    Modal,
-    Form,
-    Button,
-    Row,
-    Col,
-    Alert,
-    InputGroup
-} from 'react-bootstrap';
-import { TimePicker } from 'react-accessible-time-picker';
-import { useDispatch } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { createPositionShift, updatePositionShift } from '../../../../../../model/workplaceSlice';
-import { getShiftDuration, isNightShift } from 'shared/lib/utils/scheduleUtils';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Col, Form, InputGroup, Modal, Row} from 'react-bootstrap';
+import {TimePicker} from 'react-accessible-time-picker';
+import {useDispatch} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {createPositionShift, updatePositionShift} from '../../../../../../model/workplaceSlice';
 
 import './ShiftForm.css';
 
-const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
-    const { t } = useI18n();
+const ShiftForm = ({show, onHide, onSuccess, positionId, shift}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
@@ -32,13 +23,13 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
     const [loading, setLoading] = useState(false);
 
     const presetColors = [
-        { color: '#fbe9bd', name: 'Yellow' },
-        { color: '#b4dbfb', name: 'Blue' },
-        { color: '#fbc0c5', name: 'Pink' },
-        { color: '#dafdcb', name: 'Green' },
-        { color: '#fbaafb', name: 'Purple' },
-        { color: '#96f6e5', name: 'Cyan' },
-        { color: '#DEB887', name: 'Beige' }
+        {color: '#fbe9bd', name: 'Yellow'},
+        {color: '#b4dbfb', name: 'Blue'},
+        {color: '#fbc0c5', name: 'Pink'},
+        {color: '#dafdcb', name: 'Green'},
+        {color: '#fbaafb', name: 'Purple'},
+        {color: '#96f6e5', name: 'Cyan'},
+        {color: '#DEB887', name: 'Beige'}
     ];
 
     useEffect(() => {
@@ -92,9 +83,9 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
     };
 
     const handleChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => ({...prev, [field]: value}));
         if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: null }));
+            setErrors(prev => ({...prev, [field]: null}));
         }
     };
     const handleTimeChange = (field, newValue) => {
@@ -118,10 +109,10 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
 
     const timeStringToObject = (timeString) => {
         if (!timeString || typeof timeString !== 'string' || !timeString.includes(':')) {
-            return { hour: '', minute: '' };
+            return {hour: '', minute: ''};
         }
         const [hour, minute] = timeString.split(':');
-        return { hour, minute };
+        return {hour, minute};
     };
 
     const calculateDuration = () => {
@@ -160,8 +151,7 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
         if (!formData.start_time) return;
         const startStr = String(formData.start_time);
         const hour = parseInt(startStr.split(':')[0]);
-        let suggestion = '';
-
+        let suggestion;
         if (hour >= 5 && hour < 12) {
             suggestion = t('workplace.shifts.morningShift');
         } else if (hour >= 12 && hour < 17) {
@@ -277,13 +267,13 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                     <Row>
                         <Col md={4}>
                             <Form.Group className="mb-3">
-                                    <TimePicker
-                                        label={t('workplace.shifts.startTime')}
-                                        value={timeStringToObject(formData.start_time)}
-                                        onChange={(time) => handleTimeChange('start_time', time)}
-                                        className={errors.start_time ? 'is-invalid' : ''}
-                                        is24Hour={true}
-                                    />
+                                <TimePicker
+                                    label={t('workplace.shifts.startTime')}
+                                    value={timeStringToObject(formData.start_time)}
+                                    onChange={(time) => handleTimeChange('start_time', time)}
+                                    className={errors.start_time ? 'is-invalid' : ''}
+                                    is24Hour={true}
+                                />
 
                                 {errors.start_time && (
                                     <div className="invalid-feedback d-block">
@@ -329,7 +319,7 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                                 type="color"
                                 value={formData.color}
                                 onChange={(e) => handleChange('color', e.target.value)}
-                                style={{ width: '60px', height: '40px' }}
+                                style={{width: '60px', height: '40px'}}
                             />
                             <div className="color-presets d-flex gap-1">
                                 {presetColors.map(preset => (
@@ -337,7 +327,7 @@ const ShiftForm = ({ show, onHide, onSuccess, positionId, shift }) => {
                                         key={preset.color}
                                         type="button"
                                         className={`color-preset ${formData.color === preset.color ? 'active' : ''}`}
-                                        style={{ backgroundColor: preset.color }}
+                                        style={{backgroundColor: preset.color}}
                                         onClick={() => handleChange('color', preset.color)}
                                         title={preset.name}
                                     />

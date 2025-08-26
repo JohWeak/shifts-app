@@ -1,20 +1,20 @@
 // frontend/src/features/employee-requests/index.js
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Card, Button } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { addNotification } from 'app/model/notificationsSlice';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Button, Card, Container} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {addNotification} from 'app/model/notificationsSlice';
 import {
-    fetchMyRequests,
     addNewRequest,
-    updateRequest,
     deleteRequest,
+    fetchMyPermanentConstraints,
+    fetchMyRequests,
+    markAsViewed,
     removeRequest,
     setRequestLoading,
-    markAsViewed,
-    fetchMyPermanentConstraints
+    updateRequest
 } from './model/requestsSlice';
-import { constraintAPI } from 'shared/api/apiService';
+import {constraintAPI} from 'shared/api/apiService';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
@@ -24,9 +24,9 @@ import RequestDetails from './ui/RequestDetails/RequestDetails';
 import './index.css';
 
 const EmployeeRequests = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { items: requests, loading, loaded, error } = useSelector(state => state.requests);
+    const {items: requests, loading, loaded, error} = useSelector(state => state.requests);
 
     const [showForm, setShowForm] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -42,9 +42,8 @@ const EmployeeRequests = () => {
             }
         };
 
-        loadRequests();
+        void loadRequests();
 
-        // Отмечаем как просмотренные при открытии страницы
         dispatch(markAsViewed());
     }, [dispatch, loaded, loading]);
 
@@ -202,7 +201,7 @@ const EmployeeRequests = () => {
             <Card className="employee-requests-card">
                 <Card.Body>
                     {loading && !loaded ? (
-                        <LoadingState />
+                        <LoadingState/>
                     ) : error ? (
                         <EmptyState
                             icon="bi-exclamation-triangle"

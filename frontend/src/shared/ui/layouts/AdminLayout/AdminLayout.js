@@ -1,24 +1,14 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
-import React, {useState, useEffect, useRef} from 'react';
-import {useOutlet, useNavigate, useLocation, Link} from 'react-router-dom';
-import {
-    Container,
-    Navbar,
-    Nav,
-    Dropdown,
-    Button,
-    Badge
-} from 'react-bootstrap';
+import React, {useEffect, useRef, useState} from 'react';
+import {Link, useLocation, useNavigate, useOutlet} from 'react-router-dom';
+import {Badge, Button, Container, Dropdown, Nav, Navbar} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {logout} from 'features/auth/model/authSlice';
 import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
-import {
-    fetchSchedules,
-    resetScheduleView,
-} from 'features/admin-schedule-management/model/scheduleSlice';
+import {fetchSchedules, resetScheduleView,} from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import {addNotification} from "../../../../app/model/notificationsSlice";
 import {AnimatePresence, motion} from "motion/react";
@@ -55,7 +45,7 @@ const AdminLayout = () => {
                 console.error('Failed to preload data:', error);
             }
         };
-        preloadData();
+        void preloadData();
     }, [dispatch]);
 
     const handleLogout = () => {
@@ -149,7 +139,7 @@ const AdminLayout = () => {
         navigate(path);
     };
 
-    const SidebarContent = ({ isCompact = false }) => (
+    const SidebarContent = ({isCompact = false}) => (
         <Nav className="flex-column admin-nav">
             {navigationItems.map(item => (
                 <Nav.Item key={item.key}>
@@ -219,7 +209,7 @@ const AdminLayout = () => {
                                 variant: 'success',
                                 message: 'successMessage',
                             }))
-                        }
+                            }
                         >
                             <i className="bi bi-bell-fill"></i>
                         </Button>
@@ -305,7 +295,7 @@ const AdminLayout = () => {
                     onMouseLeave={handleSidebarMouseLeave}
                 >
                     <div className="sidebar-content">
-                        <SidebarContent isCompact={true} />
+                        <SidebarContent isCompact={true}/>
                     </div>
                 </div>
 
@@ -315,9 +305,9 @@ const AdminLayout = () => {
                         <motion.main
                             key={location.pathname}
                             className="admin-main-content"
-                            initial={{ opacity: 0.4, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
+                            initial={{opacity: 0.4, y: -10}}
+                            animate={{opacity: 1, y: 0}}
+                            exit={{opacity: 0, y: 10}}
                             transition={{
                                 duration: 0.2,
                                 ease: "easeInOut",

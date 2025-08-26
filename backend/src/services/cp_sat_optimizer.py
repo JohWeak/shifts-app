@@ -1,8 +1,10 @@
 # backend/src/services/cp_sat_optimizer.py
-from ortools.sat.python import cp_model
+import argparse
 import json
 import sys
-import argparse
+
+from ortools.sat.python import cp_model
+
 
 def _parse_time(time_str):
     """Convert time format HH:MM:SS to hours"""
@@ -77,7 +79,7 @@ class UniversalShiftSchedulerCP:
         max_shifts_per_day = soft_constraints.get('MAX_SHIFTS_PER_DAY', 1)
         max_consecutive_work_days = soft_constraints.get('MAX_CONSECUTIVE_WORK_DAYS', 6)
         max_cannot_work_days = soft_constraints.get('MAX_CANNOT_WORK_DAYS_PER_WEEK', 2)
-        max_prefer_work_days = soft_constraints.get('MAX_PREFER_WORK_DAYS_PER_WEEK', 3)
+        max_prefer_work_days = soft_constraints.get('MAX_PREFER_WORK_DAYS_PER_WEEK', 5)
 
         # Optimization weights - READ WITH UPPERCASE KEYS
         shortage_penalty = optimization_weights.get('SHORTAGE_PENALTY', 1000)
@@ -214,7 +216,8 @@ class UniversalShiftSchedulerCP:
                     if requirement and requirement.get('required_staff', 0) > 0:
                         required_employees = requirement.get('required_staff')
 
-                        print(f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
+                        print(
+                            f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
 
                         assignment_vars = []
 
@@ -237,7 +240,8 @@ class UniversalShiftSchedulerCP:
                             if len(assignment_vars) >= required_employees:
                                 # We have enough employees - enforce exact requirement
                                 self.model.Add(actual_assigned == required_employees)
-                                print(f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, EXACTLY {required_employees} required")
+                                print(
+                                    f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, EXACTLY {required_employees} required")
                             else:
                                 # Not enough employees - do the best we can
                                 self.model.Add(actual_assigned <= required_employees)
@@ -247,7 +251,8 @@ class UniversalShiftSchedulerCP:
                                 )
                                 self.model.Add(shortage_var == required_employees - actual_assigned)
                                 shortage_vars.append(shortage_var)
-                                print(f"[CP-SAT] Warning: Only {len(assignment_vars)} candidates for {required_employees} required")
+                                print(
+                                    f"[CP-SAT] Warning: Only {len(assignment_vars)} candidates for {required_employees} required")
                     else:
                         # НЕТ ТРЕБОВАНИЯ = ЗАПРЕЩАЕМ назначения на этот день/смену/позицию
                         for emp in employees:
@@ -327,7 +332,8 @@ class UniversalShiftSchedulerCP:
                         rest_hours = _calculate_rest_hours(shift1, shift2, True)
 
                         # Use appropriate rest requirement based on shift type
-                        required_rest = min_rest_after_night if shift1.get('is_night_shift', False) else min_rest_after_regular
+                        required_rest = min_rest_after_night if shift1.get('is_night_shift',
+                                                                           False) else min_rest_after_regular
 
                         if rest_hours < required_rest:
                             for position in positions:
@@ -406,7 +412,8 @@ class UniversalShiftSchedulerCP:
                     for position in positions:
                         if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
                             objective_terms.append(
-                                assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] * prefer_work_bonus
+                                assignments[
+                                    (emp_id, day_idx, shift['shift_id'], position['pos_id'])] * prefer_work_bonus
                             )
 
         # 5.3 Position matching bonus (reduced importance)
@@ -438,7 +445,8 @@ class UniversalShiftSchedulerCP:
                 for shift in shifts:
                     for position in positions:
                         if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                            emp_assignments.append(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
+                            emp_assignments.append(
+                                assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
 
             if emp_assignments:
                 self.model.AddMaxEquality(emp_works, emp_assignments)
@@ -562,6 +570,7 @@ class UniversalShiftSchedulerCP:
                 }
             }
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data_file', help='Path to JSON data file')
@@ -586,6 +595,7 @@ if __name__ == '__main__':
 
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         error_result = {
             'success': False,

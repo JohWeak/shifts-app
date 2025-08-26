@@ -1,11 +1,10 @@
 // frontend/src/features/admin-schedule-management/model/hooks/useScheduleValidation.js
-import { useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { scheduleAPI } from 'shared/api/apiService';
+import {useCallback} from 'react';
+import {useSelector} from 'react-redux';
+import {scheduleAPI} from 'shared/api/apiService';
 
 export const useScheduleValidation = () => {
-    const { scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
+    const {scheduleDetails, pendingChanges} = useSelector(state => state.schedule);
 
     /**
      * Validate pending changes for a specific position

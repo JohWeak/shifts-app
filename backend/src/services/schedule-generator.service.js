@@ -66,7 +66,7 @@ class ScheduleGeneratorService {
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     include: [{
                         model: ShiftRequirement,
@@ -112,13 +112,13 @@ class ScheduleGeneratorService {
                     {
                         model: EmployeeConstraint,
                         as: 'constraints',
-                        where: { status: 'active' },
+                        where: {status: 'active'},
                         required: false
                     },
                     {
                         model: PermanentConstraint, // Include permanent constraints
                         as: 'permanentConstraints',
-                        where: { is_active: true },
+                        where: {is_active: true},
                         required: false,
                         include: [{
                             model: Employee,
@@ -142,7 +142,7 @@ class ScheduleGeneratorService {
 
             // Get settings
             const settings = await ScheduleSettings.findOne({
-                where: { site_id: siteId },
+                where: {site_id: siteId},
                 transaction
             });
 
@@ -243,7 +243,7 @@ class ScheduleGeneratorService {
             }
         }
 
-        return { cannotWork, preferWork, permanentCannotWork };
+        return {cannotWork, preferWork, permanentCannotWork};
     }
 
     async generateOptimalSchedule(data) {
@@ -253,7 +253,6 @@ class ScheduleGeneratorService {
             positions,
             shiftsMap,
             shiftRequirementsMap,
-            settings,
             constraints,
             days
         } = data;
@@ -386,7 +385,7 @@ class ScheduleGeneratorService {
     }
 
     async saveSchedule(siteId, weekStart, scheduleData, transaction = null) {
-        const { Schedule, ScheduleAssignment } = this.db;
+        const {Schedule, ScheduleAssignment} = this.db;
 
         try {
             const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
@@ -402,7 +401,7 @@ class ScheduleGeneratorService {
                     algorithm: 'simple',
                     timezone: 'Asia/Jerusalem'
                 }
-            }, { transaction });
+            }, {transaction});
 
             // Create assignments
             const assignments = scheduleData.map((assignment, index) => ({
@@ -416,7 +415,7 @@ class ScheduleGeneratorService {
             }));
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments, { transaction });
+                await ScheduleAssignment.bulkCreate(assignments, {transaction});
             }
 
             console.log(`[ScheduleGeneratorService] Saved schedule with ${assignments.length} assignments`);

@@ -1,24 +1,17 @@
 // frontend/src/features/admin-workplace-settings/ui/DisplaySettingsTab/index.js
-import React, { useState, useEffect } from 'react';
-import {
-    Card,
-    Form,
-    Button,
-    Row,
-    Col,
-    Alert
-} from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { fetchSystemSettings, updateSystemSettings } from '../../../admin-system-settings/model/settingsSlice';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Card, Col, Form, Row} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {updateSystemSettings} from '../../../admin-system-settings/model/settingsSlice';
 
 import './DisplaySettingsTab.css';
 
 const DisplaySettingsTab = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
-    const { systemSettings, loading } = useSelector(state => state.settings);
+    const {systemSettings, loading} = useSelector(state => state.settings);
 
     const [localSettings, setLocalSettings] = useState({
         dateFormat: systemSettings?.dateFormat || 'DD/MM/YYYY',
@@ -46,7 +39,7 @@ const DisplaySettingsTab = () => {
     }, [localSettings, systemSettings]);
 
     const handleChange = (field, value) => {
-        setLocalSettings(prev => ({ ...prev, [field]: value }));
+        setLocalSettings(prev => ({...prev, [field]: value}));
         setSaveSuccess(false);
         setSaveError(null);
     };
@@ -84,8 +77,8 @@ const DisplaySettingsTab = () => {
     };
 
     const timeExamples = {
-        '24h': currentDate.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-        '12h': currentDate.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' })
+        '24h': currentDate.toLocaleTimeString('en-GB', {hour12: false, hour: '2-digit', minute: '2-digit'}),
+        '12h': currentDate.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
     };
 
     return (

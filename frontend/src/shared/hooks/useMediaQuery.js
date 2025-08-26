@@ -1,5 +1,5 @@
 // src/shared/lib/hooks/useMediaQuery.js
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 
 export const useMediaQuery = (query) => {
     const [matches, setMatches] = useState(window.matchMedia(query).matches);
@@ -8,11 +8,10 @@ export const useMediaQuery = (query) => {
         const media = window.matchMedia(query);
         const listener = () => setMatches(media.matches);
 
-        // Старый Safari может не поддерживать addEventListener
         if (media.addEventListener) {
             media.addEventListener('change', listener);
         } else {
-            media.addListener(listener); // для обратной совместимости
+            media.addListener(listener);
         }
 
         return () => {

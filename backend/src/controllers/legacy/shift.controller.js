@@ -5,13 +5,10 @@
  * It's being replaced by position-shift.controller.js which provides
  * more flexible shift management per position.
  *
- * TODO: Migrate existing functionality to position-based shifts
- * TODO: Update schedule generation to use position shifts
- *
  * @deprecated Use position-shift.controller.js for new features
  */
 const db = require('../../models');
-const { Shift } = db;
+const {Shift} = db;
 
 // Get all shifts
 const findAll = async (req, res) => {
@@ -81,7 +78,7 @@ const create = async (req, res) => {
 const update = async (req, res) => {
     try {
         const [updated] = await Shift.update(req.body, {
-            where: { shift_id: req.params.id }
+            where: {shift_id: req.params.id}
         });
 
         if (!updated) {
@@ -111,7 +108,7 @@ const update = async (req, res) => {
 const deleteShift = async (req, res) => {
     try {
         const deleted = await Shift.destroy({
-            where: { shift_id: req.params.id }
+            where: {shift_id: req.params.id}
         });
 
         if (!deleted) {

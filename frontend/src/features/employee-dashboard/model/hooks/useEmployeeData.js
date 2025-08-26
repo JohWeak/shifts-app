@@ -1,12 +1,11 @@
 // frontend/src/features/employee-dashboard/hooks/useEmployeeData.js
-import { useEffect, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import {useCallback, useEffect, useRef} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
-    fetchEmployeeSchedule,
-    fetchEmployeeConstraints,
-    fetchEmployeeArchiveSummary,
     checkScheduleUpdates,
-    selectNewUpdatesCount,
+    fetchEmployeeArchiveSummary,
+    fetchEmployeeConstraints,
+    fetchEmployeeSchedule,
     setDashboardStats,
 } from '../employeeDataSlice';
 
@@ -17,17 +16,17 @@ export const useEmployeeData = () => {
 
     // Load schedule with cache
     const loadSchedule = useCallback((forceRefresh = false) => {
-        return dispatch(fetchEmployeeSchedule({ forceRefresh }));
+        return dispatch(fetchEmployeeSchedule({forceRefresh}));
     }, [dispatch]);
 
     // Load constraints with cache
     const loadConstraints = useCallback((weekStart, forceRefresh = false) => {
-        return dispatch(fetchEmployeeConstraints({ weekStart, forceRefresh }));
+        return dispatch(fetchEmployeeConstraints({weekStart, forceRefresh}));
     }, [dispatch]);
 
     // Load archive with cache
     const loadArchive = useCallback((month, forceRefresh = false) => {
-        return dispatch(fetchEmployeeArchiveSummary({ month, forceRefresh }));
+        return dispatch(fetchEmployeeArchiveSummary({month, forceRefresh}));
     }, [dispatch]);
 
     // 2. Создаем новую функцию, которая будет диспатчить действие

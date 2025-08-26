@@ -1,16 +1,15 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.js
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {Card, Button, Form, Alert, Toast, ToastContainer} from 'react-bootstrap';
+import {Alert, Button, Card, Form, Toast, ToastContainer} from 'react-bootstrap';
 import {X} from 'react-bootstrap-icons';
 import TextareaAutosize from 'react-textarea-autosize';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
-import {addNotification} from 'app/model/notificationsSlice'; // Для будущих уведомлений
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
 import {constraintAPI} from "shared/api/apiService";
-import { fetchMyPermanentConstraints } from '../../model/requestsSlice';
+import {fetchMyPermanentConstraints} from '../../model/requestsSlice';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
@@ -21,7 +20,7 @@ import store from "../../../../app/store/store";
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null }) => {
+const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}) => {
     const {t} = useI18n();
     const dispatch = useDispatch();
 
@@ -42,7 +41,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
 
     useEffect(() => {
         console.log('[PermanentConstraintForm] Current permanentConstraints from Redux:', permanentConstraints);
-
 
 
     }, [permanentConstraints]);
@@ -72,7 +70,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
                 setLoading(false);
             }
         };
-        loadData();
+        void loadData();
     }, [dispatch, t]);
 
     // Обновим эффект для инициализации из initialData (при редактировании)

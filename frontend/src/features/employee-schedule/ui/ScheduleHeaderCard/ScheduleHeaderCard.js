@@ -1,6 +1,6 @@
 //frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard.js
-import React, {useState, useEffect} from 'react';
-import {Card, Badge, Form, Col, Row} from 'react-bootstrap';
+import React from 'react';
+import {Badge, Card, Form} from 'react-bootstrap';
 import {formatWeekRange} from 'shared/lib/utils/scheduleUtils';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './ScheduleHeaderCard.css';
@@ -40,40 +40,40 @@ export const ScheduleHeaderCard = ({
                     </div>
                 </div>
                 {shouldRenderFooter && (
-                <div className="d-flex justify-content-between align-items-center mt-2 pt-1 border-top">
-                    {showSubtitle && (
-                        <small className="d-flex gap-2 text-muted ">
-                            {site && (
-                                <span className="d-block">
+                    <div className="d-flex justify-content-between align-items-center mt-2 pt-1 border-top">
+                        {showSubtitle && (
+                            <small className="d-flex gap-2 text-muted ">
+                                {site && (
+                                    <span className="d-block">
                                     <i className="bi bi-building me-1"></i>
-                                    {site}
+                                        {site}
                                 </span>
-                            )}
-                            {position && (
-                                <span className="d-block">
+                                )}
+                                {position && (
+                                    <span className="d-block">
                                     <i className="bi bi-person-badge ms-1 me-1"></i>
-                                    {position}
+                                        {position}
                                 </span>
+                                )}
+                            </small>
+                        )}
+                        <div>
+                            {empName && (
+                                <span className="fw-semibold">{empName}</span>
                             )}
-                        </small>
-                    )}
-                    <div>
-                        {empName && (
-                            <span className="fw-semibold">{empName}</span>
-                        )}
-                        {showNameToggle && (
-                            <Form.Check
-                                type="switch"
-                                id="name-display-toggle"
-                                label={t('employee.showFullName')}
-                                checked={showFullName}
-                                onChange={(e) => onNameToggle(e.target.checked)}
-                                className="mt-1 me-1 text-muted"
-                                reverse={direction === 'ltr'}
-                            />
-                        )}
+                            {showNameToggle && (
+                                <Form.Check
+                                    type="switch"
+                                    id="name-display-toggle"
+                                    label={t('employee.showFullName')}
+                                    checked={showFullName}
+                                    onChange={(e) => onNameToggle(e.target.checked)}
+                                    className="mt-1 me-1 text-muted"
+                                    reverse={direction === 'ltr'}
+                                />
+                            )}
+                        </div>
                     </div>
-                </div>
                 )}
 
             </Card.Body>

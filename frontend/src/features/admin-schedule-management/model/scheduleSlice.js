@@ -14,20 +14,20 @@ import {classifySchedules} from 'shared/lib/utils/scheduleUtils';
 // Fetch work sites with unified cache
 export const fetchWorkSites = createAsyncThunk(
     'schedule/fetchWorkSites',
-    async (forceRefresh = false, { getState, rejectWithValue }) => {
+    async (forceRefresh = false, {getState, rejectWithValue}) => {
         const state = getState();
-        const { cache, cacheDurations } = state.schedule;
+        const {cache, cacheDurations} = state.schedule;
 
         // Check cache
         if (!forceRefresh && isCacheEntryValid(cache.workSites, cacheDurations.workSites)) {
             console.log('[Cache] Using cached work sites');
-            return { cached: true, data: cache.workSites.data };
+            return {cached: true, data: cache.workSites.data};
         }
 
         try {
             console.log('[Cache] Fetching fresh work sites');
             const response = await worksiteAPI.fetchWorkSites();
-            return { cached: false, data: response };
+            return {cached: false, data: response};
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -36,7 +36,7 @@ export const fetchWorkSites = createAsyncThunk(
 
 export const fetchSchedules = createAsyncThunk(
     'schedule/fetchSchedules',
-    async (_, { rejectWithValue }) => {
+    async (_, {rejectWithValue}) => {
         try {
             const response = await scheduleAPI.fetchSchedules();
             if (response && response.items) {
@@ -52,21 +52,21 @@ export const fetchSchedules = createAsyncThunk(
 // Fetch schedule details with cache
 export const fetchScheduleDetails = createAsyncThunk(
     'schedule/fetchScheduleDetails',
-    async (scheduleId, { getState, rejectWithValue }) => {
+    async (scheduleId, {getState, rejectWithValue}) => {
         const state = getState();
-        const { cache, cacheDurations } = state.schedule;
+        const {cache, cacheDurations} = state.schedule;
         const cached = getCacheEntry(cache.scheduleDetails, scheduleId);
 
         // Check cache
         if (cached && isCacheEntryValid(cached, cacheDurations.scheduleDetails)) {
             console.log(`[Cache] Using cached details for schedule ${scheduleId}`);
-            return { cached: true, scheduleId, data: cached.data };
+            return {cached: true, scheduleId, data: cached.data};
         }
 
         try {
             console.log(`[Cache] Fetching fresh details for schedule ${scheduleId}`);
             const details = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            return { cached: false, scheduleId, data: details };
+            return {cached: false, scheduleId, data: details};
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -76,7 +76,7 @@ export const fetchScheduleDetails = createAsyncThunk(
 
 export const generateSchedule = createAsyncThunk(
     'schedule/generateSchedule',
-    async (settings, { dispatch, rejectWithValue }) => {
+    async (settings, {dispatch, rejectWithValue}) => {
         try {
             const response = await scheduleAPI.generateSchedule(settings);
 
@@ -97,7 +97,7 @@ export const generateSchedule = createAsyncThunk(
 
 export const updateScheduleStatus = createAsyncThunk(
     'schedule/updateScheduleStatus',
-    async ({ scheduleId, status }, { rejectWithValue }) => {
+    async ({scheduleId, status}, {rejectWithValue}) => {
         try {
             return await scheduleAPI.updateScheduleStatus(scheduleId, status); // Возвращаем только data
         } catch (error) {
@@ -109,7 +109,7 @@ export const updateScheduleStatus = createAsyncThunk(
 
 export const compareAlgorithms = createAsyncThunk(
     'schedule/compareAlgorithms',
-    async (settings, { rejectWithValue }) => {
+    async (settings, {rejectWithValue}) => {
         try {
             return await scheduleAPI.compareAlgorithms(settings);
         } catch (error) {
@@ -121,7 +121,7 @@ export const compareAlgorithms = createAsyncThunk(
 
 export const deleteSchedule = createAsyncThunk(
     'schedule/deleteSchedule',
-    async (scheduleId, { rejectWithValue }) => {
+    async (scheduleId, {rejectWithValue}) => {
         try {
             await scheduleAPI.deleteSchedule(scheduleId);
             return scheduleId;
@@ -134,7 +134,7 @@ export const deleteSchedule = createAsyncThunk(
 
 export const updateScheduleAssignments = createAsyncThunk(
     'schedule/updateScheduleAssignments',
-    async ({ scheduleId, changes }, { rejectWithValue }) => {
+    async ({scheduleId, changes}, {rejectWithValue}) => {
         try {
             return await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
         } catch (error) {
@@ -146,10 +146,10 @@ export const updateScheduleAssignments = createAsyncThunk(
 
 export const exportSchedule = createAsyncThunk(
     'schedule/exportSchedule',
-    async ({ scheduleId, format }, { rejectWithValue }) => {
+    async ({scheduleId, format}, {rejectWithValue}) => {
         try {
             await scheduleAPI.exportSchedule(scheduleId, format);
-            return { success: true };
+            return {success: true};
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -157,13 +157,12 @@ export const exportSchedule = createAsyncThunk(
 );
 
 
-
 export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
-    async ({ positionId, shiftId, date, scheduleId }, { getState, rejectWithValue }) => {
+    async ({positionId, shiftId, date, scheduleId}, {getState, rejectWithValue}) => {
         try {
             const state = getState();
-            const { pendingChanges, cache, cacheDurations } = state.schedule;
+            const {pendingChanges, cache, cacheDurations} = state.schedule;
 
             // Create cache key based on parameters
             const cacheKey = `${scheduleId}_${positionId}_${shiftId}_${date}`;
@@ -174,7 +173,7 @@ export const fetchRecommendations = createAsyncThunk(
 
             if (!hasPendingChanges && cached && isCacheEntryValid(cached, cacheDurations.recommendations)) {
                 console.log(`[Cache] Using cached recommendations for ${cacheKey}`);
-                return { cached: true, cacheKey, data: cached.data };
+                return {cached: true, cacheKey, data: cached.data};
             }
 
             const virtualChanges = Object.values(pendingChanges || {}).map(change => ({
@@ -194,7 +193,7 @@ export const fetchRecommendations = createAsyncThunk(
                 virtualChanges.length > 0 ? virtualChanges : null
             );
 
-            return { cached: false, cacheKey, data: response };
+            return {cached: false, cacheKey, data: response};
         } catch (error) {
             return rejectWithValue(error.response?.message || 'Failed to fetch recommendations');
         }
@@ -205,11 +204,11 @@ export const fetchRecommendations = createAsyncThunk(
 // Preload with cache
 export const preloadScheduleDetails = createAsyncThunk(
     'schedule/preloadScheduleDetails',
-    async (_, { getState, dispatch }) => {
+    async (_, {getState, dispatch}) => {
         const state = getState();
-        const { schedules, cache, cacheDurations } = state.schedule;
+        const {schedules, cache, cacheDurations} = state.schedule;
 
-        const { activeSchedules } = classifySchedules(schedules);
+        const {activeSchedules} = classifySchedules(schedules);
         console.log(`[Cache] Preloading details for ${activeSchedules.length} active schedules`);
 
         const batchSize = 3;
@@ -238,7 +237,7 @@ export const preloadScheduleDetails = createAsyncThunk(
         }
 
         console.log(`[Cache] Preloaded ${loadedCount} schedule details`);
-        return { loaded: loadedCount };
+        return {loaded: loadedCount};
     }
 );
 
@@ -290,7 +289,7 @@ const scheduleSlice = createSlice({
     },
     reducers: {
         updateShiftColor: (state, action) => {
-            const { shiftId, color } = action.payload;
+            const {shiftId, color} = action.payload;
 
             if (state.scheduleDetails?.shifts) {
                 const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
@@ -327,7 +326,7 @@ const scheduleSlice = createSlice({
             }
         },
         addPendingChange(state, action) {
-            const { key, change } = action.payload;
+            const {key, change} = action.payload;
             state.pendingChanges[key] = change;
 
             // Track if this was an autofilled change
@@ -340,7 +339,7 @@ const scheduleSlice = createSlice({
         },
         addBatchPendingChanges(state, action) {
             const changes = action.payload;
-            changes.forEach(({ key, change }) => {
+            changes.forEach(({key, change}) => {
                 state.pendingChanges[key] = change;
                 if (change.isAutofilled) {
                     state.autofilledChanges[key] = true;
@@ -403,7 +402,7 @@ const scheduleSlice = createSlice({
         },
 
         clearCache(state, action) {
-            const { type, key } = action.payload || {};
+            const {type, key} = action.payload || {};
 
             if (type === 'workSites') {
                 state.cache.workSites = null;
@@ -491,7 +490,7 @@ const scheduleSlice = createSlice({
                 state.loading = 'pending';
                 state.error = null;
             })
-            .addCase(compareAlgorithms.fulfilled, (state, action) => {
+            .addCase(compareAlgorithms.fulfilled, (state) => {
                 state.loading = 'succeeded';
 
             })
@@ -515,8 +514,8 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
-                const { newEmployees = [] } = action.payload;
-                const { changes } = action.meta.arg;
+                const {newEmployees = []} = action.payload;
+                const {changes} = action.meta.arg;
                 const positionId = changes[0]?.positionId;
 
                 if (!positionId || !state.scheduleDetails) return;
@@ -649,7 +648,7 @@ const scheduleSlice = createSlice({
             })
             .addCase(updateScheduleStatus.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                const { scheduleId, status } = action.meta.arg;
+                const {scheduleId, status} = action.meta.arg;
 
 
                 clearCacheEntry(state.cache.scheduleDetails, scheduleId);

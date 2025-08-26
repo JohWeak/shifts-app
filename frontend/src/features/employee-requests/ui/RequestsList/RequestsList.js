@@ -1,6 +1,6 @@
 // frontend/src/features/employee-requests/ui/RequestsList/RequestsList.js
 import React from 'react';
-import {ListGroup, Button, Dropdown, Badge} from 'react-bootstrap';
+import {Dropdown, ListGroup} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import {formatDateTime} from 'shared/lib/utils/scheduleUtils';
@@ -65,26 +65,26 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
 
                         </div>
                         <div className="d-flex flex-column gap-2">
-                        <StatusBadge
-                            status={request.status}
-                            text={t(`requests.status.${request.status}`)}
-                        />
-                        {isInactive && (
                             <StatusBadge
-                                status={t('requests.inactive')}
-                                text={t('requests.inactive')}
+                                status={request.status}
+                                text={t(`requests.status.${request.status}`)}
                             />
-                        )}
+                            {isInactive && (
+                                <StatusBadge
+                                    status={t('requests.inactive')}
+                                    text={t('requests.inactive')}
+                                />
+                            )}
                         </div>
 
                     </div>
 
                 </div>
                 {canEdit && (
-                    <Dropdown >
-                        <Dropdown.Toggle as={CustomToggle} id={`request-actions-${request.id}`} />
+                    <Dropdown>
+                        <Dropdown.Toggle as={CustomToggle} id={`request-actions-${request.id}`}/>
 
-                        <Dropdown.Menu >
+                        <Dropdown.Menu>
                             {/* Edit Button */}
                             <Dropdown.Item onClick={() => onEditRequest(request)}>
                                 <i className="bi bi-pencil me-2"></i>

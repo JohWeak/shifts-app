@@ -1,32 +1,22 @@
 //frontend/src/features/admin-reports/index.js
 
-import React, {useState, useEffect, useMemo} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {format, subMonths} from 'date-fns';
-import {
-    Container,
-    Row,
-    Col,
-    Card,
-    Form,
-    Button,
-    Spinner,
-    Table
-} from 'react-bootstrap';
-import { ResponsiveBar } from '@nivo/bar';
+import {Button, Card, Col, Container, Form, Row, Spinner, Table} from 'react-bootstrap';
+import {ResponsiveBar} from '@nivo/bar';
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import {worksiteAPI} from 'shared/api/apiService';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
 import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import { fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
+import {fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
 import {formatScheduleDate, formatWeekRange} from "../../shared/lib/utils/scheduleUtils";
 import './index.css';
 
 
-
 const Reports = () => {
-    const {t, locale, direction} = useI18n();
+    const {t, locale} = useI18n();
     const dispatch = useDispatch();
 
     const {workSites: sites, loading: sitesLoading} = useSelector((state) => state.workplace);
@@ -83,18 +73,20 @@ const Reports = () => {
     const nivoTheme = {
         background: 'transparent',
         axis: {
-            domain: { line: { stroke: 'transparent' } },
-            legend: { text: { fill: 'var(--bs-secondary)' } },
-            ticks: { line: { stroke: 'var(--bs-secondary)', strokeWidth: 1 }, text: { fill: 'var(--bs-secondary)' } },
+            domain: {line: {stroke: 'transparent'}},
+            legend: {text: {fill: 'var(--bs-secondary)'}},
+            ticks: {line: {stroke: 'var(--bs-secondary)', strokeWidth: 1}, text: {fill: 'var(--bs-secondary)'}},
         },
-        grid: { line: { stroke: 'var(--bs-border-color)', strokeDasharray: '3 3' } },
-        tooltip: { container: {
+        grid: {line: {stroke: 'var(--bs-border-color)', strokeDasharray: '3 3'}},
+        tooltip: {
+            container: {
                 background: 'var(--bs-body-bg)',
                 color: 'var(--bs-body-color)',
                 border: '1px solid var(--bs-border-color)',
                 boxShadow: 'var(--shadow-lg)',
                 borderRadius: 'var(--radius-md)'
-            }},
+            }
+        },
         legends: {
             text: {
                 fill: 'var(--bs-body-color)'
@@ -202,18 +194,32 @@ const Reports = () => {
                                     data={chartData}
                                     keys={[t('reports.coverage'), t('reports.issues')]}
                                     indexBy="date"
-                                    margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                                    margin={{top: 50, right: 130, bottom: 50, left: 60}}
                                     padding={0.3}
                                     groupMode="grouped"
-                                    valueScale={{ type: 'linear' }}
-                                    indexScale={{ type: 'band', round: true }}
+                                    valueScale={{type: 'linear'}}
+                                    indexScale={{type: 'band', round: true}}
                                     colors={['var(--bs-primary)', 'var(--bs-danger)']}
                                     theme={nivoTheme}
-                                    borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+                                    borderColor={{from: 'color', modifiers: [['darker', 1.6]]}}
                                     axisTop={null}
                                     axisRight={null}
-                                    axisBottom={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: t('common.date'), legendPosition: 'middle', legendOffset: 32 }}
-                                    axisLeft={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: t('common.value'), legendPosition: 'middle', legendOffset: -40 }}
+                                    axisBottom={{
+                                        tickSize: 5,
+                                        tickPadding: 5,
+                                        tickRotation: 0,
+                                        legend: t('common.date'),
+                                        legendPosition: 'middle',
+                                        legendOffset: 32
+                                    }}
+                                    axisLeft={{
+                                        tickSize: 5,
+                                        tickPadding: 5,
+                                        tickRotation: 0,
+                                        legend: t('common.value'),
+                                        legendPosition: 'middle',
+                                        legendOffset: -40
+                                    }}
                                     enableLabel={false}
                                     legends={[
                                         {
@@ -229,7 +235,7 @@ const Reports = () => {
                                             itemDirection: 'left-to-right',
                                             itemOpacity: 0.85,
                                             symbolSize: 20,
-                                            effects: [{ on: 'hover', style: { itemOpacity: 1 } }],
+                                            effects: [{on: 'hover', style: {itemOpacity: 1}}],
                                         },
                                     ]}
                                     motionConfig="stiff"

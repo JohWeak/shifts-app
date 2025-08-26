@@ -23,11 +23,11 @@ const archiveOldConstraints = async () => {
 
         if (oldConstraints.length > 0) {
             // Create archive records (need to create this table)
-            const archiveData = oldConstraints.map(c => ({
-                original_id: c.id,
-                data: JSON.stringify(c.toJSON()),
-                archived_at: new Date()
-            }));
+            // const archiveData = oldConstraints.map(c => ({
+            //     original_id: c.id,
+            //     data: JSON.stringify(c.toJSON()),
+            //     archived_at: new Date()
+            // }));
 
             // await db.ConstraintArchive.bulkCreate(archiveData, { transaction });
 
@@ -49,4 +49,4 @@ const archiveOldConstraints = async () => {
     }
 };
 
-module.exports = { archiveOldConstraints };
+module.exports = {archiveOldConstraints};
