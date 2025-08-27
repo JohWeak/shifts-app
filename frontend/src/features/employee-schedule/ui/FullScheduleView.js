@@ -8,7 +8,15 @@ import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './FullScheduleView.css';
 
-const FullScheduleView = ({user, scheduleData, employeeData, getShiftColor, openColorPicker}) => {
+const FullScheduleView = ({
+                              user,
+                              scheduleData,
+                              employeeData,
+                              getShiftColor,
+                              openColorPicker,
+                              showCurrentWeek,
+                              showNextWeek,
+                          }) => {
     const {t} = useI18n();
     const tableRef = useRef(null);
 
@@ -64,6 +72,13 @@ const FullScheduleView = ({user, scheduleData, employeeData, getShiftColor, open
 
     const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData || !weekData.days || weekData.days.length === 0) {
+            return null;
+        }
+        const hasAnyEmployeeInWeek = weekData.days.some(day =>
+            day.shifts.some(shift => shift.employees && shift.employees.length > 0)
+        );
+
+        if (!hasAnyEmployeeInWeek) {
             return null;
         }
 
@@ -157,8 +172,8 @@ const FullScheduleView = ({user, scheduleData, employeeData, getShiftColor, open
 
     return (
         <div className="full-schedule-content">
-            {currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
-            {nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
+            {showCurrentWeek && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
+            {showNextWeek && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
         </div>
     );
 };

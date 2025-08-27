@@ -29,26 +29,22 @@ const AdminPermanentRequests = () => {
         dispatch(fetchAllRequests());
     }, [dispatch]);
 
-    useEffect(() => {
-        console.log('[AdminPermanentRequests] All requests:', requests);
-        console.log('[AdminPermanentRequests] Pending:', pendingRequests.length);
-        console.log('[AdminPermanentRequests] Active processed:', activeProcessedRequests.length);
-        console.log('[AdminPermanentRequests] Inactive:', inactiveRequests.length);
-        // eslint-disable-next-line no-use-before-define
-    }, [activeProcessedRequests.length, inactiveRequests.length, pendingRequests.length, requests]);
-
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
-
 
     const activeProcessedRequests = requests.filter(r =>
         r.status === 'approved' && r.is_active === true
     );
 
-
     const inactiveRequests = requests.filter(r =>
         r.status === 'rejected' || (r.status === 'approved' && r.is_active === false)
     );
+    useEffect(() => {
+        console.log('[AdminPermanentRequests] All requests:', requests);
+        console.log('[AdminPermanentRequests] Pending:', pendingRequests.length);
+        console.log('[AdminPermanentRequests] Active processed:', activeProcessedRequests.length);
+        console.log('[AdminPermanentRequests] Inactive:', inactiveRequests.length);
+    }, [activeProcessedRequests.length, inactiveRequests.length, pendingRequests.length, requests]);
 
     const sortAccessors = {
         'employee.first_name': (item) => item.employee?.first_name || '',

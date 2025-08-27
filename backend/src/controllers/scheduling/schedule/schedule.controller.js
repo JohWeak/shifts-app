@@ -13,7 +13,6 @@ const {
 const cpSatBridge = require('../../../services/cp-sat-bridge.service');
 
 
-
 const getAllSchedules = async (req, res) => {
     try {
         const {page = 1, limit = 10, site_id} = req.query;
@@ -103,7 +102,6 @@ const getScheduleDetails = async (req, res) => {
             order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
         });
 
-        // Получить все позиции с их сменами и требованиями
         const positions = await db.Position.findAll({
             where: {
                 site_id: schedule.site_id,
@@ -655,16 +653,16 @@ const handleGetScheduleStatistics = async (req, res) => {
 
 /**
  * @description Handles HTTP request to get dashboard overview (multiple schedules)
- * @route GET /api/worksites/:siteId/statistics
+ * @route GET /api/worksites/:worksiteId/statistics
  */
 const getDashboardOverview = async (req, res) => {
     try {
-        const { siteId } = req.params;
-        const { startDate, endDate } = req.query;
+        const {worksiteId: siteId} = req.params;
+        const {startDate, endDate} = req.query;
 
         // Проверка наличия обязательных параметров
         if (!startDate || !endDate) {
-            return res.status(400).json({ success: false, message: 'startDate and endDate are required' });
+            return res.status(400).json({success: false, message: 'startDate and endDate are required'});
         }
 
         const schedules = await Schedule.findAll({

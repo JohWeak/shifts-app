@@ -20,8 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(20),
             allowNull: true,
             validate: {
-                isNumeric: true,
-                len: [10, 20]
+                len: [0, 20]
             }
         },
         country: {type: DataTypes.STRING(100), allowNull: true},

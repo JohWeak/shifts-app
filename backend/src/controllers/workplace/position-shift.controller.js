@@ -1,13 +1,13 @@
 // backend/src/controllers/position-shift.controller.js
 const db = require('../../models');
-const { Position, PositionShift, ShiftRequirement } = db;
-const { Op } = require('sequelize');
+const {Position, PositionShift, ShiftRequirement} = db;
+const {Op} = require('sequelize');
 
 // Get all shifts for a position
 const getPositionShifts = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { includeRequirements = false } = req.query;
+        const {positionId} = req.params;
+        const {includeRequirements = false} = req.query;
 
         const includeOptions = [];
         if (includeRequirements) {
@@ -20,7 +20,7 @@ const getPositionShifts = async (req, res) => {
 
         const shifts = await PositionShift.findAll({
             where: {
-                position_id: id,
+                position_id: positionId,
                 is_active: true
             },
             include: includeOptions,
@@ -40,8 +40,8 @@ const getPositionShifts = async (req, res) => {
 // Create a new shift for a position
 const createPositionShift = async (req, res) => {
     try {
-        const { id: position_id } = req.params;
-        const { shift_name, start_time, end_time, color, sort_order } = req.body;
+        const {positionId: position_id} = req.params;
+        const {shift_name, start_time, end_time, color, sort_order} = req.body.shift || req.body;
 
         // Format times to ensure they are valid
         const formatTime = (time) => {
@@ -60,7 +60,7 @@ const createPositionShift = async (req, res) => {
         // Validate position exists
         const position = await Position.findByPk(position_id);
         if (!position) {
-            return res.status(404).json({ message: 'Position not found' });
+            return res.status(404).json({message: 'Position not found'});
         }
 
         // Check for time conflicts with existing shifts
@@ -119,12 +119,12 @@ const createPositionShift = async (req, res) => {
 // Update a shift
 const updatePositionShift = async (req, res) => {
     try {
-        const { shiftId } = req.params;
-        const { shift_name, start_time, end_time, color, sort_order, is_active } = req.body;
+        const {shiftId} = req.params;
+        const {shift_name, start_time, end_time, color, sort_order, is_active} = req.body.shift || req.body;
 
         const shift = await PositionShift.findByPk(shiftId);
         if (!shift) {
-            return res.status(404).json({ message: 'Shift not found' });
+            return res.status(404).json({message: 'Shift not found'});
         }
 
         // If updating times, check for conflicts
@@ -135,7 +135,7 @@ const updatePositionShift = async (req, res) => {
             const conflictingShifts = await PositionShift.findAll({
                 where: {
                     position_id: shift.position_id,
-                    id: { [Op.ne]: shiftId },
+                    id: {[Op.ne]: shiftId},
                     is_active: true
                 }
             });
@@ -179,18 +179,15 @@ const updatePositionShift = async (req, res) => {
 // Soft delete a shift
 const deletePositionShift = async (req, res) => {
     try {
-        const { shiftId } = req.params;
+        const {shiftId} = req.params;
 
         const shift = await PositionShift.findByPk(shiftId);
         if (!shift) {
-            return res.status(404).json({ message: 'Shift not found' });
+            return res.status(404).json({message: 'Shift not found'});
         }
 
-        // Check if shift has active assignments in current/future schedules
-        // TODO: Add this check when schedule system is integrated
-
         // Soft delete
-        await shift.update({ is_active: false });
+        await shift.update({is_active: false});
 
         res.json({
             message: 'Shift deactivated successfully',

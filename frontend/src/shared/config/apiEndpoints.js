@@ -1,84 +1,82 @@
 //frontend/src/shared/config/apiEndpoints.js
+const API_BASE = '/api';
+
 export const API_ENDPOINTS = {
-    // Auth
     AUTH: {
-        LOGIN: '/api/auth/login',
-        LOGOUT: '/api/auth/logout',
-        PROFILE: '/api/auth/profile'
+        LOGIN: `${API_BASE}/auth/login`,
+        LOGOUT: `${API_BASE}/auth/logout`,
+        PROFILE: `${API_BASE}/auth/profile`,
     },
 
-    // Schedules
-    SCHEDULES: {
-        BASE: '/api/schedules',
-        DETAILS: (id) => `/api/schedules/${id}`,
-        GENERATE: '/api/schedules/generate',
-        STATUS: (id) => `/api/schedules/${id}/status`,
-        ASSIGNMENTS: (id) => `/api/schedules/${id}/update-assignments`,
-        EXPORT: (id) => `/api/schedules/${id}/export`,
-        COMPARE: '/api/schedules/compare-algorithms',
-        WEEKLY: '/api/schedules/weekly',
-        ADMIN: {
-            WEEKLY: '/api/schedules/admin/weekly',
-        },
-        WEEKLY_BY_POSITION: (positionId) => `/api/schedules/position/${positionId}/weekly`,
-        EMPLOYEE_ARCHIVE_SUMMARY: '/api/schedules/employee/archive/summary',
-        EMPLOYEE_ARCHIVE_MONTH: '/api/schedules/employee/archive/month',
-        VALIDATE: (scheduleId) => `/api/schedules/${scheduleId}/validate`,
-
-    },
-    // Employees
-    EMPLOYEES: {
-        BASE: '/api/employees',
-        DETAILS: (id) => `/api/employees/${id}`,
-        RECOMMENDATIONS: '/api/employees/recommendations',
-        MY_SHIFTS: '/api/employees/my-shifts',
-    },
-
-    // Work Sites
     WORKSITES: {
-        BASE: '/api/worksites',
-        STATS_OVERVIEW: (siteId) => `/api/worksites/${siteId}/statistics`,
+        BASE: `${API_BASE}/worksites`,
+        DETAILS: (worksiteId) => `${API_BASE}/worksites/${worksiteId}`,
+        RESTORE: (worksiteId) => `${API_BASE}/worksites/${worksiteId}/restore`,
+        STATS_OVERVIEW: (worksiteId) => `${API_BASE}/worksites/${worksiteId}/statistics`,
+        POSITIONS: (worksiteId) => `${API_BASE}/worksites/${worksiteId}/positions`,
     },
 
-    // Constraints
-    CONSTRAINTS: {
-        BASE: '/api/constraints',
-        EMPLOYEE: (empId) => `/api/constraints/employee/${empId}`,
-        WEEKLY: '/api/constraints/weekly-grid',
-        SUBMIT: '/api/constraints/submit-weekly',
-        PERMANENT_REQUESTS_MY: '/api/constraints/permanent-requests/my',
-        PERMANENT_REQUEST: '/api/constraints/permanent-request',
-        PERMANENT_REQUESTS_ALL: '/api/constraints/permanent-requests',
-        PENDING_COUNT: '/api/constraints/permanent-requests/count',
-        REVIEW_REQUEST: (id) => `/api/constraints/permanent-request/${id}/review`,
-        DELETE_REQUEST: (id) => `/api/constraints/permanent-request/${id}`,
-        PERMANENT_CONSTRAINTS_MY: '/api/constraints/permanent-constraints/my',
-
-    },
-    SETTINGS: {
-        SYSTEM: '/api/settings/system',
-        POSITIONS: '/api/positions',
-        POSITION_UPDATE: (id) => `/api/positions/${id}`,
-        POSITION_SHIFTS: '/api/positions/:id/shifts',
-        POSITION_SHIFT: '/api/positions/shifts/:id',
-        SHIFT_REQUIREMENTS: '/api/positions/shifts/:id/requirements',
-        SHIFT_REQUIREMENT: '/api/positions/requirements/:id',
-        POSITION_REQUIREMENTS_MATRIX: '/api/positions/:id/requirements-matrix',
-        SHIFTS: {
-            BASE: '/api/shifts',
-            BY_ID: (id) => `/api/shifts/${id}`,
-            BY_POSITION: (positionId) => `/api/positions/${positionId}/shifts`,
-            CREATE: (positionId) => `/api/positions/${positionId}/shifts`,
-            UPDATE: (id) => `/api/shifts/${id}`,
-            DELETE: (id) => `/api/shifts/${id}`,
-            UPDATE_COLOR: (id) => `/api/shifts/${id}/color`,
-            REQUIREMENTS: (shiftId) => `/api/shifts/${shiftId}/requirements`,
-            UPDATE_REQUIREMENT: (reqId) => `/api/requirements/${reqId}`
-        }
-    },
     POSITIONS: {
-        BY_SITE: (siteId) => `/api/sites/${siteId}/positions`,
-        DETAILS: (positionId) => `/api/positions/${positionId}`,
-        SHIFTS: (positionId) => `/api/positions/${positionId}/shifts`,
+        BASE: `${API_BASE}/positions`,
+        DETAILS: (positionId) => `${API_BASE}/positions/${positionId}`,
+        RESTORE: (positionId) => `${API_BASE}/positions/${positionId}/restore`,
+        // matrix route for a position
+        REQUIREMENTS_MATRIX: (positionId) => `${API_BASE}/positions/${positionId}/requirements-matrix`,
+    },
+
+    SHIFTS: {
+        // A shift belongs to a position
+        BY_POSITION: (positionId) => `${API_BASE}/positions/${positionId}/shifts`,
+        DETAILS: (shiftId) => `${API_BASE}/shifts/${shiftId}`,
+    },
+
+    REQUIREMENTS: {
+        // A requirement belongs to a shift
+        BY_SHIFT: (shiftId) => `${API_BASE}/shifts/${shiftId}/requirements`,
+        DETAILS: (requirementId) => `${API_BASE}/requirements/${requirementId}`,
+    },
+
+    SCHEDULES: {
+        BASE: `${API_BASE}/schedules`,
+        DETAILS: (scheduleId) => `${API_BASE}/schedules/${scheduleId}`,
+        GENERATE: `${API_BASE}/schedules/generate`,
+        COMPARE_ALGORITHMS: `${API_BASE}/schedules/compare-algorithms`,
+        STATUS: (scheduleId) => `${API_BASE}/schedules/${scheduleId}/status`,
+        ASSIGNMENTS: (scheduleId) => `${API_BASE}/schedules/${scheduleId}/update-assignments`,
+        EXPORT: (scheduleId) => `${API_BASE}/schedules/${scheduleId}/export`,
+        VALIDATE: (scheduleId) => `${API_BASE}/schedules/${scheduleId}/validate`,
+        // Employee-facing weekly schedules
+        WEEKLY: `${API_BASE}/schedules/weekly`,
+        WEEKLY_BY_POSITION: (positionId) => `${API_BASE}/schedules/position/${positionId}/weekly`,
+        // Archive
+        EMPLOYEE_ARCHIVE_SUMMARY: `${API_BASE}/schedules/employee/archive/summary`,
+        EMPLOYEE_ARCHIVE_MONTH: `${API_BASE}/schedules/employee/archive/month`,
+    },
+
+    EMPLOYEES: {
+        BASE: `${API_BASE}/employees`,
+        DETAILS: (employeeId) => `${API_BASE}/employees/${employeeId}`,
+        RECOMMENDATIONS: `${API_BASE}/employees/recommendations`,
+        MY_SHIFTS: `${API_BASE}/employees/my-shifts`,
+    },
+
+    CONSTRAINTS: {
+        // Employee-facing
+        WEEKLY_GRID: `${API_BASE}/constraints/weekly-grid`,
+        SUBMIT_WEEKLY: `${API_BASE}/constraints/submit-weekly`,
+        MY_PERMANENT_REQUESTS: `${API_BASE}/constraints/permanent-requests/my`,
+        SUBMIT_PERMANENT_REQUEST: `${API_BASE}/constraints/permanent-request`,
+        DELETE_PERMANENT_REQUEST: (requestId) => `${API_BASE}/constraints/permanent-request/${requestId}`,
+        MY_PERMANENT_CONSTRAINTS: `${API_BASE}/constraints/permanent-constraints/my`,
+        // Admin-facing
+        ALL_PERMANENT_REQUESTS: `${API_BASE}/constraints/permanent-requests`,
+        PENDING_COUNT: `${API_BASE}/constraints/permanent-requests/count`,
+        REVIEW_REQUEST: (requestId) => `${API_BASE}/constraints/permanent-request/${requestId}/review`,
+    },
+
+    SETTINGS: {
+        SYSTEM: `${API_BASE}/settings/system`,
+        SCHEDULE_SETTINGS_ALL_SITES: `${API_BASE}/settings/schedule/sites`,
+        SCHEDULE_SETTINGS_BY_SITE: (siteId) => `${API_BASE}/settings/schedule/site/${siteId}`,
     },
 };

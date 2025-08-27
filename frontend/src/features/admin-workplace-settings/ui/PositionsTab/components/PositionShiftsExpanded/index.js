@@ -1,14 +1,11 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/index.js
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Button, Table, Badge, Card, OverlayTrigger, Tooltip, Nav, Spinner, Tab} from 'react-bootstrap';
+import {Badge, Button, Card, Nav, OverlayTrigger, Spinner, Tab, Table, Tooltip} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {AnimatePresence} from 'motion/react';
 import * as motion from "motion/react-client"
-import {
-    fetchPositionShifts,
-    deletePositionShift
-} from '../../../../model/workplaceSlice';
+import {deletePositionShift, fetchPositionShifts} from '../../../../model/workplaceSlice';
 import {addNotification} from 'app/model/notificationsSlice';
 import ShiftForm from './components/ShiftForm';
 import ShiftRequirementsMatrix from './components/ShiftRequirementsMatrix';
@@ -57,7 +54,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                 message: t('workplace.shifts.deleteSuccess'),
                 duration: 3000
             }));
-            // Refresh shifts
+
             dispatch(fetchPositionShifts({positionId: position.pos_id, forceRefresh: true}));
         } catch (err) {
             dispatch(addNotification({

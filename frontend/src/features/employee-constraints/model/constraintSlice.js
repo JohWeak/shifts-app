@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/model/constraintSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { constraintAPI } from 'shared/api/apiService';
-import { addNotification } from 'app/model/notificationsSlice';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {constraintAPI} from 'shared/api/apiService';
+import {addNotification} from 'app/model/notificationsSlice';
 
 const CACHE_DURATION = 10 * 60 * 1000; // 10 минут
 
@@ -11,15 +11,15 @@ const isCacheValid = (timestamp) => {
 };
 
 export const fetchWeeklyConstraints = createAsyncThunk(
-    'constraints/fetchWeekly', // Уникальное имя
-    async ({ forceRefresh = false } = {}, { getState, rejectWithValue }) => {
+    'constraints/fetchWeekly',
+    async ({forceRefresh = false} = {}, {getState, rejectWithValue}) => {
         const state = getState().constraints;
         if (!forceRefresh && state.weeklyTemplate && isCacheValid(state.lastFetched)) {
-            return { data: state.weeklyTemplate, fromCache: true };
+            return {data: state.weeklyTemplate, fromCache: true};
         }
         try {
             const response = await constraintAPI.getWeeklyConstraints({});
-            return { data: response, fromCache: false };
+            return {data: response, fromCache: false};
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -29,11 +29,10 @@ export const fetchWeeklyConstraints = createAsyncThunk(
 // Async thunks
 export const submitWeeklyConstraints = createAsyncThunk(
     'constraints/submitWeeklyConstraints',
-    async (constraintsData, { dispatch }) => {
+    async (constraintsData, {dispatch}) => {
         try {
             const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
 
-            // После успешной отправки диспатчим уведомление
             dispatch(addNotification({
                 id: 'constraint-submit-success',
                 message: 'constraints.submitSuccess',
@@ -52,8 +51,8 @@ const constraintSlice = createSlice({
     name: 'constraints',
     initialState: {
         // Weekly constraints data
-        weeklyTemplate: null, // Шаблон с сервера
-        weeklyConstraints: {}, // Редактируемая копия
+        weeklyTemplate: null,
+        weeklyConstraints: {},
         loading: false,
         error: null,
         lastFetched: null,
@@ -75,18 +74,18 @@ const constraintSlice = createSlice({
             state.currentMode = action.payload;
         },
         updateConstraint: (state, action) => {
-            const { date, shiftId, status } = action.payload;
+            const {date, shiftId, status} = action.payload;
 
             if (!state.weeklyConstraints[date]) {
-                state.weeklyConstraints[date] = { day_status: 'neutral', shifts: {} };
+                state.weeklyConstraints[date] = {day_status: 'neutral', shifts: {}};
             }
 
             if (shiftId) {
-                // Сценарий 1: Клик по конкретной смене
+                // Scenario 1: Click on a specific shift
                 state.weeklyConstraints[date].shifts[shiftId] = status;
 
-                // Проверяем, нарушает ли это изменение "статус всего дня".
-                // Если да, сбрасываем статус дня в нейтральный.
+                // Checking if this change violates the "all-day status".
+                // If so, we reset the day's status to neutral.
                 const allShiftsSame = Object.values(state.weeklyConstraints[date].shifts)
                     .every(s => s === status);
                 if (!allShiftsSame) {
@@ -94,31 +93,28 @@ const constraintSlice = createSlice({
                 }
 
             } else {
-                // Сценарий 2: Клик по заголовку дня (shiftId is null)
+                // Scenario 2: Click on the day's header (shiftId is null)
                 state.weeklyConstraints[date].day_status = status;
 
-                // ЯВНО обновляем статус для КАЖДОЙ смены в этот день.
-                // Это ключевое исправление.
+                // We explicitly update the status for EVERY shift on this day.
+                // This is a key fix.
                 if (state.weeklyTemplate) {
                     const dayTemplate = state.weeklyTemplate.constraints.template.find(d => d.date === date);
                     if (dayTemplate && dayTemplate.shifts) {
                         dayTemplate.shifts.forEach(shift => {
-                            // Используем shift.shift_id для доступа к правильному ключу
+                            // Use shift.shift_id to access the correct key.
                             state.weeklyConstraints[date].shifts[shift.shift_id] = status;
                         });
                     }
                 }
             }
         },
-        clearSubmitStatus: (state) => {
-            state.submitStatus = null;
-        },
 
         resetConstraints: (state) => {
             const initialConstraints = {};
             if (state.weeklyTemplate) {
                 state.weeklyTemplate.constraints.template.forEach(day => {
-                    initialConstraints[day.date] = { day_status: 'neutral', shifts: {} };
+                    initialConstraints[day.date] = {day_status: 'neutral', shifts: {}};
                     day.shifts.forEach(shift => {
                         initialConstraints[day.date].shifts[shift.shift_id] = 'neutral';
                     });
@@ -136,18 +132,17 @@ const constraintSlice = createSlice({
             state.originalConstraintsOnEdit = JSON.parse(JSON.stringify(state.weeklyConstraints));
         },
         cancelEditing: (state) => {
-            // Если снимок существует, восстанавливаем из него данные
+            // If the image exists, restore data from it.
             if (state.originalConstraintsOnEdit) {
                 state.weeklyConstraints = state.originalConstraintsOnEdit;
             }
-            // Возвращаем UI в состояние "до редактирования"
             state.isSubmitted = true;
-            state.canEdit = false; // или true, в зависимости от того, хотите ли вы сразу снова разрешить редактирование
-            state.originalConstraintsOnEdit = null; // Очищаем снимок
+            state.canEdit = false;
+            state.originalConstraintsOnEdit = null;
         },
         submissionInitiated: (state) => {
-            state.isSubmitted = true;  // Оптимистично переключаем UI
-            state.submitting = true;   // Включаем спиннер
+            state.isSubmitted = true;
+            state.submitting = true;
         },
     },
     extraReducers: (builder) => {
@@ -165,10 +160,9 @@ const constraintSlice = createSlice({
                     state.canEdit = templateData.constraints.can_edit;
                     state.lastFetched = Date.now();
 
-                    // --- Вот исправление для "пустой таблицы" ---
                     const initialConstraints = {};
                     templateData.constraints.template.forEach(day => {
-                        initialConstraints[day.date] = { day_status: 'neutral', shifts: {} };
+                        initialConstraints[day.date] = {day_status: 'neutral', shifts: {}};
                         let allSame = true, firstStatus = null;
                         day.shifts.forEach((shift, index) => {
                             const status = shift.status || 'neutral';
@@ -196,15 +190,14 @@ const constraintSlice = createSlice({
             })
             .addCase(submitWeeklyConstraints.fulfilled, (state) => {
                 state.submitting = false;
-                state.canEdit = false; // или true, если хотите разрешить сразу редактировать
+                state.canEdit = false;
                 state.originalConstraintsOnEdit = null;
             })
-            // Rejected теперь должен "откатить" наш оптимистичный UI
             .addCase(submitWeeklyConstraints.rejected, (state, action) => {
                 state.submitting = false;
-                state.isSubmitted = false; // Возвращаем UI в режим редактирования
+                state.isSubmitted = false;
                 state.error = action.error.message;
-                // Здесь же можно отправить уведомление об ошибке
+
             });
     }
 });
@@ -212,7 +205,6 @@ const constraintSlice = createSlice({
 export const {
     setCurrentMode,
     updateConstraint,
-    clearSubmitStatus,
     resetConstraints,
     enableEditing,
     cancelEditing,

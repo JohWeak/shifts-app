@@ -1,7 +1,6 @@
 /* frontend/src/features/employee-schedule/ui/FullScheduleView.css */
 
 
-
 /* Table Container */
 .week-schedule-section .table-container {
     overflow: hidden;
@@ -16,14 +15,14 @@
 }
 
 /* Full Schedule Table */
-.week-schedule-section .full-schedule-table{
-    margin-bottom: 0!important;
+.week-schedule-section .full-schedule-table {
+    margin-bottom: 0 !important;
     font-size: 0.875rem;
 
 }
 
 
-.week-schedule-section  .full-schedule-table th {
+.week-schedule-section .full-schedule-table th {
     background: var(--bs-gray-100);
     font-weight: 600;
     white-space: nowrap;
@@ -35,20 +34,19 @@
 }
 
 
-
 [data-theme="dark"] .week-schedule-section .sticky-column {
     background: var(--bs-gray-900);
 }
 
 /* Headers */
-.week-schedule-section  .shift-header-cell {
+.week-schedule-section .shift-header-cell {
     min-width: 100px;
     text-align: center;
     align-content: center;
     font-size: 1.3rem;
-    background-color: rgba(var(--bs-secondary-rgb), 0.05)!important;
+    background-color: rgba(var(--bs-secondary-rgb), 0.05) !important;
     backdrop-filter: blur(1px);
-    color: var(--bs-gray-600)!important;
+    color: var(--bs-gray-600) !important;
 
 }
 
@@ -68,6 +66,7 @@
     font-size: 0.75rem;
     color: var(--bs-gray-600);
 }
+
 /* Sticky Column */
 .week-schedule-section .sticky-column {
     position: sticky;
@@ -78,10 +77,12 @@
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
     align-content: center;
 }
+
 [dir="rtl"] .week-schedule-section .sticky-column {
     border-right: none;
     right: 0;
 }
+
 /* Shift Info */
 .week-schedule-section .shift-info-cell {
     padding: 0.75rem;
@@ -112,12 +113,6 @@
 
 }
 
-.week-schedule-section .shift-cell {
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    min-height: 60px;
-    transition: all 0.2s ease;
-}
 
 .week-schedule-section .shift-cell:hover {
     transform: scale(1.02);
@@ -170,12 +165,14 @@
 
 /* Employee cells */
 .week-schedule-section .shift-cell {
+    position: relative;
     padding: 0.5rem;
     border-radius: 0.25rem;
-    min-height: 50px;
+    min-height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
 }
 
 .week-schedule-section .shift-employees {
@@ -229,9 +226,11 @@
     background: var(--bs-gray-400);
     cursor: pointer;
 }
+
 [data-theme="dark"] .table-scroll-wrapper::-webkit-scrollbar-track {
     background: var(--bs-gray-800);
 }
+
 [data-theme="dark"] .table-scroll-wrapper::-webkit-scrollbar-thumb {
     background: var(--bs-gray-700);
 }
@@ -250,11 +249,13 @@
     line-height: 1;
     color: inherit !important;
 }
-[dir="rtl"] .week-schedule-section .shift-header-info .color-picker-btn{
+
+[dir="rtl"] .week-schedule-section .shift-header-info .color-picker-btn {
     position: absolute;
     top: 18px;
     left: 0;
 }
+
 .week-schedule-section .shift-header-info:hover .color-picker-btn {
     opacity: 0.7;
 }
@@ -265,7 +266,7 @@
 
 /* Mobile Responsive */
 @media (max-width: 767px) {
-    .week-schedule-section  .full-schedule-table {
+    .week-schedule-section .full-schedule-table {
         font-size: 0.75rem;
     }
 
@@ -281,6 +282,7 @@
         min-height: 50px;
         padding: 0.375rem;
     }
+
     .week-schedule-section .shift-header-info {
         min-width: 100px;
         font-size: 0.75rem;
@@ -289,12 +291,15 @@
     .week-schedule-section .employee-name {
         font-size: 0.75rem;
     }
+
     .week-schedule-section .shift-header-info .color-picker-btn {
         opacity: 0.8;
     }
+
     .week-schedule-section .shift-header-time {
         font-size: 0.75rem;
     }
+
     .week-schedule-section .shift-header-name {
         font-size: 0.85rem;
     }

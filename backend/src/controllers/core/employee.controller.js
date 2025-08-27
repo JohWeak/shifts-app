@@ -4,8 +4,6 @@ const {Employee, Position, EmployeeConstraint, WorkSite, PositionShift} = db;
 const bcrypt = require('bcryptjs');
 const {Op} = require("sequelize");
 
-// redis для кэша?
-
 
 // Create new employee
 const create = async (req, res) => {
@@ -16,12 +14,19 @@ const create = async (req, res) => {
         if (password) {
             employeeData.password = await bcrypt.hash(password, 10);
         }
-        if (req.body.email === '') {
-            req.body.email = null;
+
+        // Explicitly handle empty or non-existent optional fields
+        if (!employeeData.email || employeeData.email === '') {
+            employeeData.email = null;
         }
+
+        // If default_position_id is not provided or is an empty string, set it to null.
+        if (!employeeData.default_position_id || employeeData.default_position_id === '') {
+            employeeData.default_position_id = null;
+        }
+
         const employee = await Employee.create(employeeData);
 
-        // Загружаем созданного сотрудника с ассоциациями
         const employeeWithAssociations = await Employee.findByPk(employee.emp_id, {
             attributes: {exclude: ['password']},
             include: [

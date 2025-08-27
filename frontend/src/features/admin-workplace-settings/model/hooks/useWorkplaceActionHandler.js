@@ -1,11 +1,10 @@
 // frontend/src/features/admin-workplace-settings/model/hooks/useWorkplaceActionHandler.js
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { nanoid } from '@reduxjs/toolkit';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { addNotification, updateNotification } from 'app/model/notificationsSlice';
+import {useState} from 'react';
+import {useDispatch} from 'react-redux';
+import {nanoid} from '@reduxjs/toolkit';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {addNotification, updateNotification} from 'app/model/notificationsSlice';
 
-// Универсальный хук для обработки CRUD-операций с уведомлениями
 export const useWorkplaceActionHandler = ({
                                               actionThunk,
                                               refetchThunk,
@@ -13,7 +12,7 @@ export const useWorkplaceActionHandler = ({
                                               getSuccessMessage
                                           }) => {
     const dispatch = useDispatch();
-    const { t } = useI18n();
+    const {t} = useI18n();
     const [isLoading, setIsLoading] = useState(false);
 
     const execute = async (item) => {
@@ -57,5 +56,5 @@ export const useWorkplaceActionHandler = ({
         }
     };
 
-    return { execute, isLoading };
+    return {execute, isLoading};
 };

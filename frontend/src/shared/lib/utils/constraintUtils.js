@@ -17,7 +17,7 @@ export const groupConstraintsByDay = (constraints, weekStartsOn = 0) => {
 
     if (constraints && Array.isArray(constraints)) {
         constraints.forEach(constraint => {
-            const dayLower = constraint.day_of_week.toLowerCase();
+            const dayLower = constraint?.day_of_week?.toLowerCase();
             if (!grouped[dayLower]) {
                 grouped[dayLower] = [];
             }

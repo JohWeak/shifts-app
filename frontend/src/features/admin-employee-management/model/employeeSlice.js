@@ -1,21 +1,15 @@
 // frontend/src/features/admin-employee-management/model/employeeSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from 'shared/api';
-import { API_ENDPOINTS } from 'shared/config/apiEndpoints';
-import {
-    CACHE_DURATION,
-    isCacheEntryValid,
-    getCacheEntry,
-    setCacheEntry
-} from 'shared/lib/cache/cacheUtils';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {CACHE_DURATION, getCacheEntry, isCacheEntryValid, setCacheEntry} from 'shared/lib/cache/cacheUtils';
+import {employeeAPI} from "shared/api/apiService";
 
 // Async thunks
 export const fetchEmployees = createAsyncThunk(
     'employees/fetchAll',
-    async (filters = {}, { getState, rejectWithValue }) => {
+    async (filters = {}, {getState, rejectWithValue}) => {
         try {
             const state = getState();
-            const { cache, cacheDuration } = state.employees;
+            const {cache, cacheDuration} = state.employees;
 
             // Generate cache key from filters
             const cacheKey = JSON.stringify(filters);
@@ -24,15 +18,14 @@ export const fetchEmployees = createAsyncThunk(
             // Check cache validity
             if (cached && isCacheEntryValid(cached, cacheDuration)) {
                 console.log('[Cache] Using cached employees');
-                return { ...cached.data, fromCache: true };
+                return {...cached.data, fromCache: true};
             }
 
             console.log('[Cache] Fetching fresh employees');
-            const response = await api.get(API_ENDPOINTS.EMPLOYEES.BASE, { params: filters });
+            const response = await employeeAPI.fetchEmployees(filters);
 
             // Store in cache
-            const cacheData = { ...response, cacheKey };
-            return cacheData;
+            return {...response, cacheKey};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -41,10 +34,9 @@ export const fetchEmployees = createAsyncThunk(
 
 export const fetchEmployeeDetails = createAsyncThunk(
     'employees/fetchOne',
-    async (employeeId, { rejectWithValue }) => {
+    async (employeeId, {rejectWithValue}) => {
         try {
-            const response = await api.get(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId));
-            return response;
+            return await employeeAPI.fetchEmployeeDetails(employeeId);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -53,10 +45,9 @@ export const fetchEmployeeDetails = createAsyncThunk(
 
 export const createEmployee = createAsyncThunk(
     'employees/create',
-    async (employeeData, { rejectWithValue }) => {
+    async (employeeData, {rejectWithValue}) => {
         try {
-            const response = await api.post(API_ENDPOINTS.EMPLOYEES.BASE, employeeData);
-            return response;
+            return await employeeAPI.createEmployee(employeeData);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -65,10 +56,9 @@ export const createEmployee = createAsyncThunk(
 
 export const updateEmployee = createAsyncThunk(
     'employees/update',
-    async ({ employeeId, data }, { rejectWithValue }) => {
+    async ({employeeId, data}, {rejectWithValue}) => {
         try {
-            const response = await api.put(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId), data);
-            return response;
+            return await employeeAPI.updateEmployee(employeeId, data);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -77,10 +67,10 @@ export const updateEmployee = createAsyncThunk(
 
 export const deleteEmployee = createAsyncThunk(
     'employees/delete',
-    async (employeeId, { rejectWithValue }) => {
+    async (employeeId, {rejectWithValue}) => {
         try {
-            const response = await api.delete(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId));
-            return { employeeId, ...response };
+            await employeeAPI.deleteEmployee(employeeId);
+            return {employeeId};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);
         }
@@ -117,11 +107,11 @@ const employeeSlice = createSlice({
     initialState,
     reducers: {
         setFilters: (state, action) => {
-            state.filters = { ...state.filters, ...action.payload };
+            state.filters = {...state.filters, ...action.payload};
             state.pagination.page = 1;
         },
         setPagination: (state, action) => {
-            state.pagination = { ...state.pagination, ...action.payload };
+            state.pagination = {...state.pagination, ...action.payload};
         },
         clearError: (state) => {
             state.error = null;

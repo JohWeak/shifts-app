@@ -1,7 +1,7 @@
 /* frontend/src/features/employee-constraints/index.css */
 
 /* ============================================
-   1. ОБЩИЙ КОНТЕЙНЕР
+   GENERAL CONTAINER
    ============================================ */
 
 .employee-constraints-container {
@@ -12,17 +12,19 @@
 }
 
 /* ============================================
-   2. СТРУКТУРА ТАБЛИЦЫ И СЕТКИ
-   ============================================ */
+    TABLE AND GRID STRUCTURE
+  ============================================ */
 #root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card {
     border-radius: var(--radius-lg);
     overflow: hidden;
     border-color: var(--bs-gray-200);
     box-shadow: var(--shadow-base);
 }
-.employee-constraints-container .desktop-constraints .table-responsive::-webkit-scrollbar{
+
+.employee-constraints-container .desktop-constraints .table-responsive::-webkit-scrollbar {
     display: none;
 }
+
 [data-theme="dark"] #root > div > main > div > div.employee-constraints-container.position-relative.container-fluid > div.p-0.card {
 
     border-color: var(--bs-gray-800);
@@ -30,7 +32,7 @@
 
 .employee-constraints-container .full-schedule-table {
     font-size: 0.875rem;
-    table-layout: fixed; /* Это ключ к адаптивному поведению колонок */
+    table-layout: fixed;
     width: calc(100% + 2px);
     margin-right: -1px;
     margin-left: -1px;
@@ -57,17 +59,17 @@
     border-color: var(--bs-gray-200);
     border-bottom-color: var(--bs-gray-100);
 }
+
 [data-theme="dark"] .employee-constraints-container .info-footer {
     border-color: var(--bs-gray-800);
     border-bottom-color: var(--bs-gray-900);
 }
 
 
-    /* ============================================
-       3. ЗАГОЛОВКИ (Дни и Смены)
-       ============================================ */
+/* ============================================
+                HEADERS
+   ============================================ */
 
-/* Заголовки дней (верхняя строка) */
 .employee-constraints-container .day-header, .employee-constraints-container .day-header-cell {
     text-align: center;
     vertical-align: middle;
@@ -100,12 +102,12 @@
     color: var(--bs-gray-600);
 }
 
-/* Заголовки смен (левая колонка) */
 .employee-constraints-container .shift-header-cell {
     vertical-align: middle;
     text-align: center;
     width: 120px;
     min-width: 100px;
+    padding: var(--space-1);
 }
 
 .employee-constraints-container .shift-header-info {
@@ -125,7 +127,6 @@
     font-size: 0.85rem;
 }
 
-/* "Липкая" колонка для заголовков смен */
 .employee-constraints-container .sticky-column {
     position: sticky;
     left: -1px;
@@ -141,12 +142,8 @@
 
 
 /* ============================================
-   4. ИНТЕРАКТИВНЫЕ ЯЧЕЙКИ (ЦВЕТНЫЕ DIV'ы)
+   CELLS
    ============================================ */
-
-/* ОБЩИЕ стили для всех состояний ячейки */
-
-/* Ячейка-обертка <td>, которая создает отступы */
 .employee-constraints-container .constraint-td-wrapper {
     vertical-align: middle;
     position: relative;
@@ -159,7 +156,6 @@
     transition: background-color 0.2s ease;
 }
 
-/* 1. Определяем анимацию "появления" */
 @keyframes pop-in {
     from {
         transform: scale(0.9);
@@ -184,15 +180,15 @@
 }
 
 .employee-constraints-container .constraint-cell.clickable:active {
-    transform: scale(0.95); /* Немного уменьшаем ячейку */
-    transition-duration: 0.2s; /* Делаем отклик на нажатие почти мгновенным */
+    transform: scale(0.95);
+    transition-duration: 0.2s;
 }
 
 
 /* Стили для ВЫБРАННЫХ ячеек (любой статус, кроме 'neutral') */
 .employee-constraints-container .constraint-cell:not(.neutral) {
-    border-radius: 0.3rem; /* Скругленные углы */
-    inset: 4px; /* Отступы со всех сторон */
+    border-radius: 0.3rem;
+    inset: 4px;
 
 }
 
@@ -205,7 +201,6 @@
 }
 
 
-/* Состояние неактивности (без изменений) */
 .employee-constraints-container .constraint-cell:not(.clickable) {
     pointer-events: none;
     opacity: 0.6;
@@ -215,7 +210,6 @@
     cursor: not-allowed;
 }
 
-/* --- СТИЛИ ДЛЯ ИКОНОК --- */
 .employee-constraints-container .constraint-cell > .cell-icon {
     padding: 0;
     width: 100%;
@@ -229,7 +223,6 @@
     transition: opacity 0.2s ease-in-out;
 }
 
-/* 2. Показываем ВЫБРАННУЮ иконку. */
 .employee-constraints-container .constraint-cell.prefer_work > .icon-prefer-work,
 .employee-constraints-container .constraint-cell.cannot_work > .icon-cannot-work {
     opacity: 0.05;
@@ -241,32 +234,24 @@
         opacity: 0.7;
     }
 
-    /* Применяем эффект увеличения только к ячейкам с отступами */
     .employee-constraints-container .constraint-cell.clickable:not(.neutral):hover {
         transform: scale(1.03);
     }
 
-    /* Состояние при наведении (работает для обоих состояний) */
     .employee-constraints-container .constraint-cell.clickable:hover {
-        /* Цвет берется из CSS переменной, заданной в getCellStyle */
         background-color: var(--cell-hover-color) !important;
     }
 
-    /* 3. Показываем ХОВЕР-иконку, используя data-атрибут. */
     .employee-constraints-container .constraint-cell[data-next-status="cannot_work"]:hover > .hover-icon-cannot-work,
     .employee-constraints-container .constraint-cell[data-next-status="prefer_work"]:hover > .hover-icon-prefer-work {
         opacity: 0.1;
     }
 
-    /* 4. Принудительно СКРЫВАЕМ выбранную иконку при наведении. */
     .employee-constraints-container .constraint-cell:hover > .selected-icon {
         opacity: 0;
     }
 }
 
-/* ============================================
-   5. АДАПТИВНОСТЬ (Mobile)
-   ============================================ */
 
 @media (max-width: 888px) {
     .employee-constraints-container {
@@ -293,16 +278,13 @@
         padding: var(--space-1);
     }
 
-    /* Убираем фиксированную ширину колонок для мобильной сетки */
     .employee-constraints-container .mobile-constraints th,
     .employee-constraints-container .mobile-constraints td {
         width: 25%;
     }
 }
 
-/* --- ДОБАВЛЕНО: Дополнительная точка для очень маленьких экранов --- */
 @media (max-width: 550px) {
-    /* Уменьшаем шрифты в заголовках смен */
     .mobile-constraints .shift-header-name {
         font-size: 0.8rem;
     }
@@ -311,7 +293,6 @@
         font-size: 0.7rem;
     }
 
-    /* Уменьшаем отступы в заголовках, чтобы текст влез */
     .mobile-constraints .shift-header-info {
         padding: 0.4rem 0.2rem;
     }

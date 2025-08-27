@@ -8,7 +8,7 @@ import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useShiftColor} from 'shared/hooks/useShiftColor';
 import {useMediaQuery} from 'shared/hooks/useMediaQuery';
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
-import {constraintAPI} from "shared/api/apiService";
+import {constraintAPI, employeeAPI} from "shared/api/apiService";
 import {fetchMyPermanentConstraints} from '../../model/requestsSlice';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -144,7 +144,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
         try {
             setLoading(true);
             setError(null);
-            const response = await constraintAPI.getEmployeeShifts();
+            const response = await employeeAPI.getEmployeeShifts();
             setShifts(response.data?.shifts || []);
         } catch (error) {
             console.error('Error loading shifts:', error);

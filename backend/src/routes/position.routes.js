@@ -3,30 +3,40 @@ const express = require('express');
 const positionController = require('../controllers/workplace/position.controller');
 const positionShiftController = require('../controllers/workplace/position-shift.controller');
 const shiftRequirementController = require('../controllers/workplace/shift-requirement.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
 
-const router = express.Router();
+const positionRouter = express.Router();
+const shiftRouter = express.Router();
+const requirementRouter = express.Router();
 
-// Existing position routes
-router.get('/', verifyToken, positionController.getAllPositions);
-router.post('/', ...[verifyToken, isAdmin], positionController.createPosition);
-router.put('/:id', ...[verifyToken, isAdmin], positionController.updatePosition);
-router.delete('/:id', ...[verifyToken, isAdmin], positionController.deletePosition);
-router.post('/:id/restore', ...[verifyToken, isAdmin], positionController.restorePosition);
+positionRouter.get('/', verifyToken, positionController.getAllPositions);
+positionRouter.post('/', verifyToken, isAdmin, positionController.createPosition);
 
-// Position shifts routes
-router.get('/:id/shifts', verifyToken, positionShiftController.getPositionShifts);
-router.post('/:id/shifts', ...[verifyToken, isAdmin], positionShiftController.createPositionShift);
-router.put('/shifts/:shiftId', ...[verifyToken, isAdmin], positionShiftController.updatePositionShift);
-router.delete('/shifts/:shiftId', ...[verifyToken, isAdmin], positionShiftController.deletePositionShift);
+positionRouter.get('/:positionId/requirements-matrix', verifyToken, shiftRequirementController.getPositionRequirementsMatrix);
 
-// Shift requirements routes
-router.get('/shifts/:shiftId/requirements', verifyToken, shiftRequirementController.getShiftRequirements);
-router.post('/shifts/:shiftId/requirements', ...[verifyToken, isAdmin], shiftRequirementController.createShiftRequirement);
-router.put('/requirements/:reqId', ...[verifyToken, isAdmin], shiftRequirementController.updateShiftRequirement);
-router.delete('/requirements/:reqId', ...[verifyToken, isAdmin], shiftRequirementController.deleteShiftRequirement);
+positionRouter.get('/:positionId', verifyToken, positionController.getPositionDetails);
+positionRouter.put('/:positionId', verifyToken, isAdmin, positionController.updatePosition);
+positionRouter.delete('/:positionId', verifyToken, isAdmin, positionController.deletePosition);
+positionRouter.post('/:positionId/restore', verifyToken, isAdmin, positionController.restorePosition);
 
-// Special route for requirements matrix
-router.get('/:positionId/requirements-matrix', verifyToken, shiftRequirementController.getPositionRequirementsMatrix);
+positionRouter.get('/:positionId/shifts', verifyToken, positionShiftController.getPositionShifts);
+positionRouter.post('/:positionId/shifts', verifyToken, isAdmin, positionShiftController.createPositionShift);
 
-module.exports = router;
+
+shiftRouter.put('/:shiftId', verifyToken, isAdmin, positionShiftController.updatePositionShift);
+shiftRouter.delete('/:shiftId', verifyToken, isAdmin, positionShiftController.deletePositionShift);
+
+
+shiftRouter.get('/:shiftId/requirements', verifyToken, shiftRequirementController.getShiftRequirements);
+shiftRouter.post('/:shiftId/requirements', verifyToken, isAdmin, shiftRequirementController.createShiftRequirement);
+
+
+requirementRouter.put('/:requirementId', verifyToken, isAdmin, shiftRequirementController.updateShiftRequirement);
+requirementRouter.delete('/:requirementId', verifyToken, isAdmin, shiftRequirementController.deleteShiftRequirement);
+
+
+module.exports = {
+    positionRouter,
+    shiftRouter,
+    requirementRouter
+};

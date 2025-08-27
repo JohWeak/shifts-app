@@ -1,9 +1,9 @@
 // frontend/src/features/employee-schedule/index.js
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Container, Form, Alert} from 'react-bootstrap';
+import {Alert, Container, Form} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
+import {fetchPositionSchedule} from 'features/employee-dashboard/model/employeeDataSlice';
 
 import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
@@ -22,13 +22,11 @@ const EmployeeSchedule = () => {
     const dispatch = useDispatch();
 
 
-    // Состояние для переключателя
     const [showFullSchedule, setShowFullSchedule] = useState(() => {
         const saved = localStorage.getItem('employee_showFullSchedule');
         return saved !== null ? JSON.parse(saved) : false;
     });
 
-    // --- Получаем все данные из Redux ---
     const {
         personalSchedule,
         personalScheduleLoading,
@@ -39,7 +37,6 @@ const EmployeeSchedule = () => {
     } = useSelector(state => state.employeeData);
 
 
-    // Централизованный хук для управления цветами
     const {
         colorPickerState,
         openColorPicker,
@@ -58,8 +55,7 @@ const EmployeeSchedule = () => {
 
         if (showFullSchedule && personalSchedule?.current?.employee?.position_id) {
             const positionId = personalSchedule.current.employee.position_id;
-            // Загружаем данные для должности (они кешируются отдельно)
-            dispatch(fetchPositionSchedule({ positionId }));
+            dispatch(fetchPositionSchedule({positionId}));
         }
 
     }, [dispatch, showFullSchedule, personalSchedule]);
@@ -71,30 +67,36 @@ const EmployeeSchedule = () => {
     const employeeInfo = personalSchedule?.current?.employee;
     const hasAssignedPosition = employeeInfo?.position_id || false;
 
-    const hasDataForView = (data) => {
-        if (!data?.current && !data?.next) return false;
+    const hasDataForCurrentWeek = (data) => {
+        if (!data?.current) return false;
         if (showFullSchedule) {
-            return ((data.current.days && data.current.days.length > 0) ||
-                (data.next.days && data.next.days.length > 0));
+            return data.current.days && data.current.days.length > 0;
         }
-        return ((data.current.schedule && data.current.schedule.length > 0) ||
-            (data.next.schedule && data.next.schedule.length > 0));
+        return data.current.schedule && data.current.schedule.length > 0;
     };
-    const hasAnyData = hasDataForView(scheduleData);
 
+    const hasDataForNextWeek = (data) => {
+        if (!data?.next) return false;
+        if (showFullSchedule) {
+            return data.next.days && data.next.days.length > 0;
+        }
+        return data.next.schedule && data.next.schedule.length > 0;
+    };
+
+    const hasAnyData = hasDataForCurrentWeek(scheduleData) || hasDataForNextWeek(scheduleData);
 
     const renderContent = () => {
         if (isLoading && !scheduleData) {
-            return <LoadingState message={t('common.loading')} />;
+            return <LoadingState message={t('common.loading')}/>;
         }
         if (error) {
             return <Alert variant="danger">{error}</Alert>;
         }
         if (showFullSchedule && !hasAssignedPosition) {
-            return <EmptyState title={t('employee.schedule.positionRequired')} />;
+            return <EmptyState title={t('employee.schedule.positionRequired')}/>;
         }
         if (!hasAnyData) {
-            return <EmptyState title={t('employee.schedule.noSchedule')} />;
+            return <EmptyState title={t('employee.schedule.noSchedule')}/>;
         }
 
         if (showFullSchedule) {
@@ -105,6 +107,8 @@ const EmployeeSchedule = () => {
                     employeeData={employeeInfo}
                     getShiftColor={getShiftColor}
                     openColorPicker={openColorPicker}
+                    showCurrentWeek={hasDataForCurrentWeek(scheduleData)}
+                    showNextWeek={hasDataForNextWeek(scheduleData)}
                 />
             );
         }
@@ -115,6 +119,8 @@ const EmployeeSchedule = () => {
                 employeeInfo={employeeInfo}
                 getShiftColor={getShiftColor}
                 openColorPicker={openColorPicker}
+                showCurrentWeek={hasDataForCurrentWeek(scheduleData)}
+                showNextWeek={hasDataForNextWeek(scheduleData)}
             />
         );
     };

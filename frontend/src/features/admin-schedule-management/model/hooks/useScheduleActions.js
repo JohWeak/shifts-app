@@ -200,38 +200,6 @@ export const useScheduleActions = (schedule = null) => {
         }
     }, [autofillAllEditingPositions, editingPositions, dispatch]);
 
-    // Position save with validation
-    const handleSavePosition = useCallback(async (positionId) => {
-        const positionChanges = Object.values(pendingChanges).filter(
-            c => c.positionId === positionId && !c.isApplied
-        );
-
-        if (positionChanges.length === 0) {
-            return {success: true, noChanges: true};
-        }
-
-        try {
-            const violations = await validatePositionChanges(positionId);
-
-            if (violations.length > 0) {
-                setValidationViolations(violations);
-                setPendingSavePositionId(positionId);
-                setShowValidationModal(true);
-                return {showValidation: true, violations};
-            }
-
-            return await performSave(positionId);
-        } catch (error) {
-            dispatch(addNotification({
-                variant: 'error',
-                message: 'schedule.saveFailed',
-                duration: 5000
-            }));
-            return {success: false, error};
-        }
-        // eslint-disable-next-line no-use-before-define
-    }, [pendingChanges, validatePositionChanges, performSave, dispatch]);
-
     const performSave = useCallback(async (positionId) => {
         const positionChanges = Object.values(pendingChanges).filter(
             c => c.positionId === positionId && !c.isApplied
@@ -263,6 +231,38 @@ export const useScheduleActions = (schedule = null) => {
             }
         );
     }, [pendingChanges, scheduleDetails, handleAction, dispatch]);
+
+    // Position save with validation
+    const handleSavePosition = useCallback(async (positionId) => {
+        const positionChanges = Object.values(pendingChanges).filter(
+            c => c.positionId === positionId && !c.isApplied
+        );
+
+        if (positionChanges.length === 0) {
+            return {success: true, noChanges: true};
+        }
+
+        try {
+            const violations = await validatePositionChanges(positionId);
+
+            if (violations.length > 0) {
+                setValidationViolations(violations);
+                setPendingSavePositionId(positionId);
+                setShowValidationModal(true);
+                return {showValidation: true, violations};
+            }
+
+            return await performSave(positionId);
+        } catch (error) {
+            dispatch(addNotification({
+                variant: 'error',
+                message: 'schedule.saveFailed',
+                duration: 5000
+            }));
+            return {success: false, error};
+        }
+    }, [pendingChanges, validatePositionChanges, performSave, dispatch]);
+
 
     const confirmSaveWithViolations = useCallback(async () => {
         if (pendingSavePositionId) {

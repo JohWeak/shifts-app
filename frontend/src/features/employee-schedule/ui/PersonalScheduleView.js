@@ -1,28 +1,41 @@
 // frontend/src/features/employee-schedule/ui/PersonalScheduleView.js
 import React from 'react';
-import {Button, Card, Badge} from 'react-bootstrap';
+import {Badge, Button, Card} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatShiftTime, getDayName, formatTableHeaderDate} from 'shared/lib/utils/scheduleUtils';
+import {formatShiftTime, formatTableHeaderDate, getDayName} from 'shared/lib/utils/scheduleUtils';
 import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
 import './PersonalScheduleView.css';
 
-const PersonalScheduleView = ({ scheduleData, employeeInfo, getShiftColor, openColorPicker }) => {
+const PersonalScheduleView = ({
+                                  scheduleData,
+                                  employeeInfo,
+                                  getShiftColor,
+                                  openColorPicker,
+                                  showCurrentWeek,
+                                  showNextWeek,
+                              }) => {
     const {t} = useI18n();
     const currentWeekData = scheduleData?.current;
     const nextWeekData = scheduleData?.next;
 
     const renderWeekSchedule = (weekData, weekTitle) => {
-        if (!weekData) return null;
+        if (!weekData || !weekData.schedule) return null;
 
         const employee = employeeInfo || weekData.employee;
-        const hasSchedule = weekData.schedule && weekData.schedule.length > 0;
         const hasPosition = employee?.position_id;
         const hasWorkSite = employee?.site_id;
-        if (!hasSchedule) {
+
+        const userHasAtLeastOneShift = weekData.schedule.some(day =>
+            day.shifts?.some(shift =>
+                shift.employees?.some(e => e.is_current_user || e.emp_id === employee?.emp_id)
+            )
+        );
+        if (!userHasAtLeastOneShift) {
             return null;
         }
+
         return (
             <Card className="week-schedule-section mb-4 ">
                 <ScheduleHeaderCard
@@ -128,8 +141,8 @@ const PersonalScheduleView = ({ scheduleData, employeeInfo, getShiftColor, openC
 
     return (
         <div className="personal-schedule-content">
-            {currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
-            {nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
+            {showCurrentWeek && currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
+            {showNextWeek && nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
         </div>
     );
 };

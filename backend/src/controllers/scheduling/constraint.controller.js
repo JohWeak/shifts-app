@@ -483,11 +483,10 @@ const reviewPermanentRequest = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const { id } = req.params;
-        const { status, admin_response } = req.body;
+        const {id} = req.params;
+        const {status, admin_response} = req.body;
         const adminId = req.userId;
 
-        // Разрешаем pending статус для возврата на рассмотрение
         if (!['approved', 'rejected', 'pending'].includes(status)) {
             return res.status(400).json({
                 success: false,
@@ -495,7 +494,6 @@ const reviewPermanentRequest = async (req, res) => {
             });
         }
 
-        // Get request
         const request = await PermanentConstraintRequest.findByPk(id, {
             include: [{
                 model: Employee,
@@ -511,7 +509,6 @@ const reviewPermanentRequest = async (req, res) => {
             });
         }
 
-        // Получаем информацию об администраторе для сохранения имени
         const admin = await Employee.findByPk(adminId, {
             attributes: ['emp_id', 'first_name', 'last_name']
         });
@@ -525,7 +522,6 @@ const reviewPermanentRequest = async (req, res) => {
         }
 
 
-        // Для возврата в pending требуется причина
         if (status === 'pending' && request.status !== 'pending') {
             if (!admin_response || admin_response.trim() === '') {
                 await transaction.rollback();
@@ -536,7 +532,6 @@ const reviewPermanentRequest = async (req, res) => {
             }
         }
 
-        // Update request
         await request.update({
             status,
             admin_response,
@@ -544,9 +539,7 @@ const reviewPermanentRequest = async (req, res) => {
             reviewed_by: status !== 'pending' ? adminId : null
         }, {transaction});
 
-        // If approved, create permanent constraints
         if (status === 'approved' && request.constraints && Array.isArray(request.constraints)) {
-            // Деактивируем все существующие permanent constraints для этого сотрудника
             await PermanentConstraint.update(
                 {
                     is_active: false,
@@ -561,10 +554,8 @@ const reviewPermanentRequest = async (req, res) => {
                 }
             );
 
-
             const adminFullName = `${admin.first_name} ${admin.last_name}`.trim();
 
-            // Создаем новые ограничения
             const approvedAt = new Date();
             for (const constraint of request.constraints) {
                 await PermanentConstraint.create({
@@ -576,18 +567,17 @@ const reviewPermanentRequest = async (req, res) => {
                     approved_by_name: adminFullName,
                     approved_at: approvedAt,
                     is_active: true
-                }, { transaction });
+                }, {transaction});
             }
         }
 
-        // Если статус изменился на rejected или вернулся в pending, деактивируем связанные ограничения
         if ((status === 'rejected' || status === 'pending') && request.status === 'approved') {
             await PermanentConstraint.update(
                 {is_active: false},
                 {
                     where: {
                         emp_id: request.emp_id,
-                        approved_at: request.reviewed_at // Деактивируем только те, что были одобрены с этим запросом
+                        approved_at: request.reviewed_at
                     },
                     transaction
                 }
@@ -617,7 +607,7 @@ const getMyPermanentRequests = async (req, res) => {
         const empId = req.userId;
 
         const requests = await PermanentConstraintRequest.findAll({
-            where: { emp_id: empId },
+            where: {emp_id: empId},
             include: [{
                 model: Employee,
                 as: 'reviewer',
@@ -626,7 +616,6 @@ const getMyPermanentRequests = async (req, res) => {
             order: [['requested_at', 'DESC']]
         });
 
-        // Получаем все активные ограничения
         const activeConstraints = await PermanentConstraint.findAll({
             where: {
                 emp_id: empId,
@@ -636,7 +625,6 @@ const getMyPermanentRequests = async (req, res) => {
             order: [['approved_at', 'DESC']]
         });
 
-        // Создаем карту активных ограничений
         const activeConstraintsMap = new Map();
         activeConstraints.forEach(constraint => {
             const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
@@ -645,19 +633,16 @@ const getMyPermanentRequests = async (req, res) => {
             }
         });
 
-        // Помечаем запросы как активные или неактивные
         const requestsWithActiveFlag = requests.map(request => {
             const requestData = request.toJSON();
 
-            // Pending запросы не могут быть активными или неактивными
             if (requestData.status === 'pending') {
                 return {
                     ...requestData,
-                    is_active: null // null для pending запросов
+                    is_active: null
                 };
             }
 
-            // Rejected запросы всегда неактивны
             if (requestData.status === 'rejected') {
                 return {
                     ...requestData,
@@ -665,10 +650,8 @@ const getMyPermanentRequests = async (req, res) => {
                 };
             }
 
-            // Для approved запросов проверяем активность
             let isActive = false;
             if (requestData.status === 'approved' && requestData.constraints) {
-                // Проверяем, все ли ограничения из этого запроса активны
                 isActive = requestData.constraints.length > 0 &&
                     requestData.constraints.every(constraint => {
                         const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
@@ -678,7 +661,6 @@ const getMyPermanentRequests = async (req, res) => {
                             const requestReviewedAt = new Date(requestData.reviewed_at);
                             const constraintApprovedAt = new Date(activeApprovedAt);
 
-                            // Проверяем, что время одобрения совпадает (с точностью до 5 секунд)
                             const timeDiff = Math.abs(requestReviewedAt - constraintApprovedAt);
                             return timeDiff < 5000;
                         }
@@ -766,7 +748,6 @@ const getMyPermanentConstraints = async (req, res) => {
     }
 };
 
-// Метод для получения смен сотрудника
 const getEmployeeShifts = async (req, res) => {
     try {
         const empId = req.userId;

@@ -1,18 +1,17 @@
 // frontend/src/features/employee-constraints/ui/ConstraintGrid.js
 import React from 'react';
 import {Button, Card, Table} from 'react-bootstrap';
-import { X, Check } from 'react-bootstrap-icons';
+import {Check, X} from 'react-bootstrap-icons';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     formatShiftTime,
     formatTableHeaderDate,
     getCanonicalShiftType,
-    getShiftIcon,
     getDayName,
+    getShiftIcon,
 } from 'shared/lib/utils/scheduleUtils';
 
-// Компонент для отрисовки ячейки данных таблицы
-const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => {
+const GridCell = ({day, shift, onCellClick, getCellStyles, isJustChanged}) => {
     const {
         tdStyle,
         foregroundStyle,
@@ -25,7 +24,10 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => 
     const tdClassName = `constraint-td-wrapper ${isNotClickable ? 'not-allowed' : ''}`;
     const finalClasses = `${foregroundClasses} ${isJustChanged ? 'is-appearing' : ''}`;
 
-    if (!dayShift) { return <td key={`${day.date}-${shift.shift_id}-empty`} className={`${tdClassName} text-center text-muted align-middle`}>-</td>; }
+    if (!dayShift) {
+        return <td key={`${day.date}-${shift.shift_id}-empty`}
+                   className={`${tdClassName} text-center text-muted align-middle`}>-</td>;
+    }
 
     return (
         <td
@@ -37,16 +39,14 @@ const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => 
                 className={finalClasses}
                 style={foregroundStyle}
                 onClick={() => onCellClick(day.date, shift.shift_id)}
-                // <<< ГЛАВНОЕ ИЗМЕНЕНИЕ: Устанавливаем data-атрибут.
-                // CSS будет использовать его для ховер-эффекта.
+
                 data-next-status={nextStatus}
             >
-                {/* Все 4 иконки всегда в DOM, как и раньше */}
-                <X className="cell-icon selected-icon icon-cannot-work" />
-                <Check className="cell-icon selected-icon icon-prefer-work" />
+                <X className="cell-icon selected-icon icon-cannot-work"/>
+                <Check className="cell-icon selected-icon icon-prefer-work"/>
 
-                <X className="cell-icon hover-icon hover-icon-cannot-work" />
-                <Check className="cell-icon hover-icon hover-icon-prefer-work" />
+                <X className="cell-icon hover-icon hover-icon-cannot-work"/>
+                <Check className="cell-icon hover-icon hover-icon-prefer-work"/>
             </div>
         </td>
     );
@@ -73,13 +73,12 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: C
     );
 };
 
-// Компонент для отрисовки заголовка дня (может быть как <th>, так и <td>)
+// <th>,  <td>)
 const DayHeader = ({day, getDayHeaderClass, onCellClick, t, as: Component = 'th', isMobile = false}) => (
     <Component
-        className={`${getDayHeaderClass(day.date)} day-header-cell`} // класс из FullScheduleView
+        className={`${getDayHeaderClass(day.date)} day-header-cell`}
         onClick={() => onCellClick(day.date, null)}
     >
-        {/* Структура теперь соответствует FullScheduleView */}
         <div className="day-name">{getDayName(new Date(day.date).getDay(), t, isMobile)}</div>
         <small className="day-date">
             {formatTableHeaderDate(new Date(day.date))}
@@ -105,9 +104,9 @@ const ConstraintGrid = (props) => {
     } = props;
 
     const {t} = useI18n();
-    const commonCellProps = { onCellClick, getCellStyles };
+    const commonCellProps = {onCellClick, getCellStyles};
 
-    const LimitsFooter = ({ colSpan }) => (
+    const LimitsFooter = ({colSpan}) => (
         <tfoot className="info-footer">
         <tr>
             <td colSpan={colSpan} className="text-center p-2">
@@ -172,7 +171,7 @@ const ConstraintGrid = (props) => {
                             </tr>
                         ))}
                         </tbody>
-                        <LimitsFooter colSpan={template.length + 1} />
+                        <LimitsFooter colSpan={template.length + 1}/>
                     </Table>
                 </div>
             </Card.Body>
@@ -221,7 +220,7 @@ const ConstraintGrid = (props) => {
                     ))}
 
                     </tbody>
-                    <LimitsFooter colSpan={uniqueShifts.length + 1} />
+                    <LimitsFooter colSpan={uniqueShifts.length + 1}/>
                 </Table>
             </Card.Body>
         </Card>

@@ -1,15 +1,13 @@
 // frontend/src/features/admin-workplace-settings/model/workplaceSlice.js
-import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import api from 'shared/api';
-import {API_ENDPOINTS} from 'shared/config/apiEndpoints';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import apiService from 'shared/api/apiService';
 import {
     CACHE_DURATION,
-    isCacheEntryValid,
+    clearCacheEntry,
     getCacheEntry,
-    setCacheEntry,
-    clearCacheEntry
+    isCacheEntryValid,
+    setCacheEntry
 } from 'shared/lib/cache/cacheUtils';
-import apiService from "../../../shared/api/apiService";
 
 // Fetch work sites with cache
 export const fetchWorkSites = createAsyncThunk(
@@ -26,9 +24,7 @@ export const fetchWorkSites = createAsyncThunk(
 
         try {
             console.log('[Cache] Fetching fresh work sites');
-            const response = await api.get(API_ENDPOINTS.WORKSITES.BASE, {
-                params: {includeStats}
-            });
+            const response = await apiService.worksite.fetchWorkSites({includeStats});
             return {cached: false, data: response};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch work sites');
@@ -40,8 +36,7 @@ export const createWorkSite = createAsyncThunk(
     'workplace/createWorkSite',
     async (siteData, {rejectWithValue}) => {
         try {
-            const response = await api.post(API_ENDPOINTS.WORKSITES.BASE, siteData);
-            return response; // Без .data
+            return await apiService.worksite.createWorkSite(siteData);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create work site');
         }
@@ -52,8 +47,7 @@ export const updateWorkSite = createAsyncThunk(
     'workplace/updateWorkSite',
     async ({id, ...data}, {rejectWithValue}) => {
         try {
-            const response = await api.put(`${API_ENDPOINTS.WORKSITES.BASE}/${id}`, data);
-            return response; // Без .data
+            return await apiService.worksite.updateWorkSite(id, data); // Без .data
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to update work site');
         }
@@ -64,7 +58,7 @@ export const deleteWorkSite = createAsyncThunk(
     'workplace/deleteWorkSite',
     async (id, {rejectWithValue}) => {
         try {
-            await api.delete(`${API_ENDPOINTS.WORKSITES.BASE}/${id}`);
+            await apiService.worksite.deleteWorkSite(id);
             return id;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to delete work site');
@@ -76,7 +70,7 @@ export const restoreWorkSite = createAsyncThunk(
     'workplace/restoreWorkSite',
     async (id, {rejectWithValue}) => {
         try {
-            const response = await api.post(`${API_ENDPOINTS.WORKSITES.BASE}/${id}/restore`);
+            const response = await apiService.worksite.restoreWorkSite(id);
             return response.site;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to restore work site');
@@ -99,7 +93,7 @@ export const fetchPositions = createAsyncThunk(
 
         try {
             console.log('[Cache] Fetching fresh positions');
-            const response = await api.get(API_ENDPOINTS.SETTINGS.POSITIONS);
+            const response = await apiService.position.fetchAllPositions();
             return {cached: false, data: response};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch positions');
@@ -111,7 +105,7 @@ export const createPosition = createAsyncThunk(
     'workplace/createPosition',
     async (positionData, {rejectWithValue}) => {
         try {
-            const response = await api.post(API_ENDPOINTS.SETTINGS.POSITIONS, positionData);
+            const response = await apiService.position.createPosition(positionData);
             console.log('Create position response:', response); // Для отладки
             return response; // response уже содержит данные благодаря interceptor
         } catch (error) {
@@ -122,9 +116,9 @@ export const createPosition = createAsyncThunk(
 
 export const updatePosition = createAsyncThunk(
     'workplace/updatePosition',
-    async ({id, ...data}, {rejectWithValue}) => {
+    async ({positionData}, {rejectWithValue}) => {
         try {
-            const response = await api.put(API_ENDPOINTS.SETTINGS.POSITION_UPDATE(id), data);
+            const response = await apiService.position.updatePosition(positionData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to update position');
@@ -136,7 +130,7 @@ export const deletePosition = createAsyncThunk(
     'workplace/deletePosition',
     async (id, {rejectWithValue}) => {
         try {
-            await api.delete(API_ENDPOINTS.SETTINGS.POSITION_UPDATE(id));
+            await apiService.position.deletePosition(id);
             return id;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to delete position');
@@ -148,8 +142,7 @@ export const restorePosition = createAsyncThunk(
     'workplace/restorePosition',
     async (id, {rejectWithValue}) => {
         try {
-            const response = await api.post(`${API_ENDPOINTS.SETTINGS.POSITIONS}/${id}/restore`);
-            return response;
+            return await apiService.position.restorePosition(id);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to restore position');
         }
@@ -159,23 +152,20 @@ export const restorePosition = createAsyncThunk(
 // Fetch position shifts with cache
 export const fetchPositionShifts = createAsyncThunk(
     'workplace/fetchPositionShifts',
-    async ({ positionId, forceRefresh = false }, { getState, rejectWithValue }) => {
+    async ({positionId, forceRefresh = false}, {getState, rejectWithValue}) => {
         const state = getState();
-        const { cache, cacheDurations } = state.workplace;
+        const {cache, cacheDurations} = state.workplace;
         const cached = getCacheEntry(cache.positionShifts, positionId);
 
         if (!forceRefresh && cached && isCacheEntryValid(cached, cacheDurations.positionShifts)) {
             console.log(`[Cache] Using cached shifts for position ${positionId}`);
-            return { cached: true, positionId, data: cached.data };
+            return {cached: true, positionId, data: cached.data};
         }
 
         try {
             console.log(`[Cache] Fetching fresh shifts for position ${positionId}`);
-            // Используем правильный endpoint
-            const response = await api.get(
-                API_ENDPOINTS.POSITIONS.SHIFTS(positionId)
-            );
-            return { cached: false, positionId, data: response };
+            const response = await apiService.position.fetchPositionShifts(positionId);
+            return {cached: false, positionId, data: response};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch position shifts');
         }
@@ -185,10 +175,10 @@ export const fetchPositionShifts = createAsyncThunk(
 
 export const createPositionShift = createAsyncThunk(
     'workplace/createPositionShift',
-    async ({ positionId, shiftData }, { rejectWithValue }) => {
+    async ({positionId, shiftData}, {rejectWithValue}) => {
         try {
             const response = await apiService.position.createPositionShift(positionId, shiftData);
-            return { positionId, shift: response };
+            return {positionId, shift: response};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create shift');
         }
@@ -197,13 +187,9 @@ export const createPositionShift = createAsyncThunk(
 
 export const updatePositionShift = createAsyncThunk(
     'workplace/updatePositionShift',
-    async ({ shiftId, shiftData }, { rejectWithValue }) => {
+    async ({shiftId, shiftData}, {rejectWithValue}) => {
         try {
-            const response = await api.put(
-                `/api/positions/shifts/${shiftId}`,
-                shiftData
-            );
-            return response;
+            return await apiService.position.updatePositionShift(shiftId, shiftData);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to update shift');
         }
@@ -212,9 +198,9 @@ export const updatePositionShift = createAsyncThunk(
 
 export const deletePositionShift = createAsyncThunk(
     'workplace/deletePositionShift',
-    async (shiftId, { rejectWithValue }) => {
+    async (shiftId, {rejectWithValue}) => {
         try {
-            await api.delete(`/api/positions/shifts/${shiftId}`);
+            await apiService.position.deletePositionShift(shiftId);
             return shiftId;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to delete shift');
@@ -238,9 +224,7 @@ export const fetchRequirementsMatrix = createAsyncThunk(
 
         try {
             console.log(`[Cache] Fetching fresh requirements matrix for position ${positionId}`);
-            const response = await api.get(
-                API_ENDPOINTS.SETTINGS.POSITION_REQUIREMENTS_MATRIX.replace(':id', positionId)
-            );
+            const response = await apiService.position.fetchRequirementsMatrix(positionId);
             return {cached: false, positionId, data: response};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to fetch requirements matrix');
@@ -253,11 +237,7 @@ export const updateShiftRequirement = createAsyncThunk(
     'workplace/updateShiftRequirement',
     async ({requirementId, data}, {rejectWithValue}) => {
         try {
-            const response = await api.put(
-                API_ENDPOINTS.SETTINGS.SHIFT_REQUIREMENT.replace(':id', requirementId),
-                data
-            );
-            return response;
+            return await apiService.requirement.updateShiftRequirement(requirementId, data);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to update requirement');
         }
@@ -268,17 +248,23 @@ export const createShiftRequirement = createAsyncThunk(
     'workplace/createShiftRequirement',
     async ({shiftId, data}, {rejectWithValue}) => {
         try {
-            const response = await api.post(
-                API_ENDPOINTS.SETTINGS.SHIFT_REQUIREMENTS.replace(':id', shiftId),
-                data
-            );
-            return response;
+            return await apiService.requirement.createShiftRequirement(shiftId, data);
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create requirement');
         }
     }
 );
-
+export const updateShiftColorInDB = createAsyncThunk(
+    'workplace/updateShiftColorInDB',
+    async ({shiftId, color, positionId}, {rejectWithValue}) => {
+        try {
+            const updatedShift = await apiService.position.updatePositionShift(shiftId, {color});
+            return {...updatedShift, positionId};
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to update shift color');
+        }
+    }
+);
 // Preload all workplace data
 export const preloadWorkplaceData = createAsyncThunk(
     'workplace/preloadWorkplaceData',
@@ -365,20 +351,8 @@ const workplaceSlice = createSlice({
             positionShifts: CACHE_DURATION.MEDIUM,
             requirementsMatrix: CACHE_DURATION.MEDIUM
         }
-        // НЕ ДОЛЖНО БЫТЬ 'reducers' в initialState!
     },
     reducers: {
-        // clearOperationStatus: (state) => {
-        //     state.operationStatus = null;
-        //     state.error = null;
-        // },
-        // clearPositionOperationStatus: (state) => {
-        //     state.positionOperationStatus = null;
-        //     state.error = null;
-        // },
-        // clearShiftOperationStatus: (state) => {
-        //     state.shiftOperationStatus = null;
-        // },
         clearCache(state, action) {
             const {type, key} = action.payload || {};
 
@@ -596,7 +570,7 @@ const workplaceSlice = createSlice({
             // Create shift
             .addCase(createPositionShift.fulfilled, (state, action) => {
                 state.shiftOperationStatus = 'success';
-                const { positionId } = action.payload;
+                const {positionId} = action.payload;
                 clearCacheEntry(state.cache.positionShifts, positionId);
             })
             .addCase(createPositionShift.rejected, (state, action) => {
@@ -667,7 +641,29 @@ const workplaceSlice = createSlice({
 
             .addCase(createShiftRequirement.rejected, (state, action) => {
                 state.error = action.payload;
-            });
+            })
+            .addCase(updateShiftColorInDB.pending, (state) => {
+                state.shiftOperationStatus = 'pending';
+            })
+            .addCase(updateShiftColorInDB.fulfilled, (state, action) => {
+                state.shiftOperationStatus = 'success';
+                const updatedShift = action.payload;
+                const {positionId} = updatedShift;
+
+                if (state.positionShifts[positionId]) {
+                    const shiftIndex = state.positionShifts[positionId].findIndex(
+                        s => s.shift_id === updatedShift.shift_id
+                    );
+                    if (shiftIndex !== -1) {
+                        state.positionShifts[positionId][shiftIndex].color = updatedShift.color;
+                    }
+                }
+                clearCacheEntry(state.cache.positionShifts, positionId);
+            })
+            .addCase(updateShiftColorInDB.rejected, (state, action) => {
+                state.shiftOperationStatus = 'error';
+                state.error = action.payload;
+            })
 
 
     }

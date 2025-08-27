@@ -1,24 +1,21 @@
 //frontend/src/features/admin-system-settings/model/settingsSlice.js
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { settingsAPI } from 'shared/api/apiService';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {settingsAPI} from 'shared/api/apiService';
 import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
 
 // Async thunks
 export const fetchSystemSettings = createAsyncThunk(
     'settings/fetchSystemSettings',
-    async (forceRefresh = false, { getState, rejectWithValue }) => {
+    async (forceRefresh = false, {getState, rejectWithValue}) => {
         const state = getState();
-        const { lastFetched, systemSettings } = state.settings;
-
-        // Проверяем кэш
+        const {lastFetched, systemSettings} = state.settings;
         if (!forceRefresh && isCacheValid(lastFetched, CACHE_DURATION.LONG) && systemSettings?.positions?.length > 0) {
-            return { cached: true, data: systemSettings };
+            return {cached: true, data: systemSettings};
         }
-
         try {
             const response = await settingsAPI.fetchSystemSettings();
-            return { cached: false, data: response };
+            return {cached: false, data: response};
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -27,10 +24,9 @@ export const fetchSystemSettings = createAsyncThunk(
 
 export const updateSystemSettings = createAsyncThunk(
     'settings/updateSystemSettings',
-    async (settings, { rejectWithValue }) => {
+    async (settings, {rejectWithValue}) => {
         try {
-            const response = await settingsAPI.updateSystemSettings(settings);
-            return response;
+            return await settingsAPI.updateSystemSettings(settings);
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -55,10 +51,10 @@ const settingsSlice = createSlice({
             defaultEmployeesPerShift: 1,
             algorithmMaxTime: 120,
             strictLegalCompliance: true,
-            positions: [], // Добавляем массив позиций
+            positions: [],
             workSites: [],
 
-            // Position-specific settings (можно переопределить для каждой позиции)
+            // Position-specific settings
             positionSettings: {},// hours
         },
         loading: 'idle',
@@ -67,7 +63,7 @@ const settingsSlice = createSlice({
     },
     reducers: {
         updateLocalSettings(state, action) {
-            state.systemSettings = { ...state.systemSettings, ...action.payload };
+            state.systemSettings = {...state.systemSettings, ...action.payload};
         },
         invalidateCache(state) {
             state.lastFetched = null;

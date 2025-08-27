@@ -2,13 +2,13 @@
 import React, {useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {useNavigate} from 'react-router-dom';
-import {Container, Row, Col, Card} from 'react-bootstrap';
+import {Card, Col, Container, Row} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {useEmployeeData} from './model/hooks/useEmployeeData';
 import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
 import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
 import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
-import { selectNewUpdatesCount } from '../employee-requests/model/requestsSlice';
+import {selectNewUpdatesCount} from '../employee-requests/model/requestsSlice';
 import './index.css';
 
 
@@ -25,19 +25,14 @@ const EmployeeDashboard = () => {
     } = useEmployeeData();
 
 
-    // Эффект: Загружаем ограничения, как только появляется расписание
     useEffect(() => {
-        // Запускаем только если есть расписание и дата начала недели
         if (personalSchedule?.current?.week?.start) {
             loadConstraints(personalSchedule.current.week.start);
         }
     }, [personalSchedule, loadConstraints]);
 
-    // Эффект для расчета статистики, когда данные (расписание или ограничения) обновляются
     useEffect(() => {
-
-            setDashboardStats(calculateDashboardStats(personalSchedule?.current, constraints));
-
+        setDashboardStats(calculateDashboardStats(personalSchedule?.current, constraints));
     }, [personalSchedule, constraints, setDashboardStats]);
 
 
@@ -84,7 +79,7 @@ const EmployeeDashboard = () => {
     };
 
     const newRequestUpdates = useSelector(selectNewUpdatesCount);
-    console.log('newRequestUpdates',newRequestUpdates);
+    console.log('newRequestUpdates', newRequestUpdates);
 
     const dashboardCards = [
         {
@@ -117,8 +112,8 @@ const EmployeeDashboard = () => {
             icon: 'bi-envelope',
             color: 'warning',
             path: '/employee/requests',
-            badge: newRequestUpdates>0? newRequestUpdates : null,
-            highlight: newRequestUpdates>0
+            badge: newRequestUpdates > 0 ? newRequestUpdates : null,
+            highlight: newRequestUpdates > 0
         },
         {
             id: 'archive',
@@ -160,7 +155,7 @@ const EmployeeDashboard = () => {
                                     {new Date(dashboardStats.nextShift.work_date).toLocaleDateString()}
                                     {' '}
                                     <p className="d-inline-block">
-                                    ({dashboardStats.nextShift.start_time} - {dashboardStats.nextShift.end_time})
+                                        ({dashboardStats.nextShift.start_time} - {dashboardStats.nextShift.end_time})
                                     </p>
                                 </div>
                             </Col>

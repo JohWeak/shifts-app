@@ -1,11 +1,11 @@
 // backend/src/controllers/position.controller.js
 const db = require('../../models');
-const { Position, WorkSite, Employee, PositionShift } = db;
+const {Position, WorkSite, Employee, PositionShift} = db;
 
 // Get all positions with statistics
 const getAllPositions = async (req, res) => {
     try {
-        const { site_id } = req.query;
+        const {site_id} = req.query;
         const where = {};
         if (site_id) where.site_id = site_id;
 
@@ -20,7 +20,7 @@ const getAllPositions = async (req, res) => {
                 {
                     model: PositionShift,
                     as: 'shifts',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     attributes: ['id']
                 },
@@ -38,11 +38,11 @@ const getAllPositions = async (req, res) => {
             order: [['pos_name', 'ASC']]
         });
 
-        // Подсчитываем статистику
+        // Counting statistics
         const positionsWithStats = positions.map(position => {
             const posData = position.toJSON();
 
-            // Подсчитываем количество сотрудников с этой позицией по умолчанию
+            // Counting the number of employees with this default position
             return {
                 ...posData,
                 totalShifts: posData.shifts?.length || 0,
@@ -60,14 +60,77 @@ const getAllPositions = async (req, res) => {
         });
     }
 };
+const getPositionDetails = async (req, res) => {
+    try {
+        const {positionId} = req.params;
+        const position = await Position.findByPk(positionId, {
+            include: [
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name']
+                },
+                {
+                    model: PositionShift,
+                    as: 'shifts',
+                    where: {is_active: true},
+                    required: false,
+                    attributes: ['id', 'name', 'start_time', 'end_time', 'color']
+                },
+                {
+                    model: Employee,
+                    as: 'defaultEmployees',
+                    where: {status: ['active', 'admin']},
+                    required: false,
+                    attributes: ['emp_id', 'first_name', 'last_name']
+                }
+            ]
+        });
 
+        if (!position) {
+            return res.status(404).json({message: 'Position not found'});
+        }
+
+        res.status(200).json(position);
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error fetching position details',
+            error: error.message
+        });
+    }
+};
+
+const getPositionsByWorksite = async (req, res) => {
+    try {
+        const {worksiteId} = req.params;
+
+        if (!worksiteId) {
+            return res.status(400).send({message: "Worksite ID is required."});
+        }
+
+        const positions = await Position.findAll({
+            where: {
+                site_id: worksiteId,
+                is_active: true
+            },
+            order: [['pos_name', 'ASC']]
+        });
+
+        res.status(200).send(positions);
+    } catch (error) {
+        res.status(500).send({
+            message: "Error retrieving positions for the worksite.",
+            error: error.message
+        });
+    }
+};
 // Create position with support for required_roles
 const createPosition = async (req, res) => {
     try {
-        const { pos_name, site_id, profession, num_of_emp } = req.body;
+        const {pos_name, site_id, profession, num_of_emp} = req.body;
 
         if (!pos_name) {
-            return res.status(400).json({ message: 'Position name is required' });
+            return res.status(400).json({message: 'Position name is required'});
         }
 
         const position = await Position.create({
@@ -100,8 +163,8 @@ const createPosition = async (req, res) => {
 // Update position
 const updatePosition = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { pos_name, site_id, profession, num_of_emp } = req.body;
+        const {id} = req.params;
+        const {pos_name, site_id, profession, num_of_emp} = req.body;
 
         const position = await Position.findByPk(id);
         if (!position) {
@@ -141,13 +204,13 @@ const deletePosition = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const { id } = req.params;
+        const {id} = req.params;
 
         const position = await Position.findByPk(id, {
             include: [{
                 model: Employee,
                 as: 'defaultEmployees',
-                where: { status: ['active', 'admin'] },
+                where: {status: ['active', 'admin']},
                 required: false,
                 attributes: ['emp_id', 'first_name', 'last_name', 'status']
             }]
@@ -163,15 +226,15 @@ const deletePosition = async (req, res) => {
         const activeEmployees = position.defaultEmployees || [];
         const employeeCount = activeEmployees.length;
 
-        // Деактивируем позицию
-        await position.update({ is_active: false }, { transaction });
+        // We deactivate the position.
+        await position.update({is_active: false}, {transaction});
 
-        // Деактивируем всех работников с этой позицией по умолчанию
+        // We deactivate all employees with this position by default.
         if (employeeCount > 0) {
             await Employee.update(
                 {
                     status: 'inactive',
-                    // Добавляем метаданные для отслеживания автоматической деактивации
+                    // Adding metadata to track automatic deactivation.
                     deactivated_by_position: position.pos_id,
                     deactivated_at: new Date()
                 },
@@ -206,7 +269,7 @@ const restorePosition = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const { id } = req.params;
+        const {id} = req.params;
 
         const position = await Position.findByPk(id);
         if (!position) {
@@ -216,10 +279,10 @@ const restorePosition = async (req, res) => {
             });
         }
 
-        // Восстанавливаем позицию
-        await position.update({ is_active: true }, { transaction });
+        // Restoring position
+        await position.update({is_active: true}, {transaction});
 
-        // Восстанавливаем работников, которые были автоматически деактивированы этой позицией
+        // Restoring employees who were automatically deactivated by this position.
         const restoredEmployees = await Employee.update(
             {
                 status: 'active',
@@ -239,7 +302,7 @@ const restorePosition = async (req, res) => {
 
         await transaction.commit();
 
-        // Возвращаем с информацией о workSite
+        // Returning with information about workSite
         const restoredPosition = await Position.findByPk(id, {
             include: [{
                 model: WorkSite,
@@ -265,6 +328,8 @@ const restorePosition = async (req, res) => {
 
 module.exports = {
     getAllPositions,
+    getPositionDetails,
+    getPositionsByWorksite,
     createPosition,
     updatePosition,
     deletePosition,

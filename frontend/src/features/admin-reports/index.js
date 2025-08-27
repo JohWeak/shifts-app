@@ -39,10 +39,6 @@ const Reports = () => {
 
     }, [sites, selectedSite]);
 
-    useEffect(() => {
-        void handleFetchStats();
-        // eslint-disable-next-line no-use-before-define
-    }, [sites, selectedSite, dateRange, handleFetchStats]);
 
     const handleFetchStats = async () => {
         if (!selectedSite) return;
@@ -62,6 +58,10 @@ const Reports = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        void handleFetchStats();
+    }, [sites, selectedSite, dateRange]);
 
     const chartData = useMemo(() => {
         if (!stats || !stats.schedules) return [];

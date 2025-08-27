@@ -1,27 +1,27 @@
 // backend/src/controllers/worksite.controller.js
 const db = require('../../models'); // Импортируем db напрямую, как в shift.controller
-const { WorkSite, Employee, Position } = db; // Деструктурируем нужную модель
+const {WorkSite, Employee, Position} = db; // Деструктурируем нужную модель
 
 // Get all work sites
 const getWorkSites = async (req, res) => {
     try {
-        const { includeStats } = req.query;
+        const {includeStats} = req.query;
 
         const workSites = await WorkSite.findAll({
             include: [
                 {
                     model: Position,
                     as: 'positions',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     attributes: ['pos_id'],
                     include: includeStats === 'true' ? [{
                         model: Employee,
                         as: 'employees',
-                        where: { status: 'active' },
+                        where: {status: 'active'},
                         required: false,
                         attributes: ['emp_id'],
-                        through: { attributes: [] }
+                        through: {attributes: []}
                     }] : []
                 },
                 {
@@ -41,18 +41,18 @@ const getWorkSites = async (req, res) => {
         const sitesWithStats = workSites.map(site => {
             const siteData = site.toJSON();
 
-            // Подсчет позиций
+            // Position counting
             const positionCount = siteData.positions?.length || 0;
 
-            // Подсчет сотрудников (из всех позиций + напрямую назначенные на site)
+            // Counting employees (from all positions + directly assigned to site)
             const employeeIds = new Set();
 
-            // Сотрудники через позиции
+            // Employees by positions
             siteData.positions?.forEach(pos => {
                 pos.employees?.forEach(emp => employeeIds.add(emp.emp_id));
             });
 
-            // Сотрудники назначенные напрямую на site
+            // Employees directly assigned to site
             siteData.employees?.forEach(emp => employeeIds.add(emp.emp_id));
 
             return {
@@ -76,16 +76,16 @@ const getWorkSites = async (req, res) => {
 // Get work site by ID
 const findOne = async (req, res) => {
     try {
-        const id = req.params.id;
+        const {worksiteId: id} = req.params.id;
         const workSite = await WorkSite.findByPk(id, {
             include: [
-                { association: 'positions' },
-                { association: 'schedules' }
+                {association: 'positions'},
+                {association: 'schedules'}
             ]
         });
 
         if (!workSite) {
-            return res.status(404).json({ message: 'Work site not found' });
+            return res.status(404).json({message: 'Work site not found'});
         }
 
         res.json(workSite);
@@ -98,10 +98,10 @@ const findOne = async (req, res) => {
 };
 const create = async (req, res) => {
     try {
-        const { site_name, address, phone, timezone } = req.body;
+        const {site_name, address, phone, timezone} = req.body.site || req.body;
 
         if (!site_name) {
-            return res.status(400).json({ message: 'Site name is required' });
+            return res.status(400).json({message: 'Site name is required'});
         }
 
         const newSite = await WorkSite.create({
@@ -124,12 +124,12 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { site_name, address, phone, timezone, is_active } = req.body;
+        const {worksiteId: id} = req.params;
+        const {site_name, address, phone, timezone, is_active} = req.body.site || req.body;
 
         const site = await WorkSite.findByPk(id);
         if (!site) {
-            return res.status(404).json({ message: 'Work site not found' });
+            return res.status(404).json({message: 'Work site not found'});
         }
 
         await site.update({
@@ -155,14 +155,14 @@ const deleteWorkSite = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const { id } = req.params;
+        const {worksiteId: id} = req.params;
 
         const site = await WorkSite.findByPk(id, {
             include: [
                 {
                     model: Position,
                     as: 'positions',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     attributes: ['pos_id', 'pos_name']
                 },
@@ -172,7 +172,7 @@ const deleteWorkSite = async (req, res) => {
                     where: {
                         status: ['active', 'admin'],
                         [db.Sequelize.Op.or]: [
-                            { work_site_id: id },
+                            {work_site_id: id},
                             {
                                 default_position_id: {
                                     [db.Sequelize.Op.in]: db.sequelize.literal(
@@ -190,13 +190,13 @@ const deleteWorkSite = async (req, res) => {
 
         if (!site) {
             await transaction.rollback();
-            return res.status(404).json({ message: 'Work site not found' });
+            return res.status(404).json({message: 'Work site not found'});
         }
 
         const activePositions = site.positions || [];
         const affectedEmployees = site.employees || [];
 
-        // Подсчитываем статистику
+        // Counting statistics
         const stats = {
             positionCount: activePositions.length,
             directEmployeeCount: affectedEmployees.filter(emp => emp.work_site_id === parseInt(id)).length,
@@ -204,10 +204,10 @@ const deleteWorkSite = async (req, res) => {
             totalEmployeeCount: affectedEmployees.length
         };
 
-        // 1. Деактивируем сам Work Site
-        await site.update({ is_active: false }, { transaction });
+        // 1. We deactivate the Work Site itself.
+        await site.update({is_active: false}, {transaction});
 
-        // 2. Деактивируем все позиции этого сайта
+        // 2. We deactivate all positions of this website.
         if (stats.positionCount > 0) {
             await Position.update(
                 {
@@ -225,9 +225,9 @@ const deleteWorkSite = async (req, res) => {
             );
         }
 
-        // 3. Деактивируем всех работников
+        // 3. Deactivate all employees.
         if (stats.totalEmployeeCount > 0) {
-            // Работники напрямую привязанные к сайту
+            // Employees directly tied to the site
             await Employee.update(
                 {
                     status: 'inactive',
@@ -243,7 +243,7 @@ const deleteWorkSite = async (req, res) => {
                 }
             );
 
-            // Работники через позиции
+            // Employees by positions
             const positionIds = activePositions.map(p => p.pos_id);
             if (positionIds.length > 0) {
                 await Employee.update(
@@ -290,18 +290,18 @@ const restoreWorkSite = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const { id } = req.params;
+        const {worksiteId: id} = req.params;
 
         const site = await WorkSite.findByPk(id);
         if (!site) {
             await transaction.rollback();
-            return res.status(404).json({ message: 'Work site not found' });
+            return res.status(404).json({message: 'Work site not found'});
         }
 
-        // 1. Восстанавливаем сам Work Site
-        await site.update({ is_active: true }, { transaction });
+        // 1. Restoring the Work Site.
+        await site.update({is_active: true}, {transaction});
 
-        // 2. Восстанавливаем позиции, которые были деактивированы этим сайтом
+        // 2. Restoring positions deactivated by this website
         const restoredPositions = await Position.update(
             {
                 is_active: true,
@@ -319,7 +319,7 @@ const restoreWorkSite = async (req, res) => {
             }
         );
 
-        // 3. Восстанавливаем работников, деактивированных напрямую сайтом
+        // 3. Restoring employees deactivated directly by the site.
         const restoredDirectEmployees = await Employee.update(
             {
                 status: 'active',
@@ -337,8 +337,8 @@ const restoreWorkSite = async (req, res) => {
             }
         );
 
-        // 4. Восстанавливаем работников, деактивированных через позиции
-        // Получаем ID восстановленных позиций
+        // 4. Restoring employees deactivated via positions.
+        // Getting IDs of restored positions
         const restoredPositionIds = await Position.findAll({
             where: {
                 site_id: id,

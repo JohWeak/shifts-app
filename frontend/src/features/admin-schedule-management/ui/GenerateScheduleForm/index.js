@@ -1,6 +1,6 @@
 //frontend/src/features/admin-schedule-management/ui/generate-schedule/index.js
-import React, {useState, useEffect, useMemo} from 'react';
-import {Form, Button, Spinner, Card} from 'react-bootstrap';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Button, Card, Form, Spinner} from 'react-bootstrap';
 import {useSelector} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {getNextWeekStart} from 'shared/lib/utils/scheduleUtils';
@@ -41,10 +41,10 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
         if (availablePositions.length > 0) {
             setSettings(prev => ({
                 ...prev,
-                position_ids: availablePositions.map(p => p.pos_id) // Выбираем все по умолчанию
+                position_ids: availablePositions.map(p => p.pos_id)
             }));
         } else {
-            setSettings(prev => ({...prev, position_ids: []})); // Сбрасываем, если позиций нет
+            setSettings(prev => ({...prev, position_ids: []}));
         }
     }, [availablePositions]);
 
@@ -72,7 +72,7 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
                 <Form onSubmit={handleSubmit} className="generate-form-layout">
                     <Form.Group className="form-calendar-section">
                         <Form.Label>{t('modal.generateSchedule.chooseWeek')}</Form.Label>
-                        <div >
+                        <div>
                             <DatePicker
                                 displayMode="inline"
                                 selectionMode="week"

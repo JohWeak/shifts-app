@@ -29,8 +29,6 @@ const corsOptions = {
     }
 };
 app.use(cors(corsOptions));
-
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 if (process.env.NODE_ENV === 'development') {
@@ -46,13 +44,15 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/employees', require('./routes/employee.routes'));
 app.use('/api/schedules', require('./routes/schedule.routes'));
 app.use('/api/worksites', require('./routes/worksite.routes'));
-app.use('/api/positions', require('./routes/position.routes'));
 app.use('/api/constraints', require('./routes/constraint.routes'));
-app.use('/api/schedule-settings', require('./routes/schedule-settings.routes'));
-app.use('/api/settings', require('./routes/settings.routes'));
+app.use('/api/settings', require('./routes/settings.routes')); // Объединенный роутер настроек
 
+const {positionRouter, shiftRouter, requirementRouter} = require('./routes/position.routes');
 
-// Error handling middleware
+app.use('/api/positions', positionRouter);
+app.use('/api/shifts', shiftRouter);
+app.use('/api/requirements', requirementRouter);
+
 app.use((error, req, res) => {
     console.error('SERVER ERROR:', error);
     res.status(500).json({

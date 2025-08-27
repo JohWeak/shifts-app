@@ -289,7 +289,7 @@ const scheduleSlice = createSlice({
 
     },
     reducers: {
-        updateShiftColor: (state, action) => {
+        setLocalShiftColorOverride: (state, action) => {
             const {shiftId, color} = action.payload;
 
             if (state.scheduleDetails?.shifts) {
@@ -679,7 +679,7 @@ export const {
     toggleEditPosition,
     addPendingChange,
     removePendingChange,
-    updateShiftColor,
+    setLocalShiftColorOverride,
     clearAutofilledStatus,
     addBatchPendingChanges,
     applyPendingChanges,
