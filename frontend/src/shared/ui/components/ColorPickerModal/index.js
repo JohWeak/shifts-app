@@ -7,19 +7,19 @@ import { getContrastTextColor, hexToHsl, hslToHex, isDarkTheme } from 'shared/li
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 const PRESET_COLORS = [
-    '#FFE4A3', // Светло-жёлтый
-    '#A3D5FF', // Светло-голубой
-    '#FFB3BA', // Светло-розовый
-    '#B5E7A0', // Светло-зелёный
-    '#DDA0DD', // Светло-фиолетовый
-    '#F0E68C', // Хаки
-    '#87CEEB', // Небесно-голубой
-    '#DEB887', // Бежевый
-    '#B2F2E8', // Светлая бирюза (новый)
-    '#FFDAB9', // Персиковый (новый)
-    '#E6E6FA', // Лаванда (новый)
-    '#FFFFFF', // Белый
-    '#000000', // Черный
+    '#FFE4A3', // Light yellow
+    '#A3D5FF', // Light blue
+    '#FFB3BA', // Light pink
+    '#B5E7A0', // Light green
+    '#DDA0DD', // Light purple
+    '#F0E68C', // Khaki
+    '#87CEEB', // Sky-blue
+    '#DEB887', // Beige
+    '#B2F2E8', // Light turquoise (new)
+    '#FFDAB9', // Peach (new)
+    '#E6E6FA', // Lavender (new)
+    '#FFFFFF', // White
+    '#000000', // Black
 ];
 
 
@@ -42,9 +42,9 @@ const ColorPickerModal = ({
     const { t } = useI18n();
     const colorInputRef = useRef(null);
 
-    // --- НОВЫЕ СОСТОЯНИЯ ДЛЯ СЛАЙДЕРА ---
-    const [activeHslBase, setActiveHslBase] = useState(null); // [h, s, l] базового цвета
-    const [brightness, setBrightness] = useState(50); // 0-100 для слайдера
+
+    const [activeHslBase, setActiveHslBase] = useState(null); // [h, s, l] of the base color
+    const [brightness, setBrightness] = useState(50); // 0-100 for the slider
 
     const themeAwareGlobalColor = useMemo(() => {
         if (shiftObject) {
@@ -97,7 +97,7 @@ const ColorPickerModal = ({
             }
         }
     };
-    // --- НОВАЯ ФУНКЦИЯ ДЛЯ ОБРАБОТКИ ИЗМЕНЕНИЯ ЯРКОСТИ ---
+
     const handleBrightnessChange = (e) => {
         const sliderValue = parseInt(e.target.value, 10);
         setBrightness(sliderValue);
