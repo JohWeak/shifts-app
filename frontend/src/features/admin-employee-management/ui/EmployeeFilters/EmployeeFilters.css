@@ -1,0 +1,120 @@
+/* frontend/src/features/admin-employee-management/ui/EmployeeFilters/EmployeeFilters.css */
+.filters-accordion {
+    --bs-accordion-btn-bg: #f1f2f4;
+    --bs-accordion-active-bg: #f1f2f4;
+}
+.filters-accordion .accordion-item {
+    border-radius: var(--radius-lg)!important;
+    border-color: var(--bs-gray-500)!important;
+    border-bottom-left-radius: 0!important;
+    border-bottom-right-radius: 0!important;
+    overflow: hidden;
+}
+[data-theme="dark"] .filters-accordion .accordion-item {
+    border-color: transparent!important;
+}
+/* Стили для заголовка внутри кнопки аккордеона */
+.filters-accordion .accordion-header h6 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-body-color);
+}
+
+/* Стили для кнопки-заголовка аккордеона */
+.filters-accordion .accordion-button {
+    border-color: var(--bs-border-color);
+    max-height: 3rem;
+    border-bottom-left-radius: 0!important;
+    border-bottom-right-radius: 0!important;
+
+}
+.filters-accordion .accordion-button.collapsed {
+    border-bottom: none!important;
+}
+[data-theme="dark"] .filters-accordion .accordion-button {
+    background-color: var(--bs-gray-900);
+
+}
+
+.filters-accordion .accordion-button:not(.collapsed) {
+    box-shadow: none;
+    background-color: var(--bs-gray-100);
+}
+[data-theme="dark"] .filters-accordion .accordion-button:not(.collapsed) {
+    background-color: var(--bs-gray-900);
+
+}
+
+.filters-accordion .accordion-button:focus {
+    box-shadow: none;
+}
+
+/* Кастомизация стрелочки */
+.filters-accordion .accordion-button::after {
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236c757d'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230d6efd'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+/* Темная тема */
+[data-theme="dark"] .filters-accordion {
+    --bs-accordion-bg: var(--bs-gray-800);
+    --bs-accordion-btn-bg: var(--bs-gray-800);
+    --bs-accordion-active-bg: var(--bs-gray-800);
+    --bs-accordion-btn-color: var(--bs-gray-300);
+}
+[data-theme="dark"] .filters-accordion .accordion-header h6{
+    color: var(--bs-gray-300);
+
+}
+
+/* Стили для инпутов и селектов остаются актуальными */
+.filter-input,
+.filter-select {
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    padding: 0.6rem 0.75rem;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.15);
+}
+.filter-select:hover {
+    border-color: var(--bs-gray-400);
+}
+[data-theme="dark"] .filter-select:hover {
+    border-color: var(--bs-tertiary-color);
+}
+
+.reset-button {
+    border: 1px solid var(--bs-border-color);
+    background: transparent;
+    color: var(--bs-body-color);
+    font-size: 0.875rem;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
+    height: 100%;
+    border-radius: var(--radius-sm);
+}
+
+.reset-button:hover {
+    background: var(--bs-gray-200);
+    border-color: var(--bs-gray-400);
+    color: var(--bs-gray-600);
+}
+
+[data-theme="dark"] .reset-button {
+    border-color: var(--bs-gray-800);
+    background-color: var(--bs-gray-900);
+}
+
+[data-theme="dark"] .reset-button:hover {
+    background: var(--bs-gray-700);
+    border-color: var(--bs-gray-800);
+    color: var(--bs-gray-300);
+}

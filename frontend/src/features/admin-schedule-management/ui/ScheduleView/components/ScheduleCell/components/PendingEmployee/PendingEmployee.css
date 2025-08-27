@@ -1,0 +1,69 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/components/PendingEmployee/PendingEmployee.css */
+
+.pending-assignment {
+    position: relative;
+    opacity: 0.9;
+    padding-inline-end: 1rem;
+}
+
+
+/* --- Уникальная логика состояний для PendingEmployee --- */
+
+/* Autofilled с зеленой пунктирной рамкой */
+.pending-assignment.autofilled-employee {
+    border: 1px dashed var(--autofilled-color) !important;
+    animation: autofill-pulse 1s ease-in-out;
+}
+
+/* Cross-position styling - сплошная желтая рамка */
+.pending-assignment.cross-position-employee {
+    border: 1px solid var(--cross-position-color) !important;
+    background-color: rgba(var(--cross-position-color-rgb), var(--pending-bg-opacity)) !important;
+}
+
+/* Cross-site styling - сплошная синяя рамка */
+.pending-assignment.cross-site-employee {
+    border: 1px solid var(--cross-site-color) !important;
+    background-color: rgba(var(--cross-site-color-rgb), var(--pending-bg-opacity)) !important;
+}
+
+/* Flexible employee styling - сплошная фиолетовая рамка */
+.pending-assignment.flexible-employee {
+    border: 1px solid var(--flexible-color) !important;
+    background-color: rgba(var(--flexible-color-rgb), var(--pending-bg-opacity)) !important;
+}
+
+
+/* Комбинированные стили: autofilled + другое состояние = пунктирная рамка нужного цвета */
+
+.pending-assignment.autofilled-employee.cross-position-employee {
+    border-style: dashed !important;
+    border-color: var(--cross-position-color) !important;
+}
+
+.pending-assignment.autofilled-employee.cross-site-employee {
+    border-style: dashed !important;
+    border-color: var(--cross-site-color) !important;
+}
+
+.pending-assignment.autofilled-employee.flexible-employee {
+    border-style: dashed !important;
+    border-color: var(--flexible-color) !important;
+}
+
+
+
+@keyframes autofill-pulse {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0.1;
+    }
+    70% {
+        transform: translateY(2px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

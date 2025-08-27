@@ -1,0 +1,115 @@
+/* frontend/src/features/employee-requests/ui/RequestsList/RequestsList.css */
+.requests-list {
+    max-width: 100%;
+}
+
+.requests-list .request-item {
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.requests-list .request-item:hover {
+    border-left-color: var(--bs-primary);
+}
+.requests-list .request-item.inactive {
+    opacity: 0.7;
+    background-color: var(--bs-gray-100);
+}
+
+.requests-list .request-item.inactive .request-clickable-area {
+    background-color: transparent;
+}
+
+[data-theme="dark"] .requests-list .request-item.inactive {
+    background-color: var(--bs-gray-800);
+}
+.requests-list .request-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.requests-list .request-clickable-area {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    cursor: pointer;
+}
+
+.requests-list .request-info {
+    flex: 1;
+}
+
+.requests-list .request-date,
+.requests-list .request-reviewed {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.requests-list .request-reviewer,
+.requests-list .request-constraints-count {
+    font-size: 0.813rem;
+}
+
+.requests-list .request-actions {
+    display: flex;
+    gap: 0.5rem;
+    /*flex-shrink: 0;*/
+}
+.requests-list .actions-dropdown-toggle {
+    position: absolute;
+    bottom:0.25rem;
+    right: 0;
+    margin-inline-end: -0.5rem;
+    background: transparent;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    color: var(--bs-secondary-color);
+    line-height: 1;
+    transition: all 0.2s ease-in-out;
+
+}
+[dir="rtl"] .requests-list .actions-dropdown-toggle {
+    margin-inline-start: -0.5rem;
+    margin-inline-end: 0;
+    left:0;
+    right: auto;
+}
+.requests-list .actions-dropdown-toggle:hover,
+.requests-list .actions-dropdown-toggle:focus {
+    color: var(--bs-primary);
+}
+.requests-list .dropdown-menu {
+    box-shadow: var(--bs-box-shadow-sm);
+}
+.requests-list .dropdown-menu .dropdown-item:hover {
+    background-color: transparent;
+}
+@media (max-width: 576px) {
+    /*.requests-list .request-item-content {*/
+    /*    flex-direction: column;*/
+    /*    align-items: stretch;*/
+    /*    padding: 0.75rem;*/
+    /*}*/
+
+    /*.requests-list .request-clickable-area {*/
+    /*    flex-direction: column;*/
+    /*    gap: 0.5rem;*/
+    /*}*/
+
+    /*.requests-list .request-actions {*/
+    /*    justify-content: flex-end;*/
+    /*    margin-top: 0.5rem;*/
+    /*    padding-top: 0.5rem;*/
+    /*    border-top: 1px solid var(--bs-gray-200);*/
+    /*}*/
+
+    /*.requests-list .request-date i,*/
+    /*.requests-list .request-reviewed i {*/
+    /*    display: none;*/
+    /*}*/
+}

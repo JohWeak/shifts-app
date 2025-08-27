@@ -1,0 +1,92 @@
+import React from 'react';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import store from 'app/store/store';
+import { I18nProvider } from 'shared/lib/i18n/i18nProvider';
+import { ErrorBoundary } from 'shared/ui/components/ErrorBoundary';
+
+
+// Pages
+import Login from '../features/auth';
+
+import EmployeeLayout from '../shared/ui/layouts/EmployeeLayout/EmployeeLayout';
+import EmployeeSchedule from '../features/employee-schedule';
+import EmployeeConstraints from '../features/employee-constraints';
+import EmployeeRequests from '../features/employee-requests';
+import EmployeeArchive from '../features/employee-archive';
+import EmployeeManagement from 'features/admin-employee-management';
+import EmployeeDashboard from '../features/employee-dashboard';
+
+import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
+import AdminDashboard from '../features/admin-dashboard';
+import ScheduleManagement from '../features/admin-schedule-management';
+import AlgorithmSettings from '../features/admin-algorithm-settings';
+//import SystemSettings from '../features/admin-system-settings';
+import WorkplaceSettings from '../features/admin-workplace-settings';
+import Reports from '../features/admin-reports';
+import AdminPermanentRequests from '../features/admin-permanent-requests';
+
+import { ProtectedRoute } from '../shared/lib/auth/ProtectedRoute';
+import './App.css';
+
+/**
+ * Main Application Component
+ * Defines routing structure and authentication flow
+ */
+const AppInitializer = ({ children }) => {
+
+    return children;
+};
+
+const router = createBrowserRouter([
+    { path: '/login', element: <Login /> },
+    {
+        path: '/employee',
+        element: <ProtectedRoute allowedRole="employee"><EmployeeLayout /></ProtectedRoute>,
+        children: [
+            { index: true, element: <Navigate to="/employee/dashboard" replace /> },
+            { path: 'dashboard', element: <EmployeeDashboard /> },
+            { path: 'schedule', element: <EmployeeSchedule /> },
+            { path: 'constraints', element: <EmployeeConstraints /> },
+            { path: 'requests', element: <EmployeeRequests /> },
+            { path: 'archive', element: <EmployeeArchive /> },
+        ],
+    },
+
+    {
+        path: '/admin',
+        element: <ProtectedRoute allowedRole="admin"><AdminLayout /></ProtectedRoute>,
+        children: [
+            { index: true, element: <AdminDashboard /> },
+            { path: 'schedules', element: <ScheduleManagement /> },
+            { path: 'algorithms', element: <AlgorithmSettings /> },
+            { path: 'employees', element: <EmployeeManagement /> },
+            { path: 'workplace', element: <WorkplaceSettings /> },
+            { path: 'reports', element: <Reports /> },
+            { path: 'permanent-requests', element: <AdminPermanentRequests /> },
+
+            { path: 'my-employee-profile', element: <EmployeeLayout /> },
+
+        ],
+    },
+    { path: '/', element: <Navigate to="/login" replace /> },
+    { path: '*', element: <Navigate to="/login" replace /> },
+]);
+
+function App() {
+    return (
+        <Provider store={store}>
+            <I18nProvider>
+                <AppInitializer>
+                    <ErrorBoundary>
+                        <div className="app">
+                            <RouterProvider router={router} />
+                        </div>
+                    </ErrorBoundary>
+                </AppInitializer>
+            </I18nProvider>
+        </Provider>
+    );
+}
+
+export default App;

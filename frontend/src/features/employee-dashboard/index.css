@@ -1,0 +1,250 @@
+/* frontend/src/features/employee-dashboard/index.css */
+.employee-dashboard {
+    min-height: calc(100vh - 120px);
+    margin-bottom: 60px;
+}
+.employee-dashboard .page-header-card {
+    border-radius: var(--radius-lg);
+
+}
+.employee-dashboard .dashboard-header h2 {
+    color: var(--bs-gray-800);
+    font-weight: 600;
+}
+
+[data-theme="dark"] .employee-dashboard .dashboard-header h2 {
+    color: var(--bs-gray-100);
+}
+
+/* Dashboard Cards */
+.employee-dashboard .dashboard-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--bs-gray-200);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    min-height: 130px;
+    border-radius: var(--radius-lg);
+}
+
+[data-theme="dark"] .employee-dashboard .dashboard-card {
+    border-color: var(--bs-gray-700);
+    background: var(--bs-gray-800);
+}
+
+
+
+.employee-dashboard .dashboard-card:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.employee-dashboard .dashboard-card.highlight {
+    border-color: var(--bs-warning);
+    animation: cardPulse 2s infinite;
+}
+.employee-dashboard .dashboard-card.highlight:hover {
+    animation: none;
+}
+
+@keyframes cardPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+}
+
+/* Icon Wrapper */
+.employee-dashboard .icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.employee-dashboard .icon-wrapper i {
+    font-size: 2.5rem;
+}
+
+/* Card Content */
+.employee-dashboard .dashboard-card .card-title {
+    font-weight: 600;
+    color: var(--bs-gray-800);
+    margin-bottom: 0.5rem;
+}
+
+[data-theme="dark"] .employee-dashboard .dashboard-card .card-title {
+    color: var(--bs-gray-100);
+}
+
+.employee-dashboard .dashboard-card .card-subtitle {
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.employee-dashboard .dashboard-card .stats {
+    font-weight: 500;
+}
+
+/* Next Shift Card */
+.employee-dashboard .next-shift-card {
+    background:  var(--bs-primary);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+
+}
+
+.employee-dashboard .next-shift-card h5 {
+    color: white;
+    opacity: 0.9;
+}
+
+/* Stats Card */
+.employee-dashboard .stats-card{
+    box-shadow: var(--shadow-sm);
+    border-color: var(--bs-gray-200);
+    border-radius: var(--radius-lg);
+
+}
+[data-theme="dark"] .employee-dashboard .stats-card{
+    border-color: var(--bs-gray-700);
+    background-color: var(--bs-gray-800);
+}
+
+.employee-dashboard .stats-card .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.employee-dashboard .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bs-gray-100);
+    border-radius: 0.5rem;
+}
+
+[data-theme="dark"] .employee-dashboard .stat-item {
+    background: var(--bs-gray-900);
+}
+
+.employee-dashboard .stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--bs-gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.employee-dashboard .stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--bs-primary);
+}
+.dashboard-card .dashboard-card-badge {
+    transform: translate(-120%, 20%)!important;
+
+}
+/* Mobile Responsive */
+@media (max-width: 767px) {
+    .employee-dashboard .next-shift-card {
+        border: none;
+    }
+    .employee-dashboard .next-shift-card h5 {
+        font-size: 1rem;
+    }
+    .employee-dashboard .next-shift-card p{
+        font-size: 0.875rem;
+    }
+    .dashboard-card:active{
+        transform: translateY(-3px);
+    }
+    /* 1. Уменьшаем отступы внутри всей карточки */
+    .dashboard-card .card-body {
+        padding: 0.5rem; /* Уменьшаем внутренние отступы */
+    }
+
+    /* 2. Уменьшаем размер круга с иконкой */
+    .dashboard-card .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.75rem !important; /* mb-2 вместо mb-3 */
+    }
+
+    /* 3. Уменьшаем саму иконку внутри круга */
+    .dashboard-card .icon-wrapper i.bi {
+        font-size: 1.5rem; /* Делаем иконку меньше */
+    }
+
+    /* 4. Уменьшаем размер шрифта заголовка */
+    .dashboard-card .card-title {
+        font-size: 1rem; /* Уменьшаем заголовок (был h5) */
+        margin-bottom: 0.25rem !important; /* mb-1 вместо mb-2 */
+    }
+
+    /* 5. Уменьшаем размер шрифта подзаголовка и убираем лишний отступ */
+    .dashboard-card .card-subtitle {
+        font-size: 0.75rem!important;
+        min-height: 36px; /* Добавляем минимальную высоту для выравнивания карточек */
+        margin-bottom: 0.25rem !important;
+    }
+
+    /* 6. Уменьшаем текст со статистикой (если есть) */
+    .stats-card .card-body{
+        padding: 0.5rem;
+        
+
+    }
+    .stats-card h5{
+        margin-bottom: 0.5rem!important;
+        margin-inline-start: 0.75rem!important;
+    }
+    .stats-card .stat-item{
+        padding: 0;
+    }
+    .stats-card .stat-value{
+        font-size: 1.5rem;
+    }
+    .stats-card .stat-label{
+        font-size: 0.75rem;
+    }
+    .stats-card h5{
+        font-size: 1rem;
+        margin-inline-start: 0.25rem;
+    }
+    .employee-dashboard .stats-card .stats-grid {
+        gap: 0.5rem;
+    }
+
+
+}
+
+/* RTL Support */
+[dir="rtl"] .employee-dashboard .dashboard-card .position-absolute {
+    left: 0;
+    right: auto;
+    transform: translate(-50%, -50%);
+}
+
+[dir="rtl"] .employee-dashboard .bi-download::before {
+    transform: scaleX(-1);
+}
+
+@media (hover: hover) {
+    .employee-dashboard .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: var(--bs-primary);
+    }
+}

@@ -1,29 +1,58 @@
-// backend/src/routes/constraint.routes.js (исправленная версия)
+// backend/src/routes/constraint.routes.js
 const express = require('express');
-const constraintController = require('../controllers/constraint.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
-
 const router = express.Router();
+const constraintController = require('../controllers/scheduling/constraint.controller');
+const { verifyToken,  isAdmin } = require('../middlewares/auth.middleware');
 
-// Employee routes - all authenticated users can access
-router.get('/employee/:empId', verifyToken, constraintController.getEmployeeConstraints);
-router.post('/', verifyToken, constraintController.createConstraint);
-router.put('/:id', verifyToken, constraintController.updateConstraint);
-router.delete('/:id', verifyToken, constraintController.deleteConstraint);
+// Employee routes
+router.get('/weekly-grid',
+    verifyToken,
+    constraintController.getWeeklyConstraintsGrid
+);
 
-// NEW ROUTES (основные для работы)
-router.get('/weekly-grid', verifyToken, constraintController.getWeeklyConstraintsGrid);
-router.post('/submit-weekly', verifyToken, constraintController.submitWeeklyConstraints);
+router.post('/submit-weekly',
+    verifyToken,
+    constraintController.submitWeeklyConstraints
+);
 
-// УДАЛЯЕМ СТАРЫЙ РОУТ - он больше не нужен
-// router.get('/next-week-template', verifyToken, constraintController.getNextWeekConstraintsTemplate);
+// Permanent constraint requests - Employee
+router.get('/permanent-requests/my',
+    verifyToken,
+    constraintController.getMyPermanentRequests
+);
 
-// Admin-only routes (временно закомментируем пока не нужны)
-// router.get('/pending', [verifyToken, isAdmin], constraintController.getPendingConstraints);
-// router.put('/:id/review', [verifyToken, isAdmin], constraintController.reviewConstraint);
-// router.post('/permanent', [verifyToken, isAdmin], constraintController.createPermanentConstraint);
+router.post('/permanent-request',
+    verifyToken,
+    constraintController.submitPermanentRequest
+);
 
-// Scheduling routes - for schedule generation
-router.get('/period', verifyToken, constraintController.getConstraintsForPeriod);
+router.delete('/permanent-request/:id',
+    verifyToken,
+    constraintController.deletePermanentRequest
+);
+
+router.get('/permanent-constraints/my',
+    verifyToken,
+    constraintController.getMyPermanentConstraints
+);
+
+// Admin routes
+router.get('/permanent-requests',
+    verifyToken,
+    isAdmin,
+    constraintController.getAllPermanentRequests
+);
+
+router.get('/permanent-requests/count',
+    verifyToken,
+    isAdmin,
+    constraintController.getUnprocessedRequestsCount
+);
+
+router.put('/permanent-request/:id/review',
+    verifyToken,
+    isAdmin,
+    constraintController.reviewPermanentRequest
+);
 
 module.exports = router;

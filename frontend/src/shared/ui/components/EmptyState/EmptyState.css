@@ -1,0 +1,62 @@
+/* frontend/src/shared/ui/components/EmptyState.css */
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.empty-state-card {
+    background-color: var(--bs-form-select-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid transparent;
+    box-shadow: var(--bs-box-shadow-sm);
+    animation: fade-in-up 0.5s ease-out;
+}
+
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.empty-state-icon-background {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    font-size: 2rem;
+    transition: all 0.2s ease-in-out;
+}
+
+
+.empty-state-title {
+    font-weight: 600;
+    color: var(--bs-heading-color);
+    margin-bottom: 0.5rem;
+}
+
+
+.empty-state-description {
+    max-width: 450px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.empty-state-card.variant-secondary .empty-state-icon-background {
+    color: var(--bs-emphasis-color);
+    background-color: var(--bs-secondary-bg-subtle);
+}

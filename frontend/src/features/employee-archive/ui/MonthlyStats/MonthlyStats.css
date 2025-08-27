@@ -1,0 +1,47 @@
+/* frontend/src/features/employee-archive/ui/MonthlyStats/MonthlyStats.css */
+.monthly-stats .card-body {
+    padding: 0.5rem;
+}
+[data-theme="dark"] .monthly-stats.card{
+    border-color: var(--bs-gray-900)!important;
+}
+.monthly-stats {
+    border-radius: var(--radius-lg)!important;
+    border-bottom-left-radius: 0!important;
+    border-bottom-right-radius: 0!important;
+    border-color: var(--bs-gray-300)!important;
+    box-shadow: var(--shadow-lg);
+}
+.stat-item {
+    text-align: center;
+    padding: 0.25rem;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--bs-primary);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+[data-theme="dark"] .stat-label {
+    color: var(--bs-gray-400);
+}
+
+@media (max-width: 768px) {
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    .monthly-stats .card-body {
+        padding: 0;
+    }
+}

@@ -1,0 +1,165 @@
+/* frontend/src/features/admin-permanent-requests/index.css */
+.admin-permanent-requests .requests-table {
+    /*font-size: 0.875rem;*/
+}
+
+.admin-permanent-requests .card {
+    border: none;
+}
+
+.admin-permanent-requests {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.admin-permanent-requests .card-header {
+    border-color: transparent;
+    padding: 1rem 1.25rem;
+    border-top-left-radius: var(--radius-lg)!important;
+    border-top-right-radius: var(--radius-lg)!important;
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+}
+.admin-permanent-requests .card-header .badge{
+    font-size: 0.75rem;
+}
+
+.admin-permanent-requests .card-header.bg-warning {
+    border-left-color: var(--bs-warning);
+}
+
+.admin-permanent-requests .card-header.bg-success {
+    border-left-color: var(--bs-success);
+}
+
+.admin-permanent-requests .card-header.bg-secondary {
+    border-left-color: var(--bs-secondary);
+}
+
+[dir="rtl"] .admin-permanent-requests .card-header.bg-warning {
+    border-left-color: transparent;
+    border-right-color: var(--bs-warning);
+}
+
+[dir="rtl"] .admin-permanent-requests .card-header.bg-success {
+    border-left-color: transparent;
+    border-right-color: var(--bs-success);
+}
+
+[dir="rtl"] .admin-permanent-requests .card-header.bg-secondary {
+    border-left-color: transparent;
+    border-right-color: var(--bs-secondary);
+}
+.admin-permanent-requests .sortable-header{
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+.admin-permanent-requests tbody td {
+    padding: 1rem;
+    font-size: 0.9rem;
+    vertical-align: middle;
+    transition: background-color 0.2s ease;
+}
+.admin-permanent-requests .request-row{
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+    background-color: transparent;
+}
+
+.admin-permanent-requests .request-row:hover{
+    border-left-color: var(--bs-primary);
+}
+.admin-permanent-requests .request-row:hover td{
+    background-color: rgba(var(--bs-primary-rgb), 0.04);
+}
+
+[dir="rtl"] .admin-permanent-requests .request-row:hover {
+    border-left-color: transparent;
+    border-right-color: var(--bs-primary);
+}
+
+[data-theme="dark"] .admin-permanent-requests .request-row:hover td{
+    background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.admin-permanent-requests .request-row.inactive {
+    opacity: 0.6;
+    background-color: var(--bs-gray-100);
+}
+
+.admin-permanent-requests .request-row.inactive:hover {
+    background-color: var(--bs-gray-200);
+}
+
+[data-theme="dark"] .admin-permanent-requests .request-row.inactive {
+    background-color: var(--bs-gray-900);
+}
+
+[data-theme="dark"] .admin-permanent-requests .request-row.inactive:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.css */
+.admin-permanent-requests .request-employee-info .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: var(--bs-gray-100);
+    border-radius: 0.5rem;
+}
+
+.admin-permanent-requests .constraints-review-box {
+    padding: 1rem;
+    background-color: var(--bs-light);
+    border-radius: 0.5rem;
+}
+
+.admin-permanent-requests .day-constraints-review {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--bs-gray-300);
+}
+
+.admin-permanent-requests .day-constraints-review:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.admin-permanent-requests .day-constraints-review .day-name {
+    min-width: 100px;
+    color: var(--bs-gray-800);
+}
+
+.admin-permanent-requests .constraints-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-permanent-requests .constraint-badge {
+    background-color: var(--bs-danger);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.813rem;
+    font-weight: 500;
+}
+
+@media (max-width: 576px) {
+    .admin-permanent-requests .request-employee-info .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-permanent-requests .day-constraints-review {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

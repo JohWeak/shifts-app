@@ -1,106 +1,70 @@
 /* frontend/src/index.css */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import 'app/styles/design-system.css';
+
+html {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+
+body.modal-open {
+    /*overflow: inherit !important;*/
+    padding-right: 0 !important;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-  sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #fafafa;
-  color: #2c3e50;
-  line-height: 1.6;
+    font-family: var(--bs-body-font-family), serif;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
 }
 
-.app {
-  min-height: 100vh;
+.surface {
+    border-radius: var(--bs-border-radius);
+    box-shadow: var(--bs-box-shadow-sm);
 }
 
-/* Loading and common states */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  font-size: 16px;
-  color: #666;
+[data-theme="light"] .surface {
+    background-color: var(--bs-white);
 }
 
-.error-message {
-  background-color: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
+[data-theme="dark"] .surface {
+    background-color: var(--bs-card-bg);
 }
 
-.success-message {
-  background-color: #efe;
-  border: 1px solid #cfc;
-  color: #363;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
+.card-interactive {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-/* Button base styles */
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
+.card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--bs-box-shadow-lg);
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+/* Override Bootstrap with CSS variables */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
 }
 
-.btn:active {
-  transform: translateY(0);
+.btn-primary:hover {
+    background-color: var(--bs-primary-hover);
+    border-color: var(--bs-primary-hover);
 }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+[data-theme="dark"] .text-muted {
+    color: var(--bs-gray-300) !important;
 }
 
-/* Form elements */
-input, select, textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background-color: white;
+[data-theme="dark"] ::placeholder {
+    color: var(--bs-gray-600);
 }
 
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+[data-theme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-control[readonly] {
+    background-color: var(--bs-gray-800);
+    color: var(--bs-gray-300);
 }
 
-label {
-  font-weight: 500;
-  margin-bottom: 6px;
-  display: block;
-  color: #2c3e50;
-}
+

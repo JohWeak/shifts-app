@@ -1,0 +1,159 @@
+/* frontend/src/features/employee-archive/ui/CalendarView/CalendarView.css */
+.calendar-view {
+    width: 100%;
+    border-radius: var(--radius-lg)!important;
+    border-top-left-radius: 0!important;
+    border-top-right-radius: 0!important;
+    border-top: none;
+    border-color: var(--bs-gray-300)!important;
+    margin-bottom: 0.5rem;
+    box-shadow: var(--shadow-lg);
+}
+[data-theme="dark"] .calendar-view {
+    border-color: var(--bs-gray-900)!important;
+}
+
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendar-header .nav-button {
+    background: none;
+    border: none;
+    /*padding: 5px 10px;*/
+    cursor: pointer;
+    color: var(--bs-primary);
+    transition: opacity 0.2s;
+}
+
+.calendar-header .nav-button:hover:not(:disabled) {
+    opacity: 0.7;
+}
+
+.calendar-header .nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.calendar-view .month-selector {
+    text-decoration: none;
+    color: var(--bs-body-color);
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.calendar-view .month-dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.calendar-view .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding: 10px;
+}
+
+.calendar-view .calendar-weekday {
+    text-align: center;
+    font-weight: 600;
+    color: var(--bs-body-tertiary);
+    padding-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.calendar-view .calendar-cell {
+    aspect-ratio: 1;
+    border: 1px solid var(--bs-border-color);
+    padding: 0.75rem;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.2s;
+    border-radius: var(--radius-sm);
+}
+
+.calendar-view .calendar-cell:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.calendar-view .calendar-cell.empty {
+    cursor: default;
+    border: none;
+}
+
+.calendar-view .calendar-cell.today {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+}
+
+.calendar-view .calendar-cell.selected {
+    background-color: var(--bs-primary-hover);
+    color: white;
+}
+
+.calendar-view .calendar-cell.has-shift {
+    font-weight: 500;
+}
+
+.calendar-view .calendar-date {
+    font-size: 0.875rem;
+}
+
+.calendar-view .shift-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .calendar-view .calendar-grid {
+        gap: 1px;
+        padding: 0.5rem;
+    }
+    .calendar-view .card-body {
+        padding: 0.25rem;
+    }
+
+    .calendar-view .calendar-cell {
+        padding: 4px;
+        font-size: 0.75rem;
+    }
+
+    .calendar-view .shift-indicator {
+        width: 6px;
+        height: 6px;
+    }
+    .calendar-view .month-selector {
+        font-size: 1rem;
+    }
+}
+
+[dir="rtl"] .calendar-view .nav-button {
+    transform: scaleX(-1);
+}
+[dir="rtl"] .calendar-view .calendar-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .calendar-view .nav-button svg {
+    transform: scaleX(-1);
+}
+
+[dir="rtl"] .calendar-view .calendar-grid {
+    direction: rtl;
+}
+
+[dir="rtl"] .calendar-view .detail-item {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .calendar-view .detail-label {
+    margin-right: 0;
+    margin-left: 5px;
+}

@@ -1,0 +1,22 @@
+/* frontend/src/features/admin-workplace-settings/ui/WorkplaceToolbar/WorkplaceToolbar.css */
+
+.workplace-toolbar-row .form-check {
+    margin-bottom: 0;
+}
+
+
+.workplace-toolbar-row .form-check-label {
+    white-space: nowrap;
+    cursor: pointer;
+}
+.workplace-toolbar-row .form-control{
+    border: 1px solid var(--bs-border-color);
+    border-left: none;
+}
+[dir="rtl"] .workplace-toolbar-row .form-control{
+    border-right: none;
+    border-left: 1px solid var(--bs-border-color);
+}
+[data-theme="dark"] .workplace-toolbar-row .form-control {
+    border: none;
+}

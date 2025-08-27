@@ -1,0 +1,51 @@
+/*!* frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/components/WorkSitesTable/WorkSitesTable.css *!*/
+/*.workplace-table .status-badge {*/
+/*    font-size: 0.75rem;*/
+/*    padding: 0.25rem 0.75rem;*/
+/*}*/
+
+
+/*.workplace-table  .clickable-row {*/
+/*    transition: background-color 0.3s ease;*/
+/*}*/
+/*.workplace-table .clickable-row:hover {*/
+/*    --bs-table-hover-bg:  rgba(var(--bs-primary-rgb), 0.07);*/
+/*}*/
+/*.workplace-table .workplace-actions {*/
+/*    display: flex;*/
+/*    gap: 0.25rem;*/
+/*    justify-content: flex-end;*/
+/*}*/
+/*[data-theme="dark"] .workplace-table tbody tr:hover {*/
+/*    background-color: var(--bs-gray-800);*/
+/*}*/
+
+/*!* Styles for inactive rows *!*/
+/*.workplace-table .inactive-row {*/
+/*    opacity: 0.6;*/
+/*    background-color: var(--bs-gray-100);*/
+/*}*/
+
+/*[data-theme="dark"] .workplace-table .inactive-row {*/
+/*    background-color: rgba(255, 255, 255, 0.03);*/
+/*}*/
+
+/*.workplace-table .inactive-row:hover {*/
+/*    opacity: 0.8;*/
+/*}*/
+
+/*!* Success variant for restore button *!*/
+/*.workplace-table .action-btn.text-success:hover {*/
+/*    background: var(--bs-success-bg-subtle);*/
+/*    color: var(--bs-success) !important;*/
+/*}*/
+
+/*!* Status filter styles *!*/
+/*.workplace-table .status-filter {*/
+/*    border-color: var(--bs-border-color);*/
+/*}*/
+
+/*.workplace-table .status-filter:focus {*/
+/*    border-color: var(--bs-primary);*/
+/*    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);*/
+/*}*/

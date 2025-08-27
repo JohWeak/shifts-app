@@ -1,0 +1,289 @@
+/* frontend/src/features/admin-employee-management/ui/EmployeeList/EmployeeList.css */
+.list-card {
+    /*border: none;*/
+    border-radius: 0.5rem;
+    background: var(--bs-white);
+    overflow: hidden;
+
+}
+
+
+[data-theme="dark"] .list-card {
+    background: var(--bs-gray-800);
+}
+
+.list-card .list-header,
+.list-card .list-footer {
+    background: var(--bs-gray-100);
+    border: none;
+    padding: 0.75rem 1.25rem;
+}
+
+[data-theme="dark"] .list-card .list-header,
+[data-theme="dark"] .list-card .list-footer {
+    background: var(--bs-gray-900);
+}
+
+.list-card .data-table {
+    margin: 0;
+    font-size: 0.875rem;
+
+}
+
+.list-card .data-table thead th {
+    background: var(--bs-gray-100);
+    border-bottom: 2px solid var(--bs-border-color);
+    color: var(--bs-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.25rem;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .list-card .data-table thead th {
+    background: var(--bs-gray-900);
+    color: var(--bs-gray-400);
+}
+
+.list-card .data-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.list-card .data-table tbody tr:hover {
+    background: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .list-card .data-table tbody tr:hover {
+    background: var(--bs-gray-900);
+}
+
+
+
+
+
+.list-card .site-badge.common {
+    background: var(--bs-gray-200) !important;
+    color: var(--bs-gray-700) !important;
+}
+
+[data-theme="dark"] .list-card .site-badge.common {
+    background: var(--bs-gray-700) !important;
+    color: var(--bs-gray-300) !important;
+}
+
+.list-card .action-btn {
+    padding: 0.25rem 0.5rem;
+    color: var(--bs-gray-600);
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.list-card .action-btn:hover {
+    background: var(--bs-gray-100);
+    color: var(--bs-primary);
+}
+
+[data-theme="dark"] .list-card .action-btn:hover {
+    background: var(--bs-gray-700);
+}
+
+.list-card .action-btn.text-danger:hover {
+    background: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger) !important;
+}
+
+/* Pagination styles */
+.list-card .pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.list-card .page-size-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.list-card .page-size-select {
+    width: auto;
+    border: 1px solid var(--bs-border-color);
+    /*padding: 0.25rem 0.5rem;*/
+    font-size: 0.875rem;
+}
+.list-card .page-size-select:hover {
+    cursor: pointer;
+}
+
+.list-card .pagination-info {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+.list-card .pagination-container .page-item .page-link{
+    color: var(--bs-body-color);
+    margin: 0 0.25rem;
+    border-radius: var(--radius-sm);
+    user-select: none;
+}
+
+.list-card .pagination-container .page-item.active .page-link {
+    transform: translateY(-1px);
+    background: var(--bs-primary);
+    color: white;
+}
+[data-theme="dark"] .list-card .pagination-container .pagination .page-item.disabled .page-link{
+    background: var(--bs-gray-800);
+}
+[data-theme="dark"] .list-card .pagination-container .page-item:hover .page-link {
+    background: var(--bs-gray-700);
+}
+[data-theme="dark"] .list-card .pagination-container .page-item.active:hover .page-link {
+    background: var(--bs-primary);
+}
+
+.list-card .inactive-row {
+    opacity: 0.6;
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .list-card .inactive-row {
+    background-color: var(--bs-gray-900);
+}
+
+.list-card .inactive-row:hover {
+    opacity: 0.8;
+}
+
+.list-card .action-btn.text-success:hover {
+    background: var(--bs-success-bg-subtle);
+    color: var(--bs-success) !important;
+}
+.list-card .sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.list-card .sortable-header:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .list-card .sortable-header:hover {
+    background-color: var(--bs-gray-800);
+}
+
+.list-card .sortable-header i {
+    font-size: 0.55rem;
+    /*vertical-align: middle;*/
+}
+.list-card .text-muted{
+    font-size: var(--text-sm);
+}
+.list-card .d-flex .text-muted{
+    font-size: 0.75rem;
+}
+.list-card .clickable-row {
+    transition: background-color 0.2s ease;
+}
+
+.list-card .clickable-row:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .list-card .clickable-row:hover {
+    background-color: var(--bs-gray-900);
+}
+
+/* Стили для телефонной кнопки */
+.list-card .btn-link.text-muted:hover {
+    color: var(--bs-primary) !important;
+}
+
+.list-card .btn-link.text-muted:hover i {
+    animation: ring 0.3s ease-in-out;
+}
+.list-card .employee-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.list-card .employee-avatar:hover {
+    background: var(--bs-primary-hover);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(var(--bs-primary-rgb), 0.3);
+}
+@keyframes ring {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.list-card .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+[data-theme="dark"] .list-card .loading-overlay {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .list-card .data-table {
+        font-size: 0.8125rem;
+    }
+
+    .list-card .data-table thead th,
+    .list-card .data-table tbody td {
+        padding: 0.75rem 1rem;
+    }
+
+    .list-card .employee-avatar {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.75rem;
+    }
+    .list-card .d-flex .text-muted{
+        display: none !important;
+    }
+
+
+
+    .list-card .pagination-container {
+        justify-content: center;
+    }
+
+    .list-card .pagination-info {
+        width: 100%;
+        text-align: center;
+        order: -1;
+    }
+}

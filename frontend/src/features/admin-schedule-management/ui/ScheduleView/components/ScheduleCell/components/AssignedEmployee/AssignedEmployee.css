@@ -1,0 +1,56 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/components/AssignedEmployee/AssignedEmployee.css */
+.assigned-employee {
+    --cross-position-bg-color: var(--cross-position-bg-light);
+    --cross-site-bg-color: var(--cross-site-bg-light);
+    --flexible-bg-color: var(--flexible-bg-light);
+    --gradient-start-color: var(--cross-site-bg-light);
+    --gradient-end-color: var(--cross-position-bg-light);
+}
+
+[data-theme="dark"] .assigned-employee {
+    --cross-position-bg-color: var(--cross-position-bg-dark);
+    --cross-site-bg-color: var(--cross-site-bg-dark);
+    --flexible-bg-color: var(--flexible-bg-dark);
+    --gradient-start-color: var(--cross-site-bg-dark);
+    --gradient-end-color: var(--cross-position-bg-dark);
+}
+
+
+/* --- Основные стили компонента --- */
+.assigned-employee {
+    position: relative;
+    transition: all 0.2s ease;
+    border: 1px solid transparent !important;
+    padding-inline-end: 1rem;
+}
+
+/* --- Стилизация состояний сотрудника --- */
+
+/* Cross-position styling - yellow */
+.assigned-employee.cross-position-employee {
+    border-color: var(--cross-position-color) !important;
+    background-color: var(--cross-position-bg-color) !important;
+}
+
+/* Cross-site styling - blue */
+.assigned-employee.cross-site-employee {
+    border-color: var(--cross-site-color) !important;
+    background-color: var(--cross-site-bg-color) !important;
+}
+
+/* Flexible employee styling - purple */
+.assigned-employee.flexible-employee {
+    border-color: var(--flexible-color) !important;
+    background-color: var(--flexible-bg-color) !important;
+}
+
+/* Combined styles - gradient border and background */
+.assigned-employee.cross-position-employee.cross-site-employee {
+    background: linear-gradient(135deg, var(--gradient-start-color), var(--gradient-end-color)) !important;
+    border-color: var(--cross-site-color) !important;
+    border-bottom-color: var(--cross-position-color) !important;
+    border-inline-end-color: var(--cross-position-color) !important;
+}
+
+
+

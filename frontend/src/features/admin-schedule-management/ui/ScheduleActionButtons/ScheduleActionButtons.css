@@ -1,0 +1,180 @@
+/* frontend/src/features/admin-schedule-management/ui/ActionButtons/index.css */
+
+/* Button variant styles (for ScheduleInfo) */
+.schedule-action-buttons {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.schedule-action-buttons .status-action,
+.schedule-action-buttons .export-action {
+    display: flex;
+    flex-grow: 1;
+}
+.schedule-action-buttons .autofill-all-btn,
+.schedule-action-buttons .publish-btn,
+.schedule-action-buttons .unpublish-btn,
+.schedule-action-buttons .export-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-medium);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    white-space: nowrap;
+    width: 100%;
+    min-width: 100px;
+}
+
+.schedule-action-buttons .autofill-all-btn:hover,
+.schedule-action-buttons .publish-btn:hover,
+.schedule-action-buttons .unpublish-btn:hover,
+.schedule-action-buttons .export-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.schedule-action-buttons .export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Dropdown variant styles (for table) */
+.schedule-action-dropdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.schedule-action-dropdown .action-dropdown-toggle {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--bs-gray-600);
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .schedule-action-dropdown .action-dropdown-toggle {
+    color: var(--bs-gray-400);
+}
+
+.schedule-action-dropdown .action-dropdown-toggle:hover,
+.schedule-action-dropdown .action-dropdown-toggle:focus,
+.schedule-action-dropdown .action-dropdown-toggle:active,
+.schedule-action-dropdown .show > .action-dropdown-toggle {
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-gray-300);
+    color: var(--bs-dark);
+    box-shadow: none;
+}
+
+[data-theme="dark"] .schedule-action-dropdown .action-dropdown-toggle:hover,
+[data-theme="dark"] .schedule-action-dropdown .action-dropdown-toggle:focus,
+[data-theme="dark"] .schedule-action-dropdown .action-dropdown-toggle:active,
+[data-theme="dark"] .schedule-action-dropdown .show > .action-dropdown-toggle {
+    background-color: var(--bs-gray-700);
+    border-color: var(--bs-gray-600);
+    color: var(--bs-gray-100);
+}
+
+.schedule-action-dropdown .action-dropdown-toggle::after {
+    display: none;
+}
+
+/* Portal menu styles */
+.schedule-action-menu-portal .dropdown-menu {
+    position: static;
+    display: block;
+    margin: 0;
+    border-radius: var(--radius-md);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--bs-border-color);
+    padding: 0.25rem 0;
+    min-width: 160px;
+    background-color: var(--bs-body-bg);
+}
+
+.schedule-action-menu-portal .dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    color: var(--bs-body-color);
+}
+
+.schedule-action-menu-portal .dropdown-item:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .schedule-action-menu-portal .dropdown-item:hover {
+    background-color: var(--bs-gray-700);
+}
+
+.schedule-action-menu-portal .dropdown-item i {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.schedule-action-menu-portal .dropdown-divider {
+    height: 0;
+    margin: 0.25rem 0;
+    overflow: hidden;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* RTL for button variant */
+
+[dir="rtl"] .schedule-action-buttons .publish-btn i,
+[dir="rtl"] .schedule-action-buttons .unpublish-btn i,
+[dir="rtl"] .schedule-action-buttons .export-btn i {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .schedule-action-buttons {
+        flex-wrap: nowrap;
+    }
+}
+
+@media (max-width: 576px) {
+    .schedule-action-buttons {
+        gap: var(--space-2);
+        align-items: stretch;
+    }
+
+    .schedule-action-buttons .publish-btn,
+    .schedule-action-buttons .unpublish-btn,
+    .schedule-action-buttons .export-btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .schedule-action-dropdown .action-dropdown-toggle {
+        padding: 0.125rem 0.375rem;
+        font-size: 0.875rem;
+    }
+
+    .schedule-action-menu-portal .dropdown-menu {
+        min-width: 140px;
+        font-size: 0.875rem;
+    }
+
+    .schedule-action-menu-portal .dropdown-item {
+        padding: 0.375rem 0.75rem;
+    }
+}

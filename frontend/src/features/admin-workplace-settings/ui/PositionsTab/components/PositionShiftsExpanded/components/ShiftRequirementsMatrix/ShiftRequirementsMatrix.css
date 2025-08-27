@@ -1,0 +1,177 @@
+/* frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftRequirementsMatrix/ShiftRequirementsMatrix.css */
+.requirements-matrix-container {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.requirements-matrix {
+    min-width: 600px;
+}
+
+.requirements-matrix-container .table-responsive {
+    border-radius: 0.5rem; /* Здесь можно выбрать любую величину скругления (e.g., 8px, 10px) */
+    border: 1px solid var(--bs-accordion-active-bg); /* Цвет рамки Bootstrap по умолчанию */
+}
+
+
+.requirements-matrix th {
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .requirements-matrix th {
+    background-color: var(--bs-gray-800);
+}
+
+.requirements-matrix-container .shift-header {
+    min-width: 150px;
+    text-align: left !important;
+}
+
+.requirements-matrix-container .day-header {
+    width: 100px;
+}
+
+.requirements-matrix-container .total-header {
+    width: 80px;
+}
+
+.requirements-matrix-container .shift-cell {
+    vertical-align: middle;
+    min-height: 90px;
+}
+
+.requirements-matrix-container .shift-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.requirements-matrix-container .requirement-cell {
+    padding: 0.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.requirements-matrix-container .requirement-input-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+
+.requirements-matrix-container .requirement-input.non-working {
+    background-color: var(--bs-accordion-active-bg);
+    color: var(--bs-gray-600);
+}
+
+
+.requirements-matrix-container .saving-indicator {
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+}
+
+.requirements-matrix-container .total-cell, .day-total, .grand-total {
+    text-align: center;
+    vertical-align: middle;
+    background-color: var(--bs-gray-100);
+}
+
+
+[data-theme="dark"] .requirements-matrix-container .total-cell,
+[data-theme="dark"] .requirements-matrix-container .day-total,
+[data-theme="dark"] .requirements-matrix-container .grand-total {
+    background-color: var(--bs-gray-900);
+}
+
+.requirements-matrix-container .total-badge {
+    font-size: 0.875rem;
+}
+
+.requirements-matrix-container .total-label {
+    font-weight: 600;
+    text-align: right;
+}
+
+.requirements-matrix-container .custom-number-input {
+    width: 45px;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* 2. Стили для кнопок "+" и "-" */
+.requirements-matrix-container .custom-number-input .btn-decrement,
+.requirements-matrix-container .custom-number-input .btn-increment {
+    background-color: #f8f9fa; /* Светлый фон, */
+    border: 1px solid #ced4da; /* Стандартная рамка Bootstrap */
+    color: #495057;
+    cursor: pointer;
+    height: 100%;
+    width: 45px; /* Ширина кнопок */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    line-height: 1;
+    user-select: none; /* Запрещаем выделение текста на кнопках */
+    transition: background-color 0.25s ease-in-out;
+}
+
+.requirements-matrix-container .custom-number-input .btn-decrement:hover,
+.requirements-matrix-container .custom-number-input .btn-increment:hover {
+    background-color: #e9ecef; /* Немного темнее при наведении */
+}
+
+/* Скругляем нужные углы */
+.requirements-matrix-container .custom-number-input .btn-increment {
+    border-bottom: none;
+    border-top-left-radius: 0.375rem; /* Стандартный радиус Bootstrap */
+    border-top-right-radius: 0.375rem;
+}
+
+.requirements-matrix-container .custom-number-input .btn-decrement {
+    border-top: none;
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.requirements-matrix-container .custom-number-input .requirement-input {
+    text-align: center;
+    border-radius: 0;
+    height: 100%;
+    -moz-appearance: textfield;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
+
+/* Для Chrome, Safari, Edge, Opera */
+.custom-number-input .requirement-input::-webkit-outer-spin-button,
+.custom-number-input .requirement-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+[data-theme="dark"] .custom-number-input .btn-decrement,
+[data-theme="dark"] .custom-number-input .btn-increment {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #f8f9fa;
+}
+
+[data-theme="dark"] .custom-number-input .btn-decrement:hover,
+[data-theme="dark"] .custom-number-input .btn-increment:hover {
+    background-color: #343a40;
+}
+
+@media (max-width: 768px) {
+    .requirement-input {
+        font-size: 0.875rem;
+    }
+
+    .day-header {
+        width: 60px;
+    }
+}

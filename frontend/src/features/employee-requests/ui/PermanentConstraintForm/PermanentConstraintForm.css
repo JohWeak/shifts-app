@@ -1,0 +1,241 @@
+/* frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.css */
+
+/* --- 1. ОБЩИЕ СТИЛИ (Для обеих версий) --- */
+.permanent-constraint-form-container{
+    margin-inline-start: 1rem;
+    margin-inline-end: 1rem;
+}
+.permanent-constraint-form-container .full-schedule-table {
+    font-size: 0.875rem;
+    table-layout: fixed;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.permanent-constraint-form-container .table-responsive {
+    border-radius: var(--bs-card-inner-border-radius);
+    overflow: hidden;
+}
+.permanent-constraint-form-container .permanent-constraint-card{
+    border-color: var(--bs-border-color);
+}
+
+.permanent-constraint-form-container .full-schedule-table th,
+.permanent-constraint-form-container .full-schedule-table td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 0;
+}
+.permanent-constraint-form-container .action-buttons-group > button{
+    border-radius: var(--radius-lg);
+}
+/* ЗАГОЛОВКИ (Общие стили) */
+.permanent-constraint-form-container .day-name,
+.permanent-constraint-form-container .shift-header-name {
+}
+.permanent-constraint-form-container .shift-header-time {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.permanent-constraint-form-container .shift-header-info {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+/* ЯЧЕЙКИ (Общие стили) */
+.permanent-constraint-form-container .constraint-td-wrapper {
+    position: relative;
+    padding: var(--space-1);
+    height: 60px;
+}
+.permanent-constraint-form-container .constraint-cell {
+    position: absolute;
+    inset: 0;
+    transition: background-color 0.2s ease, inset 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+.permanent-constraint-form-container .constraint-cell:active {
+    transform: scale(0.95);
+    transition-duration: 0.05s;
+}
+.permanent-constraint-form-container .constraint-cell.neutral {
+    inset: 0; /* Фон занимает всю ячейку */
+}
+.permanent-constraint-form-container .constraint-cell.cannot_work {
+    border-radius: 0.3rem;
+    inset: 4px; /* Красный "чип" имеет отступы */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.permanent-constraint-form-container .constraint-cell .cell-icon {
+    font-size: 1.5rem;
+    color: inherit;
+}
+
+.permanent-constraint-form-container .day-header {
+    /* Внешняя ячейка <th>/<td> теперь тоже имеет padding */
+    padding: var(--space-1);
+    position: relative;
+    height: 60px; /* Та же высота, что и у ячеек данных */
+}
+
+.permanent-constraint-form-container .day-header-inner {
+    /* Внутренний div, который будет нашим "чипом" */
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 0.3rem;
+}
+
+.permanent-constraint-form-container .day-header-inner.selected {
+    /* Когда день выбран, применяем отступы, как у .constraint-cell.cannot_work */
+    inset: 4px;
+}
+.permanent-constraint-form-container .help-button {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+
+/* --- 2. ДЕСКТОПНАЯ ВЕРСТКА (.desktop-constraints) --- */
+
+.permanent-constraint-form-container .desktop-constraints .day-header,
+.permanent-constraint-form-container .desktop-constraints .day-header-cell,
+.permanent-constraint-form-container .desktop-constraints .shift-header-cell {
+    padding: 0.5rem;
+    min-width: 100px;
+}
+.permanent-constraint-form-container .desktop-constraints .shift-header-cell {
+    width: 120px;
+}
+.permanent-constraint-form-container .desktop-constraints .sticky-column {
+    position: sticky;
+    z-index: 10;
+    /* Фон нужен, чтобы при скролле контент не просвечивал */
+    background-color: var(--bs-body-bg);
+}
+.permanent-constraint-form-container .include-message-checkbox.desktop .form-check-label,
+.permanent-constraint-form-container .include-message-checkbox.desktop .form-check-input {
+    /*cursor: pointer;*/
+}
+.permanent-constraint-form-container .help-button.desktop {
+    align-self: center;
+    border-radius: 30%;
+    margin-inline-end: 0.5rem;
+    opacity: 0.3;
+
+}
+
+[dir="ltr"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
+    left: 0;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+}
+[dir="rtl"] .permanent-constraint-form-container .desktop-constraints .sticky-column {
+    right: 0;
+    box-shadow: -2px 0 4px rgba(0,0,0,0.05);
+}
+
+
+/* --- 3. МОБИЛЬНАЯ ВЕРСТКА (.mobile-constraints) --- */
+
+.permanent-constraint-form-container .mobile-constraints {
+    max-width: 500px; /* Ограничиваем ширину для лучшей читаемости */
+    margin: 0 auto;
+}
+.permanent-constraint-form-container .mobile-constraints .shift-header-cell,
+.permanent-constraint-form-container .mobile-constraints .day-header-cell {
+    padding: var(--space-1);
+}
+
+.permanent-constraint-form-container .mobile-constraints .constraint-td-wrapper {
+    height: 50px;
+}
+.permanent-constraint-form-container .mobile-constraints .day-header {
+    height: 50px;
+}
+.permanent-constraint-form-container .mobile-constraints .sticky-column {
+    position: sticky;
+    z-index: 10;
+    background-color: var(--bs-body-bg);
+}
+.permanent-constraint-form-container .include-message-checkbox.mobile .form-check-label {
+    font-weight: 400;
+    opacity: 0.8;
+}
+.permanent-constraint-form-container .include-message-checkbox.mobile .form-check-input {
+    border-radius: var(--radius-md);
+    border-color: var(--bs-border-color-translucent);
+}
+.permanent-constraint-form-container .help-button.mobile {
+    align-self: center;
+    border-radius: 50%;
+    opacity: 0.9;
+}
+
+[dir="ltr"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
+    left: 0;
+}
+[dir="rtl"] .permanent-constraint-form-container .mobile-constraints .sticky-column {
+    right: 0;
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 550px) {
+    .permanent-constraint-form-container .mobile-constraints .shift-header-name {
+        font-size: 0.8rem;
+    }
+    .permanent-constraint-form-container .mobile-constraints .shift-header-time {
+        font-size: 0.7rem;
+    }
+    .permanent-constraint-form-container .mobile-constraints .shift-header-info {
+        padding: 0.4rem 0.2rem;
+    }
+
+}
+
+
+
+@media (hover: hover) {
+    .permanent-constraint-form-container .day-header.clickable:hover,
+    .permanent-constraint-form-container .day-header-cell.clickable:hover {
+        background-color: var(--bs-gray-200);
+        cursor: pointer;
+    }
+
+
+    [data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
+    [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover {
+        background-color: var(--bs-gray-800);
+    }
+
+    .permanent-constraint-form-container .day-header.clickable:hover,
+    .permanent-constraint-form-container .day-header-cell.clickable:hover,
+    .permanent-constraint-form-container .shift-header-cell.clickable:hover {
+        background-color: var(--bs-light-bg-subtle);
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .permanent-constraint-form-container .day-header.clickable:hover,
+    [data-theme="dark"] .permanent-constraint-form-container .day-header-cell.clickable:hover,
+    [data-theme="dark"] .permanent-constraint-form-container .shift-header-cell.clickable:hover {
+        background-color: var(--bs-dark-bg-subtle);
+    }
+
+    .permanent-constraint-form-container .include-message-checkbox .form-check-label,
+    .permanent-constraint-form-container .include-message-checkbox .form-check-input {
+        cursor: pointer;
+    }
+
+}

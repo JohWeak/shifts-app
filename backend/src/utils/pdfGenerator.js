@@ -109,7 +109,7 @@ class PDFGenerator {
 
         return `
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
             <meta charset="utf-8">
             <title>${this.messages.WORK_SCHEDULE_TITLE} - ${data.schedule.site}</title>
@@ -152,7 +152,7 @@ class PDFGenerator {
         }, {});
     }
 
-    generateHeader(data) {
+    generateHeader() {
         const currentDate = new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',

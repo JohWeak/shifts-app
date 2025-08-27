@@ -1,0 +1,70 @@
+.reports-page {
+}
+
+.reports-page .card {
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+    margin-bottom: 1.5rem;
+    transition: all var(--transition-base);
+}
+
+.reports-page .summary-card {
+    border-left: 3px solid var(--bs-border-color);
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+}
+
+.reports-page .summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--bs-box-shadow-sm);
+    border-color: transparent;
+}
+
+.reports-page .summary-card.border-primary {
+    border-left-color: var(--bs-primary);
+}
+
+.reports-page .summary-card.border-success {
+    border-left-color: var(--bs-success);
+}
+
+.reports-page .summary-card.border-danger {
+    border-left-color: var(--bs-danger);
+}
+
+[dir="rtl"] .reports-page .summary-card {
+    border-left: none;
+    border-right: 3px solid var(--bs-border-color);
+}
+
+[dir="rtl"] .reports-page .summary-card.border-primary {
+    border-right-color: var(--bs-primary);
+}
+
+[dir="rtl"] .reports-page .summary-card.border-success {
+    border-right-color: var(--bs-success);
+}
+
+[dir="rtl"] .reports-page .summary-card.border-danger {
+    border-right-color: var(--bs-danger);
+}
+
+.reports-page .summary-card .metric-value {
+    font-size: 1.75rem;
+    font-weight: var(--font-semibold);
+    color: var(--bs-emphasis-color);
+}
+
+.reports-page .summary-card .metric-label {
+    font-size: 0.8rem;
+    color: var(--bs-secondary);
+    text-transform: uppercase;
+    font-weight: var(--font-medium);
+}
+
+.reports-page .chart-wrapper {
+    height: 450px;
+    width: 100%;
+}

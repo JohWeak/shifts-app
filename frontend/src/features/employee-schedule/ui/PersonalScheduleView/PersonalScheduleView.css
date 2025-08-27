@@ -1,0 +1,108 @@
+/* frontend/src/features/employee-schedule/ui/PersonalScheduleView.css */
+
+/* Schedule info card - same as full schedule */
+
+/* Day card */
+.day-card {
+    border: 1px solid var(--bs-gray-200);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+[data-theme="dark"] .day-card {
+    border-color: var(--bs-gray-700);
+}
+
+.day-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Today card */
+.today-card {
+    border-width: 2px;
+    /*border-color: var(--bs-primary) !important;*/
+    border-color: rgba(var(--bs-primary-rgb), 0.3)!important;
+}
+
+/* Day off card */
+.day-off-card {
+    background-color: var(--bs-gray-100);
+    opacity: 0.8;
+}
+
+[data-theme="dark"] .day-off-card {
+    background-color: var(--bs-gray-800);
+}
+
+.day-off {
+    /*color: var(--bs-gray-600);*/
+    font-style: italic;
+}
+
+.color-picker-btn {
+    opacity: 0.1;
+    transition: opacity 0.2s ease;
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+.day-card:hover .color-picker-btn {
+    opacity: 0.7;
+}
+
+.color-picker-btn:hover {
+    opacity: 1 !important;
+}
+/* Week sections */
+
+/* Remove bottom padding as we don't have fixed buttons anymore */
+.personal-schedule-content {
+    padding-bottom: 1rem;
+}
+
+/* Remove fixed week selector styles */
+.week-selector-fixed {
+    display: none;
+}
+
+/* Position and site info in card */
+.day-card .border-top {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="dark"] .day-card .border-top {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.personal-schedule-list .today-badge{
+    margin-inline-start: -0.5rem;
+}
+/* Mobile responsive */
+@media (max-width: 767px) {
+    .day-card .day-info {
+        flex: 1;
+    }
+
+    .day-card .shift-info {
+        text-align: right !important;
+    }
+    .color-picker-btn {
+        opacity: 0.8;
+    }
+
+
+}
+
+/* RTL support */
+[dir="rtl"] .day-card:hover {
+    transform: translateX(-4px);
+}
+
+[dir="rtl"] .day-card .shift-info {
+    text-align: left !important;
+}
+
+[dir="rtl"] .day-off i {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}

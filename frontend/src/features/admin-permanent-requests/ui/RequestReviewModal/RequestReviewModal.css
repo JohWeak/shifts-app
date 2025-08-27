@@ -1,0 +1,230 @@
+/* frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.css */
+
+.request-review-modal{
+    margin-top: calc(var(--app-navbar-height) + 0.5rem );
+}
+.request-review-modal .modal-content {
+    border: none;
+    border-radius: var(--radius-lg);
+}
+
+.request-review-modal  .modal-header {
+    background-color: var(--bs-primary);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    color: var(--bs-white);
+    padding: var(--space-5) 2rem;;
+    border-bottom: none;
+}
+
+.request-review-modal .modal-header .modal-title {
+    display: flex;
+    align-items: center;
+}
+
+.request-review-modal .modal-header .btn-close {
+    color: var(--bs-white);
+    opacity: 0.8;
+    transition: opacity var(--transition-base);
+}
+
+.request-review-modal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+
+.request-review-modal .section-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--bs-body-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.request-employee-info .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bs-gray-100);
+    border-radius: 0.5rem;
+}
+
+.request-review-modal .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.request-review-modal .info-label {
+    font-size: 0.875rem;
+    color: var(--bs-gray-600);
+    font-weight: 500;
+}
+
+.request-review-modal .info-value {
+    color: var(--bs-gray-900);
+    font-weight: 400;
+}
+
+.request-review-modal .constraints-review-box {
+    display: flex;
+    flex-direction: row;
+    padding: 1rem;
+    background-color: var(--bs-light);
+    border-radius: 0.5rem;
+    border: 1px solid var(--bs-gray-200);
+    width: 100%;
+
+}
+
+.request-review-modal .day-constraints-review {
+    display: flex;
+    flex-direction: column;
+    width: calc(100%/7);
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-right: 1px solid var(--bs-border-color);
+    justify-content: start;
+}
+[dir="rtl"] .request-review-modal .day-constraints-review {
+    border-left: 1px solid var(--bs-border-color);
+    border-right: none;
+}
+.request-review-modal .day-constraints-review:last-child {
+    border-right: none;
+}
+[dir="rtl"] .request-review-modal .day-constraints-review:last-child {
+    border-left: none;
+    border-right: 1px solid var(--bs-border-color);
+}
+
+
+.request-review-modal .day-constraints-review .day-name {
+    font-weight: 600;
+    color: var(--bs-gray-800);
+    text-align: center;
+    border-bottom: 1px solid var(--bs-gray-200);
+}
+
+.request-review-modal .constraints-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+
+.request-review-modal .constraint-badge {
+    /*display: inline-block;*/
+    max-width: 120px;
+    background-color: var(--bs-danger);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.request-review-modal .request-message-section .alert,
+.request-review-modal .admin-response-textarea {
+    font-size: 0.875rem;
+}
+
+.request-review-modal .admin-response-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.request-review-modal .previous-review-info .alert {
+    margin-bottom: 0;
+}
+.request-review-modal .requests-footer button{
+    min-width: 100px;
+}
+[data-theme="dark"] .request-review-modal .request-employee-info .info-grid {
+    background-color: var(--bs-gray-800);
+}
+
+[data-theme="dark"] .request-review-modal .info-label {
+    color: var(--bs-gray-300);
+}
+
+[data-theme="dark"] .request-review-modal .info-value {
+    color: var(--bs-gray-100);
+}
+
+[data-theme="dark"] .request-review-modal .constraints-review-box {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .request-review-modal .day-constraints-review {
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .request-review-modal .day-constraints-review .day-name {
+    color: var(--bs-gray-200);
+    border-color: var(--bs-gray-700);
+}
+
+/* Mobile styles */
+@media (max-width: 992px) {
+    .request-review-modal .modal-dialog{
+        max-width: 90%;
+        margin-right: auto;
+        margin-left: auto;
+    }
+    .request-review-modal .request-employee-info .info-grid {
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .request-review-modal .day-constraints-review {
+        text-align: left;
+    }
+
+    .request-review-modal .day-constraints-review .day-name {
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+
+
+}
+@media (max-width: 622px) {
+    .request-review-modal .day-constraints-review .day-name {
+        font-size: 0.75rem;
+    }
+    .request-review-modal .constraints-list{
+        flex-wrap: wrap;
+        gap: 2.25rem;
+    }
+    .request-review-modal .requests-footer{
+        flex-direction: column-reverse;
+    }
+    .request-review-modal .requests-footer .close-button{
+        align-self: start;
+    }
+    .request-review-modal .requests-footer .action-buttons{
+        width: 100%;
+    }
+    .request-review-modal .requests-footer .action-buttons button{
+        width: calc(50% - 0.5rem);
+    }
+
+    .request-review-modal .constraint-badge {
+        transform: rotate(90deg);
+        overflow: clip;
+        align-items: center;
+        text-align: center;
+        padding: 0.125rem 0.5rem 0.25rem;
+        font-size: 0.75rem;
+    }
+    [dir="rtl"] .request-review-modal .constraint-badge {
+        transform: rotate(-90deg);
+    }
+
+
+}

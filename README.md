@@ -1,207 +1,108 @@
-# Shifts - Shift Scheduling Application
+# Shifts App - Intelligent Work Schedule Planner
 
-A web application for automatic shift scheduling management, built for Israeli labor law compliance.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+Shifts App is a full-stack web application designed to automate and simplify the complex process of managing employee
+work schedules.
 
-- Employee management
-- Shift scheduling with constraints
-- Israeli labor law compliance
-- Automatic schedule generation
-- Admin and employee interfaces
+### 🎯 About The Project
 
-## Tech Stack
+Shifts App solves a common problem for managers: the time-consuming and error-prone task of manually creating and
+adjusting work schedules. It provides a centralized platform for administrators to build schedules intelligently and for
+employees to view their assignments and manage their requests.
 
-- **Backend**: Node.js, Express, Sequelize, MySQL
-- **Frontend**: React, Redux, Axios
-- **Authentication**: JWT
+### ✨ Key Features
 
-## Installation
+* 🧠 **Intelligent Schedule Generation:** Automatically create optimized schedules based on employee availability and
+  pre-defined shift requirements, saving hours of manual work.
+* ↔️ **Drag & Drop Interface:** A modern, intuitive calendar interface allows administrators to easily make manual
+  adjustments and reassign shifts.
+* 🔐 **Role-Based Access Control:** A secure authentication system with distinct roles and permissions for *
+  *Administrators** and **Employees**.
+* 📊 **Comprehensive Admin Dashboard:** Manage employees, configure work sites and positions, and oversee all scheduling
+  operations from a single control panel.
+* 👤 **Employee Self-Service Portal:** Empowers employees to view their personal schedules, submit time-off requests, and
+  track their work hours.
 
-1. Clone the repository
-2. Install dependencies:
+## 🛠️ Tech Stack
+
+This project is built with a classic MERN-based stack, containerized with Docker for easy setup and deployment.
+
+| Area               | Technology                                 | Description                                                      |
+|--------------------|--------------------------------------------|------------------------------------------------------------------|
+| **Frontend**       | **React, Create React App, Redux Toolkit** | A robust, responsive UI with efficient state management.         |
+| **Backend**        | **Node.js, Express.js**                    | A reliable and scalable server-side foundation.                  |
+| **Database**       | **MySQL, Sequelize**                       | A powerful relational database with an ORM for data management.  |
+| **Authentication** | **JWT, bcrypt**                            | Secure, token-based authentication and password hashing.         |
+| **Testing**        | **Jest, React Testing Library**            | Unit and integration tests to ensure code quality and stability. |
+
+## 🚀 Getting Started
+
+To get a local copy up and running, follow these steps.
+
+### Prerequisites
+
+Make sure you have the following installed on your machine:
+
+* [Node.js](https://nodejs.org/en/) (v18 or later recommended)
+
+### 🐳 Installation with Docker (Recommended)
+
+This is the easiest way to get started, as it sets up the frontend, backend, and database in one command.
+
+### 🔧 Manual Installation
+
+1. **Clone the repository:**
    ```bash
-   cd backend && npm install
-   cd ../frontend && npm install
-3. Set up environment variables in backend/.env
-4.   Run the application:
-   # Backend
-   cd backend && npm start
-   # Frontend
-   cd frontend && npm start
+   git clone https://github.com/JohWeak/shifts-app.git
+   cd shifts-app
+   ```
+2. **Set up and run the Backend:**
+   ```bash
+   cd backend
+   npm install
+   # Create and configure your .env file
+   npm run dev
+   ```
+3. **Set up and run the Frontend (in a new terminal window):**
+   ```bash
+   cd frontend
+   npm install
+   # Create and configure your .env file
+   npm run dev
+   ```
 
+## 🗺️ Roadmap
 
-# Project Structure
+Here are some features planned for the future:
 
-frontend/
-┣ public/
-┃ ┣ favicon.ico
-┃ ┣ index.html
-┃ ┣ logo192.png
-┃ ┣ logo512.png
-┃ ┣ manifest.json
-┃ ┗ robots.txt
-┣ src/
-┃ ┣ components/
-┃ ┃ ┣ admin/
-┃ ┃ ┃ ┣ common/
-┃ ┃ ┃ ┃ ┣ AlertMessage.js
-┃ ┃ ┃ ┃ ┣ ConfirmationModal.js
-┃ ┃ ┃ ┃ ┣ ErrorBoundary.js
-┃ ┃ ┃ ┃ ┣ ErrorBoundaryHook.js
-┃ ┃ ┃ ┃ ┗ LoadingSpinner.js
-┃ ┃ ┃ ┣ schedule/
-┃ ┃ ┃ ┃ ┣ CompareAlgorithmsModal.js
-┃ ┃ ┃ ┃ ┣ DeleteConfirmationModal.js
-┃ ┃ ┃ ┃ ┣ EmployeeSelectionModal.js
-┃ ┃ ┃ ┃ ┣ GenerateScheduleModal.js
-┃ ┃ ┃ ┃ ┣ NoPositionsMessage.js
-┃ ┃ ┃ ┃ ┣ PositionScheduleEditor.js
-┃ ┃ ┃ ┃ ┣ ScheduleActions.js
-┃ ┃ ┃ ┃ ┣ ScheduleCell.js
-┃ ┃ ┃ ┃ ┣ ScheduleDetailsView.js
-┃ ┃ ┃ ┃ ┣ ScheduleList.js
-┃ ┃ ┃ ┃ ┗ ScheduleOverviewTable.js
-┃ ┃ ┃ ┣ AdminDashboard.css
-┃ ┃ ┃ ┣ AdminLayout.css
-┃ ┃ ┃ ┣ AdminLayout.js
-┃ ┃ ┃ ┣ AlgorithmSettings.js
-┃ ┃ ┃ ┣ Dashboard.js
-┃ ┃ ┃ ┣ EmployeeManagement.js
-┃ ┃ ┃ ┣ Reports.js
-┃ ┃ ┃ ┣ ScheduleManagement.css
-┃ ┃ ┃ ┣ ScheduleManagement.js
-┃ ┃ ┃ ┗ SystemSettings.js
-┃ ┃ ┣ auth/
-┃ ┃ ┃ ┣ LoginPage.css
-┃ ┃ ┃ ┗ LoginPage.js
-┃ ┃ ┗ employee/
-┃ ┃   ┣ constraints/
-┃ ┃ ┃ ┃ ┣ ConstraintsSchedule.css
-┃ ┃ ┃ ┃ ┗ ConstraintsSchedule.js
-┃ ┃   ┣ schedule/
-┃ ┃ ┃ ┃ ┣ WeeklySchedule.css
-┃ ┃ ┃ ┃ ┗ WeeklySchedule.js
-┃ ┃   ┣ Dashboard.css
-┃ ┃   ┗ Dashboard.js
-┃ ┣ constants/
-┃ ┃ ┗ scheduleConstants.js
-┃ ┣ hooks/
-┃ ┃ ┣ useScheduleAPI.js
-┃ ┃ ┣ useScheduleOperations.js
-┃ ┃ ┗ useScheduleState.js
-┃ ┣ i18n/
-┃ ┃ ┗ messages.js
-┃ ┣ redux/
-┃ ┃ ┣ actions/
-┃ ┃ ┃ ┗ authActions.js
-┃ ┃ ┣ reducers/
-┃ ┃ ┃ ┗ authReducer.js
-┃ ┃ ┗ store.js
-┃ ┣ utils/
-┃ ┃ ┗ scheduleUtils.js
-┃ ┣ App.css
-┃ ┣ App.js
-┃ ┣ App.test.js
-┃ ┣ index.css
-┃ ┣ index.js
-┃ ┣ logo.svg
-┃ ┣ reportWebVitals.js
-┃ ┗ setupTests.js
-┣ .gitignore
-┣ package-lock.json
-┣ package.json
-┗ README.md
+- [ ] **Real-time Notifications:** Implement WebSocket or email notifications for schedule changes and requests.
+- [ ] **Google Calendar Integration:** Allow employees to sync their work schedule with their personal Google Calendar.
+- [ ] **Reporting Module:** Add functionality to export schedules and work reports as PDF or Excel files.
+- [ ] **Mobile Application:** Develop a native mobile app using React Native for on-the-go access.
 
-backend/
-┣ src/
-┃ ┣ config/
-┃ ┃ ┣ db.config.js
-┃ ┃ ┗ scheduling-constraints.js
-┃ ┣ constants/
-┃ ┃ ┗ algorithms.js
-┃ ┣ controllers/
-┃ ┃ ┣ auth.controller.js
-┃ ┃ ┣ constraint.controller.js
-┃ ┃ ┣ employee-recommendation.controller.js
-┃ ┃ ┣ employee.controller.js
-┃ ┃ ┣ position.controller.js
-┃ ┃ ┣ schedule-settings.controller.js
-┃ ┃ ┣ schedule.controller.js
-┃ ┃ ┣ shift.controller.js
-┃ ┃ ┣ test.controller.js
-┃ ┃ ┗ worksite.controller.js
-┃ ┣ middlewares/
-┃ ┃ ┗ auth.middleware.js
-┃ ┣ migrations/
-┃ ┃ ┣ 001-simplify-constraints.js
-┃ ┃ ┣ 002-fix-shift-columns.js
-┃ ┃ ┗ add_default_position_to_employees.sql
-┃ ┣ models/
-┃ ┃ ┣ constraints/
-┃ ┃ ┃ ┣ employee-constraint.model.js
-┃ ┃ ┃ ┣ index.js
-┃ ┃ ┃ ┗ legal-constraint.model.js
-┃ ┃ ┣ core/
-┃ ┃ ┃ ┣ employee-qualification.model.js
-┃ ┃ ┃ ┣ employee.model.js
-┃ ┃ ┃ ┣ index.js
-┃ ┃ ┃ ┗ worksite.model.js
-┃ ┃ ┣ scheduling/
-┃ ┃ ┃ ┣ index.js
-┃ ┃ ┃ ┣ position.model.js
-┃ ┃ ┃ ┣ schedule-assignment.model.js
-┃ ┃ ┃ ┣ schedule-period.model.js
-┃ ┃ ┃ ┣ schedule-settings.model.js
-┃ ┃ ┃ ┣ schedule.model.js
-┃ ┃ ┃ ┣ shift.model.js
-┃ ┃ ┃ ┗ workday.model.js
-┃ ┃ ┣ associations.js
-┃ ┃ ┗ index.js
-┃ ┣ routes/
-┃ ┃ ┣ auth.routes.js
-┃ ┃ ┣ constraint.routes.js
-┃ ┃ ┣ employee.routes.js
-┃ ┃ ┣ position.routes.js
-┃ ┃ ┣ schedule-settings.routes.js
-┃ ┃ ┣ schedule.routes.js
-┃ ┃ ┣ shift.routes.js
-┃ ┃ ┣ test.routes.js
-┃ ┃ ┗ worksite.routes.js
-┃ ┣ scripts/
-┃ ┃ ┣ check-indexes.sql
-┃ ┃ ┣ clear-sequelize-cache.js
-┃ ┃ ┣ createAdmin.js
-┃ ┃ ┣ run-migration.js
-┃ ┃ ┣ seedData.js
-┃ ┃ ┣ seedLegalConstraints.js
-┃ ┃ ┣ seedScheduleData.js
-┃ ┃ ┣ test-all-algorithms.js
-┃ ┃ ┣ test-new-constraints.js
-┃ ┃ ┣ test-routes.js
-┃ ┃ ┣ test-strict-schedule.sql
-┃ ┃ ┣ testConnection.js
-┃ ┃ ┣ testRecommendations.js
-┃ ┃ ┣ testRecommendationsDebug.js
-┃ ┃ ┗ testStrictGeneration.js
-┃ ┣ seeders/
-┃ ┃ ┣ assign-default-positions.js
-┃ ┃ ┗ assign_default_positions.sql
-┃ ┣ services/
-┃ ┃ ┣ cp-sat-bridge.service.js
-┃ ┃ ┣ cp_sat_optimizer.py
-┃ ┃ ┣ employee-recommendation.service.js
-┃ ┃ ┣ rest-calculator.service.js
-┃ ┃ ┗ schedule-generator.service.js
-┃ ┣ temp/
-┃ ┣ utils/
-┃ ┃ ┣ pdfGenerator.js
-┃ ┃ ┗ testPDFGenerator.js
-┃ ┣ server.js
-┃ ┣ test_schedule_en.pdf
-┃ ┗ test_schedule_ru.pdf
-┣ temp/
-┣ .env
-┣ package-lock.json
-┣ package.json
-┗ test-recommendations.js
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any
+contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC
+BY-NC-SA 4.0)**.
+
+- **You are free to** use, share, and adapt this software for **non-commercial purposes**.
+- **You are not allowed to** use this software for **commercial purposes** without a separate license.
+
+For details, see the [LICENSE](LICENSE) file.
+
+### Commercial Use
+
+If you wish to use Shifts App in a commercial project or for business purposes, please contact me at
+`s3rvlas@gmail.com` to obtain a commercial license.

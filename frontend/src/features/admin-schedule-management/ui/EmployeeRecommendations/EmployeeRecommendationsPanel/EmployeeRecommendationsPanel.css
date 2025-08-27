@@ -1,0 +1,137 @@
+/* frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/EmployeeRecommendationsPanel.css */
+
+.recommendation-panel {
+    position: fixed;
+    top: calc(var(--app-navbar-height) + 1.25rem);
+    right: 0;
+    bottom: 0;
+    height: calc(100vh - var(--app-navbar-height) - 1rem);
+
+    border-radius: var(--radius-lg);
+    background-color: var(--bs-body-bg);
+    border-left: 1px solid var(--bs-border-color);
+    /*box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);*/
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+    transform: translateX(100%);
+    z-index: 1040;
+}
+.recommendation-panel.open {
+    transform: translateX(0);
+}
+
+[dir="rtl"] .recommendation-panel {
+    right: auto;
+    left: 0;
+    transform: translateX(-100%);
+    border-left: none;
+    border-right: 1px solid var(--bs-border-color);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+[dir="rtl"] .recommendation-panel.open {
+    transform: translateX(0);
+}
+/* Resize Handle */
+.recommendation-panel .resize-handle {
+    position: absolute;
+    top: 0.75rem;
+    left: -0.25rem;
+    width: 0.25rem;
+    height: 97%;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 10;
+}
+
+[dir="rtl"] .recommendation-panel .resize-handle {
+    left: auto;
+    right: -4px;
+}
+
+.recommendation-panel .resize-handle:hover,
+.recommendation-panel .resize-handle:active {
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+/* Panel Header */
+.recommendation-panel .panel-header {
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .recommendation-panel .panel-header {
+    background-color: var(--bs-gray-900);
+}
+
+.recommendation-panel .panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recommendation-panel .panel-title h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recommendation-panel .close-btn {
+    padding: 0.25rem 0.5rem;
+    color: var(--bs-body-color);
+    opacity: 0.8;
+    text-decoration: none;
+    border: none;
+    background: none;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.recommendation-panel .close-btn:hover {
+    opacity: 1;
+    color: var(--bs-body-color);
+}
+.employee-recommendations .search-container {
+    padding: var(--space-3) var(--space-2);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Panel Content */
+.recommendation-panel .panel-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+.recommendation-panel .tab-content{
+    padding: 0.5rem;
+}
+
+.recommendation-panel .employee-badges {
+    font-size: 0.875rem;
+}
+
+
+/* Dark Theme */
+[data-theme="dark"] .recommendation-panel {
+    background-color: var(--bs-dark);
+    border-color: var(--bs-gray-800);
+}
+
+/* Responsive */
+@media (max-width: 1500px) {
+    .recommendation-panel {
+        display: none;
+    }
+}

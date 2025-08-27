@@ -1,0 +1,288 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ScheduleCell/ScheduleCell.css */
+
+/* ==========================================================================
+   ScheduleCell.css - Main styling for the schedule grid cell
+   ========================================================================== */
+
+
+/* --- 1. Base Cell Layout & Structure --- */
+
+.schedule-cell {
+    min-height: 80px;
+    height: 100%;
+    padding: var(--space-2);
+    vertical-align: middle;
+    position: relative;
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+
+/* Cells with employees align content to the top */
+.schedule-cell.has-employees {
+    vertical-align: top;
+}
+
+/* The flex container for when the cell has no assignments */
+.schedule-cell .empty-cell {
+    min-height: 80px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The flex container for assigned employees */
+.schedule-cell .employees-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    position: relative;
+    min-height: 60px;
+    padding: 4px;
+    justify-content: center;
+}
+
+
+/* --- 2. Interactive Elements: Employee Item & Controls --- */
+
+/* Wrapper for a single employee name and controls */
+.schedule-cell .employee-item {
+    padding: 0;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    border: none;
+    position: relative;
+}
+
+.schedule-cell .employee-name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    margin: 0.25rem;
+}
+
+.schedule-cell .employee-name.employee-clickable {
+    transition: color var(--transition-fast);
+}
+
+/* Button to remove an employee from the cell */
+.schedule-cell .remove-btn {
+    position: relative;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 1rem;
+    font-size: 1rem;
+    line-height: 1.8;
+    border-radius: 10%;
+    opacity: 0.8;
+    z-index: 10;
+    transition: width var(--transition-fast), opacity var(--transition-fast);
+}
+
+/*
+  [dir="rtl"] .schedule-cell .remove-btn { border-radius: 10%; }
+  -- This rule was redundant as it's identical to the base rule above.
+*/
+
+
+/* --- 3. Interaction States & Hover Effects --- */
+
+.schedule-cell.editing-mode:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.schedule-cell.editing-mode .empty-cell:hover .bi-plus-circle {
+    color: var(--bs-primary);
+    transform: scale(1.1);
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.schedule-cell .employee-item:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.schedule-cell.editing-mode .employee-name.employee-clickable:hover {
+    color: var(--bs-primary-hover);
+}
+
+.schedule-cell .remove-btn:hover {
+    opacity: 1;
+    width: 1.375rem;
+}
+
+.schedule-cell .remove-btn:active {
+    opacity: 0.4;
+    border-radius: 5%;
+    width: 100%;
+}
+
+
+/* --- 4. Visual Indicators: Badges & Status Markers --- */
+
+/* Indicator when requirements are exceeded and more employees can't be added */
+.schedule-cell .add-more-indicator {
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+    opacity: 0.7;
+    background: rgba(var(--bs-danger-rgb), 0.3);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.schedule-cell .add-more-indicator:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.schedule-cell .add-more-indicator i {
+    font-size: var(--text-xs);
+}
+
+/* Pulsing dot indicator for cells with unsaved changes */
+.schedule-cell.has-pending-change::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    inset-inline-end: 2px; /* RTL-safe property for 'right'/'left' */
+    width: 12px;
+    height: 12px;
+    background-color: var(--bs-success);
+    border-radius: 40%;
+    animation: pulse 2s infinite;
+    z-index: 1;
+}
+
+/* Employee-specific badges (positioned inside the employee-item) */
+.employee-item .badge-container {
+    position: absolute;
+    inset-inline-start: 2px;
+    top: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    opacity: 0.5;
+}
+
+.employee-item .badge-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 2px;
+    border-radius: 3px;
+    min-width: 6px;
+}
+
+.employee-item .cross-position-badge {
+    background-color: var(--cross-position-color);
+    color: var(--text-color-dark);
+}
+
+.employee-item .cross-site-badge {
+    background-color: var(--cross-site-color);
+    color: var(--text-color-light);
+}
+
+.employee-item .flexible-badge {
+    background-color: var(--flexible-color);
+    color: var(--text-color-light);
+}
+
+
+/* --- 5. Cell State Theming (Understaffed, Overstaffed, etc.) --- */
+
+.schedule-cell.empty-editing,
+.schedule-cell.understaffed {
+    background-color: rgba(var(--bs-warning-rgb), 0.1) !important;
+}
+
+.schedule-cell.empty-editing {
+    box-shadow: 3px 3px 6px -7px rgba(0,0,0,0.68) inset;
+}
+
+.schedule-cell.overstaffed {
+    background-color: rgba(var(--bs-primary-rgb), 0.2) !important;
+}
+
+.schedule-cell.full {
+    background-color: transparent !important;
+}
+
+
+/* --- 6. Employee Item State Theming --- */
+.employee-item.being-replaced {
+    background-color: var(--bs-warning-bg-subtle);
+    border-radius: 3px;
+    border: 1px dashed var(--bs-warning) !important;
+    border-inline-end: none !important;
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.employee-item.being-replaced:hover {
+    background-color: var(--bs-warning-bg-subtle) !important;
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+
+/* --- 7. Dark Theme Overrides --- */
+
+[data-theme="dark"] {
+    .schedule-cell {
+        border-color: var(--bs-gray-700);
+    }
+
+    .schedule-cell.editing-mode:hover,
+    .schedule-cell .employee-item:hover {
+        background-color: var(--bs-gray-800);
+    }
+
+    .schedule-cell.understaffed {
+        background-color: rgba(var(--bs-warning-rgb), 0.2) !important;
+    }
+
+    .schedule-cell.overstaffed {
+        background-color: rgba(var(--bs-info-rgb), 0.2) !important;
+    }
+
+    .employee-item.being-replaced .employee-name {
+        color: #1a1a2e;
+    }
+
+    .employee-item.being-replaced:hover .employee-name {
+        color: var(--bs-primary-dark);
+    }
+}
+
+
+/* --- 8. Responsive Adjustments --- */
+
+@media (max-width: 768px) {
+    .schedule-cell {
+        padding: var(--space-1);
+        min-height: 60px;
+    }
+
+    .schedule-cell .employee-name {
+        font-size: var(--text-xs);
+    }
+
+    .schedule-cell .empty-cell {
+        min-height: 40px;
+    }
+
+    .schedule-cell .remove-btn {
+        padding: 0;
+        height: 10px;
+        width: 10px;
+        border-radius: 30%;
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+}

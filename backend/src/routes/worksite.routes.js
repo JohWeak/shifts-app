@@ -1,17 +1,22 @@
 // backend/src/routes/worksite.routes.js
 const express = require('express');
-const worksiteController = require('../controllers/worksite.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const scheduleController = require('../controllers/scheduling/schedule/schedule.controller');
+const worksiteController = require('../controllers/workplace/worksite.controller');
+const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
+const {getPositionsByWorksite} = require("../controllers/workplace/position.controller");
 
 const router = express.Router();
 
-// All worksite routes require admin privileges
-router.use([verifyToken, isAdmin]);
+router.get('/', verifyToken, worksiteController.findAll);
+router.post('/', verifyToken, isAdmin, worksiteController.create);
 
-router.get('/', worksiteController.findAll);
-router.get('/:id', worksiteController.findOne);
-router.post('/', worksiteController.create);
-router.put('/:id', worksiteController.update);
-router.delete('/:id', worksiteController.delete);
+router.get('/:worksiteId/statistics', verifyToken, isAdmin, scheduleController.getDashboardOverview);
+
+
+router.post('/:worksiteId/restore', verifyToken, isAdmin, worksiteController.restore);
+router.get('/:worksiteId/positions', verifyToken, getPositionsByWorksite);
+router.get('/:worksiteId', verifyToken, isAdmin, worksiteController.findOne);
+router.put('/:worksiteId', verifyToken, isAdmin, worksiteController.update);
+router.delete('/:worksiteId', verifyToken, isAdmin, worksiteController.delete);
 
 module.exports = router;

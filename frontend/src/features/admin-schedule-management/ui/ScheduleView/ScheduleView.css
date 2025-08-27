@@ -1,0 +1,107 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/ScheduleView.css */
+
+/* Schedule Details Container */
+.schedule-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Schedule Info Card */
+.schedule-details .info-card {
+    background-color: var(--bs-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--bs-box-shadow-sm);
+    padding: var(--space-5);
+}
+
+[data-theme="dark"] .schedule-details .info-card {
+    background-color: var(--bs-gray-900);
+}
+
+/* Actions Row */
+.schedule-details .actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.schedule-details .actions-row h5 {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+}
+
+/* Positions Container */
+.schedule-details .positions-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Export Alert */
+.schedule-details .export-alert {
+    animation: slideInFromTop 0.3s ease-out;
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* --- 1. Content Overlay --- */
+.schedule-view-content-wrapper {
+    position: relative;
+}
+
+.schedule-view-overlay {
+    position: absolute;
+    inset:0;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(1px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9990;
+    border-radius: var(--bs-card-border-radius);
+    transition: opacity 0.2s ease-in-out;
+}
+
+.schedule-view-overlay .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.schedule-view-overlay p {
+    margin-top: 1rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--bs-body-color);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+}
+
+/* --- Dark Theme --- */
+[data-theme="dark"] .schedule-view-overlay {
+    background-color: rgba(33, 37, 41, 0.6);
+}
+
+[data-theme="dark"] .schedule-view-overlay p {
+    background-color: rgba(50, 55, 60, 0.8);
+    color: var(--bs-light);
+}
+
+.disabled-card {
+    pointer-events: none;
+    opacity: 0.7;
+}

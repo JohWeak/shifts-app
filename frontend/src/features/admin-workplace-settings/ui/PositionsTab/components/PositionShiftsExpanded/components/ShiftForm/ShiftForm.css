@@ -1,0 +1,22 @@
+/* frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftForm/ShiftForm.css */
+.color-preset {
+    width: 30px;
+    height: 30px;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.color-preset:hover {
+    transform: scale(1.1);
+}
+
+.color-preset.active {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
+}
+
+[data-radix-popper-content-wrapper] {
+    z-index: 1060 !important;
+}

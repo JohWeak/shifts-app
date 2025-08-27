@@ -1,282 +1,605 @@
 # backend/src/services/cp_sat_optimizer.py
-from ortools.sat.python import cp_model
+import argparse
 import json
 import sys
-import argparse
-from datetime import datetime, timedelta
 
-class ImprovedShiftSchedulerCP:
+from ortools.sat.python import cp_model
+
+
+def _parse_time(time_str):
+    """Convert time format HH:MM:SS to hours"""
+    parts = time_str.split(':')
+    return int(parts[0]) + int(parts[1]) / 60
+
+
+def _calculate_rest_hours(shift1, shift2, is_next_day=False):
+    """Calculate rest hours between two shifts"""
+    shift1_end = _parse_time(shift1['start_time']) + shift1['duration']
+    shift2_start = _parse_time(shift2['start_time'])
+
+    if is_next_day:
+        # Shifts on different days
+        if shift1_end > 24:  # Night shift extends to next day
+            shift1_end -= 24
+            rest_hours = shift2_start - shift1_end
+        else:
+            rest_hours = (24 - shift1_end) + shift2_start
+    else:
+        # Shifts on same day
+        rest_hours = shift2_start - shift1_end
+
+    return rest_hours
+
+
+class UniversalShiftSchedulerCP:
     def __init__(self):
         self.model = cp_model.CpModel()
         self.solver = cp_model.CpSolver()
 
     def optimize_schedule(self, data):
-        """Оптимизация расписания с гибкими ограничениями"""
-        print(f"[CP-SAT Improved] Starting optimization...")
+        """Universal schedule optimization with all constraints support"""
+        print(f"[Universal CP-SAT] Starting optimization...")
 
+        # Extract data
         employees = data['employees']
         shifts = data['shifts']
         positions = data['positions']
         days = data['days']
         constraints = data['constraints']
-        settings = data['settings']
+        settings = data.get('settings', {})
+        # Extract position-shift mapping
+        position_shifts_map = data.get('position_shifts_map', {})
 
-        print(f"[CP-SAT Improved] Data: {len(employees)} employees, {len(shifts)} shifts, {len(positions)} positions")
+        # Get constraints from configuration with UPPERCASE keys
+        hard_constraints = settings.get('hard_constraints', {})
+        soft_constraints = settings.get('soft_constraints', {})
+        optimization_weights = settings.get('optimization_weights', {})
 
-        # Дебаг: показать сотрудников с дефолтными позициями
-        employees_with_default = [emp for emp in employees if emp.get('default_position_id')]
-        print(f"[CP-SAT Improved] Employees with default positions: {len(employees_with_default)}")
-        for emp in employees_with_default:
-            print(f"  - {emp['name']} -> position {emp['default_position_id']}")
+        # Extract all constraint types
+        permanent_cannot_work = constraints.get('permanent_cannot_work', [])
+        temporary_cannot_work = constraints.get('cannot_work', [])
+        prefer_work = constraints.get('prefer_work', [])
+        legal_constraints = constraints.get('legal_constraints', [])
 
-        # Создание переменных
+        print(f"[Universal CP-SAT] Constraints loaded:")
+        print(f"  - Permanent cannot work: {len(permanent_cannot_work)}")
+        print(f"  - Temporary cannot work: {len(temporary_cannot_work)}")
+        print(f"  - Prefer work: {len(prefer_work)}")
+        print(f"  - Legal constraints: {len(legal_constraints)}")
+
+        # Hard constraints (law) - READ WITH UPPERCASE KEYS
+        max_hours_per_day = hard_constraints.get('MAX_HOURS_PER_DAY', 12)
+        max_hours_per_week = hard_constraints.get('MAX_HOURS_PER_WEEK', 48)
+        min_rest_between_shifts = hard_constraints.get('MIN_REST_BETWEEN_SHIFTS', 11)
+        min_rest_after_night = hard_constraints.get('MIN_REST_AFTER_NIGHT_SHIFT', 12)
+        min_rest_after_regular = hard_constraints.get('MIN_REST_AFTER_REGULAR_SHIFT', 11)
+        max_night_shifts_per_week = hard_constraints.get('MAX_NIGHT_SHIFTS_PER_WEEK', 3)
+
+        # Soft constraints (admin settings) - READ WITH UPPERCASE KEYS
+        max_shifts_per_day = soft_constraints.get('MAX_SHIFTS_PER_DAY', 1)
+        max_consecutive_work_days = soft_constraints.get('MAX_CONSECUTIVE_WORK_DAYS', 6)
+        max_cannot_work_days = soft_constraints.get('MAX_CANNOT_WORK_DAYS_PER_WEEK', 2)
+        max_prefer_work_days = soft_constraints.get('MAX_PREFER_WORK_DAYS_PER_WEEK', 5)
+
+        # Optimization weights - READ WITH UPPERCASE KEYS
+        shortage_penalty = optimization_weights.get('SHORTAGE_PENALTY', 1000)
+        prefer_work_bonus = optimization_weights.get('PREFER_WORK_BONUS', 10)
+        workload_balance_weight = optimization_weights.get('WORKLOAD_BALANCE', 5)
+        position_match_bonus = optimization_weights.get('POSITION_MATCH_BONUS', 20)
+        site_match_bonus = optimization_weights.get('SITE_MATCH_BONUS', 10)
+        excess_assignment_penalty = optimization_weights.get('EXCESS_ASSIGNMENT_PENALTY', 100)
+
+        print(f"[Universal CP-SAT] Configuration from constants:")
+        print(f"  - Max {max_hours_per_day}h/day, min {min_rest_between_shifts}h rest")
+        print(f"  - Max {max_shifts_per_day} shifts/day, {max_consecutive_work_days} consecutive days")
+        print(f"  - Shortage penalty: {shortage_penalty}, Prefer work bonus: {prefer_work_bonus}")
+
+        # Initialize objective terms list EARLY
+        objective_terms = []
+
+        # Create decision variables
         assignments = {}
         for emp in employees:
             emp_id = emp['emp_id']
+            emp_position = emp.get('default_position_id')
+
             for day_idx, day in enumerate(days):
+                for position in positions:
+                    pos_id = position['pos_id']
+
+                    # Create variables ONLY for the employee position.
+                    if emp_position != pos_id:
+                        continue
+
+                    pos_str = str(pos_id)
+                    # Get valid shifts for this position
+                    valid_shifts = position_shifts_map.get(pos_str, [])
+
+                    for shift in shifts:
+                        # Only create variable if this shift belongs to this position
+                        if shift['shift_id'] in valid_shifts:
+                            var_name = f"assign_{emp_id}_{day_idx}_{shift['shift_id']}_{pos_id}"
+                            assignments[(emp_id, day_idx, shift['shift_id'], pos_id)] = \
+                                self.model.NewBoolVar(var_name)
+
+        print(f"[CP-SAT] Created {len(assignments)} assignment variables")
+
+        # 1. APPLY ALL CONSTRAINTS IN ORDER OF PRIORITY
+
+        # 1.1 PERMANENT CONSTRAINTS (the highest priority - absolutely cannot be violated)
+        applied_permanent = 0
+        blocked_assignments = set()  # Track what we've blocked
+
+        for perm_constraint in permanent_cannot_work:
+            emp_id = perm_constraint['emp_id']
+            day_idx = perm_constraint['day_index']
+            shift_id = perm_constraint.get('shift_id')
+
+            print(f"[CP-SAT] Applying permanent constraint: emp={emp_id}, day={day_idx}, shift={shift_id}")
+
+            # Find an employee's position
+            emp = next((e for e in employees if e['emp_id'] == emp_id), None)
+            if not emp:
+                continue
+
+            emp_position_id = emp.get('default_position_id')
+
+            if shift_id is not None:
+                # Specific shift constraint - block only this shift
+                key = (emp_id, day_idx, shift_id, emp_position_id)
+                if key in assignments:
+                    self.model.Add(assignments[key] == 0)
+                    blocked_assignments.add(key)
+                    applied_permanent += 1
+                    print(f"[CP-SAT] Blocked: emp {emp_id} on day {day_idx} shift {shift_id}")
+            else:
+                # All shifts on this day - block ALL shift for this employee
+                blocked_count = 0
+                for shift in shifts:
+                    key = (emp_id, day_idx, shift['shift_id'], emp_position_id)
+                    if key in assignments:
+                        self.model.Add(assignments[key] == 0)
+                        blocked_assignments.add(key)
+                        applied_permanent += 1
+                        blocked_count += 1
+                print(f"[CP-SAT] Blocked ALL {blocked_count} shifts for emp {emp_id} on day {day_idx}")
+
+        print(f"[Universal CP-SAT] Applied {applied_permanent} permanent constraint variables")
+        print(f"[Universal CP-SAT] Total blocked assignments: {len(blocked_assignments)}")
+
+        # 1.2 TEMPORARY CANNOT WORK CONSTRAINTS (second priority)
+        applied_temporary = 0
+        for constraint in temporary_cannot_work:
+            emp_id = constraint['emp_id']
+            day_idx = constraint['day_index']
+            shift_id = constraint.get('shift_id')
+
+            if shift_id is not None:
+                # Specific shift constraint
+                for position in positions:
+                    key = (emp_id, day_idx, shift_id, position['pos_id'])
+                    if key in assignments:
+                        self.model.Add(assignments[key] == 0)
+                        applied_temporary += 1
+            else:
+                # All shifts on this day
                 for shift in shifts:
                     for position in positions:
-                        var_name = f"assign_{emp_id}_{day_idx}_{shift['shift_id']}_{position['pos_id']}"
-                        assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] = \
-                            self.model.NewBoolVar(var_name)
+                        key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                        if key in assignments:
+                            self.model.Add(assignments[key] == 0)
+                            applied_temporary += 1
 
-        # ГИБКИЕ ограничения покрытия позиций
+        print(f"[Universal CP-SAT] Applied {applied_temporary} temporary constraint variables")
+
+        # 2. POSITION COVERAGE CONSTRAINTS (with EXACT requirements)
         shortage_vars = []
-        for day_idx in range(len(days)):
-            for shift in shifts:
-                for position in positions:
-                    assignment_vars = []
-                    for emp in employees:
-                        assignment_vars.append(
-                            assignments[(emp['emp_id'], day_idx, shift['shift_id'], position['pos_id'])]
-                        )
+        shift_requirements = data.get('shift_requirements', {})
 
-                    # Переменная для недохвата
-                    shortage_var = self.model.NewIntVar(0, position['num_of_emp'],
-                                                        f"shortage_{day_idx}_{shift['shift_id']}_{position['pos_id']}")
-                    shortage_vars.append(shortage_var)
+        # Create limitations ONLY for existing requirements.
+        for day_idx, day in enumerate(days):
+            date_str = day['date']
 
-                    # Гибкое ограничение: назначенные + недохват = требуемое количество
-                    self.model.Add(sum(assignment_vars) + shortage_var == position['num_of_emp'])
+            for position in positions:
+                pos_id = position['pos_id']
+                pos_str = str(pos_id)
 
-        # Ограничения сотрудников (максимум 1 смена в день)
+                # Get valid shifts for this position
+                valid_shifts = position_shifts_map.get(pos_str, [])
+
+                for shift_id in valid_shifts:
+                    # Find requirement
+                    requirement_key = f"{pos_id}-{shift_id}-{date_str}"
+                    requirement = shift_requirements.get(requirement_key)
+
+                    # Process ONLY if there is a requirement.
+                    if requirement and requirement.get('required_staff', 0) > 0:
+                        required_employees = requirement.get('required_staff')
+
+                        print(
+                            f"[CP-SAT] Position {pos_id} shift {shift_id} on {date_str}: needs {required_employees} staff")
+
+                        assignment_vars = []
+
+                        # Only employees with matching position can work
+                        for emp in employees:
+                            if emp.get('default_position_id') == pos_id:
+                                key = (emp['emp_id'], day_idx, shift_id, pos_id)
+                                if key in assignments:
+                                    assignment_vars.append(assignments[key])
+
+                        if assignment_vars:
+                            # Create a variable for actual assignments
+                            actual_assigned = self.model.NewIntVar(
+                                0, len(assignment_vars),
+                                f"actual_{day_idx}_{shift_id}_{pos_id}"
+                            )
+                            self.model.Add(actual_assigned == sum(assignment_vars))
+
+                            # HARD CONSTRAINT: Must assign EXACTLY the required number
+                            if len(assignment_vars) >= required_employees:
+                                # We have enough employees - enforce exact requirement
+                                self.model.Add(actual_assigned == required_employees)
+                                print(
+                                    f"[CP-SAT] Constraint: {len(assignment_vars)} candidates, EXACTLY {required_employees} required")
+                            else:
+                                # Not enough employees - do the best we can
+                                self.model.Add(actual_assigned <= required_employees)
+                                shortage_var = self.model.NewIntVar(
+                                    0, required_employees,
+                                    f"shortage_{day_idx}_{shift_id}_{pos_id}"
+                                )
+                                self.model.Add(shortage_var == required_employees - actual_assigned)
+                                shortage_vars.append(shortage_var)
+                                print(
+                                    f"[CP-SAT] Warning: Only {len(assignment_vars)} candidates for {required_employees} required")
+                    else:
+                        # NO REQUIREMENT = we prohibit assignments for this day/shift/position
+                        for emp in employees:
+                            if emp.get('default_position_id') == pos_id:
+                                key = (emp['emp_id'], day_idx, shift_id, pos_id)
+                                if key in assignments:
+                                    # Assignment is prohibited if there is no requirement.
+                                    self.model.Add(assignments[key] == 0)
+
+        print(f"[CP-SAT] Total shortage variables: {len(shortage_vars)}")
+
+        # 3. HARD CONSTRAINTS (LEGAL REQUIREMENTS)
+
+        # 3.1 Maximum hours per day
         for emp in employees:
             emp_id = emp['emp_id']
             for day_idx in range(len(days)):
+                day_hours = []
                 day_assignments = []
+
                 for shift in shifts:
                     for position in positions:
-                        day_assignments.append(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
-                self.model.Add(sum(day_assignments) <= 1)
+                        if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
+                            assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
+                            day_assignments.append(assignment_var)
+                            # Account for actual shift duration
+                            day_hours.append(assignment_var * shift['duration'])
 
-        # ЖЕСТКИЕ ограничения cannot_work
-        cannot_work = constraints.get('cannot_work', [])
-        print(f"[CP-SAT Improved] Processing {len(cannot_work)} cannot_work constraints")
+                # Hard constraint on hours
+                if day_hours:
+                    self.model.Add(sum(day_hours) <= max_hours_per_day)
 
-        for constraint in cannot_work:
-            emp_id = constraint['emp_id']
-            day_idx = constraint.get('day_index')
-            shift_id = constraint.get('shift_id')
+                # Soft constraint on number of shifts (usually 1 per day)
+                if day_assignments:
+                    self.model.Add(sum(day_assignments) <= max_shifts_per_day)
 
-            if day_idx is not None:
-                if shift_id:
-                    # Конкретная смена в конкретный день
+        # 3.2 Maximum hours per week
+        for emp in employees:
+            emp_id = emp['emp_id']
+            week_hours = []
+
+            for day_idx in range(len(days)):
+                for shift in shifts:
                     for position in positions:
-                        if (emp_id, day_idx, shift_id, position['pos_id']) in assignments:
-                            self.model.Add(assignments[(emp_id, day_idx, shift_id, position['pos_id'])] == 0)
-                else:
-                    # Весь день
+                        if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
+                            assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
+                            week_hours.append(assignment_var * shift['duration'])
+
+            if week_hours:
+                self.model.Add(sum(week_hours) <= max_hours_per_week)
+
+        # 3.3 Minimum rest between shifts on same day
+        for emp in employees:
+            emp_id = emp['emp_id']
+            for day_idx in range(len(days)):
+                for i, shift1 in enumerate(shifts):
+                    for j, shift2 in enumerate(shifts):
+                        if i < j:  # Only check different shifts
+                            rest_hours = _calculate_rest_hours(shift1, shift2, False)
+
+                            if rest_hours < min_rest_between_shifts:
+                                # Cannot work both shifts
+                                for position in positions:
+                                    if ((emp_id, day_idx, shift1['shift_id'], position['pos_id']) in assignments and
+                                            (emp_id, day_idx, shift2['shift_id'], position['pos_id']) in assignments):
+                                        self.model.Add(
+                                            assignments[(emp_id, day_idx, shift1['shift_id'], position['pos_id'])] +
+                                            assignments[(emp_id, day_idx, shift2['shift_id'], position['pos_id'])] <= 1
+                                        )
+
+        # 3.4 Minimum rest between shifts on consecutive days
+        for emp in employees:
+            emp_id = emp['emp_id']
+            for day_idx in range(len(days) - 1):
+                for shift1 in shifts:
+                    for shift2 in shifts:
+                        rest_hours = _calculate_rest_hours(shift1, shift2, True)
+
+                        # Use appropriate rest requirement based on shift type
+                        required_rest = min_rest_after_night if shift1.get('is_night_shift',
+                                                                           False) else min_rest_after_regular
+
+                        if rest_hours < required_rest:
+                            for position in positions:
+                                if ((emp_id, day_idx, shift1['shift_id'], position['pos_id']) in assignments and
+                                        (emp_id, day_idx + 1, shift2['shift_id'], position['pos_id']) in assignments):
+                                    self.model.Add(
+                                        assignments[(emp_id, day_idx, shift1['shift_id'], position['pos_id'])] +
+                                        assignments[(emp_id, day_idx + 1, shift2['shift_id'], position['pos_id'])] <= 1
+                                    )
+
+        # 4. SOFT CONSTRAINTS
+
+        # 4.1 Maximum consecutive work days
+        for emp in employees:
+            emp_id = emp['emp_id']
+            for start_day in range(len(days) - max_consecutive_work_days):
+                consecutive_vars = []
+                for day_offset in range(max_consecutive_work_days + 1):
+                    day_idx = start_day + day_offset
+                    day_worked = self.model.NewBoolVar(f"worked_{emp_id}_{day_idx}")
+
+                    # Day is worked if any shift is assigned
+                    shift_vars = []
                     for shift in shifts:
                         for position in positions:
                             if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                                self.model.Add(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] == 0)
+                                shift_vars.append(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
 
-        # Установка цели: приоритизировать дефолтные позиции
-        objective_terms = []
+                    if shift_vars:
+                        self.model.AddMaxEquality(day_worked, shift_vars)
+                        consecutive_vars.append(day_worked)
 
-        # 1. ВЫСОКИЙ ПРИОРИТЕТ: назначение на дефолтную позицию
-        position_preference_score = 0
-        cross_position_penalty = 0
+                # Limit consecutive days
+                if consecutive_vars:
+                    self.model.Add(sum(consecutive_vars) <= max_consecutive_work_days)
 
-        print(f"[CP-SAT Improved] Applying STRICT position constraints...")
-
+        # 4.2 Maximum night shifts per week
         for emp in employees:
             emp_id = emp['emp_id']
-            default_position_id = emp.get('default_position_id')
+            night_shift_vars = []
 
-            if default_position_id:
-                # БЛОКИРУЕМ все позиции кроме дефолтной
-                for day_idx in range(len(days)):
-                    for shift in shifts:
+            for day_idx in range(len(days)):
+                for shift in shifts:
+                    if shift.get('is_night_shift', False):
                         for position in positions:
-                            if position['pos_id'] != default_position_id:
-                                # ЖЕСТКОЕ ограничение: не может работать на других позициях
-                                if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                                    self.model.Add(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] == 0)
+                            if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
+                                night_shift_vars.append(
+                                    assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
+                                )
 
-                print(f"  - {emp['name']} restricted to position {default_position_id} only")
+            if night_shift_vars:
+                self.model.Add(sum(night_shift_vars) <= max_night_shifts_per_week)
 
-        # 2. Минимизировать недохват (очень высокий приоритет)
+        # 5. OPTIMIZATION OBJECTIVE (using pre-initialized objective_terms)
+
+        # 5.1 Minimize shortage (the highest priority - but should be 0 if we have enough employees)
         for shortage_var in shortage_vars:
-            objective_terms.append(shortage_var * -200)  # Очень высокий штраф за недохват
+            objective_terms.append(shortage_var * -shortage_penalty)
 
-        # 3. МЯГКИЕ ограничения prefer_work
-        prefer_work = constraints.get('prefer_work', [])
-        print(f"[CP-SAT Improved] Processing {len(prefer_work)} prefer_work constraints")
-
+        # 5.2 Prefer work constraints (positive incentive)
         for constraint in prefer_work:
             emp_id = constraint['emp_id']
-            day_idx = constraint.get('day_index')
+            day_idx = constraint['day_index']
             shift_id = constraint.get('shift_id')
 
-            if day_idx is not None:
-                if shift_id:
-                    # Конкретная смена
+            if shift_id is not None:
+                # Specific shift preference
+                for position in positions:
+                    if (emp_id, day_idx, shift_id, position['pos_id']) in assignments:
+                        objective_terms.append(
+                            assignments[(emp_id, day_idx, shift_id, position['pos_id'])] * prefer_work_bonus
+                        )
+            else:
+                # Any shift on this day preference
+                for shift in shifts:
                     for position in positions:
-                        if (emp_id, day_idx, shift_id, position['pos_id']) in assignments:
-                            objective_terms.append(assignments[(emp_id, day_idx, shift_id, position['pos_id'])] * 30)
-                else:
-                    # Любая смена в этот день
-                    for shift in shifts:
-                        for position in positions:
-                            if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                                objective_terms.append(assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])] * 30)
+                        if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
+                            objective_terms.append(
+                                assignments[
+                                    (emp_id, day_idx, shift['shift_id'], position['pos_id'])] * prefer_work_bonus
+                            )
 
-        # 4. Балансировка нагрузки между сотрудниками
-        total_shifts_vars = []
+        # 5.3 Position matching bonus (reduced importance)
         for emp in employees:
             emp_id = emp['emp_id']
-            default_position_id = emp.get('default_position_id')
+            default_pos = emp.get('default_position_id')
 
-            if default_position_id:
-                emp_assignments = []
+            if default_pos:
                 for day_idx in range(len(days)):
                     for shift in shifts:
-                        # Только назначения на дефолтную позицию
-                        emp_assignments.append(assignments[(emp_id, day_idx, shift['shift_id'], default_position_id)])
+                        if (emp_id, day_idx, shift['shift_id'], default_pos) in assignments:
+                            objective_terms.append(
+                                assignments[(emp_id, day_idx, shift['shift_id'], default_pos)] * position_match_bonus
+                            )
 
-                total_var = self.model.NewIntVar(0, len(days) * len(shifts), f'total_shifts_{emp_id}')
-                self.model.Add(sum(emp_assignments) == total_var)
-                total_shifts_vars.append(total_var)
+        # 5.4 REMOVE workload balancing - we don't want to spread work equally
+        # We want to use the minimum number of employees needed
 
-        # Минимизировать разброс в нагрузке
-        if len(total_shifts_vars) > 1:
-            max_shifts = self.model.NewIntVar(0, len(days) * len(shifts), 'max_shifts')
-            min_shifts = self.model.NewIntVar(0, len(days) * len(shifts), 'min_shifts')
+        # 5.5 Add a small penalty for using too many different employees
+        # This encourages using fewer employees more consistently
+        unique_employees_working = []
+        for emp in employees:
+            emp_id = emp['emp_id']
+            emp_works = self.model.NewBoolVar(f'emp_works_{emp_id}')
 
-            self.model.AddMaxEquality(max_shifts, total_shifts_vars)
-            self.model.AddMinEquality(min_shifts, total_shifts_vars)
+            # Employee works if they have any assignment
+            emp_assignments = []
+            for day_idx in range(len(days)):
+                for shift in shifts:
+                    for position in positions:
+                        if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
+                            emp_assignments.append(
+                                assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
 
-            balance_var = self.model.NewIntVar(0, len(days) * len(shifts), 'balance')
-            self.model.Add(balance_var == max_shifts - min_shifts)
-            objective_terms.append(balance_var * -10)  # Штраф за дисбаланс
+            if emp_assignments:
+                self.model.AddMaxEquality(emp_works, emp_assignments)
+                unique_employees_working.append(emp_works)
+                # Small penalty for each employee used (encourages using fewer employees)
+                objective_terms.append(emp_works * -2)
 
-        # Установить цель
+        # Set objective function
         if objective_terms:
             self.model.Maximize(sum(objective_terms))
-            print(f"[CP-SAT Improved] Objective has {len(objective_terms)} terms")
 
-        # Решение с увеличенным временем
-        self.solver.parameters.max_time_in_seconds = 120.0  # 2 минуты
-        print(f"[CP-SAT Improved] Starting solver...")
+        # 6. SOLVE
+        self.solver.parameters.max_time_in_seconds = settings.get('max_solve_time', 120.0)
+        print(f"[Universal CP-SAT] Starting solver with {len(objective_terms)} objective terms...")
+        print(f"[Universal CP-SAT] Variables: {len(assignments)}, Constraints: {len(self.model.Proto().constraints)}")
+
         status = self.solver.Solve(self.model)
 
-        print(f"[CP-SAT Improved] Solver finished with status: {status}")
+        print(f"[Universal CP-SAT] Solver finished with status: {status}")
+        print(f"[Universal CP-SAT] Status names: OPTIMAL={cp_model.OPTIMAL}, FEASIBLE={cp_model.FEASIBLE}")
 
         if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
-            # Извлечение результатов
+            # Extract results
             schedule = []
-            total_assignments = 0
-            total_shortage = 0
-            position_matches = 0
-            cross_position_assignments = 0
+            stats = {
+                'total_assignments': 0,
+                'total_shortage': 0,
+                'position_matches': 0,
+                'hours_per_employee': {},
+                'shifts_per_employee': {},
+                'permanent_constraints_respected': len(permanent_cannot_work),
+                'temporary_constraints_respected': len(temporary_cannot_work),
+                'prefer_work_satisfied': 0,
+                'objective_value': self.solver.ObjectiveValue()
+            }
 
+            # Check prefers work satisfaction
+            for constraint in prefer_work:
+                emp_id = constraint['emp_id']
+                day_idx = constraint['day_index']
+                shift_id = constraint.get('shift_id')
+
+                satisfied = False
+                if shift_id is not None:
+                    for position in positions:
+                        key = (emp_id, day_idx, shift_id, position['pos_id'])
+                        if key in assignments and self.solver.Value(assignments[key]) == 1:
+                            satisfied = True
+                            break
+                else:
+                    for shift in shifts:
+                        for position in positions:
+                            key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                            if key in assignments and self.solver.Value(assignments[key]) == 1:
+                                satisfied = True
+                                break
+                        if satisfied:
+                            break
+
+                if satisfied:
+                    stats['prefer_work_satisfied'] += 1
+
+            assignment_index = 0
             for emp in employees:
                 emp_id = emp['emp_id']
-                default_position_id = emp.get('default_position_id')
+                emp_hours = 0
+                emp_shifts = 0
 
                 for day_idx, day in enumerate(days):
                     for shift in shifts:
                         for position in positions:
                             key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
-                            if key in assignments and self.solver.Value(assignments[key]):
+                            if key in assignments and self.solver.Value(assignments[key]) == 1:
                                 schedule.append({
                                     'emp_id': emp_id,
                                     'date': day['date'],
                                     'shift_id': shift['shift_id'],
-                                    'position_id': position['pos_id']
+                                    'position_id': position['pos_id'],
+                                    'assignment_index': assignment_index
                                 })
-                                total_assignments += 1
+                                assignment_index += 1
+                                stats['total_assignments'] += 1
+                                emp_hours += shift['duration']
+                                emp_shifts += 1
 
-                                # Подсчет совпадений с дефолтной позицией
-                                if default_position_id == position['pos_id']:
-                                    position_matches += 1
-                                elif default_position_id:
-                                    cross_position_assignments += 1
+                                if emp.get('default_position_id') == position['pos_id']:
+                                    stats['position_matches'] += 1
 
-            # Подсчет недохвата
+                if emp_shifts > 0:
+                    stats['hours_per_employee'][emp_id] = emp_hours
+                    stats['shifts_per_employee'][emp_id] = emp_shifts
+
+            # Calculate shortage
             for shortage_var in shortage_vars:
-                total_shortage += self.solver.Value(shortage_var)
+                stats['total_shortage'] += self.solver.Value(shortage_var)
 
-            print(f"[CP-SAT Improved] Generated {total_assignments} assignments with {total_shortage} shortages")
-            print(f"[CP-SAT Improved] Position matches: {position_matches}, Cross-position: {cross_position_assignments}")
-
-            match_rate = (position_matches / total_assignments * 100) if total_assignments > 0 else 0
-            print(f"[CP-SAT Improved] Default position match rate: {match_rate:.1f}%")
+            print(f"[Universal CP-SAT] Solution found:")
+            print(f"  - Assignments: {stats['total_assignments']}")
+            print(f"  - Shortage: {stats['total_shortage']}")
+            print(f"  - Position matches: {stats['position_matches']}")
+            print(f"  - Prefer work satisfied: {stats['prefer_work_satisfied']}/{len(prefer_work)}")
 
             return {
                 'success': True,
                 'schedule': schedule,
-                'status': 'OPTIMAL' if status == cp_model.OPTIMAL else 'FEASIBLE',
-                'solve_time': self.solver.WallTime(),
-                'assignments_count': total_assignments,
-                'shortage_count': total_shortage,
-                'position_matches': position_matches,
-                'cross_position_assignments': cross_position_assignments,
-                'coverage_rate': (total_assignments / (total_assignments + total_shortage)) * 100 if (total_assignments + total_shortage) > 0 else 100
+                'stats': stats,
+                'status': 'optimal' if status == cp_model.OPTIMAL else 'feasible',
+                'solve_time': self.solver.WallTime() * 1000,
+                'coverage_rate': (1 - stats['total_shortage'] / max(1, len(shortage_vars))) * 100,
+                'shortage_count': stats['total_shortage']
             }
         else:
             return {
                 'success': False,
-                'error': f'Solver failed with status: {status}',
-                'status': status,
-                'debug_info': {
-                    'employees': len(employees),
-                    'shifts': len(shifts),
-                    'positions': len(positions),
-                    'cannot_work_constraints': len(constraints.get('cannot_work', [])),
-                    'prefer_work_constraints': len(constraints.get('prefer_work', []))
+                'error': f'No solution found. Status: {status}',
+                'status': str(status),
+                'details': {
+                    'variables': len(assignments),
+                    'constraints': len(self.model.Proto().constraints),
+                    'objective_terms': len(objective_terms)
                 }
             }
 
-def main():
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', required=True, help='Input JSON file')
-    parser.add_argument('--output', required=True, help='Output JSON file')
+    parser.add_argument('data_file', help='Path to JSON data file')
     args = parser.parse_args()
 
     try:
-        with open(args.input, 'r', encoding='utf-8') as f:
+        # Load data
+        with open(args.data_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        optimizer = ImprovedShiftSchedulerCP()
-        result = optimizer.optimize_schedule(data)
+        # Create a scheduler and optimize
+        scheduler = UniversalShiftSchedulerCP()
+        result = scheduler.optimize_schedule(data)
 
-        with open(args.output, 'w', encoding='utf-8') as f:
-            json.dump(result, f, ensure_ascii=False, indent=2)
+        # Save result to file
+        result_file = args.data_file.replace('.json', '_result.json')
+        with open(result_file, 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=2)
 
-        print(f"[CP-SAT Improved] Optimization completed. Success: {result['success']}")
-        if result['success']:
-            print(f"Coverage rate: {result.get('coverage_rate', 0):.1f}%")
+        # Print only success status
+        print(json.dumps({"success": True, "result_file": result_file}))
 
     except Exception as e:
+        import traceback
+
+        traceback.print_exc()
         error_result = {
             'success': False,
             'error': str(e)
         }
-        with open(args.output, 'w', encoding='utf-8') as f:
-            json.dump(error_result, f, ensure_ascii=False, indent=2)
-        print(f"[CP-SAT Improved] Error: {str(e)}")
-
-if __name__ == "__main__":
-    main()
+        print(json.dumps(error_result))
+        sys.exit(1)

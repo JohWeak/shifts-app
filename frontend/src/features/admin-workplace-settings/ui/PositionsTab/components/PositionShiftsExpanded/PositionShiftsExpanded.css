@@ -1,0 +1,101 @@
+/* frontend/src/features/admin-workplace-settings/ui/PositionShiftsExpanded/PositionShiftsExpanded.css */
+.shift-color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.nav-pills .nav-link {
+    color: var(--bs-body-color);
+    background: transparent;
+    margin-inline-end: 0.5rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+[data-theme="dark"] .nav-pills .nav-link.active {
+    background-color: var(--bs-primary);
+}
+
+.nav-pills .nav-link:not(.active):hover {
+    background-color: var(--bs-gray-200);
+}
+
+[data-theme="dark"] .nav-pills .nav-link:not(.active):hover {
+    background-color: var(--bs-gray-800);
+    color: var(--bs-white);
+}
+
+.position-shifts-expanded {
+    overflow: hidden;
+    animation: expandRow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.position-shifts-expanded.closing {
+    animation: collapseRow 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes expandRow {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1200px;
+    }
+}
+
+@keyframes collapseRow {
+    from {
+        opacity: 1;
+        max-height: 1200px;
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+    }
+}
+
+.position-shifts-expanded .table {
+    margin-bottom: 0;
+}
+
+.position-shifts-expanded .card {
+    position: relative;
+    overflow: hidden;
+    border-top: none;
+    border-radius: 0!important;
+}
+
+.position-shifts-col{
+    border-bottom: none;
+}
+.card-actions-toolbar {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    transform: translateX(calc(100% + 2rem));
+    transition: transform 0.3s ease-in-out;
+    z-index: 2;
+}
+
+.card-actions-toolbar.visible {
+    transform: translateX(0);
+}
+
+[dir="rtl"] .card-actions-toolbar {
+    right: auto;
+    left: 1rem;
+    transform: translateX(calc(-100% - 2rem));
+}
+
+[dir="rtl"] .card-actions-toolbar.visible {
+    transform: translateX(0);
+}

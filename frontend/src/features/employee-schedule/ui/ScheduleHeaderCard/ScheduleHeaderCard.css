@@ -1,0 +1,29 @@
+.schedule-info-card {
+    border-color: var(--bs-gray-200) !important;
+    border-width: 0 0 1px 0!important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0!important;
+
+}
+
+[data-theme="dark"] .schedule-info-card {
+    border-color: var(--bs-gray-800)!important;
+    background-color: var(--bs-gray-800) ;
+}
+
+.schedule-info-card .form-check-input{
+    height: 1.25rem;
+    margin-inline-end: 0.25rem;
+}
+
+.schedule-info-card .form-check-label{
+    font-size: 0.9rem;
+}
+
+.schedule-info-card .week-title {
+    color: var(--bs-gray-700);
+    font-weight: 600;
+}
+
+[data-theme="dark"] .schedule-info-card .week-title {
+    color: var(--bs-gray-400);
+}

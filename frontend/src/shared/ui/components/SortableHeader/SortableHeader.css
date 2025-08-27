@@ -1,0 +1,65 @@
+/* frontend/src/shared/ui/components/SortableHeader/SortableHeader.css */
+
+
+.sortable-header {
+    --icon-color-default: var(--bs-secondary-color);
+    --icon-color-active: var(--bs-body-color);
+    --bg-hover: var(--bs-gray-100);
+
+    position: relative;
+    transition: background-color 0.2s ease-in-out;
+    background-color: var(--bs-gray-100) !important;
+}
+
+[data-theme="dark"] .sortable-header {
+    background-color: var(--bs-gray-900) !important;
+}
+
+.sortable-header:hover {
+    background-color: var(--bs-gray-200) !important;
+}
+
+[data-theme="dark"] .sortable-header:hover {
+    background-color: var(--bs-gray-800) !important;
+}
+
+.sortable-header.is-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.header-content {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.header-content span {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--bs-body-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+}
+
+.sort-icon {
+    font-size: 0.75rem !important;
+    opacity: 0.4;
+    color: var(--icon-color-default);
+    transition: all 0.2s ease-in-out, color 0.2s ease-out;
+}
+
+.sortable-header:hover .sort-icon {
+    opacity: 0.9;
+    transform: translateY(1px);
+}
+
+
+.sortable-header.sorted .sort-icon {
+    opacity: 1;
+    color: var(--icon-color-active);
+}

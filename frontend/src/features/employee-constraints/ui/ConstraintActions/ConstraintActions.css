@@ -1,0 +1,305 @@
+/* frontend/src/features/employee-constraints/ui/ConstraintActions.css */
+/* 1. Главный контейнер. Position: relative - ключ к наложению. */
+.constraint-actions-panel {
+    position: relative;
+    transition: all 0.4s ease-in-out;
+}
+
+/* 2. Контейнер для кнопки "Edit" */
+.constraint-actions-panel .edit-button-container {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+/* 3. Контейнер для всех кнопок действий */
+.constraint-actions-panel .action-controls-container {
+    /* Абсолютное позиционирование, чтобы он был в том же месте, что и кнопка Edit */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: var(--space-2);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- ОБЩАЯ ЛОГИКА АНИМАЦИИ --- */
+
+/* Все контейнеры-обертки по умолчанию прозрачны и сжаты */
+.constraint-actions-panel .edit-button-container,
+.constraint-actions-panel .action-controls-container {
+    transition: all 0.3s cubic-bezier(0.3, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(50px); /* Слегка сдвигаем вверх для анимации */
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none; /* Запрещаем клики по невидимым элементам */
+}
+
+/* --- ЛОГИКА ПОКАЗА В ЗАВИСИМОСТИ ОТ РЕЖИМА --- */
+
+/* Когда активен режим просмотра (НЕ редактирование) */
+.constraint-actions-panel.view-mode {
+    min-height: 110px; /* Задаем высоту, чтобы не было прыжка */
+}
+
+.constraint-actions-panel.view-mode .edit-button-container {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 100px; /* Достаточная высота для кнопки */
+    pointer-events: auto;
+}
+
+/* Когда активен режим редактирования */
+.constraint-actions-panel.edit-mode {
+    min-height: 110px; /* Высота для мобильной версии */
+}
+
+.constraint-actions-panel.edit-mode .action-controls-container {
+    position: static; /* Возвращаем в поток документа */
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 300px;    /* Достаточная высота для всех контролов */
+    pointer-events: auto;
+    padding:0;
+}
+
+/* --- Стили для конкретных версток (остаются почти без изменений) --- */
+.constraint-actions-panel .panel-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+    padding-bottom: var(--space-1);
+
+}
+
+
+.constraint-actions-panel .mobile-layout {
+    flex-direction: column;
+    width: 100%;
+}
+
+.constraint-actions-panel .mobile-actions-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 var(--space-1) var(--space-2);
+}
+.constraint-actions-panel .mobile-actions-container button{
+    border-radius: var(--radius-lg);
+}
+.constraint-actions-panel .mobile-layout .segmented-control-wrapper {
+    width: 100%;
+}
+.constraint-actions-panel .mobile-layout .segmented-control {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.constraint-actions-panel .desktop-layout {
+    flex-direction: row;
+    width: 100%;
+}
+
+.constraint-actions-panel .desktop-layout .segmented-control-wrapper {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.constraint-actions-panel .secondary-actions-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ============================================
+   СЕГМЕНТИРОВАННЫЙ ПЕРЕКЛЮЧАТЕЛЬ (ФИНАЛЬНАЯ ВЕРСИЯ)
+   ============================================ */
+
+/* 1. ОБЕРТКА: выстраивает 3 элемента в ряд (палитра, контрол, палитра) */
+.constraint-actions-panel .segmented-control-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Центрируем, чтобы контрол был главным */
+    gap: var(--space-1);
+}
+
+/* 2. КОНТРОЛ: остается без изменений */
+.constraint-actions-panel .segmented-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--bs-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-1);
+    height: 44px;
+    flex-shrink: 0;
+    min-width: 280px;
+    box-shadow: inset var(--bs-box-shadow-sm);
+
+}
+
+.constraint-actions-panel .segmented-control .segment {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 var(--space-2);
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+.constraint-actions-panel .segmented-control .indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 49%;
+    border-radius: var(--radius-md);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--bs-box-shadow-sm);
+    z-index: 5;
+}
+
+/* 3. ПАЛИТРА: стилизуем оба слота */
+.constraint-actions-panel .palette-button {
+    width: 38px;
+    height: 38px;
+    /*border-radius: var(--radius-md);*/
+    padding: 0;
+    line-height: 1;
+    transition: all 0.2s ease-in-out !important;
+    border: none;
+}
+
+
+
+
+/* --- LTR (стандартное направление) --- */
+[dir="ltr"] .segmented-control-wrapper.mode-cannot_work .indicator {
+    transform: translateX(0);
+}
+
+[dir="ltr"] .segmented-control-wrapper.mode-prefer_work .indicator {
+    transform: translateX(100%);
+}
+
+/* --- RTL (зеркальное направление) --- */
+/* "Cannot Work" теперь справа, поэтому индикатор должен уехать направо */
+[dir="rtl"] .segmented-control-wrapper.mode-cannot_work .indicator {
+    transform: translateX(0);
+}
+
+/* "Prefer to Work" теперь слева, поэтому индикатор остается слева */
+[dir="rtl"] .segmented-control-wrapper.mode-prefer_work .indicator {
+    transform: translateX(-100%);
+}
+
+
+/* --- Общие стили для всех направлений --- */
+
+/* Подсветка текста (используем надежные классы) */
+.segmented-control-wrapper.mode-cannot_work .segment-cannot-work span,
+.segmented-control-wrapper.mode-prefer_work .segment-prefer-work span {
+    font-weight: var(--font-semibold);
+
+}
+
+
+
+/* Видимость палитры (эта логика уже надежна и не меняется) */
+.segmented-control-wrapper.mode-cannot_work .palette-cannot-work,
+.segmented-control-wrapper.mode-prefer_work .palette-prefer-work {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Темная тема */
+[data-theme="dark"] .segmented-control {
+    background-color: var(--bs-gray-800);
+}
+
+
+[data-theme="dark"] .mobile-layout .segmented-control-wrapper {
+    border-color: var(--bs-gray-700);
+}
+
+.constraint-actions-panel .edit-button {
+    padding: 0.5rem 1.25rem; /* Делаем ее немного выше и шире стандартной */
+    font-size: 1rem; /* Стандартный размер шрифта */
+    font-weight: var(--font-semibold);
+    width: calc(12.5% - 8px);
+    transition: all 0.2s ease-in-out !important;
+    border-radius: var(--radius-md);
+    margin-inline-end: 2px;
+
+}
+
+
+/* ============================================
+   АДАПТИВНОСТЬ (Mobile)
+   ============================================ */
+@media (max-width: 888px) {
+    .constraint-actions-panel .edit-button {
+        width: calc(25% - 8px);
+
+    }
+}
+@media (max-width: 768px) {
+    .constraint-actions-panel .panel-content {
+        justify-content: center;
+    }
+
+    .constraint-actions-panel .actions-container {
+        justify-content: center;
+        gap: var(--space-3);
+        margin-top: 0;
+    }
+
+    .constraint-actions-panel .action-buttons-group {
+        justify-content: center;
+    }
+
+    .constraint-actions-panel .panel-content {
+        position: relative;
+        padding: 0;
+    }
+    .constraint-actions-panel.view-mode .edit-button-container{
+        padding-top: 0.5rem;
+
+    }
+
+}
+
+@media (max-width: 568px) {
+    .constraint-actions-panel .edit-button{
+        width: 100%;
+        border-radius: var(--radius-lg);
+        margin-inline-end: 0;
+
+    }
+    .constraint-actions-panel.view-mode .edit-button-container{
+        justify-content: center;
+    }
+
+
+}
+
+@media (hover: hover) {
+    .constraint-actions-panel .edit-button:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--bs-box-shadow);
+    }
+
+    .constraint-actions-panel .palette-button:hover {
+        background-color: var(--bs-btn-outline-danger-hover-bg);
+        transform: scale(1.1);
+    }
+}

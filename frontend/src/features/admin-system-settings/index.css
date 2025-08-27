@@ -1,0 +1,45 @@
+/*!* System Settings - гибридный подход *!*/
+
+/*.nav-pills .nav-link {*/
+/*    color: var(--bs-secondary);*/
+/*    border-radius: 0.375rem;*/
+/*    padding: 0.75rem 1rem;*/
+/*    margin-bottom: 0.25rem;*/
+/*    transition: all 0.2s;*/
+/*}*/
+/*[data-theme="dark"] .nav-pills .nav-link {*/
+/*    color: var(--bs-body-color);*/
+/*}*/
+
+/*[data-theme="dark"] .nav-pills .nav-link:hover {*/
+/*    background-color: var(--bs-gray-100);*/
+/*    color: var(--bs-body-color);*/
+/*}*/
+
+/*[data-theme="dark"] .nav-pills .nav-link:hover {*/
+/*    background-color: var(--bs-gray-800);*/
+/*}*/
+
+/*[data-theme="dark"] .nav-pills .nav-link.active {*/
+/*    background-color: var(--bs-primary);*/
+/*    color: var(--bs-white);*/
+/*}*/
+
+/*.nav-pills .nav-link i {*/
+/*    width: 20px;*/
+/*}*/
+
+/*.input-group-text {*/
+/*    background-color: var(--bs-gray-100);*/
+/*    border-color: var(--bs-border-color);*/
+/*    color: var(--bs-body-color);*/
+/*}*/
+
+/*[data-theme="dark"] .input-group-text {*/
+/*    background-color: var(--bs-gray-800);*/
+/*}*/
+
+/*.form-check-input:checked {*/
+/*    background-color: var(--bs-primary);*/
+/*    border-color: var(--bs-primary);*/
+/*}*/

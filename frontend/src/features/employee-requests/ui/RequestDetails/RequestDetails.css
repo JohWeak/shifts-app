@@ -1,0 +1,203 @@
+/* frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.css */
+.request-details-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.request-details-container .request-details-card {
+    border: 1px solid var(--bs-border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-lg);
+}
+.request-details-container .request-details-header{
+    padding: 1rem;
+}
+.request-details-container .request-metadata {
+    background-color: var(--bs-gray-100);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.request-details-container .metadata-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.request-details-container .metadata-item:last-child {
+    margin-bottom: 0;
+}
+
+.request-details-container .metadata-label {
+    font-weight: 500;
+    margin-right: 0.5rem;
+    color: var(--bs-body-color);
+}
+
+.request-details-container .metadata-value {
+    color: var(--bs-body-color);
+}
+
+.request-details-container .constraints-section,
+.request-details-container .message-section,
+.request-details-container .response-section {
+    margin-bottom: 1.5rem;
+}
+
+.request-details-container .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    margin-inline-start: 0.25rem;
+
+    color: var(--bs-body-color);
+    display: flex;
+    align-items: center;
+}
+
+.request-details-container .constraints-details {
+    background-color: var(--bs-light);
+    padding: 0;
+    border-radius: 0.5rem;
+}
+.request-details-container .constraints-box {
+    background-color: var(--bs-form-select-bg);
+    border-radius: 0.5rem;
+    /*border: 1px solid var(--bs-border-color);*/
+}
+
+.request-details-container .day-constraints {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.request-details-container .day-constraints:last-child {
+    border-bottom: none;
+}
+
+.request-details-container .day-constraints .day-name {
+    font-weight: 600;
+    color: var(--bs-btn-outline-dark-color);
+    text-align: start;
+}
+
+.request-details-container .constraints-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.request-details-container .constraint-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.request-details-container .constraint-badge {
+    display: inline-block;
+    background-color: var(--bs-danger);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.813rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+
+.request-details-container .constraint-type.cannot-work {
+    color: var(--bs-danger);
+}
+
+.request-details-container .constraint-type.full-day {
+    background-color: var(--bs-danger);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+}
+
+.request-details-container .message-content,
+.request-details-container .response-content {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .request-details-container .request-metadata {
+    background-color: var(--bs-gray-900);
+}
+
+[data-theme="dark"] .request-details-container .constraints-details {
+    background-color: var(--bs-gray-900);
+}
+
+[data-theme="dark"] .request-details-container .shift-name {
+    background-color: var(--bs-gray-700);
+    color: var(--bs-gray-100);
+}
+
+
+
+
+
+
+
+
+/* Mobile adaptations */
+@media (max-width: 576px) {
+    .request-details-container {
+        padding: 0.5rem;
+    }
+
+    .request-details-container .request-details-card {
+        border-radius: 0.5rem;
+    }
+
+    .request-details-container .request-details-card .card-header,
+    .request-details-container .request-details-card .card-body {
+        padding: 1rem;
+    }
+
+    .request-details-container .request-metadata,
+    .request-details-container .constraints-details {
+        /*padding: 0.75rem;*/
+    }
+
+    .request-details-container .metadata-item {
+        font-size: 0.813rem;
+    }
+
+    .request-details-container .metadata-item i {
+        font-size: 0.875rem;
+    }
+
+    .request-details-container .section-title {
+        font-size: 0.938rem;
+    }
+
+    .request-details-container .day-constraints {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .request-details-container .day-name {
+        min-width: auto;
+        font-size: 0.875rem;
+    }
+
+    .request-details-container .shift-name,
+    .request-details-container .constraint-type {
+        font-size: 0.75rem;
+    }
+
+    .request-details-container .message-content,
+    .request-details-container .response-content {
+        font-size: 0.813rem;
+    }
+
+}

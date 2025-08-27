@@ -1,0 +1,25 @@
+/* frontend/src/features/admin-employee-management/index.css */
+
+.employee-management {
+    min-height: calc(100vh - var(--app-navbar-height) - 1rem);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.employee-management .list-card {
+    border-top-left-radius: 0!important;
+    border-top-right-radius: 0!important;
+}
+.employee-management .list-card .list-header{
+    border-top-left-radius: 0!important;
+    border-top-right-radius: 0!important;
+}
+.create-button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+[data-theme="dark"] .employee-management .text-muted {
+    color: var(--bs-gray-500) !important;
+}

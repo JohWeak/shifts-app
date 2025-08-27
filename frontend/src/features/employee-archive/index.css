@@ -1,0 +1,32 @@
+/* frontend/src/features/employee-archive/index.css */
+.employee-archive-container {
+    padding: 20px;
+    max-width: 1200px;
+    min-height: calc(100vh - 58px);
+    margin-bottom: 60px;
+}
+
+.archive-content {
+    display: flex;
+    flex-direction: column;
+    /*gap: 20px;*/
+    max-width: 500px;
+    margin: 0 auto;
+
+}
+
+@media (max-width: 768px) {
+    .archive-content {
+        /*gap: 15px;*/
+    }
+}
+
+@media (max-width: 576px) {
+    .archive-content {
+        /*gap: 10px;*/
+    }
+
+    .employee-archive-container {
+        padding: 10px 5px;
+    }
+}

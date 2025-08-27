@@ -1,0 +1,144 @@
+// frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/EmployeeRecommendationsPanel.js
+import React, {useState, useEffect, useRef, useCallback} from 'react';
+import ReactDOM from 'react-dom';
+import {Button} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import EmployeeRecommendations from '../';
+import './EmployeeRecommendationsPanel.css';
+
+const EmployeeRecommendationsPanel = ({
+                                          isOpen,
+                                          onClose,
+                                          selectedPosition,
+                                          onEmployeeSelect,
+                                          scheduleDetails,
+                                          panelWidth,
+                                          onWidthChange
+                                      }) => {
+    const {t, direction} = useI18n();
+    const [isResizing, setIsResizing] = useState(false);
+    const panelRef = useRef(null);
+    const resizeData = useRef({
+        startX: 0,
+        startWidthPercent: 0,
+    });
+    const throttleTimer = useRef(null);
+    const throttledOnWidthChange = useCallback((newWidth) => {
+        if (throttleTimer.current) return;
+
+        onWidthChange(newWidth);
+
+        throttleTimer.current = setTimeout(() => {
+            throttleTimer.current = null;
+        }, 16); // 60fps
+
+    }, [onWidthChange]);
+
+    // Handle resize
+    const handleMouseDown = (e) => {
+        resizeData.current.startX = e.pageX;
+        resizeData.current.startWidthPercent = panelWidth;
+        setIsResizing(true);
+        e.preventDefault();
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            const containerWidth = window.innerWidth;
+            const isRTL = direction === 'rtl';
+
+            const diff = isRTL
+                ? resizeData.current.startX - e.pageX
+                : e.pageX - resizeData.current.startX;
+
+            let newWidthPercent = resizeData.current.startWidthPercent - (diff / containerWidth * 100);
+
+            newWidthPercent = Math.max(20, Math.min(30, newWidthPercent));
+            throttledOnWidthChange(newWidthPercent);
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+        };
+
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            if (throttleTimer.current) {
+                clearTimeout(throttleTimer.current);
+                throttleTimer.current = null;
+            }
+        };
+    }, [isResizing, throttledOnWidthChange, direction]);
+
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!isOpen) return;
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
+    const getPanelTitle = () => {
+        if (!selectedPosition || !scheduleDetails) return t('employee.selectEmployee');
+
+        const shift = scheduleDetails.shifts?.find(s => s.shift_id === selectedPosition.shiftId);
+        const position = scheduleDetails.positions?.find(p => p.pos_id === selectedPosition.positionId);
+        const date = new Date(selectedPosition.date).toLocaleDateString();
+
+        return `${position?.pos_name || ''} - ${shift?.shift_name || ''} (${date})`;
+    };
+
+    return ReactDOM.createPortal(
+        <div
+            ref={panelRef}
+            className={`recommendation-panel ${isOpen ? 'open' : ''}`}
+            style={{width: `${panelWidth}%`}}
+        >
+            <div
+                className="resize-handle"
+                onMouseDown={handleMouseDown}
+            />
+
+            <div className="panel-header">
+                <div className="panel-title">
+                    <h5>{getPanelTitle()}</h5>
+                    <Button
+                        variant="link"
+                        className="close-btn"
+                        onClick={onClose}
+                    >
+                        <i className="bi bi-x-lg"></i>
+                    </Button>
+                </div>
+            </div>
+
+            <div className="panel-content">
+                <EmployeeRecommendations
+                    selectedPosition={selectedPosition}
+                    onEmployeeSelect={onEmployeeSelect}
+                    scheduleDetails={scheduleDetails}
+                    isVisible={isOpen}
+                />
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+export default EmployeeRecommendationsPanel;
