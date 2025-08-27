@@ -47,7 +47,6 @@ To get a local copy up and running, follow these steps.
 Make sure you have the following installed on your machine:
 
 * [Node.js](https://nodejs.org/en/) (v18 or later recommended)
-*
 
 ### 🐳 Installation with Docker (Recommended)
 
@@ -108,4 +107,4 @@ For details, see the [LICENSE](LICENSE) file.
 ### Commercial Use
 
 If you wish to use Shifts App in a commercial project or for business purposes, please contact me at
-`[s3rvlas@gmail.com]` to obtain a commercial license.
+`s3rvlas@gmail.com` to obtain a commercial license.
