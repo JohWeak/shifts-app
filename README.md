@@ -5,9 +5,7 @@
 Shifts App is a full-stack web application designed to automate and simplify the complex process of managing employee
 work schedules.
 
-<br>
-
-## 🎯 About The Project
+### 🎯 About The Project
 
 Shifts App solves a common problem for managers: the time-consuming and error-prone task of manually creating and
 adjusting work schedules. It provides a centralized platform for administrators to build schedules intelligently and for
@@ -28,15 +26,15 @@ employees to view their assignments and manage their requests.
 
 ## 🛠️ Tech Stack
 
-This project is built with the MERN stack and containerized with Docker for easy setup and deployment.
+This project is built with a classic MERN-based stack, containerized with Docker for easy setup and deployment.
 
-| Area               | Technology                      | Description                                                      |
-|--------------------|---------------------------------|------------------------------------------------------------------|
-| **Frontend**       | **React, Redux Toolkit**        | A fast, responsive UI with efficient state management.           |
-| **Backend**        | **Node.js, Express.js**         | A robust and scalable server-side foundation.                    |
-| **Database**       | **MySQL**                       | An SQL database for storing all application data.                |
-| **Authentication** | **JWT, bcrypt**                 | Secure, token-based authentication and password hashing.         |
-| **Testing**        | **Jest, React Testing Library** | Unit and integration tests to ensure code quality and stability. |
+| Area               | Technology                                 | Description                                                      |
+|--------------------|--------------------------------------------|------------------------------------------------------------------|
+| **Frontend**       | **React, Create React App, Redux Toolkit** | A robust, responsive UI with efficient state management.         |
+| **Backend**        | **Node.js, Express.js**                    | A reliable and scalable server-side foundation.                  |
+| **Database**       | **MySQL, Sequelize**                       | A powerful relational database with an ORM for data management.  |
+| **Authentication** | **JWT, bcrypt**                            | Secure, token-based authentication and password hashing.         |
+| **Testing**        | **Jest, React Testing Library**            | Unit and integration tests to ensure code quality and stability. |
 
 ## 🚀 Getting Started
 

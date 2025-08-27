@@ -1,4 +1,6 @@
-const {Sequelize} = require('sequelize');
+// backend/src/config/db.config.js
+
+const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 
@@ -17,9 +19,9 @@ const sequelize = process.env.DATABASE_URL
         dialectOptions: {
             ssl: {
                 require: false,
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
             },
-            connectTimeout: 60000
+            connectTimeout: 60000,
         },
         pool: {
             max: isProduction ? 10 : 5,
@@ -49,7 +51,7 @@ const sequelize = process.env.DATABASE_URL
             },
             logging: isDevelopment ? console.log : false,
             timezone: '+03:00',
-        }
+        },
     );
 
 

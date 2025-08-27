@@ -15,7 +15,7 @@ app.set('db', db);
 const allowedOrigins = [
     'http://localhost:3000',
     `http://172.20.10.2:3000`,
-    `http://192.168.1.111:3000`
+    `http://192.168.1.111:3000`,
 ];
 const corsOptions = {
     origin: (origin, callback) => {
@@ -26,18 +26,18 @@ const corsOptions = {
             return callback(new Error(msg), false);
         }
         return callback(null, true);
-    }
+    },
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') {
     app.use(performanceMonitor);
 }
 
 // Routes
 app.get('/', (req, res) => {
-    res.json({message: 'Shifts API is running!'});
+    res.json({ message: 'Shifts API is running!' });
 });
 
 app.use('/api/auth', require('./routes/auth.routes'));
@@ -47,7 +47,7 @@ app.use('/api/worksites', require('./routes/worksite.routes'));
 app.use('/api/constraints', require('./routes/constraint.routes'));
 app.use('/api/settings', require('./routes/settings.routes')); // Объединенный роутер настроек
 
-const {positionRouter, shiftRouter, requirementRouter} = require('./routes/position.routes');
+const { positionRouter, shiftRouter, requirementRouter } = require('./routes/position.routes');
 
 app.use('/api/positions', positionRouter);
 app.use('/api/shifts', shiftRouter);
@@ -57,7 +57,7 @@ app.use((error, req, res) => {
     console.error('SERVER ERROR:', error);
     res.status(500).json({
         message: 'Internal server error',
-        error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
     });
 });
 
