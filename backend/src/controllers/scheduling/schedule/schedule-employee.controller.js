@@ -1,6 +1,6 @@
 // backend/src/controllers/schedule/schedule-employee.controller.js
 const dayjs = require('dayjs');
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 const {
     calculateWeekBounds,
     formatDisplayDate,
@@ -17,29 +17,34 @@ const {
     WorkSite
 } = db;
 
+
 const getWeeklySchedule = async (req, res) => {
     try {
         const userId = req.userId;
-        const { date } = req.query;
+        const {date} = req.query;
 
         console.log('[GetWeeklySchedule] User ID:', userId);
 
-        // Get employee by user ID
+        // Get employee by user ID with work site details
         const employee = await Employee.findByPk(userId, {
             include: [
                 {
                     model: Position,
                     as: 'defaultPosition',
-                    attributes: ['pos_id', 'pos_name']
+                    attributes: ['pos_id', 'pos_name'],
+                    include: [{
+                        model: WorkSite,
+                        as: 'workSite',
+                        attributes: ['site_id', 'site_name', 'address']
+                    }]
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
+                    attributes: ['site_id', 'site_name', 'address']
                 }
             ]
         });
-
 
         if (!employee) {
             return res.status(404).json({
@@ -54,15 +59,20 @@ const getWeeklySchedule = async (req, res) => {
             position: employee.defaultPosition?.pos_name
         });
 
-        const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
+        const {weekStartStr, weekEndStr} = calculateWeekBounds(date);
 
         // Find published schedule for this week
         const schedule = await Schedule.findOne({
             where: {
-                start_date: { [Op.lte]: weekEndStr },
-                end_date: { [Op.gte]: weekStartStr },
+                start_date: {[Op.lte]: weekEndStr},
+                end_date: {[Op.gte]: weekStartStr},
                 status: 'published'
             },
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name', 'address']
+            }],
             order: [['createdAt', 'DESC']]
         });
 
@@ -81,7 +91,8 @@ const getWeeklySchedule = async (req, res) => {
                     position_id: employee.default_position_id,
                     position_name: employee.defaultPosition?.pos_name,
                     site_id: employee.work_site_id,
-                    site_name: employee.workSite?.site_name
+                    site_name: employee.workSite?.site_name,
+                    site_address: employee.workSite?.address
                 }
             });
         }
@@ -108,19 +119,15 @@ const getWeeklySchedule = async (req, res) => {
                 {
                     model: Position,
                     as: 'position',
-                    attributes: ['pos_id', 'pos_name']
+                    attributes: ['pos_id', 'pos_name'],
+                    include: [{
+                        model: WorkSite,
+                        as: 'workSite',
+                        attributes: ['site_id', 'site_name', 'address']
+                    }]
                 }
             ],
             order: [['work_date', 'ASC'], ['shift', 'start_time', 'ASC']]
-        });
-
-        // Add WorkSite info from schedule
-        const scheduleWithSite = await Schedule.findByPk(schedule.id, {
-            include: [{
-                model: WorkSite,
-                as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }]
         });
 
         // Build weekly schedule data
@@ -148,7 +155,10 @@ const getWeeklySchedule = async (req, res) => {
                         start_time: assignment.shift.start_time,
                         duration: assignment.shift.duration_hours,
                         color: assignment.shift.color,
-                        employees: []
+                        employees: [],
+                        // Add site info from position or schedule
+                        site_name: assignment.position?.workSite?.site_name || schedule.workSite?.site_name,
+                        site_address: assignment.position?.workSite?.address || schedule.workSite?.address
                     });
                 }
 
@@ -156,7 +166,8 @@ const getWeeklySchedule = async (req, res) => {
                     emp_id: assignment.employee.emp_id,
                     name: `${assignment.employee.first_name} ${assignment.employee.last_name}`,
                     position: assignment.position.pos_name,
-                    site_name: scheduleWithSite.workSite?.site_name,
+                    site_name: assignment.position?.workSite?.site_name || schedule.workSite?.site_name,
+                    site_address: assignment.position?.workSite?.address || schedule.workSite?.address,
                     is_current_user: assignment.employee.emp_id === employee.emp_id
                 });
             });
@@ -182,7 +193,8 @@ const getWeeklySchedule = async (req, res) => {
                 position_id: employee.default_position_id,
                 position_name: employee.defaultPosition?.pos_name,
                 site_id: employee.work_site_id,
-                site_name: employee.workSite?.site_name
+                site_name: employee.workSite?.site_name,
+                site_address: employee.workSite?.address
             },
             schedule: weekSchedule,
             metadata: {
@@ -203,13 +215,13 @@ const getWeeklySchedule = async (req, res) => {
 
 const getAdminWeeklySchedule = async (req, res) => {
     try {
-        const { date, site_id } = req.query;
+        const {date, site_id} = req.query;
 
-        const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
+        const {weekStartStr, weekEndStr} = calculateWeekBounds(date);
 
         const scheduleWhere = {
-            start_date: { [Op.lte]: weekEndStr },
-            end_date: { [Op.gte]: weekStartStr },
+            start_date: {[Op.lte]: weekEndStr},
+            end_date: {[Op.gte]: weekStartStr},
             status: 'published'
         };
 
@@ -293,8 +305,8 @@ const getAdminWeeklySchedule = async (req, res) => {
 
 const getPositionWeeklySchedule = async (req, res) => {
     try {
-        const { positionId } = req.params;
-        const { date } = req.query;
+        const {positionId} = req.params;
+        const {date} = req.query;
         const userId = req.userId;
 
         console.log('[GetPositionWeeklySchedule] Position ID:', positionId, 'User ID:', userId);
@@ -322,13 +334,13 @@ const getPositionWeeklySchedule = async (req, res) => {
             });
         }
 
-        const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
+        const {weekStartStr, weekEndStr} = calculateWeekBounds(date);
 
         // Находим опубликованное расписание
         const schedule = await Schedule.findOne({
             where: {
-                start_date: { [Op.lte]: weekEndStr },
-                end_date: { [Op.gte]: weekStartStr },
+                start_date: {[Op.lte]: weekEndStr},
+                end_date: {[Op.gte]: weekStartStr},
                 status: 'published'
             },
             include: [{
@@ -355,7 +367,7 @@ const getPositionWeeklySchedule = async (req, res) => {
             include: [{
                 model: PositionShift,
                 as: 'shifts',
-                where: { is_active: true },
+                where: {is_active: true},
                 required: false,
                 order: [['sort_order', 'ASC'], ['start_time', 'ASC']]
             }]
@@ -470,13 +482,13 @@ const getEmployeeArchiveSummary = async (req, res) => {
 
         // Get first and last shift dates
         const firstAssignment = await ScheduleAssignment.findOne({
-            where: { emp_id: employee.emp_id },
+            where: {emp_id: employee.emp_id},
             order: [['work_date', 'ASC']],
             attributes: ['work_date']
         });
 
         const lastAssignment = await ScheduleAssignment.findOne({
-            where: { emp_id: employee.emp_id },
+            where: {emp_id: employee.emp_id},
             order: [['work_date', 'DESC']],
             attributes: ['work_date']
         });
@@ -484,7 +496,7 @@ const getEmployeeArchiveSummary = async (req, res) => {
         if (!firstAssignment || !lastAssignment) {
             return res.json({
                 success: true,
-                data: { availableMonths: [] }
+                data: {availableMonths: []}
             });
         }
 
@@ -502,7 +514,7 @@ const getEmployeeArchiveSummary = async (req, res) => {
 
         res.json({
             success: true,
-            data: { availableMonths }
+            data: {availableMonths}
         });
 
     } catch (error) {
@@ -518,7 +530,7 @@ const getEmployeeArchiveSummary = async (req, res) => {
 const getEmployeeArchiveMonth = async (req, res) => {
     try {
         const userId = req.userId;
-        const { year, month } = req.query;
+        const {year, month} = req.query;
 
         if (!year || !month) {
             return res.status(400).json({

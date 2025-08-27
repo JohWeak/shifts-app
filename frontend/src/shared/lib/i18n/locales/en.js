@@ -114,7 +114,31 @@ export const en = {
             thursday: 'Thursday',
             friday: 'Friday',
             saturday: 'Saturday',
-        }
+
+        },
+        export: {
+            title: 'Add to Calendar',
+            buttonTitle: 'Export shifts to calendar',
+            selectShifts: 'Select shifts to add',
+            noShifts: 'No shifts available for export',
+            includeLocation: 'Include location',
+            includeLocationHelp: 'Add site address',
+            reminder: 'Reminder',
+            noReminder: 'No reminder',
+            atEventTime: 'At time of event',
+            minutes: '{count} minutes before',
+            hours: '{count} hour before',
+            hours_plural: '{count} hours before',
+            addToCalendar: 'Add to Calendar',
+            noLocationAvailable: 'Location information not available',
+            mobileTip: 'After tapping "Open in Calendar", your device will prompt you to add the events',
+            mobileInstructions: 'If the calendar didn\'t open, check your Downloads folder for the .ics file and open it manually',
+            errorExporting: 'Error exporting calendar events. Please try again.',
+            exporting: 'Exporting...',
+            openInCalendar: 'Open in Calendar',
+            selectCalendarType: 'Select your calendar app',
+            downloadICS: 'ICS File',
+        },
     },
     color: {
         apply: 'Apply Color',
@@ -215,6 +239,8 @@ export const en = {
         yes: 'Yes',
         new: 'New',
         view: 'View',
+        selectAll: 'Select All',
+        deselectAll: 'Deselect All',
     },
     constraints: {
         alreadySubmitted: 'You have already submitted constraints for this week',
@@ -996,7 +1022,6 @@ export const en = {
         publishedScheduleExists: 'A published schedule already exists for these dates. Please unpublish it first.',
         generationSuccess: 'Schedule generated successfully',
         saveFailed: 'Failed to save changes',
-
 
 
     },

@@ -1,5 +1,5 @@
 // frontend/src/features/employee-schedule/ui/PersonalScheduleView/index.js
-import React from 'react';
+import React, {useState} from 'react';
 import {Badge, Button, Card} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {formatShiftTime, formatTableHeaderDate, getDayName} from 'shared/lib/utils/scheduleUtils';
@@ -7,6 +7,7 @@ import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
 import {parseISO} from 'date-fns';
 import {ScheduleHeaderCard} from '../ScheduleHeaderCard';
 import './PersonalScheduleView.css';
+import CalendarExportModal from "../CalendarExportModal";
 
 const PersonalScheduleView = ({
                                   scheduleData,
@@ -19,6 +20,14 @@ const PersonalScheduleView = ({
     const {t} = useI18n();
     const currentWeekData = scheduleData?.current;
     const nextWeekData = scheduleData?.next;
+
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportWeekData, setExportWeekData] = useState(null);
+
+    const handleCalendarExport = (weekData) => {
+        setExportWeekData(weekData);
+        setShowExportModal(true);
+    };
 
     const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData || !weekData.schedule) return null;
@@ -45,6 +54,8 @@ const PersonalScheduleView = ({
                     site={employee?.site_name}
                     position={employee?.position_name}
                     week={weekData.week}
+                    showCalendarExport={true}
+                    onCalendarExport={() => handleCalendarExport(weekData)}
                 />
                 <div className="personal-schedule-list">
                     {weekData.schedule.map((day) => {
@@ -143,6 +154,13 @@ const PersonalScheduleView = ({
         <div className="personal-schedule-content">
             {showCurrentWeek && currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
             {showNextWeek && nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
+
+            <CalendarExportModal
+                show={showExportModal}
+                onHide={() => setShowExportModal(false)}
+                weekSchedule={exportWeekData}
+                employeeName={employeeInfo?.name || exportWeekData?.employee?.name}
+            />
         </div>
     );
 };

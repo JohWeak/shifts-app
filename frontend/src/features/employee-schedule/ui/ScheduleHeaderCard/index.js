@@ -1,6 +1,6 @@
 // frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/index.js
 import React from 'react';
-import {Badge, Card, Form} from 'react-bootstrap';
+import {Badge, Button, Card, Form} from 'react-bootstrap';
 import {formatWeekRange} from 'shared/lib/utils/scheduleUtils';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './ScheduleHeaderCard.css';
@@ -15,6 +15,8 @@ export const ScheduleHeaderCard = ({
                                        showNameToggle = false,
                                        showFullName,
                                        onNameToggle,
+                                       onCalendarExport,
+                                       showCalendarExport = false,
                                    }) => {
 
     const {t, direction, locale} = useI18n();
@@ -31,9 +33,19 @@ export const ScheduleHeaderCard = ({
                                 {title}
                             </h6>)}
                     </div>
-                    <div>
+                    <div className="d-flex align-items-center gap-2">
+                        {showCalendarExport && (
+                            <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={onCalendarExport}
+                                title={t('calendar.export.buttonTitle')}
+                            >
+                                <i className="bi bi-calendar-plus"></i>
+                            </Button>
+                        )}
                         {week && (
-                            <Badge bg="primary mb-2">
+                            <Badge bg="primary">
                                 {formatWeekRange(week, locale)}
                             </Badge>
                         )}
