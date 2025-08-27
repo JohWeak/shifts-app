@@ -30,13 +30,13 @@ employees to view their assignments and manage their requests.
 
 This project is built with the MERN stack and containerized with Docker for easy setup and deployment.
 
-| Area              | Technology                                   | Description                                                     |
-| ----------------- | -------------------------------------------- | --------------------------------------------------------------- |
-| **Frontend**      | **React, Redux Toolkit**               | A fast, responsive UI with efficient state management.          |
-| **Backend**       | **Node.js, Express.js**                      | A robust and scalable server-side foundation.                   |
-| **Database**      | **MySQL**                                    | An SQL database for storing all application data.     |
-| **Authentication**| **JWT, bcrypt**                              | Secure, token-based authentication and password hashing.        |
-| **Testing**       | **Jest, React Testing Library**              | Unit and integration tests to ensure code quality and stability.|
+| Area               | Technology                      | Description                                                      |
+|--------------------|---------------------------------|------------------------------------------------------------------|
+| **Frontend**       | **React, Redux Toolkit**        | A fast, responsive UI with efficient state management.           |
+| **Backend**        | **Node.js, Express.js**         | A robust and scalable server-side foundation.                    |
+| **Database**       | **MySQL**                       | An SQL database for storing all application data.                |
+| **Authentication** | **JWT, bcrypt**                 | Secure, token-based authentication and password hashing.         |
+| **Testing**        | **Jest, React Testing Library** | Unit and integration tests to ensure code quality and stability. |
 
 ## 🚀 Getting Started
 
@@ -97,4 +97,15 @@ contributions you make are **greatly appreciated**.
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC
+BY-NC-SA 4.0)**.
+
+- **You are free to** use, share, and adapt this software for **non-commercial purposes**.
+- **You are not allowed to** use this software for **commercial purposes** without a separate license.
+
+For details, see the [LICENSE](LICENSE) file.
+
+### Commercial Use
+
+If you wish to use Shifts App in a commercial project or for business purposes, please contact me at
+`[s3rvlas@gmail.com]` to obtain a commercial license.
