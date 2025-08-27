@@ -1,27 +1,27 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
-import React, {useEffect, useRef, useState} from 'react';
-import {Link, useLocation, useNavigate, useOutlet} from 'react-router-dom';
-import {Badge, Button, Container, Dropdown, Nav, Navbar} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {logout} from 'features/auth/model/authSlice';
-import {LanguageSwitch} from '../../components/LanguageSwitch/LanguageSwitch';
-import {useI18n} from "shared/lib/i18n/i18nProvider";
-import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
-import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
-import {fetchSchedules, resetScheduleView,} from 'features/admin-schedule-management/model/scheduleSlice';
-import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
-import {addNotification} from "../../../../app/model/notificationsSlice";
-import {AnimatePresence, motion} from "motion/react";
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useOutlet } from 'react-router-dom';
+import { Badge, Button, Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from 'features/auth/model/authSlice';
+import { LanguageSwitch } from '../../components/LanguageSwitch';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import GlobalAlerts from 'shared/ui/components/GlobalAlerts';
+import ThemeToggle from 'shared/ui/components/ThemeToggle';
+import { fetchSchedules, resetScheduleView } from 'features/admin-schedule-management/model/scheduleSlice';
+import { fetchAllRequests } from 'features/admin-permanent-requests/model/adminRequestsSlice';
+import { addNotification } from '../../../../app/model/notificationsSlice';
+import { AnimatePresence, motion } from 'motion/react';
 
 import './AdminLayout.css';
 
 const AdminLayout = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const navigate = useNavigate();
     const location = useLocation();
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const dispatch = useDispatch();
-    const {pendingCount} = useSelector(state => state.adminRequests);
+    const { pendingCount } = useSelector(state => state.adminRequests);
     const sidebarRef = useRef(null);
     const expandTimeoutRef = useRef(null);
 
@@ -79,49 +79,49 @@ const AdminLayout = () => {
             label: t('navigation.dashboard'),
             icon: 'speedometer2',
             path: '/admin',
-            badge: null
+            badge: null,
         },
         {
             key: 'schedules',
             label: t('navigation.schedules'),
             icon: 'calendar-week',
             path: '/admin/schedules',
-            badge: t('common.new')
+            badge: t('common.new'),
         },
         {
             key: 'algorithms',
             label: t('navigation.algorithms'),
             icon: 'cpu-fill',
             path: '/admin/algorithms',
-            badge: null
+            badge: null,
         },
         {
             key: 'employees',
             label: t('navigation.employees'),
             icon: 'people-fill',
             path: '/admin/employees',
-            badge: null
+            badge: null,
         },
         {
             key: 'workplace',
             label: t('navigation.workplace'),
             icon: 'building',
             path: '/admin/workplace',
-            badge: null
+            badge: null,
         },
         {
             key: 'reports',
             label: t('navigation.reports'),
             icon: 'graph-up-arrow',
             path: '/admin/reports',
-            badge: null
+            badge: null,
         },
         {
             key: 'requests',
             label: t('navigation.requests'),
             icon: 'clipboard-check',
             path: '/admin/permanent-requests',
-            badge: pendingCount > 0 ? pendingCount : null
+            badge: pendingCount > 0 ? pendingCount : null,
         },
     ];
 
@@ -140,7 +140,7 @@ const AdminLayout = () => {
         navigate(path);
     };
 
-    const SidebarContent = ({isCompact = false}) => (
+    const SidebarContent = ({ isCompact = false }) => (
         <Nav className="flex-column admin-nav">
             {navigationItems.map(item => (
                 <Nav.Item key={item.key}>
@@ -247,10 +247,10 @@ const AdminLayout = () => {
                         >
                             <i className="bi bi-bell-fill"></i>
                         </Button>
-                        <ThemeToggle variant="icon"/>
-                        <LanguageSwitch/>
+                        <ThemeToggle variant="icon" />
+                        <LanguageSwitch />
 
-                        <Dropdown align="end" className='ms-1'>
+                        <Dropdown align="end" className="ms-1">
                             <Dropdown.Toggle
                                 className="user-dropdown-btn border-0 shadow-sm"
                                 id="user-dropdown"
@@ -267,7 +267,7 @@ const AdminLayout = () => {
                                     <div className="text-muted small">{t('auth.signedInAs')}</div>
                                     <div className="fw-semibold">{t('common.admin')}</div>
                                 </Dropdown.Header>
-                                <Dropdown.Divider/>
+                                <Dropdown.Divider />
                                 <Dropdown.Item>
                                     <i className="bi bi-person me-2"></i>
                                     {t('common.profile')}
@@ -276,7 +276,7 @@ const AdminLayout = () => {
                                     <i className="bi bi-gear me-2"></i>
                                     {t('common.settings')}
                                 </Dropdown.Item>
-                                <Dropdown.Divider/>
+                                <Dropdown.Divider />
                                 <Dropdown.Item onClick={handleLogout} className="text-danger">
                                     <i className="bi bi-box-arrow-right me-2"></i>
                                     {t('auth.logout')}
@@ -296,7 +296,7 @@ const AdminLayout = () => {
                     onMouseLeave={handleSidebarMouseLeave}
                 >
                     <div className="sidebar-content">
-                        <SidebarContent isCompact={true}/>
+                        <SidebarContent isCompact={true} />
                     </div>
                 </div>
 
@@ -306,12 +306,12 @@ const AdminLayout = () => {
                         <motion.main
                             key={location.pathname}
                             className="admin-main-content"
-                            initial={{opacity: 0.4, y: -10}}
-                            animate={{opacity: 1, y: 0}}
-                            exit={{opacity: 0, y: 10}}
+                            initial={{ opacity: 0.4, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
                             transition={{
                                 duration: 0.2,
-                                ease: "easeInOut",
+                                ease: 'easeInOut',
                             }}
                         >
                             {outlet}
@@ -320,7 +320,7 @@ const AdminLayout = () => {
                 </div>
             </div>
 
-            <GlobalAlerts/>
+            <GlobalAlerts />
         </div>
     );
 };

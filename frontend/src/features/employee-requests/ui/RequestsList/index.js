@@ -1,23 +1,23 @@
-// frontend/src/features/employee-requests/ui/RequestsList/RequestsList.js
+// frontend/src/features/employee-requests/ui/RequestsList/index.js
 import React from 'react';
-import {Dropdown, ListGroup} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import {formatDateTime} from 'shared/lib/utils/scheduleUtils';
+import { Dropdown, ListGroup } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import StatusBadge from 'shared/ui/components/StatusBadge';
+import { formatDateTime } from 'shared/lib/utils/scheduleUtils';
 import './RequestsList.css';
 
-const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}) => {
-    const {t, locale} = useI18n();
+const RequestsList = ({ requests, onRequestClick, onEditRequest, onDeleteRequest }) => {
+    const { t, locale } = useI18n();
 
     const pendingRequests = requests.filter(r => r.status === 'pending');
     const activeProcessedRequests = requests.filter(r =>
-        r.status !== 'pending' && r.is_active !== false
+        r.status !== 'pending' && r.is_active !== false,
     );
     const inactiveRequests = requests.filter(r =>
-        r.status !== 'pending' && r.is_active === false
+        r.status !== 'pending' && r.is_active === false,
     );
 
-    const CustomToggle = React.forwardRef(({children, onClick}, ref) => (
+    const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
         <button
             ref={ref}
             onClick={(e) => {
@@ -31,7 +31,7 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
         </button>
     ));
 
-    const RequestItem = ({request}) => {
+    const RequestItem = ({ request }) => {
         const constraintsCount = request.constraints?.length || 0;
         const canEdit = request.status === 'pending' && !request.id.toString().startsWith('temp_');
         const isInactive = request.is_active === false;
@@ -82,7 +82,7 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                 </div>
                 {canEdit && (
                     <Dropdown>
-                        <Dropdown.Toggle as={CustomToggle} id={`request-actions-${request.id}`}/>
+                        <Dropdown.Toggle as={CustomToggle} id={`request-actions-${request.id}`} />
 
                         <Dropdown.Menu>
                             {/* Edit Button */}
@@ -110,7 +110,7 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                     <h6 className="text-muted mb-3">{t('requests.pendingRequests')}</h6>
                     <ListGroup>
                         {pendingRequests.map(request => (
-                            <RequestItem key={request.id} request={request}/>
+                            <RequestItem key={request.id} request={request} />
                         ))}
                     </ListGroup>
                 </div>
@@ -121,7 +121,7 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                     <h6 className="text-muted mb-3">{t('requests.activeProcessedRequests')}</h6>
                     <ListGroup>
                         {activeProcessedRequests.map(request => (
-                            <RequestItem key={request.id} request={request}/>
+                            <RequestItem key={request.id} request={request} />
                         ))}
                     </ListGroup>
                 </div>
@@ -132,7 +132,7 @@ const RequestsList = ({requests, onRequestClick, onEditRequest, onDeleteRequest}
                     <h6 className="text-muted mb-3">{t('requests.inactiveRequests')}</h6>
                     <ListGroup>
                         {inactiveRequests.map(request => (
-                            <RequestItem key={request.id} request={request}/>
+                            <RequestItem key={request.id} request={request} />
                         ))}
                     </ListGroup>
                 </div>

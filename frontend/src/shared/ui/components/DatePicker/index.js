@@ -1,7 +1,7 @@
-// frontend/src/shared/ui/components/DatePicker/DatePicker.js
-import React, { useState, useRef, useEffect } from 'react';
-import { Form, InputGroup, Overlay, Popover, Card } from 'react-bootstrap';
-import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
+// frontend/src/shared/ui/components/DatePicker/index.js
+import React, { useEffect, useRef, useState } from 'react';
+import { Card, Form, InputGroup, Overlay, Popover } from 'react-bootstrap';
+import { endOfWeek, format, isValid, parse, startOfWeek } from 'date-fns';
 import { enUS, he, ru } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -20,7 +20,7 @@ const DatePicker = ({
                         displayMode = 'input', // 'input' | 'inline'
                         selectionMode = 'week', // 'week' | 'day'
                     }) => {
-    const { locale, } = useI18n();
+    const { locale } = useI18n();
     const [showCalendar, setShowCalendar] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [hoveredDay, setHoveredDay] = useState(null);
@@ -159,7 +159,8 @@ const DatePicker = ({
                 </InputGroup.Text>
             </InputGroup>
 
-            <Overlay show={showCalendar} target={inputRef.current} placement="bottom-start" onHide={() => setShowCalendar(false)} rootClose>
+            <Overlay show={showCalendar} target={inputRef.current} placement="bottom-start"
+                     onHide={() => setShowCalendar(false)} rootClose>
                 <Popover className="custom-calendar-popover custom-day-picker-wrapper">
                     <Popover.Body className="p-2">
                         {CalendarComponent}

@@ -1,4 +1,4 @@
-// frontend/src/shared/ui/components/EmptyState.js
+// frontend/src/shared/ui/components/index.js
 
 import React from 'react';
 import { Button } from 'react-bootstrap';

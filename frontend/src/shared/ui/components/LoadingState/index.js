@@ -1,4 +1,4 @@
-// LoadingState.js
+// index.js
 import React from 'react';
 import './LoadingState.css';
 

@@ -1,4 +1,4 @@
-// frontend/src/features/employee-constraints/ui/ConstraintActions.js
+// frontend/src/features/employee-constraints/ui/index.js
 
 import React from 'react';
 import { Button, Spinner } from 'react-bootstrap';
@@ -9,15 +9,15 @@ import './ConstraintActions.css';
 const SegmentedControl = ({ currentMode, onModeChange, t, customColors }) => {
     // Стиль для индикатора
     const indicatorStyle = {
-        backgroundColor: customColors[currentMode].background
+        backgroundColor: customColors[currentMode].background,
     };
 
     // Стили для текста. Применяются только к активному сегменту.
     const cannotWorkTextStyle = {
-        color: currentMode === 'cannot_work' ? customColors.cannot_work.text : ''
+        color: currentMode === 'cannot_work' ? customColors.cannot_work.text : '',
     };
     const preferWorkTextStyle = {
-        color: currentMode === 'prefer_work' ? customColors.prefer_work.text : ''
+        color: currentMode === 'prefer_work' ? customColors.prefer_work.text : '',
     };
 
     return (
@@ -40,7 +40,7 @@ const PaletteButton = ({ currentMode, onColorButtonClick, t, customColors }) => 
     const paletteStyle = {
         backgroundColor: customColors[currentMode].background,
         borderColor: customColors[currentMode].background,
-        color: customColors[currentMode].text
+        color: customColors[currentMode].text,
     };
 
     return (
@@ -70,7 +70,8 @@ const ConstraintActions = (props) => {
                 <Button variant="primary" onClick={onEdit} className="edit-button" disabled={submitting}>
                     {submitting ? (
                         <>
-                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"
+                                     className="me-2" />
                             {t('common.saving')}
                         </>
                     ) : (
@@ -90,16 +91,20 @@ const ConstraintActions = (props) => {
                         <SegmentedControl t={t} customColors={customColors} {...actionProps} />
                         <div className="mobile-actions-container">
                             <div className="secondary-actions-group">
-                                <Button variant="outline-secondary" onClick={actionProps.onCancel} disabled={actionProps.submitting} title={t('common.cancel')}>
+                                <Button variant="outline-secondary" onClick={actionProps.onCancel}
+                                        disabled={actionProps.submitting} title={t('common.cancel')}>
                                     {t('common.cancel')}
                                 </Button>
-                                <Button variant="outline-secondary" onClick={actionProps.onClear} disabled={actionProps.submitting} title={t('common.reset')}>
+                                <Button variant="outline-secondary" onClick={actionProps.onClear}
+                                        disabled={actionProps.submitting} title={t('common.reset')}>
                                     <i className="bi bi-arrow-counterclockwise"></i>
                                 </Button>
                                 <PaletteButton t={t} customColors={customColors} {...actionProps} />
                             </div>
-                            <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting} className="submit-button">
-                                {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2"/> : <i className="bi bi-check-lg me-1"></i>}
+                            <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting}
+                                    className="submit-button">
+                                {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2" /> :
+                                    <i className="bi bi-check-lg me-1"></i>}
                                 {actionProps.submitting ? t('common.saving') : t('common.submit')}
                             </Button>
                         </div>
@@ -108,17 +113,21 @@ const ConstraintActions = (props) => {
                     // ДЕСКТОПНАЯ ВЕРСТКА
                     <div className="panel-content desktop-layout">
                         <div className="secondary-actions-group">
-                            <Button variant="outline-secondary" onClick={actionProps.onCancel} disabled={actionProps.submitting} title={t('common.cancel')}>
+                            <Button variant="outline-secondary" onClick={actionProps.onCancel}
+                                    disabled={actionProps.submitting} title={t('common.cancel')}>
                                 {t('common.cancel')}
                             </Button>
-                            <Button variant="outline-secondary" onClick={actionProps.onClear} disabled={actionProps.submitting} title={t('common.reset')}>
+                            <Button variant="outline-secondary" onClick={actionProps.onClear}
+                                    disabled={actionProps.submitting} title={t('common.reset')}>
                                 <i className="bi bi-arrow-counterclockwise"></i>
                             </Button>
                             <PaletteButton t={t} customColors={customColors} {...actionProps} />
                         </div>
                         <SegmentedControl t={t} customColors={customColors} {...actionProps} />
-                        <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting} className="submit-button">
-                            {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2"/> : <i className="bi bi-check-lg me-1"></i>}
+                        <Button variant="primary" onClick={actionProps.onSubmit} disabled={actionProps.submitting}
+                                className="submit-button">
+                            {actionProps.submitting ? <Spinner size="sm" as="span" className="me-2" /> :
+                                <i className="bi bi-check-lg me-1"></i>}
                             {actionProps.submitting ? t('common.saving') : t('common.submit')}
                         </Button>
                     </div>

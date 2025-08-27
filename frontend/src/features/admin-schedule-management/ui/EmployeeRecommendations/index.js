@@ -1,11 +1,11 @@
 // frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/index.js
 
-import React, { useState, useEffect } from 'react';
-import { Alert, Form, Tab, Tabs, Badge } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Alert, Badge, Form, Tab, Tabs } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRecommendations } from '../../model/scheduleSlice';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import LoadingState from 'shared/ui/components/LoadingState';
 import EmployeeList from './components/EmployeeList';
 import UnavailableEmployeeGroups from './components/UnavailableEmployeeGroups';
 import './EmployeeRecommendations.css';
@@ -15,7 +15,7 @@ const EmployeeRecommendations = ({
                                      onEmployeeSelect,
                                      scheduleDetails,
                                      isVisible = true,
-                                     onTabChange = null
+                                     onTabChange = null,
                                  }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
@@ -31,7 +31,7 @@ const EmployeeRecommendations = ({
                 positionId: selectedPosition.positionId,
                 shiftId: selectedPosition.shiftId,
                 date: selectedPosition.date,
-                scheduleId: scheduleDetails.schedule.id
+                scheduleId: scheduleDetails.schedule.id,
             }));
         }
     }, [isVisible, selectedPosition, scheduleDetails, pendingChanges, dispatch]);
@@ -85,27 +85,35 @@ const EmployeeRecommendations = ({
                 <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-3">
                     <Tab
                         eventKey="available"
-                        title={<span><Badge bg="success" pill className="me-2">{recommendations?.available?.length || 0}</Badge>{t('employee.tabs.available')}</span>}
+                        title={<span><Badge bg="success" pill
+                                            className="me-2">{recommendations?.available?.length || 0}</Badge>{t('employee.tabs.available')}</span>}
                     >
-                        <EmployeeList employees={recommendations?.available} type="available" onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
+                        <EmployeeList employees={recommendations?.available} type="available"
+                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="unavailable"
-                        title={<span><Badge bg="danger" pill className="me-2">{countUnavailable}</Badge>{t('employee.tabs.unavailable')}</span>}
+                        title={<span><Badge bg="danger" pill
+                                            className="me-2">{countUnavailable}</Badge>{t('employee.tabs.unavailable')}</span>}
                     >
-                        <UnavailableEmployeeGroups recommendations={recommendations} onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
+                        <UnavailableEmployeeGroups recommendations={recommendations} onItemClick={onEmployeeSelect}
+                                                   searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="cross_position"
-                        title={<span><Badge bg="warning" pill className="me-2">{recommendations?.cross_position?.length || 0}</Badge>{t('employee.tabs.crossPosition')}</span>}
+                        title={<span><Badge bg="warning" pill
+                                            className="me-2">{recommendations?.cross_position?.length || 0}</Badge>{t('employee.tabs.crossPosition')}</span>}
                     >
-                        <EmployeeList employees={recommendations?.cross_position} type="cross_position" onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
+                        <EmployeeList employees={recommendations?.cross_position} type="cross_position"
+                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="other_site"
-                        title={<span><Badge bg="info" pill className="me-2">{recommendations?.other_site?.length || 0}</Badge>{t('employee.tabs.otherSite')}</span>}
+                        title={<span><Badge bg="info" pill
+                                            className="me-2">{recommendations?.other_site?.length || 0}</Badge>{t('employee.tabs.otherSite')}</span>}
                     >
-                        <EmployeeList employees={recommendations?.other_site} type="other_site" onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
+                        <EmployeeList employees={recommendations?.other_site} type="other_site"
+                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                 </Tabs>
             )}

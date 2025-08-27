@@ -1,11 +1,11 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/index.js
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Card, Table, Button, Badge, Spinner, Pagination, Form} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {getStatusBadgeVariant} from "shared/lib/utils/scheduleUtils";
-import {useSortableData} from 'shared/hooks/useSortableData';
-import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
-import {motion, AnimatePresence} from "motion/react";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Badge, Button, Card, Form, Pagination, Spinner, Table } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { getStatusBadgeVariant } from 'shared/lib/utils/scheduleUtils';
+import { useSortableData } from 'shared/hooks/useSortableData';
+import SortableHeader from 'shared/ui/components/SortableHeader';
+import { AnimatePresence, motion } from 'motion/react';
 import './EmployeeList.css';
 
 const EmployeeList = ({
@@ -18,7 +18,7 @@ const EmployeeList = ({
                           onPageChange,
                           onPageSizeChange,
                       }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const isInitialMount = useRef(true);
     const [isAnimating, setIsAnimating] = useState(false);
     const animationTimeout = 5000;
@@ -50,7 +50,7 @@ const EmployeeList = ({
     const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
         dataToRender,
         { field: 'name', order: 'ASC' },
-        sortingAccessors
+        sortingAccessors,
     );
 
 
@@ -61,12 +61,12 @@ const EmployeeList = ({
     const tableBodyVariants = {
         hidden: {
             opacity: 0,
-            transition: { duration: 0.15 }
+            transition: { duration: 0.15 },
         },
         visible: {
             opacity: 1,
-            transition: { duration: 0.15, staggerChildren: 0.04 }
-        }
+            transition: { duration: 0.15, staggerChildren: 0.04 },
+        },
     };
 
     const rowVariants = {
@@ -77,7 +77,7 @@ const EmployeeList = ({
         visible: {
             opacity: 1,
             y: 0,
-            transition: { ease: "easeOut", duration: 0.15 }
+            transition: { ease: 'easeOut', duration: 0.15 },
         },
     };
 
@@ -139,7 +139,7 @@ const EmployeeList = ({
                                 );
                             }
                             if (page === pagination.page - 2 || page === pagination.page + 2) {
-                                return <Pagination.Ellipsis key={page} disabled/>;
+                                return <Pagination.Ellipsis key={page} disabled />;
                             }
                             return null;
                         })}
@@ -196,12 +196,12 @@ const EmployeeList = ({
                     {loading && !isInitialMount.current && (
                         <motion.div
                             className="loading-overlay"
-                            initial={{opacity: 0}}
-                            animate={{opacity: 1}}
-                            exit={{opacity: 0}}
-                            transition={{duration: 0.2}}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
                         >
-                            <Spinner animation="border" variant="primary"/>
+                            <Spinner animation="border" variant="primary" />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -258,18 +258,18 @@ const EmployeeList = ({
                                         className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
                                         variants={rowVariants}
                                         onClick={() => onEdit(employee)}
-                                        style={{cursor: 'pointer'}}
+                                        style={{ cursor: 'pointer' }}
                                     >
                                         <td>
                                             <div className="d-flex align-items-center">
                                                 <div
                                                     className="employee-avatar me-3"
-                                                    style={{cursor: 'pointer'}}
+                                                    style={{ cursor: 'pointer' }}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         if (employee.phone && window.confirm(t('employee.confirmCall', {
                                                             name: `${employee.first_name} ${employee.last_name}`,
-                                                            phone: employee.phone
+                                                            phone: employee.phone,
                                                         }))) {
                                                             window.location.href = `tel:${employee.phone}`;
                                                         } else if (!employee.phone) {

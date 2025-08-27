@@ -1,17 +1,17 @@
 //frontend/src/features/admin-schedule-management/ui/generate-schedule/index.js
-import React, {useEffect, useMemo, useState} from 'react';
-import {Button, Card, Form, Spinner} from 'react-bootstrap';
-import {useSelector} from 'react-redux';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {getNextWeekStart} from 'shared/lib/utils/scheduleUtils';
-import DatePicker from 'shared/ui/components/DatePicker/DatePicker';
-import {ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS} from 'shared/config/scheduleConstants';
-import './GenerateScheduleForm.css'
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Card, Form, Spinner } from 'react-bootstrap';
+import { useSelector } from 'react-redux';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { getNextWeekStart } from 'shared/lib/utils/scheduleUtils';
+import DatePicker from 'shared/ui/components/DatePicker';
+import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from 'shared/config/scheduleConstants';
+import './GenerateScheduleForm.css';
 
-const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, workSitesLoading}) => {
-    const {t} = useI18n();
-    const {systemSettings} = useSelector(state => state.settings);
-    const {positions: allPositions} = useSelector(state => state.workplace);
+const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, workSitesLoading }) => {
+    const { t } = useI18n();
+    const { systemSettings } = useSelector(state => state.settings);
+    const { positions: allPositions } = useSelector(state => state.workplace);
     const weekStartDay = systemSettings?.weekStartDay || 0;
     const minSelectableDate = getNextWeekStart(weekStartDay);
 
@@ -19,7 +19,7 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
         ...DEFAULT_GENERATION_SETTINGS,
         weekStart: minSelectableDate,
         algorithm: 'auto',
-        position_ids: []
+        position_ids: [],
     });
 
 
@@ -34,17 +34,17 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
     useEffect(() => {
         const activeWorkSites = safeWorkSites.filter(site => site.is_active);
         if (activeWorkSites.length > 0 && !settings.site_id) {
-            setSettings(prev => ({...prev, site_id: activeWorkSites[0].site_id}));
+            setSettings(prev => ({ ...prev, site_id: activeWorkSites[0].site_id }));
         }
     }, [safeWorkSites, settings.site_id]);
     useEffect(() => {
         if (availablePositions.length > 0) {
             setSettings(prev => ({
                 ...prev,
-                position_ids: availablePositions.map(p => p.pos_id)
+                position_ids: availablePositions.map(p => p.pos_id),
             }));
         } else {
-            setSettings(prev => ({...prev, position_ids: []}));
+            setSettings(prev => ({ ...prev, position_ids: [] }));
         }
     }, [availablePositions]);
 
@@ -53,7 +53,7 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
             const newPositionIds = prev.position_ids.includes(posId)
                 ? prev.position_ids.filter(id => id !== posId)
                 : [...prev.position_ids, posId];
-            return {...prev, position_ids: newPositionIds};
+            return { ...prev, position_ids: newPositionIds };
         });
     };
 
@@ -78,20 +78,20 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
                                 selectionMode="week"
                                 value={settings.weekStart}
                                 weekStartsOn={weekStartDay}
-                                onChange={(date) => setSettings(prev => ({...prev, weekStart: date}))}
+                                onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
                             />
                         </div>
                     </Form.Group>
                     <div className="form-settings-section">
                         <Form.Group className="mb-3">
                             <Form.Label>{t('modal.generateSchedule.workSite')}</Form.Label>
-                            {workSitesLoading ? <Spinner size="sm"/> : (
+                            {workSitesLoading ? <Spinner size="sm" /> : (
                                 <Form.Select
-                                    style={{cursor: 'pointer'}}
+                                    style={{ cursor: 'pointer' }}
                                     value={settings.site_id || ''}
                                     onChange={(e) => setSettings(prev => ({
                                         ...prev,
-                                        site_id: parseInt(e.target.value)
+                                        site_id: parseInt(e.target.value),
                                     }))}
                                 >
                                     {workSites?.filter(site => site.is_active).map(site => (
@@ -124,7 +124,7 @@ const GenerateScheduleForm = ({onGenerate, onCancel, generating, workSites, work
                             disabled={generating}>{t('common.cancel')}</Button>
                     <Button onClick={handleSubmit} variant="primary" disabled={generating || !isFormValid}>
                         {generating ? <><Spinner size="sm"
-                                                 className="me-2"/>{t('modal.generateSchedule.generating')}</> : t('modal.generateSchedule.generate')}
+                                                 className="me-2" />{t('modal.generateSchedule.generating')}</> : t('modal.generateSchedule.generate')}
                     </Button>
                 </div>
             </Card.Body>

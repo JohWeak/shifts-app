@@ -1,16 +1,19 @@
 // frontend/src/features/employee-archive/index.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
-import CalendarView from './ui/CalendarView/CalendarView';
-import MonthlyStats from './ui/MonthlyStats/MonthlyStats';
-import ShiftDetailsPanel from './ui/ShiftDetailsPanel/ShiftDetailsPanel';
-import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
-import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
-import { fetchEmployeeArchiveMonth, fetchEmployeeArchiveSummary } from 'features/employee-dashboard/model/employeeDataSlice';
+import LoadingState from 'shared/ui/components/LoadingState';
+import ErrorMessage from 'shared/ui/components/ErrorMessage';
+import CalendarView from './ui/CalendarView';
+import MonthlyStats from './ui/MonthlyStats';
+import ShiftDetailsPanel from './ui/ShiftDetailsPanel';
+import PageHeader from '../../shared/ui/components/PageHeader';
+import { useMediaQuery } from '../../shared/hooks/useMediaQuery';
+import {
+    fetchEmployeeArchiveMonth,
+    fetchEmployeeArchiveSummary,
+} from 'features/employee-dashboard/model/employeeDataSlice';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './index.css';
 
@@ -26,7 +29,7 @@ const EmployeeArchive = () => {
         archiveSummaryError,
         archiveCache,
         archiveLoading,
-        archiveError
+        archiveError,
     } = useSelector(state => state.employeeData);
 
     const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -58,7 +61,6 @@ const EmployeeArchive = () => {
     };
 
 
-
     const availableMonths = archiveSummary?.availableMonths || [];
     const cacheKey = selectedMonth ? `${selectedMonth.getFullYear()}-${selectedMonth.getMonth() + 1}` : null;
     const monthData = cacheKey ? archiveCache[cacheKey]?.data : null;
@@ -70,7 +72,6 @@ const EmployeeArchive = () => {
         const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
         return monthData.shifts.find(shift => shift.work_date === dateStr);
     };
-
 
 
     return (

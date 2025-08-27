@@ -1,19 +1,19 @@
-// frontend/src/features/employee-requests/ui/RequestDetails/RequestDetails.js
-import React, {useState, useEffect} from 'react';
-import {Container, Card, Button, Alert, Badge} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useDispatch, useSelector} from 'react-redux';
-import {constraintAPI} from 'shared/api/apiService';
-import {deleteRequest} from '../../model/requestsSlice';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-import {formatDateTime, getDayName} from 'shared/lib/utils/scheduleUtils';
-import {getDayIndex, groupConstraintsByDay} from "shared/lib/utils/constraintUtils";
+// frontend/src/features/employee-requests/ui/RequestDetails/index.js
+import React, { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useDispatch, useSelector } from 'react-redux';
+import { constraintAPI } from 'shared/api/apiService';
+import { deleteRequest } from '../../model/requestsSlice';
+import StatusBadge from 'shared/ui/components/StatusBadge';
+import LoadingState from 'shared/ui/components/LoadingState';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
+import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
+import { getDayIndex, groupConstraintsByDay } from 'shared/lib/utils/constraintUtils';
 import './RequestDetails.css';
 
-const RequestDetails = ({request, onBack, onEdit, onDelete}) => {
-    const {t, locale} = useI18n();
+const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
+    const { t, locale } = useI18n();
     const dispatch = useDispatch();
     const [shiftsData, setShiftsData] = useState({});
     const [loading, setLoading] = useState(true);
@@ -65,7 +65,7 @@ const RequestDetails = ({request, onBack, onEdit, onDelete}) => {
 
 
     if (loading) {
-        return <LoadingState/>;
+        return <LoadingState />;
     }
 
     const constraintsByDay = groupConstraintsByDay(request.constraints, weekStartsOn);

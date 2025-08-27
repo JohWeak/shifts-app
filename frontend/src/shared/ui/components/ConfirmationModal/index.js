@@ -1,6 +1,6 @@
-// frontend/src/shared/ui/components/ConfirmationModal.js
+// frontend/src/shared/ui/components/index.js
 import React from 'react';
-import { Modal, Button, Spinner } from 'react-bootstrap';
+import { Button, Modal, Spinner } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './ConfirmationModal.css';
 
@@ -13,8 +13,8 @@ export const ConfirmationModal = ({
                                       loading = false,
                                       confirmText,
                                       cancelText,
-                                      variant = "danger",
-                                      size = "md",
+                                      variant = 'danger',
+                                      size = 'md',
                                       children,
                                       confirmVariant,
                                   }) => {

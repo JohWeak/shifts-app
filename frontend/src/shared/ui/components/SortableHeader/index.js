@@ -1,4 +1,4 @@
-// frontend/src/shared/ui/components/SortableHeader/SortableHeader.js
+// frontend/src/shared/ui/components/SortableHeader/index.js
 import React from 'react';
 import './SortableHeader.css';
 
@@ -21,7 +21,7 @@ const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) =
     const headerClasses = [
         'sortable-header',
         isSortable ? 'is-sortable' : '',
-        isSorted ? 'sorted' : ''
+        isSorted ? 'sorted' : '',
     ].join(' ').trim();
 
     return (

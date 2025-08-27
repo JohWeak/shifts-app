@@ -1,14 +1,14 @@
-// frontend/src/shared/ui/components/GlobalAlerts/GlobalAlerts.js
-import React, {useCallback, useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Alert, Spinner} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {removeNotification} from 'app/model/notificationsSlice';
+// frontend/src/shared/ui/components/GlobalAlerts/index.js
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Alert, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { removeNotification } from 'app/model/notificationsSlice';
 import './GlobalAlerts.css';
 
 const GlobalAlerts = () => {
     const notifications = useSelector((state) => state.notifications.notifications);
-    const {locale} = useI18n();
+    const { locale } = useI18n();
     const isRTL = locale === 'he';
 
     return (
@@ -23,10 +23,10 @@ const GlobalAlerts = () => {
     );
 };
 
-const AlertItem = ({notification}) => {
+const AlertItem = ({ notification }) => {
     const dispatch = useDispatch();
     const [isClosing, setIsClosing] = useState(false);
-    const {t} = useI18n();
+    const { t } = useI18n();
 
     // Support both 'variant' and 'type' for backwards compatibility
     const variant = notification.variant || notification.type || 'info';

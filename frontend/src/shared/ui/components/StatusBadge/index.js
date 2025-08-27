@@ -1,4 +1,4 @@
-// frontend/src/shared/ui/components/StatusBadge/StatusBadge.js
+// frontend/src/shared/ui/components/StatusBadge/index.js
 import React from 'react';
 import { Badge } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
@@ -11,7 +11,7 @@ const StatusBadge = ({
                          mode = 'text',
                          variant,  //  для кастомного варианта
                          text,     // для кастомного текста
-                         statusText // Для обратной совместимости
+                         statusText, // Для обратной совместимости
                      }) => {
     const { t } = useI18n();
 
@@ -26,7 +26,7 @@ const StatusBadge = ({
 
         pending: 'warning',
         approved: 'success',
-        rejected: 'danger'
+        rejected: 'danger',
     };
 
     const icons = {
@@ -39,13 +39,13 @@ const StatusBadge = ({
 
         pending: 'bi bi-clock-fill',
         approved: 'bi bi-check-circle-fill',
-        rejected: 'bi bi-x-circle-fill'
+        rejected: 'bi bi-x-circle-fill',
     };
 
     const sizeClasses = {
         sm: 'badge-sm',
         md: '',
-        lg: 'badge-lg'
+        lg: 'badge-lg',
     };
 
     const displayText = text || statusText || t(`schedule.${status}`, { defaultValue: status });

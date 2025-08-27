@@ -1,9 +1,9 @@
-// frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Button, Col, Container, Form, Modal, Row} from 'react-bootstrap';
-import {useI18n} from "shared/lib/i18n/i18nProvider";
+// frontend/src/shared/ui/components/ColorPickerModal/index.js
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Col, Container, Form, Modal, Row } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './ColorPickerModal.css';
-import {getContrastTextColor, hexToHsl, hslToHex, isDarkTheme} from "shared/lib/utils/colorUtils";
+import { getContrastTextColor, hexToHsl, hslToHex, isDarkTheme } from 'shared/lib/utils/colorUtils';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 const PRESET_COLORS = [
@@ -36,10 +36,10 @@ const ColorPickerModal = ({
                               onResetColor = null,
                               shiftObject = null,
                               userRole = 'employee',
-                              originalGlobalColor = null
+                              originalGlobalColor = null,
                           }) => {
     const [selectedColor, setSelectedColor] = useState(initialColor);
-    const {t} = useI18n();
+    const { t } = useI18n();
     const colorInputRef = useRef(null);
 
     // --- НОВЫЕ СОСТОЯНИЯ ДЛЯ СЛАЙДЕРА ---
@@ -50,7 +50,7 @@ const ColorPickerModal = ({
         if (shiftObject) {
             return ThemeColorService.getShiftColor({
                 ...shiftObject,
-                color: originalGlobalColor
+                color: originalGlobalColor,
             }, currentTheme, userRole);
         }
         return originalGlobalColor || '#6c757d';
@@ -132,7 +132,7 @@ const ColorPickerModal = ({
                     <small className="d-flex align-items-center justify-content-between">
                         <span>
                             <i className={`bi ${saveMode === 'local' ? 'bi-person' : 'bi-globe'} me-1`}></i>
-                            {saveMode === 'local' ? t('color.savingLocally', {theme: t(`theme.${currentTheme}`)}) : t('color.savingGlobally')}
+                            {saveMode === 'local' ? t('color.savingLocally', { theme: t(`theme.${currentTheme}`) }) : t('color.savingGlobally')}
                         </span>
                     </small>
                 </div>
@@ -142,7 +142,7 @@ const ColorPickerModal = ({
                         className="color-preview-button"
                         style={{
                             backgroundColor: selectedColor,
-                            color: getContrastTextColor(selectedColor, isDarkTheme())
+                            color: getContrastTextColor(selectedColor, isDarkTheme()),
                         }}
                         onClick={() => colorInputRef.current?.click()}
                     >
@@ -154,7 +154,7 @@ const ColorPickerModal = ({
                         ref={colorInputRef}
                         value={selectedColor}
                         onChange={(e) => updateColorAndSlider(e.target.value)}
-                        style={{opacity: 0, position: 'absolute', width: 0, height: 0, border: 'none', padding: 0}}
+                        style={{ opacity: 0, position: 'absolute', width: 0, height: 0, border: 'none', padding: 0 }}
                     />
                 </Row>
 
@@ -168,7 +168,7 @@ const ColorPickerModal = ({
                             <i className="bi bi-globe small me-1 mt-0"></i>
                             <span className="me-2">{t('color.globalColorIs')}:</span>
                             <div className="global-color-swatch"
-                                 style={{backgroundColor: themeAwareGlobalColor}}></div>
+                                 style={{ backgroundColor: themeAwareGlobalColor }}></div>
                             {saveMode === 'local' && hasLocalColor && onResetColor && (
                                 <Button
                                     variant="link"
@@ -192,7 +192,7 @@ const ColorPickerModal = ({
                                 style={{
                                     backgroundColor: color,
                                     borderColor: selectedColor === color ? '#43a1ff' : '#dee2e6',
-                                    borderWidth: selectedColor === color ? '2px' : '1px'
+                                    borderWidth: selectedColor === color ? '2px' : '1px',
                                 }}
                                 onClick={() => updateColorAndSlider(color)}
                             />

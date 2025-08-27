@@ -1,11 +1,11 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleList/components/index.js
 import React from 'react';
-import {Card, Table} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
+import { Card, Table } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import SortableHeader from 'shared/ui/components/SortableHeader';
 import ScheduleTableListRow from '../ScheduleTableListRow';
-import {motion, AnimatePresence} from 'motion/react';
-import './ScheduleTableList.css'
+import { AnimatePresence, motion } from 'motion/react';
+import './ScheduleTableList.css';
 
 const ScheduleTableList = ({
                                schedules,
@@ -22,9 +22,9 @@ const ScheduleTableList = ({
                                isCollapsible = false,
                                isOpen = true,
                                onToggle = () => {
-                               }
+                               },
                            }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
 
     return (
         <Card className="schedule-list-card mb-4">
@@ -42,11 +42,11 @@ const ScheduleTableList = ({
                 {isOpen && (
                     <motion.div
                         key="content"
-                        initial={{opacity: 0, height: 0}}
-                        animate={{opacity: 1, height: 'auto'}}
-                        exit={{opacity: 0, height: 0}}
-                        transition={{duration: 0.2, ease: 'easeInOut'}}
-                        style={{overflow: 'hidden'}}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        style={{ overflow: 'hidden' }}
                     >
                         <Card.Body className="p-0">
                             {schedules.length === 0 ? (

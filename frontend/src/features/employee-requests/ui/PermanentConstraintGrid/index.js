@@ -1,19 +1,19 @@
-// frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintGrid.js
+// frontend/src/features/employee-requests/ui/PermanentConstraintForm/index.js
 
 import React from 'react';
-import {Table} from 'react-bootstrap';
-import {X} from 'react-bootstrap-icons';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatShiftTime, getCanonicalShiftType, getDayName, getShiftIcon} from 'shared/lib/utils/scheduleUtils';
+import { Table } from 'react-bootstrap';
+import { X } from 'react-bootstrap-icons';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { formatShiftTime, getCanonicalShiftType, getDayName, getShiftIcon } from 'shared/lib/utils/scheduleUtils';
 
 
-const GridCell = ({day, shift, onCellClick, getCellStyles}) => {
+const GridCell = ({ day, shift, onCellClick, getCellStyles }) => {
     const styles = getCellStyles(day, shift.id);
     return (
         <td className="constraint-td-wrapper" style={styles.tdStyle}>
             <div className={styles.foregroundClasses} style={styles.foregroundStyle}
                  onClick={() => onCellClick(day, shift.id)}>
-                {styles.status === 'cannot_work' && <X className="cell-icon"/>}
+                {styles.status === 'cannot_work' && <X className="cell-icon" />}
             </div>
         </td>
     );
@@ -38,7 +38,15 @@ const ShiftHeader = ({ shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: 
     );
 };
 
-const DayHeader = ({ day, dayIndex, onDayClick, getDayHeaderStyle, as: Component = 'th', isMobile = false, fullyBlockedDays }) => {
+const DayHeader = ({
+                       day,
+                       dayIndex,
+                       onDayClick,
+                       getDayHeaderStyle,
+                       as: Component = 'th',
+                       isMobile = false,
+                       fullyBlockedDays,
+                   }) => {
     const { t } = useI18n();
     const translatedDayName = getDayName(dayIndex, t, isMobile);
     // 1. Проверяем, заблокирован ли этот день
@@ -73,7 +81,7 @@ const PermanentConstraintGrid = ({
                                      getDayHeaderStyle,
                                      fullyBlockedDays,
                                  }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
 
     const DesktopGrid = () => (
         <div className="table-responsive desktop-constraints">
@@ -164,7 +172,7 @@ const PermanentConstraintGrid = ({
         </div>
     );
 
-    return isMobile ? <MobileGrid/> : <DesktopGrid/>;
+    return isMobile ? <MobileGrid /> : <DesktopGrid />;
 };
 
 export default PermanentConstraintGrid;

@@ -1,18 +1,18 @@
-// frontend/src/features/employee-archive/ui/CalendarView/CalendarView.js
+// frontend/src/features/employee-archive/ui/CalendarView/index.js
 import React from 'react';
 import { Card, Dropdown } from 'react-bootstrap';
 import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {
-    formatMonthYear,
-    getMonthDays,
     formatDayNumber,
-    isToday,
+    formatMonthYear,
+    formatToIsoDate,
+    formatToYearMonth,
     getDayNames,
+    getMonthDays,
     getShiftForDate,
     isSameDate,
-    formatToIsoDate,
-    formatToYearMonth
+    isToday,
 } from 'shared/lib/utils/scheduleUtils';
 import './CalendarView.css';
 
@@ -23,7 +23,7 @@ const CalendarView = ({
                           selectedDate,
                           onDateSelect,
                           availableMonths,
-                          getShiftColor
+                          getShiftColor,
                       }) => {
     const { t, locale } = useI18n();
 
@@ -103,7 +103,12 @@ const CalendarView = ({
                             {shift && (
                                 <div
                                     className="shift-indicator"
-                                    style={{ backgroundColor: getShiftColor({ shift_id: shift.shift_id, color: shift.color }) }}
+                                    style={{
+                                        backgroundColor: getShiftColor({
+                                            shift_id: shift.shift_id,
+                                            color: shift.color,
+                                        }),
+                                    }}
                                 />
                             )}
                         </div>

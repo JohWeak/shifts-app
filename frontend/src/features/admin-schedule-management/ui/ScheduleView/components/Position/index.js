@@ -1,22 +1,22 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
-import React, {useState} from 'react';
-import {format} from "date-fns";
-import {useDispatch} from 'react-redux';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useMediaQuery} from 'shared/hooks/useMediaQuery';
-import {isDarkTheme} from 'shared/lib/utils/colorUtils';
-import {canEditSchedule, formatEmployeeName as formatEmployeeNameUtil} from 'shared/lib/utils/scheduleUtils';
-import {useShiftColor} from 'shared/hooks/useShiftColor';
-import {useEmployeeHighlight} from '../../../../model/hooks/useEmployeeHighlight';
-import {useDragAndDrop} from '../../../../model/hooks/useDragAndDrop';
-import {usePositionScheduleData} from './hooks/usePositionScheduleData';
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import { useDispatch } from 'react-redux';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
+import { isDarkTheme } from 'shared/lib/utils/colorUtils';
+import { canEditSchedule, formatEmployeeName as formatEmployeeNameUtil } from 'shared/lib/utils/scheduleUtils';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
+import { useEmployeeHighlight } from '../../../../model/hooks/useEmployeeHighlight';
+import { useDragAndDrop } from '../../../../model/hooks/useDragAndDrop';
+import { usePositionScheduleData } from './hooks/usePositionScheduleData';
 
-import {addPendingChange, removePendingChange} from '../../../../model/scheduleSlice';
-import {addNotification} from "app/model/notificationsSlice";
+import { addPendingChange, removePendingChange } from '../../../../model/scheduleSlice';
+import { addNotification } from 'app/model/notificationsSlice';
 
 import ScheduleCell from '../ScheduleCell';
-import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import ColorPickerModal from 'shared/ui/components/ColorPickerModal';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 import PositionScheduleHeader from './components/PositionScheduleHeader';
 import PositionScheduleTable from './components/PositionScheduleTable';
 import './PositionEditor.css';
@@ -36,9 +36,9 @@ const PositionEditor = ({
                             onRemovePendingChange,
                             scheduleDetails,
                             onAutofill,
-                            isAutofilling = false
+                            isAutofilling = false,
                         }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
     // --- STATE & SETTINGS ---
@@ -61,7 +61,7 @@ const PositionEditor = ({
         currentStats,
         totalRequired,
         shortage,
-        uniqueEmployees
+        uniqueEmployees,
     } = usePositionScheduleData(scheduleDetails, position, pendingChanges);
 
     const {
@@ -72,9 +72,9 @@ const PositionEditor = ({
         previewColor,
         applyColor,
         getShiftColor,
-        resetShiftColor
+        resetShiftColor,
     } = useShiftColor();
-    const {highlightedEmployeeId, handleMouseEnter, handleMouseLeave} = useEmployeeHighlight();
+    const { highlightedEmployeeId, handleMouseEnter, handleMouseLeave } = useEmployeeHighlight();
     const dnd = useDragAndDrop(isEditing, pendingChanges, assignments);
 
     // --- HANDLERS ---
@@ -110,7 +110,7 @@ const PositionEditor = ({
             const errorItem = changesToApply.find(item => item.action === 'error');
             dispatch(addNotification({
                 type: 'warning',
-                message: errorItem.message || 'Cannot complete this operation'
+                message: errorItem.message || 'Cannot complete this operation',
             }));
             return;
         }
@@ -128,12 +128,12 @@ const PositionEditor = ({
     const formatEmployeeName = (employee) => {
         const employeesInPosition = employees.filter(emp =>
             emp.default_position_id === position.pos_id ||
-            assignments.some(a => a.emp_id === emp.emp_id && a.position_id === position.pos_id)
+            assignments.some(a => a.emp_id === emp.emp_id && a.position_id === position.pos_id),
         );
         return formatEmployeeNameUtil(employee, {
             showFullName: !showFirstNameOnly,
             checkDuplicates: true,
-            contextEmployees: employeesInPosition
+            contextEmployees: employeesInPosition,
         });
     };
 
@@ -188,8 +188,8 @@ const PositionEditor = ({
                             <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>
                                 <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>
                                 {shortage > 0
-                                    ? t('schedule.assignmentsShortage', {count: shortage})
-                                    : t('schedule.assignmentsOverage', {count: Math.abs(shortage)})
+                                    ? t('schedule.assignmentsShortage', { count: shortage })
+                                    : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })
                                 }
                             </small>
                         )}
@@ -199,8 +199,8 @@ const PositionEditor = ({
                     </div>
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
 
     const renderCell = (shift, dayIndex) => {
@@ -213,7 +213,7 @@ const PositionEditor = ({
             emp_id: a.emp_id,
             isCrossPosition: a.isCrossPosition,
             isCrossSite: a.isCrossSite,
-            isFlexible: a.isFlexible
+            isFlexible: a.isFlexible,
 
         })).filter(e => e.emp_id);
 
@@ -311,8 +311,8 @@ const PositionEditor = ({
                 title={t('schedule.saveChanges')}
                 message={
                     shortage > 0
-                        ? t('schedule.confirmSaveWithShortage', {count: shortage})
-                        : t('schedule.confirmSaveWithOverage', {count: Math.abs(shortage)})
+                        ? t('schedule.confirmSaveWithShortage', { count: shortage })
+                        : t('schedule.confirmSaveWithOverage', { count: Math.abs(shortage) })
                 }
                 confirmText={t('common.save')}
                 confirmVariant="warning"

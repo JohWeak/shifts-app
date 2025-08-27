@@ -1,8 +1,8 @@
-// frontend/src/features/employee-constraints/ui/ConstraintGrid.js
+// frontend/src/features/employee-constraints/ui/index.js
 import React from 'react';
-import {Button, Card, Table} from 'react-bootstrap';
-import {Check, X} from 'react-bootstrap-icons';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import { Button, Card, Table } from 'react-bootstrap';
+import { Check, X } from 'react-bootstrap-icons';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import {
     formatShiftTime,
     formatTableHeaderDate,
@@ -11,12 +11,12 @@ import {
     getShiftIcon,
 } from 'shared/lib/utils/scheduleUtils';
 
-const GridCell = ({day, shift, onCellClick, getCellStyles, isJustChanged}) => {
+const GridCell = ({ day, shift, onCellClick, getCellStyles, isJustChanged }) => {
     const {
         tdStyle,
         foregroundStyle,
         foregroundClasses,
-        nextStatus
+        nextStatus,
     } = getCellStyles(day.date, shift.shift_id);
 
     const dayShift = day.shifts.find(s => s.shift_id === shift.shift_id);
@@ -42,18 +42,18 @@ const GridCell = ({day, shift, onCellClick, getCellStyles, isJustChanged}) => {
 
                 data-next-status={nextStatus}
             >
-                <X className="cell-icon selected-icon icon-cannot-work"/>
-                <Check className="cell-icon selected-icon icon-prefer-work"/>
+                <X className="cell-icon selected-icon icon-cannot-work" />
+                <Check className="cell-icon selected-icon icon-prefer-work" />
 
-                <X className="cell-icon hover-icon hover-icon-cannot-work"/>
-                <Check className="cell-icon hover-icon hover-icon-prefer-work"/>
+                <X className="cell-icon hover-icon hover-icon-cannot-work" />
+                <Check className="cell-icon hover-icon hover-icon-prefer-work" />
             </div>
         </td>
     );
 };
 
 
-const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th'}) => {
+const ShiftHeader = ({ shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: Component = 'th' }) => {
     const canonicalType = getCanonicalShiftType(shift.shift_name);
     const icon = getShiftIcon(canonicalType);
 
@@ -74,7 +74,7 @@ const ShiftHeader = ({shift, getShiftHeaderStyle, getShiftHeaderCellStyle, as: C
 };
 
 // <th>,  <td>)
-const DayHeader = ({day, getDayHeaderClass, onCellClick, t, as: Component = 'th', isMobile = false}) => (
+const DayHeader = ({ day, getDayHeaderClass, onCellClick, t, as: Component = 'th', isMobile = false }) => (
     <Component
         className={`${getDayHeaderClass(day.date)} day-header-cell`}
         onClick={() => onCellClick(day.date, null)}
@@ -103,10 +103,10 @@ const ConstraintGrid = (props) => {
         onShowInstructions,
     } = props;
 
-    const {t} = useI18n();
-    const commonCellProps = {onCellClick, getCellStyles};
+    const { t } = useI18n();
+    const commonCellProps = { onCellClick, getCellStyles };
 
-    const LimitsFooter = ({colSpan}) => (
+    const LimitsFooter = ({ colSpan }) => (
         <tfoot className="info-footer">
         <tr>
             <td colSpan={colSpan} className="text-center p-2">
@@ -122,7 +122,7 @@ const ConstraintGrid = (props) => {
                     <p className="text-muted small mb-0">
                         {t('constraints.instructions.remaining', {
                             cannotWork: (limitParams.cannotWork - usedCounts.cannot_work),
-                            preferWork: (limitParams.preferWork - usedCounts.prefer_work)
+                            preferWork: (limitParams.preferWork - usedCounts.prefer_work),
                         })}
                     </p>
                 </div>
@@ -171,7 +171,7 @@ const ConstraintGrid = (props) => {
                             </tr>
                         ))}
                         </tbody>
-                        <LimitsFooter colSpan={template.length + 1}/>
+                        <LimitsFooter colSpan={template.length + 1} />
                     </Table>
                 </div>
             </Card.Body>
@@ -220,13 +220,13 @@ const ConstraintGrid = (props) => {
                     ))}
 
                     </tbody>
-                    <LimitsFooter colSpan={uniqueShifts.length + 1}/>
+                    <LimitsFooter colSpan={uniqueShifts.length + 1} />
                 </Table>
             </Card.Body>
         </Card>
     );
 
-    return isMobile ? <MobileGrid/> : <DesktopGrid/>;
+    return isMobile ? <MobileGrid /> : <DesktopGrid />;
 };
 
 export default ConstraintGrid;

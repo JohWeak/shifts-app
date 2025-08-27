@@ -1,11 +1,16 @@
-// frontend/src/features/employee-schedule/ui/FullScheduleView.js
-import React, {useRef, useState} from 'react';
-import {Badge, Button, Card, Table} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatEmployeeName, formatShiftTime, formatTableHeaderDate, getDayName,} from 'shared/lib/utils/scheduleUtils';
-import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
-import {parseISO} from 'date-fns';
-import {ScheduleHeaderCard} from './ScheduleHeaderCard/ScheduleHeaderCard';
+// frontend/src/features/employee-schedule/ui/FullScheduleView/index.js
+import React, { useRef, useState } from 'react';
+import { Badge, Button, Card, Table } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {
+    formatEmployeeName,
+    formatShiftTime,
+    formatTableHeaderDate,
+    getDayName,
+} from 'shared/lib/utils/scheduleUtils';
+import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
+import { parseISO } from 'date-fns';
+import { ScheduleHeaderCard } from '../ScheduleHeaderCard/ScheduleHeaderCard';
 import './FullScheduleView.css';
 
 const FullScheduleView = ({
@@ -17,7 +22,7 @@ const FullScheduleView = ({
                               showCurrentWeek,
                               showNextWeek,
                           }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const tableRef = useRef(null);
 
     const currentWeekData = scheduleData?.current;
@@ -35,15 +40,15 @@ const FullScheduleView = ({
 
     const renderShiftCell = (shift, employees, onNameClick) => {
         const hasCurrentUser = employees.some(emp =>
-            emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id
+            emp.is_current_user || emp.emp_id === employeeData?.emp_id || emp.emp_id === user?.id,
         );
-        const bgColor = getShiftColor({...shift, shift_id: shift.id});
+        const bgColor = getShiftColor({ ...shift, shift_id: shift.id });
         const textColor = getContrastTextColor(bgColor);
 
         return (
             <div
                 className={`shift-cell ${hasCurrentUser ? 'current-user-shift' : ''}`}
-                style={{backgroundColor: bgColor, color: textColor}}
+                style={{ backgroundColor: bgColor, color: textColor }}
                 onClick={onNameClick}
                 title={t('employee.schedule.toggleNameFormatHint')}
             >
@@ -56,7 +61,7 @@ const FullScheduleView = ({
                                 <div
                                     key={emp.emp_id}
                                     className={`employee-name ${emp.is_current_user || emp.emp_id === employeeData?.emp_id ? 'fw-bold' : ''}`}
-                                    style={{color: textColor}}
+                                    style={{ color: textColor }}
                                 >
                                     {formatEmployeeName(firstName, lastName, showFullName)}
                                 </div>
@@ -75,14 +80,14 @@ const FullScheduleView = ({
             return null;
         }
         const hasAnyEmployeeInWeek = weekData.days.some(day =>
-            day.shifts.some(shift => shift.employees && shift.employees.length > 0)
+            day.shifts.some(shift => shift.employees && shift.employees.length > 0),
         );
 
         if (!hasAnyEmployeeInWeek) {
             return null;
         }
 
-        const {week, position, shifts, days} = weekData;
+        const { week, position, shifts, days } = weekData;
 
         return (
             <Card className="week-schedule-section mb-4 p-0">
@@ -124,11 +129,11 @@ const FullScheduleView = ({
                                         <div
                                             className="shift-header-info"
                                             style={{
-                                                backgroundColor: getShiftColor({...shift, shift_id: shift.id}),
+                                                backgroundColor: getShiftColor({ ...shift, shift_id: shift.id }),
                                                 color: getContrastTextColor(getShiftColor({
                                                     ...shift,
-                                                    shift_id: shift.id
-                                                }))
+                                                    shift_id: shift.id,
+                                                })),
                                             }}
                                         >
                                             <span className="shift-header-name">{shift.shift_name}</span>
@@ -142,7 +147,7 @@ const FullScheduleView = ({
                                                     e.stopPropagation();
                                                     openColorPicker(shift.id, getShiftColor({
                                                         ...shift,
-                                                        shift_id: shift.id
+                                                        shift_id: shift.id,
                                                     }), shift);
                                                 }}
                                                 title={t('shift.editColor')}

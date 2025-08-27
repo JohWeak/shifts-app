@@ -1,30 +1,30 @@
-// frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.js
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {Alert, Button, Card, Form, Toast, ToastContainer} from 'react-bootstrap';
-import {X} from 'react-bootstrap-icons';
+// frontend/src/features/employee-requests/ui/PermanentConstraintForm/index.js
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Alert, Button, Card, Form, Toast, ToastContainer } from 'react-bootstrap';
+import { X } from 'react-bootstrap-icons';
 import TextareaAutosize from 'react-textarea-autosize';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useShiftColor} from 'shared/hooks/useShiftColor';
-import {useMediaQuery} from 'shared/hooks/useMediaQuery';
-import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
-import {constraintAPI, employeeAPI} from "shared/api/apiService";
-import {fetchMyPermanentConstraints} from '../../model/requestsSlice';
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
-import PermanentConstraintGrid from './PermanentConstraintGrid';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
+import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
+import { constraintAPI, employeeAPI } from 'shared/api/apiService';
+import { fetchMyPermanentConstraints } from '../../model/requestsSlice';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
+import LoadingState from 'shared/ui/components/LoadingState';
+import ErrorMessage from 'shared/ui/components/ErrorMessage';
+import PermanentConstraintGrid from '../PermanentConstraintGrid';
 import './PermanentConstraintForm.css';
-import store from "../../../../app/store/store";
+import store from '../../../../app/store/store';
 
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}) => {
-    const {t} = useI18n();
+const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null }) => {
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const {getShiftColor, currentTheme} = useShiftColor();
+    const { getShiftColor, currentTheme } = useShiftColor();
     const isMobile = useMediaQuery('(max-width: 888px)');
 
     const permanentConstraints = useSelector(state => state.requests.permanentConstraints);
@@ -173,7 +173,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
 
         shifts.forEach(shift => {
             const allDaysForShiftBlocked = DAYS_OF_WEEK_CANONICAL.every(day =>
-                constraints[`${day}-${shift.id}`] === 'cannot_work'
+                constraints[`${day}-${shift.id}`] === 'cannot_work',
             );
             if (allDaysForShiftBlocked) {
                 blocked.add(shift.id);
@@ -186,7 +186,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
     const handleCellClick = (day, shiftId) => {
         const key = `${day}-${shiftId}`;
         setConstraints(prev => {
-            const newConstraints = {...prev};
+            const newConstraints = { ...prev };
             if (newConstraints[key] === 'cannot_work') {
                 delete newConstraints[key];
             } else {
@@ -201,7 +201,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
         const allSelected = dayKeys.every(key => constraints[key] === 'cannot_work');
 
         setConstraints(prev => {
-            const newConstraints = {...prev};
+            const newConstraints = { ...prev };
             if (allSelected) {
                 dayKeys.forEach(key => delete newConstraints[key]);
             } else {
@@ -215,7 +215,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
         setConstraints(prev => {
             const shiftKeys = DAYS_OF_WEEK_CANONICAL.map(day => `${day}-${shiftId}`);
             const allSelected = shiftKeys.every(key => prev[key] === 'cannot_work');
-            const newConstraints = {...prev};
+            const newConstraints = { ...prev };
             if (allSelected) {
                 shiftKeys.forEach(key => delete newConstraints[key]);
             } else {
@@ -241,14 +241,14 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
             foregroundStyle.color = getContrastTextColor(foregroundStyle.backgroundColor);
         }
 
-        return {tdStyle, foregroundStyle, foregroundClasses, status};
+        return { tdStyle, foregroundStyle, foregroundClasses, status };
     };
 
     const getShiftHeaderStyle = (shift) => {
         const baseColor = getShiftColor(shift);
         const style = {
             backgroundColor: baseColor,
-            color: getContrastTextColor(baseColor)
+            color: getContrastTextColor(baseColor),
         };
 
         // Если смена полностью заблокирована, добавляем внутреннюю тень
@@ -264,12 +264,12 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
         const neutralBgAlpha = currentTheme === 'dark' ? 0.1 : 0.5;
         const baseColor = getShiftColor(shift);
 
-        return {backgroundColor: hexToRgba(baseColor, neutralBgAlpha)};
+        return { backgroundColor: hexToRgba(baseColor, neutralBgAlpha) };
     };
 
     const getDayHeaderStyle = (day) => {
         if (fullyBlockedDays.has(day)) {
-            return {backgroundColor: '#dc3545', color: getContrastTextColor('#dc3545')};
+            return { backgroundColor: '#dc3545', color: getContrastTextColor('#dc3545') };
         }
         return {};
     };
@@ -284,13 +284,13 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
                 return {
                     day_of_week: day_of_week.toLowerCase(),
                     shift_id: parseInt(shift_id_str, 10),
-                    constraint_type
+                    constraint_type,
                 };
             });
 
             const requestData = {
                 constraints: constraintsArray,
-                message: showMessage ? message.trim() : null
+                message: showMessage ? message.trim() : null,
             };
 
             // Создаем оптимистичный объект запроса
@@ -303,7 +303,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
                 requested_at: new Date().toISOString(),
                 reviewed_at: null,
                 reviewer: null,
-                admin_response: null
+                admin_response: null,
             };
 
             // Закрываем модальное окно
@@ -315,7 +315,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
                 onSubmitSuccess(
                     optimisticRequest,
                     requestData,
-                    initialData?.id || null
+                    initialData?.id || null,
                 );
             }
 
@@ -327,7 +327,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
     };
 
 
-    if (loading) return <LoadingState/>;
+    if (loading) return <LoadingState />;
 
     if (error) {
         return (
@@ -342,7 +342,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
                                 }
                             </h5>
                             <Button variant="link" onClick={onCancel} className="p-0 text-secondary">
-                                <X size={28}/>
+                                <X size={28} />
                             </Button>
                         </div>
                     </Card.Header>
@@ -375,7 +375,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
                                 onClick={onCancel}
                                 className="p-0 text-secondary"
                         >
-                            <X size={28}/>
+                            <X size={28} />
                         </Button>
                     </div>
                 </Card.Header>

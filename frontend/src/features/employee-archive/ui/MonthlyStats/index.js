@@ -1,6 +1,6 @@
-// frontend/src/features/employee-archive/ui/MonthlyStats/MonthlyStats.js
+// frontend/src/features/employee-archive/ui/MonthlyStats/index.js
 import React from 'react';
-import { Card, Row, Col } from 'react-bootstrap';
+import { Card, Col, Row } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { formatMinutesToHours } from 'shared/lib/utils/scheduleUtils';
 import './MonthlyStats.css';
@@ -17,7 +17,7 @@ const MonthlyStats = ({ monthData }) => {
     return (
         <Card className="monthly-stats">
             <Card.Body>
-                <Row >
+                <Row>
                     <Col xs={4} className="stat-item">
                         <div className="stat-value">{totalShifts}</div>
                         <div className="stat-label">{t('employee.archive.totalShifts')}</div>
