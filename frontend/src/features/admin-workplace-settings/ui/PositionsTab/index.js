@@ -1,5 +1,5 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/index.js
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Alert, Button, Card} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
@@ -78,7 +78,10 @@ const PositionsTab = ({selectedSite}) => {
         });
     }, [positions, searchTerm, filterSite, showInactive]);
 
-    const getSiteName = (siteId) => workSites.find(s => s.site_id === siteId)?.site_name || '-';
+    const getSiteName = useCallback((siteId) => {
+            return workSites.find(s => s.site_id === siteId)?.site_name || '-';
+        },
+        [workSites]);
 
     const sortingAccessors = useMemo(() => ({
         name: p => p.pos_name,
@@ -88,7 +91,7 @@ const PositionsTab = ({selectedSite}) => {
         shifts: p => p.totalShifts || 0,
         employees: p => p.totalEmployees || 0,
         status: p => p.is_active ? 0 : 1,
-    }), [workSites]);
+    }), [getSiteName]);
 
     const {sortedItems: sortedPositions, requestSort, sortConfig} = useSortableData(filteredPositions, {
         field: 'status',

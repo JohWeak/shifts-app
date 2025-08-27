@@ -1,5 +1,5 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/PermanentConstraintForm.js
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {Alert, Button, Card, Form, Toast, ToastContainer} from 'react-bootstrap';
 import {X} from 'react-bootstrap-icons';
@@ -135,12 +135,7 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
         }
     }, [message, showMessage]);
 
-    // Load employee shifts
-    useEffect(() => {
-        void loadEmployeeShifts();
-    }, []);
-
-    const loadEmployeeShifts = async () => {
+    const loadEmployeeShifts = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -152,7 +147,12 @@ const PermanentConstraintForm = ({onSubmitSuccess, onCancel, initialData = null}
         } finally {
             setLoading(false);
         }
-    };
+    }, [t, setShifts, setLoading, setError]);
+
+    useEffect(() => {
+        void loadEmployeeShifts();
+    }, [loadEmployeeShifts]);
+
 
     const fullyBlockedDays = useMemo(() => {
         const blocked = new Set();

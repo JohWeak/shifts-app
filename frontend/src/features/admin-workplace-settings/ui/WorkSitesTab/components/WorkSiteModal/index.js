@@ -1,14 +1,14 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkSiteModal/index.js
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { createWorkSite, updateWorkSite } from '../../../../model/workplaceSlice';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Col, Form, Modal, Row} from 'react-bootstrap';
+import {useDispatch} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {createWorkSite, updateWorkSite} from '../../../../model/workplaceSlice';
 
 import './WorkSiteModal.css';
 
-const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
-    const { t } = useI18n();
+const WorkSiteModal = ({show, onHide, onSuccess, site}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
@@ -51,7 +51,7 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
         }
 
         if (formData.phone && formData.phone.trim()) {
-            if (!/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
+            if (!/^[\d\s-+()]+$/.test(formData.phone)) {
                 newErrors.phone = t('validation.invalidPhone');
             }
         }
@@ -61,9 +61,9 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
     };
 
     const handleChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => ({...prev, [field]: value}));
         if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: null }));
+            setErrors(prev => ({...prev, [field]: null}));
         }
     };
 
@@ -85,7 +85,7 @@ const WorkSiteModal = ({ show, onHide, onSuccess, site }) => {
             }
             onSuccess();
         } catch (error) {
-            setErrors({ submit: error.message || t('common.error') });
+            setErrors({submit: error.message || t('common.error')});
         } finally {
             setLoading(false);
         }

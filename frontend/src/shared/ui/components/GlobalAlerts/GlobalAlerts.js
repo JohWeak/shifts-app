@@ -1,14 +1,14 @@
 // frontend/src/shared/ui/components/GlobalAlerts/GlobalAlerts.js
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Alert, Spinner } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { removeNotification } from 'app/model/notificationsSlice';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Alert, Spinner} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {removeNotification} from 'app/model/notificationsSlice';
 import './GlobalAlerts.css';
 
 const GlobalAlerts = () => {
     const notifications = useSelector((state) => state.notifications.notifications);
-    const { locale } = useI18n();
+    const {locale} = useI18n();
     const isRTL = locale === 'he';
 
     return (
@@ -23,10 +23,10 @@ const GlobalAlerts = () => {
     );
 };
 
-const AlertItem = ({ notification }) => {
+const AlertItem = ({notification}) => {
     const dispatch = useDispatch();
     const [isClosing, setIsClosing] = useState(false);
-    const { t } = useI18n();
+    const {t} = useI18n();
 
     // Support both 'variant' and 'type' for backwards compatibility
     const variant = notification.variant || notification.type || 'info';
@@ -34,6 +34,13 @@ const AlertItem = ({ notification }) => {
 
     // Auto-close for success and info, manual close for warnings and errors
     const isAutoClose = variant === 'success' || variant === 'info';
+
+    const handleClose = useCallback(() => {
+        setIsClosing(true);
+        setTimeout(() => {
+            dispatch(removeNotification(notification.id));
+        }, animationDuration);
+    }, [dispatch, notification.id, setIsClosing, animationDuration]);
 
     useEffect(() => {
         let timer;
@@ -43,14 +50,8 @@ const AlertItem = ({ notification }) => {
             }, notification.duration);
         }
         return () => clearTimeout(timer);
-    }, [notification.duration, isAutoClose, isClosing]);
+    }, [notification.duration, isAutoClose, isClosing, handleClose]);
 
-    const handleClose = () => {
-        setIsClosing(true);
-        setTimeout(() => {
-            dispatch(removeNotification(notification.id));
-        }, animationDuration);
-    };
 
     const getIcon = () => {
         switch (variant) {

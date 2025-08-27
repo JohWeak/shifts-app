@@ -1,5 +1,5 @@
 // frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.js
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, Button, Form, Modal, Spinner} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -34,15 +34,11 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
 
     const isMobile = useMediaQuery('(max-width: 992px)');
 
-    useEffect(() => {
-        if (show && request && request.employee?.defaultPosition?.pos_id) {
-            void loadShiftDetails();
-        } else if (show && request) {
-            setLoadingShifts(false);
+    const loadShiftDetails = useCallback(async () => {
+        if (!request || !request.employee?.defaultPosition?.pos_id) {
+            return;
         }
-    }, [show, request]);
 
-    const loadShiftDetails = async () => {
         try {
             setLoadingShifts(true);
             const positionId = request.employee.defaultPosition.pos_id;
@@ -62,7 +58,16 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
         } finally {
             setLoadingShifts(false);
         }
-    };
+    }, [request]);
+
+    useEffect(() => {
+        if (show && request && request.employee?.defaultPosition?.pos_id) {
+            void loadShiftDetails();
+        } else if (show && request) {
+            setLoadingShifts(false);
+        }
+    }, [show, request, loadShiftDetails]);
+
 
     const handleReviewClick = (status) => {
         setConfirmAction(status);

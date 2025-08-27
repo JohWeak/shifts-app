@@ -1,5 +1,5 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Accordion, Button, Col, Form, Row} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {debounce} from 'lodash';
@@ -24,12 +24,6 @@ const EmployeeFilters = () => {
 
     const allPositions = systemSettings?.positions || [];
 
-
-    const debouncedSearch = useMemo(
-        () => debounce((value) => {
-            handleFilterChange('search', value);
-        }, 50), []
-    );
 
     const getFilteredPositions = () => {
         if (selectedWorkSite === 'all') {
@@ -62,8 +56,27 @@ const EmployeeFilters = () => {
             return allPositions.filter(pos => pos.site_id === parseInt(selectedWorkSite));
         }
     };
-
     const filteredPositions = getFilteredPositions();
+
+    const handleFilterChange = useCallback((field, value) => {
+        if (field === 'position' && selectedWorkSite === 'all' && value !== 'all') {
+            const position = filteredPositions.find(p => p.pos_id === value);
+            if (position && position.actual_ids) {
+                dispatch(setFilters({[field]: value}));
+            } else {
+                dispatch(setFilters({[field]: value}));
+            }
+        } else {
+            dispatch(setFilters({[field]: value}));
+        }
+    }, [dispatch, selectedWorkSite, filteredPositions]);
+
+    const debouncedSearch = useMemo(
+        () => debounce((value) => {
+            handleFilterChange('search', value);
+        }, 50),
+        [handleFilterChange]
+    );
 
     useEffect(() => {
         if (!systemSettings || !systemSettings.positions) {
@@ -74,19 +87,6 @@ const EmployeeFilters = () => {
         }
     }, [dispatch, systemSettings, workSites]);
 
-    const handleFilterChange = (field, value) => {
-        if (field === 'position' && selectedWorkSite === 'all' && value !== 'all') {
-            const position = filteredPositions.find(p => p.pos_id === value);
-            if (position && position.actual_ids) {
-
-                dispatch(setFilters({[field]: value}));
-            } else {
-                dispatch(setFilters({[field]: value}));
-            }
-        } else {
-            dispatch(setFilters({[field]: value}));
-        }
-    };
 
     const handleWorkSiteChange = (value) => {
         setSelectedWorkSite(value);

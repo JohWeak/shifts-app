@@ -1,9 +1,9 @@
 // frontend/src/shared/ui/components/ColorPickerModal/ColorPickerModal.js
-import React, {useState, useEffect, useRef, useMemo} from 'react';
-import {Modal, Button, Container, Col, Row, Form} from 'react-bootstrap';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Button, Col, Container, Form, Modal, Row} from 'react-bootstrap';
 import {useI18n} from "shared/lib/i18n/i18nProvider";
 import './ColorPickerModal.css';
-import {getContrastTextColor, isDarkTheme, hexToHsl, hslToHex} from "shared/lib/utils/colorUtils";
+import {getContrastTextColor, hexToHsl, hslToHex, isDarkTheme} from "shared/lib/utils/colorUtils";
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 const PRESET_COLORS = [
@@ -58,22 +58,22 @@ const ColorPickerModal = ({
 
     const hasActiveLocalColor = selectedColor !== themeAwareGlobalColor;
 
-    useEffect(() => {
-        if (show) {
-            updateColorAndSlider(initialColor);
-        }
-    }, [show, initialColor]);
-
-    const updateColorAndSlider = (newColor) => {
+    const updateColorAndSlider = useCallback((newColor) => {
         const hsl = hexToHsl(newColor);
         setActiveHslBase(hsl);
-        // Инвертированная логика: HSL lightness 1.0 (ярко) = слайдер 0.
         setBrightness(100 - Math.round(hsl[2] * 100));
         setSelectedColor(newColor);
         if (onColorChange) {
             onColorChange(newColor);
         }
-    };
+    }, [onColorChange, setActiveHslBase, setBrightness, setSelectedColor]);
+
+    useEffect(() => {
+        if (show) {
+            updateColorAndSlider(initialColor);
+        }
+    }, [show, initialColor, updateColorAndSlider]);
+
 
     const handleSaveAndClose = () => {
         if (onColorSelect) {
@@ -159,29 +159,29 @@ const ColorPickerModal = ({
                 </Row>
 
                 <Row className="d-flex justify-content-between align-items-center small text-muted">
-                    <Col xs="auto" >
+                    <Col xs="auto">
                         <label>{t('color.quickColors')}</label>
                     </Col>
 
-                        {saveMode === 'local' && currentTheme === 'light' && hasActiveLocalColor && (
-                            <Col xs="auto" className="d-flex align-items-center">
-                                <i className="bi bi-globe small me-1 mt-0"></i>
-                                <span className="me-2">{t('color.globalColorIs')}:</span>
-                                <div className="global-color-swatch"
-                                     style={{backgroundColor: themeAwareGlobalColor}}></div>
-                                {saveMode === 'local' && hasLocalColor && onResetColor && (
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className=" text-decoration-none py-0 reset-color-btn"
-                                        onClick={handleReset}
-                                        title={t('color.resetToGlobal')}
-                                    >
-                                        <i className="bi bi-arrow-counterclockwise text-warning"></i>
-                                    </Button>
-                                )}
-                            </Col>
-                        )}
+                    {saveMode === 'local' && currentTheme === 'light' && hasActiveLocalColor && (
+                        <Col xs="auto" className="d-flex align-items-center">
+                            <i className="bi bi-globe small me-1 mt-0"></i>
+                            <span className="me-2">{t('color.globalColorIs')}:</span>
+                            <div className="global-color-swatch"
+                                 style={{backgroundColor: themeAwareGlobalColor}}></div>
+                            {saveMode === 'local' && hasLocalColor && onResetColor && (
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    className=" text-decoration-none py-0 reset-color-btn"
+                                    onClick={handleReset}
+                                    title={t('color.resetToGlobal')}
+                                >
+                                    <i className="bi bi-arrow-counterclockwise text-warning"></i>
+                                </Button>
+                            )}
+                        </Col>
+                    )}
 
                 </Row>
                 <div className="g-1 align-items-center preset-colors-wrapper my-2 py-1">

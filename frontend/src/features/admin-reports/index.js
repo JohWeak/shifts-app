@@ -1,6 +1,6 @@
 //frontend/src/features/admin-reports/index.js
 
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {format, subMonths} from 'date-fns';
 import {Button, Card, Col, Container, Form, Row, Spinner, Table} from 'react-bootstrap';
@@ -40,8 +40,9 @@ const Reports = () => {
     }, [sites, selectedSite]);
 
 
-    const handleFetchStats = async () => {
+    const handleFetchStats = useCallback(async () => {
         if (!selectedSite) return;
+
         setLoading(true);
         setStats(null);
         try {
@@ -57,11 +58,12 @@ const Reports = () => {
         } finally {
             setLoading(false);
         }
-    };
+
+    }, [dateRange.endDate, dateRange.startDate, selectedSite]);
 
     useEffect(() => {
         void handleFetchStats();
-    }, [sites, selectedSite, dateRange]);
+    }, [handleFetchStats]);
 
     const chartData = useMemo(() => {
         if (!stats || !stats.schedules) return [];
