@@ -1,11 +1,11 @@
-// frontend/src/features/employee-schedule/ui/index.js
+// frontend/src/features/employee-schedule/ui/PersonalScheduleView/index.js
 import React from 'react';
-import { Badge, Button, Card } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { formatShiftTime, formatTableHeaderDate, getDayName } from 'shared/lib/utils/scheduleUtils';
-import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
-import { parseISO } from 'date-fns';
-import { ScheduleHeaderCard } from '../ScheduleHeaderCard/ScheduleHeaderCard';
+import {Badge, Button, Card} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {formatShiftTime, formatTableHeaderDate, getDayName} from 'shared/lib/utils/scheduleUtils';
+import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
+import {parseISO} from 'date-fns';
+import {ScheduleHeaderCard} from '../ScheduleHeaderCard';
 import './PersonalScheduleView.css';
 
 const PersonalScheduleView = ({
@@ -16,7 +16,7 @@ const PersonalScheduleView = ({
                                   showCurrentWeek,
                                   showNextWeek,
                               }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const currentWeekData = scheduleData?.current;
     const nextWeekData = scheduleData?.next;
 
@@ -56,7 +56,7 @@ const PersonalScheduleView = ({
                             );
                             if (userAssignment) {
                                 const assignedEmployee = userAssignment.employees.find(e => e.is_current_user || e.emp_id === employee?.emp_id);
-                                userAssignment = { ...userAssignment, employee_info: assignedEmployee };
+                                userAssignment = {...userAssignment, employee_info: assignedEmployee};
                             }
                         }
 

@@ -1,4 +1,4 @@
-//frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard.js
+// frontend/src/features/employee-schedule/ui/ScheduleHeaderCard/index.js
 import React from 'react';
 import {Badge, Card, Form} from 'react-bootstrap';
 import {formatWeekRange} from 'shared/lib/utils/scheduleUtils';
