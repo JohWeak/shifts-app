@@ -2,18 +2,18 @@
 export const he = {
     admin: {
         requests: {
-            title: "בקשות קבועות",
-            employee: "עובד",
-            position: "תפקיד",
-            worksite: "אתר עבודה",
-            status: "סטטוס",
-            sentAt: "נשלח ב",
-            reviewedAt: "נבדק ב",
-            pending: "ממתין",
-            pendingRequests: "בקשות ממתינות",
-            processedRequests: "בקשות שטופלו",
-            noRequests: "לא נמצאו בקשות",
-            noRequestsMessage: "כאשר עובדים יגישו בקשות לאילוצים קבועים, הן יופיעו כאן לבדיקה.",
+            title: 'בקשות קבועות',
+            employee: 'עובד',
+            position: 'תפקיד',
+            worksite: 'אתר עבודה',
+            status: 'סטטוס',
+            sentAt: 'נשלח ב',
+            reviewedAt: 'נבדק ב',
+            pending: 'ממתין',
+            pendingRequests: 'בקשות ממתינות',
+            processedRequests: 'בקשות שטופלו',
+            noRequests: 'לא נמצאו בקשות',
+            noRequestsMessage: 'כאשר עובדים יגישו בקשות לאילוצים קבועים, הן יופיעו כאן לבדיקה.',
             includeResponse: 'כלול תגובה',
             responsePlaceholder: 'תגובה',
             reject: 'דחה',
@@ -49,7 +49,7 @@ export const he = {
                         busy: 'עסוק',
                         constraints: 'אילוצים',
                         permanent: 'קבוע',
-                        preferences: 'העדפות'
+                        preferences: 'העדפות',
                     },
                     alreadyAssigned: 'כבר משובץ ל-{shift}',
                     permanentConstraint: 'אילוץ קבוע',
@@ -57,8 +57,8 @@ export const he = {
                     cannotWork: 'לא יכול לעבוד',
                     prefersNotToWork: 'מעדיף לא לעבוד',
                     restViolation: 'הפרת מנוחה',
-                    noEmployees: 'אין עובדים בקטגוריה זו'
-                }
+                    noEmployees: 'אין עובדים בקטגוריה זו',
+                },
             },
             confirmApprove: 'אישור אישור',
             confirmApproveMessage: 'האם אתה בטוח שברצונך לאשר בקשה זו?',
@@ -75,7 +75,7 @@ export const he = {
             reviewRejected: 'בדיקה נדחתה',
             reviewApprovedMessage: 'בקשה זו אושרה',
             reviewRejectedMessage: 'בקשה זו נדחתה',
-        }
+        },
     },
     app: {
         name: 'מערכת סידורים',
@@ -239,6 +239,8 @@ export const he = {
         view: 'צפה',
         selectAll: 'בחר הכל',
         deselectAll: 'בטל בחירה',
+        noEmail: 'לא צוין אימייל',
+        logout: 'התנתקות',
     },
     constraints: {
         alreadySubmitted: 'כבר שלחת אילוצים לשבוע זה',
@@ -299,7 +301,7 @@ export const he = {
             pendingRequests: 'בקשות ממתינות',
             weeklyShifts: 'משמרות שבועיות',
             totalShifts: 'סך הכל משמרות',
-            coveredShifts: 'משמרות מאוישות'
+            coveredShifts: 'משמרות מאוישות',
         },
         quickActions: {
             title: 'פעולות מהירות',
@@ -308,7 +310,7 @@ export const he = {
             viewReports: 'צפה בדוחות',
             systemSettings: 'הגדרות מערכת',
             workplaceSettings: 'הגדרות סביבת עבודה',
-            algorithmSettings: 'הגדרות אלגוריתם'
+            algorithmSettings: 'הגדרות אלגוריתם',
         },
         recentActivity: {
             title: 'פעילות אחרונה',
@@ -317,7 +319,7 @@ export const he = {
             requestApproved: 'בקשה אושרה עבור {name}',
             positionUpdated: 'תפקיד עודכן: {position}',
             siteActivated: 'אתר עבודה הופעל: {site}',
-            viewAll: 'צפה בכל הפעילות'
+            viewAll: 'צפה בכל הפעילות',
         },
         systemStatus: {
             title: 'מצב מערכת',
@@ -329,8 +331,8 @@ export const he = {
             offline: 'לא מקוון',
             available: 'זמין',
             connected: 'מחובר',
-            lastUpdated: 'עודכן לאחרונה'
-        }
+            lastUpdated: 'עודכן לאחרונה',
+        },
     },
     days: {
         months: {
@@ -345,7 +347,7 @@ export const he = {
             september: 'ספטמבר',
             october: 'אוקטובר',
             november: 'נובמבר',
-            december: 'דצמבר'
+            december: 'דצמבר',
         },
         short: {
             sunday: 'א\'',
@@ -562,7 +564,7 @@ export const he = {
             available: 'זמינים',
             crossPosition: 'תפקידים אחרים',
             otherSite: 'אתרים אחרים',
-            unavailable: 'לא זמינים'
+            unavailable: 'לא זמינים',
         },
         teams: 'צוותים',
         time: 'שעה',
@@ -689,6 +691,7 @@ export const he = {
         title: 'ניווט',
         workplace: 'סביבת עבודה',
         requests: 'בקשות',
+        profile: 'פרופיל',
     },
     notifications: {
         constraintsSaved: 'האילוצים נשמרו בהצלחה',
@@ -716,6 +719,20 @@ export const he = {
         requirements: 'דרישות',
         saveChanges: 'שמור שינויים',
         unsavedChanges: 'יש לך שינויים שלא נשמרו',
+    },
+    profile: {
+        title: 'הפרופיל שלי',
+        subtitle: 'נהל את המידע האישי וההגדרות שלך',
+        firstName: 'שם פרטי',
+        lastName: 'שם משפחה',
+        email: 'אימייל',
+        phone: 'טלפון',
+        updateSuccess: 'הפרופיל עודכן בהצלחה',
+        notifications: {
+            title: 'התראות באימייל',
+            receiveScheduleEmails: 'קבל התראות על לוח הזמנים באימייל',
+            scheduleEmailsDescription: 'קבל אימיילים עם הזמנות ליומן כאשר לוח הזמנים מתפרסם',
+        },
     },
     recommendation: {
         'Already assigned to': 'כבר משובץ ל-',
@@ -764,7 +781,7 @@ export const he = {
         title: 'הבקשות שלי',
         createNew: 'בקשה חדשה',
         permanentConstraints: {
-            title: 'הגבלות סידור קבועות'
+            title: 'הגבלות סידור קבועות',
         },
         noRequests: 'אין בקשות',
         noRequestsMessage: 'עדיין לא הגשתם בקשות',
@@ -785,7 +802,7 @@ export const he = {
         messagePlaceholder: 'הוסף מידע נוסף לגבי ההגבלות שלך...',
         confirmSubmit: {
             title: 'שליחת בקשה',
-            message: 'האם לשלוח את הבקשה להגבלות קבועות?'
+            message: 'האם לשלוח את הבקשה להגבלות קבועות?',
         },
         submitSuccess: 'הבקשה נשלחה בהצלחה',
         submitError: 'שליחת הבקשה נכשלה',
@@ -793,7 +810,7 @@ export const he = {
         status: {
             pending: 'בהמתנה',
             approved: 'אושר',
-            rejected: 'נדחה'
+            rejected: 'נדחה',
         },
         includeMessage: 'צירוף הודעה',
         includeMessageLabel: 'כלול את ההודעה באימייל',
@@ -807,7 +824,7 @@ export const he = {
         updateSuccess: 'הבקשה עודכנה בהצלחה',
         confirmUpdate: {
             title: 'עדכון בקשה',
-            message: 'האם לעדכן בקשה זו? הבקשה הקודמת תוחלף.'
+            message: 'האם לעדכן בקשה זו? הבקשה הקודמת תוחלף.',
         },
         deleteSuccess: 'הבקשה נמחקה בהצלחה',
         inactive: 'לא פעיל',
@@ -841,7 +858,7 @@ export const he = {
         empty: {
             title: 'לא נטענו נתונים לדוח',
             message: 'בחרו אתר עבודה וטווח תאריכים, ולחצו על "החל" כדי להפיק את הדוח.',
-            action: 'הפק דוח'
+            action: 'הפק דוח',
         },
         assignments: 'שיבוצים (בפועל / נדרש)',
         employeesUsed: 'עובדים בשימוש',
@@ -851,7 +868,7 @@ export const he = {
         employee: 'עובד',
         manager: 'מנהל',
         supervisor: 'מפקח',
-        teamLead: 'ראש צוות'
+        teamLead: 'ראש צוות',
     },
     schedule: {
         actions: 'פעולות',
@@ -996,7 +1013,7 @@ export const he = {
         statuses: {
             draft: 'טיוטה',
             published: 'פורסם',
-            archived: 'בארכיון'
+            archived: 'בארכיון',
         },
         publishError: 'פרסום הסידור נכשל',
         publishedScheduleExists: 'קיים כבר סידור שפורסם עבור תאריכים אלה. אנא בטל את פרסומו תחילה.',
@@ -1109,30 +1126,30 @@ export const he = {
             title: 'הפרות זמן מנוחה',
             beforeDetail: 'בתאריך {date}: רק {restHours} שעות מנוחה לפני משמרת {nextShift} (מינימום נדרש: {requiredRest} שעות)',
             afterDetail: 'בתאריך {date}: רק {restHours} שעות מנוחה אחרי משמרת {previousShift} (מינימום נדרש: {requiredRest} שעות)',
-            generalDetail: 'בתאריך {date}: רק {restHours} שעות מנוחה בין משמרות (מינימום נדרש: {requiredRest} שעות)'
+            generalDetail: 'בתאריך {date}: רק {restHours} שעות מנוחה בין משמרות (מינימום נדרש: {requiredRest} שעות)',
         },
         weekly_hours_violation: {
             title: 'הפרות שעות שבועיות',
-            detail: 'עבודה של {totalHours} שעות השבוע (מקסימום מותר: {maxHours} שעות)'
+            detail: 'עבודה של {totalHours} שעות השבוע (מקסימום מותר: {maxHours} שעות)',
         },
         daily_hours_violation: {
             title: 'הפרות שעות יומיות',
-            detail: 'בתאריך {date}: עבודה של {totalHours} שעות ביום אחד (מקסימום מותר: {maxHours} שעות)'
+            detail: 'בתאריך {date}: עבודה של {totalHours} שעות ביום אחד (מקסימום מותר: {maxHours} שעות)',
         },
         consecutive_shifts_violation: {
             title: 'הפרות ימים רצופים',
-            detail: 'עבודה של {consecutiveDays} ימים רצופים (מקסימום מותר: {maxDays} ימים)'
+            detail: 'עבודה של {consecutiveDays} ימים רצופים (מקסימום מותר: {maxDays} ימים)',
         },
         severity: {
             critical: 'קריטי',
             high: 'גבוה',
             medium: 'בינוני',
-            low: 'נמוך'
+            low: 'נמוך',
         },
         noViolations: 'לא נמצאו הפרות',
         violationSummary: 'נמצאו {count} הפרות',
         checkingCompliance: 'בודק תאימות לחוק...',
-        complianceCheckFailed: 'לא ניתן היה לאמת תאימות'
+        complianceCheckFailed: 'לא ניתן היה לאמת תאימות',
     },
     workSite: {
         addWorkSite: 'הוסף אתר עבודה',
@@ -1159,8 +1176,8 @@ export const he = {
                 },
                 time: {
                     '12h': '12 שעות',
-                    '24h': '24 שעות'
-                }
+                    '24h': '24 שעות',
+                },
             },
             preview: 'תצוגה מקדימה',
             timeExample: 'דוגמת שעה',

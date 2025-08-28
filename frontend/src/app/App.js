@@ -16,6 +16,7 @@ import EmployeeRequests from '../features/employee-requests';
 import EmployeeArchive from '../features/employee-archive';
 import EmployeeManagement from 'features/admin-employee-management';
 import EmployeeDashboard from '../features/employee-dashboard';
+import EmployeeProfile from '../features/employee-profile';
 
 import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import AdminDashboard from '../features/admin-dashboard';
@@ -50,6 +51,8 @@ const router = createBrowserRouter([
             { path: 'constraints', element: <EmployeeConstraints /> },
             { path: 'requests', element: <EmployeeRequests /> },
             { path: 'archive', element: <EmployeeArchive /> },
+
+            { path: 'profile', element: <EmployeeProfile /> },
         ],
     },
 

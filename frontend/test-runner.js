@@ -42,6 +42,36 @@ const features = {
         description: 'Test work sites, positions, shifts configuration.',
         category: 'Admin Features',
     },
+    'admin-algorithm-settings': {
+        name: '🤖 Algorithm Settings',
+        path: 'admin-algorithm-settings/index.test.js',
+        description: 'Test algorithm configuration, optimization parameters.',
+        category: 'Admin Features',
+    },
+    'admin-permanent-requests': {
+        name: '📋 Permanent Requests Review',
+        path: 'admin-permanent-requests/index.test.js',
+        description: 'Test permanent constraint requests review and approval.',
+        category: 'Admin Features',
+    },
+    'admin-position-settings': {
+        name: '💼 Position Settings',
+        path: 'admin-position-settings/index.test.js',
+        description: 'Test position configuration and management.',
+        category: 'Admin Features',
+    },
+    'admin-reports': {
+        name: '📊 Reports & Analytics',
+        path: 'admin-reports/index.test.js',
+        description: 'Test report generation, analytics, data export.',
+        category: 'Admin Features',
+    },
+    'admin-system-settings': {
+        name: '⚙️ System Settings',
+        path: 'admin-system-settings/index.test.js',
+        description: 'Test system configuration, global settings.',
+        category: 'Admin Features',
+    },
     'employee-dashboard': {
         name: '👤 Employee Dashboard',
         path: 'employee-dashboard/index.test.js',
@@ -58,6 +88,18 @@ const features = {
         name: '✋ Employee Requests',
         path: 'employee-requests/index.test.js',
         description: 'Test time-off requests, shift changes, approvals.',
+        category: 'Employee Features',
+    },
+    'employee-archive': {
+        name: '📚 Employee Archive',
+        path: 'employee-archive/index.test.js',
+        description: 'Test shift history, calendar view, monthly statistics.',
+        category: 'Employee Features',
+    },
+    'employee-constraints': {
+        name: '⏰ Employee Constraints',
+        path: 'employee-constraints/index.test.js',
+        description: 'Test availability constraints, time preferences.',
         category: 'Employee Features',
     },
 };

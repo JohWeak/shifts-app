@@ -2,18 +2,18 @@
 export const en = {
     admin: {
         requests: {
-            title: "Permanent Requests",
-            employee: "Employee",
-            position: "Position",
-            worksite: "Work Site",
-            status: "Status",
-            sentAt: "Sent At",
-            reviewedAt: "Reviewed At",
-            pending: "Pending",
-            pendingRequests: "Pending Requests",
-            processedRequests: "Processed Requests",
-            noRequests: "No Requests Found",
-            noRequestsMessage: "When employees submit permanent constraint requests, they will appear here for review.",
+            title: 'Permanent Requests',
+            employee: 'Employee',
+            position: 'Position',
+            worksite: 'Work Site',
+            status: 'Status',
+            sentAt: 'Sent At',
+            reviewedAt: 'Reviewed At',
+            pending: 'Pending',
+            pendingRequests: 'Pending Requests',
+            processedRequests: 'Processed Requests',
+            noRequests: 'No Requests Found',
+            noRequestsMessage: 'When employees submit permanent constraint requests, they will appear here for review.',
             includeResponse: 'Include Response',
             responsePlaceholder: 'Response',
             reject: 'Reject',
@@ -49,7 +49,7 @@ export const en = {
                         busy: 'Busy',
                         constraints: 'Constraints',
                         permanent: 'Permanent',
-                        preferences: 'Preferences'
+                        preferences: 'Preferences',
                     },
                     alreadyAssigned: 'Already assigned to {shift}',
                     permanentConstraint: 'Permanent constraint',
@@ -57,8 +57,8 @@ export const en = {
                     cannotWork: 'Cannot work',
                     prefersNotToWork: 'Prefers not to work',
                     restViolation: 'Rest violation',
-                    noEmployees: 'No employees in this category'
-                }
+                    noEmployees: 'No employees in this category',
+                },
             },
             confirmApprove: 'Confirm Approve',
             confirmApproveMessage: 'Are you sure you want to approve this request?',
@@ -76,7 +76,7 @@ export const en = {
             reviewApprovedMessage: 'This request has been approved',
             reviewRejectedMessage: 'This request has been rejected',
 
-        }
+        },
     },
     app: {
         name: 'Schedule System',
@@ -241,6 +241,9 @@ export const en = {
         view: 'View',
         selectAll: 'Select All',
         deselectAll: 'Deselect All',
+        noEmail: 'No email set',
+        logout: 'Logout',
+
     },
     constraints: {
         alreadySubmitted: 'You have already submitted constraints for this week',
@@ -303,7 +306,7 @@ export const en = {
             pendingRequests: 'Pending Requests',
             weeklyShifts: 'Weekly Shifts',
             totalShifts: 'Total Shifts',
-            coveredShifts: 'Covered Shifts'
+            coveredShifts: 'Covered Shifts',
         },
 
         // Quick actions
@@ -314,7 +317,7 @@ export const en = {
             viewReports: 'View Reports',
             systemSettings: 'System Settings',
             workplaceSettings: 'Workplace Settings',
-            algorithmSettings: 'Algorithm Settings'
+            algorithmSettings: 'Algorithm Settings',
         },
 
         // Recent activity
@@ -325,7 +328,7 @@ export const en = {
             requestApproved: 'Request approved for {name}',
             positionUpdated: 'Position updated: {position}',
             siteActivated: 'Work site activated: {site}',
-            viewAll: 'View All Activity'
+            viewAll: 'View All Activity',
         },
 
         // System status
@@ -339,8 +342,8 @@ export const en = {
             offline: 'Offline',
             available: 'Available',
             connected: 'Connected',
-            lastUpdated: 'Last updated'
-        }
+            lastUpdated: 'Last updated',
+        },
     },
     days: {
         months: {
@@ -355,7 +358,7 @@ export const en = {
             september: 'September',
             october: 'October',
             november: 'November',
-            december: 'December'
+            december: 'December',
         },
         short: {
             sunday: 'Sun',
@@ -572,7 +575,7 @@ export const en = {
             available: 'Available',
             crossPosition: 'Other Positions',
             otherSite: 'Other Sites',
-            unavailable: 'Unavailable'
+            unavailable: 'Unavailable',
         },
         teams: 'Teams',
         time: 'Time',
@@ -641,7 +644,7 @@ export const en = {
         confirmAction: {
             areYouSure: 'Are you sure?',
             body: 'This action cannot be undone. Do you want to proceed?',
-            title: 'Confirm Action'
+            title: 'Confirm Action',
         },
         errors: {
             deleteFailed: 'Failed to delete schedule',
@@ -652,7 +655,7 @@ export const en = {
             algorithms: {
                 auto: 'Auto',
                 'cp-sat': 'CP-SAT by Google OR-Tools',
-                simple: 'Simple'
+                simple: 'Simple',
             },
             autoDesc: 'Auto choice algorithm',
             cpSatDesc: 'CP-SAT by Google OR-Tools',
@@ -702,6 +705,7 @@ export const en = {
         title: 'Navigation',
         workplace: 'Workplace',
         requests: 'Requests',
+        profile: 'Profile',
     },
     notifications: {
         constraintsSaved: 'Constraints saved successfully',
@@ -729,6 +733,20 @@ export const en = {
         requirements: 'Requirements',
         saveChanges: 'Save Changes',
         unsavedChanges: 'You have unsaved changes',
+    },
+    profile: {
+        title: 'My Profile',
+        subtitle: 'Manage your personal information and preferences',
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        email: 'Email',
+        phone: 'Phone',
+        updateSuccess: 'Profile updated successfully',
+        notifications: {
+            title: 'Email Notifications',
+            receiveScheduleEmails: 'Receive schedule notifications by email',
+            scheduleEmailsDescription: 'Get email notifications with calendar invitations when your schedule is published',
+        },
     },
     recommendation: {
         'Already assigned to': 'Already assigned to',
@@ -779,7 +797,7 @@ export const en = {
         title: 'My Requests',
         createNew: 'New Request',
         permanentConstraints: {
-            title: 'Permanent Schedule Constraints'
+            title: 'Permanent Schedule Constraints',
         },
         noRequests: 'No Requests',
         noRequestsMessage: 'You haven\'t submitted any requests yet',
@@ -800,7 +818,7 @@ export const en = {
         messagePlaceholder: 'Add any additional information about your constraints...',
         confirmSubmit: {
             title: 'Submit Request',
-            message: 'Are you sure you want to submit this permanent constraint request?'
+            message: 'Are you sure you want to submit this permanent constraint request?',
         },
         submitSuccess: 'Request submitted successfully',
         submitError: 'Failed to submit request',
@@ -808,7 +826,7 @@ export const en = {
         status: {
             pending: 'Pending',
             approved: 'Approved',
-            rejected: 'Rejected'
+            rejected: 'Rejected',
         },
         includeMessage: 'Include Message',
         includeMessageLabel: 'Include message in email',
@@ -825,7 +843,7 @@ export const en = {
         updateSuccess: 'Request updated successfully',
         confirmUpdate: {
             title: 'Update Request',
-            message: 'Are you sure you want to update this request? The previous request will be replaced.'
+            message: 'Are you sure you want to update this request? The previous request will be replaced.',
         },
         deleteSuccess: 'Request deleted successfully',
         inactive: 'Inactive',
@@ -861,7 +879,7 @@ export const en = {
         empty: {
             title: 'No Report Data Loaded',
             message: 'Select a work site and a date range, then click "Apply" to generate a report.',
-            action: 'Generate Report'
+            action: 'Generate Report',
         },
         assignments: 'Assignments (Actual / Req.)',
         employeesUsed: 'Employees Used',
@@ -871,7 +889,7 @@ export const en = {
         employee: 'Employee',
         manager: 'Manager',
         supervisor: 'Supervisor',
-        teamLead: 'Team Lead'
+        teamLead: 'Team Lead',
     },
     schedule: {
         actions: 'Actions',
@@ -1016,7 +1034,7 @@ export const en = {
         statuses: {
             draft: 'Draft',
             published: 'Published',
-            archived: 'Archived'
+            archived: 'Archived',
         },
         publishError: 'Failed to publish schedule',
         publishedScheduleExists: 'A published schedule already exists for these dates. Please unpublish it first.',
@@ -1132,22 +1150,22 @@ export const en = {
             title: 'Rest Time Violations',
             beforeDetail: 'On {date}: Only {restHours} hours of rest before {nextShift} shift (minimum required: {requiredRest} hours)',
             afterDetail: 'On {date}: Only {restHours} hours of rest after {previousShift} shift (minimum required: {requiredRest} hours)',
-            generalDetail: 'On {date}: Only {restHours} hours of rest between shifts (minimum required: {requiredRest} hours)'
+            generalDetail: 'On {date}: Only {restHours} hours of rest between shifts (minimum required: {requiredRest} hours)',
         },
 
         weekly_hours_violation: {
             title: 'Weekly Hours Violations',
-            detail: 'Working {totalHours} hours this week (maximum allowed: {maxHours} hours)'
+            detail: 'Working {totalHours} hours this week (maximum allowed: {maxHours} hours)',
         },
 
         daily_hours_violation: {
             title: 'Daily Hours Violations',
-            detail: 'On {date}: Working {totalHours} hours in one day (maximum allowed: {maxHours} hours)'
+            detail: 'On {date}: Working {totalHours} hours in one day (maximum allowed: {maxHours} hours)',
         },
 
         consecutive_shifts_violation: {
             title: 'Consecutive Days Violations',
-            detail: 'Working {consecutiveDays} consecutive days (maximum allowed: {maxDays} days)'
+            detail: 'Working {consecutiveDays} consecutive days (maximum allowed: {maxDays} days)',
         },
 
         // Severity levels
@@ -1155,14 +1173,14 @@ export const en = {
             critical: 'Critical',
             high: 'High',
             medium: 'Medium',
-            low: 'Low'
+            low: 'Low',
         },
 
         // General messages
         noViolations: 'No violations found',
         violationSummary: '{count} violation(s) found',
         checkingCompliance: 'Checking legal compliance...',
-        complianceCheckFailed: 'Could not verify compliance'
+        complianceCheckFailed: 'Could not verify compliance',
 
 
     },
@@ -1191,8 +1209,8 @@ export const en = {
                 },
                 time: {
                     '12h': '12-hour',
-                    '24h': '24-hour'
-                }
+                    '24h': '24-hour',
+                },
             },
             preview: 'Preview',
             timeExample: 'Time Example',

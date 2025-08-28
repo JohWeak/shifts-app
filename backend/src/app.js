@@ -45,7 +45,7 @@ app.use('/api/employees', require('./routes/employee.routes'));
 app.use('/api/schedules', require('./routes/schedule.routes'));
 app.use('/api/worksites', require('./routes/worksite.routes'));
 app.use('/api/constraints', require('./routes/constraint.routes'));
-app.use('/api/settings', require('./routes/settings.routes')); // Объединенный роутер настроек
+app.use('/api/settings', require('./routes/settings.routes'));
 
 const { positionRouter, shiftRouter, requirementRouter } = require('./routes/position.routes');
 

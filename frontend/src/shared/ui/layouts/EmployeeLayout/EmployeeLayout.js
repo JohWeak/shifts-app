@@ -64,7 +64,12 @@ const EmployeeLayout = () => {
 
 
     const navItems = [
-        { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('navigation.home') },
+        {
+            path: '/employee/dashboard',
+            icon: 'house',
+            iconFill: 'house-fill',
+            label: t('navigation.home'),
+        },
         {
             path: '/employee/schedule',
             icon: 'calendar-week',
@@ -84,7 +89,12 @@ const EmployeeLayout = () => {
             label: t('employee.requests.title'),
             badge: newRequestUpdates > 0 ? newRequestUpdates : null,
         },
-        { path: '/employee/archive', icon: 'archive', iconFill: 'archive-fill', label: t('employee.archive.title') },
+        {
+            path: '/employee/archive',
+            icon: 'archive',
+            iconFill: 'archive-fill',
+            label: t('employee.archive.title'),
+        },
     ];
 
     const handleNavigation = (path) => {
