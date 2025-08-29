@@ -21,8 +21,7 @@ import EmployeeProfile from '../features/employee-profile';
 import AdminLayout from '../shared/ui/layouts/AdminLayout/AdminLayout';
 import AdminDashboard from '../features/admin-dashboard';
 import ScheduleManagement from '../features/admin-schedule-management';
-import AlgorithmSettings from '../features/admin-algorithm-settings';
-//import SystemSettings from '../features/admin-system-settings';
+import SystemSettings from '../features/admin-system-settings';
 import WorkplaceSettings from '../features/admin-workplace-settings';
 import Reports from '../features/admin-reports';
 import AdminPermanentRequests from '../features/admin-permanent-requests';
@@ -62,7 +61,7 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <AdminDashboard /> },
             { path: 'schedules', element: <ScheduleManagement /> },
-            { path: 'algorithms', element: <AlgorithmSettings /> },
+            { path: 'settings', element: <SystemSettings /> },
             { path: 'employees', element: <EmployeeManagement /> },
             { path: 'workplace', element: <WorkplaceSettings /> },
             { path: 'reports', element: <Reports /> },

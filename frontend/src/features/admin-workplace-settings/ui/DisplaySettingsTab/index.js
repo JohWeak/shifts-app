@@ -1,21 +1,21 @@
 // frontend/src/features/admin-workplace-settings/ui/DisplaySettingsTab/index.js
-import React, {useEffect, useState} from 'react';
-import {Alert, Button, Card, Col, Form, Row} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {updateSystemSettings} from '../../../admin-system-settings/model/settingsSlice';
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { updateSystemSettings } from '../../../admin-system-settings/model/settingsSlice';
 
 import './DisplaySettingsTab.css';
 
 const DisplaySettingsTab = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const {systemSettings, loading} = useSelector(state => state.settings);
+    const { systemSettings, loading } = useSelector(state => state.settings);
 
     const [localSettings, setLocalSettings] = useState({
         dateFormat: systemSettings?.dateFormat || 'DD/MM/YYYY',
-        timeFormat: systemSettings?.timeFormat || '24h'
+        timeFormat: systemSettings?.timeFormat || '24h',
     });
 
     const [hasChanges, setHasChanges] = useState(false);
@@ -26,7 +26,7 @@ const DisplaySettingsTab = () => {
         if (systemSettings) {
             setLocalSettings({
                 dateFormat: systemSettings.dateFormat || 'DD/MM/YYYY',
-                timeFormat: systemSettings.timeFormat || '24h'
+                timeFormat: systemSettings.timeFormat || '24h',
             });
         }
     }, [systemSettings]);
@@ -39,7 +39,7 @@ const DisplaySettingsTab = () => {
     }, [localSettings, systemSettings]);
 
     const handleChange = (field, value) => {
-        setLocalSettings(prev => ({...prev, [field]: value}));
+        setLocalSettings(prev => ({ ...prev, [field]: value }));
         setSaveSuccess(false);
         setSaveError(null);
     };
@@ -48,7 +48,7 @@ const DisplaySettingsTab = () => {
         try {
             await dispatch(updateSystemSettings({
                 ...systemSettings,
-                ...localSettings
+                ...localSettings,
             })).unwrap();
 
             setSaveSuccess(true);
@@ -61,7 +61,7 @@ const DisplaySettingsTab = () => {
     const handleReset = () => {
         setLocalSettings({
             dateFormat: systemSettings?.dateFormat || 'DD/MM/YYYY',
-            timeFormat: systemSettings?.timeFormat || '24h'
+            timeFormat: systemSettings?.timeFormat || '24h',
         });
         setSaveSuccess(false);
         setSaveError(null);
@@ -73,12 +73,12 @@ const DisplaySettingsTab = () => {
         'DD/MM/YYYY': currentDate.toLocaleDateString('en-GB'),
         'MM/DD/YYYY': currentDate.toLocaleDateString('en-US'),
         'YYYY-MM-DD': currentDate.toISOString().split('T')[0],
-        'DD.MM.YYYY': currentDate.toLocaleDateString('de-DE')
+        'DD.MM.YYYY': currentDate.toLocaleDateString('de-DE'),
     };
 
     const timeExamples = {
-        '24h': currentDate.toLocaleTimeString('en-GB', {hour12: false, hour: '2-digit', minute: '2-digit'}),
-        '12h': currentDate.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
+        '24h': currentDate.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        '12h': currentDate.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' }),
     };
 
     return (

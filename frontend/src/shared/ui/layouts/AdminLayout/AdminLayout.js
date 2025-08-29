@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
-    const { t } = useI18n();
+    const { t, direction } = useI18n();
     const { pendingCount } = useSelector(state => state.adminRequests);
     const navigate = useNavigate();
     const location = useLocation();
@@ -90,12 +90,13 @@ const AdminLayout = () => {
             badge: t('common.new'),
         },
         {
-            key: 'algorithms',
-            label: t('navigation.algorithms'),
-            icon: 'cpu-fill',
-            path: '/admin/algorithms',
+            key: 'workplace',
+            label: t('navigation.workplace'),
+            icon: 'building',
+            path: '/admin/workplace',
             badge: null,
         },
+
         {
             key: 'employees',
             label: t('navigation.employees'),
@@ -104,11 +105,11 @@ const AdminLayout = () => {
             badge: null,
         },
         {
-            key: 'workplace',
-            label: t('navigation.workplace'),
-            icon: 'building',
-            path: '/admin/workplace',
-            badge: null,
+            key: 'requests',
+            label: t('navigation.requests'),
+            icon: 'clipboard-check',
+            path: '/admin/permanent-requests',
+            badge: pendingCount > 0 ? pendingCount : null,
         },
         {
             key: 'reports',
@@ -118,11 +119,11 @@ const AdminLayout = () => {
             badge: null,
         },
         {
-            key: 'requests',
-            label: t('navigation.requests'),
-            icon: 'clipboard-check',
-            path: '/admin/permanent-requests',
-            badge: pendingCount > 0 ? pendingCount : null,
+            key: 'settings',
+            label: t('navigation.settings'),
+            icon: 'cpu-fill',
+            path: '/admin/settings',
+            badge: null,
         },
     ];
 
@@ -290,19 +291,39 @@ const AdminLayout = () => {
 
             {/* Main Container */}
             <div className="admin-main-container">
-                {/* Sidebar - Always compact, expands on hover/click */}
-                <div
+                {/* Sidebar - Always compact, expands on click */}
+                <motion.div
                     ref={sidebarRef}
                     className={`admin-sidebar-desktop ${isSidebarExpanded ? 'expanded' : 'compact'}`}
                     onMouseLeave={handleSidebarMouseLeave}
+                    animate={{
+                        width: isSidebarExpanded ? 'var(--app-sidebar-width)' : 'var(--app-colapsed-sidebar-width)',
+                        boxShadow: isSidebarExpanded ?
+                            (direction === 'rtl' ? '-4px 0 20px rgba(0, 0, 0, 0.15)' : '4px 0 20px rgba(0, 0, 0, 0.15)')
+                            : 'none',
+                    }}
+                    style={{
+                        position: 'fixed',
+                        left: direction === 'rtl' ? 'auto' : 0,
+                        right: direction === 'rtl' ? 0 : 'auto',
+                        top: 'var(--app-navbar-height)',
+                        zIndex: 1040,
+                    }}
+                    initial={false}
+                    transition={{
+                        duration: 0.3,
+                        ease: [0.4, 0.0, 0.2, 1],
+                        width: { duration: 0.25 },
+                        boxShadow: { duration: 0.2, delay: isSidebarExpanded ? 0.1 : 0 },
+                    }}
                 >
                     <div className="sidebar-content">
                         <SidebarContent isCompact={true} />
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Main Content Area */}
-                <div className={`admin-content-area ${isSidebarExpanded ? 'under-sidebar' : ''}`}>
+                <div className="admin-content-area">
                     <AnimatePresence mode="wait">
                         <motion.main
                             key={location.pathname}
