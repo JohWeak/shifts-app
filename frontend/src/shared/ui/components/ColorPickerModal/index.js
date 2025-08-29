@@ -72,7 +72,7 @@ const ColorPickerModal = ({
         if (show) {
             updateColorAndSlider(initialColor);
         }
-    }, [show, initialColor, updateColorAndSlider]);
+    }, [show, initialColor]);
 
 
     const handleSaveAndClose = () => {
