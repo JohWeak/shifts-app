@@ -292,6 +292,21 @@ const getScheduleDetails = async (req, res) => {
     }
 };
 
+// Helper function for email masking
+function maskEmail(email) {
+    if (!email || email.indexOf('@') === -1) {
+        return 'invalid-email';
+    }
+    const [localPart, domain] = email.split('@');
+    const [domainName, topLevelDomain] = domain.split('.');
+
+    const maskedLocal = localPart.length > 2
+        ? `${localPart.substring(0, 2)}***`
+        : `${localPart.substring(0, 1)}***`;
+
+    return `${maskedLocal}@***.${topLevelDomain}`;
+}
+
 /**
  * Send schedule notifications to employees
  */
@@ -358,24 +373,46 @@ const sendScheduleNotifications = async (scheduleId) => {
         // Send emails asynchronously
         const emailPromises = Object.values(employeeSchedules).map(({ employee, shifts }) =>
             emailService.sendScheduleNotification(employee, {
-                week: {
-                    start: schedule.start_date,
-                    end: schedule.end_date,
-                },
+                week: { start: schedule.start_date, end: schedule.end_date },
                 shifts,
-            }).catch(error => {
-                console.error(`Failed to send email to ${employee.email}:`, error);
             }),
         );
-
-        await Promise.allSettled(emailPromises);
-
-        return {
-            success: true,
-            emailsSent: Object.keys(employeeSchedules).length,
+        const results = await Promise.all(emailPromises);
+        const report = {
+            total_processed: results.length,
+            sent_count: 0,
+            skipped_count: 0,
+            failed_count: 0,
+            details: {
+                sent: [],
+                skipped: [],
+                failed: [],
+            },
         };
+        results.forEach(res => {
+            const maskedTo = maskEmail(res.to);
+            switch (res.status) {
+                case 'sent':
+                    report.sent_count++;
+                    report.details.sent.push(maskedTo);
+                    break;
+                case 'skipped':
+                    report.skipped_count++;
+                    report.details.skipped.push({ to: maskedTo, reason: res.reason });
+                    break;
+                case 'failed':
+                    report.failed_count++;
+                    report.details.failed.push({ to: maskedTo, error: res.error });
+                    break;
+            }
+        });
+
+        console.log('Email Notification Report:', JSON.stringify(report, null, 2));
+
+        return report;
+
     } catch (error) {
-        console.error('Error sending schedule notifications:', error);
+        console.error('Critical error in sendScheduleNotifications:', error);
         throw error;
     }
 };

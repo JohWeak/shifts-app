@@ -25,6 +25,7 @@ class EmailService {
     }
 
     async sendScheduleNotification(employee, scheduleData) {
+        const email = employee.email || 'no-email-provided';
         if (!employee.email || !employee.receive_schedule_emails) {
             console.log(
                 `Skipping email for ${employee.first_name} ${employee.last_name} \n 
@@ -61,9 +62,11 @@ class EmailService {
 
         try {
             await this.transporter.sendMail(mailOptions);
-            console.log(`Schedule email sent to ${employee.email} in [${locale}]`);
+            console.log(`✅Schedule email sent to ${employee.email} in [${locale}]`);
+            return { to: employee.email, status: 'sent' };
         } catch (error) {
-            console.error(`Failed to send email to ${employee.email}:`, error);
+            console.error(`❌Failed to send email to ${employee.email}:`, error);
+            return { to: employee.email, status: 'failed', error: error.message };
         }
     }
 
@@ -105,7 +108,7 @@ class EmailService {
 
     generateEmailHTML(employee, scheduleData, t, localeCode) {
         const weekRange = this.formatWeekRange(scheduleData.week, localeCode);
-
+        const locale = dateFnsLocales[localeCode] || enUS;
         //All CSS is in the <style>. Juice will transfer it to inline styles.
         return `
           <!DOCTYPE html>
@@ -137,7 +140,7 @@ class EmailService {
                 </thead>
                 <tbody>
                   ${scheduleData.shifts.map(shift => {
-            const formattedDate = format(parseISO(shift.date), 'dd/MM');
+            const formattedDate = format(parseISO(shift.date), 'EEE, dd/MM', { locale });
             const startTime = shift.start_time.substring(0, 5);
             const endTime = shift.end_time.substring(0, 5);
 

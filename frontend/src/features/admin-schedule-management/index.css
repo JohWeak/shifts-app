@@ -1,7 +1,6 @@
 /* Schedule Management */
 
 
-
 /* SCHEDULE TABLE */
 .schedule-table {
     width: 100%;
@@ -171,6 +170,7 @@
 .admin-schedule-management-container {
     flex: 1;
     height: 100%;
+    overflow-y: hidden; /* Prevent scroller appearance while animating */
 }
 
 /* Ensure proper z-index stacking */
@@ -193,7 +193,9 @@
 /* Responsive adjustments */
 @media (max-width: 1500px) {
     .admin-schedule-management-container {
-        width: 100% !important;
+        /*width: 100% !important;*/
+        /*overflow: hidden;*/
+
     }
 }
 

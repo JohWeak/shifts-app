@@ -1,13 +1,13 @@
 // frontend/src/features/employee-schedule/ui/PersonalScheduleView/index.js
-import React, {useState} from 'react';
-import {Badge, Button, Card} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {formatShiftTime, formatTableHeaderDate, getDayName} from 'shared/lib/utils/scheduleUtils';
-import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
-import {parseISO} from 'date-fns';
-import {ScheduleHeaderCard} from '../ScheduleHeaderCard';
+import React, { useState } from 'react';
+import { Badge, Button, Card } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { formatShiftTime, formatTableHeaderDate, getDayName } from 'shared/lib/utils/scheduleUtils';
+import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
+import { parseISO } from 'date-fns';
+import { ScheduleHeaderCard } from '../ScheduleHeaderCard';
 import './PersonalScheduleView.css';
-import CalendarExportModal from "../CalendarExportModal";
+import CalendarExportModal from '../CalendarExportModal';
 
 const PersonalScheduleView = ({
                                   scheduleData,
@@ -17,7 +17,7 @@ const PersonalScheduleView = ({
                                   showCurrentWeek,
                                   showNextWeek,
                               }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const currentWeekData = scheduleData?.current;
     const nextWeekData = scheduleData?.next;
 
@@ -67,7 +67,7 @@ const PersonalScheduleView = ({
                             );
                             if (userAssignment) {
                                 const assignedEmployee = userAssignment.employees.find(e => e.is_current_user || e.emp_id === employee?.emp_id);
-                                userAssignment = {...userAssignment, employee_info: assignedEmployee};
+                                userAssignment = { ...userAssignment, employee_info: assignedEmployee };
                             }
                         }
 
@@ -75,6 +75,21 @@ const PersonalScheduleView = ({
                         const isToday = new Date().toDateString() === dateObj.toDateString();
                         const bgColor = userAssignment ? getShiftColor(userAssignment) : '#f8f9fa';
                         const textColor = getContrastTextColor(bgColor);
+
+                        // Check if we need to show additional position/site info
+                        const shouldShowPositionInfo = userAssignment && (
+                            !hasPosition || // Flexible employee
+                            (userAssignment.employee_info?.position &&
+                                userAssignment.employee_info.position !== employee?.position_name) // Different position
+                        );
+
+                        const shouldShowSiteInfo = userAssignment && (
+                            !hasWorkSite || // No default site
+                            (userAssignment.employee_info?.site_name &&
+                                userAssignment.employee_info.site_name !== employee?.site_name) // Different site
+                        );
+
+                        const shouldShowAdditionalInfo = shouldShowPositionInfo || shouldShowSiteInfo;
 
                         return (
                             <Card
@@ -125,18 +140,18 @@ const PersonalScheduleView = ({
                                             )}
                                         </div>
                                     </div>
-                                    {userAssignment && (!hasPosition || !hasWorkSite) && (
+                                    {shouldShowAdditionalInfo && (
                                         <div className="mt-2 pt-2 border-top small d-flex justify-content-between">
-                                            {userAssignment.employee_info?.position && (
+                                            {shouldShowPositionInfo && userAssignment?.employee_info?.position && (
                                                 <div className="me-1">
                                                     <i className="bi bi-person-badge me-1"></i>
-                                                    {userAssignment.employee_info.position}
+                                                    {userAssignment?.employee_info.position}
                                                 </div>
                                             )}
-                                            {userAssignment.employee_info?.site_name && (
+                                            {shouldShowSiteInfo && userAssignment?.employee_info?.site_name && (
                                                 <div className="ms-1">
                                                     <i className="bi bi-building me-1"></i>
-                                                    {userAssignment.employee_info.site_name}
+                                                    {userAssignment?.employee_info.site_name}
                                                 </div>
                                             )}
                                         </div>
