@@ -105,7 +105,7 @@ const FullScheduleView = ({
         return (
             <Card className="week-schedule-section mb-4">
                 <ScheduleHeaderCard
-                    className="mb-2"
+                    className="mb-1"
                     title={weekTitle}
                     empName={employeeData?.name}
                     site={position?.site_name}

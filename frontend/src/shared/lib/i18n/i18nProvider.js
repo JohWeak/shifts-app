@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { en } from './locales/en';
 import { he } from './locales/he';
 import { ru } from './locales/ru';
@@ -37,20 +37,20 @@ export const I18nProvider = ({ children }) => {
         for (const k of keys) {
             value = value?.[k];
         }
-        // Если значение не найдено, возвращаем ключ
+        // If the value is not found, return the key.
         let template = value || key;
 
-        // Если найденное значение - не строка, просто возвращаем его
+        // If the found value is not a string, we simply return it.
         if (typeof template !== 'string') {
             return template;
         }
         if (Array.isArray(replacements)) {
-            // Для массива используем позиционные параметры {0}, {1}, {2}...
+            // For the array, we use positional parameters {0}, {1}, {2}...
             return template.replace(/\{(\d+)\}/g, (match, index) => {
                 return replacements[index] !== undefined ? replacements[index] : match;
             });
         } else {
-            // Для объекта используем именованные параметры {name}, {count}...
+            // For the object, we use named parameters {name}, {count}...
             return template.replace(/\{(\w+)\}/g, (match, placeholder) => {
                 return replacements.hasOwnProperty(placeholder) ? replacements[placeholder] : match;
             });

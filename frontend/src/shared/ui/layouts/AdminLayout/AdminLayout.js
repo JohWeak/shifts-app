@@ -17,11 +17,12 @@ import './AdminLayout.css';
 
 const AdminLayout = () => {
     const { t } = useI18n();
+    const { pendingCount } = useSelector(state => state.adminRequests);
     const navigate = useNavigate();
     const location = useLocation();
-    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const dispatch = useDispatch();
-    const { pendingCount } = useSelector(state => state.adminRequests);
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+
     const sidebarRef = useRef(null);
     const expandTimeoutRef = useRef(null);
 
