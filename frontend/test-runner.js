@@ -42,12 +42,6 @@ const features = {
         description: 'Test work sites, positions, shifts configuration.',
         category: 'Admin Features',
     },
-    'admin-algorithm-settings': {
-        name: '🤖 Algorithm Settings',
-        path: 'admin-algorithm-settings/index.test.js',
-        description: 'Test algorithm configuration, optimization parameters.',
-        category: 'Admin Features',
-    },
     'admin-permanent-requests': {
         name: '📋 Permanent Requests Review',
         path: 'admin-permanent-requests/index.test.js',
@@ -69,7 +63,7 @@ const features = {
     'admin-system-settings': {
         name: '⚙️ System Settings',
         path: 'admin-system-settings/index.test.js',
-        description: 'Test system configuration, global settings.',
+        description: 'Test unified system configuration, algorithm settings, and global settings.',
         category: 'Admin Features',
     },
     'employee-dashboard': {
@@ -100,6 +94,12 @@ const features = {
         name: '⏰ Employee Constraints',
         path: 'employee-constraints/index.test.js',
         description: 'Test availability constraints, time preferences.',
+        category: 'Employee Features',
+    },
+    'employee-profile': {
+        name: '👤 Employee Profile',
+        path: 'employee-profile/index.test.js',
+        description: 'Test profile management, personal information, settings.',
         category: 'Employee Features',
     },
 };
