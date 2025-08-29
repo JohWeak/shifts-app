@@ -9,11 +9,13 @@
     margin-left: auto;
     margin-right: auto;
 }
+
 [data-theme="dark"] .admin-dashboard {
-    background-color: var(--bs-black)!important;
+    background-color: var(--bs-black) !important;
 }
+
 [data-theme="dark"] .admin-dashboard .text-muted {
-    color: var(--bs-gray-500) ;
+    color: var(--bs-gray-500);
 }
 
 /* Header */
@@ -25,12 +27,14 @@
     margin-bottom: 0.5rem;
 
 }
+
 .admin-dashboard h1 {
     color: var(--bs-emphasis-color);
     margin-bottom: 2rem;
     position: relative;
     padding-bottom: 1rem;
 }
+
 .admin-dashboard h1::after {
     content: '';
     position: absolute;
@@ -42,6 +46,10 @@
     border-radius: 2px;
 }
 
+.admin-dashboard .page-header-card {
+    border-inline-start: 3px solid var(--bs-primary) !important;
+}
+
 /* Cards */
 .admin-dashboard .action-card,
 .admin-dashboard .status-card {
@@ -50,6 +58,7 @@
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: all 0.3s ease;
 }
+
 .admin-dashboard .action-card {
     border-inline-start: 3px solid var(--bs-primary);
 }
@@ -74,11 +83,10 @@
     gap: 0.5rem;
     padding: 1.25rem 1rem;
     border-radius: var(--radius-lg);
-    transition:
-            transform 0.25s ease-in-out,
-            background-color 0.35s ease-in-out,
-            border-color 0.5s ease-in-out,
-            color 0.2s ease-in-out;
+    transition: transform 0.25s ease-in-out,
+    background-color 0.35s ease-in-out,
+    border-color 0.5s ease-in-out,
+    color 0.2s ease-in-out;
     font-weight: 500;
     text-transform: none;
     height: 100%;
@@ -93,10 +101,11 @@
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     color: var(--bs-white)
 }
+
 .admin-dashboard .action-button:active {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) inset;
     transform: translateY(2px);
-    color: var(--bs-white)!important;
+    color: var(--bs-white) !important;
 }
 
 .admin-dashboard .action-button i {
@@ -108,7 +117,6 @@
     text-align: center;
     /*text-transform: uppercase;*/
 }
-
 
 
 /* Status list */
@@ -172,7 +180,6 @@
     /*.admin-dashboard {*/
     /*    padding: 1rem 0.5rem;*/
     /*}*/
-
     .admin-dashboard .dashboard-title {
         font-size: 1.5rem;
     }
