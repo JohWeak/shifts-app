@@ -33,7 +33,12 @@ export const ScheduleHeaderCard = ({
                                 {title}
                             </h6>)}
                     </div>
-                    <div className="d-flex align-items-center gap-2">
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                        {week && (
+                            <Badge bg="primary">
+                                {formatWeekRange(week, locale)}
+                            </Badge>
+                        )}
                         {showCalendarExport && (
                             <Button
                                 variant="outline-primary"
@@ -43,11 +48,6 @@ export const ScheduleHeaderCard = ({
                             >
                                 <i className="bi bi-calendar-plus-fill"></i>
                             </Button>
-                        )}
-                        {week && (
-                            <Badge bg="primary">
-                                {formatWeekRange(week, locale)}
-                            </Badge>
                         )}
                     </div>
                 </div>

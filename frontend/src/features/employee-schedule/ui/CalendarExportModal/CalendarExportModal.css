@@ -1,4 +1,8 @@
 /* frontend/src/features/employee-schedule/ui/CalendarExportModal/CalendarExportModal.css */
+.calendar-export-modal .modal-content {
+    border-radius: var(--radius-lg);
+}
+
 .shift-selection-list {
     max-height: 300px;
     overflow-y: auto;
@@ -25,6 +29,11 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.25rem;
+}
+
+[dir="rtl"] .calendar-choice-buttons {
+    display: flex;
+    flex-direction: row-reverse;
 }
 
 /* Dark mode styles */

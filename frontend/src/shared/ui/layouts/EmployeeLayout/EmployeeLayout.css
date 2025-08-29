@@ -171,6 +171,7 @@
     min-height: calc(100vh - 58px - 56px);
     background: var(--bs-gray-50);
     position: relative;
+
 }
 
 [data-theme="dark"] .employee-main-content {

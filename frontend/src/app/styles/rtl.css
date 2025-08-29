@@ -282,7 +282,7 @@
 
 [dir="rtl"] .form-check {
     /*padding-right: 0.5em;*/
-    /*padding-left: 0;*/
+    padding-left: 0;
 }
 
 [dir="rtl"] .form-check-input {
@@ -354,6 +354,9 @@
     right: auto;
     left: 0;
 }
+
+/* Button Group*/
+
 
 /* Pagination */
 [dir="rtl"] .page-item:first-child .page-link {

@@ -1,19 +1,19 @@
 // frontend/src/features/employee-schedule/ui/CalendarExportModal/index.js
-import React, {useMemo, useState} from 'react';
-import {Button, ButtonGroup, Form, Modal} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {CalendarExportService} from 'shared/lib/utils/calendarExport';
-import {formatShiftTime} from 'shared/lib/utils/scheduleUtils';
-import {parseISO} from 'date-fns';
+import React, { useMemo, useState } from 'react';
+import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { CalendarExportService } from 'shared/lib/utils/calendarExport';
+import { formatShiftTime } from 'shared/lib/utils/scheduleUtils';
+import { parseISO } from 'date-fns';
 import './CalendarExportModal.css';
-import {CalendarLinkGenerator} from "shared/lib/utils/calendarLinks";
+import { CalendarLinkGenerator } from 'shared/lib/utils/calendarLinks';
 
 const CalendarExportModal = ({
                                  show,
                                  onHide,
                                  weekSchedule,
                              }) => {
-    const {t, locale} = useI18n();
+    const { t, locale } = useI18n();
     const [selectedShifts, setSelectedShifts] = useState(new Set());
     const [includeLocation, setIncludeLocation] = useState(false);
     const [reminderMinutes, setReminderMinutes] = useState(15);
@@ -43,7 +43,7 @@ const CalendarExportModal = ({
                             position_name: employee?.position,
                             site_name: shift.site_name || employee?.site_name,
                             site_address: shift.site_address || employee?.site_address,
-                            uniqueKey: `${day.date}-${shift.shift_id}`
+                            uniqueKey: `${day.date}-${shift.shift_id}`,
                         });
                     }
                 });
@@ -55,14 +55,14 @@ const CalendarExportModal = ({
 
     // Reminder options matching iOS/Android standards
     const reminderOptions = [
-        {value: null, label: t('calendar.export.noReminder')},
-        {value: 0, label: t('calendar.export.atEventTime')},
-        {value: 5, label: t('calendar.export.minutes', {count: 5})},
-        {value: 10, label: t('calendar.export.minutes', {count: 10})},
-        {value: 15, label: t('calendar.export.minutes', {count: 15})},
-        {value: 30, label: t('calendar.export.minutes', {count: 30})},
-        {value: 60, label: t('calendar.export.hours', {count: 1})},
-        {value: 120, label: t('calendar.export.hours', {count: 2})},
+        { value: null, label: t('calendar.export.noReminder') },
+        { value: 0, label: t('calendar.export.atEventTime') },
+        { value: 5, label: t('calendar.export.minutes', { count: 5 }) },
+        { value: 10, label: t('calendar.export.minutes', { count: 10 }) },
+        { value: 15, label: t('calendar.export.minutes', { count: 15 }) },
+        { value: 30, label: t('calendar.export.minutes', { count: 30 }) },
+        { value: 60, label: t('calendar.export.hours', { count: 1 }) },
+        { value: 120, label: t('calendar.export.hours', { count: 2 }) },
     ];
 
     const handleShiftToggle = (shiftKey) => {
@@ -85,7 +85,7 @@ const CalendarExportModal = ({
 
     const handleAddToCalendar = () => {
         const shiftsToExport = availableShifts.filter(shift =>
-            selectedShifts.has(shift.uniqueKey)
+            selectedShifts.has(shift.uniqueKey),
         );
 
         if (shiftsToExport.length === 0) return;
@@ -104,9 +104,9 @@ const CalendarExportModal = ({
                     const icsContent = CalendarExportService.generateICS([shift], {
                         includeLocation,
                         reminderMinutes,
-                        locale
+                        locale,
                     });
-                    const blob = new Blob([icsContent], {type: 'text/calendar'});
+                    const blob = new Blob([icsContent], { type: 'text/calendar' });
                     url = URL.createObjectURL(blob);
                     break;
                 case 'outlook':
@@ -117,7 +117,7 @@ const CalendarExportModal = ({
                     const defaultIcs = CalendarExportService.generateICS([shift], {
                         includeLocation,
                         reminderMinutes,
-                        locale
+                        locale,
                     });
                     CalendarExportService.downloadICS(defaultIcs, `shift_${shift.date}.ics`);
                     return;
@@ -129,7 +129,7 @@ const CalendarExportModal = ({
             const icsContent = CalendarExportService.generateICS(shiftsToExport, {
                 includeLocation,
                 reminderMinutes,
-                locale
+                locale,
             });
 
             // If Google Calendar, try to import via URL
@@ -156,7 +156,13 @@ const CalendarExportModal = ({
     };
 
     return (
-        <Modal show={show} onHide={onHide} centered size="lg">
+        <Modal
+            show={show}
+            onHide={onHide}
+            centered
+            size="lg"
+            className="calendar-export-modal"
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     <i className="bi bi-calendar-plus me-2"></i>
@@ -167,7 +173,7 @@ const CalendarExportModal = ({
                 {/* Calendar type selection */}
                 <div className="mb-3">
                     <Form.Label>{t('calendar.export.selectCalendarType')}</Form.Label>
-                    <ButtonGroup className="w-100">
+                    <ButtonGroup className="w-100 calendar-choice-buttons">
                         <Button
                             variant={calendarType === 'google' ? 'primary' : 'outline-primary'}
                             onClick={() => setCalendarType('google')}
@@ -251,7 +257,7 @@ const CalendarExportModal = ({
                 {/* Options */}
                 {calendarType !== 'google' && calendarType !== 'outlook' && (
                     <>
-                        <hr/>
+                        <hr />
                         <div className="mb-3">
                             <Form.Check
                                 type="switch"

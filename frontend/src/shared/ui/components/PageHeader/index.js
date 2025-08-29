@@ -1,17 +1,17 @@
 import React from 'react';
-import {Card, Badge} from 'react-bootstrap';
+import { Badge, Card } from 'react-bootstrap';
 import './PageHeader.css';
 
 /**
- * Универсальный компонент для заголовков страниц.
- * @param {string} title - Главный заголовок.
- * @param {string} [subtitle] - Подзаголовок (опционально).
- * @param {JSX.Element|string} [icon] - Иконка. Может быть JSX-элементом или строкой с классом Bootstrap Icon.
- * @param {string} [iconColor] - Цвет иконки, если она передана как строка.
- * @param {object} [badge] - Объект для бейджа: { text: string, variant: string }.
- * @param {JSX.Element} [actions] - Кнопки или другие элементы для правой части заголовка.
- * @param {JSX.Element} [children] - Альтернатива actions.
- * @param {string} [className] - Дополнительные классы для кастомизации.
+ * Universal component for page headers.
+ * @param {string} title - Main title.
+ * @param {string} [subtitle] - Subtitle (optional).
+ * @param {JSX.Element|string} [icon] - Icon. Can be a JSX element or a string with a Bootstrap Icon class.
+ * @param {string} [iconColor] - Icon color, if it is passed as a string.
+ * @param {object} [badge] - Object for badge: { text: string, variant: string }.
+ * @param {JSX.Element} [actions] - Buttons or other elements for the right part of the header.
+ * @param {JSX.Element} [children] - Alternative to actions.
+ * @param {string} [className] - Additional classes for customization.
  */
 const PageHeader = ({
                         title,
@@ -21,7 +21,7 @@ const PageHeader = ({
                         badge,
                         actions,
                         children,
-                        className = ''
+                        className = '',
                     }) => {
 
     const renderIcon = () => {

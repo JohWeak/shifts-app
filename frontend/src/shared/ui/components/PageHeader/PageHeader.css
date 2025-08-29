@@ -1,11 +1,10 @@
 /* Page Header  */
 
-
 .page-header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    /*flex-wrap: wrap;*/
     gap: 1rem;
     padding-left: var(--space-2);
     padding-right: var(--space-2);
@@ -46,7 +45,7 @@
 .page-header-actions {
     display: flex;
     gap: 0.5rem;
-    align-items: center;
+    align-items: start;
     flex-shrink: 0;
 }
 
@@ -61,7 +60,7 @@
 @media (max-width: 768px) {
     .page-header-content {
         /*flex-direction: column;*/
-        /*align-items: stretch;*/
+        align-items: stretch;
     }
 
     .page-header h1 {
