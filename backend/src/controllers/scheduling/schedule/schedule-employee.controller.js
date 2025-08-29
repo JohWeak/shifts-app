@@ -323,13 +323,7 @@ const getPositionWeeklySchedule = async (req, res) => {
         console.log('[GetPositionWeeklySchedule] Position ID:', positionId, 'User ID:', userId);
 
         // Get employee
-        const employee = await Employee.findByPk(userId, {
-            include: [{
-                model: Position,
-                as: 'defaultPosition',
-            }],
-        });
-
+        const employee = await Employee.findByPk(userId);
         if (!employee) {
             return res.status(404).json({
                 success: false,
@@ -339,148 +333,187 @@ const getPositionWeeklySchedule = async (req, res) => {
 
         const { weekStartStr, weekEndStr } = calculateWeekBounds(date);
 
-        // Find ALL published schedules for this week that might have this position
-        const schedules = await Schedule.findAll({
-            where: {
-                start_date: { [Op.lte]: weekEndStr },
-                end_date: { [Op.gte]: weekStartStr },
-                status: 'published',
-            },
+        // If positionId is 'all', get all positions for this employee
+        let positionIds = [];
+        if (positionId === 'all') {
+            // Find all positions where employee has assignments this week
+            const schedules = await Schedule.findAll({
+                where: {
+                    start_date: { [Op.lte]: weekEndStr },
+                    end_date: { [Op.gte]: weekStartStr },
+                    status: 'published',
+                },
+            });
+
+            const scheduleIds = schedules.map(s => s.id);
+
+            const assignments = await ScheduleAssignment.findAll({
+                where: {
+                    schedule_id: { [Op.in]: scheduleIds },
+                    emp_id: employee.emp_id,
+                    work_date: {
+                        [Op.between]: [weekStartStr, weekEndStr],
+                    },
+                },
+                attributes: ['position_id'],
+                group: ['position_id'],
+            });
+
+            positionIds = [...new Set(assignments.map(a => a.position_id))];
+        } else {
+            positionIds = [parseInt(positionId)];
+        }
+
+        // Get all positions with their shifts
+        const positions = await Position.findAll({
+            where: { pos_id: { [Op.in]: positionIds } },
             include: [{
+                model: PositionShift,
+                as: 'shifts',
+                where: { is_active: true },
+                required: false,
+            }, {
                 model: WorkSite,
                 as: 'workSite',
             }],
         });
 
-        if (!schedules || schedules.length === 0) {
-            return res.json({
-                success: true,
-                message: 'No published schedules found for this week',
-                week: {
-                    start: weekStartStr,
-                    end: weekEndStr,
-                },
-                days: [],
-            });
-        }
-
-        const scheduleIds = schedules.map(s => s.id);
-
-        // Get position with shifts
-        const position = await Position.findByPk(positionId, {
-            include: [{
-                model: PositionShift,
-                as: 'shifts',
-                attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'color'],
-            }],
-        });
-
-        if (!position) {
+        if (!positions || positions.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Position not found',
+                message: 'Positions not found',
             });
         }
 
-        // Get ALL assignments for this position from ALL schedules
-        const assignments = await ScheduleAssignment.findAll({
-            where: {
-                schedule_id: { [Op.in]: scheduleIds },
-                position_id: positionId,
-                work_date: {
-                    [Op.between]: [weekStartStr, weekEndStr],
+        // Process each position separately
+        const positionSchedules = [];
+
+        for (const position of positions) {
+            // Find ALL published schedules
+            const schedules = await Schedule.findAll({
+                where: {
+                    start_date: { [Op.lte]: weekEndStr },
+                    end_date: { [Op.gte]: weekStartStr },
+                    status: 'published',
                 },
-            },
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['emp_id', 'first_name', 'last_name'],
+                include: [{
+                    model: WorkSite,
+                    as: 'workSite',
+                }],
+            });
+
+            const scheduleIds = schedules.map(s => s.id);
+
+            // Get ALL assignments for this position from ALL schedules
+            const assignments = await ScheduleAssignment.findAll({
+                where: {
+                    schedule_id: { [Op.in]: scheduleIds },
+                    position_id: position.pos_id,
+                    work_date: {
+                        [Op.between]: [weekStartStr, weekEndStr],
+                    },
                 },
-                {
-                    model: PositionShift,
-                    as: 'shift',
-                    attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'color'],
-                },
-                {
-                    model: Schedule,
-                    as: 'schedule',
-                    attributes: ['id', 'site_id'],
-                    include: [{
-                        model: WorkSite,
-                        as: 'workSite',
-                        attributes: ['site_id', 'site_name'],
-                    }],
-                },
-            ],
-            order: [['work_date', 'ASC'], ['shift', 'start_time', 'ASC']],
-        });
+                include: [
+                    {
+                        model: Employee,
+                        as: 'employee',
+                        attributes: ['emp_id', 'first_name', 'last_name', 'work_site_id'],
+                    },
+                    {
+                        model: PositionShift,
+                        as: 'shift',
+                    },
+                    {
+                        model: Schedule,
+                        as: 'schedule',
+                        include: [{
+                            model: WorkSite,
+                            as: 'workSite',
+                        }],
+                    },
+                ],
+                order: [['work_date', 'ASC'], ['shift', 'start_time', 'ASC']],
+            });
 
-        // Build week days structure
-        const weekDays = [];
-        const weekStart = dayjs(weekStartStr).tz(ISRAEL_TIMEZONE);
+            // Build week days structure
+            const weekDays = [];
+            const weekStart = dayjs(weekStartStr).tz(ISRAEL_TIMEZONE);
 
-        for (let i = 0; i < 7; i++) {
-            const currentDay = weekStart.add(i, 'day');
-            const dateStr = currentDay.format(DATE_FORMAT);
+            for (let i = 0; i < 7; i++) {
+                const currentDay = weekStart.add(i, 'day');
+                const dateStr = currentDay.format(DATE_FORMAT);
 
-            const dayAssignments = assignments.filter(a => a.work_date === dateStr);
+                const dayAssignments = assignments.filter(a => a.work_date === dateStr);
 
-            // Group by shifts
-            const dayShifts = [];
-            position.shifts.forEach(shift => {
-                const shiftAssignments = dayAssignments.filter(a => a.shift_id === shift.id);
-                const employees = shiftAssignments.map(a => ({
-                    emp_id: a.employee.emp_id,
-                    name: `${a.employee.first_name} ${a.employee.last_name}`,
-                    is_current_user: a.employee.emp_id === employee.emp_id,
-                    site_name: a.schedule.workSite?.site_name,
-                    site_id: a.schedule.site_id,
-                    // Flags for display
-                    is_cross_site: a.schedule.site_id !== position.site_id,
-                }));
+                // Group by shifts
+                const dayShifts = [];
+                position.shifts.forEach(shift => {
+                    const shiftAssignments = dayAssignments.filter(a => a.shift_id === shift.id);
+                    const employees = shiftAssignments.map(a => ({
+                        emp_id: a.employee.emp_id,
+                        name: `${a.employee.first_name} ${a.employee.last_name}`,
+                        is_current_user: a.employee.emp_id === employee.emp_id,
+                        site_name: a.schedule.workSite?.site_name,
+                        site_id: a.schedule.site_id,
+                        is_cross_site: a.schedule.site_id !== position.site_id,
+                    }));
 
-                dayShifts.push({
-                    shift_id: shift.id,
-                    employees,
+                    dayShifts.push({
+                        shift_id: shift.id,
+                        employees,
+                    });
                 });
-            });
 
-            weekDays.push({
-                date: dateStr,
-                shifts: dayShifts,
+                weekDays.push({
+                    date: dateStr,
+                    shifts: dayShifts,
+                });
+            }
+
+            // Get sites involved
+            const sitesWithAssignments = [...new Set(assignments.map(a => a.schedule.site_id))];
+            const siteNames = schedules
+                .filter(s => sitesWithAssignments.includes(s.id))
+                .map(s => s.workSite?.site_name)
+                .filter(Boolean);
+
+            positionSchedules.push({
+                position: {
+                    id: position.pos_id,
+                    name: position.pos_name,
+                    site_name: position.workSite?.site_name,
+                    has_cross_site_assignments: sitesWithAssignments.length > 1,
+                    sites_involved: siteNames,
+                },
+                shifts: position.shifts.map(s => ({
+                    id: s.id,
+                    shift_name: s.shift_name,
+                    start_time: s.start_time,
+                    duration: s.duration_hours,
+                    color: s.color,
+                })),
+                days: weekDays,
             });
         }
 
-        // Get all sites that have assignments for this position
-        const sitesWithAssignments = [...new Set(assignments.map(a => a.schedule.site_id))];
-        const siteNames = schedules
-            .filter(s => sitesWithAssignments.includes(s.id))
-            .map(s => s.workSite?.site_name)
-            .filter(Boolean);
-
-        res.json({
-            success: true,
+        // If multiple positions, return array, otherwise single object
+        const responseData = positionIds.length === 1 ? {
+            ...positionSchedules[0],
             week: {
                 start: weekStartStr,
                 end: weekEndStr,
             },
-            position: {
-                id: position.pos_id,
-                name: position.pos_name,
-                site_name: position.site?.site_name,
-                // Additional info about cross-site assignments
-                has_cross_site_assignments: sitesWithAssignments.length > 1,
-                sites_involved: siteNames,
+        } : {
+            week: {
+                start: weekStartStr,
+                end: weekEndStr,
             },
-            shifts: position.shifts.map(s => ({
-                id: s.id,
-                shift_name: s.shift_name,
-                start_time: s.start_time,
-                duration: s.duration_hours,
-                color: s.color,
-            })),
-            days: weekDays,
+            positions: positionSchedules,
+        };
+
+        res.json({
+            success: true,
+            ...responseData,
         });
 
     } catch (error) {
