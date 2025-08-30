@@ -35,7 +35,9 @@ const SystemSettings = () => {
     }, [dispatch, t]);
 
     useEffect(() => {
-        setLocalSettings(systemSettings);
+        if (systemSettings && Object.keys(systemSettings).length > 0) {
+            setLocalSettings(systemSettings);
+        }
     }, [systemSettings]);
 
     const handleChange = (field, value) => {
