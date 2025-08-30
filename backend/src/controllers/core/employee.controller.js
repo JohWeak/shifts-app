@@ -477,7 +477,7 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { first_name, last_name, email, phone, receive_schedule_emails } = req.body;
+        const { first_name, last_name, email, phone, receive_schedule_emails, locale } = req.body;
 
         const employee = await Employee.findByPk(req.userId);
 
@@ -494,6 +494,7 @@ const updateProfile = async (req, res) => {
             email,
             phone,
             receive_schedule_emails,
+            locale,
         });
 
         res.json({
