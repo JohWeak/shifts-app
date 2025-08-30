@@ -2,25 +2,12 @@
 
 .unified-settings {
     min-height: 100vh;
-    background: linear-gradient(135deg,
-    var(--bs-gray-50) 0%,
-    var(--bs-gray-100) 100%);
-}
-
-[data-theme="dark"] .unified-settings {
-    background: linear-gradient(135deg,
-    var(--bs-gray-900) 0%,
-    var(--bs-black) 100%);
 }
 
 .settings-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
-}
-
-.settings-row {
-    /*gap: 1rem;*/
 }
 
 /* Sidebar Navigation */
@@ -278,6 +265,7 @@
     transition: all 0.2s ease;
 }
 
+
 [data-theme="dark"] .settings-checkbox {
     background: var(--bs-gray-800);
 }
@@ -286,6 +274,7 @@
     background: var(--bs-light);
     border-color: var(--bs-primary);
 }
+
 
 [data-theme="dark"] .settings-checkbox:hover {
     background: var(--bs-gray-700);

@@ -56,8 +56,10 @@ const ScheduleTableList = ({
                                     <Table className="schedule-overview-table mb-0">
                                         <thead>
                                         <tr>
-                                            <SortableHeader sortKey="week" sortConfig={sortConfig}
-                                                            onSort={requestSort}>{t('schedule.weekPeriod')}</SortableHeader>
+                                            <SortableHeader
+                                                sortKey="week"
+                                                sortConfig={sortConfig}
+                                                onSort={requestSort}>{t('schedule.weekPeriod')}</SortableHeader>
                                             <SortableHeader sortKey="site" sortConfig={sortConfig}
                                                             onSort={requestSort}>{t('schedule.site')}</SortableHeader>
                                             <SortableHeader sortKey="updatedAt" sortConfig={sortConfig}

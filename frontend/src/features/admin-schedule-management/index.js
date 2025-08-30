@@ -22,6 +22,7 @@ import {
     setSelectedScheduleId,
 } from './model/scheduleSlice';
 
+import { fetchPositions } from '../admin-workplace-settings/model/workplaceSlice';
 import './index.css';
 
 const ScheduleManagement = () => {
@@ -57,7 +58,7 @@ const ScheduleManagement = () => {
     useEffect(() => {
         dispatch(fetchSchedules());
         dispatch(fetchWorkSites());
-        //dispatch(fetchPositions())
+        dispatch(fetchPositions());
     }, [dispatch]);
 
     useEffect(() => {
