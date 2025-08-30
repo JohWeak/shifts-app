@@ -1,6 +1,6 @@
 // frontend/src/app/store/slices/authSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authAPI } from 'shared/api/apiService';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { authAPI, employeeAPI } from 'shared/api/apiService';
 
 // --- (Thunks) ---
 export const login = createAsyncThunk(
@@ -30,7 +30,29 @@ export const login = createAsyncThunk(
             const message = error.response?.data?.message || 'Login failed';
             return rejectWithValue(message);
         }
-    }
+    },
+);
+
+export const updateUserLocale = createAsyncThunk(
+    'auth/updateUserLocale',
+    async (locale, { getState, rejectWithValue }) => {
+        try {
+            const state = getState();
+            const userId = state.auth.user?.id;
+
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+
+            await employeeAPI.updateProfile({ locale });
+
+            return { locale };
+        } catch (error) {
+            console.error('Failed to update locale in database:', error);
+            // Не блокируем UI, просто логируем ошибку
+            return rejectWithValue(error.response?.data?.message || 'Failed to update locale');
+        }
+    },
 );
 
 // --- (Slice) ---
@@ -41,7 +63,7 @@ try {
         initialUser = JSON.parse(storedUserJSON);
     }
 } catch (error) {
-    console.error("Failed to parse user from localStorage:", error);
+    console.error('Failed to parse user from localStorage:', error);
     initialUser = null;
 }
 
@@ -89,6 +111,12 @@ const authSlice = createSlice({
                 state.user = null;
                 state.token = null;
                 state.error = action.payload;
+            })
+            .addCase(updateUserLocale.fulfilled, (state, action) => {
+                if (state.user) {
+                    state.user.locale = action.payload.locale;
+                    localStorage.setItem('user', JSON.stringify(state.user));
+                }
             });
     },
 });

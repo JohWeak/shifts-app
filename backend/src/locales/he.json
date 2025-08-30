@@ -1,0 +1,17 @@
+{
+  "email": {
+    "subject": "לוח הזמנים שלך לשבוע {{weekRange}}",
+    "greeting": "שלום {{name}},",
+    "published": "לוח הזמנים שלך לשבוע {{weekRange}} פורסם.",
+    "shifts_title": "המשמרות שלך:",
+    "table_header_date": "תאריך",
+    "table_header_shift": "משמרת",
+    "table_header_time": "שעה",
+    "table_header_location": "מיקום",
+    "instructions_title": "כדי להוסיף משמרות אלו ליומן שלך:",
+    "instructions_ios": "באייפון/אייפד: פתח את המייל הזה והקש על הזמנת היומן בחלק העליון",
+    "instructions_android": "באנדרואיד: פתח את קובץ ה-.ics המצורף",
+    "instructions_desktop": "במחשב: לחץ על \"הוסף ליומן\" בתוכנת המייל שלך",
+    "preferences_note": "תוכל לנהל את העדפות המייל שלך בהגדרות הפרופיל."
+  }
+}

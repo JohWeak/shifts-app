@@ -1,9 +1,9 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionsTable/index.js
 
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import { Table } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
+import SortableHeader from 'shared/ui/components/SortableHeader';
 import PositionsTableRow from '../PositionsTableRow';
 import './PositionsTable.css';
 
@@ -18,46 +18,46 @@ const PositionsTable = ({
                             onViewEmployees,
                             onDelete,
                             onRestore,
-                            getSiteName
+                            getSiteName,
                         }) => {
     const { t } = useI18n();
 
     const positionTableHeaders = useMemo(() => [
         {
             key: 'name',
-            label: t('workplace.positions.name')
+            label: t('workplace.positions.name'),
         },
         {
             key: 'site',
-            label: t('workplace.worksites.title')
+            label: t('workplace.worksites.title'),
         },
         {
             key: 'profession',
-            label: t('workplace.positions.profession')
+            label: t('workplace.positions.profession'),
         },
         {
             key: 'defaultStaff',
-            label: t('workplace.positions.defaultStaff')
+            label: t('workplace.positions.defaultStaff'),
         },
         {
             key: 'shifts',
-            label: t('workplace.positions.shifts')
+            label: t('workplace.positions.shifts'),
         },
         {
             key: 'employees',
-            label: t('workplace.positions.employees')
+            label: t('workplace.positions.employees'),
         },
         {
             key: 'status',
-            label: t('common.status')
+            label: t('common.status'),
         },
         {
             label: t('common.actions'),
             isSortable: false,
             thProps: {
-                className: 'sortable-header text-center px-4'
-            }
-        }
+                className: 'sortable-header text-center px-4',
+            },
+        },
     ], [t]);
 
     return (

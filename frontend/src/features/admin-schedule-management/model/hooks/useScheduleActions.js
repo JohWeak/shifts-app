@@ -1,7 +1,7 @@
 // frontend/src/features/admin-schedule-management/model/hooks/useScheduleActions.js
 
-import React, {useCallback, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useCallback, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     applyPendingChanges,
     clearAutofilledStatus,
@@ -10,26 +10,26 @@ import {
     fetchScheduleDetails,
     generateSchedule,
     updateScheduleAssignments,
-    updateScheduleStatus
+    updateScheduleStatus,
 } from '../scheduleSlice';
-import {addNotification} from 'app/model/notificationsSlice';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useScheduleAutofill} from './useScheduleAutofill';
-import {useScheduleValidation} from './useScheduleValidation';
-import ConfirmationModal from "../../../../shared/ui/components/ConfirmationModal/ConfirmationModal";
-import {formatWeekRange} from "../../../../shared/lib/utils/scheduleUtils";
+import { addNotification } from 'app/model/notificationsSlice';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useScheduleAutofill } from './useScheduleAutofill';
+import { useScheduleValidation } from './useScheduleValidation';
+import ConfirmationModal from '../../../../shared/ui/components/ConfirmationModal';
+import { formatWeekRange } from '../../../../shared/lib/utils/scheduleUtils';
 
 export const useScheduleActions = (schedule = null) => {
     const dispatch = useDispatch();
-    const {t, locale} = useI18n();
+    const { t, locale } = useI18n();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
 
     // For detail actions
-    const {editingPositions, scheduleDetails, pendingChanges} = useSelector(state => state.schedule);
-    const {autofillAllEditingPositions, isAutofilling} = useScheduleAutofill();
-    const {validatePositionChanges} = useScheduleValidation();
+    const { editingPositions, scheduleDetails, pendingChanges } = useSelector(state => state.schedule);
+    const { autofillAllEditingPositions, isAutofilling } = useScheduleAutofill();
+    const { validatePositionChanges } = useScheduleValidation();
 
 
     const [scheduleToPublish, setScheduleToPublish] = useState(null);
@@ -50,7 +50,7 @@ export const useScheduleActions = (schedule = null) => {
         actionThunk,
         successMessage,
         errorMessage,
-        options = {}
+        options = {},
     ) => {
         setLoading(true);
         setError(null);
@@ -63,7 +63,7 @@ export const useScheduleActions = (schedule = null) => {
                     variant: 'success',
                     message: successMessage,
                     params: options.messageParams,
-                    duration: options.successDuration || 5000
+                    duration: options.successDuration || 5000,
                 }));
             }
 
@@ -71,7 +71,7 @@ export const useScheduleActions = (schedule = null) => {
                 await options.onSuccess(result);
             }
 
-            return {success: true, data: result};
+            return { success: true, data: result };
 
         } catch (err) {
             const errorMsg = err?.message || err || errorMessage || t('errors.genericError');
@@ -80,14 +80,14 @@ export const useScheduleActions = (schedule = null) => {
                 dispatch(addNotification({
                     variant: 'warning',
                     message: 'schedule.publishedScheduleExists',
-                    duration: 8000
+                    duration: 8000,
                 }));
                 setError(t('schedule.publishedScheduleExists'));
             } else if (!options.skipNotification) {
                 dispatch(addNotification({
                     variant: 'error',
                     message: errorMsg,
-                    duration: options.errorDuration || 5000
+                    duration: options.errorDuration || 5000,
                 }));
                 setError(errorMsg);
             }
@@ -96,7 +96,7 @@ export const useScheduleActions = (schedule = null) => {
                 await options.onError(err);
             }
 
-            return {success: false, error: errorMsg};
+            return { success: false, error: errorMsg };
 
         } finally {
             setLoading(false);
@@ -109,16 +109,16 @@ export const useScheduleActions = (schedule = null) => {
             'generate',
             generateSchedule(settings),
             'schedule.generationSuccess',
-            'errors.generateFailed'
+            'errors.generateFailed',
         ), [handleAction]);
 
 
     const handleExport = useCallback((scheduleId, format) =>
         handleAction(
             'export',
-            exportSchedule({scheduleId, format}),
+            exportSchedule({ scheduleId, format }),
             'schedule.exportSuccess',
-            'errors.exportFailed'
+            'errors.exportFailed',
         ), [handleAction]);
 
     // Schedule detail actions with modals
@@ -128,15 +128,15 @@ export const useScheduleActions = (schedule = null) => {
         setIsUpdating(true);
         await handleAction(
             'publish',
-            updateScheduleStatus({scheduleId: scheduleToPublish.id, status: 'published'}),
+            updateScheduleStatus({ scheduleId: scheduleToPublish.id, status: 'published' }),
             'schedule.publishSuccess',
             'errors.publishFailed',
             {
                 onSuccess: () => {
                     if (schedule) dispatch(fetchScheduleDetails(schedule.id));
                     setScheduleToPublish(null);
-                }
-            }
+                },
+            },
         );
         setIsUpdating(false);
     }, [scheduleToPublish, handleAction, dispatch, schedule]);
@@ -147,15 +147,15 @@ export const useScheduleActions = (schedule = null) => {
         setIsUpdating(true);
         await handleAction(
             'unpublish',
-            updateScheduleStatus({scheduleId: scheduleToUnpublish.id, status: 'draft'}),
+            updateScheduleStatus({ scheduleId: scheduleToUnpublish.id, status: 'draft' }),
             'schedule.unpublishSuccess',
             'errors.unpublishFailed',
             {
                 onSuccess: () => {
                     if (schedule) dispatch(fetchScheduleDetails(schedule.id));
                     setScheduleToUnpublish(null);
-                }
-            }
+                },
+            },
         );
         setIsUpdating(false);
     }, [scheduleToUnpublish, handleAction, dispatch, schedule]);
@@ -176,8 +176,8 @@ export const useScheduleActions = (schedule = null) => {
                         scheduleToDelete.onSuccess();
                     }
                     setScheduleToDelete(null); // Закрываем модальное окно
-                }
-            }
+                },
+            },
         );
         setIsUpdating(false);
     }, [scheduleToDelete, handleAction]);
@@ -189,27 +189,27 @@ export const useScheduleActions = (schedule = null) => {
             dispatch(addNotification({
                 variant: 'success',
                 message: 'schedule.autofillSuccess',
-                duration: 5000
+                duration: 5000,
             }));
         } catch (error) {
             dispatch(addNotification({
                 variant: 'error',
                 message: 'schedule.autofillFailed',
-                duration: 5000
+                duration: 5000,
             }));
         }
     }, [autofillAllEditingPositions, editingPositions, dispatch]);
 
     const performSave = useCallback(async (positionId) => {
         const positionChanges = Object.values(pendingChanges).filter(
-            c => c.positionId === positionId && !c.isApplied
+            c => c.positionId === positionId && !c.isApplied,
         );
 
         return await handleAction(
             'save',
             updateScheduleAssignments({
                 scheduleId: scheduleDetails.schedule.id,
-                changes: positionChanges
+                changes: positionChanges,
             }),
             'schedule.saveSuccess',
             'errors.saveFailed',
@@ -227,19 +227,19 @@ export const useScheduleActions = (schedule = null) => {
                     if (autofilledKeys.length > 0) {
                         dispatch(clearAutofilledStatus(autofilledKeys));
                     }
-                }
-            }
+                },
+            },
         );
     }, [pendingChanges, scheduleDetails, handleAction, dispatch]);
 
     // Position save with validation
     const handleSavePosition = useCallback(async (positionId) => {
         const positionChanges = Object.values(pendingChanges).filter(
-            c => c.positionId === positionId && !c.isApplied
+            c => c.positionId === positionId && !c.isApplied,
         );
 
         if (positionChanges.length === 0) {
-            return {success: true, noChanges: true};
+            return { success: true, noChanges: true };
         }
 
         try {
@@ -249,7 +249,7 @@ export const useScheduleActions = (schedule = null) => {
                 setValidationViolations(violations);
                 setPendingSavePositionId(positionId);
                 setShowValidationModal(true);
-                return {showValidation: true, violations};
+                return { showValidation: true, violations };
             }
 
             return await performSave(positionId);
@@ -257,9 +257,9 @@ export const useScheduleActions = (schedule = null) => {
             dispatch(addNotification({
                 variant: 'error',
                 message: 'schedule.saveFailed',
-                duration: 5000
+                duration: 5000,
             }));
-            return {success: false, error};
+            return { success: false, error };
         }
     }, [pendingChanges, validatePositionChanges, performSave, dispatch]);
 
@@ -284,7 +284,7 @@ export const useScheduleActions = (schedule = null) => {
     const promptDelete = (scheduleOverride, options = {}) => {
         const target = scheduleOverride || schedule;
         if (target) {
-            setScheduleToDelete({schedule: target, onSuccess: options.onSuccess});
+            setScheduleToDelete({ schedule: target, onSuccess: options.onSuccess });
         }
     };
 

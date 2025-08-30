@@ -1,5 +1,5 @@
 // frontend/src/features/employee-constraints/index.js
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Card, Container, Toast, ToastContainer} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -8,26 +8,25 @@ import {useMediaQuery} from 'shared/hooks/useMediaQuery';
 import {addNotification, removeNotification} from 'app/model/notificationsSlice';
 
 // Components
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import ErrorMessage from 'shared/ui/components/ErrorMessage/ErrorMessage';
-import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
+import PageHeader from 'shared/ui/components/PageHeader';
+import LoadingState from 'shared/ui/components/LoadingState';
+import ErrorMessage from 'shared/ui/components/ErrorMessage';
+import ColorPickerModal from 'shared/ui/components/ColorPickerModal';
 import ConstraintActions from './ui/ConstraintActions';
 import ConstraintGrid from './ui/ConstraintGrid';
-import {ScheduleHeaderCard} from 'features/employee-schedule/ui/ScheduleHeaderCard/ScheduleHeaderCard';
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import {ScheduleHeaderCard} from 'features/employee-schedule/ui/ScheduleHeaderCard';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 
 // Redux actions & utils
-
 import {
+    cancelEditing,
+    enableEditing,
     fetchWeeklyConstraints,
+    resetConstraints,
+    setCurrentMode,
+    submissionInitiated,
     submitWeeklyConstraints,
     updateConstraint,
-    setCurrentMode,
-    enableEditing,
-    resetConstraints,
-    cancelEditing,
-    submissionInitiated
 } from './model/constraintSlice';
 
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
@@ -57,14 +56,14 @@ const ConstraintsSchedule = () => {
             title: t('constraints.modals.resetTitle'),
             message: t('constraints.modals.resetMessage'),
             confirmText: t('common.reset'),
-            variant: 'warning'
+            variant: 'warning',
         },
         submit: {
             title: t('constraints.modals.submitTitle'),
             message: t('constraints.modals.submitMessage'),
             confirmText: t('common.submit'),
-            variant: 'primary'
-        }
+            variant: 'primary',
+        },
     };
 
     const handleShowModal = (action) => setModalState({show: true, action});
@@ -93,7 +92,7 @@ const ConstraintsSchedule = () => {
         hasLocalColor,
         resetShiftColor,
         shiftObject,
-        originalGlobalColor
+        originalGlobalColor,
     } = useShiftColor();
 
 
@@ -105,7 +104,7 @@ const ConstraintsSchedule = () => {
         loading,
         error,
         isSubmitted,
-        canEdit
+        canEdit,
     } = useSelector(state => state.constraints);
 
     const {user} = useSelector(state => state.auth);
@@ -117,13 +116,13 @@ const ConstraintsSchedule = () => {
         'cannot_work': {
             shift_id: 'constraint_cannot_work', // Уникальный ID для localStorage
             name: t('constraints.cannotWork'),
-            color: '#dc3545' // Цвет по умолчанию
+            color: '#dc3545', // Цвет по умолчанию
         },
         'prefer_work': {
             shift_id: 'constraint_prefer_work', // Уникальный ID для localStorage
             name: t('constraints.preferWork'),
-            color: '#28a745' // Цвет по умолчанию
-        }
+            color: '#28a745', // Цвет по умолчанию
+        },
     }), [t]);
     const customColors = useMemo(() => {
         const cannotWorkBg = getShiftColor(constraintPseudoShifts.cannot_work);
@@ -132,12 +131,12 @@ const ConstraintsSchedule = () => {
         return {
             cannot_work: {
                 background: cannotWorkBg,
-                text: getContrastTextColor(cannotWorkBg)
+                text: getContrastTextColor(cannotWorkBg),
             },
             prefer_work: {
                 background: preferWorkBg,
-                text: getContrastTextColor(preferWorkBg)
-            }
+                text: getContrastTextColor(preferWorkBg),
+            },
         };
     }, [getShiftColor, constraintPseudoShifts.cannot_work, constraintPseudoShifts.prefer_work]);
 
@@ -188,7 +187,7 @@ const ConstraintsSchedule = () => {
 
     const checkLimits = (testConstraints, mode) => {
         const dayCount = Object.values(testConstraints).filter(day =>
-            Object.values(day.shifts).some(status => status === mode)
+            Object.values(day.shifts).some(status => status === mode),
         ).length;
         const limits = weeklyTemplate?.constraints?.limits;
         if (mode === 'cannot_work' && dayCount > limits?.cannot_work_days) {
@@ -208,7 +207,7 @@ const ConstraintsSchedule = () => {
         } catch (e) {
             // Если что-то пошло не так (например, из-за настроек безопасности),
             // просто игнорируем ошибку, чтобы не сломать приложение.
-            console.log("Haptic feedback failed, but it's okay.", e);
+            console.log('Haptic feedback failed, but it\'s okay.', e);
         }
     };
     const handleCellClick = (date, shiftId) => {
@@ -241,7 +240,7 @@ const ConstraintsSchedule = () => {
                     id: LIMIT_ERROR_NOTIFICATION_ID,
                     message: limitError,
                     variant: 'warning',
-                    duration: 4000
+                    duration: 4000,
                 }));
                 return;
             }
@@ -258,8 +257,8 @@ const ConstraintsSchedule = () => {
                     constraint_type: status,
                     target_date: date,
                     applies_to: 'specific_date',
-                    shift_id: shiftId
-                }))
+                    shift_id: shiftId,
+                })),
         );
         dispatch(submitWeeklyConstraints({constraints: formattedConstraints, week_start: weeklyTemplate.weekStart}));
     };
@@ -325,7 +324,7 @@ const ConstraintsSchedule = () => {
 
     const limitParams = {
         cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
-        preferWork: weeklyTemplate.constraints.limits.prefer_work_days
+        preferWork: weeklyTemplate.constraints.limits.prefer_work_days,
     };
 
     return (

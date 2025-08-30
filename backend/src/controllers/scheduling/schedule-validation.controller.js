@@ -2,7 +2,7 @@
 const { Op } = require('sequelize');
 require('dayjs');
 const db = require('../../models');
-const EmployeeRecommendationService = require('../../services/employee-recommendation.service');
+const EmployeeRecommendationService = require('../../services/recommendations/employee-recommendation.service');
 const constraints = require('../../config/scheduling-constraints');
 
 class ScheduleValidationController {
@@ -13,7 +13,7 @@ class ScheduleValidationController {
                 Employee,
                 Schedule,
                 ScheduleAssignment,
-                PositionShift
+                PositionShift,
             } = db;
 
             // Get schedule details with shifts
@@ -24,9 +24,9 @@ class ScheduleValidationController {
                     include: [{
                         model: PositionShift,
                         as: 'shift',
-                        attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift']
-                    }]
-                }]
+                        attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift'],
+                    }],
+                }],
             });
 
             if (!schedule) {
@@ -39,10 +39,10 @@ class ScheduleValidationController {
                     id: {
                         [Op.in]: [...new Set([
                             ...schedule.assignments.map(a => a.shift_id),
-                            ...changes.filter(c => c.action === 'assign').map(c => c.shiftId)
-                        ])]
-                    }
-                }
+                            ...changes.filter(c => c.action === 'assign').map(c => c.shiftId),
+                        ])],
+                    },
+                },
             });
 
             const shiftMap = {};
@@ -60,7 +60,7 @@ class ScheduleValidationController {
                 }
                 employeeAssignments[assignment.emp_id].push({
                     ...assignment.toJSON(),
-                    shift: assignment.shift || shiftMap[assignment.shift_id]
+                    shift: assignment.shift || shiftMap[assignment.shift_id],
                 });
             });
 
@@ -75,14 +75,14 @@ class ScheduleValidationController {
                         shift_id: change.shiftId,
                         work_date: change.date,
                         position_id: change.positionId,
-                        shift: shiftMap[change.shiftId]
+                        shift: shiftMap[change.shiftId],
                     });
                 } else if (change.action === 'remove') {
                     if (employeeAssignments[change.empId]) {
                         employeeAssignments[change.empId] = employeeAssignments[change.empId].filter(
                             a => !(a.work_date === change.date &&
                                 a.shift_id === change.shiftId &&
-                                a.position_id === change.positionId)
+                                a.position_id === change.positionId),
                         );
                     }
                 }
@@ -104,7 +104,7 @@ class ScheduleValidationController {
                         empId,
                         assignments,
                         assignment.shift,
-                        assignment.work_date
+                        assignment.work_date,
                     );
 
                     if (restViolation) {
@@ -112,7 +112,7 @@ class ScheduleValidationController {
                             type: 'rest_violation',
                             employeeId: parseInt(empId),
                             date: assignment.work_date,
-                            ...restViolation
+                            ...restViolation,
                         });
                     }
                 }
@@ -127,7 +127,7 @@ class ScheduleValidationController {
                         type: 'weekly_hours_violation',
                         employeeId: parseInt(empId),
                         totalHours: weeklyHours,
-                        maxHours: constraints.HARD_CONSTRAINTS.MAX_HOURS_PER_WEEK
+                        maxHours: constraints.HARD_CONSTRAINTS.MAX_HOURS_PER_WEEK,
                     });
                 }
 
@@ -151,7 +151,7 @@ class ScheduleValidationController {
                             employeeId: parseInt(empId),
                             date,
                             totalHours: dailyHours,
-                            maxHours: constraints.HARD_CONSTRAINTS.MAX_HOURS_PER_DAY
+                            maxHours: constraints.HARD_CONSTRAINTS.MAX_HOURS_PER_DAY,
                         });
                     }
                 }
@@ -174,7 +174,7 @@ class ScheduleValidationController {
                 const employeeIds = [...new Set(uniqueViolations.map(v => v.employeeId))];
                 const employees = await Employee.findAll({
                     where: { emp_id: employeeIds },
-                    attributes: ['emp_id', 'first_name', 'last_name']
+                    attributes: ['emp_id', 'first_name', 'last_name'],
                 });
 
                 const employeeMap = {};

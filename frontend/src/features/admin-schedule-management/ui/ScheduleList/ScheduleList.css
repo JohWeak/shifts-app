@@ -2,7 +2,7 @@
 
 /* Schedule List Cards */
 .schedule-list-card {
-    border: 1px solid var(--bs-border-color)!important;
+    border: 1px solid var(--bs-border-color) !important;
     border-radius: var(--radius-lg);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     margin-bottom: 1.5rem;
@@ -13,9 +13,11 @@
     background-color: var(--bs-gray-100);
     border-bottom: 1px solid var(--bs-border-color);
     padding: 1rem 1.25rem;
-    border-top-left-radius: var(--radius-lg)!important;
-    border-top-right-radius: var(--radius-lg)!important;
+    border-top-left-radius: var(--radius-lg) !important;
+    border-top-right-radius: var(--radius-lg) !important;
+
 }
+
 [data-theme="dark"] .schedule-list-card .schedule-list-header {
     background-color: var(--bs-gray-800);
     border-bottom-color: var(--bs-gray-700);
@@ -23,13 +25,19 @@
 
 .schedule-list-card .schedule-list-header.active {
     background-color: rgba(var(--bs-success-rgb), 0.2);
+    transition: background-color 0.3s ease, border-radius 0.4s ease;
+
 }
+
 .schedule-list-card .schedule-list-header.active:hover {
     background-color: rgba(var(--bs-success-rgb), 0.25);
 }
 
 .schedule-list-card .schedule-list-header.inactive {
     background-color: rgba(var(--bs-danger-rgb), 0.1);
+    transition: background-color 0.3s ease, border-radius 0.4s ease;
+
+
 }
 
 .schedule-list-card .schedule-list-header.inactive:hover {
@@ -37,14 +45,13 @@
 }
 
 
-
-
 .schedule-list-header.collapsible {
     cursor: pointer;
 }
+
 .schedule-list-header.collapsible.closed {
-    border-bottom-left-radius: var(--radius-lg)!important;
-    border-bottom-right-radius: var(--radius-lg)!important;
+    border-bottom-left-radius: var(--radius-lg) !important;
+    border-bottom-right-radius: var(--radius-lg) !important;
 }
 
 .schedule-list-header .accordion-icon {
@@ -61,6 +68,7 @@
 [data-theme="dark"] .schedule-list-header .accordion-icon {
     color: var(--bs-gray-400);
 }
+
 .schedule-list-card .schedule-list-header h5 {
     margin: 0;
     font-size: 1.1rem;
@@ -96,21 +104,43 @@
     table-layout: fixed;
     width: 100%;
 }
-.schedule-overview-table th:nth-child(1) { width: 30%; } /* Week Period */
-.schedule-overview-table th:nth-child(2) { width: 20%; } /* Site */
-.schedule-overview-table th:nth-child(3) { width: 30%; } /* Last Updated */
-.schedule-overview-table th:nth-child(4) { width: 10%; } /* Status */
-.schedule-overview-table th:nth-child(5) { width: 10%; } /* Actions */
-.schedule-overview-table td {
-    overflow: hidden;         /* Скрыть все, что не помещается */
-    text-overflow: ellipsis;  /* Добавить многоточие (...) в конце */
-    white-space: nowrap;      /* Запретить перенос текста на новую строку */
+
+.schedule-overview-table th:nth-child(1) {
+    width: 30%;
 }
 
-.schedule-overview-table .sortable-header{
+/* Week Period */
+.schedule-overview-table th:nth-child(2) {
+    width: 20%;
+}
+
+/* Site */
+.schedule-overview-table th:nth-child(3) {
+    width: 30%;
+}
+
+/* Last Updated */
+.schedule-overview-table th:nth-child(4) {
+    width: 10%;
+}
+
+/* Status */
+.schedule-overview-table th:nth-child(5) {
+    width: 10%;
+}
+
+/* Actions */
+.schedule-overview-table td {
+    overflow: hidden; /* Скрыть все, что не помещается */
+    text-overflow: ellipsis; /* Добавить многоточие (...) в конце */
+    white-space: nowrap; /* Запретить перенос текста на новую строку */
+}
+
+.schedule-overview-table .sortable-header {
     padding-left: 1rem;
     padding-right: 1rem;
 }
+
 /* Table headers */
 .schedule-overview-table thead th {
     background-color: inherit;
@@ -133,6 +163,7 @@
     vertical-align: middle;
     background-color: var(--bs-gray-100);
 }
+
 [data-theme="dark"] .schedule-overview-table thead th.actions-header {
     background-color: var(--bs-gray-900);
 }
@@ -152,12 +183,14 @@
     border-left: 2px solid transparent;
 
 }
-[dir="rtl"]  .schedule-overview-table tbody tr.schedule-row {
+
+[dir="rtl"] .schedule-overview-table tbody tr.schedule-row {
     border-left: none;
     border-right: 2px solid transparent;
 
 }
-.schedule-overview-table tbody tr.schedule-row td{
+
+.schedule-overview-table tbody tr.schedule-row td {
     background-color: transparent;
     transition: all 0.2s ease;
 
@@ -166,16 +199,18 @@
 .schedule-overview-table tbody tr.schedule-row:hover {
     border-left-color: var(--bs-primary);
 }
-[dir="rtl"]  .schedule-overview-table tbody tr.schedule-row:hover {
+
+[dir="rtl"] .schedule-overview-table tbody tr.schedule-row:hover {
     border-right-color: var(--bs-primary);
 
 }
-.schedule-overview-table tbody tr.schedule-row:hover td{
-    background-color: rgba(var(--bs-primary-rgb), 0.04)!important;
+
+.schedule-overview-table tbody tr.schedule-row:hover td {
+    background-color: rgba(var(--bs-primary-rgb), 0.04) !important;
 }
 
 [data-theme="dark"] .schedule-overview-table tbody tr.schedule-row:hover td {
-    background-color: rgba(var(--bs-primary-rgb), 0.08)!important;
+    background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
 }
 
 /* Current week highlight - PROPERLY APPLIED TO CELLS */
@@ -187,7 +222,6 @@
 .schedule-overview-table tbody tr.current-week:hover td.current-week-cell {
     background-color: rgba(var(--bs-info-rgb), 0.12) !important;
 }
-
 
 
 /* Week period cell */
@@ -220,6 +254,7 @@
     border-top-right-radius: 0;
 
 }
+
 [dir="rtl"] .schedule-overview-table .week-period-cell .current-week-badge {
     left: auto;
     right: 0;
@@ -331,6 +366,7 @@
     font-weight: 500;
     padding: 0.35em 0.65em;
     font-size: 0.75em;
+    display: flex;
 }
 
 /* Prevent text selection */

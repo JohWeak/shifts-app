@@ -1,14 +1,14 @@
 // backend/src/controllers/employee.controller.js
 const db = require('../../models');
-const {Employee, Position, EmployeeConstraint, WorkSite, PositionShift} = db;
+const { Employee, Position, EmployeeConstraint, WorkSite, PositionShift } = db;
 const bcrypt = require('bcryptjs');
-const {Op} = require("sequelize");
+const { Op } = require('sequelize');
 
 
 // Create new employee
 const create = async (req, res) => {
     try {
-        const {password, ...employeeData} = req.body;
+        const { password, ...employeeData } = req.body;
 
         // Hash password if provided
         if (password) {
@@ -28,31 +28,31 @@ const create = async (req, res) => {
         const employee = await Employee.create(employeeData);
 
         const employeeWithAssociations = await Employee.findByPk(employee.emp_id, {
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
                     as: 'defaultPosition',
-                    attributes: ['pos_id', 'pos_name']
+                    attributes: ['pos_id', 'pos_name'],
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
-                }
-            ]
+                    attributes: ['site_id', 'site_name'],
+                },
+            ],
         });
 
         res.status(201).json({
             success: true,
             message: 'Employee created successfully',
-            data: employeeWithAssociations
+            data: employeeWithAssociations,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error creating employee',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -69,7 +69,7 @@ const findAll = async (req, res) => {
             work_site,
             sortBy = 'createdAt',
             sortOrder = 'DESC',
-            fields
+            fields,
         } = req.query;
 
         const attributes = fields
@@ -77,7 +77,7 @@ const findAll = async (req, res) => {
             : [
                 'emp_id', 'first_name', 'last_name', 'email', 'phone',
                 'status', 'role', 'default_position_id', 'work_site_id',
-                'login', 'createdAt', 'updatedAt', 'country', 'city', 'address'
+                'login', 'createdAt', 'updatedAt', 'country', 'city', 'address',
                 // No password
             ];
 
@@ -102,17 +102,17 @@ const findAll = async (req, res) => {
             where[Op.or] = [
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('first_name')),
-                    {[Op.like]: `%${searchLower}%`}
+                    { [Op.like]: `%${searchLower}%` },
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('last_name')),
-                    {[Op.like]: `%${searchLower}%`}
+                    { [Op.like]: `%${searchLower}%` },
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('email')),
-                    {[Op.like]: `%${searchLower}%`}
+                    { [Op.like]: `%${searchLower}%` },
                 ),
-                {phone: {[Op.like]: `%${search}%`}}
+                { phone: { [Op.like]: `%${search}%` } },
             ];
         }
 
@@ -132,10 +132,10 @@ const findAll = async (req, res) => {
                 order = [['first_name', sortOrder], ['last_name', sortOrder]];
                 break;
             case 'workSite':
-                order = [[{model: WorkSite, as: 'workSite'}, 'site_name', sortOrder]];
+                order = [[{ model: WorkSite, as: 'workSite' }, 'site_name', sortOrder]];
                 break;
             case 'position':
-                order = [[{model: Position, as: 'defaultPosition'}, 'pos_name', sortOrder]];
+                order = [[{ model: Position, as: 'defaultPosition' }, 'pos_name', sortOrder]];
                 break;
             case 'status':
                 order = [['status', sortOrder]];
@@ -148,7 +148,7 @@ const findAll = async (req, res) => {
         const offset = (page - 1) * pageSize;
 
         // Оптимизированный запрос с ограниченным набором полей
-        const {count, rows} = await Employee.findAndCountAll({
+        const { count, rows } = await Employee.findAndCountAll({
             where,
             attributes,
             include: [
@@ -157,14 +157,14 @@ const findAll = async (req, res) => {
                     as: 'defaultPosition',
                     attributes: ['pos_id', 'pos_name'], // Только необходимые поля
                     where: Object.keys(includeWhere).length > 0 ? includeWhere : undefined,
-                    required: position && position !== 'all' && work_site === 'all'
+                    required: position && position !== 'all' && work_site === 'all',
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
                     attributes: ['site_id', 'site_name'], // Только необходимые поля
-                    required: false
-                }
+                    required: false,
+                },
             ],
             limit: parseInt(pageSize),
             offset: offset,
@@ -172,15 +172,15 @@ const findAll = async (req, res) => {
             distinct: true,
             // Добавляем подсказку для использования индексов
             ...((status || work_site) && {
-                index: status && work_site ? 'idx_work_site_status' : 'idx_status_created'
-            })
+                index: status && work_site ? 'idx_work_site_status' : 'idx_status_created',
+            }),
         });
 
         // Format response
         const employees = rows.map(emp => ({
             ...emp.toJSON(),
             position_name: emp.defaultPosition?.pos_name || null,
-            work_site_name: emp.workSite?.site_name || null
+            work_site_name: emp.workSite?.site_name || null,
         }));
 
         res.json({
@@ -191,15 +191,15 @@ const findAll = async (req, res) => {
                 pageSize: parseInt(pageSize),
                 total: count,
                 totalPages: Math.ceil(count / pageSize),
-                hasNextPage: page < Math.ceil(count / pageSize)
-            }
+                hasNextPage: page < Math.ceil(count / pageSize),
+            },
         });
     } catch (error) {
         console.error('Error fetching employees:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching employees',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -209,35 +209,35 @@ const findAll = async (req, res) => {
 const findOne = async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
-                    as: 'defaultPosition'
+                    as: 'defaultPosition',
                 },
                 {
                     model: WorkSite,
-                    as: 'workSite'
-                }
-            ]
+                    as: 'workSite',
+                },
+            ],
         });
 
         if (!employee) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found',
             });
         }
 
         res.json({
             success: true,
-            data: employee
+            data: employee,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error fetching employee',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -245,7 +245,7 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const {password, ...updateData} = req.body;
+        const { password, ...updateData } = req.body;
 
         // Hash password if provided
         if (password) {
@@ -256,43 +256,43 @@ const update = async (req, res) => {
         }
         // Обновляем только переданные поля
         const [updated] = await Employee.update(updateData, {
-            where: {emp_id: req.params.id}
+            where: { emp_id: req.params.id },
         });
 
         if (!updated) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found',
             });
         }
 
         // Возвращаем полные данные сотрудника с включенными ассоциациями
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
                     as: 'defaultPosition',
-                    attributes: ['pos_id', 'pos_name']
+                    attributes: ['pos_id', 'pos_name'],
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
-                }
-            ]
+                    attributes: ['site_id', 'site_name'],
+                },
+            ],
         });
 
         res.json({
             success: true,
             message: 'Employee updated successfully',
-            data: employee
+            data: employee,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error updating employee',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -301,25 +301,25 @@ const update = async (req, res) => {
 const deleteEmployee = async (req, res) => {
     try {
         const deleted = await Employee.destroy({
-            where: {emp_id: req.params.id}
+            where: { emp_id: req.params.id },
         });
 
         if (!deleted) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found',
             });
         }
 
         res.json({
             success: true,
-            message: 'Employee deleted successfully'
+            message: 'Employee deleted successfully',
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error deleting employee',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -328,23 +328,23 @@ const deleteEmployee = async (req, res) => {
 const getConstraints = async (req, res) => {
     try {
         const constraints = await EmployeeConstraint.findAll({
-            where: {emp_id: req.params.id},
+            where: { emp_id: req.params.id },
             include: [{
                 model: db.Shift,
                 as: 'shift',
-                attributes: ['shift_id', 'shift_name']
-            }]
+                attributes: ['shift_id', 'shift_name'],
+            }],
         });
 
         res.json({
             success: true,
-            data: constraints
+            data: constraints,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error fetching constraints',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -355,13 +355,13 @@ const getQualifications = async (req, res) => {
         // Placeholder implementation
         res.json({
             success: true,
-            data: []
+            data: [],
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error fetching qualifications',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -372,13 +372,13 @@ const addQualification = async (req, res) => {
         // Placeholder implementation
         res.json({
             success: true,
-            message: 'Qualification added successfully'
+            message: 'Qualification added successfully',
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: 'Error adding qualification',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -393,15 +393,15 @@ const getMyShifts = async (req, res) => {
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color']
-                }]
-            }]
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color'],
+                }],
+            }],
         });
 
         if (!employee) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found',
             });
         }
 
@@ -410,8 +410,8 @@ const getMyShifts = async (req, res) => {
                 success: true,
                 data: {
                     position: null,
-                    shifts: []
-                }
+                    shifts: [],
+                },
             });
         }
 
@@ -420,17 +420,92 @@ const getMyShifts = async (req, res) => {
             data: {
                 position: {
                     pos_id: employee.defaultPosition.pos_id,
-                    position_name: employee.defaultPosition.pos_name
+                    position_name: employee.defaultPosition.pos_name,
                 },
-                shifts: employee.defaultPosition.shifts || []
-            }
+                shifts: employee.defaultPosition.shifts || [],
+            },
         });
 
     } catch (error) {
         console.error('Error in getMyShifts:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
+        });
+    }
+};
+const getProfile = async (req, res) => {
+    try {
+        const employee = await Employee.findByPk(req.userId, {
+            attributes: [
+                'emp_id', 'first_name', 'last_name', 'email',
+                'phone', 'receive_schedule_emails', 'status',
+            ],
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition',
+                    attributes: ['pos_id', 'pos_name'],
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name'],
+                },
+            ],
+        });
+
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found',
+            });
+        }
+
+        res.json({
+            success: true,
+            data: employee,
+        });
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch profile',
+        });
+    }
+};
+
+const updateProfile = async (req, res) => {
+    try {
+        const { first_name, last_name, email, phone, receive_schedule_emails } = req.body;
+
+        const employee = await Employee.findByPk(req.userId);
+
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found',
+            });
+        }
+
+        await employee.update({
+            first_name,
+            last_name,
+            email,
+            phone,
+            receive_schedule_emails,
+        });
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: employee,
+        });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update profile',
         });
     }
 };
@@ -444,5 +519,7 @@ module.exports = {
     getConstraints,
     getQualifications,
     addQualification,
-    getMyShifts
+    getMyShifts,
+    getProfile,
+    updateProfile,
 };

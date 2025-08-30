@@ -1,18 +1,18 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Card, Spinner} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useScheduleActions} from '../../model/hooks/useScheduleActions';
-import {addPendingChange, removePendingChange, toggleEditPosition,} from '../../model/scheduleSlice';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Card, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useScheduleActions } from '../../model/hooks/useScheduleActions';
+import { addPendingChange, removePendingChange, toggleEditPosition } from '../../model/scheduleSlice';
 import PositionEditor from './components/Position';
 import ScheduleInfo from './components/ScheduleInfo';
 import ValidationModal from './components/ValidationModal';
-import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import {useScheduleAutofill} from '../../model/hooks/useScheduleAutofill';
+import EmptyState from 'shared/ui/components/EmptyState';
+import { useScheduleAutofill } from '../../model/hooks/useScheduleAutofill';
 import EmployeeRecommendationsPanel from '../EmployeeRecommendations/EmployeeRecommendationsPanel';
 import EmployeeRecommendationsModal from '../EmployeeRecommendations/EmployeeRecommendationsModal';
-import TopProgressBar from 'shared/ui/components/TopProgressBar/TopProgressBar';
+import TopProgressBar from 'shared/ui/components/TopProgressBar';
 import './ScheduleView.css';
 
 const ScheduleView = ({
@@ -25,13 +25,13 @@ const ScheduleView = ({
                           isLargeScreen,
                           closeAllModals,
                           panelWidth,
-                          onPanelWidthChange
+                          onPanelWidthChange,
                       }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const {scheduleDetails, editingPositions, pendingChanges, loading} = useSelector(state => state.schedule);
-    const {autofillPosition, isAutofilling: isPositionAutofilling, isProcessing} = useScheduleAutofill();
+    const { scheduleDetails, editingPositions, pendingChanges, loading } = useSelector(state => state.schedule);
+    const { autofillPosition, isAutofilling: isPositionAutofilling, isProcessing } = useScheduleAutofill();
 
     // --- ACTIONS & MODALS HOOK ---
     const {
@@ -45,7 +45,7 @@ const ScheduleView = ({
         validationViolations,
         showValidationModal,
         setShowValidationModal,
-        handleExport
+        handleExport,
     } = useScheduleActions(scheduleDetails?.schedule);
 
     // --- LOCAL UI STATE ---
@@ -78,7 +78,10 @@ const ScheduleView = ({
 
     const handleEmployeeRemove = (date, positionId, shiftId, empId, assignmentId = null) => {
         const key = `remove-${positionId}-${date}-${shiftId}-${empId}`;
-        dispatch(addPendingChange({key, change: {action: 'remove', positionId, date, shiftId, empId, assignmentId}}));
+        dispatch(addPendingChange({
+            key,
+            change: { action: 'remove', positionId, date, shiftId, empId, assignmentId },
+        }));
     };
 
     const handleEmployeeClick = (date, positionId, shiftId, empId) => {
@@ -86,18 +89,18 @@ const ScheduleView = ({
             (a.pos_id === positionId || a.position_id === positionId) &&
             a.emp_id === empId &&
             a.shift_id === shiftId &&
-            (a.work_date === date || a.date === date)
+            (a.work_date === date || a.date === date),
         );
         onCellClick(date, positionId, shiftId, empId, assignment?.id);
     };
 
     if (loading === 'pending' && !scheduleDetails) {
         return (
-            <TopProgressBar/>
+            <TopProgressBar />
         );
     }
     if (!schedule) {
-        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')}/>;
+        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')} />;
     }
 
     const isUIBlocked = isProcessing || isAutofilling;
@@ -105,7 +108,7 @@ const ScheduleView = ({
     return (
         <>
 
-            {isUIBlocked && <TopProgressBar/>}
+            {isUIBlocked && <TopProgressBar />}
 
             <div className="schedule-view-content-wrapper">
                 {isUIBlocked &&

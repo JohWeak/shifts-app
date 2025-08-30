@@ -1,25 +1,25 @@
 //frontend/src/features/admin-reports/index.js
 
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {format, subMonths} from 'date-fns';
-import {Button, Card, Col, Container, Form, Row, Spinner, Table} from 'react-bootstrap';
-import {ResponsiveBar} from '@nivo/bar';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
-import {worksiteAPI} from 'shared/api/apiService';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import {fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
-import {formatScheduleDate, formatWeekRange} from "../../shared/lib/utils/scheduleUtils";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { format, subMonths } from 'date-fns';
+import { Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { ResponsiveBar } from '@nivo/bar';
+import PageHeader from 'shared/ui/components/PageHeader';
+import { worksiteAPI } from 'shared/api/apiService';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import StatusBadge from 'shared/ui/components/StatusBadge';
+import EmptyState from 'shared/ui/components/EmptyState';
+import { fetchWorkSites } from 'features/admin-workplace-settings/model/workplaceSlice';
+import { formatScheduleDate, formatWeekRange } from '../../shared/lib/utils/scheduleUtils';
 import './index.css';
 
 
 const Reports = () => {
-    const {t, locale} = useI18n();
+    const { t, locale } = useI18n();
     const dispatch = useDispatch();
 
-    const {workSites: sites, loading: sitesLoading} = useSelector((state) => state.workplace);
+    const { workSites: sites, loading: sitesLoading } = useSelector((state) => state.workplace);
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState(null);
     const [selectedSite, setSelectedSite] = useState('');
@@ -48,7 +48,7 @@ const Reports = () => {
         try {
             const responseData = await worksiteAPI.fetchWorkSiteStats(selectedSite, {
                 startDate: dateRange.startDate,
-                endDate: dateRange.endDate
+                endDate: dateRange.endDate,
             });
             setStats(responseData);
             console.log('Worksite stats overview:', responseData);
@@ -76,25 +76,25 @@ const Reports = () => {
     const nivoTheme = {
         background: 'transparent',
         axis: {
-            domain: {line: {stroke: 'transparent'}},
-            legend: {text: {fill: 'var(--bs-secondary)'}},
-            ticks: {line: {stroke: 'var(--bs-secondary)', strokeWidth: 1}, text: {fill: 'var(--bs-secondary)'}},
+            domain: { line: { stroke: 'transparent' } },
+            legend: { text: { fill: 'var(--bs-secondary)' } },
+            ticks: { line: { stroke: 'var(--bs-secondary)', strokeWidth: 1 }, text: { fill: 'var(--bs-secondary)' } },
         },
-        grid: {line: {stroke: 'var(--bs-border-color)', strokeDasharray: '3 3'}},
+        grid: { line: { stroke: 'var(--bs-border-color)', strokeDasharray: '3 3' } },
         tooltip: {
             container: {
                 background: 'var(--bs-body-bg)',
                 color: 'var(--bs-body-color)',
                 border: '1px solid var(--bs-border-color)',
                 boxShadow: 'var(--shadow-lg)',
-                borderRadius: 'var(--radius-md)'
-            }
+                borderRadius: 'var(--radius-md)',
+            },
         },
         legends: {
             text: {
-                fill: 'var(--bs-body-color)'
-            }
-        }
+                fill: 'var(--bs-body-color)',
+            },
+        },
     };
 
     return (
@@ -134,7 +134,7 @@ const Reports = () => {
                                 <Form.Control
                                     type="date"
                                     value={dateRange.startDate}
-                                    onChange={e => setDateRange(prev => ({...prev, startDate: e.target.value}))}
+                                    onChange={e => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
                                 />
 
                             </Form.Group>
@@ -145,20 +145,20 @@ const Reports = () => {
                                 <Form.Control
                                     type="date"
                                     value={dateRange.endDate}
-                                    onChange={e => setDateRange(prev => ({...prev, endDate: e.target.value}))}
+                                    onChange={e => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
                                 />
                             </Form.Group>
                         </Col>
                         <Col md={2}>
                             <Button onClick={handleFetchStats} className="w-100" disabled={loading || !selectedSite}>
-                                {loading ? <Spinner as="span" animation="border" size="sm"/> : t('common.apply')}
+                                {loading ? <Spinner as="span" animation="border" size="sm" /> : t('common.apply')}
                             </Button>
                         </Col>
                     </Row>
                 </Card.Body>
             </Card>
 
-            {loading && <div className="text-center p-5"><Spinner animation="border" variant="primary"/></div>}
+            {loading && <div className="text-center p-5"><Spinner animation="border" variant="primary" /></div>}
 
             {!loading && stats && (
                 <>
@@ -197,14 +197,14 @@ const Reports = () => {
                                     data={chartData}
                                     keys={[t('reports.coverage'), t('reports.issues')]}
                                     indexBy="date"
-                                    margin={{top: 50, right: 130, bottom: 50, left: 60}}
+                                    margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
                                     padding={0.3}
                                     groupMode="grouped"
-                                    valueScale={{type: 'linear'}}
-                                    indexScale={{type: 'band', round: true}}
+                                    valueScale={{ type: 'linear' }}
+                                    indexScale={{ type: 'band', round: true }}
                                     colors={['var(--bs-primary)', 'var(--bs-danger)']}
                                     theme={nivoTheme}
-                                    borderColor={{from: 'color', modifiers: [['darker', 1.6]]}}
+                                    borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
                                     axisTop={null}
                                     axisRight={null}
                                     axisBottom={{
@@ -213,7 +213,7 @@ const Reports = () => {
                                         tickRotation: 0,
                                         legend: t('common.date'),
                                         legendPosition: 'middle',
-                                        legendOffset: 32
+                                        legendOffset: 32,
                                     }}
                                     axisLeft={{
                                         tickSize: 5,
@@ -221,7 +221,7 @@ const Reports = () => {
                                         tickRotation: 0,
                                         legend: t('common.value'),
                                         legendPosition: 'middle',
-                                        legendOffset: -40
+                                        legendOffset: -40,
                                     }}
                                     enableLabel={false}
                                     legends={[
@@ -238,7 +238,7 @@ const Reports = () => {
                                             itemDirection: 'left-to-right',
                                             itemOpacity: 0.85,
                                             symbolSize: 20,
-                                            effects: [{on: 'hover', style: {itemOpacity: 1}}],
+                                            effects: [{ on: 'hover', style: { itemOpacity: 1 } }],
                                         },
                                     ]}
                                     motionConfig="stiff"
@@ -266,7 +266,7 @@ const Reports = () => {
                                 {stats.schedules.map(s => s.statistics && (
                                     <tr key={s.id}>
                                         <td>{formatWeekRange(s.start_date, locale)}</td>
-                                        <td><StatusBadge status={s.status}/></td>
+                                        <td><StatusBadge status={s.status} /></td>
                                         <td>{s.statistics.overall_coverage}</td>
                                         <td>{`${s.statistics.total_assignments} / ${s.statistics.total_required}`}</td>
                                         <td>{s.statistics.employees_used}</td>

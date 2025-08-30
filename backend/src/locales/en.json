@@ -1,0 +1,17 @@
+{
+  "email": {
+    "subject": "Your Schedule for Week {{weekRange}}",
+    "greeting": "Hello {{name}},",
+    "published": "Your schedule for week {{weekRange}} has been published.",
+    "shifts_title": "Your Shifts:",
+    "table_header_date": "Date",
+    "table_header_shift": "Shift",
+    "table_header_time": "Time",
+    "table_header_location": "Location",
+    "instructions_title": "To add these shifts to your calendar:",
+    "instructions_ios": "On iPhone/iPad: Open this email and tap the calendar invitation at the top",
+    "instructions_android": "On Android: Open the attached .ics file",
+    "instructions_desktop": "On Desktop: Click \"Add to Calendar\" in your email client",
+    "preferences_note": "You can manage your email preferences in your profile settings."
+  }
+}

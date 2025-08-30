@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Nav, Tab, Card } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Card, Container, Nav, Tab } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
-import { motion, AnimatePresence } from 'motion/react';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import TopProgressBar from "../../shared/ui/components/TopProgressBar/TopProgressBar";
+import { AnimatePresence, motion } from 'motion/react';
+import LoadingState from 'shared/ui/components/LoadingState';
+import TopProgressBar from '../../shared/ui/components/TopProgressBar';
 
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
+import PageHeader from 'shared/ui/components/PageHeader';
 import WorkSitesTab from './ui/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab';
@@ -50,24 +50,24 @@ const WorkplaceSettings = () => {
     const tabAnimationVariants = {
         initial: {
             opacity: 0,
-            x: 15
+            x: 15,
         },
         animate: {
             opacity: 1,
             x: 0,
             transition: {
                 duration: 0.25,
-                ease: 'easeOut'
-            }
+                ease: 'easeOut',
+            },
         },
         exit: {
             opacity: 0,
             x: -15,
             transition: {
                 duration: 0.15,
-                ease: 'easeIn'
-            }
-        }
+                ease: 'easeIn',
+            },
+        },
     };
 
     if (isPreloading) {

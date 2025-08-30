@@ -6,8 +6,8 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
     headers: {
-        'Content-Type': 'application/json'
-    }
+        'Content-Type': 'application/json',
+    },
 });
 console.log('API Base URL is:', api.defaults.baseURL);
 
@@ -22,7 +22,7 @@ api.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
 );
 
 // 3. Перехватчик ответов (Response Interceptor)
@@ -38,18 +38,18 @@ api.interceptors.response.use(
         // Список endpoints, которые должны возвращать полный ответ
         const fullResponseEndpoints = [
             '/api/employees',
-            '/api/schedules/weekly',      // Добавляем для employee schedule
-            '/api/schedules/position',    // Добавляем для full schedule
-            '/api/schedules/employee',    // Добавляем для archive
-            '/api/constraints/permanent-requests/my',  // Добавляем новый endpoint
-            '/api/constraints/permanent-requests',     // И админский endpoint
+            '/api/schedules/weekly',
+            '/api/schedules/position',
+            '/api/schedules/employee',
+            '/api/constraints/permanent-requests/my',
+            '/api/constraints/permanent-requests',
             '/api/constraints/permanent-request',
         ];
 
         // Проверяем, нужен ли полный ответ для этого endpoint
         const requestUrl = response.config.url || '';  // Защита от undefined
         const needsFullResponse = fullResponseEndpoints.some(endpoint =>
-            requestUrl.includes(endpoint) && !requestUrl.includes('/recommendations')
+            requestUrl.includes(endpoint) && !requestUrl.includes('/recommendations'),
         );
 
 
@@ -72,7 +72,7 @@ api.interceptors.response.use(
             window.location.replace('/login');
         }
         return Promise.reject(error);
-    }
+    },
 );
 
 export default api;

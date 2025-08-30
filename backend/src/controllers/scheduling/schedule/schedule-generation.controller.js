@@ -2,15 +2,15 @@
 const dayjs = require('dayjs');
 
 const db = require('../../../models');
-const {Schedule, WorkSite, ScheduleAssignment} = db;
+const { Schedule, WorkSite, ScheduleAssignment } = db;
 
-const ScheduleGeneratorService = require('../../../services/schedule-generator.service');
-const cpSatBridge = require('../../../services/cp-sat-bridge.service');
+const ScheduleGeneratorService = require('../../../services/scheduling/schedule-generator.service');
+const cpSatBridge = require('../../../services/scheduling/cp-sat-bridge.service');
 /**
  * Check Python availability
  */
 const checkPythonAvailability = async () => {
-    const {spawn} = require('child_process');
+    const { spawn } = require('child_process');
 
     return new Promise((resolve) => {
         const pythonProcess = spawn('python', ['--version']);
@@ -39,11 +39,11 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
             where: {
                 site_id: siteId,
                 start_date: {
-                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd],
                 },
-                status: 'published'
+                status: 'published',
             },
-            transaction
+            transaction,
         });
 
         if (publishedSchedule) {
@@ -54,15 +54,15 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
         const deletedAssignments = await ScheduleAssignment.destroy({
             where: {
                 work_date: {
-                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd],
                 },
                 position_id: {
                     [db.Sequelize.Op.in]: db.Sequelize.literal(
-                        `(SELECT pos_id FROM positions WHERE site_id = ${siteId})`
-                    )
-                }
+                        `(SELECT pos_id FROM positions WHERE site_id = ${siteId})`,
+                    ),
+                },
             },
-            transaction
+            transaction,
         });
 
         if (deletedAssignments > 0) {
@@ -74,11 +74,11 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
             where: {
                 site_id: siteId,
                 start_date: {
-                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd],
                 },
-                status: 'draft' // Only delete draft schedules
+                status: 'draft', // Only delete draft schedules
             },
-            transaction
+            transaction,
         });
 
         for (const schedule of existingSchedules) {
@@ -86,12 +86,12 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
 
             // Удалить связанные assignments (если остались)
             await ScheduleAssignment.destroy({
-                where: {schedule_id: schedule.id},
-                transaction
+                where: { schedule_id: schedule.id },
+                transaction,
             });
 
             // Удалить само расписание
-            await schedule.destroy({transaction});
+            await schedule.destroy({ transaction });
         }
 
         console.log(`[ScheduleController] Cleaned up ${existingSchedules.length} schedules`);
@@ -132,11 +132,11 @@ const generateNextWeekSchedule = async (req, res) => {
         console.log(`[ScheduleController] Generating schedule for site ${siteId}, week starting ${weekStart}, algorithm: ${algorithm}`);
 
         // Check the existence of the site
-        const workSite = await WorkSite.findByPk(siteId, {transaction});
+        const workSite = await WorkSite.findByPk(siteId, { transaction });
         if (!workSite) {
             return res.status(400).json({
                 success: false,
-                message: `Work site with ID ${siteId} not found`
+                message: `Work site with ID ${siteId} not found`,
             });
         }
 
@@ -163,7 +163,7 @@ const generateNextWeekSchedule = async (req, res) => {
                             siteId,
                             weekStart,
                             [], // assignments
-                            transaction
+                            transaction,
                         );
                     }
 
@@ -187,7 +187,7 @@ const generateNextWeekSchedule = async (req, res) => {
             default:
                 return res.status(400).json({
                     success: false,
-                    message: `Unknown algorithm: ${selectedAlgorithm}`
+                    message: `Unknown algorithm: ${selectedAlgorithm}`,
                 });
         }
 
@@ -202,9 +202,9 @@ const generateNextWeekSchedule = async (req, res) => {
                     {
                         include: [{
                             model: WorkSite,
-                            as: 'workSite'
-                        }]
-                    }
+                            as: 'workSite',
+                        }],
+                    },
                 );
             }
 
@@ -213,11 +213,11 @@ const generateNextWeekSchedule = async (req, res) => {
                 message: `Schedule generated successfully using ${result.algorithm || selectedAlgorithm}`,
                 data: {
                     ...(result.schedule || {}),
-                    workSite: fullSchedule?.workSite || workSite
+                    workSite: fullSchedule?.workSite || workSite,
                 },
                 stats: result.stats || {},
                 algorithm: result.algorithm || selectedAlgorithm,
-                requested_algorithm: algorithm
+                requested_algorithm: algorithm,
             };
 
             if (result.fallback) {
@@ -233,7 +233,7 @@ const generateNextWeekSchedule = async (req, res) => {
                 success: false,
                 message: result?.error || 'Failed to generate schedule',
                 error: result?.error || 'Unknown error',
-                algorithm: selectedAlgorithm
+                algorithm: selectedAlgorithm,
             });
         }
 
@@ -244,7 +244,7 @@ const generateNextWeekSchedule = async (req, res) => {
             return res.status(409).json({
                 success: false,
                 error: 'PUBLISHED_SCHEDULE_EXISTS',
-                message: 'A published schedule already exists for this week. Please unpublish it first.'
+                message: 'A published schedule already exists for this week. Please unpublish it first.',
             });
         }
 
@@ -252,7 +252,7 @@ const generateNextWeekSchedule = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error generating schedule',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
     }
 };
@@ -269,7 +269,7 @@ const compareAllAlgorithms = async (req, res) => {
 
         const comparison = {
             'simple': null,
-            'cp-sat': null
+            'cp-sat': null,
         };
 
         try {
@@ -281,12 +281,12 @@ const compareAllAlgorithms = async (req, res) => {
                 status: 'success',
                 algorithm: 'simple',
                 assignments_count: result.schedule.length,
-                stats: result.stats
+                stats: result.stats,
             };
         } catch (error) {
             comparison['simple'] = {
                 status: 'failed',
-                error: error.message
+                error: error.message,
             };
         }
 
@@ -302,12 +302,12 @@ const compareAllAlgorithms = async (req, res) => {
                     assignments_count: pythonResult.schedule?.length || 0,
                     coverage_rate: pythonResult.coverage_rate,
                     solve_time: pythonResult.solve_time,
-                    stats: pythonResult.stats
+                    stats: pythonResult.stats,
                 };
             } catch (error) {
                 comparison['cp-sat'] = {
                     status: 'failed',
-                    error: error.message
+                    error: error.message,
                 };
             }
         }
@@ -316,7 +316,7 @@ const compareAllAlgorithms = async (req, res) => {
             success: true,
             comparison,
             recommendation: selectBestResult(comparison),
-            week: weekStart
+            week: weekStart,
         });
 
     } catch (error) {
@@ -324,7 +324,7 @@ const compareAllAlgorithms = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error during algorithm comparison',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -368,5 +368,5 @@ module.exports = {
     generateNextWeekSchedule,
     compareAllAlgorithms,
     checkPythonAvailability,
-    selectBestResult
+    selectBestResult,
 };

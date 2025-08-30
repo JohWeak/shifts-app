@@ -1,0 +1,47 @@
+/* frontend/src/features/employee-schedule/ui/CalendarExportModal/CalendarExportModal.css */
+.calendar-export-modal .modal-content {
+    border-radius: var(--radius-lg);
+}
+
+.shift-selection-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    padding: 0.5rem;
+}
+
+.shift-selection-item {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--bs-gray-200);
+}
+
+.shift-selection-item:last-child {
+    border-bottom: none;
+}
+
+.shift-selection-item:hover {
+    background-color: var(--bs-gray-100);
+}
+
+.shift-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+[dir="rtl"] .calendar-choice-buttons {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .shift-selection-list {
+    background-color: var(--bs-dark);
+    border-color: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .shift-selection-item:hover {
+    background-color: var(--bs-gray-800);
+}

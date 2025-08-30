@@ -1,13 +1,13 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
 import React from 'react';
-import {Button} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {resetScheduleView} from '../../../../model/scheduleSlice';
-import ScheduleActionButtons from "../../../ScheduleActionButtons";
+import { Button } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import StatusBadge from 'shared/ui/components/StatusBadge';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { resetScheduleView } from '../../../../model/scheduleSlice';
+import ScheduleActionButtons from '../../../ScheduleActionButtons';
 import './ScheduleInfo.css';
-import {formatWeekRange, formatDate as formatDateUtil } from "shared/lib/utils/scheduleUtils";
+import { formatDate as formatDateUtil, formatWeekRange } from 'shared/lib/utils/scheduleUtils';
 
 const ScheduleInfo = ({
                           schedule,
@@ -19,9 +19,9 @@ const ScheduleInfo = ({
                           onAutofill,
                           isAutofilling,
                       }) => {
-    const {t, locale} = useI18n();
+    const { t, locale } = useI18n();
     const dispatch = useDispatch();
-    const {editingPositions, pendingChanges} = useSelector(state => state.schedule);
+    const { editingPositions, pendingChanges } = useSelector(state => state.schedule);
 
     // Check if there are any positions being edited or unsaved changes
     const hasUnsavedChanges = Object.values(editingPositions || {}).some(Boolean) ||
@@ -86,7 +86,7 @@ const ScheduleInfo = ({
                         <i className="bi bi-flag"></i>
                         <span className="info-label">{t('schedule.status')}</span>
                     </div>
-                    <StatusBadge status={schedule.status} size="sm"/>
+                    <StatusBadge status={schedule.status} size="sm" />
                 </div>
                 <div className="info-item">
                     <div className="info-item-header">

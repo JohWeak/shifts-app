@@ -1,16 +1,16 @@
 // frontend/src/features/auth/index.js
-import React, {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useDispatch, useSelector} from 'react-redux';
-import {login} from './model/authSlice'; // Импортируем наш Thunk
-import {Button, FloatingLabel, Form, InputGroup, Spinner} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from './model/authSlice'; // Импортируем наш Thunk
+import { Button, FloatingLabel, Form, InputGroup, Spinner } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import './index.css';
-import {LanguageSwitch} from "../../shared/ui/components/LanguageSwitch/LanguageSwitch";
-import ThemeToggle from "../../shared/ui/components/ThemeToggle/ThemeToggle";
+import { LanguageSwitch } from '../../shared/ui/components/LanguageSwitch';
+import ThemeToggle from '../../shared/ui/components/ThemeToggle';
 
 const Login = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
 
     // Локальное состояние для полей формы
     const [identifier, setIdentifier] = useState('');
@@ -21,7 +21,7 @@ const Login = () => {
     const dispatch = useDispatch();
 
     // Получаем состояние аутентификации из Redux
-    const {loading, error, isAuthenticated, user} = useSelector((state) => state.auth);
+    const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
 
     const handlePasswordToggle = () => {
         setShowPassword(!showPassword);
@@ -30,14 +30,14 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         // Диспатчим экшен `login`, передавая данные из формы
-        dispatch(login({login: identifier, password}));
+        dispatch(login({ login: identifier, password }));
     };
 
     // Эффект для редиректа после успешного входа
     useEffect(() => {
         if (isAuthenticated && user) {
             const redirectPath = user.role === 'admin' ? '/admin' : '/employee/dashboard';
-            navigate(redirectPath, {replace: true});
+            navigate(redirectPath, { replace: true });
         }
     }, [isAuthenticated, user, navigate]);
 
@@ -98,7 +98,7 @@ const Login = () => {
                             <Button
                                 variant="outline-secondary"
                                 onClick={handlePasswordToggle}
-                                title={showPassword ? "Hide password" : "Show password"}
+                                title={showPassword ? 'Hide password' : 'Show password'}
                             >
                                 <i className={`bi bi-${showPassword ? 'eye' : 'eye-slash'}`}></i>
                             </Button>
@@ -130,7 +130,7 @@ const Login = () => {
                     {/* Loading overlay */}
                     {loading === 'pending' && (
                         <div className="auth-loading">
-                            <Spinner animation="border" variant="primary"/>
+                            <Spinner animation="border" variant="primary" />
                         </div>
                     )}
                 </div>
@@ -138,8 +138,8 @@ const Login = () => {
                 <div className="auth-footer">
                     {/* Контролы в углу */}
                     <div className="auth-controls">
-                        <ThemeToggle variant="icon"/>
-                        <LanguageSwitch/>
+                        <ThemeToggle variant="icon" />
+                        <LanguageSwitch />
                     </div>
                 </div>
             </div>

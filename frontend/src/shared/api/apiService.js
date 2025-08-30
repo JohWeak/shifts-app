@@ -1,32 +1,31 @@
 // frontend/src/shared/api/apiService.js
 import api from './index';
-import {API_ENDPOINTS} from '../config/apiEndpoints';
+import { API_ENDPOINTS } from '../config/apiEndpoints';
 
 
 export const authAPI = {
     loginUser: (credentials) => api.post(API_ENDPOINTS.AUTH.LOGIN, credentials),
-    //fetchUserProfile: () => api.get(API_ENDPOINTS.AUTH.PROFILE)
 };
 
 export const scheduleAPI = {
     fetchSchedules: () => api.get(API_ENDPOINTS.SCHEDULES.BASE),
     fetchScheduleDetails: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
     fetchWeeklySchedule: (weekStart) => api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
-        params: weekStart ? {date: weekStart} : {}
+        params: weekStart ? { date: weekStart } : {},
     }),
     fetchPositionWeeklySchedule: (positionId, weekStart) => api.get(API_ENDPOINTS.SCHEDULES.WEEKLY_BY_POSITION(positionId), {
-        params: weekStart ? {date: weekStart} : {}
+        params: weekStart ? { date: weekStart } : {},
     }),
     generateSchedule: (settings) => api.post(API_ENDPOINTS.SCHEDULES.GENERATE, settings),
-    updateScheduleStatus: (scheduleId, status) => api.put(API_ENDPOINTS.SCHEDULES.STATUS(scheduleId), {status}),
+    updateScheduleStatus: (scheduleId, status) => api.put(API_ENDPOINTS.SCHEDULES.STATUS(scheduleId), { status }),
     deleteSchedule: (scheduleId) => api.delete(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
     compareAlgorithms: (settings) => api.post(API_ENDPOINTS.SCHEDULES.COMPARE_ALGORITHMS, settings),
-    updateScheduleAssignments: (scheduleId, changes) => api.put(API_ENDPOINTS.SCHEDULES.ASSIGNMENTS(scheduleId), {changes}),
+    updateScheduleAssignments: (scheduleId, changes) => api.put(API_ENDPOINTS.SCHEDULES.ASSIGNMENTS(scheduleId), { changes }),
     exportSchedule: async (scheduleId, format) => {
         try {
             const response = await api.get(API_ENDPOINTS.SCHEDULES.EXPORT(scheduleId), {
-                params: {format},
-                responseType: 'blob'
+                params: { format },
+                responseType: 'blob',
             });
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -36,7 +35,7 @@ export const scheduleAPI = {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            return {success: true};
+            return { success: true };
         } catch (error) {
             console.error('Export failed:', error);
             throw error;
@@ -44,25 +43,25 @@ export const scheduleAPI = {
     },
     fetchEmployeeArchiveSummary: () => api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_SUMMARY),
     fetchEmployeeArchiveMonth: (year, month) => api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_MONTH, {
-        params: {year, month}
+        params: { year, month },
     }),
     validateScheduleChanges: (scheduleId, changes) => api.post(API_ENDPOINTS.SCHEDULES.VALIDATE(scheduleId), {
         scheduleId,
-        changes
+        changes,
     }),
 };
 
 export const worksiteAPI = {
-    fetchWorkSites: (params = {}) => api.get(API_ENDPOINTS.WORKSITES.BASE, {params}),
+    fetchWorkSites: (params = {}) => api.get(API_ENDPOINTS.WORKSITES.BASE, { params }),
     createWorkSite: (siteData) => api.post(API_ENDPOINTS.WORKSITES.BASE, siteData),
     updateWorkSite: (siteId, data) => api.put(API_ENDPOINTS.WORKSITES.DETAILS(siteId), data),
     deleteWorkSite: (siteId) => api.delete(API_ENDPOINTS.WORKSITES.DETAILS(siteId)),
     restoreWorkSite: (siteId) => api.post(API_ENDPOINTS.WORKSITES.RESTORE(siteId)),
-    fetchWorkSiteStats: (siteId, params) => api.get(API_ENDPOINTS.WORKSITES.STATS_OVERVIEW(siteId), {params}),
+    fetchWorkSiteStats: (siteId, params) => api.get(API_ENDPOINTS.WORKSITES.STATS_OVERVIEW(siteId), { params }),
 };
 
 export const employeeAPI = {
-    fetchEmployees: (filters) => api.get(API_ENDPOINTS.EMPLOYEES.BASE, {params: filters}),
+    fetchEmployees: (filters) => api.get(API_ENDPOINTS.EMPLOYEES.BASE, { params: filters }),
     fetchEmployeeDetails: (employeeId) => api.get(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId)),
     createEmployee: (employeeData) => api.post(API_ENDPOINTS.EMPLOYEES.BASE, employeeData),
     updateEmployee: (employeeId, data) => api.put(API_ENDPOINTS.EMPLOYEES.DETAILS(employeeId), data),
@@ -73,22 +72,22 @@ export const employeeAPI = {
             positionId,
             shiftId,
             date,
-            virtualChanges
+            virtualChanges,
         });
 
         // If there are virtualChanges, send a POST request.
         if (virtualChanges && virtualChanges.length > 0) {
             console.log('Sending POST request with virtualChanges');
             return api.post(API_ENDPOINTS.EMPLOYEES.RECOMMENDATIONS,
-                {virtualChanges},
+                { virtualChanges },
                 {
                     params: {
                         position_id: positionId,
                         shift_id: shiftId,
                         date,
-                        schedule_id: scheduleId
-                    }
-                }
+                        schedule_id: scheduleId,
+                    },
+                },
             );
         }
 
@@ -99,20 +98,22 @@ export const employeeAPI = {
                 position_id: positionId,
                 shift_id: shiftId,
                 date,
-                schedule_id: scheduleId
-            }
+                schedule_id: scheduleId,
+            },
         });
     },
     getEmployeeShifts: () => api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS),
+    getProfile: () => apiService.get(API_ENDPOINTS.EMPLOYEES.PROFILE),
+    updateProfile: (data) => apiService.put(API_ENDPOINTS.EMPLOYEES.PROFILE, data),
 };
 
 export const constraintAPI = {
-    getWeeklyConstraints: (params) => api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY_GRID, {params}),
+    getWeeklyConstraints: (params) => api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY_GRID, { params }),
     submitWeeklyConstraints: (data) => api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT_WEEKLY, data),
     getMyPermanentRequests: () => api.get(API_ENDPOINTS.CONSTRAINTS.MY_PERMANENT_REQUESTS),
     submitPermanentRequest: (data) => api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT_PERMANENT_REQUEST, data),
     getMyPermanentConstraints: () => api.get(API_ENDPOINTS.CONSTRAINTS.MY_PERMANENT_CONSTRAINTS),
-    getAllPermanentRequests: (params = {}) => api.get(API_ENDPOINTS.CONSTRAINTS.ALL_PERMANENT_REQUESTS, {params}),
+    getAllPermanentRequests: (params = {}) => api.get(API_ENDPOINTS.CONSTRAINTS.ALL_PERMANENT_REQUESTS, { params }),
     reviewRequest: (requestId, data) => api.put(API_ENDPOINTS.CONSTRAINTS.REVIEW_REQUEST(requestId), data),
     deletePermanentRequest: (requestId) => api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_PERMANENT_REQUEST(requestId)),
 };

@@ -44,7 +44,7 @@
     transition: all 0.2s ease;
     border: none;
     padding: 0;
-    margin-left: 0.5rem;
+    margin-inline-start: 0.5rem;
 }
 
 .theme-toggle-icon:hover {

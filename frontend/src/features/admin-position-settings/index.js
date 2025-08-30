@@ -7,7 +7,7 @@ import { fetchPositions, updatePosition } from './model/positionSlice';
 const PositionSettings = ({ siteId }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
-    const { positions } = useSelector(state => state.positions);
+    const { positions } = useSelector(state => state.position);
     const [editingPosition, setEditingPosition] = useState(null);
     const [showModal, setShowModal] = useState(false);
 

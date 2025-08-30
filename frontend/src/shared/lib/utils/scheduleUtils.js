@@ -694,4 +694,52 @@ export const classifySchedules = (schedules) => {
     };
 };
 
+/**
+ * Translate shift name based on locale
+ * This can be expanded to support more complex translation logic
+ * @param {string} shiftName - Original shift name
+ * @param {string} locale - Current locale (en, ru, he)
+ * @returns {string} Translated shift name
+ */
+export const translateShiftName = (shiftName, locale = 'en') => {
+    // Common shift name translations
+    const shiftTranslations = {
+        en: {
+            'Morning': 'Morning',
+            'Evening': 'Evening',
+            'Night': 'Night',
+            'Day': 'Day',
+            'Afternoon': 'Afternoon',
+            'Early Morning': 'Early Morning',
+            'Late Evening': 'Late Evening',
+        },
+        ru: {
+            'Morning': 'Утро',
+            'Evening': 'Вечер',
+            'Night': 'Ночь',
+            'Day': 'День',
+            'Afternoon': 'После обеда',
+            'Early Morning': 'Раннее утро',
+            'Late Evening': 'Поздний вечер',
+        },
+        he: {
+            'Morning': 'בוקר',
+            'Evening': 'ערב',
+            'Night': 'לילה',
+            'Day': 'צהריים',
+            'Afternoon': 'אחר הצהריים',
+            'Early Morning': 'בוקר מוקדם',
+            'Late Evening': 'ערב מאוחר',
+        }
+    };
+
+    // Check if we have a translation for this shift name
+    if (shiftTranslations[locale] && shiftTranslations[locale][shiftName]) {
+        return shiftTranslations[locale][shiftName];
+    }
+
+    // Return original name if no translation found
+    return shiftName;
+};
+
 

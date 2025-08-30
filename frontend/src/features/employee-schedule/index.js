@@ -1,24 +1,24 @@
 // frontend/src/features/employee-schedule/index.js
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Alert, Container, Form} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {fetchPositionSchedule} from 'features/employee-dashboard/model/employeeDataSlice';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Alert, Container, Form } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
 
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import ColorPickerModal from 'shared/ui/components/ColorPickerModal/ColorPickerModal';
+import PageHeader from 'shared/ui/components/PageHeader';
+import LoadingState from 'shared/ui/components/LoadingState';
+import EmptyState from 'shared/ui/components/EmptyState';
+import ColorPickerModal from 'shared/ui/components/ColorPickerModal';
 import PersonalScheduleView from './ui/PersonalScheduleView';
 import FullScheduleView from './ui/FullScheduleView';
 
-import {useShiftColor} from 'shared/hooks/useShiftColor';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
 
 import './index.css';
 
 const EmployeeSchedule = () => {
-    const {t, direction} = useI18n();
-    const {user} = useSelector(state => state.auth);
+    const { t, direction } = useI18n();
+    const { user } = useSelector(state => state.auth);
     const dispatch = useDispatch();
 
 
@@ -46,7 +46,7 @@ const EmployeeSchedule = () => {
         getShiftColor,
         currentTheme,
         hasLocalColor,
-        resetShiftColor
+        resetShiftColor,
     } = useShiftColor();
 
 
@@ -55,7 +55,7 @@ const EmployeeSchedule = () => {
 
         if (showFullSchedule && personalSchedule?.current?.employee?.position_id) {
             const positionId = personalSchedule.current.employee.position_id;
-            dispatch(fetchPositionSchedule({positionId}));
+            dispatch(fetchPositionSchedule({ positionId }));
         }
 
     }, [dispatch, showFullSchedule, personalSchedule]);
@@ -87,16 +87,16 @@ const EmployeeSchedule = () => {
 
     const renderContent = () => {
         if (isLoading && !scheduleData) {
-            return <LoadingState message={t('common.loading')}/>;
+            return <LoadingState message={t('common.loading')} />;
         }
         if (error) {
             return <Alert variant="danger">{error}</Alert>;
         }
         if (showFullSchedule && !hasAssignedPosition) {
-            return <EmptyState title={t('employee.schedule.positionRequired')}/>;
+            return <EmptyState title={t('employee.schedule.positionRequired')} />;
         }
         if (!hasAnyData) {
-            return <EmptyState title={t('employee.schedule.noSchedule')}/>;
+            return <EmptyState title={t('employee.schedule.noSchedule')} />;
         }
 
         if (showFullSchedule) {

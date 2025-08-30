@@ -1,31 +1,31 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/index.js
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Alert, Button, Card} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import {useSortableData} from 'shared/hooks/useSortableData';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Card } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useSortableData } from 'shared/hooks/useSortableData';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 // Slices & Actions
-import {deletePosition, fetchPositions, restorePosition} from '../../model/workplaceSlice';
-import {useWorkplaceActionHandler} from '../../model/hooks/useWorkplaceActionHandler';
+import { deletePosition, fetchPositions, restorePosition } from '../../model/workplaceSlice';
+import { useWorkplaceActionHandler } from '../../model/hooks/useWorkplaceActionHandler';
 
 // UI Components
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 import PositionModal from './components/PositionModal';
-import WorkplaceToolbar from "../WorkplaceToolbar";
+import WorkplaceToolbar from '../WorkplaceToolbar';
 import PositionsTable from './components/PositionsTable';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import LoadingState from 'shared/ui/components/LoadingState';
 
 import './PositionsTab.css';
 
 
-const PositionsTab = ({selectedSite}) => {
-    const {t} = useI18n();
+const PositionsTab = ({ selectedSite }) => {
+    const { t } = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const {positions = [], workSites = [], loading} = useSelector(state => state.workplace || {});
+    const { positions = [], workSites = [], loading } = useSelector(state => state.workplace || {});
 
     // --- STATE MANAGEMENT ---
     const [showModal, setShowModal] = useState(false);
@@ -41,24 +41,24 @@ const PositionsTab = ({selectedSite}) => {
     const [isClosingPositionId, setIsClosingPositionId] = useState(null);
 
     // --- ACTION HANDLERS using custom hook ---
-    const {execute: confirmDelete, isLoading: isDeleting} = useWorkplaceActionHandler({
+    const { execute: confirmDelete, isLoading: isDeleting } = useWorkplaceActionHandler({
         actionThunk: (id) => deletePosition(id),
         refetchThunk: fetchPositions,
         messages: {
             processing: 'common.processing',
             success: 'workplace.positions.deleted',
-            error: 'errors.generic'
-        }
+            error: 'errors.generic',
+        },
     });
 
-    const {execute: confirmRestore, isLoading: isRestoring} = useWorkplaceActionHandler({
+    const { execute: confirmRestore, isLoading: isRestoring } = useWorkplaceActionHandler({
         actionThunk: (id) => restorePosition(id),
         refetchThunk: fetchPositions,
         messages: {
             processing: 'common.processing',
             success: 'workplace.positions.restored',
-            error: 'errors.generic'
-        }
+            error: 'errors.generic',
+        },
     });
 
     // --- DATA FETCHING & SYNC ---
@@ -93,9 +93,9 @@ const PositionsTab = ({selectedSite}) => {
         status: p => p.is_active ? 0 : 1,
     }), [getSiteName]);
 
-    const {sortedItems: sortedPositions, requestSort, sortConfig} = useSortableData(filteredPositions, {
+    const { sortedItems: sortedPositions, requestSort, sortConfig } = useSortableData(filteredPositions, {
         field: 'status',
-        order: 'ASC'
+        order: 'ASC',
     }, sortingAccessors);
 
     // --- HANDLERS ---
@@ -136,15 +136,15 @@ const PositionsTab = ({selectedSite}) => {
                 state: {
                     filters: {
                         position: position.pos_id.toString(),
-                        work_site: position.site_id.toString()
-                    }
-                }
-            }
+                        work_site: position.site_id.toString(),
+                    },
+                },
+            },
         );
 
     // --- RENDER ---
     if (loading && positions.length === 0) {
-        return <LoadingState/>;
+        return <LoadingState />;
     }
 
     return (
@@ -215,7 +215,7 @@ const PositionsTab = ({selectedSite}) => {
                 onHide={() => setShowDeleteConfirm(false)}
                 onConfirm={() => {
                     confirmDelete({
-                        id: positionToProcess.pos_id
+                        id: positionToProcess.pos_id,
                     });
                     setShowDeleteConfirm(false);
                 }}
@@ -229,7 +229,7 @@ const PositionsTab = ({selectedSite}) => {
                 onHide={() => setShowRestoreConfirm(false)}
                 onConfirm={() => {
                     confirmRestore({
-                        id: positionToProcess.pos_id
+                        id: positionToProcess.pos_id,
                     });
                     setShowRestoreConfirm(false);
                 }}

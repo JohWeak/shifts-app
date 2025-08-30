@@ -1,19 +1,19 @@
 // frontend/src/features/employee-dashboard/index.js
-import React, {useEffect} from 'react';
-import {useSelector} from "react-redux";
-import {useNavigate} from 'react-router-dom';
-import {Card, Col, Container, Row} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useEmployeeData} from './model/hooks/useEmployeeData';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
-import {useMediaQuery} from "../../shared/hooks/useMediaQuery";
-import {selectNewUpdatesCount} from '../employee-requests/model/requestsSlice';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { Card, Col, Container, Row } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useEmployeeData } from './model/hooks/useEmployeeData';
+import LoadingState from 'shared/ui/components/LoadingState';
+import PageHeader from '../../shared/ui/components/PageHeader';
+import { useMediaQuery } from '../../shared/hooks/useMediaQuery';
+import { selectNewUpdatesCount } from '../employee-requests/model/requestsSlice';
 import './index.css';
 
 
 const EmployeeDashboard = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 567px)');
     const {
@@ -57,7 +57,7 @@ const EmployeeDashboard = () => {
                     start_time: shift.start_time.substring(0, 5),
                     end_time: new Date(new Date(`1970-01-01T${shift.start_time}Z`).getTime() + shift.duration * 60 * 60 * 1000).toISOString().substr(11, 5),
                     duration: shift.duration,
-                }))
+                })),
         );
 
         const today = new Date();
@@ -90,7 +90,7 @@ const EmployeeDashboard = () => {
             color: 'primary',
             path: '/employee/schedule',
             stats: dashboardStats?.thisWeekShifts
-                ? t('employee.dashboard.shiftsThisWeek', {count: dashboardStats.thisWeekShifts})
+                ? t('employee.dashboard.shiftsThisWeek', { count: dashboardStats.thisWeekShifts })
                 : t('employee.dashboard.noShifts'),
         },
         {
@@ -103,7 +103,7 @@ const EmployeeDashboard = () => {
             stats: dashboardStats?.constraintsSubmitted
                 ? t('employee.dashboard.submitted')
                 : t('employee.dashboard.notSubmitted'),
-            highlight: !dashboardStats?.constraintsSubmitted
+            highlight: !dashboardStats?.constraintsSubmitted,
         },
         {
             id: 'requests',
@@ -113,7 +113,7 @@ const EmployeeDashboard = () => {
             color: 'warning',
             path: '/employee/requests',
             badge: newRequestUpdates > 0 ? newRequestUpdates : null,
-            highlight: newRequestUpdates > 0
+            highlight: newRequestUpdates > 0,
         },
         {
             id: 'archive',
@@ -121,8 +121,8 @@ const EmployeeDashboard = () => {
             subtitle: t('employee.dashboard.viewHistory'),
             icon: 'bi-archive',
             color: 'info',
-            path: '/employee/archive'
-        }
+            path: '/employee/archive',
+        },
     ];
 
     const handleCardClick = (path) => {
@@ -131,7 +131,7 @@ const EmployeeDashboard = () => {
 
 
     if (personalSchedule === null || dashboardStats === null) {
-        return <LoadingState size="lg" message={t('common.loading')}/>;
+        return <LoadingState size="lg" message={t('common.loading')} />;
     }
 
     return (

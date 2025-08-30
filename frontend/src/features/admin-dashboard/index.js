@@ -1,15 +1,15 @@
 // frontend/src/features/admin-dashboard/index.js
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import MetricCard from './components/MetricCard';
 import { fetchEmployees } from 'features/admin-employee-management/model/employeeSlice';
 import { fetchSchedules } from 'features/admin-schedule-management/model/scheduleSlice';
-import { fetchWorkSites, fetchPositions } from 'features/admin-workplace-settings/model/workplaceSlice';
+import { fetchPositions, fetchWorkSites } from 'features/admin-workplace-settings/model/workplaceSlice';
 import './AdminDashboard.css';
-import PageHeader from "../../shared/ui/components/PageHeader/PageHeader";
+import PageHeader from '../../shared/ui/components/PageHeader';
 
 /**
  * Admin Dashboard Component
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
         totalPositions: 0,
         activePositions: 0,
         publishedSchedules: 0,
-        pendingRequests: 0
+        pendingRequests: 0,
     });
 
     // Load data on mount
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
             totalPositions: positions?.length || 0,
             activePositions: positions?.filter(p => p.is_active).length || 0,
             publishedSchedules: schedules?.filter(s => s.status === 'published').length || 0,
-            pendingRequests: 0
+            pendingRequests: 0,
         });
     }, [employees, workSites, positions, schedules]);
 
@@ -64,7 +64,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="admin-dashboard">
-            <Container fluid >
+            <Container fluid>
                 {/* Header */}
                 <Row className="mb-2">
                     <Col>

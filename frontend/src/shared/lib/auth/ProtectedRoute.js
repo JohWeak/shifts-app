@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
+import LoadingState from 'shared/ui/components/LoadingState';
 
 export const ProtectedRoute = ({ children, allowedRole }) => {
     const { isAuthenticated, user, loading } = useSelector((state) => state.auth);

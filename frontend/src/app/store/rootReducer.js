@@ -10,6 +10,7 @@ import constraintReducer from 'features/employee-constraints/model/constraintSli
 import employeeDataReducer from 'features/employee-dashboard/model/employeeDataSlice'; // NEW
 import requestsReducer from 'features/employee-requests/model/requestsSlice';
 import adminRequestsReducer from 'features/admin-permanent-requests/model/adminRequestsSlice';
+import profileReducer from '../../features/employee-profile/model/profileSlice';
 
 export const rootReducer = combineReducers({
     auth: authReducer,
@@ -23,4 +24,5 @@ export const rootReducer = combineReducers({
     employeeData: employeeDataReducer,
     requests: requestsReducer,
     adminRequests: adminRequestsReducer,
+    profile: profileReducer,
 });

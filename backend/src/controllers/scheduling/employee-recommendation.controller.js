@@ -1,7 +1,8 @@
 // backend/src/controllers/EmployeeRecommendations.controller.js
-const EmployeeRecommendationService = require('../../services/employee-recommendation.service');
+const EmployeeRecommendationService = require('../../services/recommendations/employee-recommendation.service');
 const db = require('../../models');
 const recommendationService = new EmployeeRecommendationService(db);
+
 class EmployeeRecommendationController {
     static async getRecommendations(req, res) {
         try {
@@ -20,7 +21,7 @@ class EmployeeRecommendationController {
                 shift_id,
                 date,
                 schedule_id,
-                virtualChanges
+                virtualChanges,
             });
 
             let parsedVirtualChanges = [];
@@ -40,7 +41,7 @@ class EmployeeRecommendationController {
                 date,
                 [], // excludeEmployeeIds
                 schedule_id ? parseInt(schedule_id) : null,
-                parsedVirtualChanges
+                parsedVirtualChanges,
             );
 
             res.json(recommendations);
@@ -48,7 +49,7 @@ class EmployeeRecommendationController {
             console.error('[EmployeeRecommendationController] Error:', error);
             res.status(500).json({
                 error: 'Failed to get recommendations',
-                message: error.message
+                message: error.message,
             });
         }
     }

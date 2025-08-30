@@ -1,21 +1,21 @@
 // frontend/src/features/admin-permanent-requests/ui/RequestReviewModal/RequestReviewModal.js
-import React, {useCallback, useEffect, useState} from 'react';
-import {Alert, Button, Form, Modal, Spinner} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {reviewRequest} from '../../model/adminRequestsSlice';
-import {addNotification} from 'app/model/notificationsSlice';
-import {positionAPI} from 'shared/api/apiService';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import StatusBadge from 'shared/ui/components/StatusBadge/StatusBadge';
-import {formatDateTime, getDayName} from 'shared/lib/utils/scheduleUtils';
-import {getDayIndex, groupConstraintsByDay} from 'shared/lib/utils/constraintUtils';
-import ConfirmationModal from "shared/ui/components/ConfirmationModal/ConfirmationModal";
-import {useMediaQuery} from "shared/hooks/useMediaQuery";
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { reviewRequest } from '../../model/adminRequestsSlice';
+import { addNotification } from 'app/model/notificationsSlice';
+import { positionAPI } from 'shared/api/apiService';
+import LoadingState from 'shared/ui/components/LoadingState';
+import StatusBadge from 'shared/ui/components/StatusBadge';
+import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
+import { getDayIndex, groupConstraintsByDay } from 'shared/lib/utils/constraintUtils';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import './RequestReviewModal.css';
 
-const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
-    const {t, locale} = useI18n();
+const RequestReviewModal = ({ show, onHide, request, onReviewComplete }) => {
+    const { t, locale } = useI18n();
     const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
     const [revertReason, setRevertReason] = useState('');
 
     const weekStartsOn = useSelector(state =>
-        state.settings?.systemSettings?.weekStartDay || 0
+        state.settings?.systemSettings?.weekStartDay || 0,
     );
 
     const isMobile = useMediaQuery('(max-width: 992px)');
@@ -83,7 +83,7 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
         if (!revertReason.trim()) {
             dispatch(addNotification({
                 type: 'error',
-                message: t('admin.requests.revertReasonRequired')
+                message: t('admin.requests.revertReasonRequired'),
             }));
             return;
         }
@@ -94,12 +94,12 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
             await dispatch(reviewRequest({
                 requestId: request.id,
                 status: 'pending',
-                adminResponse: `Returned for review: ${revertReason.trim()}`
+                adminResponse: `Returned for review: ${revertReason.trim()}`,
             })).unwrap();
 
             dispatch(addNotification({
                 type: 'success',
-                message: t('admin.requests.revertedSuccess')
+                message: t('admin.requests.revertedSuccess'),
             }));
 
             setShowRevertModal(false);
@@ -107,7 +107,7 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
         } catch (error) {
             dispatch(addNotification({
                 type: 'error',
-                message: error || t('admin.requests.revertError')
+                message: error || t('admin.requests.revertError'),
             }));
         } finally {
             setLoading(false);
@@ -121,19 +121,19 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
             await dispatch(reviewRequest({
                 requestId: request.id,
                 status,
-                adminResponse: showResponseField ? adminResponse.trim() : null
+                adminResponse: showResponseField ? adminResponse.trim() : null,
             })).unwrap();
 
             dispatch(addNotification({
                 type: 'success',
-                message: t(`admin.requests.${status}Success`)
+                message: t(`admin.requests.${status}Success`),
             }));
 
             onReviewComplete();
         } catch (error) {
             dispatch(addNotification({
                 type: 'error',
-                message: error || t('admin.requests.reviewError')
+                message: error || t('admin.requests.reviewError'),
             }));
         } finally {
             setLoading(false);
@@ -157,7 +157,7 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
             </Modal.Header>
             <Modal.Body>
                 {loadingShifts ? (
-                    <LoadingState/>
+                    <LoadingState />
                 ) : (
                     <>
                         {/* Employee Information */}
@@ -305,14 +305,14 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
                             onClick={() => handleReviewClick('rejected')}
                             disabled={loading}
                         >
-                            {loading ? <Spinner size="sm"/> : t('admin.requests.reject')}
+                            {loading ? <Spinner size="sm" /> : t('admin.requests.reject')}
                         </Button>
                         <Button
                             variant="success"
                             onClick={() => handleReviewClick('approved')}
                             disabled={loading}
                         >
-                            {loading ? <Spinner size="sm"/> : t('admin.requests.approve')}
+                            {loading ? <Spinner size="sm" /> : t('admin.requests.approve')}
                         </Button>
                     </div>
                 )}
@@ -363,7 +363,7 @@ const RequestReviewModal = ({show, onHide, request, onReviewComplete}) => {
                         onClick={handleRevertToPending}
                         disabled={!revertReason.trim() || loading}
                     >
-                        {loading ? <Spinner size="sm"/> : t('admin.requests.revert')}
+                        {loading ? <Spinner size="sm" /> : t('admin.requests.revert')}
                     </Button>
                 </Modal.Footer>
             </Modal>

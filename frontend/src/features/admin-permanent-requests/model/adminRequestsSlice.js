@@ -1,24 +1,34 @@
 // frontend/src/features/admin-permanent-requests/model/adminRequestsSlice.js
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {constraintAPI} from 'shared/api/apiService';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { constraintAPI } from 'shared/api/apiService';
+import { CACHE_DURATION, isCacheValid } from '../../../shared/lib/cache/cacheUtils';
 
 export const fetchAllRequests = createAsyncThunk(
     'adminRequests/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (forceRefresh = false, { getState, rejectWithValue }) => {
+        const state = getState();
+        const { lastFetched, items } = state.adminRequests;
+
+        if (!forceRefresh && isCacheValid(lastFetched, CACHE_DURATION.MEDIUM) && items.length > 0) {
+            return { cached: true, data: items };
+        }
+
         try {
             const response = await constraintAPI.getAllPermanentRequests();
             console.log('[fetchAllRequests] Response:', response);
 
+            let data = [];
             if (Array.isArray(response)) {
-                return response;
+                data = response;
             } else if (response && response.data) {
-                return response.data;
+                data = response.data;
             }
-            return [];
+
+            return { cached: false, data };
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to load requests');
         }
-    }
+    },
 );
 
 export const reviewRequest = createAsyncThunk(
@@ -30,7 +40,7 @@ export const reviewRequest = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to review request');
         }
-    }
+    },
 );
 
 const adminRequestsSlice = createSlice({
@@ -39,12 +49,16 @@ const adminRequestsSlice = createSlice({
         items: [],
         loading: false,
         error: null,
-        pendingCount: 0
+        pendingCount: 0,
+        lastFetched: null,
     },
     reducers: {
         updatePendingCount: (state) => {
             state.pendingCount = state.items.filter(r => r.status === 'pending').length;
-        }
+        },
+        invalidateCache(state) {
+            state.lastFetched = null;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -54,9 +68,13 @@ const adminRequestsSlice = createSlice({
             })
             .addCase(fetchAllRequests.fulfilled, (state, action) => {
                 state.loading = false;
-                state.items = action.payload;
-                state.pendingCount = action.payload.filter(r => r.status === 'pending').length;
-
+                if (!action.payload.cached) {
+                    state.items = action.payload.data || [];
+                    state.lastFetched = Date.now();
+                } else {
+                    state.items = action.payload.data || [];
+                }
+                state.pendingCount = state.items.filter(r => r.status === 'pending').length;
             })
             .addCase(fetchAllRequests.rejected, (state, action) => {
                 state.loading = false;
@@ -70,9 +88,11 @@ const adminRequestsSlice = createSlice({
                     request.reviewed_at = new Date().toISOString();
                 }
                 state.pendingCount = state.items.filter(r => r.status === 'pending').length;
+                // Invalidate cache when data changes
+                state.lastFetched = null;
             });
-    }
+    },
 });
 
-
+export const { updatePendingCount, invalidateCache } = adminRequestsSlice.actions;
 export default adminRequestsSlice.reducer;
