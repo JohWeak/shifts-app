@@ -488,14 +488,20 @@ const updateProfile = async (req, res) => {
             });
         }
 
-        await employee.update({
+        const updateData = {
             first_name,
             last_name,
             email,
             phone,
             receive_schedule_emails,
-            locale,
-        });
+        };
+
+        // Only update locale if it's provided
+        if (locale) {
+            updateData.locale = locale;
+        }
+
+        await employee.update(updateData);
 
         res.json({
             success: true,

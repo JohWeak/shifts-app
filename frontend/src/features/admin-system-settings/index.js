@@ -4,9 +4,7 @@ import { Alert, Button, Card, Col, Container, Form, Nav, Row, Spinner, Tab } fro
 import PageHeader from 'shared/ui/components/PageHeader';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchSystemSettings, updateLocalSettings, updateSystemSettings } from './model/settingsSlice';
-import { fetchWorkSites } from '../admin-schedule-management/model/scheduleSlice';
 import { addNotification } from '../../app/model/notificationsSlice';
-import PositionSettings from '../admin-position-settings';
 import { motion } from 'motion/react';
 
 import './index.css';
@@ -16,11 +14,9 @@ const SystemSettings = () => {
     const dispatch = useDispatch();
 
     const { systemSettings, loading, error } = useSelector(state => state.settings);
-    const { workSites, workSitesLoading } = useSelector(state => state.schedule);
 
     const [localSettings, setLocalSettings] = useState(systemSettings);
-    const [activeTab, setActiveTab] = useState('general');
-    const [selectedSiteId, setSelectedSiteId] = useState('');
+    const [activeTab, setActiveTab] = useState('schedule');
 
     useEffect(() => {
         dispatch(fetchSystemSettings()).then((result) => {
@@ -31,7 +27,6 @@ const SystemSettings = () => {
                 }));
             }
         });
-        dispatch(fetchWorkSites());
     }, [dispatch, t]);
 
     useEffect(() => {
@@ -87,12 +82,6 @@ const SystemSettings = () => {
 
     const settingsNavItems = [
         {
-            key: 'general',
-            label: t('settings.generalSettings'),
-            icon: 'sliders',
-            description: t('settings.generalSettingsDesc'),
-        },
-        {
             key: 'schedule',
             label: t('settings.scheduleSettings'),
             icon: 'calendar-week',
@@ -105,12 +94,6 @@ const SystemSettings = () => {
             description: t('dashboard.quickActions.algorithmSettingsDesc'),
         },
         {
-            key: 'positions',
-            label: t('settings.positionSettings'),
-            icon: 'diagram-3',
-            description: t('settings.positionSettingsDesc'),
-        },
-        {
             key: 'constraints',
             label: t('settings.constraintSettings'),
             icon: 'people',
@@ -121,12 +104,6 @@ const SystemSettings = () => {
             label: t('settings.notificationSettings'),
             icon: 'bell',
             description: t('settings.notificationSettingsDesc'),
-        },
-        {
-            key: 'security',
-            label: t('settings.securitySettings'),
-            icon: 'shield-lock',
-            description: t('settings.securitySettingsDesc'),
         },
     ];
 
@@ -228,64 +205,6 @@ const SystemSettings = () => {
                                 </Alert>
                             )}
                             <Tab.Content>
-                                {/* General Settings */}
-                                <Tab.Pane eventKey="general">
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 }}
-                                    >
-                                        <Card className="settings-card">
-                                            <Card.Header className="settings-card-header">
-                                                <div className="header-content">
-                                                    <i className="bi bi-sliders header-icon"></i>
-                                                    <div>
-                                                        <h5 className="mb-1">{t('settings.generalSettings')}</h5>
-                                                        <small
-                                                            className="text-muted">{t('settings.generalSettingsDesc')}</small>
-                                                    </div>
-                                                </div>
-                                            </Card.Header>
-                                            <Card.Body className="settings-card-body">
-                                                <Row>
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-calendar-date me-2"></i>
-                                                                {t('settings.dateFormat')}
-                                                            </Form.Label>
-                                                            <Form.Select
-                                                                value={localSettings.dateFormat}
-                                                                onChange={(e) => handleChange('dateFormat', e.target.value)}
-                                                                className="settings-input"
-                                                            >
-                                                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                                                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                                                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                                                            </Form.Select>
-                                                        </Form.Group>
-                                                    </Col>
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-clock me-2"></i>
-                                                                {t('settings.timeFormat')}
-                                                            </Form.Label>
-                                                            <Form.Select
-                                                                value={localSettings.timeFormat}
-                                                                onChange={(e) => handleChange('timeFormat', e.target.value)}
-                                                                className="settings-input"
-                                                            >
-                                                                <option value="24h">24-hour</option>
-                                                                <option value="12h">12-hour (AM/PM)</option>
-                                                            </Form.Select>
-                                                        </Form.Group>
-                                                    </Col>
-                                                </Row>
-                                            </Card.Body>
-                                        </Card>
-                                    </motion.div>
-                                </Tab.Pane>
 
                                 {/* Schedule Settings */}
                                 <Tab.Pane eventKey="schedule">
@@ -454,52 +373,6 @@ const SystemSettings = () => {
                                                 </div>
                                             </Card.Header>
                                             <Card.Body className="settings-card-body">
-                                                <Row>
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-stopwatch me-2"></i>
-                                                                {t('settings.algorithmMaxTime')}
-                                                            </Form.Label>
-                                                            <div className="input-group">
-                                                                <Form.Control
-                                                                    type="number"
-                                                                    min="30"
-                                                                    max="300"
-                                                                    step="30"
-                                                                    value={localSettings.algorithmMaxTime || 120}
-                                                                    onChange={(e) => handleChange('algorithmMaxTime', parseInt(e.target.value))}
-                                                                    className="settings-input"
-                                                                />
-                                                                <span
-                                                                    className="input-group-text">{t('settings.seconds')}</span>
-                                                            </div>
-                                                            <Form.Text className="settings-help">
-                                                                {t('settings.algorithmMaxTimeHint')}
-                                                            </Form.Text>
-                                                        </Form.Group>
-                                                    </Col>
-
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-people me-2"></i>
-                                                                {t('settings.defaultEmployeesPerShift')}
-                                                            </Form.Label>
-                                                            <Form.Control
-                                                                type="number"
-                                                                min="1"
-                                                                max="10"
-                                                                value={localSettings.defaultEmployeesPerShift || 1}
-                                                                onChange={(e) => handleChange('defaultEmployeesPerShift', parseInt(e.target.value))}
-                                                                className="settings-input"
-                                                            />
-                                                            <Form.Text className="settings-help">
-                                                                {t('settings.defaultEmployeesPerShiftHint')}
-                                                            </Form.Text>
-                                                        </Form.Group>
-                                                    </Col>
-                                                </Row>
 
                                                 <div className="settings-section">
                                                     <h6 className="settings-section-title">
@@ -559,59 +432,6 @@ const SystemSettings = () => {
                                     </motion.div>
                                 </Tab.Pane>
 
-                                {/* Rest of the tabs remain the same as in SystemSettings but with updated styling */}
-                                {/* Positions Settings */}
-                                <Tab.Pane eventKey="positions">
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 }}
-                                    >
-                                        <Card className="settings-card">
-                                            <Card.Header className="settings-card-header">
-                                                <div className="header-content">
-                                                    <i className="bi bi-diagram-3 header-icon"></i>
-                                                    <div>
-                                                        <h5 className="mb-1">{t('settings.positionSettings')}</h5>
-                                                        <small
-                                                            className="text-muted">{t('settings.positionSettingsDesc')}</small>
-                                                    </div>
-                                                </div>
-                                            </Card.Header>
-                                            <Card.Body className="settings-card-body">
-                                                <Form.Group className="mb-4">
-                                                    <Form.Label className="settings-label">
-                                                        <i className="bi bi-building me-2"></i>
-                                                        {t('settings.selectSite')}
-                                                    </Form.Label>
-                                                    <Form.Select
-                                                        value={selectedSiteId}
-                                                        onChange={(e) => setSelectedSiteId(e.target.value)}
-                                                        disabled={workSitesLoading === 'pending'}
-                                                        className="settings-input"
-                                                    >
-                                                        <option value="">{t('settings.selectSitePrompt')}</option>
-                                                        {(workSites || []).map(site => (
-                                                            <option key={site.site_id} value={site.site_id}>
-                                                                {site.site_name}
-                                                            </option>
-                                                        ))}
-                                                    </Form.Select>
-                                                </Form.Group>
-
-                                                {selectedSiteId && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, height: 0 }}
-                                                        animate={{ opacity: 1, height: 'auto' }}
-                                                        transition={{ delay: 0.1 }}
-                                                    >
-                                                        <PositionSettings siteId={selectedSiteId} />
-                                                    </motion.div>
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </motion.div>
-                                </Tab.Pane>
 
                                 {/* Constraint Settings */}
                                 <Tab.Pane eventKey="constraints">
@@ -682,77 +502,6 @@ const SystemSettings = () => {
                                                     </Col>
                                                 </Row>
 
-                                                <div className="settings-section">
-                                                    <h6 className="settings-section-title">
-                                                        <i className="bi bi-shield-check me-2"></i>
-                                                        {t('settings.legalCompliance')}
-                                                    </h6>
-
-                                                    <Alert variant="info" className="settings-alert">
-                                                        <i className="bi bi-info-circle me-2"></i>
-                                                        {t('settings.legalComplianceInfo')}
-                                                    </Alert>
-
-                                                    <Row>
-                                                        <Col md={6}>
-                                                            <Form.Group className="mb-3">
-                                                                <Form.Label className="settings-label">
-                                                                    <i className="bi bi-clock-history me-2"></i>
-                                                                    {t('settings.maxHoursPerDay')}
-                                                                </Form.Label>
-                                                                <div className="input-group">
-                                                                    <Form.Control
-                                                                        type="number"
-                                                                        value={12}
-                                                                        disabled
-                                                                        className="settings-input"
-                                                                    />
-                                                                    <span
-                                                                        className="input-group-text">{t('settings.hours')}</span>
-                                                                </div>
-                                                                <Form.Text className="settings-help">
-                                                                    {t('settings.fixedByLaw')}
-                                                                </Form.Text>
-                                                            </Form.Group>
-                                                        </Col>
-
-                                                        <Col md={6}>
-                                                            <Form.Group className="mb-3">
-                                                                <Form.Label className="settings-label">
-                                                                    <i className="bi bi-moon me-2"></i>
-                                                                    {t('settings.minRestBetweenShifts')}
-                                                                </Form.Label>
-                                                                <div className="input-group">
-                                                                    <Form.Control
-                                                                        type="number"
-                                                                        value={11}
-                                                                        disabled
-                                                                        className="settings-input"
-                                                                    />
-                                                                    <span
-                                                                        className="input-group-text">{t('settings.hours')}</span>
-                                                                </div>
-                                                                <Form.Text className="settings-help">
-                                                                    {t('settings.fixedByLaw')}
-                                                                </Form.Text>
-                                                            </Form.Group>
-                                                        </Col>
-                                                    </Row>
-
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Check
-                                                            type="switch"
-                                                            id="strictLegalCompliance"
-                                                            label={t('settings.strictLegalCompliance')}
-                                                            checked={localSettings.strictLegalCompliance ?? true}
-                                                            onChange={(e) => handleChange('strictLegalCompliance', e.target.checked)}
-                                                            className="settings-switch"
-                                                        />
-                                                        <Form.Text className="settings-help">
-                                                            {t('settings.strictLegalComplianceHint')}
-                                                        </Form.Text>
-                                                    </Form.Group>
-                                                </div>
                                             </Card.Body>
                                         </Card>
                                     </motion.div>
@@ -777,141 +526,21 @@ const SystemSettings = () => {
                                                 </div>
                                             </Card.Header>
                                             <Card.Body className="settings-card-body">
-                                                <Form.Group className="mb-4">
-                                                    <Form.Check
-                                                        type="switch"
-                                                        id="enableNotifications"
-                                                        label={t('settings.enableNotifications')}
-                                                        checked={localSettings.enableNotifications}
-                                                        onChange={(e) => handleChange('enableNotifications', e.target.checked)}
-                                                        className="settings-switch main-switch"
-                                                    />
-                                                </Form.Group>
-
-                                                <div className="settings-section">
-                                                    <h6 className="settings-section-title">
-                                                        <i className="bi bi-bell-fill me-2"></i>
-                                                        {t('settings.notificationTypes')}
-                                                    </h6>
-
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Check
-                                                            type="checkbox"
-                                                            id="notifySchedulePublished"
-                                                            label={t('settings.notifySchedulePublished')}
-                                                            checked={localSettings.notifySchedulePublished ?? true}
-                                                            onChange={(e) => handleChange('notifySchedulePublished', e.target.checked)}
-                                                            disabled={!localSettings.enableNotifications}
-                                                            className="settings-checkbox"
-                                                        />
-                                                    </Form.Group>
-
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Check
-                                                            type="checkbox"
-                                                            id="notifyShiftReminder"
-                                                            label={t('settings.notifyShiftReminder')}
-                                                            checked={localSettings.notifyShiftReminder ?? true}
-                                                            onChange={(e) => handleChange('notifyShiftReminder', e.target.checked)}
-                                                            disabled={!localSettings.enableNotifications}
-                                                            className="settings-checkbox"
-                                                        />
-                                                    </Form.Group>
-
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Check
-                                                            type="checkbox"
-                                                            id="notifyScheduleChange"
-                                                            label={t('settings.notifyScheduleChange')}
-                                                            checked={localSettings.notifyScheduleChange ?? true}
-                                                            onChange={(e) => handleChange('notifyScheduleChange', e.target.checked)}
-                                                            disabled={!localSettings.enableNotifications}
-                                                            className="settings-checkbox"
-                                                        />
-                                                    </Form.Group>
-                                                </div>
-                                            </Card.Body>
-                                        </Card>
-                                    </motion.div>
-                                </Tab.Pane>
-
-                                {/* Security Settings */}
-                                <Tab.Pane eventKey="security">
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 }}
-                                    >
-                                        <Card className="settings-card">
-                                            <Card.Header className="settings-card-header">
-                                                <div className="header-content">
-                                                    <i className="bi bi-shield-lock header-icon"></i>
-                                                    <div>
-                                                        <h5 className="mb-1">{t('settings.securitySettings')}</h5>
-                                                        <small
-                                                            className="text-muted">{t('settings.securitySettingsDesc')}</small>
-                                                    </div>
-                                                </div>
-                                            </Card.Header>
-                                            <Card.Body className="settings-card-body">
-                                                <Row>
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-hourglass-split me-2"></i>
-                                                                {t('settings.sessionTimeout')}
-                                                            </Form.Label>
-                                                            <div className="input-group">
-                                                                <Form.Control
-                                                                    type="number"
-                                                                    min="15"
-                                                                    max="480"
-                                                                    step="15"
-                                                                    value={localSettings.sessionTimeout || 60}
-                                                                    onChange={(e) => handleChange('sessionTimeout', parseInt(e.target.value))}
-                                                                    className="settings-input"
-                                                                />
-                                                                <span
-                                                                    className="input-group-text">{t('settings.minutes')}</span>
-                                                            </div>
-                                                        </Form.Group>
-                                                    </Col>
-
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-key me-2"></i>
-                                                                {t('settings.passwordMinLength')}
-                                                            </Form.Label>
-                                                            <Form.Control
-                                                                type="number"
-                                                                min="6"
-                                                                max="20"
-                                                                value={localSettings.passwordMinLength || 8}
-                                                                onChange={(e) => handleChange('passwordMinLength', parseInt(e.target.value))}
-                                                                className="settings-input"
-                                                            />
-                                                        </Form.Group>
-                                                    </Col>
-                                                </Row>
-
                                                 <Form.Group className="mb-3">
                                                     <Form.Check
                                                         type="switch"
-                                                        id="requirePasswordChange"
-                                                        label={t('settings.requirePasswordChange')}
-                                                        checked={localSettings.requirePasswordChange || false}
-                                                        onChange={(e) => handleChange('requirePasswordChange', e.target.checked)}
-                                                        className="settings-switch"
+                                                        id="notifySchedulePublished"
+                                                        label={t('settings.notifySchedulePublished')}
+                                                        checked={localSettings.notifySchedulePublished ?? true}
+                                                        onChange={(e) => handleChange('notifySchedulePublished', e.target.checked)}
+                                                        className="settings-switch main-switch"
                                                     />
-                                                    <Form.Text className="settings-help">
-                                                        {t('settings.requirePasswordChangeHint')}
-                                                    </Form.Text>
                                                 </Form.Group>
                                             </Card.Body>
                                         </Card>
                                     </motion.div>
                                 </Tab.Pane>
+
                             </Tab.Content>
                         </Col>
                     </Row>
