@@ -1,6 +1,6 @@
 //frontend/src/features/admin-schedule-management/ui/generate-schedule/index.js
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Card, Form, Spinner } from 'react-bootstrap';
+import { Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { getNextWeekStart } from 'shared/lib/utils/scheduleUtils';
@@ -21,6 +21,8 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
         weekStart: minSelectableDate,
         algorithm: 'auto',
         position_ids: [],
+        optimizationMode: 'balanced',
+        fairnessWeight: 50,
     });
 
 
@@ -71,54 +73,94 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
             <Card.Body>
 
                 <Form onSubmit={handleSubmit} className="generate-form-layout">
-                    <Form.Group className="form-calendar-section">
-                        <Form.Label>{t('modal.generateSchedule.chooseWeek')}</Form.Label>
-                        <div>
-                            <DatePicker
-                                displayMode="inline"
-                                selectionMode="week"
-                                value={settings.weekStart}
-                                weekStartsOn={weekStartDay}
-                                dateFormat={dateFormat.toLowerCase().replace(/yyyy/i, 'yyyy').replace(/dd/i, 'dd').replace(/mm/i, 'MM')}
-                                onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
-                            />
-                        </div>
-                    </Form.Group>
-                    <div className="form-settings-section">
-                        <Form.Group className="mb-3">
-                            <Form.Label>{t('modal.generateSchedule.workSite')}</Form.Label>
-                            {workSitesLoading ? <Spinner size="sm" /> : (
+                    <Row>
+                        <Col md={4} className="form-calendar-section">
+                            <Form.Group>
+                                <Form.Label>{t('modal.generateSchedule.chooseWeek')}</Form.Label>
+                                <div>
+                                    <DatePicker
+                                        displayMode="inline"
+                                        selectionMode="week"
+                                        value={settings.weekStart}
+                                        weekStartsOn={weekStartDay}
+                                        dateFormat={dateFormat.toLowerCase().replace(/yyyy/i, 'yyyy').replace(/dd/i, 'dd').replace(/mm/i, 'MM')}
+                                        onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
+                                    />
+                                </div>
+                            </Form.Group>
+                        </Col>
+
+                        <Col md={4} className="form-settings-section">
+                            <Form.Group className="mb-3">
+                                <Form.Label>{t('modal.generateSchedule.workSite')}</Form.Label>
+                                {workSitesLoading ? <Spinner size="sm" /> : (
+                                    <Form.Select
+                                        style={{ cursor: 'pointer' }}
+                                        value={settings.site_id || ''}
+                                        onChange={(e) => setSettings(prev => ({
+                                            ...prev,
+                                            site_id: parseInt(e.target.value),
+                                        }))}
+                                    >
+                                        {workSites?.filter(site => site.is_active).map(site => (
+                                            <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
+                                        ))}
+                                    </Form.Select>
+                                )}
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>{t('position.positions')}</Form.Label>
+                                <div className="positions-checkbox-group">
+                                    {availablePositions.length > 0 ? availablePositions.map(pos => (
+                                        <Form.Check
+                                            key={pos.pos_id}
+                                            type="checkbox"
+                                            id={`pos-check-${pos.pos_id}`}
+                                            label={pos.pos_name}
+                                            checked={settings.position_ids.includes(pos.pos_id)}
+                                            onChange={() => handlePositionChange(pos.pos_id)}
+                                        />
+                                    )) : <small className="text-muted">{t('position.noPositions')}</small>}
+                                </div>
+                            </Form.Group>
+                        </Col>
+
+                        <Col md={4} className="form-optimization-section">
+                            <Form.Group className="mb-3">
+                                <Form.Label>{t('settings.optimizationMode')}</Form.Label>
                                 <Form.Select
-                                    style={{ cursor: 'pointer' }}
-                                    value={settings.site_id || ''}
+                                    value={settings.optimizationMode}
                                     onChange={(e) => setSettings(prev => ({
                                         ...prev,
-                                        site_id: parseInt(e.target.value),
+                                        optimizationMode: e.target.value,
                                     }))}
                                 >
-                                    {workSites?.filter(site => site.is_active).map(site => (
-                                        <option key={site.site_id} value={site.site_id}>{site.site_name}</option>
-                                    ))}
+                                    <option value="fast">{t('settings.optimizationFast')}</option>
+                                    <option value="balanced">{t('settings.optimizationBalanced')}</option>
+                                    <option value="thorough">{t('settings.optimizationThorough')}</option>
                                 </Form.Select>
-                            )}
-                        </Form.Group>
+                            </Form.Group>
 
-                        <Form.Group>
-                            <Form.Label>{t('position.positions')}</Form.Label>
-                            <div className="positions-checkbox-group">
-                                {availablePositions.length > 0 ? availablePositions.map(pos => (
-                                    <Form.Check
-                                        key={pos.pos_id}
-                                        type="checkbox"
-                                        id={`pos-check-${pos.pos_id}`}
-                                        label={pos.pos_name}
-                                        checked={settings.position_ids.includes(pos.pos_id)}
-                                        onChange={() => handlePositionChange(pos.pos_id)}
-                                    />
-                                )) : <small className="text-muted">{t('position.noPositions')}</small>}
-                            </div>
-                        </Form.Group>
-                    </div>
+                            <Form.Group>
+                                <Form.Label>{t('settings.fairnessWeight')}</Form.Label>
+                                <Form.Range
+                                    min={0}
+                                    max={100}
+                                    value={settings.fairnessWeight}
+                                    onChange={(e) => setSettings(prev => ({
+                                        ...prev,
+                                        fairnessWeight: parseInt(e.target.value),
+                                    }))}
+                                />
+                                <div className="d-flex justify-content-between">
+                                    <small className="text-muted">{t('settings.efficiency')}</small>
+                                    <small className="text-muted">{settings.fairnessWeight}%</small>
+                                    <small className="text-muted">{t('settings.fairness')}</small>
+                                </div>
+                            </Form.Group>
+                        </Col>
+                    </Row>
                 </Form>
 
                 <div className="d-flex justify-content-end gap-2 mt-3 generate-buttons">

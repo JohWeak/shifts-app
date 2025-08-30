@@ -1,7 +1,7 @@
 // backend/src/services/scheduling/auto-generation.service.js
 const cron = require('node-cron');
 const db = require('../../models');
-const { SystemSettings } = db;
+const { SystemSettings, WorkSite, Schedule, Sequelize } = db;
 const cpSatBridge = require('./cp-sat-bridge.service');
 
 class AutoGenerationService {
@@ -70,7 +70,7 @@ class AutoGenerationService {
             console.log('Starting automatic schedule generation...');
 
             // Get all work sites
-            const workSites = await db.WorkSite.findAll({
+            const workSites = await WorkSite.findAll({
                 attributes: ['site_id'],
             });
 
@@ -85,12 +85,12 @@ class AutoGenerationService {
                     nextWeekStart.setDate(today.getDate() + daysUntilNextWeek);
 
                     // Check if schedule already exists for next week
-                    const existingSchedule = await db.Schedule.findOne({
+                    const existingSchedule = await Schedule.findOne({
                         where: {
                             site_id: site.site_id,
                             start_date: {
-                                [db.Sequelize.Op.gte]: nextWeekStart,
-                                [db.Sequelize.Op.lt]: new Date(nextWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000),
+                                [Sequelize.Op.gte]: nextWeekStart,
+                                [Sequelize.Op.lt]: new Date(nextWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000),
                             },
                         },
                     });
@@ -104,12 +104,7 @@ class AutoGenerationService {
                     const settings = await this.getOptimizationSettings();
 
                     // Generate schedule using CP-SAT bridge
-                    const result = await cpSatBridge.generateSchedule({
-                        site_id: site.site_id,
-                        start_date: nextWeekStart,
-                        optimization_mode: settings.optimizationMode,
-                        fairness_weight: settings.fairnessWeight,
-                    });
+                    const result = await cpSatBridge.generateOptimalSchedule(site.site_id, nextWeekStart.toISOString().split('T')[0]);
 
                     if (result.success) {
                         generatedCount++;

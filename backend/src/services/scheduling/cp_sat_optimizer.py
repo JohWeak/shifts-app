@@ -429,30 +429,63 @@ class UniversalShiftSchedulerCP:
                                 assignments[(emp_id, day_idx, shift['shift_id'], default_pos)] * position_match_bonus
                             )
 
-        # 5.4 REMOVE workload balancing - we don't want to spread work equally
-        # We want to use the minimum number of employees needed
+        # 5.4 Fairness vs Efficiency balancing
+        fairness_weight = settings.get('fairness_weight', 50)  # 0-100, where 0=efficiency, 100=fairness
 
-        # 5.5 Add a small penalty for using too many different employees
-        # This encourages using fewer employees more consistently
+        # Calculate workload for each employee
+        employee_workload = {}
         unique_employees_working = []
+
         for emp in employees:
             emp_id = emp['emp_id']
             emp_works = self.model.NewBoolVar(f'emp_works_{emp_id}')
 
             # Employee works if they have any assignment
             emp_assignments = []
+            total_hours_terms = []
+
             for day_idx in range(len(days)):
                 for shift in shifts:
                     for position in positions:
                         if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                            emp_assignments.append(
-                                assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])])
+                            assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
+                            emp_assignments.append(assignment_var)
+                            total_hours_terms.append(assignment_var * shift['duration'])
 
             if emp_assignments:
                 self.model.AddMaxEquality(emp_works, emp_assignments)
                 unique_employees_working.append(emp_works)
-                # Small penalty for each employee used (encourages using fewer employees)
-                objective_terms.append(emp_works * -2)
+
+                # Calculate total hours for this employee
+                total_hours = self.model.NewIntVar(0, 200, f'total_hours_{emp_id}')
+                if total_hours_terms:
+                    self.model.Add(total_hours == sum(total_hours_terms))
+                    employee_workload[emp_id] = total_hours
+
+                # Efficiency component: penalty for using more employees (stronger when fairness_weight is low)
+                efficiency_penalty = (100 - fairness_weight) / 20  # Scale 0-5
+                if efficiency_penalty > 0:
+                    objective_terms.append(emp_works * -efficiency_penalty)
+
+        # 5.5 Fairness component: minimize workload variance (stronger when fairness_weight is high)
+        if len(employee_workload) > 1 and fairness_weight > 0:
+            # Create variables for workload differences between employees
+            max_workload = self.model.NewIntVar(0, 200, 'max_workload')
+            min_workload = self.model.NewIntVar(0, 200, 'min_workload')
+
+            # Set bounds for max and min workload
+            for emp_id, hours in employee_workload.items():
+                self.model.Add(hours <= max_workload)
+                self.model.Add(hours >= min_workload)
+
+            # Minimize the difference between max and min workload (fairness objective)
+            workload_variance = self.model.NewIntVar(0, 200, 'workload_variance')
+            self.model.Add(workload_variance == max_workload - min_workload)
+
+            # Add fairness objective (stronger when fairness_weight is high)
+            fairness_importance = fairness_weight / 10  # Scale 0-10
+            if fairness_importance > 0:
+                objective_terms.append(workload_variance * -fairness_importance)
 
         # Set objective function
         if objective_terms:

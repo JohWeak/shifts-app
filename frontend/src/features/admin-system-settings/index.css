@@ -1,133 +1,15 @@
-/* Unified Settings Styles */
+/* system-settings */
 
-.unified-settings {
+.system-settings-page {
     min-height: 100vh;
 }
 
 .settings-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    /*padding: 0 1.5rem;*/
 }
 
-/* Sidebar Navigation */
-.settings-sidebar {
-    margin-bottom: 2rem;
-
-    .settings-nav-card {
-        border: none;
-        border-radius: 1rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        background: var(--bs-body-bg);
-        overflow: hidden;
-
-        [data-theme="dark"] & {
-            background: var(--bs-dark);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .settings-nav {
-            padding: 0;
-
-            .settings-nav-link {
-                border: none;
-                border-radius: 0;
-                padding: 1.25rem 1.5rem;
-                background: transparent;
-                color: var(--bs-body-color);
-                text-align: left;
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-
-                &:hover {
-                    background: linear-gradient(90deg,
-                    var(--bs-primary-bg-subtle) 0%,
-                    transparent 100%);
-                    color: var(--bs-primary);
-                    transform: translateX(-4px);
-
-                    [dir="rtl"] & {
-                        transform: translateX(4px);
-                    }
-                }
-
-                &.active {
-                    background: linear-gradient(90deg,
-                    var(--bs-primary) 0%,
-                    var(--bs-primary-bg-subtle) 100%);
-                    color: var(--bs-white);
-                    box-shadow: inset 4px 0 0 var(--bs-primary-dark);
-
-                    [dir="rtl"] & {
-                        box-shadow: inset -4px 0 0 var(--bs-primary-dark);
-                    }
-
-                    &::before {
-                        content: '';
-                        position: absolute;
-                        right: 0;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        width: 0;
-                        height: 0;
-                        border-top: 8px solid transparent;
-                        border-bottom: 8px solid transparent;
-                        border-right: 8px solid var(--bs-body-bg);
-                        z-index: 1;
-
-                        [dir="rtl"] & {
-                            right: auto;
-                            left: 0;
-                            border-right: none;
-                            border-left: 8px solid var(--bs-body-bg);
-                        }
-
-                        [data-theme="dark"] & {
-                            border-right-color: var(--bs-black);
-                        }
-
-                        [data-theme="dark"][dir="rtl"] & {
-                            border-left-color: var(--bs-black);
-                            border-right-color: transparent;
-                        }
-                    }
-                }
-
-                .nav-link-content {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-
-                    .nav-link-header {
-                        display: flex;
-                        align-items: center;
-                        gap: 0.75rem;
-
-                        .nav-icon {
-                            font-size: 1.25rem;
-                            width: 20px;
-                            text-align: center;
-                            flex-shrink: 0;
-                        }
-
-                        .nav-title {
-                            font-weight: 600;
-                            font-size: 0.95rem;
-                        }
-                    }
-
-                    .nav-description {
-                        font-size: 0.8rem;
-                        line-height: 1.3;
-                        margin: 0;
-                        opacity: 0.8;
-                    }
-                }
-            }
-        }
-    }
-}
 
 /* Settings Content */
 .settings-content {
@@ -348,11 +230,6 @@
         margin: 0 auto;
     }
 
-    .settings-sidebar {
-        flex: 0 0 300px;
-        max-width: 300px;
-    }
-
     .settings-content {
         flex: 1;
         min-width: 0;
@@ -362,7 +239,6 @@
 @media (max-width: 1199.98px) {
     .settings-container {
         max-width: 100%;
-        padding: 0 1rem;
     }
 }
 
@@ -377,17 +253,6 @@
             padding: 2rem;
         }
 
-        .settings-nav-link {
-            padding: 1rem 1.25rem;
-
-            .nav-link-content {
-                gap: 0.25rem;
-            }
-        }
-
-        .nav-description {
-            display: none;
-        }
     }
 }
 
@@ -436,23 +301,10 @@
         padding: 1.25rem;
     }
 
-    .nav-link-header {
-        gap: 0.5rem;
-    }
-
-    .nav-icon {
-        font-size: 1.1rem;
-        width: 18px;
-    }
-
-    .nav-title {
-        font-size: 0.9rem;
-    }
 }
 
 /* Animation Enhancements */
-.settings-card,
-.settings-nav-card {
+.settings-card {
     transition: all 0.3s ease;
 }
 

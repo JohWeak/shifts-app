@@ -12,12 +12,19 @@ class CPSATBridge {
         this.db = database || db;
     }
 
-    async generateOptimalSchedule(siteId, weekStart, transaction = null) {
+    async generateOptimalSchedule(siteId, weekStart, transaction = null, options = {}) {
 
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
 
             const data = await this.prepareScheduleData(siteId, weekStart, transaction);
+
+            // Add optimization settings to data
+            data.settings = {
+                ...data.settings,
+                optimizationMode: options.optimizationMode || 'balanced',
+                fairness_weight: options.fairnessWeight || 50,
+            };
 
             const pythonResult = await this.callPythonOptimizer(data);
 

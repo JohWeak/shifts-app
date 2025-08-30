@@ -110,6 +110,8 @@ const generateNextWeekSchedule = async (req, res) => {
     try {
         const siteId = req.body.site_id || 1;
         const algorithm = req.body.algorithm || 'auto';
+        const optimizationMode = req.body.optimizationMode || 'balanced';
+        const fairnessWeight = req.body.fairnessWeight || 50;
 
         let weekStart;
         if (req.body.weekStart) {
@@ -154,7 +156,10 @@ const generateNextWeekSchedule = async (req, res) => {
             case 'cp-sat':
                 try {
                     console.log('[ScheduleController] Attempting CP-SAT generation...');
-                    result = await cpSatBridge.generateOptimalSchedule(siteId, weekStart, transaction);
+                    result = await cpSatBridge.generateOptimalSchedule(siteId, weekStart, transaction, {
+                        optimizationMode,
+                        fairnessWeight,
+                    });
 
 
                     if (result.success && result.schedule) {
