@@ -2,7 +2,7 @@
 const nodemailer = require('nodemailer');
 const { generateScheduleICS } = require('./ics-generator.service');
 const { format, parseISO, isValid } = require('date-fns');
-const i18n = require('./i18n.service');
+const i18n = require('../common/i18n.service');
 const juice = require('juice');
 const { enUS, ru, he } = require('date-fns/locale');
 const dateFnsLocales = {

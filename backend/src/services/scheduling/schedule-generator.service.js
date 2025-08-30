@@ -1,6 +1,6 @@
 // backend/src/services/schedule-generator.service.js
 const dayjs = require('dayjs');
-const db = require('../models');
+const db = require('../../models');
 
 class ScheduleGeneratorService {
     constructor(database) {
@@ -30,7 +30,7 @@ class ScheduleGeneratorService {
                 success: true,
                 schedule: savedSchedule,
                 stats: result.stats,
-                algorithm: 'simple'
+                algorithm: 'simple',
             };
 
         } catch (error) {
@@ -38,7 +38,7 @@ class ScheduleGeneratorService {
             return {
                 success: false,
                 error: error.message,
-                algorithm: 'simple'
+                algorithm: 'simple',
             };
         }
     }
@@ -52,7 +52,7 @@ class ScheduleGeneratorService {
             ScheduleSettings,
             SystemSettings,
             EmployeeConstraint,
-            PermanentConstraint
+            PermanentConstraint,
         } = this.db;
 
         try {
@@ -62,20 +62,20 @@ class ScheduleGeneratorService {
             const positions = await Position.findAll({
                 where: {
                     site_id: siteId,
-                    is_active: true
+                    is_active: true,
                 },
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: {is_active: true},
+                    where: { is_active: true },
                     required: false,
                     include: [{
                         model: ShiftRequirement,
                         as: 'requirements',
-                        required: false
-                    }]
+                        required: false,
+                    }],
                 }],
-                transaction
+                transaction,
             });
 
             // Flatten shifts and create maps
@@ -103,32 +103,32 @@ class ScheduleGeneratorService {
                 where: {
                     work_site_id: siteId,
                     status: 'active',
-                    role: 'employee'
+                    role: 'employee',
                 },
                 include: [
                     {
                         model: Position,
-                        as: 'defaultPosition'
+                        as: 'defaultPosition',
                     },
                     {
                         model: EmployeeConstraint,
                         as: 'constraints',
-                        where: {status: 'active'},
-                        required: false
+                        where: { status: 'active' },
+                        required: false,
                     },
                     {
                         model: PermanentConstraint, // Include permanent constraints
                         as: 'permanentConstraints',
-                        where: {is_active: true},
+                        where: { is_active: true },
                         required: false,
                         include: [{
                             model: Employee,
                             as: 'approver',
-                            attributes: ['emp_id', 'first_name', 'last_name']
-                        }]
-                    }
+                            attributes: ['emp_id', 'first_name', 'last_name'],
+                        }],
+                    },
                 ],
-                transaction
+                transaction,
             });
 
             console.log(`[ScheduleGeneratorService] Found ${employees.length} active employees`);
@@ -143,8 +143,8 @@ class ScheduleGeneratorService {
 
             // Get settings
             const settings = await ScheduleSettings.findOne({
-                where: {site_id: siteId},
-                transaction
+                where: { site_id: siteId },
+                transaction,
             });
 
             // Get system settings
@@ -183,7 +183,7 @@ class ScheduleGeneratorService {
                 settings,
                 systemSettings,
                 constraints,
-                days
+                days,
             };
 
         } catch (error) {
@@ -227,7 +227,7 @@ class ScheduleGeneratorService {
                             emp_id: emp.emp_id,
                             day_index: dayIndex,
                             constraint_type: constraint.constraint_type,
-                            shift_id: constraint.shift_id
+                            shift_id: constraint.shift_id,
                         };
 
                         if (constraint.constraint_type === 'cannot_work') {
@@ -255,7 +255,7 @@ class ScheduleGeneratorService {
                                 approved_by: permConstraint.approver ?
                                     `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
                                     'Unknown',
-                                approved_at: permConstraint.approved_at
+                                approved_at: permConstraint.approved_at,
                             };
 
                             if (permConstraint.constraint_type === 'cannot_work') {
@@ -268,7 +268,7 @@ class ScheduleGeneratorService {
             }
         }
 
-        return {cannotWork, preferWork, permanentCannotWork};
+        return { cannotWork, preferWork, permanentCannotWork };
     }
 
     async generateOptimalSchedule(data) {
@@ -280,7 +280,7 @@ class ScheduleGeneratorService {
             shiftRequirementsMap,
             constraints,
             systemSettings,
-            days
+            days,
         } = data;
 
         const schedule = [];
@@ -328,7 +328,7 @@ class ScheduleGeneratorService {
                         const hasPermanentConstraint = constraints.permanentCannotWork.some(c =>
                             c.emp_id === emp.emp_id &&
                             c.day_index === dayIndex &&
-                            (!c.shift_id || c.shift_id === shift.id)
+                            (!c.shift_id || c.shift_id === shift.id),
                         );
 
                         if (hasPermanentConstraint) {
@@ -340,7 +340,7 @@ class ScheduleGeneratorService {
                         const hasConstraint = constraints.cannotWork.some(c =>
                             c.emp_id === emp.emp_id &&
                             c.day_index === dayIndex &&
-                            (!c.shift_id || c.shift_id === shift.id)
+                            (!c.shift_id || c.shift_id === shift.id),
                         );
 
                         if (hasConstraint) {
@@ -350,7 +350,7 @@ class ScheduleGeneratorService {
                         // Check if already assigned
                         const alreadyAssigned = existingSchedule.some(s =>
                             s.emp_id === emp.emp_id &&
-                            s.date === date
+                            s.date === date,
                         );
 
                         return !alreadyAssigned;
@@ -359,10 +359,10 @@ class ScheduleGeneratorService {
                     // Sort by preference (prefer work constraints first)
                     availableEmployees.sort((a, b) => {
                         const aPrefers = constraints.preferWork.some(c =>
-                            c.emp_id === a.emp_id && c.day_index === dayIndex
+                            c.emp_id === a.emp_id && c.day_index === dayIndex,
                         );
                         const bPrefers = constraints.preferWork.some(c =>
-                            c.emp_id === b.emp_id && c.day_index === dayIndex
+                            c.emp_id === b.emp_id && c.day_index === dayIndex,
                         );
 
                         if (aPrefers && !bPrefers) return -1;
@@ -379,7 +379,7 @@ class ScheduleGeneratorService {
                             emp_id: employee.emp_id,
                             date: date,
                             shift_id: shift.id,
-                            position_id: position.pos_id
+                            position_id: position.pos_id,
                         };
 
                         schedule.push(assignment);
@@ -400,18 +400,18 @@ class ScheduleGeneratorService {
             total_assignments: schedule.length,
             employees_assigned: new Set(schedule.map(s => s.emp_id)).size,
             positions_covered: new Set(schedule.map(s => s.position_id)).size,
-            shifts_covered: new Set(schedule.map(s => s.shift_id)).size
+            shifts_covered: new Set(schedule.map(s => s.shift_id)).size,
         };
 
         return {
             success: true,
             schedule,
-            stats
+            stats,
         };
     }
 
     async saveSchedule(siteId, weekStart, scheduleData, transaction = null) {
-        const {Schedule, ScheduleAssignment} = this.db;
+        const { Schedule, ScheduleAssignment } = this.db;
 
         try {
             const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
@@ -425,9 +425,9 @@ class ScheduleGeneratorService {
                 metadata: {
                     generated_at: new Date().toISOString(),
                     algorithm: 'simple',
-                    timezone: 'Asia/Jerusalem'
-                }
-            }, {transaction});
+                    timezone: 'Asia/Jerusalem',
+                },
+            }, { transaction });
 
             // Create assignments
             const assignments = scheduleData.map((assignment, index) => ({
@@ -437,11 +437,11 @@ class ScheduleGeneratorService {
                 position_id: assignment.position_id,
                 work_date: assignment.date,
                 status: 'scheduled',
-                notes: `Generated by simple algorithm - ${index}`
+                notes: `Generated by simple algorithm - ${index}`,
             }));
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments, {transaction});
+                await ScheduleAssignment.bulkCreate(assignments, { transaction });
             }
 
             console.log(`[ScheduleGeneratorService] Saved schedule with ${assignments.length} assignments`);
@@ -450,7 +450,7 @@ class ScheduleGeneratorService {
                 schedule_id: newSchedule.id,
                 assignments_count: assignments.length,
                 week_start: weekStart,
-                week_end: weekEnd
+                week_end: weekEnd,
             };
 
         } catch (error) {

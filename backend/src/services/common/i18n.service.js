@@ -1,8 +1,8 @@
 // backend/src/services/i18n.service.js
 const i18next = require('i18next');
-const en = require('../locales/en.json');
-const ru = require('../locales/ru.json');
-const he = require('../locales/he.json');
+const en = require('../../locales/en.json');
+const ru = require('../../locales/ru.json');
+const he = require('../../locales/he.json');
 
 i18next.init({
     lng: 'en',

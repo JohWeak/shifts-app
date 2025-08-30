@@ -10,8 +10,8 @@ const {
     PositionShift,
     ShiftRequirement,
 } = db;
-const cpSatBridge = require('../../../services/cp-sat-bridge.service');
-const emailService = require('../../../services/email.service');
+const cpSatBridge = require('../../../services/scheduling/cp-sat-bridge.service');
+const emailService = require('../../../services/notifications/email.service');
 
 const getAllSchedules = async (req, res) => {
     try {

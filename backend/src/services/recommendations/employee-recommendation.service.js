@@ -3,20 +3,20 @@
 
 
 const dayjs = require('dayjs');
-const {EmployeeScorer, SCORING_CONFIG} = require('./employee-recommendation-scoring');
+const { EmployeeScorer, SCORING_CONFIG } = require('./employee-recommendation-scoring');
 
 class EmployeeRecommendationService {
     constructor(db) {
         this.db = db;
     }
 
-     async getRecommendedEmployees(
+    async getRecommendedEmployees(
         positionId,
         shiftId,
         date,
         excludeEmployeeIds = [],
         scheduleId = null,
-        virtualChanges = []
+        virtualChanges = [],
     ) {
         const {
             Employee,
@@ -26,9 +26,9 @@ class EmployeeRecommendationService {
             EmployeeConstraint,
             PermanentConstraint,
             ScheduleAssignment,
-            Schedule
+            Schedule,
         } = this.db;
-        const {Op} = this.db.Sequelize;
+        const { Op } = this.db.Sequelize;
 
         try {
             console.log(`[EmployeeRecommendation] Getting recommendations for:`, {
@@ -36,13 +36,13 @@ class EmployeeRecommendationService {
                 shiftId,
                 date,
                 excludeEmployeeIds,
-                scheduleId
+                scheduleId,
             });
 
             // Load target position and shift
             const [targetPosition, targetShift] = await Promise.all([
                 Position.findByPk(positionId),
-                PositionShift.findByPk(shiftId)
+                PositionShift.findByPk(shiftId),
             ]);
 
             if (!targetPosition || !targetShift) {
@@ -58,17 +58,17 @@ class EmployeeRecommendationService {
                     role: 'employee',
                     status: 'active',
                     emp_id: {
-                        [Op.notIn]: excludeEmployeeIds
-                    }
+                        [Op.notIn]: excludeEmployeeIds,
+                    },
                 },
                 include: [
                     {
                         model: WorkSite,
-                        as: 'workSite'
+                        as: 'workSite',
                     },
                     {
                         model: Position,
-                        as: 'defaultPosition'
+                        as: 'defaultPosition',
                     },
                     {
                         model: EmployeeConstraint,
@@ -78,20 +78,20 @@ class EmployeeRecommendationService {
                             [Op.or]: [
                                 {
                                     applies_to: 'specific_date',
-                                    target_date: date
+                                    target_date: date,
                                 },
                                 {
                                     applies_to: 'day_of_week',
-                                    day_of_week: dayOfWeek
+                                    day_of_week: dayOfWeek,
                                 },
                                 {
                                     applies_to: 'day_of_week',
                                     day_of_week: null,
-                                    shift_id: shiftId
-                                }
-                            ]
+                                    shift_id: shiftId,
+                                },
+                            ],
                         },
-                        required: false
+                        required: false,
                     },
                     {
                         model: PermanentConstraint,
@@ -100,18 +100,18 @@ class EmployeeRecommendationService {
                             is_active: true,
                             day_of_week: dayOfWeek,
                             [Op.or]: [
-                                {shift_id: shiftId},
-                                {shift_id: null}
-                            ]
+                                { shift_id: shiftId },
+                                { shift_id: null },
+                            ],
                         },
                         required: false,
                         include: [{
                             model: Employee,
                             as: 'approver',
-                            attributes: ['emp_id', 'first_name', 'last_name']
-                        }]
-                    }
-                ]
+                            attributes: ['emp_id', 'first_name', 'last_name'],
+                        }],
+                    },
+                ],
             });
 
             const targetDate = dayjs(date).format('YYYY-MM-DD');
@@ -122,7 +122,7 @@ class EmployeeRecommendationService {
             weekAssignments = await ScheduleAssignment.findAll({
                 where: {
                     work_date: {
-                        [Op.between]: [weekStart, weekEnd]
+                        [Op.between]: [weekStart, weekEnd],
                     },
                     // Remove schedule_id filter to get assignments from ALL schedules
                     // This is critical for cross-schedule conflict detection
@@ -131,7 +131,7 @@ class EmployeeRecommendationService {
                     {
                         model: PositionShift,
                         as: 'shift',
-                        attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift']
+                        attributes: ['id', 'shift_name', 'start_time', 'duration_hours', 'is_night_shift'],
                     },
                     {
                         model: Position,
@@ -140,24 +140,23 @@ class EmployeeRecommendationService {
                         include: [{
                             model: WorkSite,
                             as: 'workSite',
-                            attributes: ['site_id', 'site_name']
-                        }]
+                            attributes: ['site_id', 'site_name'],
+                        }],
                     },
                     {
                         model: Schedule,
                         as: 'schedule',
-                        attributes: ['id', 'status']
-                    }
-                ]
+                        attributes: ['id', 'status'],
+                    },
+                ],
             });
 
             console.log(`[EmployeeRecommendation] Found ${weekAssignments.length} total assignments across ALL schedules for week ${weekStart} to ${weekEnd}`);
 
 
-
             // Log assignments for the target date specifically
             const todayAssignmentsAll = weekAssignments.filter(a =>
-                dayjs(a.work_date).format('YYYY-MM-DD') === targetDate
+                dayjs(a.work_date).format('YYYY-MM-DD') === targetDate,
             );
             console.log(`[EmployeeRecommendation] ${todayAssignmentsAll.length} assignments on ${targetDate} across all schedules`);
 
@@ -172,7 +171,7 @@ class EmployeeRecommendationService {
                         !(assignment.schedule_id === scheduleId &&
                             assignment.emp_id === change.emp_id &&
                             assignment.shift_id === change.shift_id &&
-                            dayjs(assignment.work_date).format('YYYY-MM-DD') === change.date)
+                            dayjs(assignment.work_date).format('YYYY-MM-DD') === change.date),
                     );
                 });
 
@@ -182,8 +181,8 @@ class EmployeeRecommendationService {
                     const position = await Position.findByPk(change.position_id, {
                         include: [{
                             model: WorkSite,
-                            as: 'workSite'
-                        }]
+                            as: 'workSite',
+                        }],
                     });
 
                     if (shift && position) {
@@ -197,7 +196,7 @@ class EmployeeRecommendationService {
                             is_virtual: true,
                             shift: shift,
                             position: position,
-                            schedule: {id: scheduleId, name: 'Current', status: 'draft'}
+                            schedule: { id: scheduleId, name: 'Current', status: 'draft' },
                         };
                         weekAssignments.push(virtualAssignment);
                     }
@@ -229,8 +228,8 @@ class EmployeeRecommendationService {
                     todayAssignments.map(a => ({
                         emp_id: a.emp_id,
                         shift: a.shift?.shift_name,
-                        is_virtual: a.is_virtual || false
-                    }))
+                        is_virtual: a.is_virtual || false,
+                    })),
                 );
             }
 
@@ -242,7 +241,7 @@ class EmployeeRecommendationService {
                 unavailable_busy: [],
                 unavailable_hard: [],
                 unavailable_soft: [],
-                unavailable_permanent: []
+                unavailable_permanent: [],
             };
 
             for (const employee of employees) {
@@ -254,7 +253,7 @@ class EmployeeRecommendationService {
                     date,
                     assignmentsByEmployee[employee.emp_id] || [],
                     todayAssignments,
-                    weekAssignments
+                    weekAssignments,
                 );
 
                 const employeeData = {
@@ -265,7 +264,7 @@ class EmployeeRecommendationService {
                     default_position_name: employee.defaultPosition?.pos_name || null,
                     work_site_id: employee.work_site_id,
                     work_site_name: employee.workSite?.site_name || null,
-                    recommendation: evaluation
+                    recommendation: evaluation,
                 };
 
                 // Categorize based on evaluation
@@ -280,52 +279,52 @@ class EmployeeRecommendationService {
                     recommendations.unavailable_permanent.push({
                         ...employeeData,
                         unavailable_reason: 'permanent_constraint',
-                        constraint_details: evaluation.permanentConstraintDetails
+                        constraint_details: evaluation.permanentConstraintDetails,
                     });
                 } else if (evaluation.hasRestViolation) {
                     recommendations.unavailable_hard.push({
                         ...employeeData,
                         unavailable_reason: 'rest_violation',
                         rest_details: evaluation.restViolationDetails,
-                        note: evaluation.restViolationDetails.message
+                        note: evaluation.restViolationDetails.message,
                     });
                 } else if (evaluation.hasHardConstraint) {
                     recommendations.unavailable_hard.push({
                         ...employeeData,
                         unavailable_reason: 'hard_constraint',
-                        constraint_details: evaluation.constraintDetails.filter(c => c.type === 'cannot_work')
+                        constraint_details: evaluation.constraintDetails.filter(c => c.type === 'cannot_work'),
                     });
                 } else if (evaluation.hasSoftConstraint) {
                     recommendations.unavailable_soft.push({
                         ...employeeData,
                         unavailable_reason: 'soft_constraint',
                         constraint_details: evaluation.constraintDetails.filter(c => c.type === 'prefer_work'),
-                        note: 'prefer_different_time'
+                        note: 'prefer_different_time',
                     });
                 } else if (evaluation.isOtherSite && evaluation.isCorrectPosition) {
                     recommendations.other_site.push({
                         ...employeeData,
-                        match_type: 'other_site_same_position'
+                        match_type: 'other_site_same_position',
                     });
                 } else if (evaluation.isOtherSite) {
                     recommendations.other_site.push({
                         ...employeeData,
-                        match_type: 'other_site_cross_position'
+                        match_type: 'other_site_cross_position',
                     });
                 } else if (evaluation.isCorrectPosition) {
                     recommendations.available.push({
                         ...employeeData,
-                        match_type: 'primary_position'
+                        match_type: 'primary_position',
                     });
                 } else if (evaluation.hasNoPosition) {
                     recommendations.available.push({
                         ...employeeData,
-                        match_type: 'no_position'
+                        match_type: 'no_position',
                     });
                 } else {
                     recommendations.cross_position.push({
                         ...employeeData,
-                        match_type: 'cross_position'
+                        match_type: 'cross_position',
                     });
                 }
             }
@@ -340,7 +339,7 @@ class EmployeeRecommendationService {
                 unavailable_busy: recommendations.unavailable_busy.length,
                 unavailable_hard: recommendations.unavailable_hard.length,
                 unavailable_soft: recommendations.unavailable_soft.length,
-                unavailable_permanent: recommendations.unavailable_permanent.length
+                unavailable_permanent: recommendations.unavailable_permanent.length,
             });
 
             return recommendations;
@@ -370,7 +369,7 @@ class EmployeeRecommendationService {
             permanentConstraintDetails: [],
             assignedShiftToday: null,
             assignedSiteToday: null,
-            restViolationDetails: null
+            restViolationDetails: null,
         };
 
         // 1. Check BLOCKING factors first (score = 0)
@@ -403,7 +402,7 @@ class EmployeeRecommendationService {
             const todayDate = date;
             const employeeAssignmentsToday = allWeekAssignments.filter(a =>
                 a.emp_id === employee.emp_id &&
-                a.work_date === todayDate
+                a.work_date === todayDate,
             );
 
             if (employeeAssignmentsToday.length > 0) {
@@ -437,7 +436,7 @@ class EmployeeRecommendationService {
                             `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
                             'Unknown',
                         approved_at: permConstraint.approved_at,
-                        message: `Permanent constraint: Cannot work ${targetShift.shift_name} on ${dayOfWeek}`
+                        message: `Permanent constraint: Cannot work ${targetShift.shift_name} on ${dayOfWeek}`,
                     });
 
                     return evaluation;
@@ -450,7 +449,7 @@ class EmployeeRecommendationService {
             employee.emp_id,
             employeeWeekAssignments,
             targetShift,
-            date
+            date,
         );
 
         if (restViolation) {
@@ -477,7 +476,7 @@ class EmployeeRecommendationService {
                     evaluation.constraintDetails.push({
                         type: 'cannot_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
-                        date: constraint.target_date || dayOfWeek
+                        date: constraint.target_date || dayOfWeek,
                     });
                     return evaluation; // BLOCKING
                 } else if (constraint.constraint_type === 'prefer_work') {
@@ -485,14 +484,14 @@ class EmployeeRecommendationService {
                     evaluation.constraintDetails.push({
                         type: 'prefer_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
-                        date: constraint.target_date || dayOfWeek
+                        date: constraint.target_date || dayOfWeek,
                     });
                 } else if (constraint.constraint_type === 'prefer_not_work') {
                     evaluation.hasSoftConstraint = true;
                     evaluation.constraintDetails.push({
                         type: 'prefer_not_work',
                         target: constraint.shift_id ? `shift ${targetShift.shift_name}` : 'any shift',
-                        date: constraint.target_date || dayOfWeek
+                        date: constraint.target_date || dayOfWeek,
                     });
                 }
             }
@@ -503,7 +502,7 @@ class EmployeeRecommendationService {
             employee,
             targetPosition,
             targetShift,
-            employeeWeekAssignments
+            employeeWeekAssignments,
         );
 
         evaluation.score = scoringResult.score;
@@ -514,13 +513,13 @@ class EmployeeRecommendationService {
             evaluation.score += SCORING_CONFIG.PREFERENCES.PREFERS_WORK;
             scoringResult.reasons.push({
                 type: 'prefers_work',
-                points: SCORING_CONFIG.PREFERENCES.PREFERS_WORK
+                points: SCORING_CONFIG.PREFERENCES.PREFERS_WORK,
             });
         } else if (evaluation.hasSoftConstraint) {
             evaluation.score += SCORING_CONFIG.PREFERENCES.PREFERS_NOT_WORK;
             scoringResult.penalties.push({
                 type: 'prefers_not_work',
-                points: SCORING_CONFIG.PREFERENCES.PREFERS_NOT_WORK
+                points: SCORING_CONFIG.PREFERENCES.PREFERS_NOT_WORK,
             });
         }
 
@@ -537,7 +536,7 @@ class EmployeeRecommendationService {
 
         scoringResult.reasons.forEach(reason => {
             let reasonKey;
-            switch(reason.type) {
+            switch (reason.type) {
                 case 'primary_position':
                     reasonKey = 'primary_position_match';
                     break;
@@ -570,7 +569,7 @@ class EmployeeRecommendationService {
 
         scoringResult.penalties.forEach(penalty => {
             let warningKey;
-            switch(penalty.type) {
+            switch (penalty.type) {
                 case 'cross_position':
                     warningKey = 'cross_position_assignment';
                     break;
@@ -598,7 +597,7 @@ class EmployeeRecommendationService {
 
 
     _checkRestViolations(empId, employeeAssignments, targetShift, date) {
-        const constraints = require('../config/scheduling-constraints');
+        const constraints = require('../../config/scheduling-constraints');
         const targetDate = dayjs(date);
 
         const relevantAssignments = employeeAssignments.filter(a => {
@@ -647,7 +646,7 @@ class EmployeeRecommendationService {
                         previousShift: assignment.shift.shift_name,
                         restHours: Math.floor(restHours),
                         requiredRest,
-                        type: violationType
+                        type: violationType,
                     };
                 }
             } else {
@@ -677,7 +676,7 @@ class EmployeeRecommendationService {
                         nextShift: assignment.shift.shift_name,
                         restHours: Math.floor(restHours),
                         requiredRest,
-                        type: violationType
+                        type: violationType,
                     };
                 }
             }

@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { en } from './locales/en';
 import { he } from './locales/he';
 import { ru } from './locales/ru';
+import { updateUserLocale } from '../../../features/auth/model/authSlice';
 
 const I18nContext = createContext(undefined);
 
 const translations = { en, he, ru };
 
 export const I18nProvider = ({ children }) => {
+    const dispatch = useDispatch();
+    const { isAuthenticated } = useSelector(state => state.auth);
     const [locale, setLocale] = useState('en');
     const [direction, setDirection] = useState('ltr');
 
@@ -28,6 +32,11 @@ export const I18nProvider = ({ children }) => {
         setLocale(newLocale);
         setDirection(newLocale === 'he' ? 'rtl' : 'ltr');
         localStorage.setItem('preferredLocale', newLocale);
+
+        // Обновляем локаль в базе данных бесшовно (только если пользователь авторизован)
+        if (isAuthenticated) {
+            dispatch(updateUserLocale(newLocale));
+        }
     };
 
     const t = (key, replacements = {}) => {

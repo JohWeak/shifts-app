@@ -3,9 +3,9 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
-const db = require('../models');
+const db = require('../../models');
 const { v4: uuidv4 } = require('uuid');
-const CONSTRAINTS = require('../config/scheduling-constraints');
+const CONSTRAINTS = require('../../config/scheduling-constraints');
 
 class CPSATBridge {
     constructor(database) {
@@ -610,12 +610,14 @@ class CPSATBridge {
                         reject(error);
                     } finally {
                         // Clean up temp files
-                        // try {
-                        //     await fs.unlink(tempFilePath).catch(() => {});
-                        //     await fs.unlink(resultFilePath).catch(() => {});
-                        // } catch (err) {
-                        //     console.error('Error cleaning temp files:', err);
-                        // }
+                        try {
+                            await fs.unlink(tempFilePath).catch(() => {
+                            });
+                            await fs.unlink(resultFilePath).catch(() => {
+                            });
+                        } catch (err) {
+                            console.error('Error cleaning temp files:', err);
+                        }
                     }
                 });
 
