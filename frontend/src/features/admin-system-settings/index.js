@@ -88,22 +88,10 @@ const SystemSettings = () => {
             description: t('settings.scheduleSettingsDesc'),
         },
         {
-            key: 'algorithm',
-            label: t('dashboard.quickActions.algorithmSettings'),
-            icon: 'cpu-fill',
-            description: t('dashboard.quickActions.algorithmSettingsDesc'),
-        },
-        {
             key: 'constraints',
             label: t('settings.constraintSettings'),
             icon: 'people',
             description: t('settings.constraintSettingsDesc'),
-        },
-        {
-            key: 'notifications',
-            label: t('settings.notificationSettings'),
-            icon: 'bell',
-            description: t('settings.notificationSettingsDesc'),
         },
     ];
 
@@ -251,24 +239,6 @@ const SystemSettings = () => {
                                                         </Form.Group>
                                                     </Col>
 
-                                                    <Col md={6}>
-                                                        <Form.Group className="mb-4">
-                                                            <Form.Label className="settings-label">
-                                                                <i className="bi bi-calendar-range me-2"></i>
-                                                                {t('settings.defaultScheduleDuration')}
-                                                            </Form.Label>
-                                                            <Form.Select
-                                                                value={localSettings.defaultScheduleDuration}
-                                                                onChange={(e) => handleChange('defaultScheduleDuration', parseInt(e.target.value))}
-                                                                className="settings-input"
-                                                            >
-                                                                <option value={7}>1 {t('common.week')}</option>
-                                                                <option value={14}>2 {t('common.weeks')}</option>
-                                                                <option value={21}>3 {t('common.weeks')}</option>
-                                                                <option value={28}>4 {t('common.weeks')}</option>
-                                                            </Form.Select>
-                                                        </Form.Group>
-                                                    </Col>
                                                 </Row>
 
                                                 <Row>
@@ -324,55 +294,58 @@ const SystemSettings = () => {
                                                     <Form.Group className="mb-3">
                                                         <Form.Check
                                                             type="switch"
-                                                            id="autoPublish"
-                                                            label={t('settings.autoPublishSchedule')}
-                                                            checked={localSettings.autoPublishSchedule}
-                                                            onChange={(e) => handleChange('autoPublishSchedule', e.target.checked)}
+                                                            id="autoGenerate"
+                                                            label={t('settings.autoGenerateSchedule')}
+                                                            checked={localSettings.autoGenerateSchedule || false}
+                                                            onChange={(e) => handleChange('autoGenerateSchedule', e.target.checked)}
                                                             className="settings-switch"
                                                         />
                                                         <Form.Text className="settings-help">
-                                                            {t('settings.autoPublishHint')}
+                                                            {t('settings.autoGenerateHint')}
                                                         </Form.Text>
                                                     </Form.Group>
 
-                                                    <Form.Group className="mb-3">
-                                                        <Form.Check
-                                                            type="switch"
-                                                            id="autoAssignShifts"
-                                                            label={t('settings.autoAssignShifts')}
-                                                            checked={localSettings.autoAssignShifts || false}
-                                                            onChange={(e) => handleChange('autoAssignShifts', e.target.checked)}
-                                                            className="settings-switch"
-                                                        />
-                                                        <Form.Text className="settings-help">
-                                                            {t('settings.autoAssignHint')}
-                                                        </Form.Text>
-                                                    </Form.Group>
-                                                </div>
-                                            </Card.Body>
-                                        </Card>
-                                    </motion.div>
-                                </Tab.Pane>
+                                                    {localSettings.autoGenerateSchedule && (
+                                                        <Row className="mt-3">
+                                                            <Col md={6}>
+                                                                <Form.Group className="mb-3">
+                                                                    <Form.Label className="settings-label">
+                                                                        <i className="bi bi-calendar-day me-2"></i>
+                                                                        {t('settings.autoGenerateDay')}
+                                                                    </Form.Label>
+                                                                    <Form.Select
+                                                                        value={localSettings.autoGenerateDay || 0}
+                                                                        onChange={(e) => handleChange('autoGenerateDay', parseInt(e.target.value))}
+                                                                        className="settings-select"
+                                                                    >
+                                                                        <option value={0}>{t('days.sunday')}</option>
+                                                                        <option value={1}>{t('days.monday')}</option>
+                                                                        <option value={2}>{t('days.tuesday')}</option>
+                                                                        <option value={3}>{t('days.wednesday')}</option>
+                                                                        <option value={4}>{t('days.thursday')}</option>
+                                                                        <option value={5}>{t('days.friday')}</option>
+                                                                        <option value={6}>{t('days.saturday')}</option>
+                                                                    </Form.Select>
+                                                                </Form.Group>
+                                                            </Col>
+                                                            <Col md={6}>
+                                                                <Form.Group className="mb-3">
+                                                                    <Form.Label className="settings-label">
+                                                                        <i className="bi bi-clock me-2"></i>
+                                                                        {t('settings.autoGenerateTime')}
+                                                                    </Form.Label>
+                                                                    <Form.Control
+                                                                        type="time"
+                                                                        value={localSettings.autoGenerateTime || '06:00'}
+                                                                        onChange={(e) => handleChange('autoGenerateTime', e.target.value)}
+                                                                        className="settings-input"
+                                                                    />
+                                                                </Form.Group>
+                                                            </Col>
+                                                        </Row>
+                                                    )}
 
-                                {/* Algorithm Settings */}
-                                <Tab.Pane eventKey="algorithm">
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 }}
-                                    >
-                                        <Card className="settings-card">
-                                            <Card.Header className="settings-card-header">
-                                                <div className="header-content">
-                                                    <i className="bi bi-cpu-fill header-icon"></i>
-                                                    <div>
-                                                        <h5 className="mb-1">{t('dashboard.quickActions.algorithmSettings')}</h5>
-                                                        <small
-                                                            className="text-muted">{t('dashboard.quickActions.algorithmSettingsDesc')}</small>
-                                                    </div>
                                                 </div>
-                                            </Card.Header>
-                                            <Card.Body className="settings-card-body">
 
                                                 <div className="settings-section">
                                                     <h6 className="settings-section-title">
@@ -427,10 +400,33 @@ const SystemSettings = () => {
                                                         </Col>
                                                     </Row>
                                                 </div>
+
+                                                <div className="settings-section">
+                                                    <h6 className="settings-section-title">
+                                                        <i className="bi bi-bell me-2"></i>
+                                                        {t('settings.notificationSettings')}
+                                                    </h6>
+
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Check
+                                                            type="switch"
+                                                            id="notifySchedulePublished"
+                                                            label={t('settings.notifySchedulePublished')}
+                                                            checked={localSettings.notifySchedulePublished || false}
+                                                            onChange={(e) => handleChange('notifySchedulePublished', e.target.checked)}
+                                                            className="settings-switch"
+                                                        />
+                                                        <Form.Text className="settings-help">
+                                                            {t('settings.notifySchedulePublishedHint')}
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </div>
+
                                             </Card.Body>
                                         </Card>
                                     </motion.div>
                                 </Tab.Pane>
+
 
 
                                 {/* Constraint Settings */}
@@ -508,38 +504,6 @@ const SystemSettings = () => {
                                 </Tab.Pane>
 
                                 {/* Notification Settings */}
-                                <Tab.Pane eventKey="notifications">
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 }}
-                                    >
-                                        <Card className="settings-card">
-                                            <Card.Header className="settings-card-header">
-                                                <div className="header-content">
-                                                    <i className="bi bi-bell header-icon"></i>
-                                                    <div>
-                                                        <h5 className="mb-1">{t('settings.notificationSettings')}</h5>
-                                                        <small
-                                                            className="text-muted">{t('settings.notificationSettingsDesc')}</small>
-                                                    </div>
-                                                </div>
-                                            </Card.Header>
-                                            <Card.Body className="settings-card-body">
-                                                <Form.Group className="mb-3">
-                                                    <Form.Check
-                                                        type="switch"
-                                                        id="notifySchedulePublished"
-                                                        label={t('settings.notifySchedulePublished')}
-                                                        checked={localSettings.notifySchedulePublished ?? true}
-                                                        onChange={(e) => handleChange('notifySchedulePublished', e.target.checked)}
-                                                        className="settings-switch main-switch"
-                                                    />
-                                                </Form.Group>
-                                            </Card.Body>
-                                        </Card>
-                                    </motion.div>
-                                </Tab.Pane>
 
                             </Tab.Content>
                         </Col>

@@ -120,9 +120,9 @@ describe('SystemSettings Component', () => {
         renderWithProviders(<SystemSettings />);
 
         await waitFor(() => {
-            // Проверяем что есть 4 вкладки навигации
+            // Проверяем что есть 2 вкладки навигации
             const tabs = screen.getAllByRole('tab');
-            expect(tabs).toHaveLength(4);
+            expect(tabs).toHaveLength(2);
         }, { timeout: 3000 });
     });
 

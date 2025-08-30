@@ -9,6 +9,7 @@ const {
     WorkSite,
     PositionShift,
     ShiftRequirement,
+    SystemSettings,
 } = db;
 const cpSatBridge = require('../../../services/scheduling/cp-sat-bridge.service');
 const emailService = require('../../../services/notifications/email.service');
@@ -312,6 +313,25 @@ function maskEmail(email) {
  */
 const sendScheduleNotifications = async (scheduleId) => {
     try {
+        // First check if global notifications are enabled
+        const notificationSetting = await SystemSettings.findOne({
+            where: { setting_key: 'notifySchedulePublished' },
+        });
+
+        const globalNotificationsEnabled = notificationSetting
+            ? JSON.parse(notificationSetting.setting_value)
+            : true; // Default to true if setting doesn't exist
+
+        if (!globalNotificationsEnabled) {
+            console.log('Global schedule notifications are disabled by admin');
+            return {
+                emailsSent: 0,
+                emailsFailed: 0,
+                details: [],
+                skippedReason: 'Global notifications disabled by admin',
+            };
+        }
+
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [{
                 model: WorkSite,

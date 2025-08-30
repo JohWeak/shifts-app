@@ -24,8 +24,17 @@ class EmailService {
         });
     }
 
-    async sendScheduleNotification(employee, scheduleData) {
+    async sendScheduleNotification(employee, scheduleData, globalNotificationSettings = {}) {
         const email = employee.email || 'no-email-provided';
+
+        // If admin disabled global notifications, skip all emails regardless of user preference
+        if (globalNotificationSettings.notifySchedulePublished === false) {
+            console.log(
+                `Skipping email for ${employee.first_name} ${employee.last_name} - Admin disabled global notifications`);
+            return;
+        }
+
+        // If global notifications enabled, check user preference
         if (!employee.email || !employee.receive_schedule_emails) {
             console.log(
                 `Skipping email for ${employee.first_name} ${employee.last_name} \n 

@@ -2,6 +2,7 @@
 require('dotenv').config();
 const app = require('./app');
 const db = require('./models');
+const autoGenerationService = require('./services/scheduling/auto-generation.service');
 
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
