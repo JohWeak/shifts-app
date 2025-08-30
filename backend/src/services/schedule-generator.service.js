@@ -50,6 +50,7 @@ class ScheduleGeneratorService {
             PositionShift,
             ShiftRequirement,
             ScheduleSettings,
+            SystemSettings,
             EmployeeConstraint,
             PermanentConstraint
         } = this.db;
@@ -146,6 +147,29 @@ class ScheduleGeneratorService {
                 transaction
             });
 
+            // Get system settings
+            const systemSettingsData = await SystemSettings.findAll({ transaction });
+            const systemSettings = {};
+            systemSettingsData.forEach(setting => {
+                let value = setting.setting_value;
+                switch (setting.setting_type) {
+                    case 'number':
+                        value = parseFloat(value);
+                        break;
+                    case 'boolean':
+                        value = value === 'true';
+                        break;
+                    case 'json':
+                        try {
+                            value = JSON.parse(value);
+                        } catch (e) {
+                            console.warn(`Failed to parse JSON setting ${setting.setting_key}:`, e);
+                        }
+                        break;
+                }
+                systemSettings[setting.setting_key] = value;
+            });
+
             // Process constraints (updated to include permanent)
             const constraints = await this.processConstraints(employees, days);
 
@@ -157,6 +181,7 @@ class ScheduleGeneratorService {
                 shiftsMap,
                 shiftRequirementsMap,
                 settings,
+                systemSettings,
                 constraints,
                 days
             };
@@ -254,6 +279,7 @@ class ScheduleGeneratorService {
             shiftsMap,
             shiftRequirementsMap,
             constraints,
+            systemSettings,
             days
         } = data;
 

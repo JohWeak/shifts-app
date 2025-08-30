@@ -467,10 +467,6 @@
     transition: all 0.3s ease;
 }
 
-.settings-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
-}
 
 [data-theme="dark"] .settings-card:hover {
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);

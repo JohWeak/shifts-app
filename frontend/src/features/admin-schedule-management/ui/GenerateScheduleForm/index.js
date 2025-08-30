@@ -13,6 +13,7 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
     const { systemSettings } = useSelector(state => state.settings);
     const { positions: allPositions } = useSelector(state => state.workplace);
     const weekStartDay = systemSettings?.weekStartDay || 0;
+    const dateFormat = systemSettings?.dateFormat || 'DD/MM/YYYY';
     const minSelectableDate = getNextWeekStart(weekStartDay);
 
     const [settings, setSettings] = useState({
@@ -78,6 +79,7 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
                                 selectionMode="week"
                                 value={settings.weekStart}
                                 weekStartsOn={weekStartDay}
+                                dateFormat={dateFormat.toLowerCase().replace(/yyyy/i, 'yyyy').replace(/dd/i, 'dd').replace(/mm/i, 'MM')}
                                 onChange={(date) => setSettings(prev => ({ ...prev, weekStart: date }))}
                             />
                         </div>

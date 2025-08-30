@@ -1,67 +1,148 @@
 // backend/src/controllers/system-settings.controller.js
 const db = require('../../models');
-const { Position, WorkSite } = db;
+const { Position, WorkSite, SystemSettings } = db;
 
 const getSystemSettings = async (req, res) => {
     try {
-        // Get all positions for settings
-        const positions = await Position.findAll({
-            include: [{
-                model: WorkSite,
-                as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }],
-            order: [['pos_name', 'ASC']]
+        // Get all stored settings
+        const storedSettings = await SystemSettings.findAll();
+
+        // Convert to key-value object
+        const settingsObj = {};
+        storedSettings.forEach(setting => {
+            let value = setting.setting_value;
+
+            // Parse based on type
+            switch (setting.setting_type) {
+                case 'number':
+                    value = parseFloat(value);
+                    break;
+                case 'boolean':
+                    value = value === 'true';
+                    break;
+                case 'json':
+                    try {
+                        value = JSON.parse(value);
+                    } catch (e) {
+                        console.warn(`Failed to parse JSON setting ${setting.setting_key}:`, e);
+                    }
+                    break;
+                default:
+                    // string type - keep as is
+                    break;
+            }
+
+            settingsObj[setting.setting_key] = value;
         });
 
-        // Get all work sites
-        const workSites = await WorkSite.findAll({
-            order: [['site_name', 'ASC']]
-        });
+        // Default values if not set
+        const defaultSettings = {
+            weekStartDay: 1,
+            dateFormat: 'DD/MM/YYYY',
+            timeFormat: '24h',
+            autoPublishSchedule: false,
+            autoAssignShifts: false,
+            defaultScheduleDuration: 7,
+            minRestBetweenShifts: 11,
+            maxConsecutiveDays: 6,
+            algorithmMaxTime: 120,
+            defaultEmployeesPerShift: 1,
+            optimizationMode: 'balanced',
+            fairnessWeight: 50,
+            maxCannotWorkDays: 2,
+            maxPreferWorkDays: 3,
+            strictLegalCompliance: true,
+            enableNotifications: true,
+            notifySchedulePublished: true,
+            notifyShiftReminder: true,
+            notifyScheduleChange: true,
+            sessionTimeout: 60,
+            passwordMinLength: 8,
+            requirePasswordChange: false,
+        };
+
+        // Merge defaults with stored settings
+        const finalSettings = { ...defaultSettings, ...settingsObj };
 
         res.json({
             success: true,
-            data: {
-                positions,
-                workSites,
-                weekStartDay: 0,
-                dateFormat: 'DD/MM/YYYY',
-                timeFormat: '24h',
-                autoPublishSchedule: false,
-                defaultScheduleDuration: 7,
-                minRestBetweenShifts: 11,
-                maxCannotWorkDays: 2,
-                maxPreferWorkDays: 6,
-                strictLegalCompliance: true
-            }
+            data: finalSettings,
         });
     } catch (error) {
         console.error('Error fetching system settings:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching system settings',
-            error: error.message
+            error: error.message,
         });
     }
 };
 
 const updateSystemSettings = async (req, res) => {
     try {
-        // Implement update logic here
+        const settings = req.body;
+
+        // Определяем типы настроек
+        const settingTypes = {
+            weekStartDay: 'number',
+            dateFormat: 'string',
+            timeFormat: 'string',
+            autoPublishSchedule: 'boolean',
+            autoAssignShifts: 'boolean',
+            defaultScheduleDuration: 'number',
+            minRestBetweenShifts: 'number',
+            maxConsecutiveDays: 'number',
+            algorithmMaxTime: 'number',
+            defaultEmployeesPerShift: 'number',
+            optimizationMode: 'string',
+            fairnessWeight: 'number',
+            maxCannotWorkDays: 'number',
+            maxPreferWorkDays: 'number',
+            strictLegalCompliance: 'boolean',
+            enableNotifications: 'boolean',
+            notifySchedulePublished: 'boolean',
+            notifyShiftReminder: 'boolean',
+            notifyScheduleChange: 'boolean',
+            sessionTimeout: 'number',
+            passwordMinLength: 'number',
+            requirePasswordChange: 'boolean',
+        };
+
+        // Сохраняем или обновляем каждую настройку
+        for (const [key, value] of Object.entries(settings)) {
+            if (settingTypes[key]) {
+                let stringValue = value;
+                if (settingTypes[key] === 'json') {
+                    stringValue = JSON.stringify(value);
+                } else {
+                    stringValue = String(value);
+                }
+
+                await SystemSettings.upsert({
+                    setting_key: key,
+                    setting_value: stringValue,
+                    setting_type: settingTypes[key],
+                    description: `System setting: ${key}`,
+                    is_editable: !['minRestBetweenShifts', 'strictLegalCompliance'].includes(key), // Некоторые настройки нельзя изменить из-за законодательства
+                });
+            }
+        }
+
         res.json({
             success: true,
-            message: 'Settings updated successfully'
+            message: 'Settings updated successfully',
         });
     } catch (error) {
+        console.error('Error updating system settings:', error);
         res.status(500).json({
             success: false,
             message: 'Error updating settings',
-            error: error.message
+            error: error.message,
         });
     }
 };
 
 module.exports = {
     getSystemSettings,
-    updateSystemSettings
+    updateSystemSettings,
 };

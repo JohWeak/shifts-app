@@ -1,10 +1,10 @@
 // backend/src/services/cp-sat-bridge.service.js
-const {spawn} = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
 const db = require('../models');
-const {v4: uuidv4} = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 const CONSTRAINTS = require('../config/scheduling-constraints');
 
 class CPSATBridge {
@@ -25,7 +25,7 @@ class CPSATBridge {
                 return {
                     success: false,
                     error: pythonResult.error,
-                    algorithm: 'CP-SAT-Python'
+                    algorithm: 'CP-SAT-Python',
                 };
             }
 
@@ -37,18 +37,18 @@ class CPSATBridge {
                     schedule_id: savedSchedule.schedule_id,
                     assignments_count: savedSchedule.assignments_count,
                     week_start: savedSchedule.week_start,
-                    week_end: savedSchedule.week_end
+                    week_end: savedSchedule.week_end,
                 },
                 stats: {
                     basic: this.calculateScheduleStats(pythonResult.schedule),
-                    detailed: savedSchedule.statistics
+                    detailed: savedSchedule.statistics,
                 },
                 algorithm: 'CP-SAT-Python',
                 solve_time: pythonResult.solve_time,
                 status: pythonResult.status,
                 coverage_rate: pythonResult.coverage_rate || 100,
                 shortage_count: pythonResult.shortage_count || 0,
-                issues: savedSchedule.statistics?.issues || []
+                issues: savedSchedule.statistics?.issues || [],
             };
 
         } catch (error) {
@@ -56,7 +56,7 @@ class CPSATBridge {
             return {
                 success: false,
                 error: error.message,
-                algorithm: 'CP-SAT-Python'
+                algorithm: 'CP-SAT-Python',
             };
         }
     }
@@ -67,11 +67,12 @@ class CPSATBridge {
         const {
             Employee,
             Position,
+            SystemSettings,
             PositionShift,
             ShiftRequirement,
             EmployeeConstraint,
             PermanentConstraint,
-            LegalConstraint
+            LegalConstraint,
         } = this.db;
 
         try {
@@ -80,61 +81,61 @@ class CPSATBridge {
                 where: {
                     status: 'active',
                     role: 'employee',
-                    work_site_id: siteId
+                    work_site_id: siteId,
                 },
                 include: [
                     {
                         model: Position,
-                        as: 'defaultPosition'
+                        as: 'defaultPosition',
                     },
                     {
                         model: EmployeeConstraint,
                         as: 'constraints',
-                        where: {status: 'active'},
-                        required: false
+                        where: { status: 'active' },
+                        required: false,
                     },
                     {
                         model: PermanentConstraint,
                         as: 'permanentConstraints',
-                        where: {is_active: true},
+                        where: { is_active: true },
                         required: false,
                         include: [{
                             model: Employee,
                             as: 'approver',
-                            attributes: ['emp_id', 'first_name', 'last_name']
-                        }]
-                    }
+                            attributes: ['emp_id', 'first_name', 'last_name'],
+                        }],
+                    },
                 ],
-                transaction
+                transaction,
             });
 
             console.log(`[CP-SAT Bridge] Found ${employees.length} active employees for site ${siteId}`);
 
             // Get legal constraints
             const legalConstraints = await LegalConstraint.findAll({
-                where: {is_active: true},
-                transaction
+                where: { is_active: true },
+                transaction,
             });
 
             // Get positions with shifts and requirements
             const positions = await Position.findAll({
                 where: {
                     site_id: siteId,
-                    is_active: true
+                    is_active: true,
                 },
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: {is_active: true},
+                    where: { is_active: true },
                     required: false,
                     include: [{
                         model: ShiftRequirement,
                         as: 'requirements',
-                        required: false
+                        required: false,
                     }],
                 }],
                 order: [['pos_name', 'ASC']],
-                transaction
+                transaction,
             });
 
             console.log(`[CP-SAT Bridge] Found ${positions.length} active positions`);
@@ -160,7 +161,7 @@ class CPSATBridge {
                         duration: posShift.duration_hours || 8,
                         shift_type: this.determineShiftType(posShift.start_time),
                         is_night_shift: posShift.is_night_shift || false,
-                        position_id: position.pos_id
+                        position_id: position.pos_id,
                     };
 
                     // Only add if not already added
@@ -211,7 +212,7 @@ class CPSATBridge {
                                 date: dateStr,
                                 day_index: dayOffset,
                                 required_staff: requiredStaff,
-                                is_working_day: true
+                                is_working_day: true,
                             };
 
                             console.log(`[CP-SAT Bridge] Requirement for ${position.pos_name} - ${posShift.shift_name} on ${dateStr}: ${requiredStaff} staff`);
@@ -229,7 +230,7 @@ class CPSATBridge {
                     emp_id: emp.emp_id,
                     name: `${emp.first_name} ${emp.last_name}`,
                     default_position_id: emp.default_position_id,
-                    status: emp.status
+                    status: emp.status,
                 }));
 
             // Format position data - include required employees info
@@ -248,7 +249,7 @@ class CPSATBridge {
                     pos_name: position.pos_name,
                     profession: position.profession,
                     num_of_emp: position.num_of_emp || 1, // Legacy field
-                    total_required: totalRequired
+                    total_required: totalRequired,
                 };
             });
 
@@ -262,9 +263,9 @@ class CPSATBridge {
 
                 days.push({
                     date: currentDate.toISOString().split('T')[0],
-                    day_name: currentDate.toLocaleDateString('en-US', {weekday: 'long'}),
+                    day_name: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
                     day_index: i,
-                    weekday: currentDate.getDay()
+                    weekday: currentDate.getDay(),
                 });
             }
 
@@ -274,8 +275,31 @@ class CPSATBridge {
             const existingAssignments = await this.getExistingAssignments(
                 employees.map(e => e.emp_id),
                 weekStart,
-                transaction
+                transaction,
             );
+
+            // Get system settings
+            const systemSettingsData = await SystemSettings.findAll({ transaction });
+            const systemSettings = {};
+            systemSettingsData.forEach(setting => {
+                let value = setting.setting_value;
+                switch (setting.setting_type) {
+                    case 'number':
+                        value = parseFloat(value);
+                        break;
+                    case 'boolean':
+                        value = value === 'true';
+                        break;
+                    case 'json':
+                        try {
+                            value = JSON.parse(value);
+                        } catch (e) {
+                            console.warn(`Failed to parse JSON setting ${setting.setting_key}:`, e);
+                        }
+                        break;
+                }
+                systemSettings[setting.setting_key] = value;
+            });
 
             const settings = {
                 week_start: weekStart,
@@ -283,10 +307,14 @@ class CPSATBridge {
                 hard_constraints: CONSTRAINTS.HARD_CONSTRAINTS,
                 soft_constraints: CONSTRAINTS.SOFT_CONSTRAINTS,
                 optimization_weights: CONSTRAINTS.OPTIMIZATION_WEIGHTS,
-                max_solve_time: CONSTRAINTS.SOLVER_SETTINGS.MAX_TIME_SECONDS || 120,
+                max_solve_time: systemSettings.algorithmMaxTime || CONSTRAINTS.SOLVER_SETTINGS.MAX_TIME_SECONDS || 120,
+                optimization_mode: systemSettings.optimizationMode || 'balanced',
+                fairness_weight: systemSettings.fairnessWeight || 50,
+                max_consecutive_days: systemSettings.maxConsecutiveDays || 6,
+                default_employees_per_shift: systemSettings.defaultEmployeesPerShift || 1,
                 enable_overtime: CONSTRAINTS.SOLVER_SETTINGS.enable_overtime,
                 enable_weekend_work: CONSTRAINTS.SOLVER_SETTINGS.enable_weekend_work,
-                strict_rest_requirements: CONSTRAINTS.SOLVER_SETTINGS.strict_rest_requirements
+                strict_rest_requirements: systemSettings.strictLegalCompliance !== false,
             };
 
             const preparedData = {
@@ -298,7 +326,7 @@ class CPSATBridge {
                 constraints: constraintsData,
                 existing_assignments: existingAssignments,
                 shift_requirements: shiftRequirementsMap,
-                settings: settings
+                settings: settings,
             };
 
             console.log('[CP-SAT Bridge] Data prepared:', {
@@ -307,7 +335,7 @@ class CPSATBridge {
                 positions: positionsData.length,
                 position_shifts_map: positionShiftsMap,
                 days: days.length,
-                shift_requirements_count: Object.keys(shiftRequirementsMap).length
+                shift_requirements_count: Object.keys(shiftRequirementsMap).length,
             });
 
             return preparedData;
@@ -375,7 +403,7 @@ class CPSATBridge {
                             day_index: dayIndex,
                             shift_id: mappedShiftId, // Use mapped ID
                             constraint_type: constraint.constraint_type,
-                            reason: constraint.reason
+                            reason: constraint.reason,
                         };
 
                         if (constraint.constraint_type === 'cannot_work') {
@@ -402,7 +430,7 @@ class CPSATBridge {
                                 approved_by: permConstraint.approver ?
                                     `${permConstraint.approver.first_name} ${permConstraint.approver.last_name}` :
                                     permConstraint.approved_by_name || 'Unknown',
-                                approved_at: permConstraint.approved_at
+                                approved_at: permConstraint.approved_at,
                             };
 
                             if (permConstraint.constraint_type === 'cannot_work') {
@@ -421,7 +449,7 @@ class CPSATBridge {
                 constraint_type: legal.constraint_type,
                 scope: legal.scope,
                 value: legal.value,
-                description: legal.description
+                description: legal.description,
             });
         }
 
@@ -430,14 +458,14 @@ class CPSATBridge {
             prefer_work: preferWork.length,
             permanent_cannot_work: permanentCannotWork.length,
             sample_cannot_work: cannotWork.slice(0, 3),
-            sample_permanent: permanentCannotWork.slice(0, 3)
+            sample_permanent: permanentCannotWork.slice(0, 3),
         });
 
         return {
             cannot_work: cannotWork,
             prefer_work: preferWork,
             permanent_cannot_work: permanentCannotWork,
-            legal_constraints: legalConstraintData
+            legal_constraints: legalConstraintData,
         };
     }
 
@@ -445,7 +473,7 @@ class CPSATBridge {
      * Get existing assignments for the week
      */
     async getExistingAssignments(employeeIds, weekStart, transaction = null) {
-        const {ScheduleAssignment, PositionShift, Position} = this.db;
+        const { ScheduleAssignment, PositionShift, Position } = this.db;
 
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
 
@@ -453,28 +481,28 @@ class CPSATBridge {
             where: {
                 emp_id: employeeIds,
                 work_date: {
-                    [db.Sequelize.Op.between]: [weekStart, weekEnd]
-                }
+                    [db.Sequelize.Op.between]: [weekStart, weekEnd],
+                },
             },
             include: [
                 {
                     model: PositionShift,
                     as: 'shift',
-                    attributes: ['id', 'shift_name', 'duration_hours']
+                    attributes: ['id', 'shift_name', 'duration_hours'],
                 },
                 {
                     model: Position,
                     as: 'position',
-                    attributes: ['pos_id', 'pos_name']
-                }
-            ], transaction
+                    attributes: ['pos_id', 'pos_name'],
+                },
+            ], transaction,
         });
 
         return assignments.map(a => ({
             emp_id: a.emp_id,
             date: a.work_date,
             shift_id: a.shift_id,
-            position_id: a.position_id
+            position_id: a.position_id,
         }));
     }
 
@@ -486,7 +514,7 @@ class CPSATBridge {
             try {
                 // Use backend/temp directory, not src/temp
                 const tempDir = path.join(__dirname, '..', '..', 'temp');
-                await fs.mkdir(tempDir, {recursive: true});
+                await fs.mkdir(tempDir, { recursive: true });
 
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
                 const tempFilePath = path.join(tempDir, tempFileName);
@@ -604,7 +632,7 @@ class CPSATBridge {
      * Save schedule to database
      */
     async saveSchedule(siteId, weekStart, scheduleData, transaction = null) {
-        const {Schedule, ScheduleAssignment} = this.db;
+        const { Schedule, ScheduleAssignment } = this.db;
 
         try {
             const weekEnd = dayjs(weekStart).add(6, 'days');
@@ -618,9 +646,9 @@ class CPSATBridge {
                 metadata: {
                     generated_at: new Date().toISOString(),
                     algorithm: 'CP-SAT-Python',
-                    timezone: 'Asia/Jerusalem'
-                }
-            }, {transaction});
+                    timezone: 'Asia/Jerusalem',
+                },
+            }, { transaction });
 
             const assignments = [];
 
@@ -633,12 +661,12 @@ class CPSATBridge {
                     position_id: assignment.position_id,
                     work_date: assignment.date,
                     status: 'scheduled',
-                    notes: `Generated by CP-SAT optimizer - ${assignment.assignment_index}`
+                    notes: `Generated by CP-SAT optimizer - ${assignment.assignment_index}`,
                 });
             }
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments, {transaction});
+                await ScheduleAssignment.bulkCreate(assignments, { transaction });
             }
 
             console.log(`[CP-SAT Bridge] Saved schedule with ${assignments.length} assignments`);
@@ -649,7 +677,7 @@ class CPSATBridge {
                 siteId,
                 weekStart,
                 assignments,
-                transaction
+                transaction,
             );
 
             return {
@@ -657,7 +685,7 @@ class CPSATBridge {
                 assignments_count: assignments.length,
                 week_start: weekStart,
                 week_end: weekEnd.format('YYYY-MM-DD'),
-                statistics: stats
+                statistics: stats,
             };
 
         } catch (error) {
@@ -670,31 +698,31 @@ class CPSATBridge {
      * Calculate detailed schedule statistics for dashboard
      */
     async calculateDetailedStats(scheduleId, siteId, weekStart, assignments, transaction = null) {
-        const {Position, PositionShift, ShiftRequirement, Employee} = this.db;
+        const { Position, PositionShift, ShiftRequirement, Employee } = this.db;
 
         try {
             // Load positions with requirements
             const positions = await Position.findAll({
-                where: {site_id: siteId, is_active: true},
+                where: { site_id: siteId, is_active: true },
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: {is_active: true},
+                    where: { is_active: true },
                     required: false,
                     include: [{
                         model: ShiftRequirement,
                         as: 'requirements',
-                        required: false
-                    }]
+                        required: false,
+                    }],
                 }],
-                transaction
+                transaction,
             });
 
             // Load employees
             const employees = await Employee.findAll({
-                where: {work_site_id: siteId, status: 'active'},
+                where: { work_site_id: siteId, status: 'active' },
                 attributes: ['emp_id', 'first_name', 'last_name', 'default_position_id'],
-                transaction
+                transaction,
             });
 
             // Calculate required assignments
@@ -708,7 +736,7 @@ class CPSATBridge {
                 const dateStr = date.toISOString().split('T')[0];
                 const dayOfWeek = date.getDay();
 
-                requirementsByDay[dateStr] = {required: 0, assigned: 0};
+                requirementsByDay[dateStr] = { required: 0, assigned: 0 };
 
                 positions.forEach(position => {
                     if (!requirementsByPosition[position.pos_id]) {
@@ -716,7 +744,7 @@ class CPSATBridge {
                             name: position.pos_name,
                             required: 0,
                             assigned: 0,
-                            coverage: 0
+                            coverage: 0,
                         };
                     }
 
@@ -725,7 +753,7 @@ class CPSATBridge {
 
                         if (shift.requirements?.length > 0) {
                             const dayReq = shift.requirements.find(r =>
-                                r.is_recurring && (r.day_of_week === dayOfWeek || r.day_of_week === null)
+                                r.is_recurring && (r.day_of_week === dayOfWeek || r.day_of_week === null),
                             );
                             if (dayReq) {
                                 requiredStaff = dayReq.required_staff_count || 0;
@@ -762,7 +790,7 @@ class CPSATBridge {
                         name: emp ? `${emp.first_name} ${emp.last_name}` : `Employee ${assignment.emp_id}`,
                         shifts: 0,
                         hours: 0,
-                        position_match: 0
+                        position_match: 0,
                     };
                 }
                 assignmentsByEmployee[assignment.emp_id].shifts++;
@@ -815,7 +843,7 @@ class CPSATBridge {
                         type: 'understaffed_day',
                         severity: 'high',
                         date,
-                        shortage: data.required - data.assigned
+                        shortage: data.required - data.assigned,
                     });
                 }
             });
@@ -827,7 +855,7 @@ class CPSATBridge {
                         type: 'understaffed_position',
                         severity: data.coverage < 80 ? 'high' : 'medium',
                         position: data.name,
-                        coverage: data.coverage
+                        coverage: data.coverage,
                     });
                 }
             });
@@ -839,7 +867,7 @@ class CPSATBridge {
                         type: 'overworked_employee',
                         severity: 'medium',
                         employee: data.name,
-                        hours: data.hours
+                        hours: data.hours,
                     });
                 }
             });
@@ -852,7 +880,7 @@ class CPSATBridge {
                     employees_used: Object.keys(assignmentsByEmployee).length,
                     positions_covered: Object.keys(requirementsByPosition).length,
                     avg_shifts_per_employee: Math.round(avgShiftsPerEmployee * 10) / 10,
-                    issues_count: issues.length
+                    issues_count: issues.length,
                 },
                 by_day: requirementsByDay,
                 by_position: requirementsByPosition,
@@ -863,8 +891,8 @@ class CPSATBridge {
                     schedule_id: scheduleId,
                     site_id: siteId,
                     week_start: weekStart,
-                    calculated_at: new Date().toISOString()
-                }
+                    calculated_at: new Date().toISOString(),
+                },
             };
 
         } catch (error) {
@@ -872,8 +900,8 @@ class CPSATBridge {
             return {
                 summary: {
                     total_assignments: assignments.length,
-                    error: error.message
-                }
+                    error: error.message,
+                },
             };
         }
     }
@@ -887,7 +915,7 @@ class CPSATBridge {
             employees_used: new Set(schedule.map(s => s.emp_id)).size,
             positions_covered: new Set(schedule.map(s => s.position_id)).size,
             shifts_covered: new Set(schedule.map(s => s.shift_id)).size,
-            daily_distribution: {}
+            daily_distribution: {},
         };
 
         // Daily distribution
@@ -905,7 +933,7 @@ class CPSATBridge {
      * Get schedule statistics for the dashboard
      */
     async getScheduleStatistics(scheduleId) {
-        const {ScheduleAssignment, Schedule} = this.db;
+        const { ScheduleAssignment, Schedule } = this.db;
 
         try {
             const schedule = await Schedule.findByPk(scheduleId);
@@ -915,15 +943,15 @@ class CPSATBridge {
             }
 
             const assignments = await ScheduleAssignment.findAll({
-                where: {schedule_id: scheduleId},
-                raw: true
+                where: { schedule_id: scheduleId },
+                raw: true,
             });
 
             return await this.calculateDetailedStats(
                 scheduleId,
                 schedule.site_id,
                 schedule.start_date,
-                assignments
+                assignments,
             );
 
         } catch (error) {

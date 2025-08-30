@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Button, Card, Col, Container, Form, Nav, Row, Spinner, Tab } from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { fetchSystemSettings, updateSystemSettings } from './model/settingsSlice';
+import { fetchSystemSettings, updateLocalSettings, updateSystemSettings } from './model/settingsSlice';
 import { fetchWorkSites } from '../admin-schedule-management/model/scheduleSlice';
+import { addNotification } from '../../app/model/notificationsSlice';
 import PositionSettings from '../admin-position-settings';
 import { motion } from 'motion/react';
 
@@ -18,14 +19,20 @@ const SystemSettings = () => {
     const { workSites, workSitesLoading } = useSelector(state => state.schedule);
 
     const [localSettings, setLocalSettings] = useState(systemSettings);
-    const [saveSuccess, setSaveSuccess] = useState(false);
     const [activeTab, setActiveTab] = useState('general');
     const [selectedSiteId, setSelectedSiteId] = useState('');
 
     useEffect(() => {
-        dispatch(fetchSystemSettings());
+        dispatch(fetchSystemSettings()).then((result) => {
+            if (fetchSystemSettings.rejected.match(result)) {
+                dispatch(addNotification({
+                    message: t('settings.fetchError', 'Failed to load settings'),
+                    variant: 'danger',
+                }));
+            }
+        });
         dispatch(fetchWorkSites());
-    }, [dispatch]);
+    }, [dispatch, t]);
 
     useEffect(() => {
         setLocalSettings(systemSettings);
@@ -36,20 +43,42 @@ const SystemSettings = () => {
     };
 
     const handleSave = async () => {
-        setSaveSuccess(false);
-        const result = await dispatch(updateSystemSettings(localSettings));
-        if (updateSystemSettings.fulfilled.match(result)) {
-            setSaveSuccess(true);
-            setTimeout(() => setSaveSuccess(false), 3000);
+        try {
+            // Оптимистично обновляем Redux state сразу
+            dispatch(updateLocalSettings(localSettings));
+
+            // Отправляем на сервер
+            const result = await dispatch(updateSystemSettings(localSettings));
+
+            if (updateSystemSettings.fulfilled.match(result)) {
+                dispatch(addNotification({
+                    message: t('settings.saveSuccess', 'Settings saved successfully'),
+                    variant: 'success',
+                }));
+            } else {
+                // Если ошибка, откатываем изменения
+                setLocalSettings(systemSettings);
+                dispatch(addNotification({
+                    message: t('settings.saveError', 'Failed to save settings'),
+                    variant: 'danger',
+                }));
+            }
+        } catch (error) {
+            // Откатываем изменения при ошибке
+            setLocalSettings(systemSettings);
+            dispatch(addNotification({
+                message: t('settings.saveError', 'Failed to save settings'),
+                variant: 'danger',
+            }));
         }
     };
 
     const hasChanges = JSON.stringify(localSettings) !== JSON.stringify(systemSettings);
 
-    if (loading === 'pending' && !localSettings.weekStartDay !== undefined) {
+    if (loading === 'pending' && localSettings.weekStartDay === undefined) {
         return (
             <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-                <Spinner animation="border" />
+                <Spinner animation="border" role="status" aria-label="Loading..." />
             </Container>
         );
     }
@@ -115,7 +144,13 @@ const SystemSettings = () => {
                     >
                         <Button
                             variant="outline-secondary"
-                            onClick={() => setLocalSettings(systemSettings)}
+                            onClick={() => {
+                                setLocalSettings(systemSettings);
+                                dispatch(addNotification({
+                                    message: t('settings.resetSuccess', 'Settings reset to saved values'),
+                                    variant: 'info',
+                                }));
+                            }}
                             disabled={!hasChanges || loading === 'pending'}
                         >
                             <i className="bi bi-arrow-clockwise me-2"></i>
@@ -141,31 +176,6 @@ const SystemSettings = () => {
                     </motion.div>
                 </PageHeader>
 
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <Alert variant="danger" dismissible onClose={() => {
-                        }}>
-                            <i className="bi bi-exclamation-triangle me-2"></i>
-                            {error}
-                        </Alert>
-                    </motion.div>
-                )}
-
-                {saveSuccess && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                    >
-                        <Alert variant="success" dismissible onClose={() => setSaveSuccess(false)}>
-                            <i className="bi bi-check-circle me-2"></i>
-                            {t('settings.saveSuccess')}
-                        </Alert>
-                    </motion.div>
-                )}
 
                 <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
                     <Row className="settings-row">
@@ -210,6 +220,11 @@ const SystemSettings = () => {
                         </Col>
 
                         <Col md={8} lg={9} className="settings-content">
+                            {error && (
+                                <Alert variant="danger" role="alert" className="mb-3">
+                                    {error}
+                                </Alert>
+                            )}
                             <Tab.Content>
                                 {/* General Settings */}
                                 <Tab.Pane eventKey="general">
