@@ -52,7 +52,7 @@ const WorkplaceToolbar = ({
                     label={t('workplace.positions.showInactive')}
                     checked={showInactive}
                     onChange={(e) => onShowInactiveChange(e.target.checked)}
-                    reverse={direction === 'ltr'}
+                    reverse={direction !== 'rtl'}
                 />
             </Col>
         </Row>

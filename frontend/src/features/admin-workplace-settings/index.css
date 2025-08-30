@@ -1,11 +1,11 @@
 /* frontend/src/features/admin-workplace-settings/index.css */
 
 
-.workplace-settings-container{
-    max-width: 1200px;
+.workplace-settings-container {
     margin-left: auto;
     margin-right: auto;
 }
+
 .nav-tabs-custom {
     background-color: transparent;
     border-top-left-radius: var(--radius-lg);
@@ -16,13 +16,14 @@
 .nav-tabs-custom .nav-link {
     color: var(--bs-gray-600);
     background-color: var(--bs-gray-100);
-    border-top-left-radius: var(--radius-lg)!important;
-    border-top-right-radius: var(--radius-lg)!important;
-    border-bottom: 2px solid transparent!important;
+    border-top-left-radius: var(--radius-lg) !important;
+    border-top-right-radius: var(--radius-lg) !important;
+    border-bottom: 2px solid transparent !important;
     padding: 1rem 1.5rem;
     font-weight: 500;
     transition: all 0.2s ease;
 }
+
 [data-theme="dark"] .nav-tabs-custom .nav-link {
     background-color: var(--bs-gray-900);
 }
@@ -38,28 +39,33 @@
     color: var(--bs-primary);
     background-color: var(--bs-gray-50);
     border-color: transparent;
-    border-bottom-color: var(--bs-primary)!important;
+    border-bottom-color: var(--bs-primary) !important;
     box-shadow: var(--shadow-sm);
 }
+
 [data-theme="dark"] .workplace-settings-container .nav-tabs-custom .nav-link.active {
     background-color: rgba(0, 0, 0, 0.2);
 }
+
 .workplace-settings-container .nav-tabs-custom .nav-link i {
     font-size: 1.1rem;
 }
 
-[data-theme="dark"] .workplace-settings-container .nav-tabs-custom  {
+[data-theme="dark"] .workplace-settings-container .nav-tabs-custom {
     background-color: var(--bs-gray-900);
 }
-.workplace-settings-container .workplace-card{
-    border:none!important;
+
+.workplace-settings-container .workplace-card {
+    border: none !important;
 
 }
+
 .workplace-settings-container .card-header {
     padding: 1rem;
 
 }
-.workplace-settings-container .card-header button{
+
+.workplace-settings-container .card-header button {
     padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
     font-size: 1rem;
@@ -67,16 +73,18 @@
 
 /* Tab Content */
 
-.workplace-settings-container .workplace-tab-content{
-    border-top-left-radius: 0!important;
-    border-top-right-radius:0!important;
+.workplace-settings-container .workplace-tab-content {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
     border-color: var(--bs-border-color);
 }
-.workplace-settings-container .workplace-card-header{
+
+.workplace-settings-container .workplace-card-header {
     /*border-top-left-radius: var(--radius-md)!important;*/
     /*border-top-right-radius: var(--radius-md)!important;*/
     padding: 0 0.5rem 0.5rem;
 }
+
 .workplace-settings-container .tab-pane .table {
     margin-bottom: 0;
 }
@@ -88,7 +96,6 @@
 .workplace-settings-container .tab-pane .table td {
     vertical-align: middle;
 }
-
 
 
 /* Stats badges */
@@ -128,36 +135,43 @@
     margin-bottom: 1rem;
     opacity: 0.5;
 }
+
 .workplace-settings-container .workplace-card-body {
     padding: 0;
 }
+
 .workplace-table > tbody > .worksite-row,
 .positions-table > tbody > .position-row {
     --bs-table-bg: transparent;
-    transition: background-color 0.3s ease-out ;
+    transition: background-color 0.3s ease-out;
 }
+
 .workplace-table > tbody > .worksite-row > td,
-.positions-table > tbody > .position-row > td{
+.positions-table > tbody > .position-row > td {
     padding: 0.75rem;
 }
+
 .workplace-table > tbody > .worksite-row:last-of-type,
-.positions-table > tbody > .position-row:last-of-type{
+.positions-table > tbody > .position-row:last-of-type {
     border-bottom-color: transparent;
 }
 
 .workplace-table > tbody > .worksite-row:hover,
 .positions-table > tbody > .position-row:hover {
-    --bs-table-hover-bg:  rgba(var(--bs-primary-rgb), 0.07);
+    --bs-table-hover-bg: rgba(var(--bs-primary-rgb), 0.07);
 }
+
 .positions-table > tbody > .position-row.expanded {
     background-color: rgba(var(--bs-primary-rgb), 0.07);
 }
+
 .positions-table > tbody > .position-row.expanded:hover {
-    --bs-table-hover-bg:  transparent;
+    --bs-table-hover-bg: transparent;
 }
-.position-shifts-col{
+
+.position-shifts-col {
     --bs-table-bg: rgba(var(--bs-primary-rgb), 0.03);
-    box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.1) inset !important;
+    box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1) inset !important;
 }
 
 [data-theme="dark"] .positions-table > tbody > .position-row.expanded,
@@ -166,14 +180,15 @@
     --bs-table-hover-bg: rgba(var(--bs-primary-rgb), 0.2);
 }
 
-[data-theme="dark"] .position-shifts-col{
+[data-theme="dark"] .position-shifts-col {
     --bs-table-bg: var(--bs-gray-900);
-    box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.1) inset !important;
+    box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1) inset !important;
 }
 
 .positions-table > tbody > .position-row.inactive-row {
     opacity: 0.6;
 }
+
 .positions-table > tbody > .position-row.inactive-row:hover {
     opacity: 0.8;
 }
@@ -191,27 +206,28 @@
 
 /* Modals and forms*/
 
-.workplace-modal{
-    margin-top: calc(var(--app-navbar-height) + 0.5rem );
+.workplace-modal {
+    margin-top: calc(var(--app-navbar-height) + 0.5rem);
 }
+
 .workplace-modal .modal-content {
     border: none;
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
-.workplace-modal  .modal-body {
+.workplace-modal .modal-body {
     padding: 2rem;
 }
 
-.workplace-modal  .modal-header {
+.workplace-modal .modal-header {
     background-color: var(--bs-primary);
     color: var(--bs-white);
     padding: var(--space-5) 2rem;;
     border-bottom: none;
 }
 
-.workplace-modal  .modal-header .modal-title {
+.workplace-modal .modal-header .modal-title {
     font-weight: var(--font-semibold);
     font-size: var(--text-lg);
     display: flex;
@@ -219,7 +235,7 @@
     gap: var(--space-2);
 }
 
-.workplace-modal  .modal-header .btn-close {
+.workplace-modal .modal-header .btn-close {
     color: var(--bs-white);
     opacity: 0.8;
     transition: opacity var(--transition-base);
@@ -239,9 +255,11 @@
     padding: var(--space-3);
     gap: 0.5rem;
 }
-.workplace-modal .modal-footer .btn{
+
+.workplace-modal .modal-footer .btn {
     min-width: 100px;
 }
+
 [data-theme="dark"] .workplace-modal .modal-footer {
     background-color: var(--bs-gray-900);
 }
@@ -272,6 +290,7 @@
         width: 100%;
         justify-content: center;
     }
+
     .workplace-settings-container .tab-content > .tab-pane {
         padding: 0.5rem;
     }

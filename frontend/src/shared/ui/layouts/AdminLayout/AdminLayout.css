@@ -80,9 +80,9 @@
 .admin-layout .admin-main-content {
     padding: 1rem;
     max-width: 1200px;
-
     width: 100%;
     min-height: 100%;
+
 }
 
 .admin-layout .admin-main-content .card {
@@ -286,7 +286,8 @@
     flex: 1;
     display: flex;
     margin-inline-start: var(--app-colapsed-sidebar-width);
-    width: calc(100% - var(--app-colapsed-sidebar-width));
+    justify-content: center;
+
 }
 
 
