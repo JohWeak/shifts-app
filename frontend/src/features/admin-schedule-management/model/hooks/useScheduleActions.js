@@ -80,7 +80,6 @@ export const useScheduleActions = (schedule = null) => {
                 dispatch(addNotification({
                     variant: 'warning',
                     message: 'schedule.publishedScheduleExists',
-                    duration: 8000,
                 }));
                 setError(t('schedule.publishedScheduleExists'));
             } else if (!options.skipNotification) {
@@ -93,7 +92,7 @@ export const useScheduleActions = (schedule = null) => {
             }
 
             if (options.onError) {
-                await options.onError(err);
+                await options.onError(errorMsg);
             }
 
             return { success: false, error: errorMsg };
