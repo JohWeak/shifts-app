@@ -79,6 +79,10 @@
     border-color: var(--bs-border-color);
 }
 
+.workplace-settings-container .workplace-tab-content .card-header {
+    background-color: var(--bs-body-bg);
+}
+
 .workplace-settings-container .workplace-card-header {
     /*border-top-left-radius: var(--radius-md)!important;*/
     /*border-top-right-radius: var(--radius-md)!important;*/

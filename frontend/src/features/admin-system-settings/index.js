@@ -69,9 +69,9 @@ const SystemSettings = () => {
         },
         {
             key: 'algorithm',
-            label: t('settings.algorithmSettings'),
+            label: t('dashboard.quickActions.algorithmSettings'),
             icon: 'cpu-fill',
-            description: t('settings.algorithmSettingsDesc'),
+            description: t('dashboard.quickActions.algorithmSettingsDesc'),
         },
         {
             key: 'positions',
@@ -134,7 +134,7 @@ const SystemSettings = () => {
                             ) : (
                                 <>
                                     <i className="bi bi-check2-circle me-2"></i>
-                                    {t('common.saveChanges')}
+                                    {t('common.save')}
                                 </>
                             )}
                         </Button>
@@ -430,9 +430,9 @@ const SystemSettings = () => {
                                                 <div className="header-content">
                                                     <i className="bi bi-cpu-fill header-icon"></i>
                                                     <div>
-                                                        <h5 className="mb-1">{t('settings.algorithmSettings')}</h5>
+                                                        <h5 className="mb-1">{t('dashboard.quickActions.algorithmSettings')}</h5>
                                                         <small
-                                                            className="text-muted">{t('settings.algorithmSettingsDesc')}</small>
+                                                            className="text-muted">{t('dashboard.quickActions.algorithmSettingsDesc')}</small>
                                                     </div>
                                                 </div>
                                             </Card.Header>
