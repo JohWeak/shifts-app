@@ -39,22 +39,19 @@ const EmployeeProfile = () => {
     const countryInputRef = useRef(null);
     const cityInputRef = useRef(null);
 
-    // Location data - in real app this would come from an API
-    const countries = [
-        'Israel', 'United States', 'Canada', 'United Kingdom', 'Germany', 
-        'France', 'Australia', 'Russia', 'Ukraine', 'Belarus'
-    ];
+    // Get localized location data
+    const locationData = t('locations', { returnObjects: true });
+    const countries = Object.keys(locationData.countries);
+    const localizedCountries = Object.values(locationData.countries);
+    const cities = {};
     
-    const cities = {
-        'Israel': ['Tel Aviv', 'Jerusalem', 'Haifa', 'Beersheba', 'Netanya', 'Ashdod', 'Rishon LeZion'],
-        'United States': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'],
-        'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'],
-        'United Kingdom': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Leeds'],
-        'Germany': ['Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt'],
-        'Russia': ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg', 'Kazan']
-    };
+    // Build localized cities object
+    Object.keys(locationData.cities).forEach(countryKey => {
+        const localizedCountryName = locationData.countries[countryKey];
+        cities[localizedCountryName] = Object.values(locationData.cities[countryKey]);
+    });
 
-    const filteredCountries = countries.filter(country => 
+    const filteredCountries = localizedCountries.filter(country => 
         countrySearch ? country.toLowerCase().includes(countrySearch.toLowerCase()) : true
     );
 
@@ -87,7 +84,7 @@ const EmployeeProfile = () => {
         e.preventDefault();
         
         // Validate country
-        if (formData.country && !countries.includes(formData.country)) {
+        if (formData.country && !localizedCountries.includes(formData.country)) {
             alert(t('profile.invalidCountry'));
             return;
         }
