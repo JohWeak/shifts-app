@@ -400,7 +400,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
                 });
             }
 
-            // 2. Добавляем на новое место
+            // 2. Add to new location
             changes.push({
                 key: `assign-${dragged.empId}-${timestamp}-new`,
                 change: {

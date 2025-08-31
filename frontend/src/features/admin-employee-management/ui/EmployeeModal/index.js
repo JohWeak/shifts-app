@@ -99,7 +99,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
             const positionNames = new Set();
 
             positions
-                .filter(pos => pos.is_active) // Добавляем фильтр активных позиций
+                .filter(pos => pos.is_active) // Add filter for active positions
                 .forEach(pos => {
                     if (!positionNames.has(pos.pos_name)) {
                         positionNames.add(pos.pos_name);

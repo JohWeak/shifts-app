@@ -33,7 +33,7 @@ export const I18nProvider = ({ children }) => {
         setDirection(newLocale === 'he' ? 'rtl' : 'ltr');
         localStorage.setItem('preferredLocale', newLocale);
 
-        // Обновляем локаль в базе данных бесшовно (только если пользователь авторизован)
+        // Update locale in database seamlessly (only if user is authenticated)
         if (isAuthenticated) {
             dispatch(updateUserLocale(newLocale));
         }

@@ -147,7 +147,7 @@ const findAll = async (req, res) => {
         // Calculate offset
         const offset = (page - 1) * pageSize;
 
-        // Оптимизированный запрос с ограниченным набором полей
+        // Optimized query with limited field set
         const { count, rows } = await Employee.findAndCountAll({
             where,
             attributes,
@@ -155,14 +155,14 @@ const findAll = async (req, res) => {
                 {
                     model: Position,
                     as: 'defaultPosition',
-                    attributes: ['pos_id', 'pos_name'], // Только необходимые поля
+                    attributes: ['pos_id', 'pos_name'], // Only necessary fields
                     where: Object.keys(includeWhere).length > 0 ? includeWhere : undefined,
                     required: position && position !== 'all' && work_site === 'all',
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name'], // Только необходимые поля
+                    attributes: ['site_id', 'site_name'], // Only necessary fields
                     required: false,
                 },
             ],
@@ -170,7 +170,7 @@ const findAll = async (req, res) => {
             offset: offset,
             order: order,
             distinct: true,
-            // Добавляем подсказку для использования индексов
+            // Add hint for index usage
             ...((status || work_site) && {
                 index: status && work_site ? 'idx_work_site_status' : 'idx_status_created',
             }),
@@ -254,7 +254,7 @@ const update = async (req, res) => {
         if (req.body.email === '') {
             req.body.email = null;
         }
-        // Обновляем только переданные поля
+        // Update only the passed fields
         const [updated] = await Employee.update(updateData, {
             where: { emp_id: req.params.id },
         });
@@ -266,7 +266,7 @@ const update = async (req, res) => {
             });
         }
 
-        // Возвращаем полные данные сотрудника с включенными ассоциациями
+        // Return full employee data with included associations
         const employee = await Employee.findByPk(req.params.id, {
             attributes: { exclude: ['password'] },
             include: [

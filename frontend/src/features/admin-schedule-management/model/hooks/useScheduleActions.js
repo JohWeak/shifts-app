@@ -181,11 +181,11 @@ export const useScheduleActions = (schedule = null) => {
             'errors.deleteFailed',
             {
                 onSuccess: () => {
-                    // Вызываем колбэк, который мы сохранили в promptDelete
+                    // Call the callback we saved in promptDelete
                     if (scheduleToDelete.onSuccess) {
                         scheduleToDelete.onSuccess();
                     }
-                    setScheduleToDelete(null); // Закрываем модальное окно
+                    setScheduleToDelete(null); // Close modal window
                 },
             },
         );

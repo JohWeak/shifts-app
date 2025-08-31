@@ -11,7 +11,7 @@ router.get('/system', verifyToken, systemSettingsController.getSystemSettings);
 router.put('/system', verifyToken, isAdmin, systemSettingsController.updateSystemSettings);
 
 // === Schedule Settings Routes ===
-// Все middleware применяются здесь, чтобы не дублировать
+// All middleware applied here to avoid duplication
 const scheduleRouter = express.Router();
 scheduleRouter.use(verifyToken, isAdmin);
 
@@ -19,7 +19,7 @@ scheduleRouter.get('/sites', scheduleSettingsController.getAllSitesSettings);
 scheduleRouter.get('/site/:siteId', scheduleSettingsController.getSettings);
 scheduleRouter.put('/site/:siteId', scheduleSettingsController.updateSettings);
 
-// Вкладываем роутер настроек расписания в основной роутер настроек
+// Mount schedule settings router into main settings router
 router.use('/schedule', scheduleRouter);
 
 module.exports = router;

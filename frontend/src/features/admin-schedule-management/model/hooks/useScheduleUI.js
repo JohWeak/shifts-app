@@ -15,12 +15,12 @@ export const useScheduleUI = () => {
             const newIsLarge = window.innerWidth >= 1500;
             if (newIsLarge !== isLargeScreen) {
                 setIsLargeScreen(newIsLarge);
-                // Если экран стал маленьким, а панель была открыта - открываем модалку
+                // If screen became small and panel was open - open modal
                 if (!newIsLarge && isPanelOpen) {
                     setIsPanelOpen(false);
                     setShowEmployeeModal(true);
                 }
-                // Если экран стал большим, а модалка была открыта - открываем панель
+                // If screen became large and modal was open - open panel
                 if (newIsLarge && showEmployeeModal) {
                     setShowEmployeeModal(false);
                     setIsPanelOpen(true);
@@ -31,7 +31,7 @@ export const useScheduleUI = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, [isLargeScreen, isPanelOpen, showEmployeeModal]);
 
-    // Закрывать панель, если вышли из режима редактирования
+    // Close panel if exited edit mode
     useEffect(() => {
         const isEditing = Object.values(editingPositions || {}).some(Boolean);
         if (!isEditing && isPanelOpen) {

@@ -80,7 +80,7 @@ const getScheduleDetails = async (req, res) => {
             });
         }
 
-        // Получить все назначения для этого расписания
+        // Get all assignments for this schedule
         const assignments = await ScheduleAssignment.findAll({
             where: { schedule_id: scheduleId },
             include: [
@@ -570,7 +570,7 @@ const updateScheduleAssignments = async (req, res) => {
         for (const change of changes) {
             try {
                 if (change.action === 'assign') {
-                    // Сначала проверяем, нет ли уже такого назначения
+                    // First check if such assignment already exists
                     const existingAssignment = await ScheduleAssignment.findOne({
                         where: {
                             schedule_id: scheduleId,
@@ -618,7 +618,7 @@ const updateScheduleAssignments = async (req, res) => {
                         work_date: change.date,
                     };
 
-                    // Если есть assignmentId, используем его
+                    // If assignmentId exists, use it
                     if (change.assignmentId) {
                         whereClause.id = change.assignmentId;
                     }
@@ -688,7 +688,7 @@ const deleteSchedule = async (req, res) => {
             });
         }
 
-        // Проверить, можно ли удалить (например, только draft)
+        // Check if deletion is allowed (e.g., only draft)
         if (schedule.status === 'published') {
             return res.status(400).json({
                 success: false,
@@ -696,12 +696,12 @@ const deleteSchedule = async (req, res) => {
             });
         }
 
-        // Удалить связанные назначения (каскадно через FK)
+        // Delete related assignments (cascading through FK)
         await ScheduleAssignment.destroy({
             where: { schedule_id: scheduleId },
         });
 
-        // Удалить само расписание
+        // Delete the schedule itself
         await schedule.destroy();
 
         res.json({
@@ -728,7 +728,7 @@ const getRecommendedEmployees = async (req, res) => {
 
         console.log('[ScheduleController] Getting recommendations for:', { scheduleId, date, shiftId, positionId });
 
-        // Получить расписание и его параметры
+        // Get schedule and its parameters
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [{
                 model: WorkSite,
@@ -743,13 +743,13 @@ const getRecommendedEmployees = async (req, res) => {
             });
         }
 
-        // Получить всех активных сотрудников
+        // Get all active employees
         const employees = await Employee.findAll({
             where: { status: 'active' },
             attributes: ['emp_id', 'first_name', 'last_name', 'email', 'default_position_id'],
         });
 
-        // Получить существующие назначения на эту дату
+        // Get existing assignments for this date
         const existingAssignments = await ScheduleAssignment.findAll({
             where: {
                 schedule_id: scheduleId,
@@ -762,16 +762,16 @@ const getRecommendedEmployees = async (req, res) => {
             }],
         });
 
-        // Простая логика рекомендаций
+        // Simple recommendation logic
         const employeeRecommendations = employees.map(employee => {
             const empAssignments = existingAssignments.filter(a => a.emp_id === employee.emp_id);
 
-            // Определить статус доступности
+            // Determine availability status
             let availabilityStatus = 'available';
             let reason = '';
             let priority = 1; // 0 = preferred, 1 = neutral, 2 = cannot_work
 
-            // Проверить конфликты с существующими назначениями
+            // Check conflicts with existing assignments
             const hasConflict = empAssignments.length > 0;
 
             if (hasConflict) {
@@ -794,10 +794,10 @@ const getRecommendedEmployees = async (req, res) => {
             };
         });
 
-        // Сортировать по приоритету
+        // Sort by priority
         const sortedEmployees = employeeRecommendations.sort((a, b) => a.priority - b.priority);
 
-        // Группировать по статусу
+        // Group by status
         const groupedEmployees = {
             preferred: sortedEmployees.filter(e => e.availability_status === 'preferred'),
             available: sortedEmployees.filter(e => e.availability_status === 'available'),
@@ -856,7 +856,7 @@ const getDashboardOverview = async (req, res) => {
         const { worksiteId: siteId } = req.params;
         const { startDate, endDate } = req.query;
 
-        // Проверка наличия обязательных параметров
+        // Check for required parameters
         if (!startDate || !endDate) {
             return res.status(400).json({ success: false, message: 'startDate and endDate are required' });
         }

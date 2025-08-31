@@ -101,7 +101,7 @@ export const updateScheduleStatus = createAsyncThunk(
     'schedule/updateScheduleStatus',
     async ({scheduleId, status}, {rejectWithValue}) => {
         try {
-            return await scheduleAPI.updateScheduleStatus(scheduleId, status); // Возвращаем только data
+            return await scheduleAPI.updateScheduleStatus(scheduleId, status); // Return only data
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -313,13 +313,13 @@ const scheduleSlice = createSlice({
             state.selectedScheduleId = action.payload;
             state.scheduleDetails = null;
         },
-        // Синхронные экшены для управления редактированием
+        // Synchronous actions for managing editing
         toggleEditPosition(state, action) {
             const positionId = action.payload;
             const isCurrentlyEditing = !!state.editingPositions[positionId];
             state.editingPositions[positionId] = !isCurrentlyEditing;
 
-            // Если мы перестаем редактировать, очищаем несохраненные изменения для этой позиции
+            // If we stop editing, clear unsaved changes for this position
             if (isCurrentlyEditing) {
                 Object.keys(state.pendingChanges).forEach(key => {
                     if (state.pendingChanges[key].positionId === positionId) {
@@ -433,7 +433,7 @@ const scheduleSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Обработка fetchSchedules
+            // Handle fetchSchedules
             .addCase(fetchSchedules.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;
@@ -448,7 +448,7 @@ const scheduleSlice = createSlice({
                 state.error = action.payload || 'Failed to fetch schedules';
             })
 
-            // Обработка fetchScheduleDetails
+            // Handle fetchScheduleDetails
             .addCase(fetchScheduleDetails.pending, (state) => {
                 state.loading = 'pending';
                 //state.scheduleDetails = null;
@@ -471,7 +471,7 @@ const scheduleSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // Обработка generateSchedule (только pending/rejected, fulfilled handled by thunk)
+            // Handle generateSchedule (only pending/rejected, fulfilled handled by thunk)
             .addCase(generateSchedule.pending, (state) => {
                 state.loading = 'pending';
                 state.error = null;

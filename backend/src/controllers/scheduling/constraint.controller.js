@@ -97,7 +97,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                     model: PositionShift,
                     as: 'shifts',
                     where: {is_active: true},
-                    // Явно указываем, какие атрибуты нам нужны
+                    // Explicitly specify which attributes we need
                     attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color']
                 }]
             }]
@@ -130,13 +130,13 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 dayjs(c.target_date).isSame(currentDate, 'day')
             );
 
-            // ИЗМЕНЕНИЕ 1: Обновляем логику маппинга
+            // CHANGE 1: Update mapping logic
             const dayShifts = employee.defaultPosition.shifts.map(shift => {
                 const constraint = dayConstraints.find(c => c.shift_id === shift.id);
                 return {
                     shift_id: shift.id,
-                    shift_name: shift.shift_name, // Добавлено имя смены
-                    color: shift.color,           // Добавлен цвет (даже если фронт его переопределит, лучше его иметь)
+                    shift_name: shift.shift_name, // Added shift name
+                    color: shift.color,           // Added color (even if frontend overrides it, better to have it)
                     start_time: shift.start_time,
                     duration: shift.duration_hours,
                     status: constraint ? constraint.constraint_type : 'neutral'
@@ -156,7 +156,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
         const alreadySubmitted = existingConstraints.length > 0;
         const canEdit = !alreadySubmitted; // Simple logic for now
 
-        // ИЗМЕНЕНИЕ 2: Убираем устаревшие поля из ответа
+        // CHANGE 2: Remove obsolete fields from response
         res.json({
             success: true,
             weekStart: startDate.format('YYYY-MM-DD'),
@@ -175,7 +175,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 already_submitted: alreadySubmitted,
                 can_edit: canEdit
             }
-            // Поля shiftTypes и colors удалены
+            // Fields shiftTypes and colors removed
         });
 
     } catch (error) {
@@ -310,7 +310,7 @@ const getAllPermanentRequests = async (req, res) => {
             order: [['requested_at', 'DESC']]
         });
 
-        // Получаем все активные ограничения для всех сотрудников
+        // Get all active constraints for all employees
         const activeConstraints = await PermanentConstraint.findAll({
             where: {
                 is_active: true
@@ -318,7 +318,7 @@ const getAllPermanentRequests = async (req, res) => {
             attributes: ['emp_id', 'day_of_week', 'shift_id', 'approved_at']
         });
 
-        // Группируем активные ограничения по сотрудникам
+        // Group active constraints by employees
         const activeConstraintsByEmployee = {};
         activeConstraints.forEach(constraint => {
             if (!activeConstraintsByEmployee[constraint.emp_id]) {
@@ -328,11 +328,11 @@ const getAllPermanentRequests = async (req, res) => {
             activeConstraintsByEmployee[constraint.emp_id].set(key, constraint.approved_at);
         });
 
-        // Помечаем запросы как активные или неактивные
+        // Mark requests as active or inactive
         const requestsWithActiveFlag = requests.map(request => {
             const requestData = request.toJSON();
 
-            // Pending запросы не имеют статуса активности
+            // Pending requests have no activity status
             if (requestData.status === 'pending') {
                 return {
                     ...requestData,
@@ -340,7 +340,7 @@ const getAllPermanentRequests = async (req, res) => {
                 };
             }
 
-            // Rejected запросы всегда неактивны
+            // Rejected requests are always inactive
             if (requestData.status === 'rejected') {
                 return {
                     ...requestData,
@@ -348,13 +348,13 @@ const getAllPermanentRequests = async (req, res) => {
                 };
             }
 
-            // Для approved запросов проверяем активность
+            // For approved requests check activity
             let isActive = false;
             if (requestData.status === 'approved' && requestData.constraints) {
                 const employeeActiveConstraints = activeConstraintsByEmployee[requestData.emp_id];
 
                 if (employeeActiveConstraints && requestData.constraints.length > 0) {
-                    // Проверяем, все ли ограничения из этого запроса активны
+                    // Check if all constraints from this request are active
                     isActive = requestData.constraints.every(constraint => {
                         const key = `${constraint.day_of_week}-${constraint.shift_id || 'null'}`;
                         const activeApprovedAt = employeeActiveConstraints.get(key);
@@ -363,7 +363,7 @@ const getAllPermanentRequests = async (req, res) => {
                             const requestReviewedAt = new Date(requestData.reviewed_at);
                             const constraintApprovedAt = new Date(activeApprovedAt);
 
-                            // Проверяем, что время одобрения совпадает (с точностью до 5 секунд)
+                            // Check that approval time matches (within 5 seconds accuracy)
                             const timeDiff = Math.abs(requestReviewedAt - constraintApprovedAt);
                             return timeDiff < 5000;
                         }
@@ -432,7 +432,7 @@ const submitPermanentRequest = async (req, res) => {
 
         await transaction.commit();
 
-        // Загружаем созданный запрос с ассоциациями для возврата
+        // Load created request with associations for return
         const createdRequest = await PermanentConstraintRequest.findByPk(request.id, {
             include: [{
                 model: Employee,
@@ -713,19 +713,19 @@ const getMyPermanentConstraints = async (req, res) => {
             order: [['day_of_week', 'ASC'], ['shift_id', 'ASC']]
         });
 
-        // Обрабатываем данные для фронтенда
+        // Process data for frontend
         const processedConstraints = constraints.map(constraint => {
             const constraintData = constraint.toJSON();
 
-            // Определяем кто одобрил
+            // Determine who approved
             if (constraintData.approver) {
-                // Администратор существует в системе
+                // Administrator exists in the system
                 constraintData.approved_by_display = `${constraintData.approver.first_name} ${constraintData.approver.last_name}`;
             } else if (constraintData.approved_by_name) {
-                // Администратор удален, но имя сохранено
+                // Administrator deleted, but name is preserved
                 constraintData.approved_by_display = `${constraintData.approved_by_name} (deleted)`;
             } else {
-                // Неизвестный одобряющий
+                // Unknown approver
                 constraintData.approved_by_display = 'Unknown Admin';
             }
 
@@ -791,12 +791,12 @@ const deletePermanentRequest = async (req, res) => {
         const {id} = req.params;
         const empId = req.userId;
 
-        // Находим запрос
+        // Find the request
         const request = await PermanentConstraintRequest.findOne({
             where: {
                 id,
                 emp_id: empId,
-                status: 'pending' // Можно удалять только pending запросы
+                status: 'pending' // Only pending requests can be deleted
             }
         });
 

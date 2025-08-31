@@ -2,10 +2,10 @@
 import { useState, useMemo } from 'react';
 
 /**
- * Хук для сортировки массива данных.
- * @param {Array} items - Исходный массив элементов.
- * @param {Object} [initialConfig] - Начальная конфигурация сортировки.
- * @param {Object} [accessors] - Объект с функциями-аксессорами для получения значений для сортировки.
+ * Hook for sorting array data.
+ * @param {Array} items - Original array of elements.
+ * @param {Object} [initialConfig] - Initial sorting configuration.
+ * @param {Object} [accessors] - Object with accessor functions for getting values for sorting.
  * @returns {{ sortedItems: Array, requestSort: Function, sortConfig: Object }}
  */
 export const useSortableData = (items, initialConfig = { field: null, order: 'ASC' }, accessors = {}) => {
@@ -17,13 +17,13 @@ export const useSortableData = (items, initialConfig = { field: null, order: 'AS
         let sortableItems = [...items];
 
         if (sortConfig.field) {
-            // Функция для получения значения. Проверяем, есть ли для текущего поля кастомный аксессор.
+            // Function to get value. Check if there's a custom accessor for current field.
             const getSortValue = (item) => {
                 if (accessors && typeof accessors[sortConfig.field] === 'function') {
-                    // Если есть, используем его
+                    // If there is one, use it
                     return accessors[sortConfig.field](item);
                 }
-                // Иначе, берем значение по ключу, как и раньше
+                // Otherwise, take value by key as before
                 return item[sortConfig.field];
             };
 
@@ -31,18 +31,18 @@ export const useSortableData = (items, initialConfig = { field: null, order: 'AS
                 const valueA = getSortValue(a);
                 const valueB = getSortValue(b);
 
-                // Добавим проверку на null/undefined для более стабильной сортировки
+                // Add null/undefined check for more stable sorting
                 if (valueA === null || typeof valueA === 'undefined') return 1;
                 if (valueB === null || typeof valueB === 'undefined') return -1;
 
-                // Для строк можно добавить localeCompare для корректной сортировки на разных языках
+                // For strings we can add localeCompare for correct sorting in different languages
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
                     return sortConfig.order === 'ASC'
                         ? valueA.localeCompare(valueB)
                         : valueB.localeCompare(valueA);
                 }
 
-                // Стандартное сравнение для чисел и др.
+                // Standard comparison for numbers etc.
                 if (valueA < valueB) {
                     return sortConfig.order === 'ASC' ? -1 : 1;
                 }
@@ -53,7 +53,7 @@ export const useSortableData = (items, initialConfig = { field: null, order: 'AS
             });
         }
         return sortableItems;
-        // Добавляем accessors в зависимости, чтобы сортировка пересчиталась, если они изменятся
+        // Add accessors to dependencies so sorting recalculates if they change
     }, [items, sortConfig, accessors]);
 
     const requestSort = (field) => {

@@ -565,7 +565,7 @@ const getEmployeeArchiveSummary = async (req, res) => {
         const endDate = dayjs(lastAssignment.work_date);
         let current = startDate.startOf('month');
 
-        //  isSameOrBefore
+        // isSameOrBefore
         while (current.valueOf() <= endDate.startOf('month').valueOf()) {
             availableMonths.push(current.format('YYYY-MM'));
             current = current.add(1, 'month');
@@ -620,10 +620,10 @@ const getEmployeeArchiveMonth = async (req, res) => {
             .endOf('month')
             .format(DATE_FORMAT);
 
-        // Get all assignments for the month - используем правильное имя колонки emp_id
+        // Get all assignments for the month - using correct column name emp_id
         const assignments = await ScheduleAssignment.findAll({
             where: {
-                emp_id: employee.emp_id, // Исправлено с employee_id на emp_id
+                emp_id: employee.emp_id, // Fixed from employee_id to emp_id
                 work_date: {
                     [Op.between]: [monthStart, monthEnd],
                 },

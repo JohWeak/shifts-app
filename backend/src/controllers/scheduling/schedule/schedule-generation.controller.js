@@ -84,13 +84,13 @@ const deleteExistingSchedule = async (siteId, weekStart, transaction = null) => 
         for (const schedule of existingSchedules) {
             console.log(`[ScheduleController] Deleting schedule ${schedule.id} for week ${weekStart}`);
 
-            // Удалить связанные assignments (если остались)
+            // Delete related assignments (if any remaining)
             await ScheduleAssignment.destroy({
                 where: { schedule_id: schedule.id },
                 transaction,
             });
 
-            // Удалить само расписание
+            // Delete the schedule itself
             await schedule.destroy({ transaction });
         }
 

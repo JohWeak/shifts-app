@@ -197,7 +197,7 @@ class CPSATBridge {
 
                         // Find requirement for this day
                         if (posShift.requirements && posShift.requirements.length > 0) {
-                            // Сначала ищем конкретное требование для этого дня недели
+                            // First look for specific requirement for this day of week
                             let dayRequirement = posShift.requirements.find(req => {
                                 if (!req.is_recurring) {
                                     return req.specific_date === dateStr;
@@ -205,7 +205,7 @@ class CPSATBridge {
                                 return req.day_of_week === dayOfWeek;
                             });
 
-                            // Если не нашли конкретное, ищем общее (day_of_week = null означает ВСЕ дни)
+                            // If no specific found, look for general (day_of_week = null means ALL days)
                             if (!dayRequirement) {
                                 dayRequirement = posShift.requirements.find(req => {
                                     return req.is_recurring && req.day_of_week === null;
@@ -591,7 +591,7 @@ class CPSATBridge {
                             throw new Error(`Python process exited with code ${code}: ${errorData}`);
                         }
 
-                        // Найдём JSON в выводе Python
+                        // Find JSON in Python output
                         const jsonMatch = outputData.match(/\{[^{}]*"success"[^{}]*\}/);
                         if (!jsonMatch) {
                             // noinspection ExceptionCaughtLocallyJS

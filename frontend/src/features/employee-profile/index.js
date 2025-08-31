@@ -39,16 +39,19 @@ const EmployeeProfile = () => {
     const countryInputRef = useRef(null);
     const cityInputRef = useRef(null);
 
-    // Get localized location data
-    const locationData = t('locations', { returnObjects: true });
-    const countries = Object.keys(locationData.countries);
-    const localizedCountries = Object.values(locationData.countries);
+    // Import location data
+    const { locationData, citiesData } = require('shared/utils/locationData');
+    const { locale } = useSelector(state => state.i18n) || 'en';
+    
+    // Get localized country names
+    const countries = Object.keys(locationData.en.countries);
+    const localizedCountries = Object.values(locationData[locale]?.countries || locationData.en.countries);
     const cities = {};
     
-    // Build localized cities object
-    Object.keys(locationData.cities).forEach(countryKey => {
-        const localizedCountryName = locationData.countries[countryKey];
-        cities[localizedCountryName] = Object.values(locationData.cities[countryKey]);
+    // Build cities object using localized country names
+    Object.keys(citiesData).forEach(countryKey => {
+        const localizedCountryName = (locationData[locale]?.countries || locationData.en.countries)[countryKey];
+        cities[localizedCountryName] = citiesData[countryKey];
     });
 
     const filteredCountries = localizedCountries.filter(country => 

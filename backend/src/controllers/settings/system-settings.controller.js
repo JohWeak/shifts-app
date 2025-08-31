@@ -75,7 +75,7 @@ const updateSystemSettings = async (req, res) => {
     try {
         const settings = req.body;
 
-        // Определяем типы настроек
+        // Define setting types
         const settingTypes = {
             weekStartDay: 'number',
             dateFormat: 'string',
@@ -93,7 +93,7 @@ const updateSystemSettings = async (req, res) => {
             notifySchedulePublished: 'boolean',
         };
 
-        // Сохраняем или обновляем каждую настройку
+        // Save or update each setting
         for (const [key, value] of Object.entries(settings)) {
             if (settingTypes[key]) {
                 let stringValue = value;
@@ -108,7 +108,7 @@ const updateSystemSettings = async (req, res) => {
                     setting_value: stringValue,
                     setting_type: settingTypes[key],
                     description: `System setting: ${key}`,
-                    is_editable: !['minRestBetweenShifts', 'strictLegalCompliance'].includes(key), // Некоторые настройки нельзя изменить из-за законодательства
+                    is_editable: !['minRestBetweenShifts', 'strictLegalCompliance'].includes(key), // Some settings cannot be changed due to legislation
                 });
             }
         }

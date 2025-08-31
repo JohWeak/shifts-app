@@ -629,7 +629,7 @@ class EmployeeRecommendationService {
                     const targetShiftStartHour = parseInt(targetShift.start_time.split(':')[0]);
                     restHours = targetShiftStartHour - prevShiftEndHour;
                 } else {
-                    // Смена закончилась вчера
+                    // Shift ended yesterday
                     const targetShiftStartHour = parseInt(targetShift.start_time.split(':')[0]);
                     restHours = (24 - prevShiftEndHour) + targetShiftStartHour;
                 }

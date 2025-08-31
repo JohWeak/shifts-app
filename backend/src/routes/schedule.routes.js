@@ -2,7 +2,7 @@
 const express = require('express');
 const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
 
-// Импортируем контроллеры напрямую
+// Import controllers directly
 const scheduleController = require('../controllers/scheduling/schedule/schedule.controller');
 const generationController = require('../controllers/scheduling/schedule/schedule-generation.controller');
 const employeeController = require('../controllers/scheduling/schedule/schedule-employee.controller');

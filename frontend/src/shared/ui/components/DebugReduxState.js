@@ -6,19 +6,19 @@ const DebugReduxState = () => {
     const requests = useSelector(state => state.requests);
     const auth = useSelector(state => state.auth);
 
-    // 1. Добавляем состояние для отслеживания свернутого вида
+    // 1. Add state to track collapsed view
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    // 2. Функция для переключения состояния
+    // 2. Function to toggle state
     const toggleCollapse = () => {
         setIsCollapsed(prev => !prev);
     };
 
     if (process.env.NODE_ENV !== 'development') return null;
 
-    // --- Стили для анимации и позиционирования ---
+    // --- Styles for animation and positioning ---
 
-    // Основной контейнер
+    // Main container
     const containerStyle = {
         position: 'fixed',
         left: '50%',
@@ -33,7 +33,7 @@ const DebugReduxState = () => {
         zIndex: 9999,
     };
 
-    // Хедер
+    // Header
     const headerStyle = {
         display: 'flex',
         justifyContent: 'space-between',
@@ -43,18 +43,18 @@ const DebugReduxState = () => {
         borderBottom: isCollapsed ? 'none' : '1px solid rgba(255,255,255,0.1)',
     };
 
-    // Контент (блок с <pre>)
+    // Content (block with <pre>)
     const contentStyle = {
-        // Плавная анимация для всех свойств
+        // Smooth animation for all properties
         transition: 'all 0.3s ease-in-out',
-        // Анимируем высоту, прозрачность и отступы
+        // Animate height, opacity and padding
         maxHeight: isCollapsed ? 0 : '300px',
         opacity: isCollapsed ? 0 : 1,
         overflow: 'auto',
         padding: isCollapsed ? '0 12px' : '12px',
     };
 
-    // Кнопка
+    // Button
     const buttonStyle = {
         background: 'transparent',
         border: 'none',
@@ -64,16 +64,16 @@ const DebugReduxState = () => {
 
     return (
         <div style={containerStyle}>
-            {/* 3. Весь хедер теперь кликабельный */}
+            {/* 3. The whole header is now clickable */}
             <div style={headerStyle} onClick={toggleCollapse}>
                 <h6 style={{ margin: 0, fontSize: '14px' }}>Redux State Debug</h6>
                 <button style={buttonStyle} title={isCollapsed ? "Expand" : "Collapse"}>
-                    {/* Иконка меняется в зависимости от состояния */}
+                    {/* Icon changes depending on state */}
                     <i className={`bi ${isCollapsed ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
                 </button>
             </div>
 
-            {/* 4. Контент с анимируемыми стилями */}
+            {/* 4. Content with animated styles */}
             <div style={contentStyle}>
                 <pre style={{ margin: 0, fontSize: '11px', whiteSpace: 'pre-wrap' }}>
                     {JSON.stringify({ requests, auth }, null, 2)}

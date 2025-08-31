@@ -13,27 +13,27 @@ function loadModelsRecursive(directory) {
         const fullPath = path.join(directory, entry.name);
 
         if (entry.isDirectory()) {
-            // if this is a folder, we call the same function for it
+            // If this is a folder, call the same function for it
             loadModelsRecursive(fullPath);
         } else if (entry.isFile() && entry.name.endsWith('.model.js')) {
             const model = require(fullPath)(sequelize, Sequelize.DataTypes);
             db[model.name] = model;
 
-            // Logging for clarity (the path from the 'Models' folder)
+            // Log for clarity (the path from the 'models' folder)
             const relativePath = path.relative(__dirname, fullPath);
             console.log(`✅ Loaded model: ${model.name} from /${relativePath}`);
         }
     }
 }
 
-// launch a recursive bypass, starting with the current directory (__dirname)
+// Launch recursive traversal, starting with the current directory (__dirname)
 loadModelsRecursive(__dirname);
 
-// addSequelizeToDBObject
+// Add Sequelize to DB object
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// determine all associations here
+// Define all associations here
 const defineAssociations = () => {
     const {
         Employee,
@@ -61,7 +61,7 @@ const defineAssociations = () => {
                 as: 'defaultPosition'
             });
 
-            // Employee <-> Position (many-to-many через employee_positions)
+            // Employee <-> Position (many-to-many through employee_positions)
             Employee.belongsToMany(Position, {
                 through: 'employee_positions',
                 foreignKey: 'emp_id',
@@ -168,7 +168,7 @@ const defineAssociations = () => {
             });
         }
 
-        // Position <-> Employee (many-to-many через employee_positions)
+        // Position <-> Employee (many-to-many through employee_positions)
         if (Employee) {
             Position.belongsToMany(Employee, {
                 through: 'employee_positions',
@@ -177,7 +177,7 @@ const defineAssociations = () => {
                 as: 'employees'
             });
 
-            // Position -> Employee[] (сотрудники с этой позицией по умолчанию)
+            // Position -> Employee[] (employees with this position as default)
             Position.hasMany(Employee, {
                 foreignKey: 'default_position_id',
                 as: 'defaultEmployees'
@@ -368,7 +368,7 @@ const defineAssociations = () => {
     }
 };
 
-// Вызываем функцию определения ассоциаций
+// Call the function to define associations
 defineAssociations();
 
 module.exports = db;

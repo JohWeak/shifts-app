@@ -1,6 +1,6 @@
 // backend/src/controllers/worksite.controller.js
-const db = require('../../models'); // Импортируем db напрямую, как в shift.controller
-const {WorkSite, Employee, Position} = db; // Деструктурируем нужную модель
+const db = require('../../models'); // Import db directly, as in shift.controller
+const {WorkSite, Employee, Position} = db; // Destructure the needed model
 
 // Get all work sites
 const getWorkSites = async (req, res) => {
@@ -196,7 +196,7 @@ const deleteWorkSite = async (req, res) => {
         const activePositions = site.positions || [];
         const affectedEmployees = site.employees || [];
 
-        // Counting statistics
+        // Count statistics
         const stats = {
             positionCount: activePositions.length,
             directEmployeeCount: affectedEmployees.filter(emp => emp.work_site_id === parseInt(id)).length,
@@ -204,10 +204,10 @@ const deleteWorkSite = async (req, res) => {
             totalEmployeeCount: affectedEmployees.length
         };
 
-        // 1. We deactivate the Work Site itself.
+        // 1. Deactivate the work site itself
         await site.update({is_active: false}, {transaction});
 
-        // 2. We deactivate all positions of this website.
+        // 2. Deactivate all positions of this worksite
         if (stats.positionCount > 0) {
             await Position.update(
                 {
@@ -225,7 +225,7 @@ const deleteWorkSite = async (req, res) => {
             );
         }
 
-        // 3. Deactivate all employees.
+        // 3. Deactivate all employees
         if (stats.totalEmployeeCount > 0) {
             // Employees directly tied to the site
             await Employee.update(
@@ -298,10 +298,10 @@ const restoreWorkSite = async (req, res) => {
             return res.status(404).json({message: 'Work site not found'});
         }
 
-        // 1. Restoring the Work Site.
+        // 1. Restore the work site
         await site.update({is_active: true}, {transaction});
 
-        // 2. Restoring positions deactivated by this website
+        // 2. Restore positions deactivated by this worksite
         const restoredPositions = await Position.update(
             {
                 is_active: true,
@@ -319,7 +319,7 @@ const restoreWorkSite = async (req, res) => {
             }
         );
 
-        // 3. Restoring employees deactivated directly by the site.
+        // 3. Restore employees deactivated directly by the site
         const restoredDirectEmployees = await Employee.update(
             {
                 status: 'active',
@@ -337,8 +337,8 @@ const restoreWorkSite = async (req, res) => {
             }
         );
 
-        // 4. Restoring employees deactivated via positions.
-        // Getting IDs of restored positions
+        // 4. Restore employees deactivated via positions
+        // Get IDs of restored positions
         const restoredPositionIds = await Position.findAll({
             where: {
                 site_id: id,
