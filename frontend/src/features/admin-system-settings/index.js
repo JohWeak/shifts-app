@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader';
+import OptimizationSettings from 'shared/ui/components/OptimizationSettings';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchSystemSettings, updateLocalSettings, updateSystemSettings } from './model/settingsSlice';
 import { addNotification } from '../../app/model/notificationsSlice';
@@ -292,57 +293,13 @@ const SystemSettings = () => {
                                         </div>
 
                                         <div className="settings-section">
-                                            <h6 className="settings-section-title">
-                                                <i className="bi bi-gear-wide-connected me-2"></i>
-                                                {t('settings.optimizationSettings')}
-                                            </h6>
-
-                                            <Row>
-                                                <Col md={6}>
-                                                    <Form.Group className="mb-4">
-                                                        <Form.Label className="settings-label">
-                                                            <i className="bi bi-speedometer2 me-2"></i>
-                                                            {t('settings.optimizationMode')}
-                                                        </Form.Label>
-                                                        <Form.Select
-                                                            value={localSettings.optimizationMode || 'balanced'}
-                                                            onChange={(e) => handleChange('optimizationMode', e.target.value)}
-                                                            className="settings-input"
-                                                        >
-                                                            <option
-                                                                value="fast">{t('settings.optimizationFast')}</option>
-                                                            <option
-                                                                value="balanced">{t('settings.optimizationBalanced')}</option>
-                                                            <option
-                                                                value="thorough">{t('settings.optimizationThorough')}</option>
-                                                        </Form.Select>
-                                                    </Form.Group>
-                                                </Col>
-
-                                                <Col md={6}>
-                                                    <Form.Group className="mb-4">
-                                                        <Form.Label className="settings-label">
-                                                            <i className="bi bi-graph-up me-2"></i>
-                                                            {t('settings.fairnessWeight')}
-                                                        </Form.Label>
-                                                        <Form.Range
-                                                            min={0}
-                                                            max={100}
-                                                            value={localSettings.fairnessWeight || 50}
-                                                            onChange={(e) => handleChange('fairnessWeight', parseInt(e.target.value))}
-                                                            className="settings-range"
-                                                        />
-                                                        <div className="d-flex justify-content-between">
-                                                            <small
-                                                                className="text-muted">{t('settings.efficiency')}</small>
-                                                            <small
-                                                                className="text-muted">{localSettings.fairnessWeight || 50}%</small>
-                                                            <small
-                                                                className="text-muted">{t('settings.fairness')}</small>
-                                                        </div>
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
+                                            <OptimizationSettings
+                                                optimizationMode={localSettings.optimizationMode || 'balanced'}
+                                                fairnessWeight={localSettings.fairnessWeight || 50}
+                                                onOptimizationModeChange={(value) => handleChange('optimizationMode', value)}
+                                                onFairnessWeightChange={(value) => handleChange('fairnessWeight', value)}
+                                                showTitle={true}
+                                            />
                                         </div>
 
                                         <div className="settings-section">

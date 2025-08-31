@@ -1062,6 +1062,10 @@ export const en = {
 
     },
     settings: {
+        help: {
+            optimizationMode: 'Choose the optimization approach: Fast (quick generation with basic optimization), Balanced (good balance between speed and quality), Thorough (comprehensive optimization, takes longer)',
+            fairnessBalance: 'Adjust the balance between efficiency and fairness. Lower values prioritize filling all shifts efficiently, higher values ensure more equal distribution of shifts among employees',
+        },
         algorithmMaxTime: 'Algorithm Time Limit',
         algorithmMaxTimeHint: 'Maximum time allowed for schedule optimization',
         algorithmsSettings: 'Algorithms Settings',

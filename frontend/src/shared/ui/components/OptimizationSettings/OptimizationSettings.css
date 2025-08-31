@@ -1,0 +1,52 @@
+.optimization-settings .help-button {
+    color: var(--bs-secondary);
+    text-decoration: none;
+    border: none;
+    background: none;
+    font-size: 0.875rem;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.optimization-settings .help-button:hover {
+    color: var(--bs-primary);
+    text-decoration: none;
+}
+
+.optimization-settings .help-button:focus {
+    box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.optimization-settings .settings-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--bs-gray-800);
+}
+
+.optimization-settings .settings-section-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    color: var(--bs-dark);
+}
+
+.optimization-settings .settings-input {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.optimization-settings .settings-input:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.optimization-settings .settings-range {
+    accent-color: var(--bs-primary);
+}
+
+.optimization-settings .settings-range::-webkit-slider-thumb {
+    background-color: var(--bs-primary);
+}

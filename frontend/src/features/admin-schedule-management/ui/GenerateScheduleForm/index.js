@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { getNextWeekStart } from 'shared/lib/utils/scheduleUtils';
 import DatePicker from 'shared/ui/components/DatePicker';
+import OptimizationSettings from 'shared/ui/components/OptimizationSettings';
 import { ALGORITHM_TYPES, DEFAULT_GENERATION_SETTINGS } from 'shared/config/scheduleConstants';
 import './GenerateScheduleForm.css';
 
@@ -138,38 +139,20 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
                         </Col>
 
                         <Col md={4} className="form-optimization-section">
-                            <Form.Group className="mb-3">
-                                <Form.Label>{t('settings.optimizationMode')}</Form.Label>
-                                <Form.Select
-                                    value={settings.optimizationMode}
-                                    onChange={(e) => setSettings(prev => ({
-                                        ...prev,
-                                        optimizationMode: e.target.value,
-                                    }))}
-                                >
-                                    <option value="fast">{t('settings.optimizationFast')}</option>
-                                    <option value="balanced">{t('settings.optimizationBalanced')}</option>
-                                    <option value="thorough">{t('settings.optimizationThorough')}</option>
-                                </Form.Select>
-                            </Form.Group>
-
-                            <Form.Group>
-                                <Form.Label>{t('settings.fairnessWeight')}</Form.Label>
-                                <Form.Range
-                                    min={0}
-                                    max={100}
-                                    value={settings.fairnessWeight}
-                                    onChange={(e) => setSettings(prev => ({
-                                        ...prev,
-                                        fairnessWeight: parseInt(e.target.value),
-                                    }))}
-                                />
-                                <div className="d-flex justify-content-between">
-                                    <small className="text-muted">{t('settings.efficiency')}</small>
-                                    <small className="text-muted">{settings.fairnessWeight}%</small>
-                                    <small className="text-muted">{t('settings.fairness')}</small>
-                                </div>
-                            </Form.Group>
+                            <OptimizationSettings
+                                optimizationMode={settings.optimizationMode}
+                                fairnessWeight={settings.fairnessWeight}
+                                onOptimizationModeChange={(value) => setSettings(prev => ({
+                                    ...prev,
+                                    optimizationMode: value,
+                                }))}
+                                onFairnessWeightChange={(value) => setSettings(prev => ({
+                                    ...prev,
+                                    fairnessWeight: value,
+                                }))}
+                                showTitle={false}
+                                layout="column"
+                            />
                         </Col>
                     </Row>
                 </Form>
