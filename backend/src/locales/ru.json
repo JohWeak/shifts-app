@@ -1,0 +1,17 @@
+{
+  "email": {
+    "subject": "Ваше расписание на неделю {{weekRange}}",
+    "greeting": "Здравствуйте, {{name}},",
+    "published": "Ваше расписание на неделю {{weekRange}} было опубликовано.",
+    "shifts_title": "Ваши смены:",
+    "table_header_date": "Дата",
+    "table_header_shift": "Смена",
+    "table_header_time": "Время",
+    "table_header_location": "Место",
+    "instructions_title": "Чтобы добавить эти смены в ваш календарь:",
+    "instructions_ios": "На iPhone/iPad: Откройте это письмо и нажмите на приглашение в календарь вверху",
+    "instructions_android": "На Android: Откройте прикрепленный файл .ics",
+    "instructions_desktop": "На компьютере: Нажмите «Добавить в календарь» в вашем почтовом клиенте",
+    "preferences_note": "Вы можете управлять своими предпочтениями в настройках профиля."
+  }
+}

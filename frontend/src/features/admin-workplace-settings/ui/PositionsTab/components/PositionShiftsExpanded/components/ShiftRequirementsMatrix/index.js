@@ -1,34 +1,27 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftRequirementsMatrix/index.js
-import React, {useState, useEffect} from 'react';
-import {
-    Table,
-    Form,
-    Button,
-    Badge,
-    Alert,
-    Spinner
-} from 'react-bootstrap';
-import {isEqual} from 'lodash';
-import ConfirmationModal from 'shared/ui/components/ConfirmationModal/ConfirmationModal';
-import {useDispatch, useSelector} from 'react-redux';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useBlocker} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Form, Spinner, Table } from 'react-bootstrap';
+import { isEqual } from 'lodash';
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useBlocker } from 'react-router-dom';
 
 import {
+    createShiftRequirement,
     fetchRequirementsMatrix,
     updateShiftRequirement,
-    createShiftRequirement
 } from '../../../../../../model/workplaceSlice';
 import './ShiftRequirementsMatrix.css';
 
-const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) => {
-    const {t} = useI18n();
+const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }) => {
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
     const {
         requirementsMatrix,
         matrixLoading,
-        error
+        error,
     } = useSelector(state => state.workplace);
 
     const reduxMatrix = requirementsMatrix[positionId];
@@ -42,17 +35,17 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
 
 
     const daysOfWeek = [
-        {id: 0, name: t('days.sunday'), short: t('days.sun')},
-        {id: 1, name: t('days.monday'), short: t('days.mon')},
-        {id: 2, name: t('days.tuesday'), short: t('days.tue')},
-        {id: 3, name: t('days.wednesday'), short: t('days.wed')},
-        {id: 4, name: t('days.thursday'), short: t('days.thu')},
-        {id: 5, name: t('days.friday'), short: t('days.fri')},
-        {id: 6, name: t('days.saturday'), short: t('days.sat')}
+        { id: 0, name: t('days.sunday'), short: t('days.sun') },
+        { id: 1, name: t('days.monday'), short: t('days.mon') },
+        { id: 2, name: t('days.tuesday'), short: t('days.tue') },
+        { id: 3, name: t('days.wednesday'), short: t('days.wed') },
+        { id: 4, name: t('days.thursday'), short: t('days.thu') },
+        { id: 5, name: t('days.friday'), short: t('days.fri') },
+        { id: 6, name: t('days.saturday'), short: t('days.sat') },
     ];
     // Эффект для блокировки ухода со страницы, если есть изменения
     useEffect(() => {
-        if (blocker && blocker.state === "blocked") {
+        if (blocker && blocker.state === 'blocked') {
             setShowConfirmModal(true);
         }
     }, [blocker]);
@@ -146,12 +139,12 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                     if (originalReq.requirement_id) {
                         changesToUpdate.push(dispatch(updateShiftRequirement({
                             requirementId: originalReq.requirement_id,
-                            data: payload
+                            data: payload,
                         })));
                     } else {
                         changesToCreate.push(dispatch(createShiftRequirement({
                             shiftId: shift.id,
-                            data: payload
+                            data: payload,
                         })));
                     }
                 }
@@ -209,7 +202,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
     if (matrixLoading) {
         return (
             <div className="text-center py-5">
-                <Spinner animation="border"/>
+                <Spinner animation="border" />
                 <p className="mt-3">{t('common.loading')}</p>
             </div>
         );
@@ -269,7 +262,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                                 <div className="d-flex align-items-center">
                                     <div
                                         className="shift-color-dot me-2"
-                                        style={{backgroundColor: shift.color}}
+                                        style={{ backgroundColor: shift.color }}
                                     />
                                     <div>
                                         <div className="fw-semibold">{shift.name}</div>
@@ -335,7 +328,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                         <td className="grand-total">
                             <Badge bg="success">
                                 {localMatrix.shifts.reduce((total, shift) =>
-                                    total + getTotalForShift(shift), 0
+                                    total + getTotalForShift(shift), 0,
                                 )}
                             </Badge>
                         </td>
@@ -354,7 +347,7 @@ const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) 
                 isChanged,
                 isSaving,
                 handleSave,
-                handleReset
+                handleReset,
             })}
 
             {/* Модальное окно */}

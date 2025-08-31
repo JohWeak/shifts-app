@@ -1,13 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { en } from './locales/en';
 import { he } from './locales/he';
 import { ru } from './locales/ru';
+import { updateUserLocale } from '../../../features/auth/model/authSlice';
 
 const I18nContext = createContext(undefined);
 
 const translations = { en, he, ru };
 
 export const I18nProvider = ({ children }) => {
+    const dispatch = useDispatch();
+    const { isAuthenticated } = useSelector(state => state.auth);
     const [locale, setLocale] = useState('en');
     const [direction, setDirection] = useState('ltr');
 
@@ -28,6 +32,11 @@ export const I18nProvider = ({ children }) => {
         setLocale(newLocale);
         setDirection(newLocale === 'he' ? 'rtl' : 'ltr');
         localStorage.setItem('preferredLocale', newLocale);
+
+        // Обновляем локаль в базе данных бесшовно (только если пользователь авторизован)
+        if (isAuthenticated) {
+            dispatch(updateUserLocale(newLocale));
+        }
     };
 
     const t = (key, replacements = {}) => {
@@ -37,20 +46,20 @@ export const I18nProvider = ({ children }) => {
         for (const k of keys) {
             value = value?.[k];
         }
-        // Если значение не найдено, возвращаем ключ
+        // If the value is not found, return the key.
         let template = value || key;
 
-        // Если найденное значение - не строка, просто возвращаем его
+        // If the found value is not a string, we simply return it.
         if (typeof template !== 'string') {
             return template;
         }
         if (Array.isArray(replacements)) {
-            // Для массива используем позиционные параметры {0}, {1}, {2}...
+            // For the array, we use positional parameters {0}, {1}, {2}...
             return template.replace(/\{(\d+)\}/g, (match, index) => {
                 return replacements[index] !== undefined ? replacements[index] : match;
             });
         } else {
-            // Для объекта используем именованные параметры {name}, {count}...
+            // For the object, we use named parameters {name}, {count}...
             return template.replace(/\{(\w+)\}/g, (match, placeholder) => {
                 return replacements.hasOwnProperty(placeholder) ? replacements[placeholder] : match;
             });

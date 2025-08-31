@@ -35,22 +35,20 @@
 }
 
 .generate-form-layout {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    align-items: flex-start;
-    justify-content: flex-start;
     margin-left: 0.75rem;
     margin-right: 0.75rem;
 }
 
+.generate-schedule-form-card .form-calendar-section {
+    min-width: 280px;
+}
+
 .generate-schedule-form-card .form-settings-section {
-    flex:1.3;
     min-width: 200px;
 }
-.generate-schedule-form-card .form-calendar-section {
-    flex:0.7;
-    min-width: 320px;
+
+.generate-schedule-form-card .form-optimization-section {
+    min-width: 200px;
 }
 
 .generate-schedule-form-card .form-calendar-section .custom-datepicker-inline{
@@ -93,16 +91,13 @@
 /* Адаптивность */
 @media (max-width: 768px) {
     .generate-form-layout {
-        flex-direction: column;
         margin-left: 0.25rem;
         margin-right: 0.25rem;
     }
 
-    .generate-schedule-form-card .form-calendar-section {
-        align-self: center;
-        width: 100%;
-    }
-    .generate-schedule-form-card .form-settings-section {
-        width: 100%;
+    .generate-schedule-form-card .form-calendar-section,
+    .generate-schedule-form-card .form-settings-section,
+    .generate-schedule-form-card .form-optimization-section {
+        margin-bottom: 1.5rem;
     }
 }

@@ -3,7 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "migrate:status": "npx sequelize-cli db:migrate:status",
+    "seed": "npx sequelize-cli db:seed:all",
+    "seed:undo": "npx sequelize-cli db:seed:undo:all"
   },
   "keywords": [],
   "author": "",
@@ -13,11 +21,16 @@
     "axios": "1.11.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "i18next": "^25.4.2",
     "jsonwebtoken": "^9.0.2",
+    "juice": "^11.0.1",
     "mysql2": "^3.14.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.5",
     "on-finished": "^2.4.1",
     "puppeteer": "^22.8.2",
     "sequelize": "^6.37.7",
@@ -26,6 +39,7 @@
   },
   "devDependencies": {
     "eslint": "^9.34.0",
-    "eslint-config-prettier": "^10.1.8"
+    "eslint-config-prettier": "^10.1.8",
+    "sequelize-cli": "^6.6.3"
   }
 }

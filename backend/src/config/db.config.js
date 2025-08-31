@@ -1,4 +1,6 @@
-const {Sequelize} = require('sequelize');
+// backend/src/config/db.config.js
+
+const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 
@@ -10,48 +12,48 @@ console.log('🔍 Database Configuration:');
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
+const commonOptions = {
+    dialect: 'mysql',
+    pool: {
+        max: isProduction ? 10 : 5,
+        min: isProduction ? 2 : 1,
+        acquire: 30000,
+        idle: 10000,
+        evict: 1000,
+        handleDisconnects: true,
+    },
+    logging: isDevelopment ? console.log : false,
+    benchmark: isDevelopment,
+    timezone: '+03:00',
+};
 
-const sequelize = process.env.DATABASE_URL
-    ? new Sequelize(process.env.DATABASE_URL, {
-        dialect: 'mysql',
+let dbConfig;
+if (process.env.DATABASE_URL) {
+    // Configuration for Railway
+    dbConfig = {
+        ...commonOptions,
+        url: process.env.DATABASE_URL,
         dialectOptions: {
             ssl: {
                 require: false,
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
             },
-            connectTimeout: 60000
+            connectTimeout: 60000,
         },
-        pool: {
-            max: isProduction ? 10 : 5,
-            min: isProduction ? 2 : 1,
-            acquire: 30000,
-            idle: 10000,
-            evict: 1000,
-            handleDisconnects: true,
-        },
-        logging: isDevelopment ? console.log : false,
-        benchmark: isDevelopment,
-        timezone: '+03:00',
-    })
-    : new Sequelize(
-        process.env.DB_NAME || 'shifts_db',
-        process.env.DB_USER || 'root',
-        process.env.DB_PASSWORD || '',
-        {
-            host: process.env.DB_HOST || 'localhost',
-            port: process.env.DB_PORT || 3306,
-            dialect: 'mysql',
-            pool: {
-                max: 5,
-                min: 1,
-                acquire: 30000,
-                idle: 10000,
-            },
-            logging: isDevelopment ? console.log : false,
-            timezone: '+03:00',
-        }
-    );
+    };
+} else {
+    // Local configuration
+    dbConfig = {
+        ...commonOptions,
+        database: process.env.DB_NAME || 'shifts_db',
+        username: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 3306,
+    };
+}
 
+const sequelize = new Sequelize(dbConfig.url || dbConfig);
 
 sequelize.authenticate()
     .then(() => {
@@ -62,3 +64,7 @@ sequelize.authenticate()
     });
 
 module.exports = sequelize;
+
+module.exports.development = dbConfig;
+module.exports.test = dbConfig;
+module.exports.production = dbConfig;

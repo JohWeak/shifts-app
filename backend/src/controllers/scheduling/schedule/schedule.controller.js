@@ -1,5 +1,5 @@
 // backend/src/controllers/schedule/schedule.controller.js
-const {Op} = require('sequelize');
+const { Op } = require('sequelize');
 const db = require('../../../models');
 const {
     Schedule,
@@ -8,14 +8,15 @@ const {
     Position,
     WorkSite,
     PositionShift,
-    ShiftRequirement
+    ShiftRequirement,
+    SystemSettings,
 } = db;
-const cpSatBridge = require('../../../services/cp-sat-bridge.service');
-
+const cpSatBridge = require('../../../services/scheduling/cp-sat-bridge.service');
+const emailService = require('../../../services/notifications/email.service');
 
 const getAllSchedules = async (req, res) => {
     try {
-        const {page = 1, limit = 10, site_id} = req.query;
+        const { page = 1, limit = 10, site_id } = req.query;
 
         const whereClause = {};
         if (site_id) {
@@ -30,8 +31,8 @@ const getAllSchedules = async (req, res) => {
             include: [{
                 model: WorkSite,
                 as: 'workSite',
-                attributes: ['site_name']
-            }]
+                attributes: ['site_name'],
+            }],
         });
 
         res.json({
@@ -41,8 +42,8 @@ const getAllSchedules = async (req, res) => {
                 current_page: parseInt(page),
                 total_pages: Math.ceil(schedules.count / limit),
                 total_items: schedules.count,
-                per_page: parseInt(limit)
-            }
+                per_page: parseInt(limit),
+            },
         });
 
     } catch (error) {
@@ -50,7 +51,7 @@ const getAllSchedules = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error retrieving schedules',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
     }
 };
@@ -60,65 +61,65 @@ const getAllSchedules = async (req, res) => {
  */
 const getScheduleDetails = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
+        const { scheduleId } = req.params;
         console.log(`[ScheduleController] Getting details for schedule ${scheduleId}`);
 
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [
                 {
                     model: WorkSite,
-                    as: 'workSite'
-                }
-            ]
+                    as: 'workSite',
+                },
+            ],
         });
 
         if (!schedule) {
             return res.status(404).json({
                 success: false,
-                message: 'Schedule not found'
+                message: 'Schedule not found',
             });
         }
 
         // Получить все назначения для этого расписания
         const assignments = await ScheduleAssignment.findAll({
-            where: {schedule_id: scheduleId},
+            where: { schedule_id: scheduleId },
             include: [
                 {
                     model: Employee,
                     as: 'employee',
-                    attributes: ['emp_id', 'first_name', 'last_name']
+                    attributes: ['emp_id', 'first_name', 'last_name'],
                 },
                 {
                     model: PositionShift,
                     as: 'shift',
-                    attributes: ['id', 'position_id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
+                    attributes: ['id', 'position_id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color'],
                 },
                 {
                     model: Position,
                     as: 'position',
-                    attributes: ['pos_id', 'pos_name', 'profession', 'site_id', 'num_of_emp']
-                }
+                    attributes: ['pos_id', 'pos_name', 'profession', 'site_id', 'num_of_emp'],
+                },
             ],
-            order: [['work_date', 'ASC'], ['shift_id', 'ASC']]
+            order: [['work_date', 'ASC'], ['shift_id', 'ASC']],
         });
 
         const positions = await db.Position.findAll({
             where: {
                 site_id: schedule.site_id,
-                is_active: true
+                is_active: true,
             },
             include: [{
                 model: PositionShift,
                 as: 'shifts',
-                where: {is_active: true},
+                where: { is_active: true },
                 required: false,
                 include: [{
                     model: ShiftRequirement,
                     as: 'requirements',
-                    required: false
-                }]
+                    required: false,
+                }],
             }],
-            order: [['pos_name', 'ASC']]
+            order: [['pos_name', 'ASC']],
         });
 
 
@@ -138,7 +139,7 @@ const getScheduleDetails = async (req, res) => {
                             // Find requirement for this day
                             const dayRequirement = shift.requirements.find(r =>
                                 (r.is_recurring && r.day_of_week === dayOfWeek) ||
-                                (r.is_recurring && r.day_of_week === null) // All days
+                                (r.is_recurring && r.day_of_week === null), // All days
                             );
 
                             const dayStaff = dayRequirement ? dayRequirement.required_staff_count : 1;
@@ -165,14 +166,14 @@ const getScheduleDetails = async (req, res) => {
                         duration_hours: shift.duration_hours,
                         color: shift.color,
                         position_id: position.pos_id,
-                        requirements: shift.requirements || []
+                        requirements: shift.requirements || [],
                     });
                 });
             }
 
             // Count actual assignments for this position
             const actualAssignments = assignments.filter(a =>
-                a.position_id === position.pos_id
+                a.position_id === position.pos_id,
             ).length;
 
             return {
@@ -183,7 +184,7 @@ const getScheduleDetails = async (req, res) => {
                 total_required_assignments: totalRequiredAssignments, //  total assignments needed
                 current_assignments: actualAssignments, // current assignments count
                 shift_requirements: shiftRequirements, // Per shift requirements
-                shifts: positionShifts // Shifts that belong to THIS position only
+                shifts: positionShifts, // Shifts that belong to THIS position only
             };
         });
 
@@ -205,9 +206,9 @@ const getScheduleDetails = async (req, res) => {
         const siteEmployees = await Employee.findAll({
             where: {
                 work_site_id: schedule.site_id,
-                status: 'active'
+                status: 'active',
             },
-            attributes: ['emp_id', 'first_name', 'last_name', 'status', 'work_site_id', 'default_position_id']
+            attributes: ['emp_id', 'first_name', 'last_name', 'status', 'work_site_id', 'default_position_id'],
         });
 
         // Get employees from other sites who are assigned to this schedule
@@ -216,7 +217,7 @@ const getScheduleDetails = async (req, res) => {
             .filter((id, index, self) => self.indexOf(id) === index); // unique
 
         const crossSiteEmployeeIds = assignedEmployeeIds.filter(
-            id => !siteEmployees.find(e => e.emp_id === id)
+            id => !siteEmployees.find(e => e.emp_id === id),
         );
 
         let crossSiteEmployees = [];
@@ -224,9 +225,9 @@ const getScheduleDetails = async (req, res) => {
             crossSiteEmployees = await Employee.findAll({
                 where: {
                     emp_id: crossSiteEmployeeIds,
-                    status: 'active'
+                    status: 'active',
                 },
-                attributes: ['emp_id', 'first_name', 'last_name', 'status', 'work_site_id', 'default_position_id']
+                attributes: ['emp_id', 'first_name', 'last_name', 'status', 'work_site_id', 'default_position_id'],
             });
         }
 
@@ -235,8 +236,8 @@ const getScheduleDetails = async (req, res) => {
             ...siteEmployees.map(e => e.toJSON()),
             ...crossSiteEmployees.map(e => ({
                 ...e.toJSON(),
-                isCrossSite: true
-            }))
+                isCrossSite: true,
+            })),
         ];
 
         // Add cross-assignment flags to assignments
@@ -264,12 +265,12 @@ const getScheduleDetails = async (req, res) => {
                 site_id: schedule.site_id,
                 work_site: schedule.workSite,
                 createdAt: schedule.createdAt,
-                updatedAt: schedule.updatedAt
+                updatedAt: schedule.updatedAt,
             },
             positions: enrichedPositions,
             assignments: enhancedAssignments,
             shifts: allShifts,
-            employees: allEmployees
+            employees: allEmployees,
         };
 
         console.log(`[ScheduleController] Response: 
@@ -279,7 +280,7 @@ const getScheduleDetails = async (req, res) => {
 
         res.json({
             success: true,
-            data: responseData
+            data: responseData,
         });
 
     } catch (error) {
@@ -287,8 +288,152 @@ const getScheduleDetails = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error getting schedule details',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
+    }
+};
+
+// Helper function for email masking
+function maskEmail(email) {
+    if (!email || email.indexOf('@') === -1) {
+        return 'invalid-email';
+    }
+    const [localPart, domain] = email.split('@');
+    const [domainName, topLevelDomain] = domain.split('.');
+
+    const maskedLocal = localPart.length > 2
+        ? `${localPart.substring(0, 2)}***`
+        : `${localPart.substring(0, 1)}***`;
+
+    return `${maskedLocal}@***.${topLevelDomain}`;
+}
+
+/**
+ * Send schedule notifications to employees
+ */
+const sendScheduleNotifications = async (scheduleId) => {
+    try {
+        // First check if global notifications are enabled
+        const notificationSetting = await SystemSettings.findOne({
+            where: { setting_key: 'notifySchedulePublished' },
+        });
+
+        const globalNotificationsEnabled = notificationSetting
+            ? JSON.parse(notificationSetting.setting_value)
+            : true; // Default to true if setting doesn't exist
+
+        if (!globalNotificationsEnabled) {
+            console.log('Global schedule notifications are disabled by admin');
+            return {
+                emailsSent: 0,
+                emailsFailed: 0,
+                details: [],
+                skippedReason: 'Global notifications disabled by admin',
+            };
+        }
+
+        const schedule = await Schedule.findByPk(scheduleId, {
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name', 'address'],
+            }],
+        });
+
+        if (!schedule) {
+            throw new Error('Schedule not found');
+        }
+
+        // Get all assigned employees with their shifts
+        const assignments = await ScheduleAssignment.findAll({
+            where: { schedule_id: schedule.id },
+            include: [
+                {
+                    model: Employee,
+                    as: 'employee',
+                    where: {
+                        receive_schedule_emails: true,
+                        email: { [Op.not]: null },
+                    },
+                    required: true,
+                },
+                {
+                    model: PositionShift,
+                    as: 'shift',
+                },
+                {
+                    model: Position,
+                    as: 'position',
+                },
+            ],
+        });
+
+        // Group by employee
+        const employeeSchedules = {};
+        assignments.forEach(assignment => {
+            const empId = assignment.employee.emp_id;
+            if (!employeeSchedules[empId]) {
+                employeeSchedules[empId] = {
+                    employee: assignment.employee,
+                    shifts: [],
+                };
+            }
+            employeeSchedules[empId].shifts.push({
+                date: assignment.work_date,
+                shift_name: assignment.shift.shift_name,
+                start_time: assignment.shift.start_time,
+                end_time: assignment.shift.end_time,
+                duration: assignment.shift.duration_hours,
+                position_name: assignment.position?.pos_name,
+                site_name: schedule.workSite?.site_name,
+                site_address: schedule.workSite?.address,
+            });
+        });
+
+        // Send emails asynchronously
+        const emailPromises = Object.values(employeeSchedules).map(({ employee, shifts }) =>
+            emailService.sendScheduleNotification(employee, {
+                week: { start: schedule.start_date, end: schedule.end_date },
+                shifts,
+            }),
+        );
+        const results = await Promise.all(emailPromises);
+        const report = {
+            total_processed: results.length,
+            sent_count: 0,
+            skipped_count: 0,
+            failed_count: 0,
+            details: {
+                sent: [],
+                skipped: [],
+                failed: [],
+            },
+        };
+        results.forEach(res => {
+            const maskedTo = maskEmail(res.to);
+            switch (res.status) {
+                case 'sent':
+                    report.sent_count++;
+                    report.details.sent.push(maskedTo);
+                    break;
+                case 'skipped':
+                    report.skipped_count++;
+                    report.details.skipped.push({ to: maskedTo, reason: res.reason });
+                    break;
+                case 'failed':
+                    report.failed_count++;
+                    report.details.failed.push({ to: maskedTo, error: res.error });
+                    break;
+            }
+        });
+
+        console.log('Email Notification Report:', JSON.stringify(report, null, 2));
+
+        return report;
+
+    } catch (error) {
+        console.error('Critical error in sendScheduleNotifications:', error);
+        throw error;
     }
 };
 
@@ -297,13 +442,13 @@ const getScheduleDetails = async (req, res) => {
  */
 const updateScheduleStatus = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
-        const {status} = req.body;
+        const { scheduleId } = req.params;
+        const { status } = req.body;
 
         if (!['draft', 'published', 'archived'].includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid status. Must be: draft, published, or archived'
+                message: 'Invalid status. Must be: draft, published, or archived',
             });
         }
 
@@ -311,29 +456,40 @@ const updateScheduleStatus = async (req, res) => {
         if (!schedule) {
             return res.status(404).json({
                 success: false,
-                message: 'Schedule not found'
+                message: 'Schedule not found',
             });
         }
 
-        await Schedule.update(
-            {status},
-            {where: {id: scheduleId}}
-        );
-        // Возвращаем обновленное расписание с связями
-        await Schedule.findByPk(scheduleId, {
-            include: [
-                {
-                    model: WorkSite,
-                    as: 'workSite',
-                    attributes: ['site_id', 'site_name']
-                }
-            ]
+        const previousStatus = schedule.status;
+
+        // Update status
+        await schedule.update({ status });
+
+        // Reload with associations
+        await schedule.reload({
+            include: [{
+                model: WorkSite,
+                as: 'workSite',
+                attributes: ['site_id', 'site_name'],
+            }],
         });
+
+        // Send notifications if status changed to published
+        let emailResult = null;
+        if (status === 'published' && previousStatus !== 'published') {
+            try {
+                emailResult = await sendScheduleNotifications(scheduleId);
+            } catch (error) {
+                console.error('Failed to send notifications:', error);
+                // Don't fail the whole request if emails fail
+            }
+        }
 
         res.json({
             success: true,
             message: `Schedule status updated to ${status}`,
-            data: schedule
+            data: schedule,
+            emailNotifications: emailResult,
         });
 
     } catch (error) {
@@ -341,7 +497,47 @@ const updateScheduleStatus = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error updating schedule status',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+        });
+    }
+};
+
+/**
+ * Manually send schedule notifications (admin action)
+ */
+const resendScheduleNotifications = async (req, res) => {
+    try {
+        const { scheduleId } = req.params;
+
+        const schedule = await Schedule.findByPk(scheduleId);
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: 'Schedule not found',
+            });
+        }
+
+        if (schedule.status !== 'published') {
+            return res.status(400).json({
+                success: false,
+                message: 'Can only send notifications for published schedules',
+            });
+        }
+
+        const result = await sendScheduleNotifications(scheduleId);
+
+        res.json({
+            success: true,
+            message: `Notifications sent to ${result.emailsSent} employees`,
+            ...result,
+        });
+
+    } catch (error) {
+        console.error('[ScheduleController] Error sending notifications:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error sending notifications',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
     }
 };
@@ -351,8 +547,8 @@ const updateScheduleStatus = async (req, res) => {
  */
 const updateScheduleAssignments = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
-        const {changes} = req.body;
+        const { scheduleId } = req.params;
+        const { changes } = req.body;
 
         console.log('[ScheduleController] Updating assignments for schedule:', scheduleId);
         console.log('[ScheduleController] Changes:', changes);
@@ -361,7 +557,7 @@ const updateScheduleAssignments = async (req, res) => {
         if (!schedule) {
             return res.status(404).json({
                 success: false,
-                message: 'Schedule not found'
+                message: 'Schedule not found',
             });
         }
 
@@ -381,8 +577,8 @@ const updateScheduleAssignments = async (req, res) => {
                             emp_id: change.empId,
                             shift_id: change.shiftId,
                             position_id: change.positionId,
-                            work_date: change.date
-                        }
+                            work_date: change.date,
+                        },
                     });
 
                     if (existingAssignment) {
@@ -392,7 +588,7 @@ const updateScheduleAssignments = async (req, res) => {
 
                     // Check if employee is from another site
                     const employee = await Employee.findByPk(change.empId, {
-                        attributes: ['emp_id', 'work_site_id', 'default_position_id']
+                        attributes: ['emp_id', 'work_site_id', 'default_position_id'],
                     });
 
                     if (employee && employee.work_site_id !== schedule.site_id) {
@@ -407,10 +603,10 @@ const updateScheduleAssignments = async (req, res) => {
                         position_id: change.positionId,
                         work_date: change.date,
                         status: 'scheduled',
-                        notes: 'Manually assigned via edit interface'
+                        notes: 'Manually assigned via edit interface',
                     });
 
-                    processedChanges.push({...change, status: 'created'});
+                    processedChanges.push({ ...change, status: 'created' });
                     console.log(`[ScheduleController] Added assignment: ${change.empName} to ${change.date} shift ${change.shiftId}`);
 
                 } else if (change.action === 'remove') {
@@ -419,7 +615,7 @@ const updateScheduleAssignments = async (req, res) => {
                         emp_id: change.empId,
                         shift_id: change.shiftId,
                         position_id: change.positionId,
-                        work_date: change.date
+                        work_date: change.date,
                     };
 
                     // Если есть assignmentId, используем его
@@ -428,17 +624,17 @@ const updateScheduleAssignments = async (req, res) => {
                     }
 
                     const deleted = await ScheduleAssignment.destroy({
-                        where: whereClause
+                        where: whereClause,
                     });
 
-                    processedChanges.push({...change, status: 'deleted', count: deleted});
+                    processedChanges.push({ ...change, status: 'deleted', count: deleted });
                     console.log(`[ScheduleController] Removed ${deleted} assignment(s) for employee ${change.empId} on ${change.date}`);
                 }
             } catch (changeError) {
                 console.error(`[ScheduleController] Error processing change:`, changeError.message);
                 errors.push({
                     change,
-                    error: changeError.message
+                    error: changeError.message,
                 });
             }
         }
@@ -448,9 +644,9 @@ const updateScheduleAssignments = async (req, res) => {
         if (newCrossSiteEmployeeIds.size > 0) {
             newEmployees = await Employee.findAll({
                 where: {
-                    emp_id: Array.from(newCrossSiteEmployeeIds)
+                    emp_id: Array.from(newCrossSiteEmployeeIds),
                 },
-                attributes: ['emp_id', 'first_name', 'last_name', 'work_site_id', 'default_position_id']
+                attributes: ['emp_id', 'first_name', 'last_name', 'work_site_id', 'default_position_id'],
             });
         }
 
@@ -462,9 +658,9 @@ const updateScheduleAssignments = async (req, res) => {
                 errors: errors.length > 0 ? errors : undefined,
                 newEmployees: newEmployees.map(e => ({
                     ...e.toJSON(),
-                    isCrossSite: true
-                }))
-            }
+                    isCrossSite: true,
+                })),
+            },
         });
 
     } catch (error) {
@@ -472,7 +668,7 @@ const updateScheduleAssignments = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error updating schedule assignments',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
     }
 };
@@ -482,13 +678,13 @@ const updateScheduleAssignments = async (req, res) => {
  */
 const deleteSchedule = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
+        const { scheduleId } = req.params;
 
         const schedule = await Schedule.findByPk(scheduleId);
         if (!schedule) {
             return res.status(404).json({
                 success: false,
-                message: 'Schedule not found'
+                message: 'Schedule not found',
             });
         }
 
@@ -496,13 +692,13 @@ const deleteSchedule = async (req, res) => {
         if (schedule.status === 'published') {
             return res.status(400).json({
                 success: false,
-                message: 'Cannot delete published schedule'
+                message: 'Cannot delete published schedule',
             });
         }
 
         // Удалить связанные назначения (каскадно через FK)
         await ScheduleAssignment.destroy({
-            where: {schedule_id: scheduleId}
+            where: { schedule_id: scheduleId },
         });
 
         // Удалить само расписание
@@ -510,7 +706,7 @@ const deleteSchedule = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Schedule deleted successfully'
+            message: 'Schedule deleted successfully',
         });
 
     } catch (error) {
@@ -518,7 +714,7 @@ const deleteSchedule = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error deleting schedule',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
     }
 };
@@ -528,42 +724,42 @@ const deleteSchedule = async (req, res) => {
  */
 const getRecommendedEmployees = async (req, res) => {
     try {
-        const {scheduleId, date, shiftId, positionId} = req.query;
+        const { scheduleId, date, shiftId, positionId } = req.query;
 
-        console.log('[ScheduleController] Getting recommendations for:', {scheduleId, date, shiftId, positionId});
+        console.log('[ScheduleController] Getting recommendations for:', { scheduleId, date, shiftId, positionId });
 
         // Получить расписание и его параметры
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [{
                 model: WorkSite,
-                as: 'workSite'
-            }]
+                as: 'workSite',
+            }],
         });
 
         if (!schedule) {
             return res.status(404).json({
                 success: false,
-                message: 'Schedule not found'
+                message: 'Schedule not found',
             });
         }
 
         // Получить всех активных сотрудников
         const employees = await Employee.findAll({
-            where: {status: 'active'},
-            attributes: ['emp_id', 'first_name', 'last_name', 'email', 'default_position_id']
+            where: { status: 'active' },
+            attributes: ['emp_id', 'first_name', 'last_name', 'email', 'default_position_id'],
         });
 
         // Получить существующие назначения на эту дату
         const existingAssignments = await ScheduleAssignment.findAll({
             where: {
                 schedule_id: scheduleId,
-                work_date: date
+                work_date: date,
             },
             include: [{
                 model: PositionShift,
                 as: 'shift',
-                attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color']
-            }]
+                attributes: ['id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color'],
+            }],
         });
 
         // Простая логика рекомендаций
@@ -594,7 +790,7 @@ const getRecommendedEmployees = async (req, res) => {
                 email: employee.email,
                 availability_status: availabilityStatus,
                 priority: priority,
-                reason: reason
+                reason: reason,
             };
         });
 
@@ -606,7 +802,7 @@ const getRecommendedEmployees = async (req, res) => {
             preferred: sortedEmployees.filter(e => e.availability_status === 'preferred'),
             available: sortedEmployees.filter(e => e.availability_status === 'available'),
             cannot_work: sortedEmployees.filter(e => e.availability_status === 'cannot_work'),
-            violates_constraints: []
+            violates_constraints: [],
         };
 
         res.json({
@@ -616,8 +812,8 @@ const getRecommendedEmployees = async (req, res) => {
                 shift_id: shiftId,
                 position_id: positionId,
                 recommendations: groupedEmployees,
-                total_employees: employees.length
-            }
+                total_employees: employees.length,
+            },
         });
 
     } catch (error) {
@@ -625,28 +821,28 @@ const getRecommendedEmployees = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error getting employee recommendations',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         });
     }
-}
+};
 /**
  * Get schedule statistics for dashboard
  */
 const handleGetScheduleStatistics = async (req, res) => {
     try {
-        const {scheduleId} = req.params;
+        const { scheduleId } = req.params;
         const stats = await cpSatBridge.getScheduleStatistics(scheduleId);
 
         res.json({
             success: true,
-            data: stats
+            data: stats,
         });
 
     } catch (error) {
         console.error('[ScheduleController] Error getting statistics:', error);
         res.status(500).json({
             success: false,
-            message: 'Error getting schedule statistics'
+            message: 'Error getting schedule statistics',
         });
     }
 };
@@ -657,20 +853,20 @@ const handleGetScheduleStatistics = async (req, res) => {
  */
 const getDashboardOverview = async (req, res) => {
     try {
-        const {worksiteId: siteId} = req.params;
-        const {startDate, endDate} = req.query;
+        const { worksiteId: siteId } = req.params;
+        const { startDate, endDate } = req.query;
 
         // Проверка наличия обязательных параметров
         if (!startDate || !endDate) {
-            return res.status(400).json({success: false, message: 'startDate and endDate are required'});
+            return res.status(400).json({ success: false, message: 'startDate and endDate are required' });
         }
 
         const schedules = await Schedule.findAll({
             where: {
                 site_id: siteId,
                 start_date: {
-                    [Op.between]: [new Date(startDate), new Date(endDate)]
-                }
+                    [Op.between]: [new Date(startDate), new Date(endDate)],
+                },
             },
             order: [['start_date', 'DESC']],
         });
@@ -682,13 +878,13 @@ const getDashboardOverview = async (req, res) => {
                     schedules_count: 0,
                     avg_coverage: 0,
                     total_issues: 0,
-                    schedules: []
-                }
+                    schedules: [],
+                },
             });
         }
 
         const statsPromises = schedules.map(schedule =>
-            cpSatBridge.getScheduleStatistics(schedule.id)
+            cpSatBridge.getScheduleStatistics(schedule.id),
         );
 
         const allStats = await Promise.all(statsPromises);
@@ -706,20 +902,20 @@ const getDashboardOverview = async (req, res) => {
                 id: schedule.id,
                 start_date: schedule.start_date,
                 status: schedule.status,
-                statistics: allStats[index] ? allStats[index].summary : null
-            }))
+                statistics: allStats[index] ? allStats[index].summary : null,
+            })),
         };
 
         res.json({
             success: true,
-            data: overview
+            data: overview,
         });
 
     } catch (error) {
         console.error('[ScheduleController] Error getting dashboard:', error);
         res.status(500).json({
             success: false,
-            message: 'Error getting dashboard overview'
+            message: 'Error getting dashboard overview',
         });
     }
 };
@@ -733,4 +929,6 @@ module.exports = {
     getRecommendedEmployees,
     handleGetScheduleStatistics,
     getDashboardOverview,
+    sendScheduleNotifications,
+    resendScheduleNotifications,
 };

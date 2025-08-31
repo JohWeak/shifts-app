@@ -1,9 +1,9 @@
 // frontend/src/features/employee-requests/index.js
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Button, Card, Container} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {addNotification} from 'app/model/notificationsSlice';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button, Card, Container } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { addNotification } from 'app/model/notificationsSlice';
 import {
     addNewRequest,
     deleteRequest,
@@ -12,21 +12,21 @@ import {
     markAsViewed,
     removeRequest,
     setRequestLoading,
-    updateRequest
+    updateRequest,
 } from './model/requestsSlice';
-import {constraintAPI} from 'shared/api/apiService';
-import EmptyState from 'shared/ui/components/EmptyState/EmptyState';
-import LoadingState from 'shared/ui/components/LoadingState/LoadingState';
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
-import PermanentConstraintForm from './ui/PermanentConstraintForm/PermanentConstraintForm';
-import RequestsList from './ui/RequestsList/RequestsList';
-import RequestDetails from './ui/RequestDetails/RequestDetails';
+import { constraintAPI } from 'shared/api/apiService';
+import EmptyState from 'shared/ui/components/EmptyState';
+import LoadingState from 'shared/ui/components/LoadingState';
+import PageHeader from 'shared/ui/components/PageHeader';
+import PermanentConstraintForm from './ui/PermanentConstraintForm';
+import RequestsList from './ui/RequestsList';
+import RequestDetails from './ui/RequestDetails';
 import './index.css';
 
 const EmployeeRequests = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
-    const {items: requests, loading, loaded, error} = useSelector(state => state.requests);
+    const { items: requests, loading, loaded, error } = useSelector(state => state.requests);
 
     const [showForm, setShowForm] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -71,7 +71,7 @@ const EmployeeRequests = () => {
 
                 dispatch(addNotification({
                     type: 'success',
-                    message: t('requests.updateSuccess')
+                    message: t('requests.updateSuccess'),
                 }));
             } else {
                 // Для нового запроса - существующая логика
@@ -81,12 +81,12 @@ const EmployeeRequests = () => {
 
                 dispatch(updateRequest({
                     tempId: optimisticRequest.id,
-                    realRequest: response.data
+                    realRequest: response.data,
                 }));
 
                 dispatch(addNotification({
                     type: 'success',
-                    message: t('requests.submitSuccess')
+                    message: t('requests.submitSuccess'),
                 }));
             }
         } catch (error) {
@@ -101,7 +101,7 @@ const EmployeeRequests = () => {
             const errorMessage = error.response?.data?.message || t('requests.submitError');
             dispatch(addNotification({
                 type: 'error',
-                message: errorMessage
+                message: errorMessage,
             }));
         } finally {
             setEditingRequest(null);
@@ -130,12 +130,12 @@ const EmployeeRequests = () => {
 
             dispatch(addNotification({
                 type: 'success',
-                message: t('requests.deleteSuccess')
+                message: t('requests.deleteSuccess'),
             }));
         } catch (error) {
             dispatch(addNotification({
                 type: 'error',
-                message: t('requests.deleteError')
+                message: t('requests.deleteError'),
             }));
         }
     };
@@ -194,14 +194,14 @@ const EmployeeRequests = () => {
                 title={t('requests.title')}
                 badge={pendingCount > 0 ? {
                     text: `${pendingCount} ${t('requests.pending')}`,
-                    variant: 'info'
+                    variant: 'info',
                 } : null}
             />
 
             <Card className="employee-requests-card">
                 <Card.Body>
                     {loading && !loaded ? (
-                        <LoadingState/>
+                        <LoadingState />
                     ) : error ? (
                         <EmptyState
                             icon="bi-exclamation-triangle"
@@ -209,7 +209,7 @@ const EmployeeRequests = () => {
                             message={error}
                             action={{
                                 label: t('common.retry'),
-                                onClick: () => dispatch(fetchMyRequests())
+                                onClick: () => dispatch(fetchMyRequests()),
                             }}
                         />
                     ) : validRequests.length === 0 ? (
@@ -232,7 +232,7 @@ const EmployeeRequests = () => {
             {/* Floating Action Button */}
             <Button
                 className="fab-button"
-                variant={hasPendingRequest || loading ? "secondary" : "primary"}
+                variant={hasPendingRequest || loading ? 'secondary' : 'primary'}
                 onClick={handleFabClick}
                 disabled={loading}
                 title={loading

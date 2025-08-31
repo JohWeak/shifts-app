@@ -1,36 +1,39 @@
 //frontend/src/features/admin-system-settings/model/settingsSlice.js
 
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {settingsAPI} from 'shared/api/apiService';
-import {CACHE_DURATION, isCacheValid} from "../../../shared/lib/cache/cacheUtils";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { settingsAPI } from 'shared/api/apiService';
+import { CACHE_DURATION, isCacheValid } from '../../../shared/lib/cache/cacheUtils';
 
 // Async thunks
 export const fetchSystemSettings = createAsyncThunk(
     'settings/fetchSystemSettings',
-    async (forceRefresh = false, {getState, rejectWithValue}) => {
+    async (forceRefresh = false, { getState, rejectWithValue }) => {
         const state = getState();
-        const {lastFetched, systemSettings} = state.settings;
+        const { lastFetched, systemSettings } = state.settings;
         if (!forceRefresh && isCacheValid(lastFetched, CACHE_DURATION.LONG) && systemSettings?.positions?.length > 0) {
-            return {cached: true, data: systemSettings};
+            return { cached: true, data: systemSettings };
         }
         try {
             const response = await settingsAPI.fetchSystemSettings();
-            return {cached: false, data: response};
+            return { cached: false, data: response };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 export const updateSystemSettings = createAsyncThunk(
     'settings/updateSystemSettings',
-    async (settings, {rejectWithValue}) => {
+    async (settings, { rejectWithValue, dispatch }) => {
         try {
-            return await settingsAPI.updateSystemSettings(settings);
+            const response = await settingsAPI.updateSystemSettings(settings);
+            // Оптимистично обновляем локальное состояние
+            dispatch(updateLocalSettings(settings));
+            return response;
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 const settingsSlice = createSlice({
@@ -63,11 +66,11 @@ const settingsSlice = createSlice({
     },
     reducers: {
         updateLocalSettings(state, action) {
-            state.systemSettings = {...state.systemSettings, ...action.payload};
+            state.systemSettings = { ...state.systemSettings, ...action.payload };
         },
         invalidateCache(state) {
             state.lastFetched = null;
-        }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -78,9 +81,10 @@ const settingsSlice = createSlice({
             .addCase(fetchSystemSettings.fulfilled, (state, action) => {
                 state.loading = 'idle';
                 if (!action.payload.cached) {
+                    const responseData = action.payload.data?.data || action.payload.data;
                     state.systemSettings = {
                         ...state.systemSettings,
-                        ...action.payload.data
+                        ...responseData,
                     };
                     state.lastFetched = Date.now();
                 }
@@ -95,10 +99,7 @@ const settingsSlice = createSlice({
             })
             .addCase(updateSystemSettings.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                state.systemSettings = {
-                    ...state.systemSettings,
-                    ...action.payload
-                };
+                state.error = null;
             })
             .addCase(updateSystemSettings.rejected, (state, action) => {
                 state.loading = 'idle';
@@ -107,4 +108,5 @@ const settingsSlice = createSlice({
     },
 });
 
+export const { updateLocalSettings, invalidateCache } = settingsSlice.actions;
 export default settingsSlice.reducer;

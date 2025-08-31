@@ -1,20 +1,20 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Accordion, Button, Col, Form, Row} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {debounce} from 'lodash';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {setFilters} from '../../model/employeeSlice';
-import {fetchSystemSettings} from 'features/admin-system-settings/model/settingsSlice';
-import {fetchWorkSites} from 'features/admin-schedule-management/model/scheduleSlice';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Accordion, Button, Col, Form, Row } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { debounce } from 'lodash';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { setFilters } from '../../model/employeeSlice';
+import { fetchSystemSettings } from 'features/admin-system-settings/model/settingsSlice';
+import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
 import './EmployeeFilters.css';
 
 const EmployeeFilters = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
-    const {filters, employees} = useSelector((state) => state.employees);
-    const {systemSettings} = useSelector((state) => state.settings || {});
-    const {workSites} = useSelector((state) => state.schedule || {});
+    const { filters, employees } = useSelector((state) => state.employees);
+    const { systemSettings } = useSelector((state) => state.settings || {});
+    const { workSites } = useSelector((state) => state.schedule || {});
 
     const [selectedWorkSite, setSelectedWorkSite] = useState(filters.work_site || 'all');
 
@@ -35,7 +35,7 @@ const EmployeeFilters = () => {
                     positionMap.set(pos.pos_name, {
                         pos_id: pos.pos_name,
                         pos_name: pos.pos_name,
-                        actual_ids: [pos.pos_id]
+                        actual_ids: [pos.pos_id],
                     });
                 } else {
                     positionMap.get(pos.pos_name).actual_ids.push(pos.pos_id);
@@ -49,7 +49,7 @@ const EmployeeFilters = () => {
             const positionIdsFromFlexibleEmployees = [...new Set(
                 employees
                     .filter(emp => !emp.work_site_id && emp.default_position_id)
-                    .map(emp => emp.default_position_id)
+                    .map(emp => emp.default_position_id),
             )];
             return allPositions.filter(pos => positionIdsFromFlexibleEmployees.includes(pos.pos_id));
         } else {
@@ -62,12 +62,12 @@ const EmployeeFilters = () => {
         if (field === 'position' && selectedWorkSite === 'all' && value !== 'all') {
             const position = filteredPositions.find(p => p.pos_id === value);
             if (position && position.actual_ids) {
-                dispatch(setFilters({[field]: value}));
+                dispatch(setFilters({ [field]: value }));
             } else {
-                dispatch(setFilters({[field]: value}));
+                dispatch(setFilters({ [field]: value }));
             }
         } else {
-            dispatch(setFilters({[field]: value}));
+            dispatch(setFilters({ [field]: value }));
         }
     }, [dispatch, selectedWorkSite, filteredPositions]);
 
@@ -75,7 +75,7 @@ const EmployeeFilters = () => {
         () => debounce((value) => {
             handleFilterChange('search', value);
         }, 50),
-        [handleFilterChange]
+        [handleFilterChange],
     );
 
     useEffect(() => {
@@ -99,7 +99,7 @@ const EmployeeFilters = () => {
             status: 'active',
             position: 'all',
             search: '',
-            work_site: 'all'
+            work_site: 'all',
         }));
         setSelectedWorkSite('all');
     };

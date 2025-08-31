@@ -79,11 +79,10 @@
 
 .admin-layout .admin-main-content {
     padding: 1rem;
-    position: absolute;
-    top: 0;
-    left: 0;
+    max-width: 1200px;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
+
 }
 
 .admin-layout .admin-main-content .card {
@@ -102,10 +101,6 @@
     background-color: var(--bs-body-bg);
     border-right: 1px solid var(--bs-border-color);
     height: calc(100vh - var(--app-navbar-height));
-    position: sticky;
-    top: var(--app-navbar-height);
-    z-index: 100;
-
 }
 
 [dir="rtl"] .admin-layout .admin-sidebar-desktop {
@@ -113,25 +108,18 @@
     border-left: 1px solid var(--bs-border-color);
 }
 
+[dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded {
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+}
+
 /* Expanded Sidebar (On Hover/Click) */
 .admin-layout .admin-sidebar-desktop.expanded {
     width: var(--app-sidebar-width);
-    position: fixed;
-    z-index: 1040;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-    left: 0;
-    top: var(--app-navbar-height);
     overflow-y: auto;
     overflow-x: hidden;
-    transition: width 0.3s ease;
 }
 
-
-[dir="rtl"] .admin-layout .admin-sidebar-desktop.expanded {
-    left: auto;
-    right: 0;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-}
 
 .admin-layout .sidebar-menu-btn {
     --sidebar-menu-btn-size: 2rem;
@@ -297,17 +285,11 @@
     position: relative;
     flex: 1;
     display: flex;
-
-}
-
-.admin-layout .admin-content-area.under-sidebar {
     margin-inline-start: var(--app-colapsed-sidebar-width);
+    justify-content: center;
+
 }
 
-[dir="rtl"] .admin-layout .admin-content-area {
-    /*margin-left: 0;*/
-    /*margin-right: 80px;*/
-}
 
 [data-theme="dark"] .admin-layout .admin-content-area {
     background-color: var(--bs-black);

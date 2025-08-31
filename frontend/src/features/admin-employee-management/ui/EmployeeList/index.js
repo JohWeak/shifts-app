@@ -1,11 +1,11 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/index.js
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Card, Table, Button, Badge, Spinner, Pagination, Form} from 'react-bootstrap';
+import {Badge, Button, Card, Form, Pagination, Spinner, Table} from 'react-bootstrap';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {getStatusBadgeVariant} from "shared/lib/utils/scheduleUtils";
+import {getStatusBadgeVariant} from 'shared/lib/utils/scheduleUtils';
 import {useSortableData} from 'shared/hooks/useSortableData';
-import SortableHeader from 'shared/ui/components/SortableHeader/SortableHeader';
-import {motion, AnimatePresence} from "motion/react";
+import SortableHeader from 'shared/ui/components/SortableHeader';
+import {AnimatePresence, motion} from 'motion/react';
 import './EmployeeList.css';
 
 const EmployeeList = ({
@@ -47,10 +47,10 @@ const EmployeeList = ({
     }), [t]);
 
 
-    const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
+    const {sortedItems: sortedEmployees, requestSort, sortConfig} = useSortableData(
         dataToRender,
-        { field: 'name', order: 'ASC' },
-        sortingAccessors
+        {field: 'name', order: 'ASC'},
+        sortingAccessors,
     );
 
 
@@ -61,12 +61,12 @@ const EmployeeList = ({
     const tableBodyVariants = {
         hidden: {
             opacity: 0,
-            transition: { duration: 0.15 }
+            transition: {duration: 0.15},
         },
         visible: {
             opacity: 1,
-            transition: { duration: 0.15, staggerChildren: 0.04 }
-        }
+            transition: {duration: 0.15, staggerChildren: 0.04},
+        },
     };
 
     const rowVariants = {
@@ -77,7 +77,7 @@ const EmployeeList = ({
         visible: {
             opacity: 1,
             y: 0,
-            transition: { ease: "easeOut", duration: 0.15 }
+            transition: {ease: 'easeOut', duration: 0.15},
         },
     };
 
@@ -208,7 +208,7 @@ const EmployeeList = ({
 
                 <div
                     className="table-responsive"
-                    style={{ overflowY: isAnimating ? 'hidden' : 'auto' }}
+                    style={{overflowY: isAnimating ? 'hidden' : 'auto'}}
                 >
                     <Table hover className="data-table mb-0">
                         <thead>
@@ -269,7 +269,7 @@ const EmployeeList = ({
                                                         e.stopPropagation();
                                                         if (employee.phone && window.confirm(t('employee.confirmCall', {
                                                             name: `${employee.first_name} ${employee.last_name}`,
-                                                            phone: employee.phone
+                                                            phone: employee.phone,
                                                         }))) {
                                                             window.location.href = `tel:${employee.phone}`;
                                                         } else if (!employee.phone) {

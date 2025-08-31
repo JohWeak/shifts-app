@@ -1,23 +1,23 @@
 // frontend/src/shared/ui/layouts/EmployeeLayout/EmployeeLayout.js
-import React, {useEffect, useState} from 'react';
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import {Container, Navbar, Nav, Spinner, Dropdown} from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Navigate, useLocation, useNavigate, useOutlet } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Container, Dropdown, Nav, Navbar, Spinner } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import {LanguageSwitch} from 'shared/ui/components/LanguageSwitch/LanguageSwitch';
-import ThemeToggle from 'shared/ui/components/ThemeToggle/ThemeToggle';
-import GlobalAlerts from 'shared/ui/components/GlobalAlerts/GlobalAlerts';
+import { LanguageSwitch } from 'shared/ui/components/LanguageSwitch';
+import ThemeToggle from 'shared/ui/components/ThemeToggle';
+import GlobalAlerts from 'shared/ui/components/GlobalAlerts';
 import { logout } from 'features/auth/model/authSlice';
 import {
+    checkScheduleUpdates,
+    fetchEmployeeArchiveSummary,
+    fetchEmployeeConstraints,
     fetchPersonalSchedule,
     fetchPositionSchedule,
-    fetchEmployeeArchiveSummary,
-    checkScheduleUpdates,
-    fetchEmployeeConstraints,
-} from "features/employee-dashboard/model/employeeDataSlice";
-import { selectNewUpdatesCount, fetchMyRequests } from 'features/employee-requests/model/requestsSlice';
+} from 'features/employee-dashboard/model/employeeDataSlice';
+import { fetchMyRequests, selectNewUpdatesCount } from 'features/employee-requests/model/requestsSlice';
+import { AnimatePresence, motion } from 'motion/react';
 //import DebugReduxState from "../../components/DebugReduxState";
-
 import './EmployeeLayout.css';
 
 const EmployeeLayout = () => {
@@ -26,7 +26,19 @@ const EmployeeLayout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [isAnimating, setIsAnimating] = useState(false);
+
+    // --- Animation ---
+    const currentOutlet = useOutlet();
+    const [outlet, setOutlet] = useState(currentOutlet);
+    const [prevLocation, setPrevLocation] = useState(location);
+
+    useEffect(() => {
+        if (location.pathname !== prevLocation.pathname) {
+            setPrevLocation(location);
+            setOutlet(currentOutlet);
+        }
+    }, [location, currentOutlet, prevLocation]);
+    // --- Animation end ---
 
     useEffect(() => {
         const initialLoad = async () => {
@@ -45,7 +57,7 @@ const EmployeeLayout = () => {
                 dispatch(fetchEmployeeArchiveSummary());
                 dispatch(fetchMyRequests());
             } catch (error) {
-                console.error("Error: ", error);
+                console.error('Error: ', error);
             }
         };
 
@@ -65,26 +77,42 @@ const EmployeeLayout = () => {
 
 
     const navItems = [
-        { path: '/employee/dashboard', icon: 'house', iconFill: 'house-fill', label: t('navigation.home') },
-        { path: '/employee/schedule', icon: 'calendar-week', iconFill: 'calendar-week-fill', label: t('employee.schedule.tabName') },
-        { path: '/employee/constraints', icon: 'shield-check', iconFill: 'shield-fill-check', label: t('employee.constraints') },
+        {
+            path: '/employee/dashboard',
+            icon: 'house',
+            iconFill: 'house-fill',
+            label: t('navigation.home'),
+        },
+        {
+            path: '/employee/schedule',
+            icon: 'calendar-week',
+            iconFill: 'calendar-week-fill',
+            label: t('employee.schedule.tabName'),
+        },
+        {
+            path: '/employee/constraints',
+            icon: 'shield-check',
+            iconFill: 'shield-fill-check',
+            label: t('employee.constraints'),
+        },
         {
             path: '/employee/requests',
             icon: 'envelope',
             iconFill: 'envelope-fill',
             label: t('employee.requests.title'),
-            badge: newRequestUpdates > 0 ? newRequestUpdates : null
+            badge: newRequestUpdates > 0 ? newRequestUpdates : null,
         },
-        { path: '/employee/archive', icon: 'archive', iconFill: 'archive-fill', label: t('employee.archive.title') },
+        {
+            path: '/employee/archive',
+            icon: 'archive',
+            iconFill: 'archive-fill',
+            label: t('employee.archive.title'),
+        },
     ];
 
     const handleNavigation = (path) => {
         if (location.pathname === path) return;
-        setIsAnimating(true);
-        setTimeout(() => {
-            navigate(path);
-            setIsAnimating(false);
-        }, 200);
+        navigate(path);
     };
 
     const handleLogoClick = () => {
@@ -124,7 +152,7 @@ const EmployeeLayout = () => {
         <>
             {/* Header */}
             <Navbar bg="primary" variant="dark" expand={false} fixed="top" className="employee-navbar">
-                <Container fluid >
+                <Container fluid>
                     <Navbar.Brand
                         onClick={handleLogoClick}
                         style={{ cursor: 'pointer' }}
@@ -138,7 +166,7 @@ const EmployeeLayout = () => {
 
                     <div className="d-flex align-items-center gap-2">
 
-                        <ThemeToggle variant='icon' />
+                        <ThemeToggle variant="icon" />
                         <LanguageSwitch />
 
                         {/* User Menu */}
@@ -194,8 +222,9 @@ const EmployeeLayout = () => {
                                     <i className={`bi bi-${item.icon} icon-outline`}></i>
                                     <i className={`bi bi-${item.iconFill} icon-fill`}></i>
                                     {item.badge && (
-                                        <span className="position-absolute top-5 start-100 translate-middle badge rounded-pill bg-danger"
-                                              style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem' }}>
+                                        <span
+                                            className="position-absolute top-5 start-100 translate-middle badge rounded-pill bg-danger"
+                                            style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem' }}>
                                             {item.badge}
                                             <span className="visually-hidden">new updates</span>
                                         </span>
@@ -208,14 +237,21 @@ const EmployeeLayout = () => {
                 </Container>
             </Nav>
 
-            {/* Main Content */}
-            <main className={`employee-main-content ${isAnimating ? 'animating-out' : 'animating-in'}`}>
-                <Container fluid className="px-0">
-                    <GlobalAlerts />
-                    <Outlet />
-                    {/*{process.env.NODE_ENV === 'development' && <DebugReduxState />}*/}
-                </Container>
-            </main>
+            <AnimatePresence mode="wait">
+                <motion.main
+                    key={location.pathname}
+                    className="employee-main-content"
+                    initial={{ opacity: 0, x: 15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -15 }}
+                    transition={{ duration: 0.1, ease: 'easeInOut' }}
+                >
+                    <Container fluid className="px-0 h-100">
+                        <GlobalAlerts />
+                        {outlet}
+                    </Container>
+                </motion.main>
+            </AnimatePresence>
         </>
     );
 };

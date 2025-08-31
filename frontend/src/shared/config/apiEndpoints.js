@@ -5,7 +5,6 @@ export const API_ENDPOINTS = {
     AUTH: {
         LOGIN: `${API_BASE}/auth/login`,
         LOGOUT: `${API_BASE}/auth/logout`,
-        PROFILE: `${API_BASE}/auth/profile`,
     },
 
     WORKSITES: {
@@ -58,6 +57,7 @@ export const API_ENDPOINTS = {
         DETAILS: (employeeId) => `${API_BASE}/employees/${employeeId}`,
         RECOMMENDATIONS: `${API_BASE}/employees/recommendations`,
         MY_SHIFTS: `${API_BASE}/employees/my-shifts`,
+        PROFILE: `${API_BASE}/employees/profile`,
     },
 
     CONSTRAINTS: {

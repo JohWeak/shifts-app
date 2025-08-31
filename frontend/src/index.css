@@ -1,5 +1,5 @@
 /* frontend/src/index.css */
-@import './app/design-system.css';
+@import 'app/styles/design-system.css';
 
 html {
     scrollbar-gutter: stable;
@@ -12,6 +12,7 @@ body.modal-open {
     /*overflow: inherit !important;*/
     padding-right: 0 !important;
 }
+
 body {
     font-family: var(--bs-body-font-family), serif;
     background-color: var(--bs-body-bg);
@@ -26,6 +27,7 @@ body {
 [data-theme="light"] .surface {
     background-color: var(--bs-white);
 }
+
 [data-theme="dark"] .surface {
     background-color: var(--bs-card-bg);
 }
@@ -51,17 +53,16 @@ body {
     border-color: var(--bs-primary-hover);
 }
 
-[data-theme="dark"] .text-muted{
+[data-theme="dark"] .text-muted {
     color: var(--bs-gray-300) !important;
 }
 
-[data-theme="dark"] ::placeholder{
+[data-theme="dark"] ::placeholder {
     color: var(--bs-gray-600);
 }
 
 [data-theme="dark"] .form-control:disabled,
-[data-theme="dark"] .form-control[readonly]
- {
+[data-theme="dark"] .form-control[readonly] {
     background-color: var(--bs-gray-800);
     color: var(--bs-gray-300);
 }

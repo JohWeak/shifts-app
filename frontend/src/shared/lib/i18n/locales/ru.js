@@ -2,18 +2,18 @@
 export const ru = {
     admin: {
         requests: {
-            title: "Постоянные запросы",
-            employee: "Сотрудник",
-            position: "Должность",
-            worksite: "Рабочий объект",
-            status: "Статус",
-            sentAt: "Отправлено",
-            reviewedAt: "Рассмотрено",
-            pending: "В ожидании",
-            pendingRequests: "Ожидающие запросы",
-            processedRequests: "Обработанные запросы",
-            noRequests: "Запросы не найдены",
-            noRequestsMessage: "Когда сотрудники отправят запросы на постоянные ограничения, они появятся здесь для рассмотрения.",
+            title: 'Постоянные запросы',
+            employee: 'Сотрудник',
+            position: 'Должность',
+            worksite: 'Рабочий объект',
+            status: 'Статус',
+            sentAt: 'Отправлено',
+            reviewedAt: 'Рассмотрено',
+            pending: 'В ожидании',
+            pendingRequests: 'Ожидающие запросы',
+            processedRequests: 'Обработанные запросы',
+            noRequests: 'Запросы не найдены',
+            noRequestsMessage: 'Когда сотрудники отправят запросы на постоянные ограничения, они появятся здесь для рассмотрения.',
             includeResponse: 'Включить ответ',
             responsePlaceholder: 'Ответ',
             reject: 'Отклонить',
@@ -49,7 +49,7 @@ export const ru = {
                         busy: 'Занят',
                         constraints: 'Ограничения',
                         permanent: 'Постоянные',
-                        preferences: 'Предпочтения'
+                        preferences: 'Предпочтения',
                     },
                     alreadyAssigned: 'Уже назначен на {shift}',
                     permanentConstraint: 'Постоянное ограничение',
@@ -57,8 +57,8 @@ export const ru = {
                     cannotWork: 'Не может работать',
                     prefersNotToWork: 'Предпочитает не работать',
                     restViolation: 'Нарушение отдыха',
-                    noEmployees: 'Нет сотрудников в этой категории'
-                }
+                    noEmployees: 'Нет сотрудников в этой категории',
+                },
             },
             confirmApprove: 'Подтвердить одобрение',
             confirmApproveMessage: 'Вы уверены, что хотите одобрить этот запрос?',
@@ -75,7 +75,7 @@ export const ru = {
             reviewRejected: 'Рассмотрение отклонено',
             reviewApprovedMessage: 'Этот запрос был одобрен',
             reviewRejectedMessage: 'Этот запрос был отклонен',
-        }
+        },
     },
     app: {
         name: 'Система Расписаний',
@@ -113,7 +113,32 @@ export const ru = {
             thursday: 'Четверг',
             friday: 'Пятница',
             saturday: 'Суббота',
-        }
+        },
+        export: {
+            title: 'Добавить в календарь',
+            buttonTitle: 'Экспорт смен в календарь',
+            selectShifts: 'Выберите смены для добавления',
+            noShifts: 'Нет доступных смен для экспорта',
+            includeLocation: 'Включить адрес',
+            includeLocationHelp: 'Добавить адрес',
+            reminder: 'Напоминание',
+            noReminder: 'Без напоминания',
+            atEventTime: 'В момент события',
+            minutes: 'За {count}} минут',
+            minutes_1: 'За {count} минуту',
+            minutes_2: 'За {count} минуты',
+            hours: 'За {count} час',
+            hours_2: 'За {count} часа',
+            addToCalendar: 'Добавить в календарь',
+            noLocationAvailable: 'Нет данных о местоположении',
+            mobileTip: 'После нажатия "Открыть в календаре" устройство предложит добавить события',
+            mobileInstructions: 'Если календарь не открылся, проверьте папку Загрузки и откройте файл .ics вручную',
+            errorExporting: 'Ошибка экспорта событий. Попробуйте снова.',
+            exporting: 'Экспорт...',
+            openInCalendar: 'Открыть в календаре',
+            selectCalendarType: 'Выберите приложение календаря',
+            downloadICS: 'ICS Файл',
+        },
     },
     color: {
         apply: 'Применить цвет',
@@ -214,6 +239,10 @@ export const ru = {
         yes: 'Да',
         new: 'Новый',
         view: 'Просмотр',
+        selectAll: 'Выбрать все',
+        deselectAll: 'Снять выделение',
+        noEmail: 'Email не указан',
+        logout: 'Выход',
     },
     constraints: {
         alreadySubmitted: 'Вы уже отправили ограничения на эту неделю',
@@ -274,7 +303,7 @@ export const ru = {
             pendingRequests: 'Ожидающие запросы',
             weeklyShifts: 'Смен в неделю',
             totalShifts: 'Всего смен',
-            coveredShifts: 'Закрытые смены'
+            coveredShifts: 'Закрытые смены',
         },
         quickActions: {
             title: 'Быстрые действия',
@@ -283,7 +312,7 @@ export const ru = {
             viewReports: 'Просмотр отчетов',
             systemSettings: 'Настройки системы',
             workplaceSettings: 'Настройки рабочего места',
-            algorithmSettings: 'Настройки алгоритма'
+            algorithmSettings: 'Настройки алгоритма',
         },
         recentActivity: {
             title: 'Последние действия',
@@ -292,7 +321,7 @@ export const ru = {
             requestApproved: 'Запрос одобрен для {name}',
             positionUpdated: 'Должность обновлена: {position}',
             siteActivated: 'Рабочий объект активирован: {site}',
-            viewAll: 'Просмотреть все действия'
+            viewAll: 'Просмотреть все действия',
         },
         systemStatus: {
             title: 'Состояние системы',
@@ -304,8 +333,8 @@ export const ru = {
             offline: 'Офлайн',
             available: 'Доступно',
             connected: 'Подключено',
-            lastUpdated: 'Последнее обновление'
-        }
+            lastUpdated: 'Последнее обновление',
+        },
     },
     days: {
         months: {
@@ -320,7 +349,7 @@ export const ru = {
             september: 'Сентябрь',
             october: 'Октябрь',
             november: 'Ноябрь',
-            december: 'Декабрь'
+            december: 'Декабрь',
         },
         short: {
             sunday: 'Вс',
@@ -537,7 +566,7 @@ export const ru = {
             available: 'Доступные',
             crossPosition: 'Другие должности',
             otherSite: 'Другие объекты',
-            unavailable: 'Недоступные'
+            unavailable: 'Недоступные',
         },
         teams: 'Команды',
         time: 'Время',
@@ -664,6 +693,7 @@ export const ru = {
         title: 'Навигация',
         workplace: 'Рабочее место',
         requests: 'Запросы',
+        profile: 'Профиль',
     },
     notifications: {
         constraintsSaved: 'Ограничения успешно сохранены',
@@ -691,6 +721,20 @@ export const ru = {
         requirements: 'Требования',
         saveChanges: 'Сохранить изменения',
         unsavedChanges: 'У вас есть несохраненные изменения',
+    },
+    profile: {
+        title: 'Мой профиль',
+        subtitle: 'Управление личной информацией и настройками',
+        firstName: 'Имя',
+        lastName: 'Фамилия',
+        email: 'Email',
+        phone: 'Телефон',
+        updateSuccess: 'Профиль успешно обновлен',
+        notifications: {
+            title: 'Email уведомления',
+            receiveScheduleEmails: 'Получать уведомления о расписании по email',
+            scheduleEmailsDescription: 'Получать email с приглашениями в календарь при публикации расписания',
+        },
     },
     recommendation: {
         'Already assigned to': 'Уже назначен на',
@@ -739,7 +783,7 @@ export const ru = {
         title: 'Мои запросы',
         createNew: 'Новый запрос',
         permanentConstraints: {
-            title: 'Постоянные ограничения графика'
+            title: 'Постоянные ограничения графика',
         },
         noRequests: 'Нет запросов',
         noRequestsMessage: 'Вы еще не отправляли никаких запросов',
@@ -760,7 +804,7 @@ export const ru = {
         messagePlaceholder: 'Добавьте любую дополнительную информацию о ваших ограничениях...',
         confirmSubmit: {
             title: 'Отправить запрос',
-            message: 'Вы уверены, что хотите отправить этот запрос на постоянные ограничения?'
+            message: 'Вы уверены, что хотите отправить этот запрос на постоянные ограничения?',
         },
         submitSuccess: 'Запрос успешно отправлен',
         submitError: 'Не удалось отправить запрос',
@@ -768,7 +812,7 @@ export const ru = {
         status: {
             pending: 'В ожидании',
             approved: 'Одобрено',
-            rejected: 'Отклонено'
+            rejected: 'Отклонено',
         },
         includeMessage: 'Добавить сообщение',
         includeMessageLabel: 'Включить сообщение в письмо',
@@ -782,7 +826,7 @@ export const ru = {
         updateSuccess: 'Запрос успешно обновлен',
         confirmUpdate: {
             title: 'Обновить запрос',
-            message: 'Вы уверены, что хотите обновить этот запрос? Предыдущий запрос будет заменен.'
+            message: 'Вы уверены, что хотите обновить этот запрос? Предыдущий запрос будет заменен.',
         },
         deleteSuccess: 'Запрос успешно удален',
         inactive: 'Неактивный',
@@ -826,7 +870,7 @@ export const ru = {
         employee: 'Сотрудник',
         manager: 'Менеджер',
         supervisor: 'Супервайзер',
-        teamLead: 'Руководитель группы'
+        teamLead: 'Руководитель группы',
     },
     schedule: {
         actions: 'Действия',
@@ -971,7 +1015,7 @@ export const ru = {
         statuses: {
             draft: 'Черновик',
             published: 'Опубликовано',
-            archived: 'В архиве'
+            archived: 'В архиве',
         },
         publishError: 'Не удалось опубликовать расписание',
         publishedScheduleExists: 'Опубликованное расписание для этих дат уже существует. Пожалуйста, сначала снимите его с публикации.',
@@ -1031,9 +1075,27 @@ export const ru = {
         strictLegalCompliance: 'Строгое соблюдение законодательства',
         strictLegalComplianceHint: 'Строго соблюдать все требования законодательства. Отключайте только для целей тестирования.',
         systemSettings: 'Системные настройки',
+        systemSettingsDesc: 'Управление всеми системными настройками и алгоритмами',
         timeFormat: 'Формат времени',
         weekStartDay: 'День начала недели',
         weekStartDayHint: 'Выберите день, который будет считаться первым днем недели',
+        title: 'Настройки системы',
+        description: 'Управление всеми настройками системы и алгоритмов',
+        generalSettingsDesc: 'Основные настройки интерфейса и форматов',
+        scheduleSettingsDesc: 'Настройки генерации расписания и автоматизации',
+        algorithmSettingsDesc: 'Конфигурация алгоритма оптимизации расписания',
+        positionSettingsDesc: 'Управление позициями и ролями сотрудников',
+        constraintSettingsDesc: 'Настройки ограничений и соответствия требованиям',
+        notificationSettingsDesc: 'Конфигурация уведомлений и оповещений',
+        securitySettingsDesc: 'Настройки безопасности и политики доступа',
+        optimizationSettings: 'Настройки оптимизации',
+        optimizationMode: 'Режим оптимизации',
+        optimizationFast: 'Быстро',
+        optimizationBalanced: 'Сбалансированно',
+        optimizationThorough: 'Тщательно',
+        fairnessWeight: 'Баланс эффективности и справедливости',
+        efficiency: 'Эффективность',
+        fairness: 'Справедливость',
     },
     shift: {
         colorUpdated: 'Цвет смены обновлен',
@@ -1084,30 +1146,30 @@ export const ru = {
             title: 'Нарушения времени отдыха',
             beforeDetail: '{date}: Только {restHours} часов отдыха перед сменой {nextShift} (требуемый минимум: {requiredRest} часов)',
             afterDetail: '{date}: Только {restHours} часов отдыха после смены {previousShift} (требуемый минимум: {requiredRest} часов)',
-            generalDetail: '{date}: Только {restHours} часов отдыха между сменами (требуемый минимум: {requiredRest} часов)'
+            generalDetail: '{date}: Только {restHours} часов отдыха между сменами (требуемый минимум: {requiredRest} часов)',
         },
         weekly_hours_violation: {
             title: 'Нарушения еженедельных часов',
-            detail: 'Работа {totalHours} часов на этой неделе (максимально допустимо: {maxHours} часов)'
+            detail: 'Работа {totalHours} часов на этой неделе (максимально допустимо: {maxHours} часов)',
         },
         daily_hours_violation: {
             title: 'Нарушения ежедневных часов',
-            detail: '{date}: Работа {totalHours} часов за один день (максимально допустимо: {maxHours} часов)'
+            detail: '{date}: Работа {totalHours} часов за один день (максимально допустимо: {maxHours} часов)',
         },
         consecutive_shifts_violation: {
             title: 'Нарушения последовательных дней',
-            detail: 'Работа {consecutiveDays} дней подряд (максимально допустимо: {maxDays} дней)'
+            detail: 'Работа {consecutiveDays} дней подряд (максимально допустимо: {maxDays} дней)',
         },
         severity: {
             critical: 'Критический',
             high: 'Высокий',
             medium: 'Средний',
-            low: 'Низкий'
+            low: 'Низкий',
         },
         noViolations: 'Нарушений не найдено',
         violationSummary: 'Найдено нарушений: {count}',
         checkingCompliance: 'Проверка на соответствие законодательству...',
-        complianceCheckFailed: 'Не удалось проверить соответствие'
+        complianceCheckFailed: 'Не удалось проверить соответствие',
     },
     workSite: {
         addWorkSite: 'Добавить рабочий объект',
@@ -1134,8 +1196,8 @@ export const ru = {
                 },
                 time: {
                     '12h': '12-часовой',
-                    '24h': '24-часовой'
-                }
+                    '24h': '24-часовой',
+                },
             },
             preview: 'Предпросмотр',
             timeExample: 'Пример времени',

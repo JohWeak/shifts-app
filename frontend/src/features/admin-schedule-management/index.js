@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Button } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 // UI Components
-import PageHeader from 'shared/ui/components/PageHeader/PageHeader';
+import PageHeader from 'shared/ui/components/PageHeader';
 import GenerateScheduleForm from './ui/GenerateScheduleForm';
 import ScheduleContent from './ui/ScheduleContent';
 
@@ -14,13 +14,15 @@ import ScheduleContent from './ui/ScheduleContent';
 import { useScheduleActions } from './model/hooks/useScheduleActions';
 import { useScheduleUI } from './model/hooks/useScheduleUI';
 import {
-    fetchSchedules,
-    fetchScheduleDetails,
-    setSelectedScheduleId,
     addPendingChange,
-    preloadScheduleDetails, fetchWorkSites,
+    fetchScheduleDetails,
+    fetchSchedules,
+    fetchWorkSites,
+    preloadScheduleDetails,
+    setSelectedScheduleId,
 } from './model/scheduleSlice';
 
+import { fetchPositions } from '../admin-workplace-settings/model/workplaceSlice';
 import './index.css';
 
 const ScheduleManagement = () => {
@@ -32,14 +34,21 @@ const ScheduleManagement = () => {
         scheduleDetails,
         schedules,
         workSites,
-        workSitesLoading
+        workSitesLoading,
     } = useSelector((state) => state.schedule);
 
     const { loading: actionsLoading, handleGenerate } = useScheduleActions();
-    const { selectedCell, isPanelOpen, showEmployeeModal, isLargeScreen, handleCellClick, closeAllModals } = useScheduleUI();
+    const {
+        selectedCell,
+        isPanelOpen,
+        showEmployeeModal,
+        isLargeScreen,
+        handleCellClick,
+        closeAllModals,
+    } = useScheduleUI();
     const [isGenerateFormVisible, setIsGenerateFormVisible] = useState(false);
     const [panelWidth, setPanelWidth] = useState(() =>
-        parseInt(localStorage.getItem('recommendationPanelWidth')) || 25
+        parseInt(localStorage.getItem('recommendationPanelWidth')) || 25,
     );
     const handlePanelWidthChange = (newWidth) => {
         setPanelWidth(newWidth);
@@ -48,8 +57,8 @@ const ScheduleManagement = () => {
 
     useEffect(() => {
         dispatch(fetchSchedules());
-        dispatch(fetchWorkSites())
-        //dispatch(fetchPositions())
+        dispatch(fetchWorkSites());
+        dispatch(fetchPositions());
     }, [dispatch]);
 
     useEffect(() => {
@@ -82,8 +91,8 @@ const ScheduleManagement = () => {
                     date: selectedCell.date,
                     shiftId: selectedCell.shiftId,
                     empId: selectedCell.employeeIdToReplace,
-                    assignmentId: selectedCell.assignmentIdToReplace
-                }
+                    assignmentId: selectedCell.assignmentIdToReplace,
+                },
             }));
         }
 
@@ -99,8 +108,8 @@ const ScheduleManagement = () => {
                 empName: `${employee.first_name} ${employee.last_name}`,
                 isCrossPosition,
                 isCrossSite,
-                isFlexible
-            }
+                isFlexible,
+            },
         }));
         if (!isLargeScreen) closeAllModals();
     };
@@ -142,7 +151,7 @@ const ScheduleManagement = () => {
                     <PageHeader icon="calendar-week" title={t('schedule.title')} subtitle={t('schedule.subtitle')}>
                         <Button
                             variant={`${isGenerateFormVisible ? 'outline-primary' : 'primary'}`}
-                            onClick={() => setIsGenerateFormVisible(!isGenerateFormVisible)} 
+                            onClick={() => setIsGenerateFormVisible(!isGenerateFormVisible)}
                             disabled={actionsLoading}
                         >
                             <i className={`bi ${isGenerateFormVisible ? 'bi-chevron-up' : 'bi-gear'} me-2`}></i>
@@ -151,15 +160,15 @@ const ScheduleManagement = () => {
                     </PageHeader>
 
 
-                        <div className={`generate-schedule-form-container ${isGenerateFormVisible ? 'visible' : ''}`}>
-                            <GenerateScheduleForm
-                                onGenerate={onGenerateSubmit}
-                                onCancel={() => setIsGenerateFormVisible(false)}
-                                generating={actionsLoading}
-                                workSites={workSites}
-                                workSitesLoading={workSitesLoading === 'pending'}
-                            />
-                        </div>
+                    <div className={`generate-schedule-form-container ${isGenerateFormVisible ? 'visible' : ''}`}>
+                        <GenerateScheduleForm
+                            onGenerate={onGenerateSubmit}
+                            onCancel={() => setIsGenerateFormVisible(false)}
+                            generating={actionsLoading}
+                            workSites={workSites}
+                            workSitesLoading={workSitesLoading === 'pending'}
+                        />
+                    </div>
 
 
                     <ScheduleContent
