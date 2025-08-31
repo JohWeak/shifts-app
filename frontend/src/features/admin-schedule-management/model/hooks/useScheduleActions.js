@@ -75,8 +75,19 @@ export const useScheduleActions = (schedule = null) => {
 
         } catch (err) {
             const errorMsg = err?.message || err || errorMessage || t('errors.genericError');
+            
+            
+            // Check various error formats for PUBLISHED_SCHEDULE_EXISTS
+            const isPublishedScheduleError = 
+                errorMsg.includes('PUBLISHED_SCHEDULE_EXISTS') ||
+                err?.error === 'PUBLISHED_SCHEDULE_EXISTS' ||
+                err?.response?.data?.error === 'PUBLISHED_SCHEDULE_EXISTS' ||
+                (typeof err === 'object' && err?.error === 'PUBLISHED_SCHEDULE_EXISTS') ||
+                (typeof errorMsg === 'string' && errorMsg.includes('PUBLISHED_SCHEDULE_EXISTS')) ||
+                (typeof err === 'string' && err.includes('PUBLISHED_SCHEDULE_EXISTS')) ||
+                JSON.stringify(err).includes('PUBLISHED_SCHEDULE_EXISTS');
 
-            if (errorMsg.includes('PUBLISHED_SCHEDULE_EXISTS')) {
+            if (isPublishedScheduleError) {
                 dispatch(addNotification({
                     variant: 'warning',
                     message: 'schedule.publishedScheduleExists',

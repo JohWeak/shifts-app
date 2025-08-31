@@ -90,7 +90,9 @@ export const generateSchedule = createAsyncThunk(
 
             return response;
         } catch (error) {
-            return rejectWithValue(error.message);
+            // Handle different error formats from Axios
+            const errorData = error.response?.data || error;
+            return rejectWithValue(errorData);
         }
     }
 );

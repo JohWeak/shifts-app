@@ -16,13 +16,14 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
     const dateFormat = systemSettings?.dateFormat || 'DD/MM/YYYY';
     const minSelectableDate = getNextWeekStart(weekStartDay);
 
+
     const [settings, setSettings] = useState({
         ...DEFAULT_GENERATION_SETTINGS,
         weekStart: minSelectableDate,
         algorithm: 'auto',
         position_ids: [],
-        optimizationMode: 'balanced',
-        fairnessWeight: 50,
+        optimizationMode: systemSettings?.optimizationMode || 'balanced',
+        fairnessWeight: systemSettings?.fairnessWeight || 50,
     });
 
 
@@ -50,6 +51,16 @@ const GenerateScheduleForm = ({ onGenerate, onCancel, generating, workSites, wor
             setSettings(prev => ({ ...prev, position_ids: [] }));
         }
     }, [availablePositions]);
+
+    useEffect(() => {
+        if (systemSettings) {
+            setSettings(prev => ({
+                ...prev,
+                optimizationMode: systemSettings.optimizationMode || 'balanced',
+                fairnessWeight: systemSettings.fairnessWeight || 50,
+            }));
+        }
+    }, [systemSettings]);
 
     const handlePositionChange = (posId) => {
         setSettings(prev => {

@@ -10,6 +10,7 @@ const app = express();
 
 app.set('db', db);
 
+
 // Middleware
 // --- CORS settings for local development ---
 const allowedOrigins = [

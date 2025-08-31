@@ -23,6 +23,7 @@ import {
 } from './model/scheduleSlice';
 
 import { fetchPositions } from '../admin-workplace-settings/model/workplaceSlice';
+import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
 import './index.css';
 
 const ScheduleManagement = () => {
@@ -59,6 +60,7 @@ const ScheduleManagement = () => {
         dispatch(fetchSchedules());
         dispatch(fetchWorkSites());
         dispatch(fetchPositions());
+        dispatch(fetchSystemSettings());
     }, [dispatch]);
 
     useEffect(() => {
