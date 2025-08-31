@@ -2,7 +2,7 @@
 require('dotenv').config();
 const app = require('./app');
 const db = require('./models');
-const autoGenerationService = require('./services/scheduling/auto-generation.service');
+const AutoGenerationService = require('./services/scheduling/auto-generation.service');
 
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
@@ -20,10 +20,8 @@ app.listen(PORT, HOST, async () => {
 
         // If you still need synchronization on each startup:
         // await db.sequelize.sync({ alter: false });
-        // console.log('✅ Database synchronized.');
-
-        // Here you can start your services, e.g., cron jobs
-        // autoGenerationService.start();
+        // console.log('✅ Database synchronized.'
+        new AutoGenerationService();
 
     } catch (err) {
         console.error('❌ Unable to connect to or synchronize the database:', err);
