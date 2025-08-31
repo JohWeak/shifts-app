@@ -23,7 +23,7 @@ const EmployeeRecommendations = ({
     const { recommendations, recommendationsLoading, error, pendingChanges } = useSelector(state => state.schedule);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState(() => localStorage.getItem('recommendationActiveTab') || 'available');
+    const [activeTab, setActiveTab] = useState('available');
 
     useEffect(() => {
         if (isVisible && selectedPosition && scheduleDetails?.schedule?.id) {
@@ -36,14 +36,44 @@ const EmployeeRecommendations = ({
         }
     }, [isVisible, selectedPosition, scheduleDetails, pendingChanges, dispatch]);
 
+    // Determine the best tab based on recommendations data
     useEffect(() => {
         if (!recommendations) return;
-        if (activeTab === 'available' && recommendations.available?.length === 0) {
-            if (recommendations.cross_position?.length > 0) setActiveTab('cross_position');
-            else if (recommendations.other_site?.length > 0) setActiveTab('other_site');
-            else setActiveTab('unavailable');
+        
+        const savedTab = localStorage.getItem('recommendationActiveTab');
+        let bestTab = 'available';
+        
+        // Priority: available > cross_position > other_site > unavailable
+        if (recommendations.available?.length > 0) {
+            bestTab = 'available';
+        } else if (recommendations.cross_position?.length > 0) {
+            bestTab = 'cross_position';
+        } else if (recommendations.other_site?.length > 0) {
+            bestTab = 'other_site';
+        } else {
+            bestTab = 'unavailable';
         }
-    }, [recommendations, activeTab]);
+        
+        // Check if saved tab has data
+        const hasDataForSavedTab = () => {
+            if (!savedTab) return false;
+            if (savedTab === 'unavailable') {
+                const countUnavailable = (recommendations.unavailable_soft?.length || 0) +
+                    (recommendations.unavailable_hard?.length || 0) +
+                    (recommendations.unavailable_busy?.length || 0) +
+                    (recommendations.unavailable_permanent?.length || 0);
+                return countUnavailable > 0;
+            }
+            return recommendations[savedTab]?.length > 0;
+        };
+        
+        // Use saved tab if it has data, otherwise use best tab
+        if (hasDataForSavedTab()) {
+            setActiveTab(savedTab);
+        } else {
+            setActiveTab(bestTab);
+        }
+    }, [recommendations]);
 
     useEffect(() => {
         localStorage.setItem('recommendationActiveTab', activeTab);
