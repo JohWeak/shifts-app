@@ -1,9 +1,9 @@
 // frontend/src/shared/ui/components/ColorPickerModal/index.js
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Col, Container, Form, Modal, Row } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Button, Col, Container, Form, Modal, Row} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './ColorPickerModal.css';
-import { getContrastTextColor, hexToHsl, hslToHex, isDarkTheme } from 'shared/lib/utils/colorUtils';
+import {getContrastTextColor, hexToHsl, hslToHex, isDarkTheme} from 'shared/lib/utils/colorUtils';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
 
 const PRESET_COLORS = [
@@ -39,7 +39,7 @@ const ColorPickerModal = ({
                               originalGlobalColor = null,
                           }) => {
     const [selectedColor, setSelectedColor] = useState(initialColor);
-    const { t } = useI18n();
+    const {t} = useI18n();
     const colorInputRef = useRef(null);
 
 
@@ -72,7 +72,7 @@ const ColorPickerModal = ({
         if (show) {
             updateColorAndSlider(initialColor);
         }
-    }, [show, initialColor]);
+    }, [show, initialColor, updateColorAndSlider]);
 
 
     const handleSaveAndClose = () => {
@@ -132,7 +132,7 @@ const ColorPickerModal = ({
                     <small className="d-flex align-items-center justify-content-between">
                         <span>
                             <i className={`bi ${saveMode === 'local' ? 'bi-person' : 'bi-globe'} me-1`}></i>
-                            {saveMode === 'local' ? t('color.savingLocally', { theme: t(`theme.${currentTheme}`) }) : t('color.savingGlobally')}
+                            {saveMode === 'local' ? t('color.savingLocally', {theme: t(`theme.${currentTheme}`)}) : t('color.savingGlobally')}
                         </span>
                     </small>
                 </div>
@@ -154,7 +154,7 @@ const ColorPickerModal = ({
                         ref={colorInputRef}
                         value={selectedColor}
                         onChange={(e) => updateColorAndSlider(e.target.value)}
-                        style={{ opacity: 0, position: 'absolute', width: 0, height: 0, border: 'none', padding: 0 }}
+                        style={{opacity: 0, position: 'absolute', width: 0, height: 0, border: 'none', padding: 0}}
                     />
                 </Row>
 
@@ -168,7 +168,7 @@ const ColorPickerModal = ({
                             <i className="bi bi-globe small me-1 mt-0"></i>
                             <span className="me-2">{t('color.globalColorIs')}:</span>
                             <div className="global-color-swatch"
-                                 style={{ backgroundColor: themeAwareGlobalColor }}></div>
+                                 style={{backgroundColor: themeAwareGlobalColor}}></div>
                             {saveMode === 'local' && hasLocalColor && onResetColor && (
                                 <Button
                                     variant="link"

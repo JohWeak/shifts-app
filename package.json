@@ -3,8 +3,10 @@
   "scripts": {
     "start": "node backend/src/server.js",
     "dev": "concurrently \"npm run backend-dev\" \"npm run frontend-dev\"",
+    "dev:remote": "concurrently \"npm run backend-dev\" \"npm run frontend-dev:remote\"",
     "backend-dev": "cd backend && nodemon src/server.js",
     "frontend-dev": "cd frontend && npm start",
+    "frontend-dev:remote": "cd frontend && npm run start:remote",
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm install && npm run build",
     "postinstall": "npm run install-all && npm run build"
@@ -12,6 +14,7 @@
   "devDependencies": {
     "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",

@@ -1,5 +1,5 @@
 // frontend/src/shared/hooks/useShiftColor.js
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setLocalShiftColorOverride} from '../../features/admin-schedule-management/model/scheduleSlice';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
@@ -102,14 +102,12 @@ export const useShiftColor = () => {
         });
     };
 
-    const previewColor = (color) => {
-        if (colorPickerState.shiftId) {
-            setTempShiftColors(prev => ({
-                ...prev,
-                [colorPickerState.shiftId]: color
-            }));
-        }
-    };
+    const previewColor = useCallback((color) => {
+        setTempShiftColors(prev => ({
+            ...prev,
+            [colorPickerState.shiftId]: color
+        }));
+    }, [colorPickerState.shiftId, setTempShiftColors])
 
     const applyColor = async (color, customSaveMode = null) => {
         const {shiftId, positionId} = colorPickerState;
