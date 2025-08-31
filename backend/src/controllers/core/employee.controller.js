@@ -439,7 +439,8 @@ const getProfile = async (req, res) => {
         const employee = await Employee.findByPk(req.userId, {
             attributes: [
                 'emp_id', 'first_name', 'last_name', 'email',
-                'phone', 'receive_schedule_emails', 'status',
+                'phone', 'login', 'country', 'city', 'address',
+                'receive_schedule_emails', 'status', 'role',
             ],
             include: [
                 {
@@ -477,7 +478,20 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { first_name, last_name, email, phone, receive_schedule_emails, locale } = req.body;
+        const { 
+            first_name, 
+            last_name, 
+            email, 
+            phone, 
+            login,
+            country,
+            city,
+            address,
+            receive_schedule_emails, 
+            locale,
+            currentPassword,
+            newPassword
+        } = req.body;
 
         const employee = await Employee.findByPk(req.userId);
 
@@ -488,11 +502,35 @@ const updateProfile = async (req, res) => {
             });
         }
 
+        // Handle password change if provided
+        if (currentPassword && newPassword) {
+            const isCurrentPasswordValid = await bcrypt.compare(currentPassword, employee.password);
+            if (!isCurrentPasswordValid) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Current password is incorrect',
+                });
+            }
+            
+            // Hash new password
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+            await employee.update({ password: hashedNewPassword });
+            
+            return res.json({
+                success: true,
+                message: 'Password updated successfully',
+            });
+        }
+
         const updateData = {
             first_name,
             last_name,
             email,
             phone,
+            login,
+            country,
+            city,
+            address,
             receive_schedule_emails,
         };
 
@@ -501,18 +539,47 @@ const updateProfile = async (req, res) => {
             updateData.locale = locale;
         }
 
+        // Remove undefined fields
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === undefined) {
+                delete updateData[key];
+            }
+        });
+
         await employee.update(updateData);
+
+        // Fetch updated profile with associations
+        const updatedEmployee = await Employee.findByPk(req.userId, {
+            attributes: [
+                'emp_id', 'first_name', 'last_name', 'email',
+                'phone', 'login', 'country', 'city', 'address',
+                'receive_schedule_emails', 'status', 'role',
+            ],
+            include: [
+                {
+                    model: Position,
+                    as: 'defaultPosition',
+                    attributes: ['pos_id', 'pos_name'],
+                },
+                {
+                    model: WorkSite,
+                    as: 'workSite',
+                    attributes: ['site_id', 'site_name'],
+                },
+            ],
+        });
 
         res.json({
             success: true,
             message: 'Profile updated successfully',
-            data: employee,
+            data: updatedEmployee,
         });
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to update profile',
+            error: error.message,
         });
     }
 };

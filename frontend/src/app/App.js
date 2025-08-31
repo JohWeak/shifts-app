@@ -66,6 +66,7 @@ const router = createBrowserRouter([
             { path: 'workplace', element: <WorkplaceSettings /> },
             { path: 'reports', element: <Reports /> },
             { path: 'permanent-requests', element: <AdminPermanentRequests /> },
+            { path: 'profile', element: <EmployeeProfile /> },
 
             { path: 'my-employee-profile', element: <EmployeeLayout /> },
 

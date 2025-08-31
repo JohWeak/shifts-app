@@ -270,11 +270,11 @@ const AdminLayout = () => {
                                     <div className="fw-semibold">{t('common.admin')}</div>
                                 </Dropdown.Header>
                                 <Dropdown.Divider />
-                                <Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/admin/profile">
                                     <i className="bi bi-person me-2"></i>
                                     {t('common.profile')}
                                 </Dropdown.Item>
-                                <Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/admin/settings">
                                     <i className="bi bi-gear me-2"></i>
                                     {t('common.settings')}
                                 </Dropdown.Item>
