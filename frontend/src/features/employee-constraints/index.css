@@ -297,3 +297,30 @@
         padding: 0.4rem 0.2rem;
     }
 }
+
+/* ============================================
+   DEADLINE STYLES
+   ============================================ */
+
+/* Стили для карточки информации о дедлайне */
+.deadline-info-card {
+    border-left: 4px solid var(--bs-info);
+}
+
+.deadline-info-card.warning {
+    border-left-color: var(--bs-warning);
+}
+
+/* Стили для заблокированного состояния при истечении дедлайна */
+.constraint-cell.deadline-passed,
+.day-header.deadline-passed {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.constraint-cell.deadline-passed:hover,
+.day-header.deadline-passed:hover {
+    transform: none !important;
+    background-color: inherit !important;
+}

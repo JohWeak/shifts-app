@@ -58,7 +58,7 @@ const PaletteButton = ({ currentMode, onColorButtonClick, t, customColors }) => 
 
 const ConstraintActions = (props) => {
     const { t } = useI18n();
-    const { isSubmitted, submitting, onEdit, isMobile, customColors, ...actionProps } = props;
+    const { isSubmitted, submitting, onEdit, isMobile, customColors, deadlinePassed, ...actionProps } = props;
 
     // В зависимости от isSubmitted, добавляем класс к главному контейнеру
     const panelClassName = `mb-2 constraint-actions-panel ${isSubmitted ? 'view-mode' : 'edit-mode'}`;
@@ -67,7 +67,7 @@ const ConstraintActions = (props) => {
         <div className={panelClassName}>
             {/* 1. Контейнер для кнопки "Редактировать" (всегда в DOM) */}
             <div className="edit-button-container">
-                <Button variant="primary" onClick={onEdit} className="edit-button" disabled={submitting}>
+                <Button variant="primary" onClick={onEdit} className="edit-button" disabled={submitting || deadlinePassed}>
                     {submitting ? (
                         <>
                             <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"

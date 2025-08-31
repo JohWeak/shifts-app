@@ -280,6 +280,10 @@ export const en = {
         subtitle: 'Mark your availability for the upcoming week',
         title: 'Weekly Constraints',
         wholeDay: 'Whole Day',
+        deadline: {
+            info: 'Deadline for constraints submission: {day} at {time}',
+            passed: 'Deadline has passed. You cannot modify constraints for the upcoming week.',
+        },
     },
     dashboard: {
         dashboardDesc: 'Quick overview of your scheduling system',

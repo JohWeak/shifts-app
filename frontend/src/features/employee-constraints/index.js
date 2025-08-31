@@ -28,8 +28,10 @@ import {
     submitWeeklyConstraints,
     updateConstraint,
 } from './model/constraintSlice';
+import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
 
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
+import {formatDate} from 'shared/lib/utils/scheduleUtils';
 import './index.css';
 
 const ConstraintsSchedule = () => {
@@ -108,6 +110,7 @@ const ConstraintsSchedule = () => {
     } = useSelector(state => state.constraints);
 
     const {user} = useSelector(state => state.auth);
+    const {systemSettings} = useSelector(state => state.settings);
 
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
 
@@ -144,10 +147,52 @@ const ConstraintsSchedule = () => {
         // Компонент сам отвечает за загрузку своих данных.
         // Кеш внутри thunk'а предотвратит лишние запросы.
         dispatch(fetchWeeklyConstraints());
+        dispatch(fetchSystemSettings());
     }, [dispatch]);
 
 
     console.log('[LOG 4] weeklyTemplate:', {weeklyTemplate});
+
+    // Calculate deadline info
+    const deadlineInfo = useMemo(() => {
+        if (systemSettings?.constraintDeadlineDay === undefined || !systemSettings?.constraintDeadlineTime) {
+            return null;
+        }
+
+        const deadlineDay = systemSettings.constraintDeadlineDay || 3; // Wednesday by default
+        const deadlineTime = systemSettings.constraintDeadlineTime || '18:00';
+        
+        // Get current week's deadline
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        
+        // Calculate days until deadline day
+        let daysUntilDeadline = deadlineDay - currentDay;
+        if (daysUntilDeadline < 0) {
+            daysUntilDeadline += 7; // Next week
+        }
+        
+        // Create deadline date/time
+        const deadlineDate = new Date(now);
+        deadlineDate.setDate(now.getDate() + daysUntilDeadline);
+        const [hours, minutes] = deadlineTime.split(':').map(Number);
+        deadlineDate.setHours(hours, minutes, 0, 0);
+        
+        // If deadline is today but time has passed, it means next week's deadline
+        if (daysUntilDeadline === 0 && now > deadlineDate) {
+            deadlineDate.setDate(deadlineDate.getDate() + 7);
+        }
+        
+        const isPassed = now > deadlineDate;
+        const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][deadlineDay];
+        
+        return {
+            day: t(`days.${dayName.toLowerCase()}`),
+            time: deadlineTime,
+            isPassed,
+            dateTime: deadlineDate
+        };
+    }, [systemSettings, t]);
 
     const usedCounts = useMemo(() => {
         const counts = {cannot_work: 0, prefer_work: 0};
@@ -213,7 +258,7 @@ const ConstraintsSchedule = () => {
     const handleCellClick = (date, shiftId) => {
         triggerHapticFeedback();
 
-        if (!canEdit || isSubmitted) return;
+        if (!canEdit || isSubmitted || deadlineInfo?.isPassed) return;
 
         const cellIdentifier = `${date}-${shiftId || 'day'}`;
         setJustChangedCell(cellIdentifier);
@@ -273,7 +318,12 @@ const ConstraintsSchedule = () => {
         const tdStyle = {
             backgroundColor: hexToRgba(shift ? getShiftColor(shift) : '#6c757d', neutralBgAlpha),
         };
-        const foregroundClasses = `constraint-cell ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+        const isClickable = canEdit && !isSubmitted && !deadlineInfo?.isPassed;
+        let foregroundClasses = `constraint-cell ${status} ${isClickable ? 'clickable' : ''}`;
+        
+        if (deadlineInfo?.isPassed) {
+            foregroundClasses += ' deadline-passed';
+        }
         const foregroundStyle = {};
         if (status !== 'neutral') {
             foregroundStyle.backgroundColor = getShiftColor(constraintPseudoShifts[status]);
@@ -299,7 +349,14 @@ const ConstraintsSchedule = () => {
 
     const getDayHeaderClass = (date) => {
         const status = weeklyConstraints[date]?.day_status || 'neutral';
-        return `day-header ${status} ${canEdit && !isSubmitted ? 'clickable' : ''}`;
+        const isClickable = canEdit && !isSubmitted && !deadlineInfo?.isPassed;
+        let classes = `day-header ${status} ${isClickable ? 'clickable' : ''}`;
+        
+        if (deadlineInfo?.isPassed) {
+            classes += ' deadline-passed';
+        }
+        
+        return classes;
     };
 
     const getShiftHeaderStyle = (shift) => {
@@ -323,8 +380,8 @@ const ConstraintsSchedule = () => {
 
 
     const limitParams = {
-        cannotWork: weeklyTemplate.constraints.limits.cannot_work_days,
-        preferWork: weeklyTemplate.constraints.limits.prefer_work_days,
+        cannotWork: systemSettings?.maxCannotWorkDays || weeklyTemplate?.constraints?.limits?.cannot_work_days || 2,
+        preferWork: systemSettings?.maxPreferWorkDays || weeklyTemplate?.constraints?.limits?.prefer_work_days || 5,
     };
 
     return (
@@ -334,6 +391,22 @@ const ConstraintsSchedule = () => {
                 title={t('constraints.title')}
                 subtitle={t('constraints.subtitle')}
             />
+
+            {deadlineInfo && (
+                <Card className="mb-2 deadline-info-card">
+                    <Card.Body className="py-2">
+                        <div className="d-flex align-items-center">
+                            <i className={`bi ${deadlineInfo.isPassed ? 'bi-exclamation-triangle-fill text-warning' : 'bi-info-circle-fill text-info'} me-2`}></i>
+                            <small className={deadlineInfo.isPassed ? 'text-warning' : 'text-muted'}>
+                                {deadlineInfo.isPassed 
+                                    ? t('constraints.deadline.passed')
+                                    : t('constraints.deadline.info', {day: deadlineInfo.day, time: deadlineInfo.time})
+                                }
+                            </small>
+                        </div>
+                    </Card.Body>
+                </Card>
+            )}
 
             <Card className="p-0 mb-2 mb-md-3 constrains-card">
                 <ScheduleHeaderCard
@@ -377,6 +450,7 @@ const ConstraintsSchedule = () => {
                 currentMode={currentMode}
                 onModeChange={(mode) => dispatch(setCurrentMode(mode))}
                 isSubmitted={isSubmitted}
+                deadlinePassed={deadlineInfo?.isPassed}
                 onColorButtonClick={(mode) => {
                     const pseudoShift = constraintPseudoShifts[mode];
                     if (!pseudoShift) return;
