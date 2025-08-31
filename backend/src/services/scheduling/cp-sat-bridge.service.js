@@ -17,7 +17,7 @@ class CPSATBridge {
         try {
             console.log(`[CP-SAT Bridge] Starting optimization for site ${siteId}, week ${weekStart}`);
 
-            const data = await this.prepareScheduleData(siteId, weekStart, transaction);
+            const data = await this.prepareScheduleData(siteId, weekStart, transaction, options.positionIds);
 
             // Add optimization settings to data
             data.settings = {
@@ -68,7 +68,7 @@ class CPSATBridge {
         }
     }
 
-    async prepareScheduleData(siteId, weekStart, transaction = null) {
+    async prepareScheduleData(siteId, weekStart, transaction = null, positionIds = []) {
         console.log(`[CP-SAT Bridge] Preparing data for site ${siteId}, week ${weekStart}`);
 
         const {
@@ -125,11 +125,18 @@ class CPSATBridge {
             });
 
             // Get positions with shifts and requirements
+            const positionWhere = {
+                site_id: siteId,
+                is_active: true,
+            };
+            
+            // Filter by position IDs if provided
+            if (positionIds && positionIds.length > 0) {
+                positionWhere.pos_id = positionIds;
+            }
+            
             const positions = await Position.findAll({
-                where: {
-                    site_id: siteId,
-                    is_active: true,
-                },
+                where: positionWhere,
                 include: [{
                     model: PositionShift,
                     as: 'shifts',

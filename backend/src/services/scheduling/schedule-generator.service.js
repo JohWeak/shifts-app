@@ -7,14 +7,14 @@ class ScheduleGeneratorService {
         this.db = database || db;
     }
 
-    static async generateWeeklySchedule(database, siteId, weekStart, transaction = null) {
+    static async generateWeeklySchedule(database, siteId, weekStart, transaction = null, positionIds = []) {
         const service = new ScheduleGeneratorService(database);
 
         try {
             console.log(`[ScheduleGeneratorService] Starting generation for site ${siteId}, week ${weekStart}`);
 
             // Prepare data with new structure
-            const data = await service.prepareData(siteId, weekStart, transaction);
+            const data = await service.prepareData(siteId, weekStart, transaction, positionIds);
 
             // Generate schedule
             const result = await service.generateOptimalSchedule(data);
@@ -43,7 +43,7 @@ class ScheduleGeneratorService {
         }
     }
 
-    async prepareData(siteId, weekStart, transaction = null) {
+    async prepareData(siteId, weekStart, transaction = null, positionIds = []) {
         const {
             Employee,
             Position,
@@ -59,11 +59,18 @@ class ScheduleGeneratorService {
             console.log(`[ScheduleGeneratorService] Preparing data for site ${siteId}, week ${weekStart}`);
 
             // Load positions with their shifts and requirements
+            const positionWhere = {
+                site_id: siteId,
+                is_active: true,
+            };
+            
+            // Filter by position IDs if provided
+            if (positionIds && positionIds.length > 0) {
+                positionWhere.pos_id = positionIds;
+            }
+            
             const positions = await Position.findAll({
-                where: {
-                    site_id: siteId,
-                    is_active: true,
-                },
+                where: positionWhere,
                 include: [{
                     model: PositionShift,
                     as: 'shifts',

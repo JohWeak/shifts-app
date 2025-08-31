@@ -43,6 +43,10 @@ jest.mock('shared/api/apiService', () => ({
                 defaultScheduleDuration: 7,
                 minRestBetweenShifts: 11,
                 enableNotifications: true,
+                constraintDeadlineDay: 3,
+                constraintDeadlineTime: '18:00',
+                optimizationMode: 'balanced',
+                fairnessWeight: 50,
             },
         })),
         updateSystemSettings: jest.fn(() => Promise.resolve({ data: {} })),
@@ -72,6 +76,10 @@ const createMockStore = (initialState = {}) => {
                     defaultScheduleDuration: 7,
                     minRestBetweenShifts: 11,
                     enableNotifications: true,
+                    constraintDeadlineDay: 3,
+                    constraintDeadlineTime: '18:00',
+                    optimizationMode: 'balanced',
+                    fairnessWeight: 50,
                 },
                 loading: 'idle',
                 error: null,
@@ -116,16 +124,17 @@ describe('SystemSettings Component', () => {
         });
     });
 
-    test('displays navigation tabs', async () => {
+    test('displays all setting sections', async () => {
         renderWithProviders(<SystemSettings />);
 
         await waitFor(() => {
-            // Проверяем что есть 2 вкладки навигации
-            const tabs = screen.getAllByRole('tab');
-            expect(tabs).toHaveLength(2);
+            // Check for settings sections
+            expect(screen.getByText('Schedule')).toBeInTheDocument();
+            expect(screen.getByText('Automation')).toBeInTheDocument();
+            expect(screen.getByText('Optimization Settings')).toBeInTheDocument();
+            expect(screen.getByText('Notifications')).toBeInTheDocument();
         }, { timeout: 3000 });
     });
-
 
     test('shows loading state', () => {
         const store = createMockStore({
@@ -168,23 +177,19 @@ describe('SystemSettings Component', () => {
         });
     });
 
-    test('can switch between tabs', async () => {
-        const user = userEvent;
+    test('displays optimization settings with help buttons', async () => {
         renderWithProviders(<SystemSettings />);
 
         await waitFor(() => {
-            const tabs = screen.getAllByRole('tab');
-            expect(tabs.length).toBeGreaterThan(0);
+            expect(screen.getByText('Optimization Mode')).toBeInTheDocument();
+            expect(screen.getByText('Efficiency vs Fairness Balance')).toBeInTheDocument();
+            // Check for help buttons (question mark icons)
+            const helpButtons = screen.getAllByRole('button');
+            const questionButtons = helpButtons.filter(btn => 
+                btn.querySelector('i.bi-question-circle')
+            );
+            expect(questionButtons.length).toBeGreaterThanOrEqual(2);
         });
-
-        // Click on second tab
-        const tabs = screen.getAllByRole('tab');
-        if (tabs[1]) {
-            await user.click(tabs[1]);
-            await waitFor(() => {
-                expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-            });
-        }
     });
 
 
@@ -198,24 +203,14 @@ describe('SystemSettings Component', () => {
         });
     });
 
-    test('can toggle notification settings', async () => {
-        const user = userEvent;
+    test('displays notification settings', async () => {
         renderWithProviders(<SystemSettings />);
 
         await waitFor(() => {
-            const tabs = screen.getAllByRole('tab');
-            expect(tabs.length).toBe(4);
+            expect(screen.getByText('Notifications')).toBeInTheDocument();
+            const switches = screen.getAllByRole('checkbox');
+            expect(switches.length).toBeGreaterThanOrEqual(1);
         });
-
-        // Click on notifications tab (last tab)
-        const tabs = screen.getAllByRole('tab');
-        if (tabs[3]) {
-            await user.click(tabs[3]);
-            await waitFor(() => {
-                const switches = screen.getAllByRole('checkbox');
-                expect(switches.length).toBeGreaterThanOrEqual(1);
-            });
-        }
     });
 
     test('enables save button when changes are made', async () => {
@@ -243,34 +238,24 @@ describe('SystemSettings Component', () => {
     });
 
 
-    test('can change algorithm settings', async () => {
-        const user = userEvent;
+    test('displays constraint deadline settings', async () => {
         renderWithProviders(<SystemSettings />);
 
-        // Click on second tab (algorithm)
-        const tabs = screen.getAllByRole('tab');
-        if (tabs[1]) {
-            await user.click(tabs[1]);
-            await waitFor(() => {
-                const selects = screen.getAllByRole('combobox');
-                expect(selects.length).toBeGreaterThanOrEqual(1);
-            });
-        }
+        await waitFor(() => {
+            expect(screen.getByText('Constraint Deadline Day')).toBeInTheDocument();
+            expect(screen.getByText('Constraint Deadline Time')).toBeInTheDocument();
+        });
     });
 
     test('can change constraint settings', async () => {
-        const user = userEvent;
         renderWithProviders(<SystemSettings />);
 
-        // Click on third tab (constraints)
-        const tabs = screen.getAllByRole('tab');
-        if (tabs[2]) {
-            await user.click(tabs[2]);
-            await waitFor(() => {
-                const inputs = screen.getAllByRole('spinbutton');
-                expect(inputs.length).toBeGreaterThanOrEqual(1);
-            });
-        }
+        await waitFor(() => {
+            const inputs = screen.getAllByRole('spinbutton');
+            expect(inputs.length).toBeGreaterThanOrEqual(1);
+            const selects = screen.getAllByRole('combobox');
+            expect(selects.length).toBeGreaterThanOrEqual(1);
+        });
     });
 
 
@@ -292,25 +277,14 @@ describe('SystemSettings Component', () => {
     });
 
     test('validation works for numeric inputs', async () => {
-        const user = userEvent;
         renderWithProviders(<SystemSettings />);
 
         await waitFor(() => {
-            const tabs = screen.getAllByRole('tab');
-            expect(tabs.length).toBe(4);
+            const inputs = screen.getAllByRole('spinbutton');
+            if (inputs.length > 0) {
+                expect(inputs[0].getAttribute('min')).toBeTruthy();
+            }
         });
-
-        // Click on constraints tab
-        const tabs = screen.getAllByRole('tab');
-        if (tabs[2]) {
-            await user.click(tabs[2]);
-            await waitFor(() => {
-                const inputs = screen.getAllByRole('spinbutton');
-                if (inputs.length > 0) {
-                    expect(inputs[0].getAttribute('min')).toBeTruthy();
-                }
-            });
-        }
     });
 
 });

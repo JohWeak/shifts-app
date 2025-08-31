@@ -51,6 +51,8 @@ const settingsSlice = createSlice({
             // Constraint settings
             maxCannotWorkDays: 2,
             maxPreferWorkDays: 5,
+            constraintDeadlineDay: 3, // Wednesday by default
+            constraintDeadlineTime: '18:00',
             defaultEmployeesPerShift: 1,
             algorithmMaxTime: 120,
             strictLegalCompliance: true,

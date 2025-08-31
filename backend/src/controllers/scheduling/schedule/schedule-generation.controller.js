@@ -112,6 +112,7 @@ const generateNextWeekSchedule = async (req, res) => {
         const algorithm = req.body.algorithm || 'auto';
         const optimizationMode = req.body.optimizationMode || 'balanced';
         const fairnessWeight = req.body.fairnessWeight || 50;
+        const positionIds = req.body.position_ids || [];
 
         let weekStart;
         if (req.body.weekStart) {
@@ -159,6 +160,7 @@ const generateNextWeekSchedule = async (req, res) => {
                     result = await cpSatBridge.generateOptimalSchedule(siteId, weekStart, transaction, {
                         optimizationMode,
                         fairnessWeight,
+                        positionIds,
                     });
 
 
@@ -174,7 +176,7 @@ const generateNextWeekSchedule = async (req, res) => {
 
                     if (!result.success) {
                         console.warn(`[ScheduleController] CP-SAT failed, falling back to simple`);
-                        result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction);
+                        result = await ScheduleGeneratorService.generateWeeklySchedule(db, siteId, weekStart, transaction, positionIds);
                         result.fallback = 'cp-sat-to-simple';
                     }
                 } catch (error) {

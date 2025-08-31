@@ -395,6 +395,55 @@ const SystemSettings = () => {
                                                 </Form.Group>
                                             </Col>
                                         </Row>
+
+                                        <div className="mt-4">
+                                            <h6 className="settings-section-title">
+                                                <i className="bi bi-clock-history me-2"></i>
+                                                {t('settings.constraintDeadlineDay')} & {t('settings.constraintDeadlineTime')}
+                                            </h6>
+                                            
+                                            <Row>
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label className="settings-label">
+                                                            <i className="bi bi-calendar-day me-2"></i>
+                                                            {t('settings.constraintDeadlineDay')}
+                                                        </Form.Label>
+                                                        <Form.Select
+                                                            value={localSettings.constraintDeadlineDay || 3}
+                                                            onChange={(e) => handleChange('constraintDeadlineDay', parseInt(e.target.value))}
+                                                            className="settings-select"
+                                                        >
+                                                            <option value={0}>{t('days.sunday')}</option>
+                                                            <option value={1}>{t('days.monday')}</option>
+                                                            <option value={2}>{t('days.tuesday')}</option>
+                                                            <option value={3}>{t('days.wednesday')}</option>
+                                                            <option value={4}>{t('days.thursday')}</option>
+                                                            <option value={5}>{t('days.friday')}</option>
+                                                            <option value={6}>{t('days.saturday')}</option>
+                                                        </Form.Select>
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={6}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label className="settings-label">
+                                                            <i className="bi bi-clock me-2"></i>
+                                                            {t('settings.constraintDeadlineTime')}
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="time"
+                                                            value={localSettings.constraintDeadlineTime || '18:00'}
+                                                            onChange={(e) => handleChange('constraintDeadlineTime', e.target.value)}
+                                                            className="settings-input"
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Form.Text className="settings-help">
+                                                {t('settings.constraintDeadlineHint')}
+                                            </Form.Text>
+                                        </div>
+
                                     </Card.Body>
                                 </Card>
                             </motion.div>
