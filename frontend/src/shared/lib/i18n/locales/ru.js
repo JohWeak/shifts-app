@@ -1100,6 +1100,9 @@ export const ru = {
         fairnessWeight: 'Баланс эффективности и справедливости',
         efficiency: 'Эффективность',
         fairness: 'Справедливость',
+        constraintDeadlineDay: 'День дедлайна ограничений',
+        constraintDeadlineTime: 'Время дедлайна ограничений',
+        constraintDeadlineHint: 'День и время, после которых сотрудники не смогут отправлять или изменять свои еженедельные ограничения',
     },
     shift: {
         colorUpdated: 'Цвет смены обновлен',

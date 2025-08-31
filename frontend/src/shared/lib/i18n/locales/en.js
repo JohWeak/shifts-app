@@ -1142,6 +1142,9 @@ export const en = {
         fairnessWeight: 'Efficiency vs Fairness Balance',
         efficiency: 'Efficiency',
         fairness: 'Fairness',
+        constraintDeadlineDay: 'Constraint Deadline Day',
+        constraintDeadlineTime: 'Constraint Deadline Time',
+        constraintDeadlineHint: 'Day and time after which employees cannot submit or modify their weekly constraints',
     },
     shift: {
         colorUpdated: 'Shift color updated',
