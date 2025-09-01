@@ -1,19 +1,24 @@
 // frontend/src/shared/api/index.js
 import axios from 'axios';
 
+const isProduction = process.env.NODE_ENV === 'production';
+const baseURL = isProduction
+    ? '/api'
+    : process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// 1. Создаем один экземпляр axios для всего приложения
+// 1. Create a single axios instance for the entire application
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
+
 console.log('API Base URL is:', api.defaults.baseURL);
 
 
-// 2. Перехватчик запросов (Request Interceptor)
-// Добавляет токен авторизации к каждому запросу
+// 2. Request Interceptor
+//Adds an authorization token to each request
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -25,17 +30,16 @@ api.interceptors.request.use(
     (error) => Promise.reject(error),
 );
 
-// 3. Перехватчик ответов (Response Interceptor)
-// Обрабатывает успешные ответы и глобальные ошибки
+// 3. Response Interceptor
+//Handles successful responses and global errors
 api.interceptors.response.use(
     (response) => {
 
-        // Если это запрос на файл (blob), возвращаем весь ответ как есть
         if (response.config.responseType === 'blob') {
             return response;
         }
 
-        // Список endpoints, которые должны возвращать полный ответ
+        // List of endpoints that should return a full response
         const fullResponseEndpoints = [
             '/api/employees',
             '/api/schedules/weekly',
@@ -46,8 +50,8 @@ api.interceptors.response.use(
             '/api/constraints/permanent-request',
         ];
 
-        // Проверяем, нужен ли полный ответ для этого endpoint
-        const requestUrl = response.config.url || '';  // Защита от undefined
+        // Check if a full response is needed for this endpoint
+        const requestUrl = response.config.url || '';
         const needsFullResponse = fullResponseEndpoints.some(endpoint =>
             requestUrl.includes(endpoint) && !requestUrl.includes('/recommendations'),
         );
@@ -57,7 +61,6 @@ api.interceptors.response.use(
             return response.data;
         }
 
-        // Для остальных используем старую логику
         if (response.data && typeof response.data === 'object' && 'data' in response.data) {
             return response.data.data;
 

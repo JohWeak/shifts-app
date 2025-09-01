@@ -1,6 +1,6 @@
 // backend/src/config/scheduling-constraints.js
 /**
- * Конфигурация ограничений планирования смен
+ * Constraints configuration
  */
 
 

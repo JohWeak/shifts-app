@@ -22,6 +22,15 @@ positionRouter.post('/:positionId/restore', verifyToken, isAdmin, positionContro
 positionRouter.get('/:positionId/shifts', verifyToken, positionShiftController.getPositionShifts);
 positionRouter.post('/:positionId/shifts', verifyToken, isAdmin, positionShiftController.createPositionShift);
 
+// Flexible shifts routes
+positionRouter.get('/:positionId/flexible-shifts', verifyToken, positionShiftController.getPositionFlexibleShifts);
+positionRouter.post('/:positionId/flexible-shifts', verifyToken, isAdmin, positionShiftController.createFlexibleShift);
+positionRouter.put('/:positionId/flexible-shifts/:shiftId', verifyToken, isAdmin, positionShiftController.updateFlexibleShift);
+positionRouter.delete('/:positionId/flexible-shifts/:shiftId', verifyToken, isAdmin, positionShiftController.deleteFlexibleShift);
+
+// Flexible assignment routes
+positionRouter.post('/:positionId/flexible-shifts/:shiftId/assignments', verifyToken, isAdmin, positionShiftController.createFlexibleAssignment);
+
 
 shiftRouter.put('/:shiftId', verifyToken, isAdmin, positionShiftController.updatePositionShift);
 shiftRouter.delete('/:shiftId', verifyToken, isAdmin, positionShiftController.deletePositionShift);

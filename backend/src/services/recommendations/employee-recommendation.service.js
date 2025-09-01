@@ -619,8 +619,26 @@ class EmployeeRecommendationService {
             let violationType;
 
             if (assignmentDate.isBefore(targetDate)) {
-                const prevShiftStart = parseInt(assignment.shift.start_time.split(':')[0]);
-                const prevShiftDuration = assignment.shift.duration_hours || 8;
+                // For flexible assignments, use custom times if available
+                const prevStartTime = assignment.custom_end_time || assignment.shift.start_time;
+                const prevEndTime = assignment.custom_end_time || assignment.shift.end_time;
+                
+                const prevShiftStart = parseInt(prevStartTime.split(':')[0]);
+                let prevShiftDuration;
+                
+                if (assignment.assignment_type === 'flexible' && (assignment.custom_start_time || assignment.custom_end_time)) {
+                    // Calculate duration from custom times
+                    const startHour = parseInt((assignment.custom_start_time || assignment.shift.start_time).split(':')[0]);
+                    const endHour = parseInt((assignment.custom_end_time || assignment.shift.end_time).split(':')[0]);
+                    
+                    if (endHour >= startHour) {
+                        prevShiftDuration = endHour - startHour;
+                    } else {
+                        prevShiftDuration = (24 - startHour) + endHour; // Overnight shift
+                    }
+                } else {
+                    prevShiftDuration = assignment.shift.duration_hours || 8;
+                }
 
                 let prevShiftEndHour = prevShiftStart + prevShiftDuration;
 
@@ -655,7 +673,9 @@ class EmployeeRecommendationService {
 
                 let targetShiftEndHour = targetShiftStart + targetShiftDuration;
 
-                const nextShiftStartHour = parseInt(assignment.shift.start_time.split(':')[0]);
+                // For flexible assignments, use custom start time if available
+                const nextShiftStartTime = assignment.custom_start_time || assignment.shift.start_time;
+                const nextShiftStartHour = parseInt(nextShiftStartTime.split(':')[0]);
 
                 if (targetShiftEndHour >= 24) {
                     targetShiftEndHour = targetShiftEndHour - 24;
