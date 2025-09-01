@@ -1,16 +1,16 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+//require('dotenv').config();
 
 const verifyToken = (req, res, next) => {
     const token = req.headers['x-access-token'] || req.headers['authorization']?.split(' ')[1];
 
     if (!token) {
-        return res.status(403).json({ message: 'No token provided!' });
+        return res.status(403).json({message: 'No token provided!'});
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
-            return res.status(401).json({ message: 'Unauthorized!' });
+            return res.status(401).json({message: 'Unauthorized!'});
         }
         req.userId = decoded.id;
         req.userRole = decoded.role;
@@ -21,7 +21,7 @@ const verifyToken = (req, res, next) => {
 const isAdmin = (req, res, next) => {
     console.log('Checking admin role. User role:', req.userRole);
     if (req.userRole !== 'admin') {
-        return res.status(403).json({ message: 'Require Admin Role!' });
+        return res.status(403).json({message: 'Require Admin Role!'});
     }
     next();
 };
