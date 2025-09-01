@@ -1,6 +1,12 @@
 # === Nixpacks Configuration ===
 
-providers = ["node", "python"]
+providers = ["node", "python", "chromium"]
+
+[phases.setup]
+aptPkgs = [
+    "libgconf-2-4", "libatk1.0-0", "libatk-bridge2.0-0", "libgdk-pixbuf2.0-0",
+    "libgtk-3-0", "libgbm-dev", "libnss3-dev", "libxss1", "libasound2"
+]
 
 [phases.install]
 cmds = ["npm run install-all"]
