@@ -39,13 +39,12 @@ app.use(express.urlencoded({extended: true}));
 
 if (process.env.NODE_ENV === 'development') {
     app.use(performanceMonitor);
+    app.get('/', (req, res) => {
+        res.json({message: 'Shifts API is running!'});
+    });
 }
 
 // Routes
-app.get('/', (req, res) => {
-    res.json({message: 'Shifts API is running!'});
-});
-
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/employees', require('./routes/employee.routes'));
 app.use('/api/schedules', require('./routes/schedule.routes'));
