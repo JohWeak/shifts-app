@@ -37,6 +37,9 @@
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
   },
+  "overrides": {
+    "cheerio": "1.0.0-rc.12"
+  },
   "devDependencies": {
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
