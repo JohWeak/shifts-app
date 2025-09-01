@@ -163,7 +163,7 @@ const createPosition = async (req, res) => {
 // Update position
 const updatePosition = async (req, res) => {
     try {
-        const {id} = req.params;
+        const {positionId: id} = req.params;
         const {pos_name, site_id, profession, num_of_emp} = req.body;
 
         const position = await Position.findByPk(id);
@@ -204,7 +204,7 @@ const deletePosition = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const {id} = req.params;
+        const {positionId: id} = req.params;
 
         const position = await Position.findByPk(id, {
             include: [{
@@ -269,7 +269,7 @@ const restorePosition = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const {id} = req.params;
+        const {positionId: id} = req.params;
 
         const position = await Position.findByPk(id);
         if (!position) {

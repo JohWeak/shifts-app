@@ -4,7 +4,10 @@
       "Bash(grep:*)",
       "Bash(npm test:*)",
       "Bash(npm run migrate:*)",
-      "Bash(npx sequelize-cli:*)"
+      "Bash(npx sequelize-cli:*)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
