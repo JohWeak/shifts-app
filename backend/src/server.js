@@ -20,9 +20,10 @@ app.listen(PORT, async () => {
         await db.sequelize.authenticate();
         console.log('✅ Database connection has been established successfully.');
 
-        // If you still need synchronization on each startup:
+        // If still need synchronization on each startup:
         // await db.sequelize.sync({ alter: false });
         // console.log('✅ Database synchronized.'
+
         //new AutoGenerationService();
 
     } catch (err) {
