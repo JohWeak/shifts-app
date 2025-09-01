@@ -281,6 +281,14 @@ const defineAssociations = () => {
                 as: 'shift'
             });
         }
+
+        // ScheduleAssignment -> Employee (covering for employee)
+        if (Employee) {
+            ScheduleAssignment.belongsTo(Employee, {
+                foreignKey: 'covering_for_emp_id',
+                as: 'coveringForEmployee'
+            });
+        }
     }
 
     // =============================
