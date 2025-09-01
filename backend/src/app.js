@@ -1,6 +1,6 @@
 // backend/src/app.js
 const express = require('express');
-const performanceMonitor = require('./middlewares/performanceMonitor');
+//const performanceMonitor = require('./middlewares/performanceMonitor');
 const cors = require('cors');
 const path = require('path');
 
@@ -36,9 +36,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-if (process.env.NODE_ENV === 'development') {
-    app.use(performanceMonitor);
-}
+
+//if (process.env.NODE_ENV === 'development') {
+//   app.use(performanceMonitor);
+//}
 
 // Routes
 app.get('/', (req, res) => {
