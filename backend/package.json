@@ -32,7 +32,6 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.5",
     "on-finished": "^2.4.1",
-    "puppeteer": "^22.8.2",
     "sequelize": "^6.37.7",
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
