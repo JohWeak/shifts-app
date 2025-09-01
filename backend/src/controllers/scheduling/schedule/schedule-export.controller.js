@@ -1,6 +1,6 @@
 // backend/src/controllers/schedule/schedule-export.controller.js
 const dayjs = require('dayjs');
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 const db = require('../../../models');
 const {
     Schedule,
@@ -15,8 +15,8 @@ let PDFGenerator = null;
 
 const exportSchedule = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { format = 'pdf', lang = 'en' } = req.query;
+        const {scheduleId} = req.params;
+        const {format = 'pdf', lang = 'en'} = req.query;
 
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [
@@ -87,19 +87,19 @@ const exportSchedule = async (req, res) => {
             res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.csv"`);
             return res.send(csv);
         }
-
-        if (format === 'pdf') {
-            if (!PDFGenerator) {
-                PDFGenerator = require('../../../utils/pdfGenerator');
-            }
-
-            const pdfGenerator = new PDFGenerator(lang);
-            const pdfBuffer = await pdfGenerator.generateSchedulePDF(exportData);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.pdf"`);
-            return res.send(pdfBuffer);
-        }
+        // puppeteer deleted from package.json for faster build
+        // if (format === 'pdf') {
+        //     if (!PDFGenerator) {
+        //         PDFGenerator = require('../../../utils/pdfGenerator');
+        //     }
+        //
+        //     const pdfGenerator = new PDFGenerator(lang);
+        //     const pdfBuffer = await pdfGenerator.generateSchedulePDF(exportData);
+        //
+        //     res.setHeader('Content-Type', 'application/pdf');
+        //     res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.pdf"`);
+        //     return res.send(pdfBuffer);
+        // }
 
         res.json({
             success: true,
@@ -118,28 +118,28 @@ const exportSchedule = async (req, res) => {
 
 const getScheduleStats = async (req, res) => {
     try {
-        const { timeframe = '30' } = req.query;
+        const {timeframe = '30'} = req.query;
         const startDate = dayjs().subtract(parseInt(timeframe), 'day').toDate();
 
         const totalSchedules = await Schedule.count();
         const recentSchedules = await Schedule.count({
             where: {
-                createdAt: { [Op.gte]: startDate }
+                createdAt: {[Op.gte]: startDate}
             }
         });
 
         const publishedSchedules = await Schedule.count({
-            where: { status: 'published' }
+            where: {status: 'published'}
         });
 
         const draftSchedules = await Schedule.count({
-            where: { status: 'draft' }
+            where: {status: 'draft'}
         });
 
         const totalAssignments = await ScheduleAssignment.count();
         const recentAssignments = await ScheduleAssignment.count({
             where: {
-                createdAt: { [Op.gte]: startDate }
+                createdAt: {[Op.gte]: startDate}
             }
         });
 

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run migrate:*)",
+      "Bash(npx sequelize-cli:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

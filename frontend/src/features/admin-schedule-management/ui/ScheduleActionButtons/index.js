@@ -1,13 +1,13 @@
 // frontend/src/features/admin-schedule-management/ui/ActionButtons/index.js
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Button, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     canDeleteSchedule,
+    canEditSchedule,
     canPublishSchedule,
-    canUnpublishSchedule,
-    canEditSchedule
+    canUnpublishSchedule
 } from 'shared/lib/utils/scheduleUtils';
 import './ScheduleActionButtons.css';
 
@@ -222,7 +222,7 @@ const ScheduleActionButtons = ({
                         <Button
                             variant="outline-primary"
                             size={size}
-                            onClick={() => onExport('pdf')}
+                            onClick={() => onExport('csv')}
                             disabled={isExporting}
                             className="export-btn"
                         >
