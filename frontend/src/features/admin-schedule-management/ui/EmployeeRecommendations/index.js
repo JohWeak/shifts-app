@@ -36,45 +36,6 @@ const EmployeeRecommendations = ({
         }
     }, [isVisible, selectedPosition, scheduleDetails, pendingChanges, dispatch]);
 
-    // Determine the best tab based on recommendations data
-    useEffect(() => {
-        if (!recommendations) return;
-
-        const savedTab = localStorage.getItem('recommendationActiveTab');
-        let bestTab;
-
-        // Priority: available > cross_position > other_site > unavailable
-        if (recommendations.available?.length > 0) {
-            bestTab = 'available';
-        } else if (recommendations.cross_position?.length > 0) {
-            bestTab = 'cross_position';
-        } else if (recommendations.other_site?.length > 0) {
-            bestTab = 'other_site';
-        } else {
-            bestTab = 'unavailable';
-        }
-
-        // Check if saved tab has data
-        const hasDataForSavedTab = () => {
-            if (!savedTab) return false;
-            if (savedTab === 'unavailable') {
-                const countUnavailable = (recommendations.unavailable_soft?.length || 0) +
-                    (recommendations.unavailable_hard?.length || 0) +
-                    (recommendations.unavailable_busy?.length || 0) +
-                    (recommendations.unavailable_permanent?.length || 0);
-                return countUnavailable > 0;
-            }
-            return recommendations[savedTab]?.length > 0;
-        };
-
-        // Use saved tab if it has data, otherwise use best tab
-        if (hasDataForSavedTab()) {
-            setActiveTab(savedTab);
-        } else {
-            setActiveTab(bestTab);
-        }
-    }, [recommendations]);
-
     useEffect(() => {
         localStorage.setItem('recommendationActiveTab', activeTab);
         if (onTabChange) {
@@ -115,35 +76,86 @@ const EmployeeRecommendations = ({
                 <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-3">
                     <Tab
                         eventKey="available"
-                        title={<span><Badge bg="success" pill
-                                            className="me-2">{recommendations?.available?.length || 0}</Badge>{t('employee.tabs.available')}</span>}
+                        title={
+                            <span>
+                            <Badge
+                                bg="success"
+                                pill
+                                className="me-2"
+                            >
+                                {recommendations?.available?.length || 0}
+                            </Badge>
+                                {t('employee.tabs.available')}
+                        </span>}
                     >
-                        <EmployeeList employees={recommendations?.available} type="available"
-                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm}/>
+                        <EmployeeList
+                            employees={recommendations?.available}
+                            type="available"
+                            onItemClick={onEmployeeSelect}
+                            searchTerm={searchTerm}
+                        />
                     </Tab>
                     <Tab
                         eventKey="unavailable"
-                        title={<span><Badge bg="danger" pill
-                                            className="me-2">{countUnavailable}</Badge>{t('employee.tabs.unavailable')}</span>}
+                        title={
+                            <span>
+                            <Badge
+                                bg="danger"
+                                pill
+                                className="me-2"
+                            >
+                                {countUnavailable}
+                            </Badge>
+                                {t('employee.tabs.unavailable')}
+                        </span>}
                     >
-                        <UnavailableEmployeeGroups recommendations={recommendations} onItemClick={onEmployeeSelect}
-                                                   searchTerm={searchTerm}/>
+                        <UnavailableEmployeeGroups
+                            recommendations={recommendations}
+                            onItemClick={onEmployeeSelect}
+                            searchTerm={searchTerm}
+                        />
                     </Tab>
                     <Tab
                         eventKey="cross_position"
-                        title={<span><Badge bg="warning" pill
-                                            className="me-2">{recommendations?.cross_position?.length || 0}</Badge>{t('employee.tabs.crossPosition')}</span>}
+                        title={
+                            <span>
+                            <Badge
+                                bg="warning"
+                                pill
+                                className="me-2"
+                            >
+                                {recommendations?.cross_position?.length || 0}
+                            </Badge>
+                                {t('employee.tabs.crossPosition')}
+                        </span>}
                     >
-                        <EmployeeList employees={recommendations?.cross_position} type="cross_position"
-                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm}/>
+                        <EmployeeList
+                            employees={recommendations?.cross_position}
+                            type="cross_position"
+                            onItemClick={onEmployeeSelect}
+                            searchTerm={searchTerm}
+                        />
                     </Tab>
                     <Tab
                         eventKey="other_site"
-                        title={<span><Badge bg="info" pill
-                                            className="me-2">{recommendations?.other_site?.length || 0}</Badge>{t('employee.tabs.otherSite')}</span>}
+                        title={
+                            <span>
+                            <Badge
+                                bg="info"
+                                pill
+                                className="me-2"
+                            >
+                                {recommendations?.other_site?.length || 0}
+                            </Badge>
+                                {t('employee.tabs.otherSite')}
+                        </span>}
                     >
-                        <EmployeeList employees={recommendations?.other_site} type="other_site"
-                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm}/>
+                        <EmployeeList
+                            employees={recommendations?.other_site}
+                            type="other_site"
+                            onItemClick={onEmployeeSelect}
+                            searchTerm={searchTerm}
+                        />
                     </Tab>
                 </Tabs>
             )}
