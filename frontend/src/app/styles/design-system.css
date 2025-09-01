@@ -395,7 +395,7 @@
 
 /* Smooth transitions */
 /** {*/
-/*    transition-property: transform, width, background-color, color, border-color;*/
+/*    transition-property: transform, width, background-color, border-color;*/
 /*    transition-duration: 250ms;*/
 /*    transition-timing-function: ease-in;*/
 /*}*/

@@ -2,15 +2,18 @@
 .validation-modal {
     margin-top: calc(var(--app-navbar-height) + 1rem);
 }
+
 .validation-modal .modal-dialog {
     max-width: 700px;
 
 }
+
 .validation-modal .modal-content {
     border-radius: var(--radius-lg);
     overflow: hidden;
     margin-top: calc(var(--app-navbar-height) + 1rem);
 }
+
 .validation-modal .modal-header {
     background-color: #fff3cd;
     border-bottom: 2px solid #ffc107;
@@ -21,20 +24,26 @@
     font-weight: 600;
     padding: var(--space-2) var(--space-3);
 }
+
 .validation-modal .modal-body {
     padding: var(--space-4) var(--space-5);
 }
+
 .validation-modal .validation-item {
     border-left: 4px solid #ffc107;
 }
 
+.list-group-item-warning {
+    transition: all 0.2s ease;
+
+}
+
 .validation-modal .violation-item:hover {
-    background-color: #fff9e6;
     transform: translateX(2px);
 }
 
 .validation-modal .employee-name {
-    color: #495057;
+    color: var(--bs-body-color);
     font-size: 1.1rem;
     display: block;
     margin-bottom: 0.5rem;
