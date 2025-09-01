@@ -1,18 +1,19 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
-import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { useDispatch } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useMediaQuery } from 'shared/hooks/useMediaQuery';
-import { isDarkTheme } from 'shared/lib/utils/colorUtils';
-import { canEditSchedule, formatEmployeeName as formatEmployeeNameUtil } from 'shared/lib/utils/scheduleUtils';
-import { useShiftColor } from 'shared/hooks/useShiftColor';
-import { useEmployeeHighlight } from '../../../../model/hooks/useEmployeeHighlight';
-import { useDragAndDrop } from '../../../../model/hooks/useDragAndDrop';
-import { usePositionScheduleData } from './hooks/usePositionScheduleData';
+import React, {useState, useEffect, useMemo} from 'react';
+import {format} from 'date-fns';
+import {useDispatch} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useMediaQuery} from 'shared/hooks/useMediaQuery';
+import {isDarkTheme} from 'shared/lib/utils/colorUtils';
+import {canEditSchedule, formatEmployeeName as formatEmployeeNameUtil} from 'shared/lib/utils/scheduleUtils';
+import {useShiftColor} from 'shared/hooks/useShiftColor';
+import {useEmployeeHighlight} from '../../../../model/hooks/useEmployeeHighlight';
+import {useDragAndDrop} from '../../../../model/hooks/useDragAndDrop';
+import {useSpareShiftResize} from '../../../../model/hooks/useSpareShiftResize';
+import {usePositionScheduleData} from './hooks/usePositionScheduleData';
 
-import { addPendingChange, removePendingChange } from '../../../../model/scheduleSlice';
-import { addNotification } from 'app/model/notificationsSlice';
+import {addPendingChange, removePendingChange} from '../../../../model/scheduleSlice';
+import {addNotification} from 'app/model/notificationsSlice';
 
 import ScheduleCell from '../ScheduleCell';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal';
@@ -37,8 +38,9 @@ const PositionEditor = ({
                             scheduleDetails,
                             onAutofill,
                             isAutofilling = false,
+                            onCreateSpareShift = null,
                         }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     // --- STATE & SETTINGS ---
@@ -74,8 +76,45 @@ const PositionEditor = ({
         getShiftColor,
         resetShiftColor,
     } = useShiftColor();
-    const { highlightedEmployeeId, handleMouseEnter, handleMouseLeave } = useEmployeeHighlight();
-    const dnd = useDragAndDrop(isEditing, pendingChanges, assignments);
+    const {highlightedEmployeeId, handleMouseEnter, handleMouseLeave} = useEmployeeHighlight();
+
+    // Enhanced DnD with spare shift support
+    const positions = scheduleDetails?.positions || [];
+    const dnd = useDragAndDrop(isEditing, pendingChanges, assignments, positions, onCreateSpareShift);
+
+    // State for stretched employees with DOM references
+    const [stretchedEmployeesWithDOM, setStretchedEmployeesWithDOM] = useState([]);
+
+    // Spare shift resize functionality
+    const {handleResizeStart, tempTime, isResizing, resizeData} = useSpareShiftResize((resizeResult) => {
+        // Handle spare shift resize completion
+        console.log('🎯 Position received resize result:', resizeResult);
+
+        // Update assignment with new custom times - use consistent key to replace existing
+        const changeKey = `resize-${resizeResult.employee.empId}-${resizeResult.employee.assignmentId}`;
+        dispatch(addPendingChange({
+            key: changeKey,
+            change: {
+                action: 'assign',
+                date: resizeResult.cellData.date,
+                shiftId: resizeResult.cellData.shiftId,
+                positionId: resizeResult.cellData.positionId,
+                empId: resizeResult.employee.empId,
+                assignmentId: resizeResult.employee.assignmentId,
+                custom_start_time: resizeResult.newTimes.start_time,
+                custom_end_time: resizeResult.newTimes.end_time,
+                isResize: true // Flag to indicate this is a resize operation
+            }
+        }));
+
+        dispatch(addNotification({
+            variant: 'info',
+            message: t('admin.schedule.spareShiftResized', {
+                employee: resizeResult.employee.name,
+                duration: resizeResult.newTimes.duration
+            })
+        }));
+    });
 
     // --- HANDLERS ---
     const handleNameToggle = (checked) => {
@@ -188,8 +227,8 @@ const PositionEditor = ({
                             <small className={`d-block fw-bold ${shortage > 0 ? 'text-danger' : 'text-warning'}`}>
                                 <i className={`bi ${shortage > 0 ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-1`}></i>
                                 {shortage > 0
-                                    ? t('schedule.assignmentsShortage', { count: shortage })
-                                    : t('schedule.assignmentsOverage', { count: Math.abs(shortage) })
+                                    ? t('schedule.assignmentsShortage', {count: shortage})
+                                    : t('schedule.assignmentsOverage', {count: Math.abs(shortage)})
                                 }
                             </small>
                         )}
@@ -203,19 +242,187 @@ const PositionEditor = ({
     };
 
 
+    const stretchedEmployees = useMemo(() => {
+        const stretched = [];
+        
+        // Get pending changes for this position
+        const positionPendingChanges = Object.values(pendingChanges).filter(
+            change => change.positionId === position.pos_id
+        );
+        
+        // Look through all assignments to find employees with custom times that span multiple shifts
+        assignments.forEach(assignment => {
+            // Check if there's a pending resize change for this assignment
+            let customStartTime = assignment.custom_start_time;
+            let customEndTime = assignment.custom_end_time;
+            
+            const resizePending = positionPendingChanges.find(change => 
+                change.isResize && 
+                change.empId === assignment.emp_id && 
+                change.assignmentId === assignment.id
+            );
+            
+            if (resizePending) {
+                customStartTime = resizePending.custom_start_time;
+                customEndTime = resizePending.custom_end_time;
+            }
+            
+            // Only process assignments with custom times that differ from shift times
+            if (customStartTime && customEndTime) {
+                // Find the shift this assignment belongs to
+                const assignmentShift = shifts.find(s => s.shift_id === assignment.shift_id);
+                if (!assignmentShift) return;
+                
+                // Check if custom times extend beyond the regular shift
+                const customStart = customStartTime.substring(0, 5);
+                const customEnd = customEndTime.substring(0, 5);
+                const shiftStart = assignmentShift.start_time.substring(0, 5);
+                const shiftEnd = assignmentShift.end_time.substring(0, 5);
+                
+                // If custom times are different from shift times, this might need stretching
+                if (customStart !== shiftStart || customEnd !== shiftEnd) {
+                    // For now, find which shifts this spans across (simplified logic)
+                    const dayIndex = weekDates.findIndex(date => 
+                        format(date, 'yyyy-MM-dd') === (assignment.work_date || assignment.date)
+                    );
+                    
+                    if (dayIndex >= 0) {
+                        // Try to find start and end cells by their data attributes or class names
+                        // This is a placeholder - we'll need proper cell identification
+                        stretched.push({
+                            employee: {
+                                emp_id: assignment.emp_id,
+                                name: assignment.first_name && assignment.last_name ? 
+                                    `${assignment.first_name} ${assignment.last_name}` : 
+                                    assignment.employee_name || `Employee ${assignment.emp_id}`,
+                                assignment_id: assignment.id,
+                            },
+                            startCell: null, // Will be populated when DOM is available
+                            endCell: null,   // Will be populated when DOM is available
+                            customTimes: {
+                                start_time: customStart,
+                                end_time: customEnd
+                            },
+                            originalShift: assignmentShift,
+                            dayIndex: dayIndex
+                        });
+                    }
+                }
+            }
+        });
+        
+        if (stretched.length > 0) {
+            console.log('🔍 Found', stretched.length, 'employees to stretch:', stretched);
+        }
+        
+        return stretched;
+    }, [assignments, shifts, weekDates, pendingChanges, position.pos_id]);
+
+    // Update DOM references for stretched employees after render
+    useEffect(() => {
+        const updateStretchedEmployeesWithDOM = () => {
+            if (stretchedEmployees.length > 0) {
+                console.log('🔍 Found', stretchedEmployees.length, 'employees to stretch:', stretchedEmployees);
+            }
+            
+            const updatedStretched = stretchedEmployees.map(stretched => {
+                const dateStr = format(weekDates[stretched.dayIndex], 'yyyy-MM-dd');
+                
+                console.log('🔍 Looking for cells:', {
+                    positionId: position.pos_id,
+                    shiftId: stretched.originalShift.shift_id,
+                    date: dateStr
+                });
+                
+                // Find the start cell (original shift cell)
+                const startCell = document.querySelector(
+                    `td[data-position-id="${position.pos_id}"][data-shift-id="${stretched.originalShift.shift_id}"][data-date="${dateStr}"]`
+                );
+                
+                console.log('📍 Start cell found:', !!startCell);
+                
+                // Calculate which shift the end time falls into
+                const customEndTime = stretched.customTimes.end_time;
+                const endShift = findShiftByTime(customEndTime, shifts);
+                
+                console.log('🔍 End time analysis:', {
+                    customEndTime,
+                    endShiftFound: !!endShift,
+                    endShiftId: endShift?.shift_id,
+                    originalShiftId: stretched.originalShift.shift_id,
+                    willSpan: endShift && endShift.shift_id !== stretched.originalShift.shift_id
+                });
+                
+                let endCell = startCell; // Default to same cell
+                
+                if (endShift && endShift.shift_id !== stretched.originalShift.shift_id) {
+                    // Find the end cell if it spans to a different shift
+                    endCell = document.querySelector(
+                        `td[data-position-id="${position.pos_id}"][data-shift-id="${endShift.shift_id}"][data-date="${dateStr}"]`
+                    ) || startCell;
+                    
+                    console.log('📍 End cell found:', !!endCell);
+                }
+                
+                return {
+                    ...stretched,
+                    startCell,
+                    endCell
+                };
+            }).filter(stretched => stretched.startCell && stretched.endCell);
+            
+            setStretchedEmployeesWithDOM(updatedStretched);
+        };
+        
+        // Helper function to find which shift a time falls into
+        const findShiftByTime = (timeStr, shifts) => {
+            const timeMinutes = parseTimeToMinutes(timeStr);
+            
+            return shifts.find(shift => {
+                const shiftStart = parseTimeToMinutes(shift.start_time.substring(0, 5));
+                const shiftEnd = parseTimeToMinutes(shift.end_time.substring(0, 5));
+                
+                // Handle overnight shifts
+                if (shiftEnd < shiftStart) {
+                    return timeMinutes >= shiftStart || timeMinutes <= shiftEnd;
+                } else {
+                    return timeMinutes >= shiftStart && timeMinutes <= shiftEnd;
+                }
+            });
+        };
+        
+        const parseTimeToMinutes = (timeStr) => {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        };
+        
+        // Add a small delay to ensure DOM is fully rendered
+        const timer = setTimeout(updateStretchedEmployeesWithDOM, 100);
+        return () => clearTimeout(timer);
+    }, [stretchedEmployees, weekDates, position.pos_id, shifts]);
+
     const renderCell = (shift, dayIndex) => {
         const dateStr = format(weekDates[dayIndex], 'yyyy-MM-dd');
 
         const cellAssignments = assignments.filter(a => (a.work_date || a.date) === dateStr && a.shift_id === shift.shift_id);
-        const cellEmployees = cellAssignments.map(a => ({
-            ...employees.find(emp => emp.emp_id === a.emp_id),
-            assignment_id: a.id,
-            emp_id: a.emp_id,
-            isCrossPosition: a.isCrossPosition,
-            isCrossSite: a.isCrossSite,
-            isFlexible: a.isFlexible,
-
-        })).filter(e => e.emp_id);
+        const cellEmployees = cellAssignments.map(a => {
+            const employeeWithShift = {
+                ...employees.find(emp => emp.emp_id === a.emp_id),
+                assignment_id: a.id,
+                emp_id: a.emp_id,
+                isCrossPosition: a.isCrossPosition,
+                isCrossSite: a.isCrossSite,
+                isFlexible: a.isFlexible,
+                assignment_type: a.assignment_type,
+                // Add shift timing information
+                shift_start_time: shift.start_time,
+                shift_end_time: shift.end_time,
+                custom_start_time: a.custom_start_time,
+                custom_end_time: a.custom_end_time,
+            };
+            // Debug removed
+            return employeeWithShift;
+        }).filter(e => e.emp_id);
 
         const pendingAssignments = positionPendingChanges.filter(c => c.action === 'assign' && c.date === dateStr && c.shiftId === shift.shift_id);
         const pendingRemovals = positionPendingChanges.filter(c => c.action === 'remove' && c.date === dateStr && c.shiftId === shift.shift_id);
@@ -229,6 +436,8 @@ const PositionEditor = ({
                 employees={cellEmployees}
                 pendingAssignments={pendingAssignments}
                 pendingRemovals={pendingRemovals}
+                onSpareResize={handleResizeStart}
+                resizeState={{tempTime, isResizing, resizeData}}
                 isEditing={isEditing}
                 requiredEmployees={getRequiredEmployeesForShift(shift.shift_id, dayIndex)}
                 onCellClick={onCellClick}
@@ -282,6 +491,9 @@ const PositionEditor = ({
                 getShiftColor={getShiftColor}
                 openColorPicker={openColorPicker}
                 renderCell={renderCell}
+                resizeState={{tempTime, isResizing, resizeData}}
+                stretchedEmployees={stretchedEmployeesWithDOM}
+                formatEmployeeName={formatEmployeeName}
             />
             {isEditing && (
                 renderStats(totalRequired, currentStats, shortage)
@@ -311,8 +523,8 @@ const PositionEditor = ({
                 title={t('schedule.saveChanges')}
                 message={
                     shortage > 0
-                        ? t('schedule.confirmSaveWithShortage', { count: shortage })
-                        : t('schedule.confirmSaveWithOverage', { count: Math.abs(shortage) })
+                        ? t('schedule.confirmSaveWithShortage', {count: shortage})
+                        : t('schedule.confirmSaveWithOverage', {count: Math.abs(shortage)})
                 }
                 confirmText={t('common.save')}
                 confirmVariant="warning"

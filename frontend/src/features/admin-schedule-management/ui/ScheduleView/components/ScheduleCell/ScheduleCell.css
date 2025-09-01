@@ -193,6 +193,11 @@
     color: var(--text-color-light);
 }
 
+.employee-item .spare-badge {
+    background-color: var(--spare-color);
+    color: var(--text-color-light);
+}
+
 
 /* --- 5. Cell State Theming (Understaffed, Overstaffed, etc.) --- */
 

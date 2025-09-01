@@ -17,7 +17,7 @@ export const usePositionScheduleData = (scheduleDetails, position, pendingChange
         if (!scheduleDetails?.assignments) return [];
         return scheduleDetails.assignments.filter(a => {
             const assignmentPosId = a.pos_id || a.position_id;
-            return assignmentPosId === position.pos_id;
+            return assignmentPosId === position.pos_id && a.assignment_type !== 'flexible';
         });
     }, [position.pos_id, scheduleDetails?.assignments]);
 
@@ -29,11 +29,12 @@ export const usePositionScheduleData = (scheduleDetails, position, pendingChange
 
     const shifts = useMemo(() => {
         if (position.shifts && position.shifts.length > 0) {
-            return position.shifts;
+            // Filter out flexible shifts from display
+            return position.shifts.filter(shift => !shift.is_flexible);
         }
         if (scheduleDetails?.shifts) {
             return scheduleDetails.shifts.filter(s =>
-                !s.position_id || s.position_id === position.pos_id
+                (!s.position_id || s.position_id === position.pos_id) && !s.is_flexible
             );
         }
         return defaultShifts;

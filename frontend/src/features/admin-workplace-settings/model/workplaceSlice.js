@@ -175,10 +175,15 @@ export const fetchPositionShifts = createAsyncThunk(
 
 export const createPositionShift = createAsyncThunk(
     'workplace/createPositionShift',
-    async ({positionId, shiftData}, {rejectWithValue}) => {
+    async ({positionId, shiftData, isFlexible = false}, {rejectWithValue}) => {
         try {
-            const response = await apiService.position.createPositionShift(positionId, shiftData);
-            return {positionId, shift: response};
+            let response;
+            if (isFlexible) {
+                response = await apiService.position.createFlexibleShift(positionId, shiftData);
+            } else {
+                response = await apiService.position.createPositionShift(positionId, shiftData);
+            }
+            return {positionId, shift: response, isFlexible};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to create shift');
         }
@@ -187,9 +192,15 @@ export const createPositionShift = createAsyncThunk(
 
 export const updatePositionShift = createAsyncThunk(
     'workplace/updatePositionShift',
-    async ({shiftId, shiftData}, {rejectWithValue}) => {
+    async ({shiftId, shiftData, isFlexible = false, positionId}, {rejectWithValue}) => {
         try {
-            return await apiService.position.updatePositionShift(shiftId, shiftData);
+            let response;
+            if (isFlexible) {
+                response = await apiService.position.updateFlexibleShift(positionId, shiftId, shiftData);
+            } else {
+                response = await apiService.position.updatePositionShift(shiftId, shiftData);
+            }
+            return {shift: response, isFlexible, positionId};
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to update shift');
         }
@@ -581,14 +592,26 @@ const workplaceSlice = createSlice({
             // Update shift
             .addCase(updatePositionShift.fulfilled, (state, action) => {
                 state.shiftOperationStatus = 'success';
-                Object.keys(state.positionShifts).forEach(posId => {
-                    const shiftIndex = state.positionShifts[posId].findIndex(
-                        s => s.id === action.payload.id
+                const { shift, positionId } = action.payload;
+                
+                if (positionId && state.positionShifts[positionId]) {
+                    const shiftIndex = state.positionShifts[positionId].findIndex(
+                        s => s.id === shift.id
                     );
                     if (shiftIndex !== -1) {
-                        state.positionShifts[posId][shiftIndex] = action.payload;
+                        state.positionShifts[positionId][shiftIndex] = shift;
                     }
-                });
+                } else {
+                    // Fallback: find across all positions
+                    Object.keys(state.positionShifts).forEach(posId => {
+                        const shiftIndex = state.positionShifts[posId].findIndex(
+                            s => s.id === shift.id
+                        );
+                        if (shiftIndex !== -1) {
+                            state.positionShifts[posId][shiftIndex] = shift;
+                        }
+                    });
+                }
                 state.cache.positionShifts = null;
             })
             .addCase(updatePositionShift.rejected, (state, action) => {

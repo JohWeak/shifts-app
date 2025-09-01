@@ -168,6 +168,46 @@ const ValidationModal = ({ show, onHide, onConfirm, violations, title }) => {
                                                     </span>
                                                 </div>
                                             )}
+
+                                            {/* Flexible shift violations */}
+                                            {groupType === 'flexible_shift_violation' && (
+                                                <div className="mt-2">
+                                                    <span className="text-muted">
+                                                        {violation.violationType === 'duration_exceeded' && 
+                                                            t('validation.flexible_shift_violation.durationExceeded', {
+                                                                duration: violation.actualDuration,
+                                                                maxDuration: violation.maxDuration
+                                                            })
+                                                        }
+                                                        {violation.violationType === 'no_overlap' &&
+                                                            t('validation.flexible_shift_violation.noOverlap', {
+                                                                shiftName: violation.flexibleShiftName,
+                                                                date: formatDate(violation.date)
+                                                            })
+                                                        }
+                                                        {violation.violationType === 'insufficient_coverage' &&
+                                                            t('validation.flexible_shift_violation.insufficientCoverage', {
+                                                                required: violation.requiredCoverage,
+                                                                actual: violation.actualCoverage,
+                                                                date: formatDate(violation.date)
+                                                            })
+                                                        }
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Cross-day flexible shift violations */}
+                                            {groupType === 'cross_day_violation' && (
+                                                <div className="mt-2">
+                                                    <span className="text-muted">
+                                                        {t('validation.cross_day_violation.detail', {
+                                                            date: formatDate(violation.date),
+                                                            nextDate: formatDate(violation.nextDate),
+                                                            customHours: `${violation.customStartTime}-${violation.customEndTime}`
+                                                        })}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="violation-severity">
@@ -221,6 +261,8 @@ const getIconForViolationType = (type) => {
         weekly_hours_violation: 'bi-calendar-week',
         daily_hours_violation: 'bi-calendar-day',
         consecutive_shifts_violation: 'bi-arrow-repeat',
+        flexible_shift_violation: 'bi-bezier2',
+        cross_day_violation: 'bi-arrow-left-right',
     };
     return icons[type] || 'bi-exclamation-circle';
 };
@@ -244,6 +286,21 @@ const getSeverityLevel = (violation) => {
         const overtime = violation.totalHours - violation.maxHours;
         if (overtime >= 1) return 'critical';
     }
+
+    if (violation.type === 'flexible_shift_violation') {
+        if (violation.violationType === 'duration_exceeded') {
+            const excess = violation.actualDuration - violation.maxDuration;
+            if (excess >= 4) return 'critical';
+            if (excess >= 2) return 'high';
+        }
+        if (violation.violationType === 'no_overlap') return 'critical';
+        if (violation.violationType === 'insufficient_coverage') return 'high';
+    }
+
+    if (violation.type === 'cross_day_violation') {
+        return 'medium'; // Cross-day spans are usually warnings, not critical issues
+    }
+
     return 'medium';
 };
 

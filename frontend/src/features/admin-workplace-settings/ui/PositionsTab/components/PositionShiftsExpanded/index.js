@@ -187,12 +187,20 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                                                     {getShiftDuration(shift).toFixed(1)} {t('common.hours')}
                                                                 </td>
                                                                 <td>
-                                                                    {shift.is_night_shift && (
-                                                                        <Badge bg="dark">
-                                                                            <i className="bi bi-moon-stars me-1"></i>
-                                                                            {t('workplace.shifts.night')}
-                                                                        </Badge>
-                                                                    )}
+                                                                    <div className="d-flex flex-wrap gap-1">
+                                                                        {shift.is_night_shift && (
+                                                                            <Badge bg="dark">
+                                                                                <i className="bi bi-moon-stars me-1"></i>
+                                                                                {t('workplace.shifts.night')}
+                                                                            </Badge>
+                                                                        )}
+                                                                        {shift.is_flexible && (
+                                                                            <Badge bg="warning" text="dark">
+                                                                                <i className="bi bi-shuffle me-1"></i>
+                                                                                {t('workplace.shifts.flexible')}
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
                                                                 </td>
                                                                 <td>
                                                                     <OverlayTrigger
@@ -292,6 +300,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                     onSuccess={handleShiftFormSuccess}
                     positionId={position.pos_id}
                     shift={selectedShift}
+                    regularShifts={shifts.filter(s => !s.is_flexible && s.is_active !== false)}
                 />
             )}
         </tr>

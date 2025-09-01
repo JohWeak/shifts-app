@@ -80,9 +80,12 @@ const getScheduleDetails = async (req, res) => {
             });
         }
 
-        // Get all assignments for this schedule
+        // Get all assignments for this schedule (exclude flexible assignments)
         const assignments = await ScheduleAssignment.findAll({
-            where: {schedule_id: scheduleId},
+            where: {
+                schedule_id: scheduleId,
+                assignment_type: {[Op.ne]: 'flexible'} // Exclude flexible assignments
+            },
             include: [
                 {
                     model: Employee,
@@ -93,6 +96,7 @@ const getScheduleDetails = async (req, res) => {
                     model: PositionShift,
                     as: 'shift',
                     attributes: ['id', 'position_id', 'shift_name', 'start_time', 'end_time', 'duration_hours', 'is_night_shift', 'color'],
+                    where: {is_flexible: {[Op.ne]: true}}, // Exclude flexible shifts
                 },
                 {
                     model: Position,
@@ -111,7 +115,10 @@ const getScheduleDetails = async (req, res) => {
             include: [{
                 model: PositionShift,
                 as: 'shifts',
-                where: {is_active: true},
+                where: {
+                    is_active: true,
+                    is_flexible: {[Op.ne]: true} // Exclude flexible shifts
+                },
                 required: false,
                 include: [{
                     model: ShiftRequirement,

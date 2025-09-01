@@ -1305,6 +1305,7 @@ export const ru = {
             namePlaceholder: 'Напр., Утренняя смена',
             night: 'Ночь',
             nightShift: 'Ночная смена',
+            flexible: 'Гибкая',
             noShifts: 'Для этой должности не настроены смены',
             noShiftsForMatrix: 'Пожалуйста, сначала создайте смены, чтобы настроить требования',
             overnightShiftNotice: 'Это ночная смена (переходящая через полночь)',

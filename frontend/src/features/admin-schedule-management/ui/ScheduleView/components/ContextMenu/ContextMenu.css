@@ -1,0 +1,95 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/ContextMenu/ContextMenu.css */
+
+.context-menu {
+    position: fixed;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: var(--bs-box-shadow-lg);
+    z-index: 1050;
+    min-width: 180px;
+    padding: 0;
+    font-size: 0.875rem;
+    backdrop-filter: blur(2px);
+    animation: contextMenuFadeIn 0.15s ease-out;
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.context-menu-header {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    background: var(--bs-secondary-bg);
+    border-radius: var(--bs-border-radius-lg) var(--bs-border-radius-lg) 0 0;
+}
+
+.context-menu-items {
+    padding: 0.25rem 0;
+}
+
+.context-menu-item {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    color: var(--bs-body-color);
+    text-align: left;
+    font-size: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: flex;
+    align-items: center;
+}
+
+.context-menu-item:hover {
+    background: var(--bs-secondary-bg);
+}
+
+.context-menu-item:focus {
+    outline: none;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+}
+
+.context-menu-item-danger {
+    color: var(--bs-danger);
+}
+
+.context-menu-item-danger:hover {
+    background: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger);
+}
+
+.context-menu-divider {
+    height: 1px;
+    background: var(--bs-border-color);
+    margin: 0.25rem 0;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .context-menu {
+    background: var(--bs-dark);
+    border-color: var(--bs-gray-600);
+}
+
+[data-theme="dark"] .context-menu-header {
+    background: var(--bs-gray-800);
+    border-color: var(--bs-gray-600);
+}
+
+[data-theme="dark"] .context-menu-item:hover {
+    background: var(--bs-gray-700);
+}
+
+[data-theme="dark"] .context-menu-divider {
+    background: var(--bs-gray-600);
+}

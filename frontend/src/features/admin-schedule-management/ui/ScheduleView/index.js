@@ -1,15 +1,17 @@
 // frontend/src/features/admin-schedule-management/ui/ScheduleView/index.js
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card, Spinner } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useScheduleActions } from '../../model/hooks/useScheduleActions';
-import { addPendingChange, removePendingChange, toggleEditPosition } from '../../model/scheduleSlice';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Card, Spinner} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useScheduleActions} from '../../model/hooks/useScheduleActions';
+import {addPendingChange, removePendingChange, toggleEditPosition} from '../../model/scheduleSlice';
 import PositionEditor from './components/Position';
 import ScheduleInfo from './components/ScheduleInfo';
 import ValidationModal from './components/ValidationModal';
+import ShiftForm
+    from '../../../admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftForm';
 import EmptyState from 'shared/ui/components/EmptyState';
-import { useScheduleAutofill } from '../../model/hooks/useScheduleAutofill';
+import {useScheduleAutofill} from '../../model/hooks/useScheduleAutofill';
 import EmployeeRecommendationsPanel from '../EmployeeRecommendations/EmployeeRecommendationsPanel';
 import EmployeeRecommendationsModal from '../EmployeeRecommendations/EmployeeRecommendationsModal';
 import TopProgressBar from 'shared/ui/components/TopProgressBar';
@@ -27,11 +29,11 @@ const ScheduleView = ({
                           panelWidth,
                           onPanelWidthChange,
                       }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
-    const { scheduleDetails, editingPositions, pendingChanges, loading } = useSelector(state => state.schedule);
-    const { autofillPosition, isAutofilling: isPositionAutofilling, isProcessing } = useScheduleAutofill();
+    const {scheduleDetails, editingPositions, pendingChanges, loading} = useSelector(state => state.schedule);
+    const {autofillPosition, isAutofilling: isPositionAutofilling, isProcessing} = useScheduleAutofill();
 
     // --- ACTIONS & MODALS HOOK ---
     const {
@@ -51,6 +53,11 @@ const ScheduleView = ({
     // --- LOCAL UI STATE ---
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [flexibleShiftModal, setFlexibleShiftModal] = useState({
+        show: false,
+        positionId: null,
+        dragContext: null
+    });
 
     // --- HOOKS FOR LOGIC ---
 
@@ -80,7 +87,7 @@ const ScheduleView = ({
         const key = `remove-${positionId}-${date}-${shiftId}-${empId}`;
         dispatch(addPendingChange({
             key,
-            change: { action: 'remove', positionId, date, shiftId, empId, assignmentId },
+            change: {action: 'remove', positionId, date, shiftId, empId, assignmentId},
         }));
     };
 
@@ -94,13 +101,32 @@ const ScheduleView = ({
         onCellClick(date, positionId, shiftId, empId, assignment?.id);
     };
 
+    // Handle flexible shift creation from drag & drop
+    const handleCreateFlexibleShift = (dragContext) => {
+        console.log('Opening flexible shift modal with context:', dragContext);
+        setFlexibleShiftModal({
+            show: true,
+            positionId: dragContext.positionId,
+            dragContext
+        });
+    };
+
+    const handleFlexibleShiftSuccess = () => {
+        setFlexibleShiftModal({
+            show: false,
+            positionId: null,
+            dragContext: null
+        });
+
+    };
+
     if (loading === 'pending' && !scheduleDetails) {
         return (
-            <TopProgressBar />
+            <TopProgressBar/>
         );
     }
     if (!schedule) {
-        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')} />;
+        return <EmptyState title={t('schedule.notFound')} description={t('schedule.selectFromList')}/>;
     }
 
     const isUIBlocked = isProcessing || isAutofilling;
@@ -108,7 +134,7 @@ const ScheduleView = ({
     return (
         <>
 
-            {isUIBlocked && <TopProgressBar />}
+            {isUIBlocked && <TopProgressBar/>}
 
             <div className="schedule-view-content-wrapper">
                 {isUIBlocked &&
@@ -157,6 +183,7 @@ const ScheduleView = ({
                                     onAutofill={autofillPosition}
                                     isAutofilling={isPositionAutofilling}
                                     selectedCell={selectedCell}
+                                    onCreateFlexibleShift={handleCreateFlexibleShift}
                                 />
                             ))
                         ) : (
@@ -177,6 +204,20 @@ const ScheduleView = ({
                         violations={validationViolations}
                         title={t('schedule.validationWarning')}
                         isSaving={isSaving}
+                    />
+                )}
+
+                {/* Flexible Shift Creation Modal */}
+                {flexibleShiftModal.show && (
+                    <ShiftForm
+                        show={flexibleShiftModal.show}
+                        onHide={() => setFlexibleShiftModal({show: false, positionId: null, dragContext: null})}
+                        onSuccess={handleFlexibleShiftSuccess}
+                        positionId={flexibleShiftModal.positionId}
+                        regularShifts={
+                            scheduleDetails.positions.find(p => p.pos_id === flexibleShiftModal.positionId)?.shifts || []
+                        }
+                        dragContext={flexibleShiftModal.dragContext}
                     />
                 )}
 

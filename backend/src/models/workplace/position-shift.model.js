@@ -109,6 +109,7 @@ module.exports = (sequelize, DataTypes) => {
     PositionShift.hasTimeOverlap = function(start1, end1, start2, end2) {
         // Convert times to minutes from start of day for comparison
         const toMinutes = (timeStr) => {
+            if (!timeStr || typeof timeStr !== 'string') return 0;
             const [hours, minutes] = timeStr.split(':').map(Number);
             return hours * 60 + minutes;
         };
@@ -118,24 +119,45 @@ module.exports = (sequelize, DataTypes) => {
         let shift_start = toMinutes(start2);
         let shift_end = toMinutes(end2);
         
-        // Handle overnight shifts (end < start means crossing midnight)
-        if (flex_end < flex_start) {
-            flex_end += 24 * 60; // Add 24 hours
+        // Handle overnight shifts by expanding to handle both same-day and cross-day scenarios
+        const checkOverlap = (fs, fe, ss, se) => {
+            return Math.max(fs, ss) < Math.min(fe, se);
+        };
+        
+        // Case 1: Both are regular shifts (no overnight)
+        if (flex_end >= flex_start && shift_end >= shift_start) {
+            return checkOverlap(flex_start, flex_end, shift_start, shift_end);
         }
         
-        if (shift_end < shift_start) {
-            shift_end += 24 * 60; // Add 24 hours
+        // Case 2: Flexible shift is overnight, regular shift is not
+        if (flex_end < flex_start && shift_end >= shift_start) {
+            return checkOverlap(flex_start, flex_start + 24 * 60, shift_start, shift_end) ||
+                   checkOverlap(0, flex_end, shift_start, shift_end);
         }
         
-        // Check for any time overlap
-        return Math.max(flex_start, shift_start) < Math.min(flex_end, shift_end);
+        // Case 3: Regular shift is overnight, flexible shift is not
+        if (flex_end >= flex_start && shift_end < shift_start) {
+            return checkOverlap(flex_start, flex_end, shift_start, shift_start + 24 * 60) ||
+                   checkOverlap(flex_start, flex_end, 0, shift_end);
+        }
+        
+        // Case 4: Both are overnight shifts
+        if (flex_end < flex_start && shift_end < shift_start) {
+            return checkOverlap(flex_start, flex_start + 24 * 60, shift_start, shift_start + 24 * 60) ||
+                   checkOverlap(0, flex_end, 0, shift_end) ||
+                   checkOverlap(flex_start, flex_start + 24 * 60, 0, shift_end) ||
+                   checkOverlap(0, flex_end, shift_start, shift_start + 24 * 60);
+        }
+        
+        return false;
     };
 
     PositionShift.calculateSpanningShifts = function(flexibleStartTime, flexibleEndTime, regularShifts) {
         const spans = [];
         
         regularShifts.forEach(shift => {
-            if (this.hasTimeOverlap(flexibleStartTime, flexibleEndTime, shift.start_time, shift.end_time)) {
+            if (shift && shift.start_time && shift.end_time && 
+                this.hasTimeOverlap(flexibleStartTime, flexibleEndTime, shift.start_time, shift.end_time)) {
                 spans.push(shift.id);
             }
         });

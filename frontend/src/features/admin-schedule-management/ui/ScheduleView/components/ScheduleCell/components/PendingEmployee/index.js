@@ -17,7 +17,9 @@ const PendingEmployee = ({
                              pendingChange,
                              isCrossPosition,
                              isCrossSite,
-                             isFlexible
+                             isFlexible,
+                             onSpareResize,
+                             resizeState
                          }) => {
     const employeeData = {
         empId: assignment.empId,
@@ -27,7 +29,12 @@ const PendingEmployee = ({
         pendingKey: pendingChange.key,
         isCrossPosition: isCrossPosition || pendingChange?.isCrossPosition,
         isCrossSite: isCrossSite || pendingChange?.isCrossSite,
-        isFlexible: isFlexible || pendingChange?.isFlexible
+        isFlexible: isFlexible || pendingChange?.isFlexible,
+        // Add shift timing data for pending employees  
+        shift_start_time: pendingChange?.shift_start_time,
+        shift_end_time: pendingChange?.shift_end_time,
+        custom_start_time: pendingChange?.custom_start_time,
+        custom_end_time: pendingChange?.custom_end_time
     };
 
     const employeeForFormat = {
@@ -47,10 +54,20 @@ const PendingEmployee = ({
             classes += ' cross-position-employee';
         }
         if (isFlexible || pendingChange?.isFlexible) {
-            classes += ' flexible-employee';
+            classes += ' flexible-employee'; // This is for cross-site flexible workers
+        }
+        if (pendingChange?.assignment_type === 'spare') {
+            classes += ' spare-employee'; // This is for spare shifts
         }
         if (isHighlighted) classes += ' highlighted';
         return classes;
+    };
+
+    const handleResizeStart = (e, direction, employeeData, cellData) => {
+        e.stopPropagation();
+        if (onSpareResize) {
+            onSpareResize(e, direction, employeeData, cellData);
+        }
     };
 
     return (
@@ -65,6 +82,8 @@ const PendingEmployee = ({
             onMouseLeave={onMouseLeave}
             isHighlighted={isHighlighted}
             className={getClassName()}
+            showResizeHandles={true}
+            onResizeStart={handleResizeStart}
             renderContent={() => (
                 <>
                     <span
@@ -80,7 +99,7 @@ const PendingEmployee = ({
                     >
                         <div className="badge-container">
                             {(isCrossPosition || pendingChange?.isCrossPosition) && (
-                            <span className="badge-indicator cross-position-badge" title="Cross-position">
+                                <span className="badge-indicator cross-position-badge" title="Cross-position">
                                 <i className="bi bi-arrow-left-right"></i>
                             </span>
                             )}
@@ -89,13 +108,25 @@ const PendingEmployee = ({
                                 <i className="bi bi-building"></i>
                             </span>
                             )}
-                            {(isFlexible || pendingChange?.isFlexible) && (
-                                <span className="badge-indicator flexible-badge" title="Flexible">
+                            {(pendingChange?.assignment_type === 'spare') && (
+                                <span className="badge-indicator spare-badge" title="Spare">
                                 <i className="bi bi-shuffle"></i>
                             </span>
                             )}
                         </div>
-                            {formatEmployeeName(employeeForFormat)}
+                        {formatEmployeeName(employeeForFormat)}
+                        
+                        {/* Show temporary times during resize */}
+                        {resizeState?.isResizing && resizeState?.resizeData?.employee?.empId === assignment.empId && resizeState?.resizeData?.employee?.pendingKey === employeeData.pendingKey && resizeState?.tempTime && (
+                            <div className="custom-hours-display">
+                                <small className="text-primary fw-bold">
+                                    {resizeState.tempTime.start_time?.substring(0, 5)}
+                                    -
+                                    {resizeState.tempTime.end_time?.substring(0, 5)}
+                                    <span className="ms-1">({resizeState.tempTime.duration}h)</span>
+                                </small>
+                            </div>
+                        )}
                     </span>
 
                     {isEditing && (

@@ -27,7 +27,9 @@ const ScheduleCell = ({
                           dnd,
                           onDrop,
                           selectedCell,
-                          className = ''
+                          className = '',
+                          onSpareResize = null,
+                          resizeState = null
                       }) => {
     const {t} = useI18n();
 
@@ -80,6 +82,9 @@ const ScheduleCell = ({
     return (
         <td
             className={getCellClasses()}
+            data-position-id={positionId}
+            data-shift-id={shiftId}
+            data-date={date}
             onClick={handleCellClick}
             onDragOver={(e) => dnd.handleDragOver(e, cellData)}
             onDragEnter={(e) => e.currentTarget.classList.add('drag-over')}
@@ -111,6 +116,8 @@ const ScheduleCell = ({
                         isCrossPosition={employee.isCrossPosition}
                         isCrossSite={employee.isCrossSite}
                         isFlexible={employee.isFlexible}
+                        onSpareResize={onSpareResize}
+                        resizeState={resizeState}
                     />
                 ))}
                 {pendingAssignments.map((assignment) => {
@@ -141,6 +148,8 @@ const ScheduleCell = ({
                             isCrossPosition={pendingChange?.isCrossPosition || assignment.isCrossPosition}
                             isCrossSite={pendingChange?.isCrossSite || assignment.isCrossSite}
                             isFlexible={pendingChange?.isFlexible || assignment.isFlexible}
+                        onSpareResize={onSpareResize}
+                        resizeState={resizeState}
                         />
                     );
                 })}

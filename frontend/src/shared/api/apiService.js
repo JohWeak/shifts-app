@@ -129,6 +129,12 @@ export const positionAPI = {
     createPositionShift: (positionId, shiftData) => api.post(API_ENDPOINTS.SHIFTS.BY_POSITION(positionId), shiftData),
     updatePositionShift: (shiftId, shiftData) => api.put(API_ENDPOINTS.SHIFTS.DETAILS(shiftId), shiftData),
     deletePositionShift: (shiftId) => api.delete(API_ENDPOINTS.SHIFTS.DETAILS(shiftId)),
+    // Flexible shifts endpoints
+    fetchPositionFlexibleShifts: (positionId) => api.get(`/api/positions/${positionId}/flexible-shifts`),
+    createFlexibleShift: (positionId, shiftData) => api.post(`/api/positions/${positionId}/flexible-shifts`, shiftData),
+    updateFlexibleShift: (positionId, shiftId, shiftData) => api.put(`/api/positions/${positionId}/flexible-shifts/${shiftId}`, shiftData),
+    deleteFlexibleShift: (positionId, shiftId) => api.delete(`/api/positions/${positionId}/flexible-shifts/${shiftId}`),
+    createFlexibleAssignment: (positionId, shiftId, assignmentData) => api.post(`/api/positions/${positionId}/flexible-shifts/${shiftId}/assignments`, assignmentData),
     fetchRequirementsMatrix: (positionId) => api.get(API_ENDPOINTS.POSITIONS.REQUIREMENTS_MATRIX(positionId)),
 };
 

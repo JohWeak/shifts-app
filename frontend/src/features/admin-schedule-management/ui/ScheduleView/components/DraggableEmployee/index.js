@@ -13,7 +13,11 @@ const DraggableEmployee = ({
                                isDragOver,
                                cellData,
                                className = '',
-                               renderContent
+                               renderContent,
+                               onResizeStart,
+                               onResize,
+                               onResizeEnd,
+                               showResizeHandles = false
                            }) => {
     return (
         <div
@@ -43,6 +47,26 @@ const DraggableEmployee = ({
                 }
             }}
         >
+            {/* Resize handles for spare shifts */}
+            {showResizeHandles && isEditMode && (
+                <>
+                    <div 
+                        className="resize-handle resize-handle-top"
+                        onMouseDown={(e) => onResizeStart && onResizeStart(e, 'start', employee, cellData)}
+                        title="Adjust start time"
+                    >
+                        ↕
+                    </div>
+                    <div 
+                        className="resize-handle resize-handle-bottom"
+                        onMouseDown={(e) => onResizeStart && onResizeStart(e, 'end', employee, cellData)}
+                        title="Adjust end time"
+                    >
+                        ↕
+                    </div>
+                </>
+            )}
+            
             {renderContent ? renderContent() : (
                 <span className="employee-name">
                     {employee.name}

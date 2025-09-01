@@ -1308,6 +1308,7 @@ export const he = {
             namePlaceholder: 'לדוגמה, משמרת בוקר',
             night: 'לילה',
             nightShift: 'משמרת לילה',
+            flexible: 'גמישה',
             noShifts: 'לא הוגדרו משמרות לתפקיד זה',
             noShiftsForMatrix: 'אנא צור משמרות תחילה כדי להגדיר דרישות',
             overnightShiftNotice: 'זוהי משמרת לילה (חוצה חצות)',

@@ -2,7 +2,7 @@
 .assigned-employee {
     --cross-position-bg-color: var(--cross-position-bg-light);
     --cross-site-bg-color: var(--cross-site-bg-light);
-    --flexible-bg-color: var(--flexible-bg-light);
+    --spare-bg-color: var(--spare-bg-light);
     --gradient-start-color: var(--cross-site-bg-light);
     --gradient-end-color: var(--cross-position-bg-light);
 }
@@ -10,7 +10,7 @@
 [data-theme="dark"] .assigned-employee {
     --cross-position-bg-color: var(--cross-position-bg-dark);
     --cross-site-bg-color: var(--cross-site-bg-dark);
-    --flexible-bg-color: var(--flexible-bg-dark);
+    --spare-bg-color: var(--spare-bg-dark);
     --gradient-start-color: var(--cross-site-bg-dark);
     --gradient-end-color: var(--cross-position-bg-dark);
 }
@@ -38,10 +38,10 @@
     background-color: var(--cross-site-bg-color) !important;
 }
 
-/* Flexible employee styling - purple */
-.assigned-employee.flexible-employee {
-    border-color: var(--flexible-color) !important;
-    background-color: var(--flexible-bg-color) !important;
+/* Spare employee styling - purple */
+.assigned-employee.spare-employee {
+    border-color: var(--spare-color) !important;
+    background-color: var(--spare-bg-color) !important;
 }
 
 /* Combined styles - gradient border and background */
@@ -50,6 +50,57 @@
     border-color: var(--cross-site-color) !important;
     border-bottom-color: var(--cross-position-color) !important;
     border-inline-end-color: var(--cross-position-color) !important;
+}
+
+/* Custom hours display for spare shifts */
+.custom-hours-display {
+    font-size: 0.75em;
+    line-height: 1;
+    margin-top: 2px;
+    text-align: center;
+}
+
+.custom-hours-display small {
+    padding: 1px 4px;
+    border-radius: 3px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* Spare employee with spanning visual indicator */
+.assigned-employee.spare-employee.spans-multiple {
+    position: relative;
+    overflow: visible;
+}
+
+.assigned-employee.spare-employee.spans-multiple::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px dashed var(--spare-color);
+    border-radius: 4px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Cross-day spanning indicator */
+.assigned-employee.spare-employee.cross-day-span {
+    border-left: 3px solid #28a745 !important;
+}
+
+.assigned-employee.spare-employee.cross-day-span::after {
+    content: '→';
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    transform: translateY(-50%);
+    color: #28a745;
+    font-weight: bold;
+    font-size: 0.8em;
+    z-index: 1;
 }
 
 

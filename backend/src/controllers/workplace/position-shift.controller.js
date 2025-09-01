@@ -202,7 +202,7 @@ const deletePositionShift = async (req, res) => {
     }
 };
 
-// Helper function to check time overlap
+// Helper function to check time overlap (updated to match model)
 function checkTimeOverlap(start1, end1, start2, end2) {
     // Convert times to minutes for easier comparison
     const toMinutes = (time) => {
@@ -210,37 +210,42 @@ function checkTimeOverlap(start1, end1, start2, end2) {
         return hours * 60 + minutes;
     };
 
-    const start1Min = toMinutes(start1);
-    const end1Min = toMinutes(end1);
-    const start2Min = toMinutes(start2);
-    const end2Min = toMinutes(end2);
-
-    // Handle overnight shifts
-    if (end1Min < start1Min) {
-        // Shift 1 is overnight
-        if (end2Min < start2Min) {
-            // Both shifts are overnight
-            // Check if they overlap
-            // Overnight shift spans two periods: [start, 24:00) and [00:00, end)
-            // They overlap if:
-            // 1. start2 is between start1 and 24:00, OR
-            // 2. end2 is between 00:00 and end1, OR
-            // 3. shift2 completely contains shift1
-            return start2Min >= start1Min || end2Min <= end1Min ||
-                (start2Min <= start1Min && end2Min >= end1Min);
-        }
-        // Shift 1 overnight, shift 2 same-day
-        // They overlap if shift 2 starts after shift 1 starts OR ends before shift 1 ends
-        return start2Min >= start1Min || end2Min <= end1Min;
+    let flex_start = toMinutes(start1);
+    let flex_end = toMinutes(end1);
+    let shift_start = toMinutes(start2);
+    let shift_end = toMinutes(end2);
+    
+    // Handle overnight shifts by expanding to handle both same-day and cross-day scenarios
+    const checkOverlap = (fs, fe, ss, se) => {
+        return Math.max(fs, ss) < Math.min(fe, se);
+    };
+    
+    // Case 1: Both are regular shifts (no overnight)
+    if (flex_end >= flex_start && shift_end >= shift_start) {
+        return checkOverlap(flex_start, flex_end, shift_start, shift_end);
     }
-
-    if (end2Min < start2Min) {
-        // Shift 2 is overnight, shift 1 is same-day
-        return start1Min >= start2Min || end1Min <= end2Min;
+    
+    // Case 2: Flexible shift is overnight, regular shift is not
+    if (flex_end < flex_start && shift_end >= shift_start) {
+        return checkOverlap(flex_start, flex_start + 24 * 60, shift_start, shift_end) ||
+               checkOverlap(0, flex_end, shift_start, shift_end);
     }
-
-    // Both are same-day shifts
-    return !(end1Min <= start2Min || start1Min >= end2Min);
+    
+    // Case 3: Regular shift is overnight, flexible shift is not
+    if (flex_end >= flex_start && shift_end < shift_start) {
+        return checkOverlap(flex_start, flex_end, shift_start, shift_start + 24 * 60) ||
+               checkOverlap(flex_start, flex_end, 0, shift_end);
+    }
+    
+    // Case 4: Both are overnight shifts
+    if (flex_end < flex_start && shift_end < shift_start) {
+        return checkOverlap(flex_start, flex_start + 24 * 60, shift_start, shift_start + 24 * 60) ||
+               checkOverlap(0, flex_end, 0, shift_end) ||
+               checkOverlap(flex_start, flex_start + 24 * 60, 0, shift_end) ||
+               checkOverlap(0, flex_end, shift_start, shift_start + 24 * 60);
+    }
+    
+    return false;
 }
 
 // Get default color based on shift name

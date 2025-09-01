@@ -4,6 +4,7 @@ import React from 'react';
 import { Table } from 'react-bootstrap';
 import { formatTableHeaderDate, getDayName, formatShiftTime } from 'shared/lib/utils/scheduleUtils';
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
+import StretchedEmployee from '../../../StretchedEmployee';
 
 const PositionScheduleTable = ({
                                    weekDates,
@@ -14,10 +15,14 @@ const PositionScheduleTable = ({
                                    canEdit,
                                    getShiftColor,
                                    openColorPicker,
-                                   renderCell
+                                   renderCell,
+                                   resizeState,
+                                   stretchedEmployees,
+                                   formatEmployeeName
                                }) => {
     return (
-        <Table responsive bordered className="schedule-table mb-0">
+        <div style={{ position: 'relative' }}>
+            <Table responsive bordered className="schedule-table mb-0">
             <thead>
             <tr>
                 <th className="text-center shift-header">{t('schedule.shift')}</th>
@@ -90,6 +95,31 @@ const PositionScheduleTable = ({
             )}
             </tbody>
         </Table>
+        
+        {/* Render stretched employees overlay */}
+        {stretchedEmployees && stretchedEmployees.map((stretchedEmployee, index) => (
+            <StretchedEmployee
+                key={`stretched-${index}`}
+                employee={stretchedEmployee.employee}
+                startCell={stretchedEmployee.startCell}
+                endCell={stretchedEmployee.endCell}
+                customTimes={stretchedEmployee.customTimes}
+                formatEmployeeName={formatEmployeeName}
+            />
+        ))}
+        
+        {/* Render stretched employee during resize */}
+        {resizeState?.isResizing && resizeState?.tempTime && resizeState?.resizeData && (
+            <StretchedEmployee
+                key="resize-stretched"
+                employee={resizeState.resizeData.employee}
+                startCell={resizeState.resizeData.cellData.startCell}
+                endCell={resizeState.resizeData.cellData.endCell}
+                customTimes={resizeState.tempTime}
+                formatEmployeeName={formatEmployeeName}
+            />
+        )}
+        </div>
     );
 };
 

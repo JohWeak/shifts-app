@@ -1,8 +1,10 @@
 import {useCallback, useState} from 'react';
 
-export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []) => {
+export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = [], positions = [], onCreateFlexibleShift = null) => {
     const [draggedItem, setDraggedItem] = useState(null);
     const [dragOverEmployeeId, setDragOverEmployeeId] = useState(null);
+    const [isSpanning, setIsSpanning] = useState(false);
+    // const [spanningCells, setSpanningCells] = useState([]); // Not used yet
 
 
     const checkEmployeeInCellWithTempChanges = useCallback((empId, cell, tempChanges) => {
@@ -91,6 +93,93 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         return false;
     }, [pendingChanges, assignments]);
 
+    // Check if dragging across multiple cells to create flexible shift
+    const detectSpanningAttempt = useCallback((fromCell, targetCell, currentPosition) => {
+        if (!fromCell || !targetCell || !currentPosition) return false;
+        
+        // Same position, different dates or shifts
+        const samePosition = fromCell.positionId === targetCell.positionId;
+        const differentCells = fromCell.date !== targetCell.date || fromCell.shiftId !== targetCell.shiftId;
+        
+        // Additional check for cross-day spanning
+        if (samePosition && differentCells) {
+            const fromDate = new Date(fromCell.date);
+            const targetDate = new Date(targetCell.date);
+            const dayDiff = Math.abs((targetDate - fromDate) / (1000 * 60 * 60 * 24));
+            
+            // Allow spanning within 2 consecutive days for cross-day shifts
+            return dayDiff <= 1 && differentCells;
+        }
+        
+        return samePosition && differentCells;
+    }, []);
+
+    // Calculate spanning cells and time range
+    const calculateSpanningDetails = useCallback((fromCell, targetCell, positionData) => {
+        if (!positionData || !positionData.shifts) return null;
+        
+        const fromShift = positionData.shifts.find(s => s.id === fromCell.shiftId);
+        const targetShift = positionData.shifts.find(s => s.id === targetCell.shiftId);
+        
+        if (!fromShift || !targetShift || fromShift.is_flexible || targetShift.is_flexible) {
+            return null; // Can't span with or to flexible shifts
+        }
+
+        // Check if this is cross-day spanning
+        const isCrossDay = fromCell.date !== targetCell.date;
+        const fromDate = new Date(fromCell.date);
+        const targetDate = new Date(targetCell.date);
+        const isConsecutiveDays = Math.abs((targetDate - fromDate) / (1000 * 60 * 60 * 24)) === 1;
+
+        let start_time, end_time, suggested_name, spanning_shifts;
+        
+        if (isCrossDay && isConsecutiveDays) {
+            // Cross-day spanning: earlier date shift to later date shift
+            if (fromDate < targetDate) {
+                start_time = fromShift.start_time;
+                end_time = targetShift.end_time;
+                suggested_name = `Cross-day ${fromShift.start_time.substring(0,5)}-${targetShift.end_time.substring(0,5)}`;
+            } else {
+                start_time = targetShift.start_time;
+                end_time = fromShift.end_time;
+                suggested_name = `Cross-day ${targetShift.start_time.substring(0,5)}-${fromShift.end_time.substring(0,5)}`;
+            }
+            spanning_shifts = [fromShift.id, targetShift.id];
+        } else {
+            // Same day spanning
+            const times = [
+                { time: fromShift.start_time, shift: fromShift },
+                { time: targetShift.start_time, shift: targetShift }
+            ].sort((a, b) => a.time.localeCompare(b.time));
+
+            const endTimes = [
+                { time: fromShift.end_time, shift: fromShift },
+                { time: targetShift.end_time, shift: targetShift }
+            ].sort((a, b) => b.time.localeCompare(a.time));
+
+            start_time = times[0].time;
+            end_time = endTimes[0].time;
+            spanning_shifts = [fromShift.id, targetShift.id];
+            suggested_name = `Flexible ${start_time.substring(0,5)}-${end_time.substring(0,5)}`;
+        }
+        
+        // Check for overnight shifts
+        const startHour = parseInt(start_time.split(':')[0]);
+        const endHour = parseInt(end_time.split(':')[0]);
+        const isOvernight = endHour < startHour || isCrossDay;
+        
+        return {
+            start_time,
+            end_time,
+            spanning_shifts,
+            is_overnight: isOvernight,
+            is_cross_day: isCrossDay,
+            suggested_name,
+            date: fromCell.date < targetCell.date ? fromCell.date : targetCell.date, // Use earlier date
+            end_date: isCrossDay ? (fromCell.date > targetCell.date ? fromCell.date : targetCell.date) : null
+        };
+    }, []);
+
     const checkForDuplicateOnSwap = useCallback((draggedEmp, fromCell, targetEmp, targetCell) => {
         const tempChanges = {...pendingChanges};
         const timestamp = Date.now();
@@ -149,6 +238,23 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         const targetEmployeeEl = e.target.closest('.draggable-employee');
         const targetEmployeeData = targetEmployeeEl ?
             JSON.parse(targetEmployeeEl.dataset.employeeData || '{}') : null;
+
+        // Check for spanning attempt
+        const currentPosition = positions.find(p => p.pos_id === targetCell.positionId);
+        const isSpanningAttempt = detectSpanningAttempt(draggedItem.fromCell, targetCell, currentPosition);
+        
+        if (isSpanningAttempt && !targetEmployeeData) {
+            setIsSpanning(true);
+            const spanDetails = calculateSpanningDetails(draggedItem.fromCell, targetCell, currentPosition);
+            if (spanDetails) {
+                e.currentTarget.classList.add('spanning-attempt');
+                e.dataTransfer.dropEffect = 'copy'; // Visual indicator for flexible shift creation
+                return;
+            }
+        } else {
+            setIsSpanning(false);
+            e.currentTarget.classList.remove('spanning-attempt');
+        }
 
         if (targetEmployeeData && targetEmployeeData.empId) {
             setDragOverEmployeeId(targetEmployeeData.empId);
@@ -233,6 +339,36 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
         const changes = [];
         const timestamp = Date.now();
+
+        // Check for flexible shift creation (spanning)
+        const currentPosition = positions.find(p => p.pos_id === targetCell.positionId);
+        const isSpanningAttempt = detectSpanningAttempt(fromCell, targetCell, currentPosition);
+        
+        if (isSpanningAttempt && !targetEmployee && onCreateFlexibleShift) {
+            console.log('Flexible shift creation detected');
+            const spanDetails = calculateSpanningDetails(fromCell, targetCell, currentPosition);
+            
+            if (spanDetails) {
+                // Trigger flexible shift creation
+                const dragContext = {
+                    start_time: spanDetails.start_time,
+                    end_time: spanDetails.end_time,
+                    employeeId: dragged.empId,
+                    employeeName: dragged.name,
+                    positionId: targetCell.positionId,
+                    date: spanDetails.date,
+                    spanning_shifts: spanDetails.spanning_shifts
+                };
+                
+                onCreateFlexibleShift(dragContext);
+                
+                // Return empty changes as the flexible shift creation will be handled by the modal
+                return [{
+                    action: 'createFlexibleShift',
+                    dragContext
+                }];
+            }
+        }
 
 
         if (fromCell.date === targetCell.date &&
@@ -416,11 +552,13 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
 
         console.log('Created changes:', changes);
         return changes;
-    }, [draggedItem, pendingChanges, checkEmployeeInCellWithTempChanges]);
+    }, [draggedItem, pendingChanges, checkEmployeeInCellWithTempChanges, positions, detectSpanningAttempt, calculateSpanningDetails, onCreateFlexibleShift]);
 
 
     return {
         dragOverEmployeeId,
+        isSpanning,
+        // spanningCells, // Not used yet
         handleDragStart,
         handleDragEnd,
         handleDragOver,
@@ -428,5 +566,7 @@ export const useDragAndDrop = (isEditMode, pendingChanges = {}, assignments = []
         handleDragEnterEmployee,
         handleDragLeaveEmployee,
         createChangesOnDrop,
+        detectSpanningAttempt,
+        calculateSpanningDetails,
     };
 };

@@ -79,14 +79,14 @@ const ColorPickerModal = ({
         if (onColorSelect) {
             onColorSelect(selectedColor);
         }
-        onHide();
+        onHide(true); // true = save preview
     };
 
     const handleCancelAndClose = () => {
         if (onColorChange) {
             onColorChange(initialColor);
         }
-        onHide();
+        onHide(false); // false = cancel/reset
     };
 
     const handleReset = () => {

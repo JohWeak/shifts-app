@@ -44,11 +44,7 @@ module.exports = {
             },
         });
 
-        // Add index for fast lookup by setting_key
-        await queryInterface.addIndex('system_settings', ['setting_key'], {
-            unique: true,
-            name: 'idx_system_settings_key',
-        });
+        // Note: unique constraint on setting_key already creates an index
 
         // Insert default settings
         await queryInterface.bulkInsert('system_settings', [

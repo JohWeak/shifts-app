@@ -83,8 +83,18 @@ export const useShiftColor = () => {
         });
     };
 
-    const closeColorPicker = () => {
-
+    const closeColorPicker = (savePreview = true) => {
+        // savePreview = true: click outside modal (save preview)
+        // savePreview = false: click X button (cancel/reset)
+        
+        if (colorPickerState.shiftId && savePreview && tempShiftColors[colorPickerState.shiftId]) {
+            // Click outside - save the preview color for both local and global modes
+            const previewColor = tempShiftColors[colorPickerState.shiftId];
+            applyColor(previewColor, null, true);
+            return;
+        }
+        
+        // Click X button or no preview color - clear the temporary color
         if (colorPickerState.shiftId) {
             setTempShiftColors(prev => {
                 const newState = {...prev};
@@ -92,6 +102,7 @@ export const useShiftColor = () => {
                 return newState;
             });
         }
+        
         setColorPickerState({
             show: false,
             shiftId: null,
@@ -109,23 +120,50 @@ export const useShiftColor = () => {
         }));
     }, [colorPickerState.shiftId, setTempShiftColors])
 
-    const applyColor = async (color, customSaveMode = null) => {
+    const applyColor = async (color, customSaveMode = null, autoClose = true) => {
         const {shiftId, positionId} = colorPickerState;
         const saveMode = customSaveMode || colorPickerState.saveMode;
 
-        setTempShiftColors(prev => {
-            const newState = {...prev};
-            delete newState[shiftId];
-            return newState;
-        });
-
         if (saveMode === 'local') {
+            // For local save, clear temp colors immediately
+            setTempShiftColors(prev => {
+                const newState = {...prev};
+                delete newState[shiftId];
+                return newState;
+            });
+            
             ThemeColorService.setColor(shiftId, color, currentTheme, isAdmin && currentTheme === 'dark');
             dispatch(setLocalShiftColorOverride({shiftId, color}));
         } else { // saveMode === 'global'
-            dispatch(updateShiftColorInDB({shiftId, color, positionId}));
+            // For global save, immediately apply to Redux state and clear temp colors
+            dispatch(setLocalShiftColorOverride({shiftId, color}));
+            setTempShiftColors(prev => {
+                const newState = {...prev};
+                delete newState[shiftId];
+                return newState;
+            });
+            
+            // Send to database in background
+            try {
+                await dispatch(updateShiftColorInDB({shiftId, color, positionId})).unwrap();
+                // Color is already applied to Redux, no need to do anything more
+            } catch (error) {
+                console.error('Failed to save color to database:', error);
+                // Color is still visible via Redux override
+            }
         }
-        closeColorPicker();
+        
+        if (autoClose) {
+            // Force close without applying again
+            setColorPickerState({
+                show: false,
+                shiftId: null,
+                positionId: null,
+                currentColor: '#6c757d',
+                originalColor: '#6c757d',
+                shift: null
+            });
+        }
     };
 
     const getShiftColor = (shift) => {

@@ -1,9 +1,9 @@
 // frontend/src/features/admin-schedule-management/index.js
 
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button, Container } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Button, Container} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 
 // UI Components
 import PageHeader from 'shared/ui/components/PageHeader';
@@ -11,8 +11,8 @@ import GenerateScheduleForm from './ui/GenerateScheduleForm';
 import ScheduleContent from './ui/ScheduleContent';
 
 // Hooks & Actions
-import { useScheduleActions } from './model/hooks/useScheduleActions';
-import { useScheduleUI } from './model/hooks/useScheduleUI';
+import {useScheduleActions} from './model/hooks/useScheduleActions';
+import {useScheduleUI} from './model/hooks/useScheduleUI';
 import {
     addPendingChange,
     fetchScheduleDetails,
@@ -22,12 +22,12 @@ import {
     setSelectedScheduleId,
 } from './model/scheduleSlice';
 
-import { fetchPositions } from '../admin-workplace-settings/model/workplaceSlice';
-import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
+import {fetchPositions} from '../admin-workplace-settings/model/workplaceSlice';
+import {fetchSystemSettings} from '../admin-system-settings/model/settingsSlice';
 import './index.css';
 
 const ScheduleManagement = () => {
-    const { t, direction } = useI18n();
+    const {t, direction} = useI18n();
     const dispatch = useDispatch();
 
     const {
@@ -38,7 +38,7 @@ const ScheduleManagement = () => {
         workSitesLoading,
     } = useSelector((state) => state.schedule);
 
-    const { loading: actionsLoading, handleGenerate } = useScheduleActions();
+    const {loading: actionsLoading, handleGenerate} = useScheduleActions();
     const {
         selectedCell,
         isPanelOpen,

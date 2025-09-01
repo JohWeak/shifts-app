@@ -93,7 +93,9 @@ const ScheduleInfo = ({
                         <i className="bi bi-people"></i>
                         <span className="info-label">{t('schedule.assignments')}</span>
                     </div>
-                    <span className="info-value">{scheduleDetails?.assignments?.length}</span>
+                    <span className="info-value">
+                        {scheduleDetails?.assignments?.filter(a => a.assignment_type !== 'flexible')?.length || 0}
+                    </span>
                 </div>
                 <div className="info-item">
                     <div className="info-item-header">
