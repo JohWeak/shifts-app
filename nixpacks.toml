@@ -1,0 +1,12 @@
+# === Nixpacks Configuration ===
+
+providers = ["node", "python"]
+
+[phases.install]
+cmds = ["npm run install-all", "pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[phases.start]
+startCmd = "npm start"
