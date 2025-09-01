@@ -21,7 +21,14 @@ const allowedOrigins = [
     'http://127.0.0.1:3000',
     `http://172.20.10.2:3000`,
     `http://192.168.1.111:3000`,
+    `https://shifts.up.railway.app`,
 ];
+
+if (process.env.NODE_ENV === 'production' && process.env.CORS_ORIGIN) {
+    allowedOrigins.push(process.env.CORS_ORIGIN);
+}
+
+
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);

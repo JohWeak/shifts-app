@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const baseURL = isProduction
-    ? '/api'
+    ? ''
     : process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // 1. Create a single axios instance for the entire application
