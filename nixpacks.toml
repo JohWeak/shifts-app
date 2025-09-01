@@ -1,6 +1,6 @@
 # === Nixpacks Configuration ===
 
-providers = ["node", "python", "chromium"]
+providers = ["node", "python"]
 
 [phases.setup]
 aptPkgs = [
