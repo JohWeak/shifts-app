@@ -27,7 +27,7 @@ if (process.env.DATABASE_URL) {
         url: process.env.DATABASE_URL,
         dialectOptions: {
             ssl: {
-                require: false,
+                require: true,
                 rejectUnauthorized: false,
             },
             connectTimeout: 60000,
