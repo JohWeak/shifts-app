@@ -6,9 +6,10 @@
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "dev": "concurrently \"npm run backend-dev\" \"npm run frontend-dev\"",
     "dev:remote": "concurrently \"npm run backend-dev\" \"npm run frontend-dev:remote\"",
-    "backend-dev": "cd backend && nodemon src/server.js",
+    "backend-dev": "cd backend && npm run dev",
     "frontend-dev": "cd frontend && npm start",
-    "frontend-dev:remote": "cd frontend && npm run start:remote"
+    "frontend-dev:remote": "cd frontend && npm run start:remote",
+    "postinstall": ""
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
