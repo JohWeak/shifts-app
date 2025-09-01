@@ -28,10 +28,9 @@ import {
     submitWeeklyConstraints,
     updateConstraint,
 } from './model/constraintSlice';
-import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
+import {fetchSystemSettings} from '../admin-system-settings/model/settingsSlice';
 
 import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
-import {formatDate} from 'shared/lib/utils/scheduleUtils';
 import './index.css';
 
 const ConstraintsSchedule = () => {
@@ -161,31 +160,31 @@ const ConstraintsSchedule = () => {
 
         const deadlineDay = systemSettings.constraintDeadlineDay || 3; // Wednesday by default
         const deadlineTime = systemSettings.constraintDeadlineTime || '18:00';
-        
+
         // Get current week's deadline
         const now = new Date();
         const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        
+
         // Calculate days until deadline day
         let daysUntilDeadline = deadlineDay - currentDay;
         if (daysUntilDeadline < 0) {
             daysUntilDeadline += 7; // Next week
         }
-        
+
         // Create deadline date/time
         const deadlineDate = new Date(now);
         deadlineDate.setDate(now.getDate() + daysUntilDeadline);
         const [hours, minutes] = deadlineTime.split(':').map(Number);
         deadlineDate.setHours(hours, minutes, 0, 0);
-        
+
         // If deadline is today but time has passed, it means next week's deadline
         if (daysUntilDeadline === 0 && now > deadlineDate) {
             deadlineDate.setDate(deadlineDate.getDate() + 7);
         }
-        
+
         const isPassed = now > deadlineDate;
         const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][deadlineDay];
-        
+
         return {
             day: t(`days.${dayName.toLowerCase()}`),
             time: deadlineTime,
@@ -320,7 +319,7 @@ const ConstraintsSchedule = () => {
         };
         const isClickable = canEdit && !isSubmitted && !deadlineInfo?.isPassed;
         let foregroundClasses = `constraint-cell ${status} ${isClickable ? 'clickable' : ''}`;
-        
+
         if (deadlineInfo?.isPassed) {
             foregroundClasses += ' deadline-passed';
         }
@@ -351,11 +350,11 @@ const ConstraintsSchedule = () => {
         const status = weeklyConstraints[date]?.day_status || 'neutral';
         const isClickable = canEdit && !isSubmitted && !deadlineInfo?.isPassed;
         let classes = `day-header ${status} ${isClickable ? 'clickable' : ''}`;
-        
+
         if (deadlineInfo?.isPassed) {
             classes += ' deadline-passed';
         }
-        
+
         return classes;
     };
 
@@ -398,7 +397,7 @@ const ConstraintsSchedule = () => {
                         <div className="d-flex align-items-center">
                             <i className={`bi ${deadlineInfo.isPassed ? 'bi-exclamation-triangle-fill text-warning' : 'bi-info-circle-fill text-info'} me-2`}></i>
                             <small className={deadlineInfo.isPassed ? 'text-warning' : 'text-muted'}>
-                                {deadlineInfo.isPassed 
+                                {deadlineInfo.isPassed
                                     ? t('constraints.deadline.passed')
                                     : t('constraints.deadline.info', {day: deadlineInfo.day, time: deadlineInfo.time})
                                 }

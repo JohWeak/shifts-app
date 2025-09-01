@@ -1,16 +1,16 @@
 // frontend/src/features/employee-profile/index.js
-import React, { useEffect, useState, useRef } from 'react';
-import { Alert, Button, Card, Col, Form, FormGroup, Row } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useEffect, useRef, useState} from 'react';
+import {Alert, Button, Card, Col, Form, FormGroup, Row} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import PageHeader from 'shared/ui/components/PageHeader';
-import { loadProfile, updateProfile } from './model/profileSlice';
+import {loadProfile, updateProfile} from './model/profileSlice';
 import './index.css';
 
 const EmployeeProfile = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { user, loading, error, success } = useSelector(state => state.profile);
+    const {user, loading, error, success} = useSelector(state => state.profile);
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -40,26 +40,25 @@ const EmployeeProfile = () => {
     const cityInputRef = useRef(null);
 
     // Import location data
-    const { locationData, citiesData } = require('shared/utils/locationData');
-    const { locale } = useSelector(state => state.i18n) || 'en';
-    
+    const {locationData, citiesData} = require('shared/utils/locationData');
+    const {locale} = useSelector(state => state.i18n) || 'en';
+
     // Get localized country names
-    const countries = Object.keys(locationData.en.countries);
     const localizedCountries = Object.values(locationData[locale]?.countries || locationData.en.countries);
     const cities = {};
-    
+
     // Build cities object using localized country names
     Object.keys(citiesData).forEach(countryKey => {
         const localizedCountryName = (locationData[locale]?.countries || locationData.en.countries)[countryKey];
         cities[localizedCountryName] = citiesData[countryKey];
     });
 
-    const filteredCountries = localizedCountries.filter(country => 
+    const filteredCountries = localizedCountries.filter(country =>
         countrySearch ? country.toLowerCase().includes(countrySearch.toLowerCase()) : true
     );
 
-    const filteredCities = formData.country ? 
-        (cities[formData.country] || []).filter(city => 
+    const filteredCities = formData.country ?
+        (cities[formData.country] || []).filter(city =>
             citySearch ? city.toLowerCase().includes(citySearch.toLowerCase()) : true
         ) : [];
 
@@ -85,13 +84,13 @@ const EmployeeProfile = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         // Validate country
         if (formData.country && !localizedCountries.includes(formData.country)) {
             alert(t('profile.invalidCountry'));
             return;
         }
-        
+
         // Validate city
         if (formData.city && formData.country) {
             const validCities = cities[formData.country] || [];
@@ -100,7 +99,7 @@ const EmployeeProfile = () => {
                 return;
             }
         }
-        
+
         // Send username as login to match backend field naming
         const profileUpdateData = {
             ...formData,
@@ -111,7 +110,7 @@ const EmployeeProfile = () => {
     };
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const {name, value, type, checked} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
@@ -119,7 +118,7 @@ const EmployeeProfile = () => {
     };
 
     const handlePasswordChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setPasswordData(prev => ({
             ...prev,
             [name]: value,
@@ -129,20 +128,20 @@ const EmployeeProfile = () => {
     const handlePasswordSubmit = (e) => {
         e.preventDefault();
         setPasswordValidation('');
-        
+
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             setPasswordValidation(t('profile.security.passwordMismatch'));
             return;
         }
-        
+
         if (passwordData.newPassword.length < 6) {
             setPasswordValidation(t('profile.security.passwordTooShort'));
             return;
         }
-        
-        dispatch(updateProfile({ 
+
+        dispatch(updateProfile({
             currentPassword: passwordData.currentPassword,
-            newPassword: passwordData.newPassword 
+            newPassword: passwordData.newPassword
         })).then((result) => {
             if (result.type === 'profile/updateProfile/fulfilled') {
                 setPasswordData({
@@ -253,11 +252,13 @@ const EmployeeProfile = () => {
                                             <Col md={6}>
                                                 <div className="mb-2">
                                                     <strong>{t('profile.role')}: </strong>
-                                                    <span className="text-muted">{user.role || t('profile.notAssigned')}</span>
+                                                    <span
+                                                        className="text-muted">{user.role || t('profile.notAssigned')}</span>
                                                 </div>
                                                 <div className="mb-2">
                                                     <strong>{t('profile.status')}: </strong>
-                                                    <span className={`badge bg-${user.status === 'active' ? 'success' : 'secondary'}`}>
+                                                    <span
+                                                        className={`badge bg-${user.status === 'active' ? 'success' : 'secondary'}`}>
                                                         {t(`profile.${user.status}`) || user.status}
                                                     </span>
                                                 </div>
@@ -344,11 +345,11 @@ const EmployeeProfile = () => {
                                                     autoComplete="country"
                                                 />
                                                 {showCountryOptions && (
-                                                    <div 
+                                                    <div
                                                         className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
-                                                        style={{ 
-                                                            zIndex: 1050, 
-                                                            maxHeight: '200px', 
+                                                        style={{
+                                                            zIndex: 1050,
+                                                            maxHeight: '200px',
                                                             overflowY: 'auto',
                                                             top: '100%'
                                                         }}
@@ -357,7 +358,7 @@ const EmployeeProfile = () => {
                                                             <div
                                                                 key={country}
                                                                 className="px-3 py-2 hover-bg-light cursor-pointer"
-                                                                style={{ cursor: 'pointer' }}
+                                                                style={{cursor: 'pointer'}}
                                                                 onClick={() => handleCountrySelect(country)}
                                                                 onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                                                                 onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
@@ -392,11 +393,11 @@ const EmployeeProfile = () => {
                                                     autoComplete="address-level2"
                                                 />
                                                 {showCityOptions && formData.country && (
-                                                    <div 
+                                                    <div
                                                         className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
-                                                        style={{ 
-                                                            zIndex: 1050, 
-                                                            maxHeight: '200px', 
+                                                        style={{
+                                                            zIndex: 1050,
+                                                            maxHeight: '200px',
                                                             overflowY: 'auto',
                                                             top: '100%'
                                                         }}
@@ -405,7 +406,7 @@ const EmployeeProfile = () => {
                                                             <div
                                                                 key={city}
                                                                 className="px-3 py-2 hover-bg-light cursor-pointer"
-                                                                style={{ cursor: 'pointer' }}
+                                                                style={{cursor: 'pointer'}}
                                                                 onClick={() => handleCitySelect(city)}
                                                                 onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                                                                 onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
@@ -447,7 +448,7 @@ const EmployeeProfile = () => {
                                             <Button
                                                 variant="outline-secondary"
                                                 className="rounded-pill px-4 py-2"
-                                                style={{ minHeight: '48px' }}
+                                                style={{minHeight: '48px'}}
                                                 onClick={() => {
                                                     setShowPasswordChange(!showPasswordChange);
                                                     if (showPasswordChange) {
@@ -463,7 +464,7 @@ const EmployeeProfile = () => {
                                                 {showPasswordChange ? t('common.cancel') : t('profile.security.changePassword')}
                                             </Button>
                                         </div>
-                                        
+
                                         {showPasswordChange && (
                                             <Form onSubmit={handlePasswordSubmit}>
                                                 {passwordValidation && (
@@ -471,7 +472,7 @@ const EmployeeProfile = () => {
                                                         {passwordValidation}
                                                     </Alert>
                                                 )}
-                                                
+
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{t('profile.security.currentPassword')}</Form.Label>
                                                     <Form.Control
@@ -482,7 +483,7 @@ const EmployeeProfile = () => {
                                                         required
                                                     />
                                                 </Form.Group>
-                                                
+
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{t('profile.security.newPassword')}</Form.Label>
                                                     <Form.Control
@@ -493,7 +494,7 @@ const EmployeeProfile = () => {
                                                         required
                                                     />
                                                 </Form.Group>
-                                                
+
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{t('profile.security.confirmPassword')}</Form.Label>
                                                     <Form.Control
@@ -504,13 +505,13 @@ const EmployeeProfile = () => {
                                                         required
                                                     />
                                                 </Form.Group>
-                                                
+
                                                 <div className="d-grid">
-                                                    <Button 
-                                                        type="submit" 
-                                                        variant="warning" 
+                                                    <Button
+                                                        type="submit"
+                                                        variant="warning"
                                                         className="rounded-pill px-4 py-3"
-                                                        style={{ minHeight: '50px' }}
+                                                        style={{minHeight: '50px'}}
                                                         disabled={loading}
                                                     >
                                                         <i className="bi bi-shield-lock me-2"></i>
