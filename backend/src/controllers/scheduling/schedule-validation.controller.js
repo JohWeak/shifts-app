@@ -1,5 +1,5 @@
 // backend/src/controllers/scheduling/schedule-validation.controller.js
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 require('dayjs');
 const db = require('../../models');
 const EmployeeRecommendationService = require('../../services/recommendations/employee-recommendation.service');
@@ -8,7 +8,7 @@ const constraints = require('../../config/scheduling-constraints');
 class ScheduleValidationController {
     static async validateChanges(req, res) {
         try {
-            const { scheduleId, changes } = req.body;
+            const {scheduleId, changes} = req.body;
             const {
                 Employee,
                 Schedule,
@@ -30,7 +30,7 @@ class ScheduleValidationController {
             });
 
             if (!schedule) {
-                return res.status(404).json({ error: 'Schedule not found' });
+                return res.status(404).json({error: 'Schedule not found'});
             }
 
             // Get all shifts for the schedule
@@ -142,15 +142,15 @@ class ScheduleValidationController {
 
                 for (const [date, dayAssignments] of Object.entries(dailyAssignments)) {
                     const dailyHours = dayAssignments.reduce((total, a) => {
-                        let hours = 0;
-                        
+                        let hours;
+
                         // For flexible assignments, calculate actual hours worked
                         if (a.assignment_type === 'flexible' && (a.custom_start_time || a.custom_end_time)) {
                             hours = ScheduleValidationController.calculateFlexibleAssignmentHours(a);
                         } else {
                             hours = a.shift?.duration_hours || 8;
                         }
-                        
+
                         return total + hours;
                     }, 0);
 
@@ -182,7 +182,7 @@ class ScheduleValidationController {
             if (uniqueViolations.length > 0) {
                 const employeeIds = [...new Set(uniqueViolations.map(v => v.employeeId))];
                 const employees = await Employee.findAll({
-                    where: { emp_id: employeeIds },
+                    where: {emp_id: employeeIds},
                     attributes: ['emp_id', 'first_name', 'last_name'],
                 });
 
@@ -196,11 +196,11 @@ class ScheduleValidationController {
                 });
             }
 
-            res.json({ violations: uniqueViolations });
+            res.json({violations: uniqueViolations});
 
         } catch (error) {
             console.error('Validation error:', error);
-            res.status(500).json({ error: 'Failed to validate changes', details: error.message });
+            res.status(500).json({error: 'Failed to validate changes', details: error.message});
         }
     }
 
@@ -231,8 +231,8 @@ class ScheduleValidationController {
 
     // Get flexible shift coverage for understaffing detection
     static async getFlexibleShiftCoverage(scheduleId, date, positionId, shiftId) {
-        const { ScheduleAssignment, PositionShift } = db;
-        
+        const {ScheduleAssignment, PositionShift} = db;
+
         // Get flexible shifts that span this regular shift
         const flexibleShifts = await PositionShift.findAll({
             where: {
@@ -246,7 +246,7 @@ class ScheduleValidationController {
         });
 
         if (flexibleShifts.length === 0) {
-            return { flexibleCoverage: 0, flexibleAssignments: [] };
+            return {flexibleCoverage: 0, flexibleAssignments: []};
         }
 
         // Get assignments for these flexible shifts on the given date
@@ -258,7 +258,7 @@ class ScheduleValidationController {
                     [Op.in]: flexibleShifts.map(fs => fs.id)
                 },
                 assignment_type: 'flexible',
-                status: { [Op.ne]: 'absent' }
+                status: {[Op.ne]: 'absent'}
             },
             include: [
                 {
@@ -282,7 +282,7 @@ class ScheduleValidationController {
 
     // Calculate effective staffing including flexible assignments
     static async calculateEffectiveStaffing(scheduleId, date, positionId, shiftId) {
-        const { ScheduleAssignment } = db;
+        const {ScheduleAssignment} = db;
 
         // Get regular assignments
         const regularAssignments = await ScheduleAssignment.count({
@@ -292,7 +292,7 @@ class ScheduleValidationController {
                 position_id: positionId,
                 shift_id: shiftId,
                 assignment_type: 'regular',
-                status: { [Op.ne]: 'absent' }
+                status: {[Op.ne]: 'absent'}
             }
         });
 

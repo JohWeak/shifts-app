@@ -1,6 +1,6 @@
 // backend/src/controllers/system-settings.controller.js
 const db = require('../../models');
-const { Position, WorkSite, SystemSettings } = db;
+const {SystemSettings} = db;
 const autoGenerationService = require('../../services/scheduling/auto-generation.service');
 
 const getSystemSettings = async (req, res) => {
@@ -55,7 +55,7 @@ const getSystemSettings = async (req, res) => {
         };
 
         // Merge defaults with stored settings
-        const finalSettings = { ...defaultSettings, ...settingsObj };
+        const finalSettings = {...defaultSettings, ...settingsObj};
 
         res.json({
             success: true,

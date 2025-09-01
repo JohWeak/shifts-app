@@ -1,5 +1,5 @@
 // backend/src/controllers/schedule/schedule.controller.js
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 const db = require('../../../models');
 const {
     Schedule,
@@ -16,7 +16,7 @@ const emailService = require('../../../services/notifications/email.service');
 
 const getAllSchedules = async (req, res) => {
     try {
-        const { page = 1, limit = 10, site_id } = req.query;
+        const {page = 1, limit = 10, site_id} = req.query;
 
         const whereClause = {};
         if (site_id) {
@@ -61,7 +61,7 @@ const getAllSchedules = async (req, res) => {
  */
 const getScheduleDetails = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
+        const {scheduleId} = req.params;
         console.log(`[ScheduleController] Getting details for schedule ${scheduleId}`);
 
         const schedule = await Schedule.findByPk(scheduleId, {
@@ -82,7 +82,7 @@ const getScheduleDetails = async (req, res) => {
 
         // Get all assignments for this schedule
         const assignments = await ScheduleAssignment.findAll({
-            where: { schedule_id: scheduleId },
+            where: {schedule_id: scheduleId},
             include: [
                 {
                     model: Employee,
@@ -111,7 +111,7 @@ const getScheduleDetails = async (req, res) => {
             include: [{
                 model: PositionShift,
                 as: 'shifts',
-                where: { is_active: true },
+                where: {is_active: true},
                 required: false,
                 include: [{
                     model: ShiftRequirement,
@@ -299,7 +299,7 @@ function maskEmail(email) {
         return 'invalid-email';
     }
     const [localPart, domain] = email.split('@');
-    const [domainName, topLevelDomain] = domain.split('.');
+    const [topLevelDomain] = domain.split('.');
 
     const maskedLocal = localPart.length > 2
         ? `${localPart.substring(0, 2)}***`
@@ -315,7 +315,7 @@ const sendScheduleNotifications = async (scheduleId) => {
     try {
         // First check if global notifications are enabled
         const notificationSetting = await SystemSettings.findOne({
-            where: { setting_key: 'notifySchedulePublished' },
+            where: {setting_key: 'notifySchedulePublished'},
         });
 
         const globalNotificationsEnabled = notificationSetting
@@ -346,14 +346,14 @@ const sendScheduleNotifications = async (scheduleId) => {
 
         // Get all assigned employees with their shifts
         const assignments = await ScheduleAssignment.findAll({
-            where: { schedule_id: schedule.id },
+            where: {schedule_id: schedule.id},
             include: [
                 {
                     model: Employee,
                     as: 'employee',
                     where: {
                         receive_schedule_emails: true,
-                        email: { [Op.not]: null },
+                        email: {[Op.not]: null},
                     },
                     required: true,
                 },
@@ -391,9 +391,9 @@ const sendScheduleNotifications = async (scheduleId) => {
         });
 
         // Send emails asynchronously
-        const emailPromises = Object.values(employeeSchedules).map(({ employee, shifts }) =>
+        const emailPromises = Object.values(employeeSchedules).map(({employee, shifts}) =>
             emailService.sendScheduleNotification(employee, {
-                week: { start: schedule.start_date, end: schedule.end_date },
+                week: {start: schedule.start_date, end: schedule.end_date},
                 shifts,
             }),
         );
@@ -418,11 +418,11 @@ const sendScheduleNotifications = async (scheduleId) => {
                     break;
                 case 'skipped':
                     report.skipped_count++;
-                    report.details.skipped.push({ to: maskedTo, reason: res.reason });
+                    report.details.skipped.push({to: maskedTo, reason: res.reason});
                     break;
                 case 'failed':
                     report.failed_count++;
-                    report.details.failed.push({ to: maskedTo, error: res.error });
+                    report.details.failed.push({to: maskedTo, error: res.error});
                     break;
             }
         });
@@ -442,8 +442,8 @@ const sendScheduleNotifications = async (scheduleId) => {
  */
 const updateScheduleStatus = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { status } = req.body;
+        const {scheduleId} = req.params;
+        const {status} = req.body;
 
         if (!['draft', 'published', 'archived'].includes(status)) {
             return res.status(400).json({
@@ -463,7 +463,7 @@ const updateScheduleStatus = async (req, res) => {
         const previousStatus = schedule.status;
 
         // Update status
-        await schedule.update({ status });
+        await schedule.update({status});
 
         // Reload with associations
         await schedule.reload({
@@ -507,7 +507,7 @@ const updateScheduleStatus = async (req, res) => {
  */
 const resendScheduleNotifications = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
+        const {scheduleId} = req.params;
 
         const schedule = await Schedule.findByPk(scheduleId);
         if (!schedule) {
@@ -547,8 +547,8 @@ const resendScheduleNotifications = async (req, res) => {
  */
 const updateScheduleAssignments = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
-        const { changes } = req.body;
+        const {scheduleId} = req.params;
+        const {changes} = req.body;
 
         console.log('[ScheduleController] Updating assignments for schedule:', scheduleId);
         console.log('[ScheduleController] Changes:', changes);
@@ -606,7 +606,7 @@ const updateScheduleAssignments = async (req, res) => {
                         notes: 'Manually assigned via edit interface',
                     });
 
-                    processedChanges.push({ ...change, status: 'created' });
+                    processedChanges.push({...change, status: 'created'});
                     console.log(`[ScheduleController] Added assignment: ${change.empName} to ${change.date} shift ${change.shiftId}`);
 
                 } else if (change.action === 'remove') {
@@ -627,7 +627,7 @@ const updateScheduleAssignments = async (req, res) => {
                         where: whereClause,
                     });
 
-                    processedChanges.push({ ...change, status: 'deleted', count: deleted });
+                    processedChanges.push({...change, status: 'deleted', count: deleted});
                     console.log(`[ScheduleController] Removed ${deleted} assignment(s) for employee ${change.empId} on ${change.date}`);
                 }
             } catch (changeError) {
@@ -678,7 +678,7 @@ const updateScheduleAssignments = async (req, res) => {
  */
 const deleteSchedule = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
+        const {scheduleId} = req.params;
 
         const schedule = await Schedule.findByPk(scheduleId);
         if (!schedule) {
@@ -698,7 +698,7 @@ const deleteSchedule = async (req, res) => {
 
         // Delete related assignments (cascading through FK)
         await ScheduleAssignment.destroy({
-            where: { schedule_id: scheduleId },
+            where: {schedule_id: scheduleId},
         });
 
         // Delete the schedule itself
@@ -724,9 +724,9 @@ const deleteSchedule = async (req, res) => {
  */
 const getRecommendedEmployees = async (req, res) => {
     try {
-        const { scheduleId, date, shiftId, positionId } = req.query;
+        const {scheduleId, date, shiftId, positionId} = req.query;
 
-        console.log('[ScheduleController] Getting recommendations for:', { scheduleId, date, shiftId, positionId });
+        console.log('[ScheduleController] Getting recommendations for:', {scheduleId, date, shiftId, positionId});
 
         // Get schedule and its parameters
         const schedule = await Schedule.findByPk(scheduleId, {
@@ -745,7 +745,7 @@ const getRecommendedEmployees = async (req, res) => {
 
         // Get all active employees
         const employees = await Employee.findAll({
-            where: { status: 'active' },
+            where: {status: 'active'},
             attributes: ['emp_id', 'first_name', 'last_name', 'email', 'default_position_id'],
         });
 
@@ -830,7 +830,7 @@ const getRecommendedEmployees = async (req, res) => {
  */
 const handleGetScheduleStatistics = async (req, res) => {
     try {
-        const { scheduleId } = req.params;
+        const {scheduleId} = req.params;
         const stats = await cpSatBridge.getScheduleStatistics(scheduleId);
 
         res.json({
@@ -853,12 +853,12 @@ const handleGetScheduleStatistics = async (req, res) => {
  */
 const getDashboardOverview = async (req, res) => {
     try {
-        const { worksiteId: siteId } = req.params;
-        const { startDate, endDate } = req.query;
+        const {worksiteId: siteId} = req.params;
+        const {startDate, endDate} = req.query;
 
         // Check for required parameters
         if (!startDate || !endDate) {
-            return res.status(400).json({ success: false, message: 'startDate and endDate are required' });
+            return res.status(400).json({success: false, message: 'startDate and endDate are required'});
         }
 
         const schedules = await Schedule.findAll({

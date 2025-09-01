@@ -1,16 +1,11 @@
 // frontend/src/features/employee-schedule/ui/FullScheduleView/index.js
-import React, { useRef, useState } from 'react';
-import { Badge, Button, Card, Table } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import {
-    formatEmployeeName,
-    formatShiftTime,
-    formatTableHeaderDate,
-    getDayName,
-} from 'shared/lib/utils/scheduleUtils';
-import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
-import { parseISO } from 'date-fns';
-import { ScheduleHeaderCard } from '../ScheduleHeaderCard';
+import React, {useRef, useState} from 'react';
+import {Badge, Button, Card, Table} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {formatEmployeeName, formatShiftTime, formatTableHeaderDate, getDayName,} from 'shared/lib/utils/scheduleUtils';
+import {getContrastTextColor} from 'shared/lib/utils/colorUtils';
+import {parseISO} from 'date-fns';
+import {ScheduleHeaderCard} from '../ScheduleHeaderCard';
 import './FullScheduleView.css';
 
 const FullScheduleView = ({
@@ -22,7 +17,7 @@ const FullScheduleView = ({
                               showCurrentWeek,
                               showNextWeek,
                           }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const tableRef = useRef(null);
 
     // Get theme for contrast calculation
@@ -60,7 +55,7 @@ const FullScheduleView = ({
         return (
             <div
                 className={`shift-cell ${hasCurrentUser ? 'current-user-shift' : ''}`}
-                style={{ backgroundColor: bgColor, color: textColor }}
+                style={{backgroundColor: bgColor, color: textColor}}
                 onClick={onNameClick}
                 title={t('employee.schedule.toggleNameFormatHint')}
             >
@@ -75,12 +70,12 @@ const FullScheduleView = ({
                                 <div
                                     key={emp.emp_id}
                                     className={`employee-name ${isCurrentUser ? 'fw-bold' : ''}`}
-                                    style={{ color: textColor }}
+                                    style={{color: textColor}}
                                 >
                                     {formatEmployeeName(firstName, lastName, showFullName)}
                                     {/* Show site name if it's cross-site assignment */}
                                     {emp.is_cross_site && emp.site_name && (
-                                        <span className="small ms-1" style={{ opacity: 0.8 }}>
+                                        <span className="small ms-1" style={{opacity: 0.8}}>
                                             <i className="bi bi-building"></i> {emp.site_name}
                                         </span>
                                     )}
@@ -98,7 +93,7 @@ const FullScheduleView = ({
     const renderWeekSchedule = (weekData, weekTitle) => {
         if (!weekData || !weekData.days || weekData.days.length === 0) return null;
 
-        const { days, shifts, position, week } = weekData;
+        const {days, shifts, position, week} = weekData;
         days.map(d => parseISO(d.date));
         const todayStr = new Date().toISOString().split('T')[0];
 
@@ -122,7 +117,7 @@ const FullScheduleView = ({
                                 <th className="shift-header-cell sticky-column">
                                     {t('employee.schedule.shift')}
                                 </th>
-                                {days.map((day, index) => {
+                                {days.map((day) => {
                                     const dateObj = parseISO(day.date);
                                     const isToday = day.date === todayStr;
                                     return (
@@ -178,7 +173,7 @@ const FullScheduleView = ({
                                                         openColorPicker(shiftId, bgColor, shiftObj);
                                                     }}
                                                     title={t('shift.editColor')}
-                                                    style={{ color: textColor }}
+                                                    style={{color: textColor}}
                                                 >
                                                     <i className="bi bi-palette"></i>
                                                 </Button>

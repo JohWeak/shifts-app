@@ -1,10 +1,10 @@
 // backend/src/services/email.service.js
 const nodemailer = require('nodemailer');
-const { generateScheduleICS } = require('./ics-generator.service');
-const { format, parseISO, isValid } = require('date-fns');
+const {generateScheduleICS} = require('./ics-generator.service');
+const {format, parseISO, isValid} = require('date-fns');
 const i18n = require('../common/i18n.service');
 const juice = require('juice');
-const { enUS, ru, he } = require('date-fns/locale');
+const {enUS, ru, he} = require('date-fns/locale');
 const dateFnsLocales = {
     en: enUS,
     ru: ru,
@@ -25,7 +25,6 @@ class EmailService {
     }
 
     async sendScheduleNotification(employee, scheduleData, globalNotificationSettings = {}) {
-        const email = employee.email || 'no-email-provided';
 
         // If admin disabled global notifications, skip all emails regardless of user preference
         if (globalNotificationSettings.notifySchedulePublished === false) {
@@ -57,7 +56,7 @@ class EmailService {
         const mailOptions = {
             from: process.env.SMTP_FROM || '"Company Name" <noreply@company.com>',
             to: employee.email,
-            subject: t('email.subject', { weekRange }),
+            subject: t('email.subject', {weekRange}),
             html: inlinedHtml,
             icalEvent: {
                 method: 'REQUEST',
@@ -72,10 +71,10 @@ class EmailService {
         try {
             await this.transporter.sendMail(mailOptions);
             console.log(`✅Schedule email sent to ${employee.email} in [${locale}]`);
-            return { to: employee.email, status: 'sent' };
+            return {to: employee.email, status: 'sent'};
         } catch (error) {
             console.error(`❌Failed to send email to ${employee.email}:`, error);
-            return { to: employee.email, status: 'failed', error: error.message };
+            return {to: employee.email, status: 'failed', error: error.message};
         }
     }
 
@@ -99,11 +98,11 @@ class EmailService {
             let startFormat, endFormat;
 
             if (start.getFullYear() === end.getFullYear()) {
-                startFormat = format(start, 'MMM d', { locale });
-                endFormat = format(end, 'MMM d, yyyy', { locale });
+                startFormat = format(start, 'MMM d', {locale});
+                endFormat = format(end, 'MMM d, yyyy', {locale});
             } else {
-                startFormat = format(start, 'MMM d, yyyy', { locale });
-                endFormat = format(end, 'MMM d, yyyy', { locale });
+                startFormat = format(start, 'MMM d, yyyy', {locale});
+                endFormat = format(end, 'MMM d, yyyy', {locale});
             }
 
             return `${startFormat} - ${endFormat}`;
@@ -125,7 +124,7 @@ class EmailService {
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>${t('email.subject', { weekRange })}</title>
+              <title>${t('email.subject', {weekRange})}</title>
               <style>
                 body { font-family: Arial, sans-serif; }
                 table { border-collapse: collapse; width: 100%; margin-top: 15px; }
@@ -134,8 +133,8 @@ class EmailService {
               </style>
             </head>
             <body>
-              <h2>${t('email.greeting', { name: employee.first_name })}</h2>
-              <p>${t('email.published', { weekRange })}</p>
+              <h2>${t('email.greeting', {name: employee.first_name})}</h2>
+              <p>${t('email.published', {weekRange})}</p>
               
               <h3>${t('email.shifts_title')}</h3>
               <table>
@@ -149,7 +148,7 @@ class EmailService {
                 </thead>
                 <tbody>
                   ${scheduleData.shifts.map(shift => {
-            const formattedDate = format(parseISO(shift.date), 'EEE, dd/MM', { locale });
+            const formattedDate = format(parseISO(shift.date), 'EEE, dd/MM', {locale});
             const startTime = shift.start_time.substring(0, 5);
             const endTime = shift.end_time.substring(0, 5);
 
