@@ -4,8 +4,10 @@ providers = ["node", "python"]
 
 [phases.setup]
 aptPkgs = [
-    "libgconf-2-4", "libatk1.0-0", "libatk-bridge2.0-0", "libgdk-pixbuf2.0-0",
-    "libgtk-3-0", "libgbm-dev", "libnss3-dev", "libxss1", "libasound2"
+    "libnss3", "libnspr4", "libdbus-1-3", "libatk1.0-0", "libatk-bridge2.0-0",
+    "libcups2", "libdrm2", "libatspi2.0-0", "libxcomposite1", "libxdamage1",
+    "libxfixes3", "libxrandr2", "libgbm1", "libpango-1.0-0", "libcairo2",
+    "libx11-xcb1", "libfontconfig1"
 ]
 
 [phases.install]
