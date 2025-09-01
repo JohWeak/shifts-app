@@ -11,7 +11,7 @@ const HOST = '0.0.0.0';
 
 // Start server immediately.
 // This ensures that the Node.js process remains active.
-app.listen(PORT, HOST, async () => {
+app.listen(PORT, async () => {
     console.log(`🚀 Server is running on http://${HOST}:${PORT}`);
 
     // Asynchronously check DB connection AFTER server startup.
