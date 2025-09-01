@@ -1,6 +1,6 @@
 // backend/src/app.js
 const express = require('express');
-//const performanceMonitor = require('./middlewares/performanceMonitor');
+const performanceMonitor = require('./middlewares/performanceMonitor');
 const cors = require('cors');
 const path = require('path');
 
@@ -37,9 +37,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-//if (process.env.NODE_ENV === 'development') {
-//   app.use(performanceMonitor);
-//}
+if (process.env.NODE_ENV === 'development') {
+    app.use(performanceMonitor);
+}
 
 // Routes
 app.get('/', (req, res) => {
@@ -59,7 +59,7 @@ app.use('/api/positions', positionRouter);
 app.use('/api/shifts', shiftRouter);
 app.use('/api/requirements', requirementRouter);
 
-app.use((error, req, res) => {
+app.use((error, req, res, _next) => {
     console.error('SERVER ERROR:', error);
     res.status(500).json({
         message: 'Internal server error',
