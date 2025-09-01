@@ -2,14 +2,13 @@
   "name": "shifts-app",
   "scripts": {
     "start": "cd backend && npm start",
-    "build": "cd frontend && npm install && npm run build",
-    "postinstall": "npm run install-all",
+    "build": "npm run install-all && cd frontend && npm run build",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "dev": "concurrently \"npm run backend-dev\" \"npm run frontend-dev\"",
     "dev:remote": "concurrently \"npm run backend-dev\" \"npm run frontend-dev:remote\"",
     "backend-dev": "cd backend && nodemon src/server.js",
     "frontend-dev": "cd frontend && npm start",
-    "frontend-dev:remote": "cd frontend && npm run start:remote",
-    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+    "frontend-dev:remote": "cd frontend && npm run start:remote"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
