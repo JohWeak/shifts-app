@@ -3,7 +3,7 @@
 providers = ["node", "python"]
 
 [phases.install]
-cmds = ["npm run install-all", "pip install -r requirements.txt"]
+cmds = ["npm run install-all"]
 
 [phases.build]
 cmds = ["npm run build"]
