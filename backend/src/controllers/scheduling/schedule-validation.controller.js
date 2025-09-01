@@ -142,7 +142,16 @@ class ScheduleValidationController {
 
                 for (const [date, dayAssignments] of Object.entries(dailyAssignments)) {
                     const dailyHours = dayAssignments.reduce((total, a) => {
-                        return total + (a.shift?.duration_hours || 8);
+                        let hours = 0;
+                        
+                        // For flexible assignments, calculate actual hours worked
+                        if (a.assignment_type === 'flexible' && (a.custom_start_time || a.custom_end_time)) {
+                            hours = ScheduleValidationController.calculateFlexibleAssignmentHours(a);
+                        } else {
+                            hours = a.shift?.duration_hours || 8;
+                        }
+                        
+                        return total + hours;
                     }, 0);
 
                     if (dailyHours > constraints.HARD_CONSTRAINTS.MAX_HOURS_PER_DAY) {
@@ -193,6 +202,111 @@ class ScheduleValidationController {
             console.error('Validation error:', error);
             res.status(500).json({ error: 'Failed to validate changes', details: error.message });
         }
+    }
+
+    // Static method to calculate hours for flexible assignments
+    static calculateFlexibleAssignmentHours(assignment) {
+        if (!assignment.custom_start_time && !assignment.custom_end_time && assignment.shift) {
+            return assignment.shift.duration_hours || 8;
+        }
+
+        const startTime = assignment.custom_start_time || assignment.shift?.start_time || '09:00:00';
+        const endTime = assignment.custom_end_time || assignment.shift?.end_time || '17:00:00';
+
+        // Parse times and calculate duration
+        const [startHour, startMin] = startTime.split(':').map(Number);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+
+        let duration;
+        if (endHour >= startHour) {
+            // Same day
+            duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+        } else {
+            // Overnight shift
+            duration = (24 * 60 - (startHour * 60 + startMin)) + (endHour * 60 + endMin);
+        }
+
+        return duration / 60; // Convert to hours
+    }
+
+    // Get flexible shift coverage for understaffing detection
+    static async getFlexibleShiftCoverage(scheduleId, date, positionId, shiftId) {
+        const { ScheduleAssignment, PositionShift } = db;
+        
+        // Get flexible shifts that span this regular shift
+        const flexibleShifts = await PositionShift.findAll({
+            where: {
+                position_id: positionId,
+                is_flexible: true,
+                is_active: true,
+                spans_shifts: {
+                    [Op.contains]: [shiftId]
+                }
+            }
+        });
+
+        if (flexibleShifts.length === 0) {
+            return { flexibleCoverage: 0, flexibleAssignments: [] };
+        }
+
+        // Get assignments for these flexible shifts on the given date
+        const flexibleAssignments = await ScheduleAssignment.findAll({
+            where: {
+                schedule_id: scheduleId,
+                work_date: date,
+                shift_id: {
+                    [Op.in]: flexibleShifts.map(fs => fs.id)
+                },
+                assignment_type: 'flexible',
+                status: { [Op.ne]: 'absent' }
+            },
+            include: [
+                {
+                    model: db.Employee,
+                    as: 'employee',
+                    attributes: ['emp_id', 'first_name', 'last_name']
+                },
+                {
+                    model: PositionShift,
+                    as: 'shift',
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time']
+                }
+            ]
+        });
+
+        return {
+            flexibleCoverage: flexibleAssignments.length,
+            flexibleAssignments: flexibleAssignments
+        };
+    }
+
+    // Calculate effective staffing including flexible assignments
+    static async calculateEffectiveStaffing(scheduleId, date, positionId, shiftId) {
+        const { ScheduleAssignment } = db;
+
+        // Get regular assignments
+        const regularAssignments = await ScheduleAssignment.count({
+            where: {
+                schedule_id: scheduleId,
+                work_date: date,
+                position_id: positionId,
+                shift_id: shiftId,
+                assignment_type: 'regular',
+                status: { [Op.ne]: 'absent' }
+            }
+        });
+
+        // Get flexible coverage
+        const flexibleCoverage = await this.getFlexibleShiftCoverage(
+            scheduleId, date, positionId, shiftId
+        );
+
+        return {
+            regular: regularAssignments,
+            flexible: flexibleCoverage.flexibleCoverage,
+            total: regularAssignments + flexibleCoverage.flexibleCoverage,
+            flexibleAssignments: flexibleCoverage.flexibleAssignments
+        };
     }
 }
 

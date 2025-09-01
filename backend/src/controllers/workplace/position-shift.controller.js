@@ -1,6 +1,6 @@
 // backend/src/controllers/position-shift.controller.js
 const db = require('../../models');
-const {Position, PositionShift, ShiftRequirement} = db;
+const {Position, PositionShift, ShiftRequirement, ScheduleAssignment} = db;
 const {Op} = require('sequelize');
 
 // Get all shifts for a position
@@ -252,9 +252,388 @@ function getDefaultShiftColor(shiftName) {
     return '#6c757d'; // Default gray
 }
 
+// Get flexible shifts for a position
+const getPositionFlexibleShifts = async (req, res) => {
+    try {
+        const { positionId } = req.params;
+        const { includeSpans = false } = req.query;
+
+        const whereClause = {
+            position_id: positionId,
+            is_active: true,
+            is_flexible: true
+        };
+
+        const includeOptions = [];
+        if (includeSpans) {
+            includeOptions.push({
+                model: ShiftRequirement,
+                as: 'requirements',
+                required: false
+            });
+        }
+
+        const flexibleShifts = await PositionShift.findAll({
+            where: whereClause,
+            include: includeOptions,
+            order: [['start_time', 'ASC'], ['sort_order', 'ASC']]
+        });
+
+        // If includeSpans is true, also return the shifts that are spanned
+        if (includeSpans && flexibleShifts.length > 0) {
+            const allShifts = await PositionShift.findAll({
+                where: {
+                    position_id: positionId,
+                    is_active: true
+                }
+            });
+
+            // Add spanned shift details to each flexible shift
+            flexibleShifts.forEach(flexShift => {
+                if (flexShift.spans_shifts && flexShift.spans_shifts.length > 0) {
+                    flexShift.dataValues.spannedShiftDetails = allShifts.filter(
+                        shift => flexShift.spans_shifts.includes(shift.id)
+                    );
+                }
+            });
+        }
+
+        res.json(flexibleShifts);
+    } catch (error) {
+        console.error('Error fetching flexible shifts:', error);
+        res.status(500).json({
+            message: 'Error fetching flexible shifts',
+            error: error.message
+        });
+    }
+};
+
+// Create a flexible shift
+const createFlexibleShift = async (req, res) => {
+    try {
+        const { positionId: position_id } = req.params;
+        const {
+            shift_name,
+            start_time,
+            end_time,
+            color = '#6c757d',
+            sort_order
+        } = req.body.shift || req.body;
+
+        // Validate position exists
+        const position = await Position.findByPk(position_id);
+        if (!position) {
+            return res.status(404).json({ message: 'Position not found' });
+        }
+
+        // Validate flexible shift constraints
+        const validation = PositionShift.validateFlexibleShift(start_time, end_time, position_id);
+        if (!validation.isValid) {
+            return res.status(400).json({
+                message: 'Invalid flexible shift',
+                errors: validation.errors
+            });
+        }
+
+        // Format times
+        const formatTime = (time) => {
+            if (!time) return null;
+            const parts = time.split(':');
+            const hours = parts[0] ? parts[0].padStart(2, '0') : '00';
+            const minutes = parts[1] ? parts[1].padStart(2, '0') : '00';
+            const seconds = parts[2] ? parts[2].padStart(2, '0') : '00';
+            return `${hours}:${minutes}:${seconds}`;
+        };
+
+        const formattedStartTime = formatTime(start_time);
+        const formattedEndTime = formatTime(end_time);
+
+        // Get all regular shifts for the position to calculate spans_shifts
+        const regularShifts = await PositionShift.findAll({
+            where: {
+                position_id,
+                is_active: true,
+                is_flexible: false
+            }
+        });
+
+        // Calculate spans_shifts
+        const spans = PositionShift.calculateSpanningShifts(
+            formattedStartTime,
+            formattedEndTime,
+            regularShifts
+        );
+
+        if (spans.length === 0) {
+            return res.status(400).json({
+                message: 'Flexible shift must overlap with at least one regular shift'
+            });
+        }
+
+        // Get existing flexible shifts count for sort_order
+        const existingFlexibleShifts = await PositionShift.findAll({
+            where: {
+                position_id,
+                is_flexible: true,
+                is_active: true
+            }
+        });
+
+        const newFlexibleShift = await PositionShift.create({
+            position_id,
+            shift_name,
+            start_time: formattedStartTime,
+            end_time: formattedEndTime,
+            color,
+            is_flexible: true,
+            spans_shifts: spans,
+            calculated_duration_hours: validation.durationHours,
+            sort_order: sort_order || existingFlexibleShifts.length,
+            is_active: true
+        });
+
+        // Get the created shift with spanned shift details
+        const flexibleShiftWithDetails = await PositionShift.findByPk(newFlexibleShift.id);
+        
+        // Add spanned shift details
+        flexibleShiftWithDetails.dataValues.spannedShiftDetails = regularShifts.filter(
+            shift => spans.includes(shift.id)
+        );
+
+        res.status(201).json({
+            message: 'Flexible shift created successfully',
+            shift: flexibleShiftWithDetails
+        });
+
+    } catch (error) {
+        console.error('Error creating flexible shift:', error);
+        res.status(500).json({
+            message: 'Error creating flexible shift',
+            error: error.message
+        });
+    }
+};
+
+// Update a flexible shift
+const updateFlexibleShift = async (req, res) => {
+    try {
+        const { positionId, shiftId } = req.params;
+        const updateData = req.body.shift || req.body;
+
+        const flexibleShift = await PositionShift.findOne({
+            where: {
+                id: shiftId,
+                position_id: positionId,
+                is_flexible: true
+            }
+        });
+
+        if (!flexibleShift) {
+            return res.status(404).json({ 
+                message: 'Flexible shift not found' 
+            });
+        }
+
+        // If updating times, recalculate spans_shifts
+        if (updateData.start_time || updateData.end_time) {
+            const newStartTime = updateData.start_time || flexibleShift.start_time;
+            const newEndTime = updateData.end_time || flexibleShift.end_time;
+
+            // Validate new times
+            const validation = PositionShift.validateFlexibleShift(
+                newStartTime, 
+                newEndTime, 
+                positionId, 
+                shiftId
+            );
+            
+            if (!validation.isValid) {
+                return res.status(400).json({
+                    message: 'Invalid flexible shift times',
+                    errors: validation.errors
+                });
+            }
+
+            // Recalculate spans_shifts
+            const regularShifts = await PositionShift.findAll({
+                where: {
+                    position_id: positionId,
+                    is_active: true,
+                    is_flexible: false
+                }
+            });
+
+            const newSpans = PositionShift.calculateSpanningShifts(
+                newStartTime,
+                newEndTime,
+                regularShifts
+            );
+
+            updateData.spans_shifts = newSpans;
+            updateData.calculated_duration_hours = validation.durationHours;
+        }
+
+        await flexibleShift.update(updateData);
+
+        const updatedShift = await PositionShift.findByPk(shiftId);
+
+        res.json({
+            message: 'Flexible shift updated successfully',
+            shift: updatedShift
+        });
+
+    } catch (error) {
+        console.error('Error updating flexible shift:', error);
+        res.status(500).json({
+            message: 'Error updating flexible shift',
+            error: error.message
+        });
+    }
+};
+
+// Delete (deactivate) a flexible shift
+const deleteFlexibleShift = async (req, res) => {
+    try {
+        const { positionId, shiftId } = req.params;
+
+        const flexibleShift = await PositionShift.findOne({
+            where: {
+                id: shiftId,
+                position_id: positionId,
+                is_flexible: true
+            }
+        });
+
+        if (!flexibleShift) {
+            return res.status(404).json({ 
+                message: 'Flexible shift not found' 
+            });
+        }
+
+        // Check if there are any assignments using this flexible shift
+        const assignmentsCount = await ScheduleAssignment.count({
+            where: {
+                shift_id: shiftId,
+                assignment_type: 'flexible'
+            }
+        });
+
+        if (assignmentsCount > 0) {
+            return res.status(400).json({
+                message: `Cannot delete flexible shift - it has ${assignmentsCount} active assignments`
+            });
+        }
+
+        // Soft delete
+        await flexibleShift.update({ is_active: false });
+
+        res.json({
+            message: 'Flexible shift deleted successfully',
+            shift_id: shiftId
+        });
+
+    } catch (error) {
+        console.error('Error deleting flexible shift:', error);
+        res.status(500).json({
+            message: 'Error deleting flexible shift',
+            error: error.message
+        });
+    }
+};
+
+// Create flexible assignment (used when dragging employee to flexible shift)
+const createFlexibleAssignment = async (req, res) => {
+    try {
+        const { positionId, shiftId } = req.params;
+        const {
+            emp_id,
+            work_date,
+            schedule_id,
+            custom_start_time,
+            custom_end_time,
+            covering_for_emp_id
+        } = req.body;
+
+        const flexibleShift = await PositionShift.findOne({
+            where: {
+                id: shiftId,
+                position_id: positionId,
+                is_flexible: true,
+                is_active: true
+            }
+        });
+
+        if (!flexibleShift) {
+            return res.status(404).json({ 
+                message: 'Flexible shift not found' 
+            });
+        }
+
+        // Check if employee is already assigned for this date/shift
+        const existingAssignment = await ScheduleAssignment.findOne({
+            where: {
+                emp_id,
+                work_date,
+                shift_id: shiftId
+            }
+        });
+
+        if (existingAssignment) {
+            return res.status(400).json({
+                message: 'Employee is already assigned to this shift on this date'
+            });
+        }
+
+        const assignment = await ScheduleAssignment.create({
+            schedule_id,
+            emp_id,
+            shift_id: shiftId,
+            position_id: positionId,
+            work_date,
+            assignment_type: 'flexible',
+            custom_start_time,
+            custom_end_time,
+            covering_for_emp_id,
+            status: 'scheduled'
+        });
+
+        const assignmentWithDetails = await ScheduleAssignment.findByPk(assignment.id, {
+            include: [
+                {
+                    model: db.Employee,
+                    as: 'employee',
+                    attributes: ['emp_id', 'first_name', 'last_name']
+                },
+                {
+                    model: PositionShift,
+                    as: 'shift',
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time']
+                }
+            ]
+        });
+
+        res.status(201).json({
+            message: 'Flexible assignment created successfully',
+            assignment: assignmentWithDetails
+        });
+
+    } catch (error) {
+        console.error('Error creating flexible assignment:', error);
+        res.status(500).json({
+            message: 'Error creating flexible assignment',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getPositionShifts,
     createPositionShift,
     updatePositionShift,
-    deletePositionShift
+    deletePositionShift,
+    getPositionFlexibleShifts,
+    createFlexibleShift,
+    updateFlexibleShift,
+    deleteFlexibleShift,
+    createFlexibleAssignment
 };
