@@ -1713,6 +1713,18 @@ export const en = {
             detail: 'Working {consecutiveDays} consecutive days (maximum allowed: {maxDays} days)',
         },
 
+        flexible_shift_violation: {
+            title: 'Flexible Shift Violations',
+            durationExceeded: 'Flexible shift duration {duration}h exceeds maximum allowed {maxDuration}h',
+            noOverlap: 'Flexible shift "{shiftName}" on {date} does not overlap with any regular shifts',
+            insufficientCoverage: 'On {date}: Required coverage {required}, but only {actual} flexible assignments available',
+        },
+
+        cross_day_violation: {
+            title: 'Cross-Day Shift Violations', 
+            detail: 'Shift spans from {date} to {nextDate} with custom hours {customHours}',
+        },
+
         // Severity levels
         severity: {
             critical: 'Critical',
@@ -1847,6 +1859,15 @@ export const en = {
             shiftColor: 'Shift Color',
             shiftColorHint: 'Shift color',
             shiftColorPlaceholder: 'Select a color',
+            // Flexible shifts
+            flexibleShift: 'Flexible Shift',
+            flexibleShiftHint: 'Flexible shifts can span multiple regular shifts and allow custom working hours',
+            flexibleMinDuration: 'Flexible shift must be at least 1 hour',
+            flexibleMaxDuration: 'Flexible shift cannot exceed 12 hours',
+            flexibleMustSpanShifts: 'Flexible shift must overlap with at least one regular shift',
+            flexibleMustOverlap: 'Flexible shift must have time overlap with existing regular shifts',
+            spansShifts: 'Spans {count} shift(s)',
+            noSpansShifts: 'No overlapping shifts found',
         },
         subtitle: 'Manage work sites and positions',
         title: 'Workplace Settings',
