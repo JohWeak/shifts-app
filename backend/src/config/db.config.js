@@ -1,59 +1,63 @@
 // backend/src/config/db.config.js
 
 const {Sequelize} = require('sequelize');
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 
 
 // Definition of optimal parameters for Railway
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+
+let databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+    if (process.env.MYSQL_URL) {
+        databaseUrl = process.env.MYSQL_URL;
+    } else if (process.env.MYSQLUSER && process.env.MYSQLPASSWORD && process.env.MYSQLHOST && process.env.MYSQLPORT && process.env.MYSQLDATABASE) {
+        databaseUrl = `mysql://${process.env.MYSQLUSER}:${process.env.MYSQLPASSWORD}@${process.env.MYSQLHOST}:${process.env.MYSQLPORT}/${process.env.MYSQLDATABASE}`;
+    }
+}
 console.log('🔍 Database Configuration:');
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
-const commonOptions = {
-    dialect: 'mysql',
-    pool: {
-        max: isProduction ? 10 : 5,
-        min: isProduction ? 2 : 1,
-        acquire: 30000,
-        idle: 10000,
-        evict: 1000,
-        handleDisconnects: true,
-    },
-    logging: isDevelopment ? console.log : false,
-    benchmark: isDevelopment,
-    timezone: '+03:00',
-};
+let sequelize;
 
-let dbConfig;
-if (process.env.DATABASE_URL) {
-    // Configuration for Railway
-    dbConfig = {
-        ...commonOptions,
-        url: process.env.DATABASE_URL,
+if (databaseUrl) {
+    // --- Configuration for Production (Railway) ---
+    sequelize = new Sequelize(databaseUrl, {
+        dialect: 'mysql',
+        pool: {max: 10, min: 2, acquire: 30000, idle: 10000},
+        logging: false, // Disabling SQL query logging in production
+        timezone: '+03:00',
         dialectOptions: {
             ssl: {
                 require: true,
-                rejectUnauthorized: false,
+                rejectUnauthorized: false, // A must for Railway
             },
             connectTimeout: 60000,
         },
-    };
+    });
 } else {
-    // Local configuration
-    dbConfig = {
-        ...commonOptions,
-        database: process.env.DB_NAME || 'shifts_db',
-        username: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
-        host: process.env.DB_HOST || 'localhost',
-        port: process.env.DB_PORT || 3306,
-    };
+    // --- Configuration for Local Development ---
+    sequelize = new Sequelize(
+        process.env.DB_NAME || 'shifts_db',
+        process.env.DB_USER || 'root',
+        process.env.DB_PASSWORD || '',
+        {
+            host: process.env.DB_HOST || 'localhost',
+            port: process.env.DB_PORT || 3306,
+            dialect: 'mysql',
+            pool: {max: 5, min: 1, acquire: 30000, idle: 10000},
+            logging: console.log, // Включаем логирование для отладки
+            benchmark: true,
+            timezone: '+03:00',
+        }
+    );
 }
-
-const sequelize = new Sequelize(dbConfig.url || dbConfig);
 
 sequelize.authenticate()
     .then(() => {
@@ -65,6 +69,6 @@ sequelize.authenticate()
 
 module.exports = sequelize;
 
-module.exports.development = dbConfig;
-module.exports.test = dbConfig;
-module.exports.production = dbConfig;
+module.exports.development = sequelize.options;
+module.exports.test = sequelize.options;
+module.exports.production = sequelize.options;
