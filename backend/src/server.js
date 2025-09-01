@@ -1,5 +1,7 @@
 // backend/src/server.js
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 const app = require('./app');
 const db = require('./models');
 const AutoGenerationService = require('./services/scheduling/auto-generation.service');
