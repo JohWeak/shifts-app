@@ -5,13 +5,29 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
 import { fetchPositions } from 'features/admin-workplace-settings/model/workplaceSlice';
-import { countries, getCitiesForCountry } from 'shared/data/locations';
+import { locationData, citiesData } from 'shared/utils/locationData';
 
 import './EmployeeModal.css';
 
 const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
+    
+    // Helper functions for location data
+    const getCountries = () => {
+        // Get current language from i18n context, fallback to 'en'
+        const currentLang = localStorage.getItem('i18n_language') || 'en';
+        return Object.keys(locationData[currentLang]?.countries || locationData.en.countries);
+    };
+    
+    const getCountryDisplayName = (countryKey) => {
+        const currentLang = localStorage.getItem('i18n_language') || 'en';
+        return locationData[currentLang]?.countries[countryKey] || locationData.en.countries[countryKey] || countryKey;
+    };
+    
+    const getCitiesForCountry = (countryKey) => {
+        return citiesData[countryKey] || [];
+    };
 
     const { workSites } = useSelector((state) => state.schedule || {});
     const { positions } = useSelector((state) => state.workplace || {});
@@ -29,7 +45,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         status: 'active',
         role: 'employee',
         default_position_id: '',
-        work_site_id: 'any'
+        work_site_id: 'any',
+        admin_work_sites_scope: [],
+        is_super_admin: false
     });
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
@@ -63,7 +81,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 status: employee.status || 'active',
                 role: employee.role || 'employee',
                 default_position_id: employee.default_position_id || '',
-                work_site_id: employee.work_site_id || 'any'
+                work_site_id: employee.work_site_id || 'any',
+                admin_work_sites_scope: employee.admin_work_sites_scope || [],
+                is_super_admin: employee.is_super_admin || false
             });
             setSelectedWorkSite(employee.work_site_id || 'any');
             if (employee.country) {
@@ -83,7 +103,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 status: 'active',
                 role: 'employee',
                 default_position_id: '',
-                work_site_id: 'any'
+                work_site_id: 'any',
+                admin_work_sites_scope: [],
+                is_super_admin: false
             });
             setSelectedWorkSite('any');
             setAvailableCities([]);
@@ -280,9 +302,9 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             onChange={(e) => handleChange('country', e.target.value)}
                                         >
                                             <option value="">{t('common.select')}</option>
-                                            {countries.map((country) => (
-                                                <option key={country} value={country}>
-                                                    {country}
+                                            {getCountries().map((countryKey) => (
+                                                <option key={countryKey} value={countryKey}>
+                                                    {getCountryDisplayName(countryKey)}
                                                 </option>
                                             ))}
                                         </Form.Select>
@@ -379,6 +401,82 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                             </Row>
                         </Card.Body>
                     </Card>
+
+                    {/* Administrative Access - Only visible for admin role and to super admin */}
+                    {formData.role === 'admin' && (
+                        <Card className="mb-4">
+                            <Card.Header className="">
+                                <h6 className="mb-0">
+                                    <i className="bi bi-shield-check me-2"></i>
+                                    {t('admin.administrativeAccess')}
+                                </h6>
+                            </Card.Header>
+                            <Card.Body>
+                                <Row>
+                                    <Col md={12}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>{t('admin.accessibleWorkSites')}</Form.Label>
+                                            <div className="form-check-list">
+                                                {workSites
+                                                    ?.filter(site => site.is_active)
+                                                    .map((site) => (
+                                                        <Form.Check
+                                                            key={site.site_id}
+                                                            type="checkbox"
+                                                            id={`worksite-${site.site_id}`}
+                                                            label={site.site_name}
+                                                            checked={formData.admin_work_sites_scope.includes(site.site_id)}
+                                                            onChange={(e) => {
+                                                                const siteId = site.site_id;
+                                                                const currentScope = formData.admin_work_sites_scope || [];
+                                                                let newScope;
+                                                                
+                                                                if (e.target.checked) {
+                                                                    newScope = [...currentScope, siteId];
+                                                                } else {
+                                                                    newScope = currentScope.filter(id => id !== siteId);
+                                                                }
+                                                                
+                                                                setFormData(prev => ({ 
+                                                                    ...prev, 
+                                                                    admin_work_sites_scope: newScope 
+                                                                }));
+                                                            }}
+                                                            className="mb-2"
+                                                        />
+                                                    ))}
+                                            </div>
+                                            <Form.Text className="text-muted">
+                                                {t('admin.accessibleWorkSitesHelp')}
+                                            </Form.Text>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col md={12}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Check
+                                                type="checkbox"
+                                                id="is_super_admin"
+                                                label={
+                                                    <span>
+                                                        <strong>{t('admin.grantSuperAdminPrivileges')}</strong>
+                                                        <br />
+                                                        <small className="text-muted">
+                                                            {t('admin.superAdminHelp')}
+                                                        </small>
+                                                    </span>
+                                                }
+                                                checked={formData.is_super_admin}
+                                                onChange={(e) => handleChange('is_super_admin', e.target.checked)}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                            </Card.Body>
+                        </Card>
+                    )}
 
                     {/* System Information */}
                     <Card className="mb-4">

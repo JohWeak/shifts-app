@@ -116,10 +116,6 @@
     color: var(--bs-danger);
 }
 
-/* Dark Mode Support */
-[data-theme="dark"] .employee-profile {
-    background-color: var(--bs-dark);
-}
 
 [data-theme="dark"] .employee-profile .card {
     background-color: var(--bs-gray-800);

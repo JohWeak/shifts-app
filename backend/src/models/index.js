@@ -42,6 +42,7 @@ const defineAssociations = () => {
         Schedule,
         ScheduleAssignment,
         ScheduleSettings,
+        SystemSettings,
         EmployeeConstraint,
         EmployeeQualification,
         PositionShift,
@@ -373,6 +374,27 @@ const defineAssociations = () => {
             });
         }
 
+    }
+
+    // =============================
+    // SYSTEM SETTINGS ASSOCIATIONS
+    // =============================
+    if (SystemSettings) {
+        // SystemSettings -> WorkSite
+        if (WorkSite) {
+            SystemSettings.belongsTo(WorkSite, {
+                foreignKey: 'site_id',
+                as: 'workSite'
+            });
+        }
+    }
+
+    // WorkSite -> SystemSettings[]
+    if (WorkSite && SystemSettings) {
+        WorkSite.hasMany(SystemSettings, {
+            foreignKey: 'site_id',
+            as: 'systemSettings'
+        });
     }
 };
 

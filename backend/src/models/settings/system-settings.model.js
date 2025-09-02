@@ -1,8 +1,8 @@
 // backend/src/models/settings/system-settings.model.js
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 
 module.exports = (sequelize) => {
-    const SystemSettings = sequelize.define('SystemSettings', {
+    return sequelize.define('SystemSettings', {
         setting_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -11,7 +11,6 @@ module.exports = (sequelize) => {
         setting_key: {
             type: DataTypes.STRING(100),
             allowNull: false,
-            unique: true,
         },
         setting_value: {
             type: DataTypes.TEXT,
@@ -41,6 +40,15 @@ module.exports = (sequelize) => {
             allowNull: false,
             defaultValue: DataTypes.NOW,
         },
+        site_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'work_sites',
+                key: 'site_id'
+            },
+            comment: 'Work Site ID for site-specific settings. NULL for global settings.'
+        },
     }, {
         tableName: 'system_settings',
         timestamps: true,
@@ -49,10 +57,13 @@ module.exports = (sequelize) => {
         indexes: [
             {
                 unique: true,
-                fields: ['setting_key'],
+                fields: ['setting_key', 'site_id'],
+                name: 'idx_system_settings_key_site'
+            },
+            {
+                fields: ['site_id'],
+                name: 'idx_system_settings_site_id'
             },
         ],
     });
-
-    return SystemSettings;
 };

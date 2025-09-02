@@ -65,7 +65,7 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        const role = employee.status === 'admin' ? 'admin' : 'employee';
+        const role = employee.role === 'admin' ? 'admin' : 'employee';
         console.log(`User ${employee.login} logging in with role: ${role}`);
 
         // Token creation

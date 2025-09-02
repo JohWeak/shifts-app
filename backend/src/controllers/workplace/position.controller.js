@@ -28,7 +28,7 @@ const getAllPositions = async (req, res) => {
                     model: Employee,
                     as: 'defaultEmployees',
                     where: {
-                        status: ['active', 'admin'],
+                        status: 'active',
                         default_position_id: db.Sequelize.col('Position.pos_id')
                     },
                     required: false,
@@ -80,7 +80,7 @@ const getPositionDetails = async (req, res) => {
                 {
                     model: Employee,
                     as: 'defaultEmployees',
-                    where: {status: ['active', 'admin']},
+                    where: {status: 'active'},
                     required: false,
                     attributes: ['emp_id', 'first_name', 'last_name']
                 }
@@ -106,6 +106,15 @@ const getPositionsByWorksite = async (req, res) => {
 
         if (!worksiteId) {
             return res.status(400).send({message: "Worksite ID is required."});
+        }
+
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(worksiteId))) {
+                return res.status(403).json({
+                    message: 'Access denied to this work site'
+                });
+            }
         }
 
         const positions = await Position.findAll({
@@ -210,7 +219,7 @@ const deletePosition = async (req, res) => {
             include: [{
                 model: Employee,
                 as: 'defaultEmployees',
-                where: {status: ['active', 'admin']},
+                where: {status: 'active'},
                 required: false,
                 attributes: ['emp_id', 'first_name', 'last_name', 'status']
             }]
@@ -241,7 +250,7 @@ const deletePosition = async (req, res) => {
                 {
                     where: {
                         default_position_id: id,
-                        status: ['active', 'admin']
+                        status: 'active'
                     },
                     transaction
                 }

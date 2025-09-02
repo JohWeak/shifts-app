@@ -4,9 +4,46 @@ const {SystemSettings} = db;
 const autoGenerationService = require('../../services/scheduling/auto-generation.service');
 
 const getSystemSettings = async (req, res) => {
+    let storedSettings;
     try {
-        // Get all stored settings
-        const storedSettings = await SystemSettings.findAll();
+        const {site_id} = req.query;
+
+        // Build where clause for filtering by site
+        const whereClause = {};
+
+        if (site_id) {
+            // Get settings for specific site, plus global settings (site_id = null) as fallback
+            if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+                // Limited admin - check access to requested site
+                if (!req.accessibleSites.includes(parseInt(site_id))) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Access denied to this work site'
+                    });
+                }
+            }
+
+            // Get both site-specific and global settings
+            const [siteSettings, globalSettings] = await Promise.all([
+                SystemSettings.findAll({where: {site_id: site_id}}),
+                SystemSettings.findAll({where: {site_id: null}})
+            ]);
+
+            // Merge settings with site-specific taking priority
+            storedSettings = [...globalSettings];
+            siteSettings.forEach(siteSetting => {
+                const index = storedSettings.findIndex(s => s.setting_key === siteSetting.setting_key);
+                if (index >= 0) {
+                    storedSettings[index] = siteSetting;
+                } else {
+                    storedSettings.push(siteSetting);
+                }
+            });
+        } else {
+            // Get global settings only
+            whereClause.site_id = null;
+            storedSettings = await SystemSettings.findAll({where: whereClause});
+        }
 
         // Convert to key-value object
         const settingsObj = {};
@@ -74,6 +111,17 @@ const getSystemSettings = async (req, res) => {
 const updateSystemSettings = async (req, res) => {
     try {
         const settings = req.body;
+        const {site_id} = req.query;
+
+        // Check Work Site access for limited admins
+        if (site_id && req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(site_id))) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site'
+                });
+            }
+        }
 
         // Define setting types
         const settingTypes = {
@@ -109,6 +157,13 @@ const updateSystemSettings = async (req, res) => {
                     setting_type: settingTypes[key],
                     description: `System setting: ${key}`,
                     is_editable: !['minRestBetweenShifts', 'strictLegalCompliance'].includes(key), // Some settings cannot be changed due to legislation
+                    site_id: site_id || null, // Global settings if no site_id provided
+                }, {
+                    // Upsert based on composite key
+                    where: {
+                        setting_key: key,
+                        site_id: site_id || null
+                    }
                 });
             }
         }

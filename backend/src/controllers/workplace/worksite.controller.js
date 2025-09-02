@@ -7,7 +7,14 @@ const getWorkSites = async (req, res) => {
     try {
         const {includeStats} = req.query;
 
+        const whereClause = {};
+        // Filter by accessible Work Sites for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            whereClause.site_id = req.accessibleSites;
+        }
+
         const workSites = await WorkSite.findAll({
+            where: whereClause,
             include: [
                 {
                     model: Position,
@@ -77,6 +84,16 @@ const getWorkSites = async (req, res) => {
 const findOne = async (req, res) => {
     try {
         const {worksiteId: id} = req.params.id;
+        
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(id))) {
+                return res.status(403).json({
+                    message: 'Access denied to this work site'
+                });
+            }
+        }
+
         const workSite = await WorkSite.findByPk(id, {
             include: [
                 {association: 'positions'},
@@ -127,6 +144,15 @@ const update = async (req, res) => {
         const {worksiteId: id} = req.params;
         const {site_name, address, phone, timezone, is_active} = req.body.site || req.body;
 
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(id))) {
+                return res.status(403).json({
+                    message: 'Access denied to this work site'
+                });
+            }
+        }
+
         const site = await WorkSite.findByPk(id);
         if (!site) {
             return res.status(404).json({message: 'Work site not found'});
@@ -157,6 +183,16 @@ const deleteWorkSite = async (req, res) => {
     try {
         const {worksiteId: id} = req.params;
 
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(id))) {
+                await transaction.rollback();
+                return res.status(403).json({
+                    message: 'Access denied to this work site'
+                });
+            }
+        }
+
         const site = await WorkSite.findByPk(id, {
             include: [
                 {
@@ -170,7 +206,7 @@ const deleteWorkSite = async (req, res) => {
                     model: Employee,
                     as: 'employees',
                     where: {
-                        status: ['active', 'admin'],
+                        status: 'active',
                         [db.Sequelize.Op.or]: [
                             {work_site_id: id},
                             {
@@ -237,7 +273,7 @@ const deleteWorkSite = async (req, res) => {
                 {
                     where: {
                         work_site_id: id,
-                        status: ['active', 'admin']
+                        status: 'active'
                     },
                     transaction
                 }
@@ -255,7 +291,7 @@ const deleteWorkSite = async (req, res) => {
                     {
                         where: {
                             default_position_id: positionIds,
-                            status: ['active', 'admin']
+                            status: 'active'
                         },
                         transaction
                     }
@@ -291,6 +327,16 @@ const restoreWorkSite = async (req, res) => {
 
     try {
         const {worksiteId: id} = req.params;
+
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(id))) {
+                await transaction.rollback();
+                return res.status(403).json({
+                    message: 'Access denied to this work site'
+                });
+            }
+        }
 
         const site = await WorkSite.findByPk(id);
         if (!site) {

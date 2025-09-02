@@ -1,18 +1,18 @@
 // frontend/src/features/admin-employee-management/index.js
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import React, {useEffect, useRef, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {useLocation} from 'react-router-dom';
 import store from 'app/store/store';
-import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
-import { fetchWorkSites } from '../admin-schedule-management/model/scheduleSlice';
-import { Alert, Button, Col, Container, Row } from 'react-bootstrap';
+import {fetchSystemSettings} from '../admin-system-settings/model/settingsSlice';
+import {fetchWorkSites} from '../admin-schedule-management/model/scheduleSlice';
+import {Alert, Button, Col, Container, Row} from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader';
 import EmployeeList from './ui/EmployeeList';
 import EmployeeModal from './ui/EmployeeModal';
 import EmployeeFilters from './ui/EmployeeFilters';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     clearCache,
     clearError,
@@ -26,7 +26,7 @@ import './index.css';
 
 
 const EmployeeManagement = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const location = useLocation();
 
@@ -40,15 +40,15 @@ const EmployeeManagement = () => {
 
 
     const employeesState = useSelector((state) => state.employees);
-    const [sortConfig, setSortConfig] = useState({ field: 'createdAt', order: 'DESC' });
+    const [sortConfig, setSortConfig] = useState({field: 'createdAt', order: 'DESC'});
 
 
     const {
         employees = [],
         loading = false,
         error = null,
-        filters = { status: 'active', position: 'all', search: '', work_site: 'all' },
-        pagination = { page: 1, pageSize: 20, total: 0 },
+        filters = {status: 'active', position: 'all', search: '', work_site: 'all'},
+        pagination = {page: 1, pageSize: 20, total: 0},
     } = employeesState || {};
 
     const isInitialMount = useRef(true);
@@ -65,8 +65,8 @@ const EmployeeManagement = () => {
 
     // Settings
     useEffect(() => {
-        const { systemSettings } = store.getState().settings;
-        const { workSites } = store.getState().schedule;
+        const {systemSettings} = store.getState().settings;
+        const {workSites} = store.getState().schedule;
 
         if (!systemSettings?.positions?.length) {
             dispatch(fetchSystemSettings());
@@ -86,6 +86,7 @@ const EmployeeManagement = () => {
                 pageSize: pagination.pageSize,
                 sortBy: sortConfig.field,
                 sortOrder: sortConfig.order,
+
             }));
         };
 
@@ -106,7 +107,7 @@ const EmployeeManagement = () => {
 
 
     const handleSort = (field, order) => {
-        setSortConfig({ field, order });
+        setSortConfig({field, order});
     };
 
     const handleCreateEmployee = () => {
@@ -197,11 +198,11 @@ const EmployeeManagement = () => {
     };
 
     const handlePageChange = (page) => {
-        dispatch(setPagination({ page }));
+        dispatch(setPagination({page}));
     };
 
     const handlePageSizeChange = (pageSize) => {
-        dispatch(setPagination({ pageSize, page: 1 }));
+        dispatch(setPagination({pageSize, page: 1}));
     };
 
     return (
@@ -210,8 +211,8 @@ const EmployeeManagement = () => {
                 title={t('employee.management')}
                 description={t('employee.managementDescription')}
                 breadcrumbs={[
-                    { text: t('navigation.dashboard'), to: '/admin' },
-                    { text: t('employee.management') },
+                    {text: t('navigation.dashboard'), to: '/admin'},
+                    {text: t('employee.management')},
                 ]}
                 actions={
                     <div className="d-flex gap-2">
@@ -257,7 +258,7 @@ const EmployeeManagement = () => {
             <Container fluid className="p-0 mt-3">
                 <Row className="">
                     <Col xs={12}>
-                        <EmployeeFilters />
+                        <EmployeeFilters/>
                     </Col>
                     <Col xs={12}>
                         <EmployeeList

@@ -8,7 +8,30 @@ const { Op } = require('sequelize');
 // Create new employee
 const create = async (req, res) => {
     try {
-        const { password, ...employeeData } = req.body;
+        const { password, admin_work_sites_scope, is_super_admin, ...employeeData } = req.body;
+
+        // Only super admins can create admin users and set admin privileges
+        if (employeeData.role === 'admin') {
+            // Get current user info
+            const currentUser = await Employee.findByPk(req.userId, {
+                attributes: ['emp_id', 'is_super_admin']
+            });
+
+            if (!currentUser || (currentUser.emp_id !== 1 && !currentUser.is_super_admin)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Only super admins can create admin users'
+                });
+            }
+
+            // Add admin-specific fields
+            employeeData.admin_work_sites_scope = admin_work_sites_scope || [];
+            employeeData.is_super_admin = is_super_admin || false;
+        } else {
+            // For non-admin users, ensure admin fields are not set
+            employeeData.admin_work_sites_scope = null;
+            employeeData.is_super_admin = false;
+        }
 
         // Hash password if provided
         if (password) {
@@ -78,12 +101,40 @@ const findAll = async (req, res) => {
                 'emp_id', 'first_name', 'last_name', 'email', 'phone',
                 'status', 'role', 'default_position_id', 'work_site_id',
                 'login', 'createdAt', 'updatedAt', 'country', 'city', 'address',
-                // No password
+                'admin_work_sites_scope', 'is_super_admin'
             ];
 
         // Build where clause
         const where = {};
         const includeWhere = {};
+
+        // Add Work Site filtering for limited admins
+        if (req.userRole === 'admin' && req.accessibleSites !== 'all') {
+            const accessibleSites = req.accessibleSites || [];
+            
+            if (accessibleSites.length === 0) {
+                // Admin has no accessible sites - return empty result
+                return res.json({
+                    success: true,
+                    data: [],
+                    total: 0,
+                    page: parseInt(page),
+                    pageSize: parseInt(pageSize),
+                    totalPages: 0
+                });
+            }
+
+            // Filter employees by accessible work sites
+            where[Op.or] = [
+                { work_site_id: { [Op.in]: accessibleSites } },
+                { work_site_id: null }, // Include employees without specific work site assignment
+                // Include employees whose default position is in accessible sites
+                db.Sequelize.literal(`default_position_id IN (
+                    SELECT pos_id FROM positions 
+                    WHERE site_id IN (${accessibleSites.join(',')})
+                )`)
+            ];
+        }
 
         if (status && status !== 'all') {
             where.status = status;
@@ -245,14 +296,61 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const { password, ...updateData } = req.body;
+        const { password, admin_work_sites_scope, is_super_admin, ...updateData } = req.body;
+
+        // Get the employee being updated to check current role
+        const existingEmployee = await Employee.findByPk(req.params.id, {
+            attributes: ['emp_id', 'role', 'admin_work_sites_scope', 'is_super_admin']
+        });
+
+        if (!existingEmployee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found'
+            });
+        }
+
+        // If role is being changed to/from admin, or admin fields are being updated
+        if (updateData.role === 'admin' || existingEmployee.role === 'admin' || 
+            admin_work_sites_scope !== undefined || is_super_admin !== undefined) {
+            
+            // Get current user info
+            const currentUser = await Employee.findByPk(req.userId, {
+                attributes: ['emp_id', 'is_super_admin']
+            });
+
+            if (!currentUser || (currentUser.emp_id !== 1 && !currentUser.is_super_admin)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Only super admins can modify admin privileges'
+                });
+            }
+
+            // Handle admin-specific fields
+            if (updateData.role === 'admin') {
+                updateData.admin_work_sites_scope = admin_work_sites_scope || existingEmployee.admin_work_sites_scope || [];
+                updateData.is_super_admin = is_super_admin !== undefined ? is_super_admin : existingEmployee.is_super_admin;
+            } else if (updateData.role === 'employee') {
+                // When changing from admin to employee, clear admin fields
+                updateData.admin_work_sites_scope = null;
+                updateData.is_super_admin = false;
+            } else {
+                // Just updating admin fields for existing admin
+                if (admin_work_sites_scope !== undefined) {
+                    updateData.admin_work_sites_scope = admin_work_sites_scope;
+                }
+                if (is_super_admin !== undefined) {
+                    updateData.is_super_admin = is_super_admin;
+                }
+            }
+        }
 
         // Hash password if provided
         if (password) {
             updateData.password = await bcrypt.hash(password, 10);
         }
         if (req.body.email === '') {
-            req.body.email = null;
+            updateData.email = null;
         }
         // Update only the passed fields
         const [updated] = await Employee.update(updateData, {

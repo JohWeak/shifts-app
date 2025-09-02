@@ -1,6 +1,6 @@
 // backend/src/routes/schedule.routes.js
 const express = require('express');
-const {verifyToken, isAdmin} = require('../middlewares/auth.middleware');
+const {verifyToken, isAdmin, getAccessibleSites} = require('../middlewares/auth.middleware');
 
 // Import controllers directly
 const scheduleController = require('../controllers/scheduling/schedule/schedule.controller');
@@ -19,20 +19,20 @@ router.get('/employee/archive/month', verifyToken, employeeController.getEmploye
 
 
 // === ADMIN ROUTES ===
-router.get('/stats/overview', ...[verifyToken, isAdmin], exportController.getScheduleStats);
-router.get('/:scheduleId/export', ...[verifyToken, isAdmin], exportController.exportSchedule);
+router.get('/stats/overview', ...[verifyToken, isAdmin, getAccessibleSites], exportController.getScheduleStats);
+router.get('/:scheduleId/export', ...[verifyToken, isAdmin, getAccessibleSites], exportController.exportSchedule);
 
-router.get('/schedules/:scheduleId/statistics', ...[verifyToken, isAdmin], scheduleController.handleGetScheduleStatistics);
+router.get('/schedules/:scheduleId/statistics', ...[verifyToken, isAdmin, getAccessibleSites], scheduleController.handleGetScheduleStatistics);
 
-router.post('/generate', ...[verifyToken, isAdmin], generationController.generateNextWeekSchedule);
-router.post('/compare-algorithms', ...[verifyToken, isAdmin], generationController.compareAllAlgorithms);
-router.get('/', ...[verifyToken, isAdmin], scheduleController.getAllSchedules);
-router.post('/:scheduleId/validate', ...[verifyToken, isAdmin], ScheduleValidationController.validateChanges);
-router.get('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.getScheduleDetails);
-router.put('/:scheduleId/status', ...[verifyToken, isAdmin], scheduleController.updateScheduleStatus);
-router.put('/:scheduleId/update-assignments', ...[verifyToken, isAdmin], scheduleController.updateScheduleAssignments);
-router.delete('/:scheduleId', ...[verifyToken, isAdmin], scheduleController.deleteSchedule);
-router.get('/admin/weekly', ...[verifyToken, isAdmin], employeeController.getAdminWeeklySchedule);
+router.post('/generate', ...[verifyToken, isAdmin, getAccessibleSites], generationController.generateNextWeekSchedule);
+router.post('/compare-algorithms', ...[verifyToken, isAdmin, getAccessibleSites], generationController.compareAllAlgorithms);
+router.get('/', ...[verifyToken, isAdmin, getAccessibleSites], scheduleController.getAllSchedules);
+router.post('/:scheduleId/validate', ...[verifyToken, isAdmin, getAccessibleSites], ScheduleValidationController.validateChanges);
+router.get('/:scheduleId', ...[verifyToken, isAdmin, getAccessibleSites], scheduleController.getScheduleDetails);
+router.put('/:scheduleId/status', ...[verifyToken, isAdmin, getAccessibleSites], scheduleController.updateScheduleStatus);
+router.put('/:scheduleId/update-assignments', ...[verifyToken, isAdmin, getAccessibleSites], scheduleController.updateScheduleAssignments);
+router.delete('/:scheduleId', ...[verifyToken, isAdmin, getAccessibleSites], scheduleController.deleteSchedule);
+router.get('/admin/weekly', ...[verifyToken, isAdmin, getAccessibleSites], employeeController.getAdminWeeklySchedule);
 
 
 module.exports = router;

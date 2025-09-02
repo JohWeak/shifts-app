@@ -19,8 +19,21 @@ const getAllSchedules = async (req, res) => {
         const {page = 1, limit = 10, site_id} = req.query;
 
         const whereClause = {};
+
+        // Filter by Work Sites for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            whereClause.site_id = req.accessibleSites;
+        }
+
+        // Allow specific site_id filtering if provided
         if (site_id) {
-            whereClause.site_id = site_id;
+            if (req.accessibleSites === 'all') {
+                // Super admin can filter by any site
+                whereClause.site_id = site_id;
+            } else if (req.accessibleSites && req.accessibleSites.includes(parseInt(site_id))) {
+                // Limited admin can filter within accessible sites
+                whereClause.site_id = site_id;
+            }
         }
 
         const schedules = await Schedule.findAndCountAll({
@@ -78,6 +91,16 @@ const getScheduleDetails = async (req, res) => {
                 success: false,
                 message: 'Schedule not found',
             });
+        }
+
+        // Check if limited admin has access to this schedule's work site
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(schedule.site_id)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site',
+                });
+            }
         }
 
         // Get all assignments for this schedule
@@ -460,6 +483,16 @@ const updateScheduleStatus = async (req, res) => {
             });
         }
 
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(schedule.site_id)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site',
+                });
+            }
+        }
+
         const previousStatus = schedule.status;
 
         // Update status
@@ -559,6 +592,16 @@ const updateScheduleAssignments = async (req, res) => {
                 success: false,
                 message: 'Schedule not found',
             });
+        }
+
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(schedule.site_id)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site',
+                });
+            }
         }
 
         // Track new cross-site employees
@@ -686,6 +729,16 @@ const deleteSchedule = async (req, res) => {
                 success: false,
                 message: 'Schedule not found',
             });
+        }
+
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(schedule.site_id)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site',
+                });
+            }
         }
 
         // Check if deletion is allowed (e.g., only draft)
@@ -859,6 +912,16 @@ const getDashboardOverview = async (req, res) => {
         // Check for required parameters
         if (!startDate || !endDate) {
             return res.status(400).json({success: false, message: 'startDate and endDate are required'});
+        }
+
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(parseInt(siteId))) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site',
+                });
+            }
         }
 
         const schedules = await Schedule.findAll({

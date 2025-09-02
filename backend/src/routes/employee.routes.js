@@ -1,7 +1,7 @@
 // backend/src/routes/employee.routes.js
 const express = require('express');
 const employeeController = require('../controllers/core/employee.controller');
-const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const { verifyToken, isAdmin, getAccessibleSites, isSuperAdmin } = require('../middlewares/auth.middleware');
 const EmployeeRecommendationController = require('../controllers/scheduling/employee-recommendation.controller');
 
 const router = express.Router();
@@ -17,8 +17,8 @@ router.get('/profile', verifyToken, employeeController.getProfile);
 router.put('/profile', verifyToken, employeeController.updateProfile);
 
 // Routes protected by JWT and requiring admin role
-router.post('/', ...[verifyToken, isAdmin], employeeController.create);
-router.get('/', ...[verifyToken, isAdmin], employeeController.findAll);
+router.post('/', ...[verifyToken, isSuperAdmin], employeeController.create); // Only super admins can create employees (admins)
+router.get('/', ...[verifyToken, isAdmin, getAccessibleSites], employeeController.findAll); // Filter by accessible sites
 router.get('/:id', verifyToken, employeeController.findOne);
 router.put('/:id', ...[verifyToken, isAdmin], employeeController.update);
 router.delete('/:id', ...[verifyToken, isAdmin], employeeController.delete);

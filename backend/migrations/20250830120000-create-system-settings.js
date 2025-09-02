@@ -44,11 +44,18 @@ module.exports = {
             },
         });
 
-        // Add index for fast lookup by setting_key
-        await queryInterface.addIndex('system_settings', ['setting_key'], {
-            unique: true,
-            name: 'idx_system_settings_key',
-        });
+        // Add index for fast lookup by setting_key (only if it doesn't exist)
+        try {
+            await queryInterface.addIndex('system_settings', ['setting_key'], {
+                unique: true,
+                name: 'idx_system_settings_key',
+            });
+        } catch (error) {
+            if (!error.message.includes('Duplicate key name')) {
+                throw error;
+            }
+            // Index already exists, continue
+        }
 
         // Insert default settings
         await queryInterface.bulkInsert('system_settings', [
@@ -253,7 +260,7 @@ module.exports = {
         ]);
     },
 
-    async down(queryInterface, Sequelize) {
+    async down(queryInterface) {
         await queryInterface.dropTable('system_settings');
     },
 };

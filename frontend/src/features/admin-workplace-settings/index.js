@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Container, Nav, Tab } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
-import { AnimatePresence, motion } from 'motion/react';
+import React, {useEffect, useState} from 'react';
+import {Card, Container, Nav, Tab} from 'react-bootstrap';
+import {useDispatch} from 'react-redux';
+import {AnimatePresence, motion} from 'motion/react';
 import LoadingState from 'shared/ui/components/LoadingState';
 import TopProgressBar from '../../shared/ui/components/TopProgressBar';
 
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import PageHeader from 'shared/ui/components/PageHeader';
 import WorkSitesTab from './ui/WorkSitesTab';
 import PositionsTab from './ui/PositionsTab';
 import DisplaySettingsTab from './ui/DisplaySettingsTab';
 
-import { preloadWorkplaceData } from './model/workplaceSlice';
+import {preloadWorkplaceData} from './model/workplaceSlice';
 
 import './index.css';
 
 const WorkplaceSettings = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState('worksites');
     const [selectedSite, setSelectedSite] = useState(null);
@@ -73,8 +73,8 @@ const WorkplaceSettings = () => {
     if (isPreloading) {
         return (
             <Container fluid>
-                <TopProgressBar />
-                <LoadingState />
+                <TopProgressBar/>
+                <LoadingState/>
             </Container>
         );
     }
@@ -105,12 +105,6 @@ const WorkplaceSettings = () => {
                                     </i>{t('workplace.positions.title')}
                                 </Nav.Link>
                             </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="display">
-                                    <i className="bi bi-display me-2">
-                                    </i>{t('workplace.displaySettings.title')}
-                                </Nav.Link>
-                            </Nav.Item>
                         </Nav>
                     </Card.Header>
                     <Card.Body className="p-0 workplace-card-body">
@@ -123,11 +117,11 @@ const WorkplaceSettings = () => {
                                 exit="exit"
                             >
                                 {activeTab === 'worksites' &&
-                                    <WorkSitesTab onSelectSite={handleSiteSelection} />}
+                                    <WorkSitesTab onSelectSite={handleSiteSelection}/>}
                                 {activeTab === 'positions' &&
-                                    <PositionsTab selectedSite={selectedSite} />}
+                                    <PositionsTab selectedSite={selectedSite}/>}
                                 {activeTab === 'display' &&
-                                    <DisplaySettingsTab />}
+                                    <DisplaySettingsTab/>}
                             </motion.div>
                         </AnimatePresence>
                     </Card.Body>

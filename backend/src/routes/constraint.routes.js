@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const constraintController = require('../controllers/scheduling/constraint.controller');
-const { verifyToken,  isAdmin } = require('../middlewares/auth.middleware');
+const { verifyToken, isAdmin, getAccessibleSites } = require('../middlewares/auth.middleware');
 
 // Employee routes
 router.get('/weekly-grid',
@@ -40,18 +40,21 @@ router.get('/permanent-constraints/my',
 router.get('/permanent-requests',
     verifyToken,
     isAdmin,
+    getAccessibleSites,
     constraintController.getAllPermanentRequests
 );
 
 router.get('/permanent-requests/count',
     verifyToken,
     isAdmin,
+    getAccessibleSites,
     constraintController.getUnprocessedRequestsCount
 );
 
 router.put('/permanent-request/:id/review',
     verifyToken,
     isAdmin,
+    getAccessibleSites,
     constraintController.reviewPermanentRequest
 );
 

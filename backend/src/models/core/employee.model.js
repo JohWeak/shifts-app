@@ -47,8 +47,20 @@ module.exports = (sequelize, DataTypes) => {
         },
 
         password: { type: DataTypes.STRING, allowNull: false },
-        status: { type: DataTypes.ENUM('active', 'inactive', 'admin'), defaultValue: 'active' },
+        status: { type: DataTypes.ENUM('active', 'inactive'), defaultValue: 'active' },
         role: { type: DataTypes.ENUM('employee', 'admin'), defaultValue: 'employee' },
+        admin_work_sites_scope: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: null,
+            comment: 'Array of work site IDs that this admin can manage. NULL means no admin rights, empty array means no sites.'
+        },
+        is_super_admin: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            comment: 'Indicates if this admin has super admin privileges (can manage all sites and create admins)'
+        },
         default_position_id: {
             type: DataTypes.INTEGER,
             allowNull: true,

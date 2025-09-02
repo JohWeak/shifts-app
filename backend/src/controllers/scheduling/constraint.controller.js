@@ -286,10 +286,17 @@ const getPendingRequests = async (req, res) => {
 // Get all permanent constraint requests with filters
 const getAllPermanentRequests = async (req, res) => {
     try {
+        // Build where clause for filtering employees by accessible work sites
+        const whereClause = {};
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            whereClause.work_site_id = req.accessibleSites;
+        }
+
         const requests = await PermanentConstraintRequest.findAll({
             include: [{
                 model: Employee,
                 as: 'employee',
+                where: whereClause,
                 include: [
                     {
                         model: Position,
@@ -460,8 +467,22 @@ const submitPermanentRequest = async (req, res) => {
 // Get unprocessed requests count (for admin badge)
 const getUnprocessedRequestsCount = async (req, res) => {
     try {
+        // Build where clause for filtering employees by accessible work sites
+        const whereClause = {status: 'pending'};
+        let includeEmployee = null;
+        
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            includeEmployee = {
+                model: Employee,
+                as: 'employee',
+                where: {work_site_id: req.accessibleSites},
+                attributes: [] // Only needed for filtering, don't select data
+            };
+        }
+
         const count = await PermanentConstraintRequest.count({
-            where: {status: 'pending'}
+            where: whereClause,
+            ...(includeEmployee && { include: [includeEmployee] })
         });
 
         res.json({
@@ -507,6 +528,17 @@ const reviewPermanentRequest = async (req, res) => {
                 success: false,
                 message: 'Request not found'
             });
+        }
+
+        // Check Work Site access for limited admins
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (!req.accessibleSites.includes(request.employee.work_site_id)) {
+                await transaction.rollback();
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied to this work site'
+                });
+            }
         }
 
         const admin = await Employee.findByPk(adminId, {

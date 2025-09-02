@@ -220,7 +220,7 @@ const EmployeeProfile = () => {
             />
 
             <Row className="justify-content-center">
-                <Col md={8} lg={6}>
+                <Col lg={12}>
                     <Card>
                         <Card.Body>
                             {error && <Alert variant="danger">{error}</Alert>}
@@ -228,7 +228,7 @@ const EmployeeProfile = () => {
 
                             {/* Read-only information */}
                             {user && (
-                                <Card className="mb-4 bg-light">
+                                <Card className="mb-4">
                                     <Card.Body>
                                         <h6 className="card-title text-muted mb-3">
                                             <i className="bi bi-info-circle me-2"></i>

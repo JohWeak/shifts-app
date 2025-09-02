@@ -314,9 +314,9 @@ const EmployeeList = ({
                                                 size="sm"
                                                 className="p-1 text-danger"
                                                 onClick={() => employee.status === 'active' ? onDelete(employee) : onRestore(employee)}
-                                                title={employee.status === ('active' || 'admin') ? t('employee.deactivate') : t('employee.restore')}
+                                                title={employee.status === 'active' ? t('employee.deactivate') : t('employee.restore')}
                                             >
-                                                <i className={`bi bi-${employee.status === ('active' || 'admin') ? 'trash' : 'arrow-clockwise'}`}></i>
+                                                <i className={`bi bi-${employee.status === 'active' ? 'trash' : 'arrow-clockwise'}`}></i>
                                             </Button>
                                         </td>
                                     </motion.tr>
