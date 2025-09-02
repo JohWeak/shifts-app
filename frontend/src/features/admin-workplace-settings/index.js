@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Card, Container, Nav, Tab} from 'react-bootstrap';
 import {useDispatch} from 'react-redux';
+import {useLocation} from "react-router-dom";
 import {AnimatePresence, motion} from 'motion/react';
 import LoadingState from 'shared/ui/components/LoadingState';
 import TopProgressBar from '../../shared/ui/components/TopProgressBar';
@@ -15,10 +16,17 @@ import {preloadWorkplaceData} from './model/workplaceSlice';
 
 import './index.css';
 
+
 const WorkplaceSettings = () => {
     const {t} = useI18n();
     const dispatch = useDispatch();
-    const [activeTab, setActiveTab] = useState('worksites');
+    const location = useLocation();
+
+    const [activeTab, setActiveTab] = useState(() => {
+        const initialTab = location.state?.initialTab;
+        return initialTab === 'positions' ? 'positions' : 'worksites';
+    });
+
     const [selectedSite, setSelectedSite] = useState(null);
     const [isPreloading, setIsPreloading] = useState(true);
 

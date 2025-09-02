@@ -1,13 +1,13 @@
 // frontend/src/features/admin-dashboard/index.js
-import React, { useEffect, useState } from 'react';
-import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useEffect, useState} from 'react';
+import {Badge, Button, Card, Col, Container, Row} from 'react-bootstrap';
+import {useNavigate} from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import MetricCard from './components/MetricCard';
-import { fetchEmployees } from 'features/admin-employee-management/model/employeeSlice';
-import { fetchSchedules } from 'features/admin-schedule-management/model/scheduleSlice';
-import { fetchPositions, fetchWorkSites } from 'features/admin-workplace-settings/model/workplaceSlice';
+import {fetchEmployees} from 'features/admin-employee-management/model/employeeSlice';
+import {fetchSchedules} from 'features/admin-schedule-management/model/scheduleSlice';
+import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
 import './AdminDashboard.css';
 import PageHeader from '../../shared/ui/components/PageHeader';
 
@@ -16,15 +16,15 @@ import PageHeader from '../../shared/ui/components/PageHeader';
  * Provides system overview with metrics, quick actions and status
  */
 const AdminDashboard = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     // Redux state
-    const { user } = useSelector(state => state.auth);
-    const { employees, loading: employeesLoading } = useSelector(state => state.employees);
-    const { schedules } = useSelector(state => state.schedule);
-    const { positions, workSites } = useSelector(state => state.workplace);
+    const {user} = useSelector(state => state.auth);
+    const {employees, loading: employeesLoading} = useSelector(state => state.employees);
+    const {schedules} = useSelector(state => state.schedule);
+    const {positions, workSites} = useSelector(state => state.workplace);
 
     // Local state
     const [metrics, setMetrics] = useState({
@@ -104,7 +104,10 @@ const AdminDashboard = () => {
                             value={metrics.activePositions}
                             label={t('dashboard.metrics.activePositions')}
                             color="info"
-                            onClick="/admin/workplace"
+                            onClick={{
+                                pathname: '/admin/workplace',
+                                state: {initialTab: 'positions'}
+                            }}
                             loading={isLoading}
                         />
                     </Col>
@@ -126,7 +129,7 @@ const AdminDashboard = () => {
                         <Card className="action-card h-100">
                             <Card.Header className="bg-transparent">
                                 <h5 className="mb-0">
-                                    <i className="bi bi-lightning-charge-fill me-2 text-primary" />
+                                    <i className="bi bi-lightning-charge-fill me-2 text-primary"/>
                                     {t('dashboard.quickActions.title')}
                                 </h5>
                             </Card.Header>
@@ -139,7 +142,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/schedules')}
                                         >
-                                            <i className="bi bi-calendar-plus" />
+                                            <i className="bi bi-calendar-plus"/>
                                             <span>{t('dashboard.quickActions.createSchedule')}</span>
                                         </Button>
                                     </Col>
@@ -150,7 +153,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/employees')}
                                         >
-                                            <i className="bi bi-person-plus" />
+                                            <i className="bi bi-person-plus"/>
                                             <span>{t('dashboard.quickActions.manageEmployees')}</span>
                                         </Button>
                                     </Col>
@@ -161,7 +164,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/reports')}
                                         >
-                                            <i className="bi bi-graph-up" />
+                                            <i className="bi bi-graph-up"/>
                                             <span>{t('dashboard.quickActions.viewReports')}</span>
                                         </Button>
                                     </Col>
@@ -172,7 +175,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/workplace')}
                                         >
-                                            <i className="bi bi-building-gear" />
+                                            <i className="bi bi-building-gear"/>
                                             <span>{t('dashboard.quickActions.workplaceSettings')}</span>
                                         </Button>
                                     </Col>
@@ -183,7 +186,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/algorithms')}
                                         >
-                                            <i className="bi bi-cpu" />
+                                            <i className="bi bi-cpu"/>
                                             <span>{t('dashboard.quickActions.algorithmSettings')}</span>
                                         </Button>
                                     </Col>
@@ -194,7 +197,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/settings')}
                                         >
-                                            <i className="bi bi-gear" />
+                                            <i className="bi bi-gear"/>
                                             <span>{t('dashboard.quickActions.systemSettings')}</span>
                                         </Button>
                                     </Col>
@@ -208,7 +211,7 @@ const AdminDashboard = () => {
                         <Card className="status-card h-100">
                             <Card.Header className="bg-transparent">
                                 <h5 className="mb-0">
-                                    <i className="bi bi-activity me-2 text-success" />
+                                    <i className="bi bi-activity me-2 text-success"/>
                                     {t('dashboard.systemStatus.title')}
                                 </h5>
                             </Card.Header>

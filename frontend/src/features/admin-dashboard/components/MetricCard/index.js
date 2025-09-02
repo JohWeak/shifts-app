@@ -24,6 +24,8 @@ const MetricCard = ({
         if (onClick) {
             if (typeof onClick === 'string') {
                 navigate(onClick);
+            } else if (typeof onClick === 'object' && onClick.pathname) {
+                navigate(onClick.pathname, {state: onClick.state});
             } else {
                 onClick();
             }
