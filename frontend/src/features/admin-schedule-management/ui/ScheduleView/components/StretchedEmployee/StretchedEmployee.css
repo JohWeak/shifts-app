@@ -1,0 +1,15 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleView/components/StretchedEmployee/StretchedEmployee.css */
+
+.stretched-employee {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.stretched-employee:hover {
+    background-color: rgba(156, 39, 176, 0.3) !important;
+}
+
+.stretched-employee .employee-name {
+    font-weight: 600;
+    color: #9c27b0;
+}

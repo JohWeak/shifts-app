@@ -1,0 +1,16 @@
+.resize-overlay {
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+    animation: pulse-resize 1.5s infinite;
+}
+
+@keyframes pulse-resize {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+.resize-overlay .employee-name {
+    color: #856404;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
