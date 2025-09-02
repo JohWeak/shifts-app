@@ -19,7 +19,8 @@ const AssignedEmployee = ({
                               isCrossSite,
                               isFlexible,
                               onSpareResize,
-                              resizeState
+                              resizeState,
+                              stretchedEmployees = []
                           }) => {
     const employeeData = {
         empId: employee.emp_id,
@@ -74,6 +75,53 @@ const AssignedEmployee = ({
         }
     };
 
+    // Calculate stretch data for DraggableEmployee
+    const stretchedEmployee = stretchedEmployees.find(stretched => 
+        stretched.employee.emp_id === employee.emp_id && 
+        stretched.employee.assignment_id === employee.assignment_id
+    );
+    
+    // Calculate stretch data during resize (temporary)
+    const isBeingResized = resizeState?.isResizing && 
+                          resizeState?.resizeData?.employee?.empId === employee.emp_id && 
+                          resizeState?.resizeData?.employee?.assignmentId === employee.assignment_id;
+    
+    let stretchData = null;
+    
+    if (isBeingResized && resizeState?.tempTime) {
+        // Temporary stretch during resize (yellow) - calculate actual stretch based on time
+        const originalDuration = 8; // Boker shift is 8 hours (7:00-15:00)
+        const newDuration = resizeState.tempTime.duration || 8;
+        stretchData = {
+            scaleY: newDuration / originalDuration, // Real scale based on duration 
+            scaleX: 1,
+            isTemporary: true,
+            customTimes: resizeState.tempTime
+        };
+    } else if (stretchedEmployee && stretchedEmployee.customTimes) {
+        // Final stretch after resize - calculate actual stretch
+        const originalDuration = 8; // Should get from shift data
+        const startTime = parseTime(stretchedEmployee.customTimes.start_time);
+        const endTime = parseTime(stretchedEmployee.customTimes.end_time);
+        let duration = endTime - startTime;
+        if (duration <= 0) duration = (24 * 60 - startTime) + endTime; // Handle overnight
+        const newDuration = duration / 60; // Convert to hours
+        
+        stretchData = {
+            scaleY: newDuration / originalDuration, // Real scale based on duration
+            scaleX: 1,
+            isTemporary: false,
+            customTimes: stretchedEmployee.customTimes,
+            isPending: stretchedEmployee.isPending
+        };
+    }
+    
+    // Helper function for time parsing
+    function parseTime(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+
     return (
         <DraggableEmployee
             employee={employeeData}
@@ -88,6 +136,7 @@ const AssignedEmployee = ({
             className={getClassName()}
             showResizeHandles={true}
             onResizeStart={handleResizeStart}
+            stretchData={stretchData}
             renderContent={() => (
                 <>
                     <span

@@ -19,7 +19,8 @@ const PendingEmployee = ({
                              isCrossSite,
                              isFlexible,
                              onSpareResize,
-                             resizeState
+                             resizeState,
+                             stretchedEmployees = []
                          }) => {
     const employeeData = {
         empId: assignment.empId,
@@ -69,6 +70,8 @@ const PendingEmployee = ({
             onSpareResize(e, direction, employeeData, cellData);
         }
     };
+
+    // Stretching is now handled by overlay components
 
     return (
         <DraggableEmployee
@@ -124,6 +127,17 @@ const PendingEmployee = ({
                                     -
                                     {resizeState.tempTime.end_time?.substring(0, 5)}
                                     <span className="ms-1">({resizeState.tempTime.duration}h)</span>
+                                </small>
+                            </div>
+                        )}
+
+                        {/* Custom hours for pending assignments with custom times */}
+                        {!resizeState?.isResizing && (pendingChange?.custom_start_time || pendingChange?.custom_end_time) && (
+                            <div className="custom-hours-display">
+                                <small className="text-success fw-bold">
+                                    {pendingChange?.custom_start_time?.substring(0, 5) || pendingChange?.shift_start_time?.substring(0, 5)}
+                                    -
+                                    {pendingChange?.custom_end_time?.substring(0, 5) || pendingChange?.shift_end_time?.substring(0, 5)}
                                 </small>
                             </div>
                         )}

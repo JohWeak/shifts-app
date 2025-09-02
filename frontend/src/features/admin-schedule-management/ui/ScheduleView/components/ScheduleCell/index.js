@@ -29,7 +29,8 @@ const ScheduleCell = ({
                           selectedCell,
                           className = '',
                           onSpareResize = null,
-                          resizeState = null
+                          resizeState = null,
+                          stretchedEmployees = []
                       }) => {
     const {t} = useI18n();
 
@@ -118,6 +119,7 @@ const ScheduleCell = ({
                         isFlexible={employee.isFlexible}
                         onSpareResize={onSpareResize}
                         resizeState={resizeState}
+                        stretchedEmployees={stretchedEmployees}
                     />
                 ))}
                 {pendingAssignments.map((assignment) => {
@@ -148,8 +150,9 @@ const ScheduleCell = ({
                             isCrossPosition={pendingChange?.isCrossPosition || assignment.isCrossPosition}
                             isCrossSite={pendingChange?.isCrossSite || assignment.isCrossSite}
                             isFlexible={pendingChange?.isFlexible || assignment.isFlexible}
-                        onSpareResize={onSpareResize}
-                        resizeState={resizeState}
+                            onSpareResize={onSpareResize}
+                            resizeState={resizeState}
+                            stretchedEmployees={stretchedEmployees}
                         />
                     );
                 })}

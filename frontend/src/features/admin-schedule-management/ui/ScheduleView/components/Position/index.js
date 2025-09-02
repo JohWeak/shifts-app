@@ -88,19 +88,35 @@ const PositionEditor = ({
     // Spare shift resize functionality
     const {handleResizeStart, tempTime, isResizing, resizeData} = useSpareShiftResize((resizeResult) => {
         // Handle spare shift resize completion
-        console.log('🎯 Position received resize result:', resizeResult);
+        // Debug removed
 
-        // Update assignment with new custom times - use consistent key to replace existing
-        const changeKey = `resize-${resizeResult.employee.empId}-${resizeResult.employee.assignmentId}`;
+        // Remove the original assignment first
+        const removeKey = `remove-${resizeResult.employee.empId}-${resizeResult.employee.assignmentId}`;
         dispatch(addPendingChange({
-            key: changeKey,
+            key: removeKey,
+            change: {
+                action: 'remove',
+                date: resizeResult.cellData.date,
+                shiftId: resizeResult.cellData.shiftId,
+                positionId: resizeResult.cellData.positionId,
+                empId: resizeResult.employee.empId,
+                assignmentId: resizeResult.employee.assignmentId
+            }
+        }));
+
+        // Then create new assignment with custom times (this creates pending assignment)
+        const assignKey = `resize-assign-${resizeResult.employee.empId}-${resizeResult.employee.assignmentId}`;
+        dispatch(addPendingChange({
+            key: assignKey,
             change: {
                 action: 'assign',
                 date: resizeResult.cellData.date,
                 shiftId: resizeResult.cellData.shiftId,
                 positionId: resizeResult.cellData.positionId,
                 empId: resizeResult.employee.empId,
+                empName: resizeResult.employee.name, // Add employee name for pending assignment
                 assignmentId: resizeResult.employee.assignmentId,
+                assignment_type: resizeResult.employee.assignment_type, // Preserve assignment type (spare, etc.)
                 custom_start_time: resizeResult.newTimes.start_time,
                 custom_end_time: resizeResult.newTimes.end_time,
                 isResize: true // Flag to indicate this is a resize operation
@@ -287,14 +303,18 @@ const PositionEditor = ({
                     );
                     
                     if (dayIndex >= 0) {
+                        // Find employee details from scheduleDetails
+                        const employeeDetails = scheduleDetails?.employees?.find(emp => emp.emp_id === assignment.emp_id);
+                        const employeeName = employeeDetails ? 
+                            `${employeeDetails.first_name} ${employeeDetails.last_name}` : 
+                            `Employee ${assignment.emp_id}`;
+                            
                         // Try to find start and end cells by their data attributes or class names
                         // This is a placeholder - we'll need proper cell identification
                         stretched.push({
                             employee: {
                                 emp_id: assignment.emp_id,
-                                name: assignment.first_name && assignment.last_name ? 
-                                    `${assignment.first_name} ${assignment.last_name}` : 
-                                    assignment.employee_name || `Employee ${assignment.emp_id}`,
+                                name: employeeName,
                                 assignment_id: assignment.id,
                             },
                             startCell: null, // Will be populated when DOM is available
@@ -311,57 +331,83 @@ const PositionEditor = ({
             }
         });
         
-        if (stretched.length > 0) {
-            console.log('🔍 Found', stretched.length, 'employees to stretch:', stretched);
-        }
+        // Also check pending assignments with custom times (from resize)
+        positionPendingChanges.forEach(change => {
+            if (change.action === 'assign' && change.isResize && 
+                change.custom_start_time && change.custom_end_time) {
+                
+                // Find the shift for this pending assignment
+                const assignmentShift = shifts.find(s => s.shift_id === change.shiftId);
+                if (!assignmentShift) return;
+                
+                const customStart = change.custom_start_time.substring(0, 5);
+                const customEnd = change.custom_end_time.substring(0, 5);
+                const shiftStart = assignmentShift.start_time.substring(0, 5);
+                const shiftEnd = assignmentShift.end_time.substring(0, 5);
+                
+                // If custom times are different from shift times, this needs stretching
+                if (customStart !== shiftStart || customEnd !== shiftEnd) {
+                    const dayIndex = weekDates.findIndex(date => 
+                        format(date, 'yyyy-MM-dd') === change.date
+                    );
+                    
+                    if (dayIndex >= 0) {
+                        // Find employee details
+                        const employeeDetails = scheduleDetails?.employees?.find(emp => emp.emp_id === change.empId);
+                        const employeeName = employeeDetails ? 
+                            `${employeeDetails.first_name} ${employeeDetails.last_name}` : 
+                            `Employee ${change.empId}`;
+                            
+                        stretched.push({
+                            employee: {
+                                emp_id: change.empId,
+                                name: employeeName,
+                                assignment_id: change.assignmentId,
+                            },
+                            startCell: null,
+                            endCell: null,
+                            customTimes: {
+                                start_time: customStart,
+                                end_time: customEnd
+                            },
+                            originalShift: assignmentShift,
+                            dayIndex: dayIndex,
+                            isPending: true // Mark as pending
+                        });
+                    }
+                }
+            }
+        });
         
         return stretched;
-    }, [assignments, shifts, weekDates, pendingChanges, position.pos_id]);
+    }, [assignments, shifts, weekDates, pendingChanges, position.pos_id, scheduleDetails]);
 
     // Update DOM references for stretched employees after render
     useEffect(() => {
         const updateStretchedEmployeesWithDOM = () => {
-            if (stretchedEmployees.length > 0) {
-                console.log('🔍 Found', stretchedEmployees.length, 'employees to stretch:', stretchedEmployees);
-            }
+            // Debug removed
             
             const updatedStretched = stretchedEmployees.map(stretched => {
                 const dateStr = format(weekDates[stretched.dayIndex], 'yyyy-MM-dd');
-                
-                console.log('🔍 Looking for cells:', {
-                    positionId: position.pos_id,
-                    shiftId: stretched.originalShift.shift_id,
-                    date: dateStr
-                });
                 
                 // Find the start cell (original shift cell)
                 const startCell = document.querySelector(
                     `td[data-position-id="${position.pos_id}"][data-shift-id="${stretched.originalShift.shift_id}"][data-date="${dateStr}"]`
                 );
                 
-                console.log('📍 Start cell found:', !!startCell);
-                
                 // Calculate which shift the end time falls into
                 const customEndTime = stretched.customTimes.end_time;
                 const endShift = findShiftByTime(customEndTime, shifts);
                 
-                console.log('🔍 End time analysis:', {
-                    customEndTime,
-                    endShiftFound: !!endShift,
-                    endShiftId: endShift?.shift_id,
-                    originalShiftId: stretched.originalShift.shift_id,
-                    willSpan: endShift && endShift.shift_id !== stretched.originalShift.shift_id
-                });
+                // Debug removed
                 
                 let endCell = startCell; // Default to same cell
                 
                 if (endShift && endShift.shift_id !== stretched.originalShift.shift_id) {
-                    // Find the end cell if it spans to a different shift
-                    endCell = document.querySelector(
-                        `td[data-position-id="${position.pos_id}"][data-shift-id="${endShift.shift_id}"][data-date="${dateStr}"]`
-                    ) || startCell;
+                    const endCellSelector = `td[data-position-id="${position.pos_id}"][data-shift-id="${endShift.shift_id}"][data-date="${dateStr}"]`;
                     
-                    console.log('📍 End cell found:', !!endCell);
+                    // Find the end cell if it spans to a different shift
+                    endCell = document.querySelector(endCellSelector) || startCell;
                 }
                 
                 return {
@@ -453,6 +499,7 @@ const PositionEditor = ({
                 onEmployeeMouseEnter={handleMouseEnter}
                 onEmployeeMouseLeave={handleMouseLeave}
                 selectedCell={selectedCell}
+                stretchedEmployees={stretchedEmployeesWithDOM}
             />
         );
     };

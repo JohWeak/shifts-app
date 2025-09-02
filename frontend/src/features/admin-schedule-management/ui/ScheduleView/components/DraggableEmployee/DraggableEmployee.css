@@ -98,6 +98,30 @@
     }
 }
 
+/* Ensure stretched employees can overflow cell boundaries */
+.stretched-employee {
+    overflow: visible !important;
+}
+
+.stretched-employee .resize-handle {
+    /* Resize handles should not be affected by stretching */
+    position: relative;
+    z-index: 10;
+}
+
+/* Make sure parent containers allow overflow */
+.draggable-employee {
+    overflow: visible;
+}
+
+.schedule-cell {
+    overflow: visible !important;
+}
+
+.employees-container {
+    overflow: visible !important;
+}
+
 /* Resize handles for spare shifts */
 .resize-handle {
     position: absolute;
