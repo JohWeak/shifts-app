@@ -125,10 +125,11 @@ export const positionAPI = {
     updatePosition: (positionData) => api.put(API_ENDPOINTS.POSITIONS.DETAILS(positionData.pos_id), positionData),
     deletePosition: (positionId) => api.delete(API_ENDPOINTS.POSITIONS.DETAILS(positionId)),
     restorePosition: (positionId) => api.post(API_ENDPOINTS.POSITIONS.RESTORE(positionId)),
-    fetchPositionShifts: (positionId) => api.get(API_ENDPOINTS.SHIFTS.BY_POSITION(positionId)),
+    fetchPositionShifts: (positionId, params = {}) => api.get(API_ENDPOINTS.SHIFTS.BY_POSITION(positionId), { params }),
     createPositionShift: (positionId, shiftData) => api.post(API_ENDPOINTS.SHIFTS.BY_POSITION(positionId), shiftData),
     updatePositionShift: (shiftId, shiftData) => api.put(API_ENDPOINTS.SHIFTS.DETAILS(shiftId), shiftData),
     deletePositionShift: (shiftId) => api.delete(API_ENDPOINTS.SHIFTS.DETAILS(shiftId)),
+    restorePositionShift: (shiftId) => api.post(`${API_ENDPOINTS.SHIFTS.DETAILS(shiftId)}/restore`),
     fetchRequirementsMatrix: (positionId) => api.get(API_ENDPOINTS.POSITIONS.REQUIREMENTS_MATRIX(positionId)),
 };
 
@@ -139,8 +140,12 @@ export const requirementAPI = {
 
 
 export const settingsAPI = {
-    fetchSystemSettings: () => api.get(API_ENDPOINTS.SETTINGS.SYSTEM),
-    updateSystemSettings: (settings) => api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings),
+    fetchSystemSettings: (siteId = null) => api.get(API_ENDPOINTS.SETTINGS.SYSTEM, {
+        params: siteId ? { site_id: siteId } : {}
+    }),
+    updateSystemSettings: (settings, siteId = null) => api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings, {
+        params: siteId ? { site_id: siteId } : {}
+    }),
 };
 
 

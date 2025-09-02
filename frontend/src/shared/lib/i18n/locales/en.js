@@ -1,6 +1,11 @@
 // frontend/src/shared/lib/i18n/locales/en.js
 export const en = {
     admin: {
+        administrativeAccess: 'Administrative Access',
+        accessibleWorkSites: 'Accessible Work Sites',
+        accessibleWorkSitesHelp: 'Select which work sites this admin can manage. Leave empty for super admin (access to all sites).',
+        grantSuperAdminPrivileges: 'Grant Super Admin Privileges',
+        superAdminHelp: 'Super admins have access to all work sites and full system privileges.',
         requests: {
             title: 'Permanent Requests',
             employee: 'Employee',
@@ -1644,6 +1649,11 @@ export const en = {
         constraintDeadlineDay: 'Constraint Deadline Day',
         constraintDeadlineTime: 'Constraint Deadline Time',
         constraintDeadlineHint: 'Day and time after which employees cannot submit or modify their weekly constraints',
+        workSite: 'Work Site',
+        globalSettings: 'Global Settings (All Sites)',
+        globalSettingsHint: 'These settings apply to all work sites unless overridden by site-specific settings.',
+        siteSpecificHint: 'These settings apply only to the selected work site and override global settings.',
+        siteSpecificSettingsDesc: 'Settings for {siteName}',
     },
     shift: {
         colorUpdated: 'Shift color updated',
@@ -1847,6 +1857,14 @@ export const en = {
             shiftColor: 'Shift Color',
             shiftColorHint: 'Shift color',
             shiftColorPlaceholder: 'Select a color',
+            showInactive: 'Show Inactive',
+            restoreConfirm: 'Are you sure you want to restore this shift?',
+            restoreSuccess: 'Shift restored successfully',
+            restoreFailed: 'Failed to restore shift',
+            createFailed: 'Failed to create shift',
+            updateFailed: 'Failed to update shift',
+            deleteConfirmMessage: 'Are you sure you want to delete shift "{shiftName}"?',
+            restoreConfirmMessage: 'Are you sure you want to restore shift "{shiftName}"?',
         },
         subtitle: 'Manage work sites and positions',
         title: 'Workplace Settings',

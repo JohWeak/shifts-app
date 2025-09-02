@@ -14,7 +14,7 @@ const notificationsSlice = createSlice({
             reducer: (state, action) => {
                 state.notifications.push(action.payload);
             },
-            prepare: ({id, message, variant = 'success', duration = 3000}) => {
+            prepare: ({id, message, variant = 'success', duration}) => {
                 const finalId = id || nanoid();
                 // Adding updateCount during creation
                 return {payload: {id: finalId, message, variant, duration, updateCount: 0}};

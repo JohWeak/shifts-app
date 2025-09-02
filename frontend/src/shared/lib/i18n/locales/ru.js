@@ -1,6 +1,11 @@
 // frontend/src/shared/lib/i18n/locales/ru.js
 export const ru = {
     admin: {
+        administrativeAccess: 'Административный доступ',
+        accessibleWorkSites: 'Доступные рабочие объекты',
+        accessibleWorkSitesHelp: 'Выберите рабочие объекты, которыми может управлять этот администратор. Оставьте пустым для супер админа (доступ ко всем объектам).',
+        grantSuperAdminPrivileges: 'Предоставить привилегии супер админа',
+        superAdminHelp: 'Супер админы имеют доступ ко всем рабочим объектам и полные системные привилегии.',
         requests: {
             title: 'Постоянные запросы',
             employee: 'Сотрудник',
@@ -1136,6 +1141,11 @@ export const ru = {
         constraintDeadlineDay: 'День дедлайна ограничений',
         constraintDeadlineTime: 'Время дедлайна ограничений',
         constraintDeadlineHint: 'День и время, после которых сотрудники не смогут отправлять или изменять свои еженедельные ограничения',
+        workSite: 'Рабочий объект',
+        globalSettings: 'Глобальные настройки (все объекты)',
+        globalSettingsHint: 'Эти настройки применяются ко всем рабочим объектам, если не переопределены специфичными настройками объекта.',
+        siteSpecificHint: 'Эти настройки применяются только к выбранному рабочему объекту и переопределяют глобальные настройки.',
+        siteSpecificSettingsDesc: 'Настройки для {siteName}',
     },
     shift: {
         colorUpdated: 'Цвет смены обновлен',
@@ -1329,6 +1339,14 @@ export const ru = {
             shiftColor: 'Цвет смены',
             shiftColorHint: 'Цвет смены',
             shiftColorPlaceholder: 'Выберите цвет',
+            showInactive: 'Показать неактивные',
+            restoreConfirm: 'Вы уверены, что хотите восстановить эту смену?',
+            restoreSuccess: 'Смена успешно восстановлена',
+            restoreFailed: 'Не удалось восстановить смену',
+            createFailed: 'Не удалось создать смену',
+            updateFailed: 'Не удалось обновить смену',
+            deleteConfirmMessage: 'Вы уверены, что хотите удалить смену "{shiftName}"?',
+            restoreConfirmMessage: 'Вы уверены, что хотите восстановить смену "{shiftName}"?',
         },
         subtitle: 'Управление рабочими объектами и должностями',
         title: 'Настройки рабочего места',

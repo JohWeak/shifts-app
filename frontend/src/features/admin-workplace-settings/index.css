@@ -189,8 +189,9 @@
     box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1) inset !important;
 }
 
+.workplace-table .inactive-row,
 .positions-table > tbody > .position-row.inactive-row {
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .positions-table > tbody > .position-row.inactive-row:hover {

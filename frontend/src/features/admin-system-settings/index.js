@@ -4,7 +4,8 @@ import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from 'react-b
 import PageHeader from 'shared/ui/components/PageHeader';
 import OptimizationSettings from 'shared/ui/components/OptimizationSettings';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { fetchSystemSettings, updateLocalSettings, updateSystemSettings } from './model/settingsSlice';
+import { fetchSystemSettings, updateLocalSettings, updateSystemSettings, setCurrentSite } from './model/settingsSlice';
+import { fetchWorkSites } from '../admin-workplace-settings/model/workplaceSlice';
 import { addNotification } from '../../app/model/notificationsSlice';
 import { motion } from 'motion/react';
 
@@ -14,12 +15,18 @@ const SystemSettings = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const { systemSettings, loading, error } = useSelector(state => state.settings);
+    const { systemSettings, loading, error, currentSiteId } = useSelector(state => state.settings);
+    const { workSites = [] } = useSelector(state => state.workplace || {});
 
     const [localSettings, setLocalSettings] = useState(systemSettings);
+    const [selectedSiteId, setSelectedSiteId] = useState(currentSiteId);
 
     useEffect(() => {
-        dispatch(fetchSystemSettings()).then((result) => {
+        // Fetch work sites for the selector
+        dispatch(fetchWorkSites());
+        
+        // Fetch settings for current site
+        dispatch(fetchSystemSettings({ siteId: selectedSiteId })).then((result) => {
             if (fetchSystemSettings.rejected.match(result)) {
                 dispatch(addNotification({
                     message: t('settings.fetchError', 'Failed to load settings'),
@@ -27,7 +34,7 @@ const SystemSettings = () => {
                 }));
             }
         });
-    }, [dispatch, t]);
+    }, [dispatch, t, selectedSiteId]);
 
     useEffect(() => {
         if (systemSettings && Object.keys(systemSettings).length > 0) {
@@ -35,8 +42,17 @@ const SystemSettings = () => {
         }
     }, [systemSettings]);
 
+    useEffect(() => {
+        setSelectedSiteId(currentSiteId);
+    }, [currentSiteId]);
+
     const handleChange = (field, value) => {
         setLocalSettings(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSiteChange = (siteId) => {
+        setSelectedSiteId(siteId);
+        dispatch(setCurrentSite(siteId));
     };
 
     const handleSave = async () => {
@@ -44,8 +60,10 @@ const SystemSettings = () => {
             // Optimistically updating the Redux state right away
             dispatch(updateLocalSettings(localSettings));
 
-
-            const result = await dispatch(updateSystemSettings(localSettings));
+            const result = await dispatch(updateSystemSettings({ 
+                settings: localSettings, 
+                siteId: selectedSiteId 
+            }));
 
             if (updateSystemSettings.fulfilled.match(result)) {
                 dispatch(addNotification({
@@ -70,6 +88,11 @@ const SystemSettings = () => {
     };
 
     const hasChanges = JSON.stringify(localSettings) !== JSON.stringify(systemSettings);
+    
+    // Get current site name for display
+    const currentSiteName = selectedSiteId 
+        ? workSites.find(site => site.site_id == selectedSiteId)?.site_name 
+        : null;
 
     if (loading === 'pending' && localSettings.weekStartDay === undefined) {
         return (
@@ -85,8 +108,14 @@ const SystemSettings = () => {
             <Container fluid className="settings-container">
                 <PageHeader
                     icon="gear-fill"
-                    title={t('settings.systemSettings')}
-                    subtitle={t('settings.systemSettingsDesc')}
+                    title={currentSiteName 
+                        ? `${t('settings.systemSettings')} - ${currentSiteName}`
+                        : t('settings.systemSettings')
+                    }
+                    subtitle={currentSiteName 
+                        ? t('settings.siteSpecificSettingsDesc', `Settings for ${currentSiteName}`)
+                        : t('settings.systemSettingsDesc')
+                    }
                 >
                     <motion.div
                         className="d-flex gap-2"
@@ -128,6 +157,51 @@ const SystemSettings = () => {
                     </motion.div>
                 </PageHeader>
 
+                {/* Site Selector */}
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mb-4"
+                >
+                    <Card className="settings-card">
+                        <Card.Body className="py-3">
+                            <Row className="align-items-center">
+                                <Col md={6}>
+                                    <Form.Group className="mb-0">
+                                        <Form.Label className="settings-label">
+                                            <i className="bi bi-building me-2"></i>
+                                            {t('settings.workSite', 'Work Site')}
+                                        </Form.Label>
+                                        <Form.Select
+                                            value={selectedSiteId || ''}
+                                            onChange={(e) => handleSiteChange(e.target.value || null)}
+                                            className="settings-input"
+                                        >
+                                            <option value="">{t('settings.globalSettings', 'Global Settings (All Sites)')}</option>
+                                            {workSites
+                                                .filter(site => site.is_active)
+                                                .map(site => (
+                                                    <option key={site.site_id} value={site.site_id}>
+                                                        {site.site_name}
+                                                    </option>
+                                                ))
+                                            }
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Text className="settings-help">
+                                        {selectedSiteId 
+                                            ? t('settings.siteSpecificHint', 'These settings apply only to the selected work site and override global settings.')
+                                            : t('settings.globalSettingsHint', 'These settings apply to all work sites unless overridden by site-specific settings.')
+                                        }
+                                    </Form.Text>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Card>
+                </motion.div>
 
                 <div className="settings-row px-0">
                     <Col className="settings-content">

@@ -7,15 +7,16 @@ import {CACHE_DURATION, isCacheValid} from '../../../shared/lib/cache/cacheUtils
 // Async thunks
 export const fetchSystemSettings = createAsyncThunk(
     'settings/fetchSystemSettings',
-    async (forceRefresh = false, {getState, rejectWithValue}) => {
+    async ({siteId = null, forceRefresh = false} = {}, {getState, rejectWithValue}) => {
         const state = getState();
-        const {lastFetched, systemSettings} = state.settings;
-        if (!forceRefresh && isCacheValid(lastFetched, CACHE_DURATION.LONG) && systemSettings?.positions?.length > 0) {
-            return {cached: true, data: systemSettings};
+        const {lastFetched, systemSettings, currentSiteId} = state.settings;
+        if (!forceRefresh && isCacheValid(lastFetched, CACHE_DURATION.LONG) && 
+            systemSettings && currentSiteId === siteId) {
+            return {cached: true, data: systemSettings, siteId};
         }
         try {
-            const response = await settingsAPI.fetchSystemSettings();
-            return {cached: false, data: response};
+            const response = await settingsAPI.fetchSystemSettings(siteId);
+            return {cached: false, data: response, siteId};
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -24,9 +25,9 @@ export const fetchSystemSettings = createAsyncThunk(
 
 export const updateSystemSettings = createAsyncThunk(
     'settings/updateSystemSettings',
-    async (settings, {rejectWithValue, dispatch}) => {
+    async ({settings, siteId = null}, {rejectWithValue, dispatch}) => {
         try {
-            const response = await settingsAPI.updateSystemSettings(settings);
+            const response = await settingsAPI.updateSystemSettings(settings, siteId);
             // Оптимистично обновляем локальное состояние
             dispatch(updateLocalSettings(settings));
             return response;
@@ -62,6 +63,7 @@ const settingsSlice = createSlice({
             // Position-specific settings
             positionSettings: {},// hours
         },
+        currentSiteId: null,
         loading: 'idle',
         error: null,
         lastFetched: null,
@@ -69,6 +71,9 @@ const settingsSlice = createSlice({
     reducers: {
         updateLocalSettings(state, action) {
             state.systemSettings = {...state.systemSettings, ...action.payload};
+        },
+        setCurrentSite(state, action) {
+            state.currentSiteId = action.payload;
         },
         invalidateCache(state) {
             state.lastFetched = null;
@@ -88,6 +93,7 @@ const settingsSlice = createSlice({
                         ...state.systemSettings,
                         ...responseData,
                     };
+                    state.currentSiteId = action.payload.siteId;
                     state.lastFetched = Date.now();
                 }
             })
@@ -110,5 +116,5 @@ const settingsSlice = createSlice({
     },
 });
 
-export const {updateLocalSettings, invalidateCache} = settingsSlice.actions;
+export const {updateLocalSettings, setCurrentSite, invalidateCache} = settingsSlice.actions;
 export default settingsSlice.reducer;

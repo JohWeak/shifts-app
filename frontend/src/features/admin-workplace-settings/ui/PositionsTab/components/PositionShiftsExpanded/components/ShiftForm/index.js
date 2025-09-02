@@ -5,6 +5,7 @@ import {TimePicker} from 'react-accessible-time-picker';
 import {useDispatch} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {createPositionShift, updatePositionShift} from '../../../../../../model/workplaceSlice';
+import {addNotification} from 'app/model/notificationsSlice';
 
 import './ShiftForm.css';
 
@@ -186,10 +187,16 @@ const ShiftForm = ({show, onHide, onSuccess, positionId, shift}) => {
             }
             onSuccess();
         } catch (error) {
-            const errorMessage = error.message || t('common.error');
-            setErrors({
-                submit: errorMessage
-            });
+            console.log('Shift form error:', error);
+            // Extract error message from different possible locations
+            const errorMessage = typeof error === 'string' ? error : 
+                error.data?.message || error.message || error.error?.message || 
+                (shift ? t('workplace.shifts.updateFailed') : t('workplace.shifts.createFailed'));
+            
+            dispatch(addNotification({
+                variant: 'danger',
+                message: errorMessage
+            }));
         } finally {
             setLoading(false);
         }
@@ -211,12 +218,6 @@ const ShiftForm = ({show, onHide, onSuccess, positionId, shift}) => {
 
             <Form onSubmit={handleSubmit}>
                 <Modal.Body>
-                    {errors.submit && (
-                        <Alert variant="danger" dismissible onClose={() => setErrors({})}>
-                            {errors.submit}
-                        </Alert>
-                    )}
-
                     <Row>
                         <Col md={8}>
                             <Form.Group className="mb-3">

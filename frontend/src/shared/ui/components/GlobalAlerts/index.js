@@ -32,8 +32,8 @@ const AlertItem = ({ notification }) => {
     const variant = notification.variant || notification.type || 'info';
     const animationDuration = 300;
 
-    // Auto-close for success and info, manual close for warnings and errors
-    const isAutoClose = variant === 'success' || variant === 'info';
+    // All notifications will auto-close, but with different durations
+    const isAutoClose = true;
 
     const handleClose = useCallback(() => {
         setIsClosing(true);
@@ -44,13 +44,28 @@ const AlertItem = ({ notification }) => {
 
     useEffect(() => {
         let timer;
-        if (notification.duration && isAutoClose && !isClosing) {
+        if (isAutoClose && !isClosing) {
+            // Set duration based on variant if not specified
+            let duration = notification.duration;
+            if (!duration) {
+                switch (variant) {
+                    case 'warning':
+                    case 'danger':
+                    case 'error':
+                        duration = 8000; // 8 seconds for warnings and errors
+                        break;
+                    default:
+                        duration = 3000; // 3 seconds for success and info
+                        break;
+                }
+            }
+            
             timer = setTimeout(() => {
                 handleClose();
-            }, notification.duration);
+            }, duration);
         }
         return () => clearTimeout(timer);
-    }, [notification.duration, isAutoClose, isClosing, handleClose]);
+    }, [isAutoClose, isClosing, handleClose, notification.duration, variant]);
 
 
     const getIcon = () => {
@@ -75,8 +90,8 @@ const AlertItem = ({ notification }) => {
     return (
         <Alert
             variant={variant === 'error' ? 'danger' : variant}
-            onClose={!isAutoClose ? handleClose : undefined}
-            dismissible={!isAutoClose}
+            onClose={handleClose}
+            dismissible={true}
             className={`global-alert-item ${isUpdated ? 'updated' : ''} ${isClosing ? 'closing' : ''}`}
         >
             <div className="alert-content">

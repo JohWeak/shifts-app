@@ -7,7 +7,7 @@ const {Op} = require('sequelize');
 const getPositionShifts = async (req, res) => {
     try {
         const {positionId} = req.params;
-        const {includeRequirements = false} = req.query;
+        const {includeRequirements = false, includeInactive = false} = req.query;
 
         const includeOptions = [];
         if (includeRequirements) {
@@ -18,13 +18,19 @@ const getPositionShifts = async (req, res) => {
             });
         }
 
+        const whereClause = {
+            position_id: positionId
+        };
+
+        // Only filter by is_active if includeInactive is not set
+        if (!includeInactive) {
+            whereClause.is_active = true;
+        }
+
         const shifts = await PositionShift.findAll({
-            where: {
-                position_id: positionId,
-                is_active: true
-            },
+            where: whereClause,
             include: includeOptions,
-            order: [['sort_order', 'ASC'], ['start_time', 'ASC']]
+            order: [['is_active', 'DESC'], ['sort_order', 'ASC'], ['start_time', 'ASC']]
         });
 
         res.json(shifts);
@@ -197,6 +203,53 @@ const deletePositionShift = async (req, res) => {
         console.error('Error deactivating shift:', error);
         res.status(500).json({
             message: 'Error deactivating shift',
+            error: error.message
+        });
+    }
+};
+
+// Restore a shift
+const restorePositionShift = async (req, res) => {
+    try {
+        const {shiftId} = req.params;
+
+        const shift = await PositionShift.findByPk(shiftId);
+        if (!shift) {
+            return res.status(404).json({message: 'Shift not found'});
+        }
+
+        // Check for time conflicts with existing active shifts
+        const existingActiveShifts = await PositionShift.findAll({
+            where: {
+                position_id: shift.position_id,
+                is_active: true,
+                id: {
+                    [Op.not]: shift.id
+                }
+            }
+        });
+
+        // Check for time conflicts
+        for (const existingShift of existingActiveShifts) {
+            if (checkTimeOverlap(shift.start_time, shift.end_time, existingShift.start_time, existingShift.end_time)) {
+                return res.status(400).json({
+                    message: 'Cannot restore shift - time overlaps with existing active shift',
+                    conflictingShift: existingShift.shift_name
+                });
+            }
+        }
+
+        // Restore
+        await shift.update({is_active: true});
+
+        res.json({
+            message: 'Shift restored successfully',
+            shift_id: shiftId
+        });
+    } catch (error) {
+        console.error('Error restoring shift:', error);
+        res.status(500).json({
+            message: 'Error restoring shift',
             error: error.message
         });
     }
@@ -631,6 +684,7 @@ module.exports = {
     createPositionShift,
     updatePositionShift,
     deletePositionShift,
+    restorePositionShift,
     getPositionFlexibleShifts,
     createFlexibleShift,
     updateFlexibleShift,

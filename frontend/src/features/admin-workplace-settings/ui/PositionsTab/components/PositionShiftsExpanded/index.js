@@ -5,11 +5,12 @@ import {Badge, Button, Card, Nav, OverlayTrigger, Spinner, Tab, Table, Tooltip} 
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {AnimatePresence} from 'motion/react';
 import * as motion from "motion/react-client"
-import {deletePositionShift, fetchPositionShifts} from '../../../../model/workplaceSlice';
+import {deletePositionShift, fetchPositionShifts, restorePositionShift} from '../../../../model/workplaceSlice';
 import {addNotification} from 'app/model/notificationsSlice';
 import ShiftForm from './components/ShiftForm';
 import ShiftRequirementsMatrix from './components/ShiftRequirementsMatrix';
 import WorkplaceActionButtons from "../../../WorkplaceActionButtons";
+import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 import './PositionShiftsExpanded.css';
 
 const PositionShiftsExpanded = ({position, isClosing}) => {
@@ -19,19 +20,40 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
     const [showShiftForm, setShowShiftForm] = useState(false);
     const [selectedShift, setSelectedShift] = useState(null);
     const [activeView, setActiveView] = useState('shifts'); // 'shifts' or 'matrix'
+    const [showInactive, setShowInactive] = useState(() =>
+        localStorage.getItem('showInactiveShifts') === 'true');
+    
+    // Confirmation modals state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showRestoreModal, setShowRestoreModal] = useState(false);
+    const [shiftToProcess, setShiftToProcess] = useState(null);
+    const [actionLoading, setActionLoading] = useState(false);
 
     const {positionShifts, shiftsLoading} = useSelector(state => state.workplace);
-    const shifts = positionShifts[position?.pos_id] || [];
-    const isLoading = shiftsLoading && shifts.length === 0;
+    const cacheKey = `${position?.pos_id}_all`;
+    const allShifts = positionShifts[cacheKey] || positionShifts[position?.pos_id] || [];
+
+    // Filter shifts based on showInactive toggle
+    const shifts = showInactive
+        ? allShifts
+        : allShifts.filter(shift => shift.is_active !== false);
+
+    const isLoading = shiftsLoading && allShifts.length === 0;
 
     useEffect(() => {
         if (position?.pos_id) {
-            dispatch(fetchPositionShifts({positionId: position.pos_id}));
+            dispatch(fetchPositionShifts({positionId: position.pos_id, includeInactive: true}));
         }
     }, [dispatch, position?.pos_id]);
 
+    const handleShowInactiveChange = (e) => {
+        const show = e.target.checked;
+        setShowInactive(show);
+        localStorage.setItem('showInactiveShifts', show);
+    };
+
     const handleMatrixUpdate = () => {
-        dispatch(fetchPositionShifts({positionId: position.pos_id, forceRefresh: true}));
+        // Matrix updates don't affect shift list, no need to refetch
     };
 
     const handleAddShift = () => {
@@ -44,25 +66,81 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
         setShowShiftForm(true);
     };
 
-    const handleDeleteShift = async (shiftId) => {
-        if (!window.confirm(t('workplace.shifts.deleteConfirm'))) return;
+    const handleDeleteShift = (shift) => {
+        setShiftToProcess(shift);
+        setShowDeleteModal(true);
+    };
 
+    const handleRestoreShift = (shift) => {
+        setShiftToProcess(shift);
+        setShowRestoreModal(true);
+    };
+
+    const confirmDeleteShift = async () => {
+        if (!shiftToProcess) return;
+
+        setActionLoading(true);
         try {
-            await dispatch(deletePositionShift(shiftId)).unwrap();
+            await dispatch(deletePositionShift(shiftToProcess.id)).unwrap();
             dispatch(addNotification({
                 variant: 'success',
                 message: t('workplace.shifts.deleteSuccess'),
                 duration: 3000
             }));
 
-            dispatch(fetchPositionShifts({positionId: position.pos_id, forceRefresh: true}));
+            setShowDeleteModal(false);
+            setShiftToProcess(null);
         } catch (err) {
+            // err is the unwrapped error from the rejected action
+            console.log('Delete error:', err);
+            // Try different possible error message locations
+            const errorMessage = typeof err === 'string' ? err : 
+                err.data?.message || err.message || err.error?.message || t('workplace.shifts.deleteFailed');
             dispatch(addNotification({
-                variant: 'error',
-                message: err.message || t('workplace.shifts.deleteFailed'),
-                duration: 5000
+                variant: 'danger',
+                message: errorMessage
+                // duration will be set automatically to 8000ms for danger variant
             }));
+        } finally {
+            setActionLoading(false);
         }
+    };
+
+    const confirmRestoreShift = async () => {
+        if (!shiftToProcess) return;
+
+        setActionLoading(true);
+        try {
+            await dispatch(restorePositionShift(shiftToProcess.id)).unwrap();
+            dispatch(addNotification({
+                variant: 'success',
+                message: t('workplace.shifts.restoreSuccess'),
+                duration: 3000
+            }));
+
+            setShowRestoreModal(false);
+            setShiftToProcess(null);
+        } catch (err) {
+            // err is the unwrapped error from the rejected action
+            console.log('Restore error:', err);
+            // Try different possible error message locations
+            const errorMessage = typeof err === 'string' ? err : 
+                err.data?.message || err.message || err.error?.message || t('workplace.shifts.restoreFailed');
+            dispatch(addNotification({
+                variant: 'danger',
+                message: errorMessage
+                // duration will be set automatically to 8000ms for danger variant
+            }));
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleModalCancel = () => {
+        if (actionLoading) return; // Prevent closing during loading
+        setShowDeleteModal(false);
+        setShowRestoreModal(false);
+        setShiftToProcess(null);
     };
 
     const handleShiftFormClose = () => {
@@ -73,7 +151,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
     const handleShiftFormSuccess = () => {
         setShowShiftForm(false);
         setSelectedShift(null);
-        dispatch(fetchPositionShifts({positionId: position.pos_id, forceRefresh: true}));
+        // No need to refetch - the slice will handle the update optimistically
     };
 
     const formatTime = (time) => {
@@ -126,6 +204,22 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                             </Nav.Link>
                                         </Nav.Item>
                                     </Nav>
+
+                                    {activeView === 'shifts' && (
+                                        <div className="form-check form-switch">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id="showInactiveShifts"
+                                                checked={showInactive}
+                                                onChange={handleShowInactiveChange}
+                                            />
+                                            <label className="form-check-label text-muted small"
+                                                   htmlFor="showInactiveShifts">
+                                                {t('workplace.shifts.showInactive', 'Show Inactive')}
+                                            </label>
+                                        </div>
+                                    )}
                                 </div>
                                 <AnimatePresence mode="wait">
                                     <motion.div
@@ -170,14 +264,23 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                                         </thead>
                                                         <tbody>
                                                         {shifts.map(shift => (
-                                                            <tr key={shift.id}>
+                                                            <tr key={shift.id}
+                                                                className={!shift.is_active ? ' opacity-50' : ''}>
                                                                 <td>
-                                                                    <div className="d-flex align-items-center">
-                                                                        <div
-                                                                            className="shift-color-indicator me-2"
-                                                                            style={{backgroundColor: shift.color}}
-                                                                        />
-                                                                        <span>{shift.shift_name}</span>
+                                                                    <div
+                                                                        className="d-flex align-items-center justify-content-between">
+                                                                        <div className="d-flex align-items-center">
+                                                                            <div
+                                                                                className="shift-color-indicator me-2"
+                                                                                style={{backgroundColor: shift.color}}
+                                                                            />
+                                                                            <span>{shift.shift_name}</span>
+                                                                        </div>
+                                                                        {!shift.is_active && (
+                                                                            <Badge bg="secondary" className="ms-auto">
+                                                                                {t('common.inactive')}
+                                                                            </Badge>
+                                                                        )}
                                                                     </div>
                                                                 </td>
                                                                 <td>
@@ -213,7 +316,8 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                                                     <WorkplaceActionButtons
                                                                         item={shift}
                                                                         onEdit={() => handleEditShift(shift)}
-                                                                        onDelete={() => handleDeleteShift(shift.id)}
+                                                                        onDelete={() => handleDeleteShift(shift)}
+                                                                        onRestore={() => handleRestoreShift(shift)}
                                                                     />
 
                                                                 </td>
@@ -294,6 +398,38 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                     shift={selectedShift}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                show={showDeleteModal}
+                title={t('workplace.shifts.deleteConfirm', 'Delete Shift')}
+                message={shiftToProcess ? 
+                    t('workplace.shifts.deleteConfirmMessage', `Are you sure you want to delete shift "${shiftToProcess.shift_name}"?`).replace('{shiftName}', shiftToProcess.shift_name) : 
+                    ''
+                }
+                onConfirm={confirmDeleteShift}
+                onHide={handleModalCancel}
+                loading={actionLoading}
+                variant="danger"
+                confirmText={t('common.delete')}
+                confirmVariant="danger"
+            />
+
+            {/* Restore Confirmation Modal */}
+            <ConfirmationModal
+                show={showRestoreModal}
+                title={t('workplace.shifts.restoreConfirm', 'Restore Shift')}
+                message={shiftToProcess ? 
+                    t('workplace.shifts.restoreConfirmMessage', `Are you sure you want to restore shift "${shiftToProcess.shift_name}"?`).replace('{shiftName}', shiftToProcess.shift_name) : 
+                    ''
+                }
+                onConfirm={confirmRestoreShift}
+                onHide={handleModalCancel}
+                loading={actionLoading}
+                variant="success"
+                confirmText={t('common.restore')}
+                confirmVariant="success"
+            />
         </tr>
     );
 };

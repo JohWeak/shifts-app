@@ -34,6 +34,7 @@ positionRouter.post('/:positionId/flexible-shifts/:shiftId/assignments', verifyT
 
 shiftRouter.put('/:shiftId', verifyToken, isAdmin, positionShiftController.updatePositionShift);
 shiftRouter.delete('/:shiftId', verifyToken, isAdmin, positionShiftController.deletePositionShift);
+shiftRouter.post('/:shiftId/restore', verifyToken, isAdmin, positionShiftController.restorePositionShift);
 
 
 shiftRouter.get('/:shiftId/requirements', verifyToken, shiftRequirementController.getShiftRequirements);

@@ -4,19 +4,27 @@
     margin-bottom: 0;
 }
 
+.workplace-toolbar-row .input-group-text {
+    background-color: transparent;
+    border-radius: var(--radius-sm);
+    border: none;
+}
 
 .workplace-toolbar-row .form-check-label {
     white-space: nowrap;
     cursor: pointer;
 }
-.workplace-toolbar-row .form-control{
+
+.workplace-toolbar-row .form-control {
     border: 1px solid var(--bs-border-color);
     border-left: none;
 }
-[dir="rtl"] .workplace-toolbar-row .form-control{
+
+[dir="rtl"] .workplace-toolbar-row .form-control {
     border-right: none;
     border-left: 1px solid var(--bs-border-color);
 }
+
 [data-theme="dark"] .workplace-toolbar-row .form-control {
     border: none;
 }

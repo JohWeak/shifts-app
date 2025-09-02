@@ -1,6 +1,11 @@
 // frontend/src/shared/lib/i18n/locales/he.js
 export const he = {
     admin: {
+        administrativeAccess: 'גישה מנהלית',
+        accessibleWorkSites: 'אתרי עבודה נגישים',
+        accessibleWorkSitesHelp: 'בחר אתרי העבודה שמנהל זה יכול לנהל. השאר ריק עבור סופר אדמין (גישה לכל האתרים).',
+        grantSuperAdminPrivileges: 'הענק הרשאות סופר אדמין',
+        superAdminHelp: 'לסופר אדמין יש גישה לכל אתרי העבודה והרשאות מערכת מלאות.',
         requests: {
             title: 'בקשות קבועות',
             employee: 'עובד',
@@ -1133,6 +1138,11 @@ export const he = {
         constraintDeadlineDay: 'יום דדליין אילוצים',
         constraintDeadlineTime: 'שעת דדליין אילוצים',
         constraintDeadlineHint: 'יום ושעה שאחריהם עובדים לא יוכלו לשלוח או לשנות את האילוצים השבועיים שלהם',
+        workSite: 'אתר עבודה',
+        globalSettings: 'הגדרות גלובליות (כל האתרים)',
+        globalSettingsHint: 'הגדרות אלה חלות על כל אתרי העבודה אלא אם כן מוחלפות על ידי הגדרות ספציפיות לאתר.',
+        siteSpecificHint: 'הגדרות אלה חלות רק על אתר העבודה הנבחר ומחליפות את ההגדרות הגלובליות.',
+        siteSpecificSettingsDesc: 'הגדרות עבור {siteName}',
         systemSettingsDesc: 'נהל את כל הגדרות המערכת והאלגוריתמים',
         autoGenerateSchedule: 'יצירה אוטומטית של סידור עבודה',
         autoGenerateHint: 'צור סידורי עבודה באופן אוטומטי מדי שבוע ביום ובשעה הנבחרים',
@@ -1332,6 +1342,14 @@ export const he = {
             shiftColor: 'צבע משמרת',
             shiftColorHint: 'צבע המשמרת',
             shiftColorPlaceholder: 'בחר צבע',
+            showInactive: 'הצג לא פעילות',
+            restoreConfirm: 'האם אתה בטוח שברצונך לשחזר משמרת זו?',
+            restoreSuccess: 'המשמרת שוחזרה בהצלחה',
+            restoreFailed: 'נכשל בשחזור המשמרת',
+            createFailed: 'נכשל ביצירת המשמרת',
+            updateFailed: 'נכשל בעדכון המשמרת',
+            deleteConfirmMessage: 'האם אתה בטוח שברצונך למחוק את המשמרת "{shiftName}"?',
+            restoreConfirmMessage: 'האם אתה בטוח שברצונך לשחזר את המשמרת "{shiftName}"?',
         },
         subtitle: 'נהל אתרי עבודה ותפקידים',
         title: 'הגדרות סביבת עבודה',
