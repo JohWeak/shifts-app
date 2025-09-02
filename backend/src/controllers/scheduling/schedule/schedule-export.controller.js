@@ -11,12 +11,11 @@ const {
     WorkSite
 } = db;
 
-let PDFGenerator = null;
 
 const exportSchedule = async (req, res) => {
     try {
         const {scheduleId} = req.params;
-        const {format = 'pdf', lang = 'en'} = req.query;
+        const {format = 'csv', lang = 'en'} = req.query;
 
         const schedule = await Schedule.findByPk(scheduleId, {
             include: [
@@ -24,87 +23,98 @@ const exportSchedule = async (req, res) => {
                     model: ScheduleAssignment,
                     as: 'assignments',
                     include: [
-                        {
-                            model: Employee,
-                            as: 'employee',
-                            attributes: ['emp_id', 'first_name', 'last_name']
-                        },
-                        {
-                            model: PositionShift,
-                            as: 'shift',
-                            attributes: ['id', 'shift_name', 'start_time', 'duration_hours']
-                        },
-                        {
-                            model: Position,
-                            as: 'position',
-                            attributes: ['pos_id', 'pos_name']
-                        }
-                    ]
+                        {model: Employee, as: 'employee', attributes: ['first_name', 'last_name']},
+                        {model: PositionShift, as: 'shift', attributes: ['id', 'shift_name', 'start_time', 'end_time']},
+                        {model: Position, as: 'position', attributes: ['pos_id', 'pos_name']},
+                    ],
+                    order: [
+                        [{model: Position, as: 'position'}, 'pos_name', 'ASC'],
+                        [{model: PositionShift, as: 'shift'}, 'start_time', 'ASC'],
+                        ['work_date', 'ASC'],
+                    ],
                 },
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
-                }
-            ]
+                    attributes: ['site_name'],
+                },
+            ],
         });
 
         if (!schedule) {
-            return res.status(404).json({
-                success: false,
-                message: 'Schedule not found'
-            });
+            return res.status(404).json({success: false, message: 'Schedule not found'});
         }
-
-        const exportData = {
-            schedule: {
-                id: schedule.id,
-                week: `${schedule.start_date.toISOString().split('T')[0]} to ${schedule.end_date.toISOString().split('T')[0]}`,
-                site: schedule.workSite?.site_name || 'Unknown',
-                status: schedule.status,
-                created: schedule.createdAt
-            },
-            assignments: schedule.assignments.map(assignment => ({
-                date: assignment.work_date,
-                employee: `${assignment.employee.first_name} ${assignment.employee.last_name}`,
-                shift: assignment.shift.shift_name,
-                shift_time: assignment.shift.start_time,
-                position: assignment.position.pos_name,
-                status: assignment.status
-            }))
-        };
 
         if (format === 'csv') {
-            const fields = ['date', 'employee', 'shift', 'shift_time', 'position', 'status'];
-            const csv = [
-                fields.join(','),
-                ...exportData.assignments.map(row =>
-                    fields.map(field => `"${row[field]}"`).join(',')
-                )
-            ].join('\n');
 
-            res.setHeader('Content-Type', 'text/csv');
-            res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.csv"`);
-            return res.send(csv);
+            // Headlines of the days of the week
+            const startDate = dayjs(schedule.start_date);
+            const endDate = dayjs(schedule.end_date);
+            const dateHeaders = [];
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            let currentDate = startDate;
+            while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+                dateHeaders.push(`${dayNames[currentDate.day()]} ${currentDate.format('DD/MM')}`);
+                currentDate = currentDate.add(1, 'day');
+            }
+
+            // Group assignments by Position -> Shift -> Date
+            const groupedData = {};
+            schedule.assignments.forEach(a => {
+                const posName = a.position.pos_name;
+                const shiftName = `${a.shift.shift_name} (${dayjs(`1970-01-01 ${a.shift.start_time}`).format('HH:mm')}-${dayjs(`1970-01-01 ${a.shift.end_time}`).format('HH:mm')})`;
+                const date = dayjs(a.work_date).format('YYYY-MM-DD');
+                const employeeName = `${a.employee.first_name} ${a.employee.last_name}`;
+
+                if (!groupedData[posName]) groupedData[posName] = {};
+                if (!groupedData[posName][shiftName]) groupedData[posName][shiftName] = {};
+                if (!groupedData[posName][shiftName][date]) groupedData[posName][shiftName][date] = [];
+
+                groupedData[posName][shiftName][date].push(employeeName);
+            });
+
+            // Collecting CSV strings
+            const csvRows = [];
+
+            // File header
+            csvRows.push(`"Work Site: ${schedule.workSite.site_name}"`);
+            csvRows.push(`"Week: ${startDate.format('DD/MM/YYYY')} - ${endDate.format('DD/MM/YYYY')}"`);
+            csvRows.push('');
+
+            // Main table
+            const headerRow = ['"Position"', '"Shift"', ...dateHeaders.map(h => `"${h}"`)];
+
+            Object.keys(groupedData).forEach(positionName => {
+                csvRows.push('');
+                csvRows.push(`"${positionName}"`);
+
+                csvRows.push(headerRow.slice(1).join(','));
+
+                Object.keys(groupedData[positionName]).forEach(shiftName => {
+                    const row = [`"${shiftName}"`];
+                    let currentDay = startDate;
+                    while (currentDay.isBefore(endDate) || currentDay.isSame(endDate, 'day')) {
+                        const dateKey = currentDay.format('YYYY-MM-DD');
+                        const employees = groupedData[positionName][shiftName][dateKey];
+
+                        row.push(employees ? `"${employees.join('\n')}"` : '""');
+                        currentDay = currentDay.add(1, 'day');
+                    }
+                    csvRows.push(row.join(','));
+                });
+            });
+
+            const csvContent = csvRows.join('\n');
+
+
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="schedule-${schedule.id}.csv"`);
+            // Adding a BOM to correctly display non-English characters in Excel
+            return res.send('\uFEFF' + csvContent);
         }
-        // puppeteer deleted from package.json for faster build
-        // if (format === 'pdf') {
-        //     if (!PDFGenerator) {
-        //         PDFGenerator = require('../../../utils/pdfGenerator');
-        //     }
-        //
-        //     const pdfGenerator = new PDFGenerator(lang);
-        //     const pdfBuffer = await pdfGenerator.generateSchedulePDF(exportData);
-        //
-        //     res.setHeader('Content-Type', 'application/pdf');
-        //     res.setHeader('Content-Disposition', `attachment; filename="schedule-${scheduleId}.pdf"`);
-        //     return res.send(pdfBuffer);
-        // }
 
-        res.json({
-            success: true,
-            data: exportData
-        });
+        // If the format is not CSV, revert to the default JSON
+        return res.json({success: true, message: "Only CSV export is currently supported."});
 
     } catch (error) {
         console.error('[ScheduleController] Export error:', error);
