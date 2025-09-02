@@ -1,75 +1,54 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Accordion, Button, Col, Form, Row } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { debounce } from 'lodash';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { setFilters } from '../../model/employeeSlice';
-import { fetchSystemSettings } from 'features/admin-system-settings/model/settingsSlice';
-import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {Accordion, Button, Col, Form, Row} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {debounce} from 'lodash';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {setFilters} from '../../model/employeeSlice';
+import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
 import './EmployeeFilters.css';
 
 const EmployeeFilters = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { filters, employees } = useSelector((state) => state.employees);
-    const { systemSettings } = useSelector((state) => state.settings || {});
-    const { workSites } = useSelector((state) => state.schedule || {});
+    const {filters} = useSelector((state) => state.employees);
+    const {workSites, positions: allPositions} = useSelector((state) => state.workplace);
 
-    const [selectedWorkSite, setSelectedWorkSite] = useState(filters.work_site || 'all');
-
-    useEffect(() => {
-        setSelectedWorkSite(filters.work_site || 'all');
-    }, [filters.work_site]);
-
-    const allPositions = systemSettings?.positions || [];
+    const selectedWorkSite = filters.work_site || 'all';
 
 
-    const getFilteredPositions = () => {
+    const filteredPositions = useMemo(() => {
         if (selectedWorkSite === 'all') {
-            const uniquePositions = [];
             const positionMap = new Map();
-
-            allPositions.forEach(pos => {
+            (allPositions || []).forEach(pos => {
                 if (!positionMap.has(pos.pos_name)) {
-                    positionMap.set(pos.pos_name, {
-                        pos_id: pos.pos_name,
-                        pos_name: pos.pos_name,
-                        actual_ids: [pos.pos_id],
-                    });
-                } else {
-                    positionMap.get(pos.pos_name).actual_ids.push(pos.pos_id);
+                    positionMap.set(pos.pos_name, {pos_id: pos.pos_name, pos_name: pos.pos_name});
                 }
             });
-
-            positionMap.forEach(value => uniquePositions.push(value));
-            return uniquePositions;
-        } else if (selectedWorkSite === 'any') {
-            // Show only positions that exist among employees without work site
-            const positionIdsFromFlexibleEmployees = [...new Set(
-                employees
-                    .filter(emp => !emp.work_site_id && emp.default_position_id)
-                    .map(emp => emp.default_position_id),
-            )];
-            return allPositions.filter(pos => positionIdsFromFlexibleEmployees.includes(pos.pos_id));
-        } else {
-            return allPositions.filter(pos => pos.site_id === parseInt(selectedWorkSite));
+            return Array.from(positionMap.values());
         }
-    };
-    const filteredPositions = getFilteredPositions();
+        return (allPositions || []).filter(pos => pos.site_id === parseInt(selectedWorkSite));
+    }, [allPositions, selectedWorkSite]);
 
     const handleFilterChange = useCallback((field, value) => {
-        if (field === 'position' && selectedWorkSite === 'all' && value !== 'all') {
-            const position = filteredPositions.find(p => p.pos_id === value);
-            if (position && position.actual_ids) {
-                dispatch(setFilters({ [field]: value }));
-            } else {
-                dispatch(setFilters({ [field]: value }));
-            }
-        } else {
-            dispatch(setFilters({ [field]: value }));
+        dispatch(setFilters({[field]: value}));
+    }, [dispatch]);
+
+    useEffect(() => {
+        // Загружаем сайты, если их нет
+        if (!workSites || workSites.length === 0) {
+            dispatch(fetchWorkSites());
         }
-    }, [dispatch, selectedWorkSite, filteredPositions]);
+        // Загружаем должности, если их нет
+        if (!allPositions || allPositions.length === 0) {
+            dispatch(fetchPositions({}));
+        }
+    }, [dispatch, workSites, allPositions]);
+
+
+    const handleWorkSiteChange = (value) => {
+        dispatch(setFilters({work_site: value, position: 'all'}));
+    };
 
     const debouncedSearch = useMemo(
         () => debounce((value) => {
@@ -78,22 +57,6 @@ const EmployeeFilters = () => {
         [handleFilterChange],
     );
 
-    useEffect(() => {
-        if (!systemSettings || !systemSettings.positions) {
-            dispatch(fetchSystemSettings());
-        }
-        if (!workSites || workSites.length === 0) {
-            dispatch(fetchWorkSites());
-        }
-    }, [dispatch, systemSettings, workSites]);
-
-
-    const handleWorkSiteChange = (value) => {
-        setSelectedWorkSite(value);
-        handleFilterChange('work_site', value);
-        handleFilterChange('position', 'all');
-    };
-
     const handleReset = () => {
         dispatch(setFilters({
             status: 'active',
@@ -101,7 +64,6 @@ const EmployeeFilters = () => {
             search: '',
             work_site: 'all',
         }));
-        setSelectedWorkSite('all');
     };
 
     return (
@@ -141,7 +103,7 @@ const EmployeeFilters = () => {
 
                             <Col lg={3} md={6} xs={12}>
                                 <Form.Select
-                                    value={selectedWorkSite}
+                                    value={filters.work_site || 'all'}
                                     onChange={(e) => handleWorkSiteChange(e.target.value)}
                                     className="filter-select"
                                 >
@@ -163,7 +125,7 @@ const EmployeeFilters = () => {
                                     value={filters.position}
                                     onChange={(e) => handleFilterChange('position', e.target.value)}
                                     className="filter-select"
-                                    disabled={filteredPositions.length === 0}
+                                    disabled={selectedWorkSite !== 'all' && filteredPositions.length === 0}
                                 >
                                     <option value="all">{t('common.all')} {t('employee.position')}</option>
                                     {filteredPositions.map((position) => (

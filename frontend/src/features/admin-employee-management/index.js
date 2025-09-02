@@ -11,7 +11,6 @@ import EmployeeList from './ui/EmployeeList';
 import EmployeeModal from './ui/EmployeeModal';
 import EmployeeFilters from './ui/EmployeeFilters';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
-
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import {
     clearCache,
@@ -23,7 +22,6 @@ import {
     updateEmployee,
 } from './model/employeeSlice';
 import './index.css';
-
 
 const EmployeeManagement = () => {
     const {t} = useI18n();
@@ -75,6 +73,7 @@ const EmployeeManagement = () => {
             dispatch(fetchWorkSites());
         }
     }, [dispatch]);
+
 
     // Main employee loading
     useEffect(() => {

@@ -129,20 +129,24 @@ const employeeSlice = createSlice({
             })
             .addCase(fetchEmployees.fulfilled, (state, action) => {
                 state.loading = false;
-                if (action.payload && action.payload.success) {
-                    state.employees = action.payload.data || [];
-                    if (action.payload.pagination) {
-                        state.pagination = {
-                            ...state.pagination,
-                            ...action.payload.pagination
-                        };
-                    }
-                    // Update cache if not from cache
-                    if (!action.payload.fromCache && action.payload.cacheKey) {
-                        setCacheEntry(state.cache.pages, action.payload.cacheKey, action.payload);
-                    }
-                } else {
+                if (!action.payload || !action.payload.success) {
                     state.employees = [];
+                    return;
+                }
+                state.employees = action.payload.data || [];
+                if (action.payload.pagination) {
+                    const newPagination = action.payload.pagination;
+                    if (
+                        state.pagination.page !== newPagination.page ||
+                        state.pagination.pageSize !== newPagination.pageSize ||
+                        state.pagination.total !== newPagination.total
+                    ) {
+                        state.pagination = {...state.pagination, ...newPagination};
+                    }
+                }
+
+                if (!action.payload.fromCache && action.payload.cacheKey) {
+                    setCacheEntry(state.cache.pages, action.payload.cacheKey, action.payload);
                 }
             })
             .addCase(fetchEmployees.rejected, (state, action) => {
