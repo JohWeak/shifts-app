@@ -1,6 +1,6 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftForm/index.js
 import React, {useEffect, useState} from 'react';
-import {Alert, Button, Col, Form, InputGroup, Modal, Row} from 'react-bootstrap';
+import {Button, Col, Form, InputGroup, Modal, Row} from 'react-bootstrap';
 import {TimePicker} from 'react-accessible-time-picker';
 import {useDispatch} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -189,10 +189,10 @@ const ShiftForm = ({show, onHide, onSuccess, positionId, shift}) => {
         } catch (error) {
             console.log('Shift form error:', error);
             // Extract error message from different possible locations
-            const errorMessage = typeof error === 'string' ? error : 
-                error.data?.message || error.message || error.error?.message || 
+            const errorMessage = typeof error === 'string' ? error :
+                error.data?.message || error.message || error.error?.message ||
                 (shift ? t('workplace.shifts.updateFailed') : t('workplace.shifts.createFailed'));
-            
+
             dispatch(addNotification({
                 variant: 'danger',
                 message: errorMessage
@@ -340,15 +340,6 @@ const ShiftForm = ({show, onHide, onSuccess, positionId, shift}) => {
                         </Form.Text>
                     </Form.Group>
 
-                    {/*{formData.start_time && formData.end_time && (*/}
-                    {/*    <Alert variant="info">*/}
-                    {/*        <i className="bi bi-info-circle me-2"></i>*/}
-                    {/*        {parseInt(formData.end_time) < parseInt(formData.start_time)*/}
-                    {/*            ? t('workplace.shifts.overnightShiftNotice')*/}
-                    {/*            : t('workplace.shifts.regularShiftNotice')*/}
-                    {/*        }*/}
-                    {/*    </Alert>*/}
-                    {/*)}*/}
                 </Modal.Body>
 
                 <Modal.Footer>

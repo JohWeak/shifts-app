@@ -1151,7 +1151,7 @@ export const he = {
         globalSettings: 'הגדרות גלובליות (כל האתרים)',
         globalSettingsHint: 'הגדרות אלה חלות על כל אתרי העבודה אלא אם כן מוחלפות על ידי הגדרות ספציפיות לאתר.',
         siteSpecificHint: 'הגדרות אלה חלות רק על אתר העבודה הנבחר ומחליפות את ההגדרות הגלובליות.',
-        siteSpecificSettingsDesc: 'הגדרות עבור {siteName}',
+        siteSpecificSettingsDesc: 'נהל את כל הגדרות המערכת והאלגוריתמים עבור {siteName}',
         systemSettingsDesc: 'נהל את כל הגדרות המערכת והאלגוריתמים',
         autoGenerateSchedule: 'יצירה אוטומטית של סידור עבודה',
         autoGenerateHint: 'צור סידורי עבודה באופן אוטומטי מדי שבוע ביום ובשעה הנבחרים',

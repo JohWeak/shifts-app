@@ -116,6 +116,7 @@
 
 .settings-switch {
     padding: 1rem;
+    padding-inline-start: 3rem !important;
     border-radius: 0.75rem;
     background: var(--bs-gray-50);
     border: 1px solid var(--bs-border-color);
@@ -123,13 +124,17 @@
 }
 
 [data-theme="dark"] .settings-switch {
-    background: var(--bs-gray-800);
+    background: rgba(var(--bs-primary-rgb), 0.1);
 }
 
 .settings-switch:hover {
     background: var(--bs-primary-bg-subtle);
-    border-color: var(--bs-primary);
+    border-color: rgba(var(--bs-primary-rgb), 0.3);
     transform: translateY(-1px);
+}
+
+[data-theme="dark"] .settings-switch:hover {
+    background: rgba(var(--bs-primary-rgb), 0.2);
 }
 
 .settings-switch.main-switch {

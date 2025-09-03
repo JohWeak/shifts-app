@@ -1664,7 +1664,7 @@ export const en = {
         globalSettings: 'Global Settings (All Sites)',
         globalSettingsHint: 'These settings apply to all work sites unless overridden by site-specific settings.',
         siteSpecificHint: 'These settings apply only to the selected work site and override global settings.',
-        siteSpecificSettingsDesc: 'Settings for {siteName}',
+        siteSpecificSettingsDesc: 'Manage all system and algorithm settings for {siteName}',
     },
     shift: {
         colorUpdated: 'Shift color updated',

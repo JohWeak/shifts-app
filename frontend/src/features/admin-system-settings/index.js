@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Alert, Button, Card, Col, Container, Form, Row, Spinner} from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader';
 import OptimizationSettings from 'shared/ui/components/OptimizationSettings';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { fetchSystemSettings, updateLocalSettings, updateSystemSettings, setCurrentSite } from './model/settingsSlice';
-import { fetchWorkSites } from '../admin-workplace-settings/model/workplaceSlice';
-import { addNotification } from '../../app/model/notificationsSlice';
-import { motion } from 'motion/react';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {fetchSystemSettings, setCurrentSite, updateLocalSettings, updateSystemSettings} from './model/settingsSlice';
+import {fetchWorkSites} from '../admin-workplace-settings/model/workplaceSlice';
+import {addNotification} from '../../app/model/notificationsSlice';
+import {motion} from 'motion/react';
 
 import './index.css';
 
 const SystemSettings = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
-    const { systemSettings, loading, error, currentSiteId } = useSelector(state => state.settings);
-    const { workSites = [] } = useSelector(state => state.workplace || {});
+    const {systemSettings, loading, error, currentSiteId} = useSelector(state => state.settings);
+    const {workSites = []} = useSelector(state => state.workplace || {});
 
     const [localSettings, setLocalSettings] = useState(systemSettings);
     const [selectedSiteId, setSelectedSiteId] = useState(currentSiteId);
@@ -24,9 +24,9 @@ const SystemSettings = () => {
     useEffect(() => {
         // Fetch work sites for the selector
         dispatch(fetchWorkSites());
-        
+
         // Fetch settings for current site
-        dispatch(fetchSystemSettings({ siteId: selectedSiteId })).then((result) => {
+        dispatch(fetchSystemSettings({siteId: selectedSiteId})).then((result) => {
             if (fetchSystemSettings.rejected.match(result)) {
                 dispatch(addNotification({
                     message: t('settings.fetchError', 'Failed to load settings'),
@@ -47,7 +47,7 @@ const SystemSettings = () => {
     }, [currentSiteId]);
 
     const handleChange = (field, value) => {
-        setLocalSettings(prev => ({ ...prev, [field]: value }));
+        setLocalSettings(prev => ({...prev, [field]: value}));
     };
 
     const handleSiteChange = (siteId) => {
@@ -60,9 +60,9 @@ const SystemSettings = () => {
             // Optimistically updating the Redux state right away
             dispatch(updateLocalSettings(localSettings));
 
-            const result = await dispatch(updateSystemSettings({ 
-                settings: localSettings, 
-                siteId: selectedSiteId 
+            const result = await dispatch(updateSystemSettings({
+                settings: localSettings,
+                siteId: selectedSiteId
             }));
 
             if (updateSystemSettings.fulfilled.match(result)) {
@@ -88,16 +88,17 @@ const SystemSettings = () => {
     };
 
     const hasChanges = JSON.stringify(localSettings) !== JSON.stringify(systemSettings);
-    
+
     // Get current site name for display
-    const currentSiteName = selectedSiteId 
-        ? workSites.find(site => site.site_id == selectedSiteId)?.site_name 
+    const currentSiteName = selectedSiteId
+        // eslint-disable-next-line
+        ? workSites.find(site => site.site_id == selectedSiteId)?.site_name
         : null;
 
     if (loading === 'pending' && localSettings.weekStartDay === undefined) {
         return (
-            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-                <Spinner animation="border" role="status" aria-label="Loading..." />
+            <Container className="d-flex justify-content-center align-items-center" style={{minHeight: '60vh'}}>
+                <Spinner animation="border" role="status" aria-label="Loading..."/>
             </Container>
         );
     }
@@ -108,20 +109,20 @@ const SystemSettings = () => {
             <Container fluid className="settings-container">
                 <PageHeader
                     icon="gear-fill"
-                    title={currentSiteName 
-                        ? `${t('settings.systemSettings')} - ${currentSiteName}`
+                    title={currentSiteName
+                        ? `${currentSiteName} ${t('settings.systemSettings')} `
                         : t('settings.systemSettings')
                     }
-                    subtitle={currentSiteName 
-                        ? t('settings.siteSpecificSettingsDesc', `Settings for ${currentSiteName}`)
+                    subtitle={currentSiteName
+                        ? t('settings.siteSpecificSettingsDesc', {siteName: currentSiteName})
                         : t('settings.systemSettingsDesc')
                     }
                 >
                     <motion.div
                         className="d-flex gap-2"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
+                        initial={{opacity: 0, x: 20}}
+                        animate={{opacity: 1, x: 0}}
+                        transition={{delay: 0.2}}
                     >
                         <Button
                             variant="outline-secondary"
@@ -144,7 +145,7 @@ const SystemSettings = () => {
                         >
                             {loading === 'pending' ? (
                                 <>
-                                    <Spinner size="sm" className="me-2" />
+                                    <Spinner size="sm" className="me-2"/>
                                     {t('common.saving')}
                                 </>
                             ) : (
@@ -159,9 +160,9 @@ const SystemSettings = () => {
 
                 {/* Site Selector */}
                 <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
+                    initial={{opacity: 0, y: -10}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{delay: 0.1}}
                     className="mb-4"
                 >
                     <Card className="settings-card">
@@ -178,7 +179,8 @@ const SystemSettings = () => {
                                             onChange={(e) => handleSiteChange(e.target.value || null)}
                                             className="settings-input"
                                         >
-                                            <option value="">{t('settings.globalSettings', 'Global Settings (All Sites)')}</option>
+                                            <option
+                                                value="">{t('settings.globalSettings', 'Global Settings (All Sites)')}</option>
                                             {workSites
                                                 .filter(site => site.is_active)
                                                 .map(site => (
@@ -192,7 +194,7 @@ const SystemSettings = () => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Text className="settings-help">
-                                        {selectedSiteId 
+                                        {selectedSiteId
                                             ? t('settings.siteSpecificHint', 'These settings apply only to the selected work site and override global settings.')
                                             : t('settings.globalSettingsHint', 'These settings apply to all work sites unless overridden by site-specific settings.')
                                         }
@@ -215,9 +217,9 @@ const SystemSettings = () => {
 
                             {/* Schedule Settings */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
+                                initial={{opacity: 0, y: 20}}
+                                animate={{opacity: 1, y: 0}}
+                                transition={{delay: 0.1}}
                                 className="mb-4"
                             >
                                 <Card className="settings-card">
@@ -403,9 +405,9 @@ const SystemSettings = () => {
 
                             {/* Constraint Settings */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
+                                initial={{opacity: 0, y: 20}}
+                                animate={{opacity: 1, y: 0}}
+                                transition={{delay: 0.2}}
                                 className="mb-4"
                             >
                                 <Card className="settings-card">
@@ -475,7 +477,7 @@ const SystemSettings = () => {
                                                 <i className="bi bi-clock-history me-2"></i>
                                                 {t('settings.constraintDeadlineDay')} & {t('settings.constraintDeadlineTime')}
                                             </h6>
-                                            
+
                                             <Row>
                                                 <Col md={6}>
                                                     <Form.Group className="mb-3">
