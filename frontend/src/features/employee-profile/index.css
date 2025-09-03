@@ -3,6 +3,8 @@
 .employee-profile {
     padding: 1rem;
     min-height: calc(100vh - 100px);
+    max-width: 1200px;
+    margin: auto;
 }
 
 /* Card Styling */

@@ -1,14 +1,14 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/index.js
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useSortableData } from 'shared/hooks/useSortableData';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Alert, Button, Card} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {useNavigate} from 'react-router-dom';
+import {useSortableData} from 'shared/hooks/useSortableData';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 
 // Slices & Actions
-import { deletePosition, fetchPositions, restorePosition } from '../../model/workplaceSlice';
-import { useWorkplaceActionHandler } from '../../model/hooks/useWorkplaceActionHandler';
+import {deletePosition, fetchPositions, restorePosition} from '../../model/workplaceSlice';
+import {useWorkplaceActionHandler} from '../../model/hooks/useWorkplaceActionHandler';
 
 // UI Components
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
@@ -20,12 +20,12 @@ import LoadingState from 'shared/ui/components/LoadingState';
 import './PositionsTab.css';
 
 
-const PositionsTab = ({ selectedSite }) => {
-    const { t } = useI18n();
+const PositionsTab = ({selectedSite}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { positions = [], workSites = [], loading } = useSelector(state => state.workplace || {});
+    const {positions = [], workSites = [], loading} = useSelector(state => state.workplace || {});
 
     // --- STATE MANAGEMENT ---
     const [showModal, setShowModal] = useState(false);
@@ -41,7 +41,7 @@ const PositionsTab = ({ selectedSite }) => {
     const [isClosingPositionId, setIsClosingPositionId] = useState(null);
 
     // --- ACTION HANDLERS using custom hook ---
-    const { execute: confirmDelete, isLoading: isDeleting } = useWorkplaceActionHandler({
+    const {execute: confirmDelete, isLoading: isDeleting} = useWorkplaceActionHandler({
         actionThunk: (id) => deletePosition(id),
         refetchThunk: fetchPositions,
         messages: {
@@ -51,7 +51,7 @@ const PositionsTab = ({ selectedSite }) => {
         },
     });
 
-    const { execute: confirmRestore, isLoading: isRestoring } = useWorkplaceActionHandler({
+    const {execute: confirmRestore, isLoading: isRestoring} = useWorkplaceActionHandler({
         actionThunk: (id) => restorePosition(id),
         refetchThunk: fetchPositions,
         messages: {
@@ -93,7 +93,7 @@ const PositionsTab = ({ selectedSite }) => {
         status: p => p.is_active ? 0 : 1,
     }), [getSiteName]);
 
-    const { sortedItems: sortedPositions, requestSort, sortConfig } = useSortableData(filteredPositions, {
+    const {sortedItems: sortedPositions, requestSort, sortConfig} = useSortableData(filteredPositions, {
         field: 'status',
         order: 'ASC',
     }, sortingAccessors);
@@ -144,7 +144,7 @@ const PositionsTab = ({ selectedSite }) => {
 
     // --- RENDER ---
     if (loading && positions.length === 0) {
-        return <LoadingState />;
+        return <LoadingState/>;
     }
 
     return (
@@ -156,7 +156,7 @@ const PositionsTab = ({ selectedSite }) => {
                     <i className="bi bi-plus-circle me-2"></i>{t('workplace.positions.add')}
                 </Button>
             </Card.Header>
-            <Card.Body>
+            <Card.Body className="px-0">
                 {workSites.filter(site => site.is_active).length === 0 ? (
                     <Alert variant="info">{t('workplace.positions.noSitesWarning')}</Alert>
                 ) : (

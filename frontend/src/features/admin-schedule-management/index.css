@@ -190,16 +190,7 @@
     }
 }
 
-/* Responsive adjustments */
-@media (max-width: 1500px) {
-    .admin-schedule-management-container {
-        /*width: 100% !important;*/
-        /*overflow: hidden;*/
 
-    }
-}
-
-/* RESPONSIVE */
 @media (max-width: 768px) {
     .schedule-management-content .page-header .text-muted {
         display: none;

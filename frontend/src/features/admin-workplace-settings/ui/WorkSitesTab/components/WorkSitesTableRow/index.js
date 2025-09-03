@@ -1,8 +1,8 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/components/WorkSitesTableRow/index.js
 
 import React from 'react';
-import { Badge } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {Badge} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import WorkplaceActionButtons from '../../../WorkplaceActionButtons';
 
 const WorkSitesTableRow = ({
@@ -13,20 +13,22 @@ const WorkSitesTableRow = ({
                                onDelete,
                                onRestore
                            }) => {
-    const { t } = useI18n();
+    const {t} = useI18n();
 
     return (
         <tr
             className={`worksite-row clickable-row ${!site.is_active ? 'inactive-row' : ''}`}
             onClick={() => onRowClick(site)}
-            style={{ cursor: 'pointer' }}
+            style={{cursor: 'pointer'}}
         >
             <td className="site-name">{site.site_name}</td>
             <td>{site.address || '-'}</td>
             <td>{site.phone || '-'}</td>
 
-            <td className="text-center"><Badge bg={site.positionCount > 0 ? 'info' : 'secondary'}>{site.positionCount || 0}</Badge></td>
-            <td className="text-center"><Badge bg={site.employeeCount > 0 ? 'primary' : 'secondary'}>{site.employeeCount || 0}</Badge></td>
+            <td className="text-center"><Badge
+                bg={site.positionCount > 0 ? 'info' : 'secondary'}>{site.positionCount || 0}</Badge></td>
+            <td className="text-center"><Badge
+                bg={site.employeeCount > 0 ? 'primary' : 'secondary'}>{site.employeeCount || 0}</Badge></td>
             <td>
                 <Badge bg={site.is_active ? 'success' : 'secondary'}>
                     {site.is_active ? t('common.active') : t('common.inactive')}

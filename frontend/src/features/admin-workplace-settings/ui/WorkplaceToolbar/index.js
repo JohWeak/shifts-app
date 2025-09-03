@@ -1,8 +1,8 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkplaceToolbar/index.js
 
 import React from 'react';
-import { Col, Form, InputGroup, Row } from 'react-bootstrap';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import {Col, Form, InputGroup, Row} from 'react-bootstrap';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import './WorkplaceToolbar.css'; // Подключаем стили
 
 const WorkplaceToolbar = ({
@@ -18,10 +18,10 @@ const WorkplaceToolbar = ({
 
                               inactiveSwitchId,
                           }) => {
-    const { t, direction } = useI18n();
+    const {t, direction} = useI18n();
 
     return (
-        <Row className="mb-3 workplace-toolbar-row align-items-center">
+        <Row className="mb-3 workplace-toolbar-row align-items-center px-3">
             <Col md className="flex-grow-1">
                 <InputGroup>
                     <InputGroup.Text><i className="bi bi-search"></i></InputGroup.Text>

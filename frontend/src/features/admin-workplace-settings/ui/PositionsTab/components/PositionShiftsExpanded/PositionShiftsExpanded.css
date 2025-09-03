@@ -68,13 +68,15 @@
 .position-shifts-expanded .card {
     position: relative;
     overflow: hidden;
-    border-top: none;
-    border-radius: 0!important;
+    border: none;
+    border-bottom: 1px dashed var(--bs-border-color);
+    border-radius: 0 !important;
 }
 
-.position-shifts-col{
+.position-shifts-col {
     border-bottom: none;
 }
+
 .card-actions-toolbar {
     position: absolute;
     bottom: 1rem;
