@@ -110,7 +110,8 @@
     border-bottom: 2px solid var(--bs-border-color);
     justify-content: space-between;
 }
-/* Стили для самих табов */
+
+
 .employee-recommendations .nav-tabs .nav-link {
     width: 100%;
     display: flex;
@@ -152,7 +153,6 @@
 }
 
 
-
 .employee-recommendations .nav-tabs .badge {
     font-size: var(--text-xs);
     padding: var(--space-1) var(--space-2);
@@ -163,8 +163,6 @@
 .employee-recommendations .nav-item {
     flex: 0 0 auto;
 }
-
-
 
 
 /* Tab content */
@@ -211,6 +209,7 @@
     background-color: var(--bs-gray-900);
 
 }
+
 .employee-recommendations .list-group-item-warning:hover {
     border-color: var(--bs-danger);
 }
@@ -254,14 +253,13 @@
     align-items: center;
     padding: var(--space-1) var(--space-2);
     background-color: var(--bs-gray-100);
-    color: var(--bs-gray-700);
+    /*color: var(--bs-gray-700);*/
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
     font-weight: var(--font-medium);
 }
 
 [data-theme="dark"] .employee-recommendations .employee-badge {
-    background-color: var(--bs-gray-800);
     color: var(--bs-gray-300);
 }
 
@@ -281,11 +279,13 @@
 .employee-recommendations .availability-busy {
     background-color: var(--bs-warning);
 }
+
 [data-theme="dark"] .employee-recommendations .availability-busy {
     background-color: rgba(var(--bs-warning-rgb), 0.5);
 }
-[data-theme="dark"] .employee-list-item-list-group-item-warning .employee-name{
-    color: var(--bs-gray-600)!important;
+
+[data-theme="dark"] .employee-list-item-list-group-item-warning .employee-name {
+    color: var(--bs-gray-600) !important;
 }
 
 .employee-recommendations .availability-unavailable {
@@ -329,10 +329,20 @@
     color: var(--bs-primary);
     opacity: 0.7;
 }
+
 /* Flexible employee highlight */
 .employee-recommendations .flexible-employee {
-    border-left: 3px solid var(--bs-secondary);
+    border-left: 3px solid var(--bs-purple);
 }
+
+[data-theme="dark"] .employee-recommendations .flexible-employee {
+    border-left: 3px solid var(--bs-purple);
+}
+
+.employee-recommendations .flexible-employee:hover {
+    border-color: var(--bs-purple);
+}
+
 /* Filter buttons in modal footer */
 .employee-recommendations .modal-footer .btn-outline-primary {
     border-color: var(--bs-btn-outline-primary-border-color);
@@ -343,6 +353,7 @@
     border-color: var(--bs-btn-outline-secondary-border-color);
     color: var(--bs-btn-outline-secondary-color);
 }
+
 /* Employee badges container */
 .employee-recommendations .employee-badges {
     display: flex;
@@ -350,6 +361,10 @@
     padding-top: var(--space-2);
     flex-direction: column;
     gap: var(--space-1);
+}
+
+.employee-recommendations .flexible-badge {
+    background-color: var(--bs-purple) !important;
 }
 
 .employee-recommendations .score-badge {
@@ -396,6 +411,7 @@
     background-color: var(--bs-primary);
     border-radius: var(--radius-sm);
 }
+
 /*-------------------------------------------*/
 .employee-recommendations .unavailable-groups {
     display: flex;
@@ -442,14 +458,14 @@
 /* Score badge */
 .employee-recommendations .score-badge {
     background: linear-gradient(135deg, #037df6 0%, #4a91d9 100%);
+
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 0.5rem;
     font-weight: 600;
     font-size: 0.75rem;
-    /*min-width: 3rem;*/
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -474,6 +490,13 @@
     gap: 0.5rem;
 }
 
+.employee-recommendations .employee-badges .badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
 /* Dark theme */
 [data-theme="dark"] .employee-recommendations .score-badge {
     background: linear-gradient(135deg, #667eea 0%, #9f7aea 100%);
@@ -486,8 +509,6 @@
 [data-theme="dark"] .employee-recommendations .permanent-constraint-info {
     background-color: rgba(220, 53, 69, 0.08);
 }
-
-
 
 
 /* Dark theme support */
@@ -505,21 +526,20 @@
 }
 
 
-/* Контейнер для проверки ширины */
 @container nav-tabs(min-width: 600px) {
-    /* Если достаточно места - табы в одну строку */
     .employee-recommendations .employee-list,
     .employee-recommendations .nav-tabs {
         flex-wrap: nowrap;
     }
 }
+
 @container (max-width: 599px) {
     .employee-recommendations .nav-tabs .nav-link {
         justify-content: start;
     }
 }
+
 @container (max-width: 599px) and (min-width: 359px) {
-    /* Средний размер - 2 строки, равная ширина */
     .employee-recommendations .nav-item {
         flex: 1 1 calc(50% - 0.25rem);
     }
@@ -527,16 +547,15 @@
 }
 
 @container (max-width: 360px) {
-    /* Маленький размер - каждый таб на всю ширину */
     .employee-recommendations .nav-item {
         flex: 1 1 100%;
     }
-    .employee-recommendations .nav-tabs .nav-link{
+
+    .employee-recommendations .nav-tabs .nav-link {
         justify-content: start;
     }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .employee-recommendations .modal-header {
         padding: var(--space-3) var(--space-4);

@@ -1,9 +1,9 @@
 //frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/components/EmployeeListItem/index.js
 
 import React from 'react';
-import { ListGroup, Badge } from 'react-bootstrap';
+import { Badge, ListGroup } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import './EmployeeListItem.css'
+import './EmployeeListItem.css';
 
 const EmployeeListItem = ({ employee, type, onItemClick }) => {
     const { t } = useI18n();
@@ -20,8 +20,8 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                 t('employee.confirmOverride', {
                     name: `${employee.first_name} ${employee.last_name}`,
                     reason: employee.unavailable_reason?.replace('_', ' ') || 'N/A',
-                    note: employee.note || ''
-                })
+                    note: employee.note || '',
+                }),
             );
             if (confirmAssign) {
                 onItemClick(employee);
@@ -64,18 +64,22 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                                     {employee.assignedSiteToday
                                         ? t('recommendation.already_assigned_at', [
                                             employee.assignedSiteToday,
-                                            employee.assigned_shift || t('recommendation.unknown_shift')
+                                            employee.assigned_shift || t('recommendation.unknown_shift'),
                                         ])
                                         : t('recommendation.already_assigned_to', [
-                                            employee.assigned_shift || t('recommendation.unknown_shift')
+                                            employee.assigned_shift || t('recommendation.unknown_shift'),
                                         ])
                                     }
                                 </div>
                             )}
                             {employee.unavailable_reason === 'permanent_constraint' && employee.constraint_details?.[0] && (
                                 <div className="permanent-constraint-info mt-2">
-                                    <div className="text-danger"><i className="bi bi-lock-fill me-1"></i>{t('employee.permanentConstraint')}</div>
-                                    <small className="text-muted d-block ms-3">{t('employee.approvedBy', { approver: employee.constraint_details[0].approved_by, date: new Date(employee.constraint_details[0].approved_at).toLocaleDateString() })}</small>
+                                    <div className="text-danger"><i
+                                        className="bi bi-lock-fill me-1"></i>{t('employee.permanentConstraint')}</div>
+                                    <small className="text-muted d-block ms-3">{t('employee.approvedBy', {
+                                        approver: employee.constraint_details[0].approved_by,
+                                        date: new Date(employee.constraint_details[0].approved_at).toLocaleDateString(),
+                                    })}</small>
                                 </div>
                             )}
                             {employee.unavailable_reason === 'rest_violation' && employee.rest_details && (
@@ -85,12 +89,12 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                                         ? t('recommendation.rest_violation_after', [
                                             employee.rest_details.restHours,
                                             employee.rest_details.previousShift,
-                                            employee.rest_details.requiredRest
+                                            employee.rest_details.requiredRest,
                                         ])
                                         : t('recommendation.rest_violation_before', [
                                             employee.rest_details.restHours,
                                             employee.rest_details.nextShift,
-                                            employee.rest_details.requiredRest
+                                            employee.rest_details.requiredRest,
                                         ])
                                     }
                                 </div>
@@ -114,7 +118,8 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                                 const translationKey = `recommendation.${key}`;
                                 const translation = t(translationKey, params);
                                 if (translation && translation !== translationKey) {
-                                    return <small key={idx} className="d-block text-success"><i className="bi bi-check-circle me-1"></i>{translation}</small>;
+                                    return <small key={idx} className="d-block text-success"><i
+                                        className="bi bi-check-circle me-1"></i>{translation}</small>;
                                 }
                                 return null;
                             })}
@@ -161,7 +166,7 @@ const EmployeeListItem = ({ employee, type, onItemClick }) => {
                     <Badge bg="info">{t('employee.otherSite')}</Badge>
                 }
                 {isFlexible &&
-                    <Badge bg="secondary">{t('employee.flexible')}</Badge>
+                    <Badge className="flexible-badge">{t('employee.flexible')}</Badge>
                 }
                 {showWarning &&
                     <Badge bg="danger">{t('employee.unavailable')}</Badge>

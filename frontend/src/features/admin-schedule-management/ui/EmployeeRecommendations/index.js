@@ -1,10 +1,10 @@
 // frontend/src/features/admin-schedule-management/ui/EmployeeRecommendations/index.js
 
-import React, {useEffect, useState} from 'react';
-import {Alert, Badge, Form, Tab, Tabs} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchRecommendations} from '../../model/scheduleSlice';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useEffect, useState } from 'react';
+import { Alert, Badge, Form, Tab, Tabs } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRecommendations } from '../../model/scheduleSlice';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import LoadingState from 'shared/ui/components/LoadingState';
 import EmployeeList from './components/EmployeeList';
 import UnavailableEmployeeGroups from './components/UnavailableEmployeeGroups';
@@ -17,10 +17,10 @@ const EmployeeRecommendations = ({
                                      isVisible = true,
                                      onTabChange = null,
                                  }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const {recommendations, recommendationsLoading, error, pendingChanges} = useSelector(state => state.schedule);
+    const { recommendations, recommendationsLoading, error, pendingChanges } = useSelector(state => state.schedule);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('available');
@@ -35,6 +35,14 @@ const EmployeeRecommendations = ({
             }));
         }
     }, [isVisible, selectedPosition, scheduleDetails, pendingChanges, dispatch]);
+
+
+    useEffect(() => {
+        localStorage.setItem('recommendationActiveTab', activeTab);
+        if (onTabChange) {
+            onTabChange(activeTab);
+        }
+    }, [activeTab, onTabChange]);
 
     // Determine the best tab based on recommendations data
     useEffect(() => {
@@ -75,12 +83,6 @@ const EmployeeRecommendations = ({
         }
     }, [recommendations]);
 
-    useEffect(() => {
-        localStorage.setItem('recommendationActiveTab', activeTab);
-        if (onTabChange) {
-            onTabChange(activeTab);
-        }
-    }, [activeTab, onTabChange]);
 
     if (!selectedPosition || !scheduleDetails) {
         return (
@@ -96,7 +98,7 @@ const EmployeeRecommendations = ({
         (recommendations?.unavailable_permanent?.length || 0);
 
     return (
-        <div className="employee-recommendations" style={{containerType: 'inline-size'}}>
+        <div className="employee-recommendations" style={{ containerType: 'inline-size' }}>
             <Form.Group className="search-container">
                 <Form.Control
                     type="text"
@@ -108,7 +110,7 @@ const EmployeeRecommendations = ({
                 />
             </Form.Group>
 
-            {recommendationsLoading === 'pending' && <LoadingState message={t('common.loading')}/>}
+            {recommendationsLoading === 'pending' && <LoadingState message={t('common.loading')} />}
             {error && <Alert variant="danger"><i className="bi bi-exclamation-triangle me-2"></i>{error}</Alert>}
 
             {recommendationsLoading !== 'pending' && !error && (
@@ -119,7 +121,7 @@ const EmployeeRecommendations = ({
                                             className="me-2">{recommendations?.available?.length || 0}</Badge>{t('employee.tabs.available')}</span>}
                     >
                         <EmployeeList employees={recommendations?.available} type="available"
-                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm}/>
+                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="unavailable"
@@ -127,7 +129,7 @@ const EmployeeRecommendations = ({
                                             className="me-2">{countUnavailable}</Badge>{t('employee.tabs.unavailable')}</span>}
                     >
                         <UnavailableEmployeeGroups recommendations={recommendations} onItemClick={onEmployeeSelect}
-                                                   searchTerm={searchTerm}/>
+                                                   searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="cross_position"
@@ -135,7 +137,7 @@ const EmployeeRecommendations = ({
                                             className="me-2">{recommendations?.cross_position?.length || 0}</Badge>{t('employee.tabs.crossPosition')}</span>}
                     >
                         <EmployeeList employees={recommendations?.cross_position} type="cross_position"
-                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm}/>
+                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="other_site"
@@ -143,7 +145,7 @@ const EmployeeRecommendations = ({
                                             className="me-2">{recommendations?.other_site?.length || 0}</Badge>{t('employee.tabs.otherSite')}</span>}
                     >
                         <EmployeeList employees={recommendations?.other_site} type="other_site"
-                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm}/>
+                                      onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                 </Tabs>
             )}
