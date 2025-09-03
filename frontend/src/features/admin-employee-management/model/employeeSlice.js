@@ -87,7 +87,8 @@ const initialState = {
         status: 'active',
         position: 'all',
         search: '',
-        work_site: 'all'
+        work_site: 'all',
+        role: 'all'
     },
     pagination: {
         page: 1,

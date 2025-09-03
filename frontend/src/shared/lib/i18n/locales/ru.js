@@ -915,7 +915,7 @@ export const ru = {
         employeesUsed: 'Сотрудников задейств.',
     },
     role: {
-        admin: 'Администратор',
+        admin: 'Админ',
         employee: 'Сотрудник',
         manager: 'Менеджер',
         supervisor: 'Супервайзер',
@@ -924,7 +924,7 @@ export const ru = {
     schedule: {
         actions: 'Действия',
         active: 'Активно',
-        admin: 'Администратор',
+        admin: 'Админ',
         approveRequests: 'Одобрить запросы',
         archived: 'В архиве',
         assignments: 'Назначения',

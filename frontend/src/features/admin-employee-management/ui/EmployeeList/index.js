@@ -44,6 +44,7 @@ const EmployeeList = ({
         workSite: (employee) => employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite'),
         position: (employee) => employee.position_name || employee.defaultPosition?.pos_name || '-',
         status: (employee) => employee.status,
+        role: (employee) => employee.role,
     }), [t]);
 
 
@@ -241,6 +242,13 @@ const EmployeeList = ({
                             >
                                 {t('employee.status')}
                             </SortableHeader>
+                            <SortableHeader
+                                sortKey="role"
+                                sortConfig={sortConfig}
+                                onSort={requestSort}
+                            >
+                                {t('employee.role')}
+                            </SortableHeader>
                             <th className="text-center">{t('common.actions')}</th>
                         </tr>
                         </thead>
@@ -300,12 +308,16 @@ const EmployeeList = ({
                                             {employee.position_name || employee.defaultPosition?.pos_name || '-'}
                                         </td>
                                         <td>
+                                            <Badge bg={getStatusBadgeVariant(employee.status)}>
+                                                {t(`status.${employee.status}`)}
+                                            </Badge>
+                                        </td>
+                                        <td>
                                             <Badge
-                                                bg={getStatusBadgeVariant(employee.role === 'admin' ? 'admin' : employee.status)}>
-                                                {employee.role === 'admin'
-                                                    ? t(`role.${employee.role}`)
-                                                    : t(`status.${employee.status}`)
-                                                }
+                                                bg={employee.role === 'admin' ? 'danger' : 'primary'}
+                                                className="d-flex justify-content-center w-50"
+                                            >
+                                                {t(`role.${employee.role}`)}
                                             </Badge>
                                         </td>
                                         <td onClick={(e) => e.stopPropagation()} className="text-center">

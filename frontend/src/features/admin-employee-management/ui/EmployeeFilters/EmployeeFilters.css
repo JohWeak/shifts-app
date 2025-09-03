@@ -121,3 +121,23 @@
     border-color: var(--bs-gray-800);
     color: var(--bs-gray-300);
 }
+
+/* Filter labels */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bs-secondary);
+    margin-inline-start: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+[data-theme="dark"] .filter-label {
+    color: var(--bs-gray-400);
+}

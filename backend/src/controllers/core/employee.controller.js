@@ -90,6 +90,7 @@ const findAll = async (req, res) => {
             position,
             search,
             work_site,
+            role,
             sortBy = 'createdAt',
             sortOrder = 'DESC',
             fields,
@@ -138,6 +139,10 @@ const findAll = async (req, res) => {
 
         if (status && status !== 'all') {
             where.status = status;
+        }
+
+        if (role && role !== 'all') {
+            where.role = role;
         }
 
         if (work_site && work_site !== 'all') {

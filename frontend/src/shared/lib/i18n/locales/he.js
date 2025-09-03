@@ -913,7 +913,7 @@ export const he = {
         employeesUsed: 'עובדים בשימוש',
     },
     role: {
-        admin: 'אדמיניסטרטור',
+        admin: 'אדמין',
         employee: 'עובד',
         manager: 'מנהל',
         supervisor: 'מפקח',
@@ -922,7 +922,7 @@ export const he = {
     schedule: {
         actions: 'פעולות',
         active: 'פעיל',
-        admin: 'אדמיניסטרטור',
+        admin: 'אדמין',
         approveRequests: 'אשר בקשות',
         archived: 'בארכיון',
         assignments: 'שיבוצים',

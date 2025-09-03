@@ -1,19 +1,21 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { Accordion, Button, Col, Form, Row } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import { debounce } from 'lodash';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { setFilters, clearCache } from '../../model/employeeSlice';
-import { fetchPositions, fetchWorkSites } from 'features/admin-workplace-settings/model/workplaceSlice';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {Accordion, Button, Col, Form, Row} from 'react-bootstrap';
+import {useDispatch, useSelector} from 'react-redux';
+import {debounce} from 'lodash';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {clearCache, setFilters} from '../../model/employeeSlice';
+import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
 import './EmployeeFilters.css';
 
 const EmployeeFilters = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
-    const { filters, employees, loading } = useSelector((state) => state.employees);
-    const { workSites, positions: allPositions } = useSelector((state) => state.workplace);
-    const { user } = useSelector((state) => state.auth);
+    const {filters, employees, loading} = useSelector((state) => state.employees);
+    const {workSites, positions: allPositions} = useSelector((state) => state.workplace);
+    const {user} = useSelector((state) => state.auth);
+    const [flexiblePositionsCache, setFlexiblePositionsCache] = React.useState(null);
+    const [waitingForFreshData, setWaitingForFreshData] = React.useState(false);
 
     // Check if current user is super admin
     const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
@@ -40,23 +42,53 @@ const EmployeeFilters = () => {
                 }
 
                 if (!positionMap.has(pos.pos_name)) {
-                    positionMap.set(pos.pos_name, { pos_id: pos.pos_name, pos_name: pos.pos_name });
+                    positionMap.set(pos.pos_name, {pos_id: pos.pos_name, pos_name: pos.pos_name});
                 }
             });
             return Array.from(positionMap.values());
         } else if (selectedWorkSite === 'any') {
-            // For flexible employees, get positions from current flexible employees in the list
+            // For flexible employees, use cached positions to avoid dependency on current filtered list
+            return flexiblePositionsCache || [];
+        }
+        return (allPositions || []).filter(pos => pos.site_id === parseInt(selectedWorkSite));
+    }, [allPositions, selectedWorkSite, isSuperAdmin, accessibleSites, flexiblePositionsCache, t]);
+
+    const handleFilterChange = useCallback((field, value) => {
+        dispatch(setFilters({[field]: value}));
+    }, [dispatch]);
+
+    const handleWorkSiteChange = useCallback((value) => {
+        dispatch(setFilters({work_site: value, position: 'all'}));
+
+        // Reset flexible positions cache when changing work site
+        setFlexiblePositionsCache(null);
+
+        // Clear employee cache to force fresh data fetch for flexible employees
+        if (value === 'any') {
+            dispatch(clearCache());
+            setWaitingForFreshData(true);
+        } else {
+            setWaitingForFreshData(false);
+        }
+    }, [dispatch]);
+
+    // Cache flexible positions when we have fresh flexible employee data
+    useEffect(() => {
+        const shouldCache = selectedWorkSite === 'any' &&
+            filters.position === 'all' &&
+            employees?.length > 0 &&
+            !flexiblePositionsCache &&
+            !loading &&
+            waitingForFreshData &&
+            employees.some(emp => emp.work_site_id === null);
+
+        if (shouldCache) {
             const flexibleEmployeePositions = new Set();
             let hasFlexibleWithoutPosition = false;
 
-            // Process employees to find truly flexible ones (work_site_id = null)
-            (employees || []).forEach(emp => {
-                // Only process truly flexible employees (work_site_id should be null)
-                const isFlexible = emp.work_site_id === null;
-                if (!isFlexible) {
-                    return;
-                }
-                
+            employees.forEach(emp => {
+                if (emp.work_site_id !== null) return;
+
                 if (emp.position_name) {
                     flexibleEmployeePositions.add(emp.position_name);
                 }
@@ -64,46 +96,25 @@ const EmployeeFilters = () => {
                     flexibleEmployeePositions.add(emp.defaultPosition.pos_name);
                 }
 
-                // Check for flexible employees without positions
                 const hasNoPosition = !emp.position_name && !emp.default_position_id && !emp.defaultPosition?.pos_name;
                 if (hasNoPosition) {
                     hasFlexibleWithoutPosition = true;
                 }
             });
 
-            // Convert to array format
             const positions = Array.from(flexibleEmployeePositions).map(posName => ({
                 pos_id: posName,
                 pos_name: posName,
             }));
 
             if (hasFlexibleWithoutPosition) {
-                positions.unshift({ pos_id: 'none', pos_name: t('employee.noPosition', 'No Position') });
+                positions.unshift({pos_id: 'none', pos_name: t('employee.noPosition', 'No Position')});
             }
 
-            return positions;
+            setFlexiblePositionsCache(positions);
+            setWaitingForFreshData(false);
         }
-        return (allPositions || []).filter(pos => pos.site_id === parseInt(selectedWorkSite));
-    }, [allPositions, selectedWorkSite, isSuperAdmin, accessibleSites, employees, t]);
-
-    const handleFilterChange = useCallback((field, value) => {
-        dispatch(setFilters({ [field]: value }));
-    }, [dispatch]);
-
-    const handleWorkSiteChange = useCallback((value) => {
-        dispatch(setFilters({ work_site: value, position: 'all' }));
-        
-        // Clear employee cache to force fresh data fetch, especially for flexible employees
-        if (value === 'any') {
-            console.log('Clearing employee cache for flexible employees');
-            dispatch(clearCache());
-            // Small delay to allow fresh data to load
-            setTimeout(() => {
-                console.log('Cache cleared, fresh data should be loading...');
-            }, 100);
-        }
-    }, [dispatch]);
-
+    }, [selectedWorkSite, filters.position, employees, flexiblePositionsCache, loading, waitingForFreshData, t]);
 
     useEffect(() => {
         if (!workSites || workSites.length === 0) {
@@ -138,6 +149,7 @@ const EmployeeFilters = () => {
             position: 'all',
             search: '',
             work_site: 'all',
+            role: 'all',
         }));
     };
 
@@ -153,82 +165,110 @@ const EmployeeFilters = () => {
                 <Accordion.Body>
                     <Form>
                         <Row className="g-3">
+                            {/* Search and Reset Button Row */}
                             <Col xs={12}>
-                                <Form.Control
-                                    type="text"
-                                    placeholder={t('employee.searchPlaceholder')}
-                                    value={filters.search}
-                                    onChange={(e) => debouncedSearch(e.target.value)}
-                                    className="filter-input"
-                                />
+                                <Row className="g-2">
+                                    <Col>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder={t('employee.searchPlaceholder')}
+                                            value={filters.search}
+                                            onChange={(e) => debouncedSearch(e.target.value)}
+                                            className="filter-input"
+                                        />
+                                    </Col>
+                                    <Col xs="auto">
+                                        <Button
+                                            variant="secondary"
+                                            onClick={handleReset}
+                                            className="reset-button"
+                                        >
+                                            <i className="bi bi-arrow-clockwise"></i>
+                                        </Button>
+                                    </Col>
+                                </Row>
                             </Col>
 
+                            {/* Status Filter */}
                             <Col lg={3} md={6} xs={12}>
-                                <Form.Select
-                                    value={filters.status}
-                                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                                    className="filter-select"
-                                >
-                                    <option value="all">{t('common.all')} {t('employee.status')}</option>
-                                    <option value="active">{t('status.active')}</option>
-                                    <option value="inactive">{t('status.inactive')}</option>
-                                </Form.Select>
+                                <div className="filter-group">
+                                    <label className="filter-label">{t('employee.status')}</label>
+                                    <Form.Select
+                                        value={filters.status}
+                                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                                        className="filter-select"
+                                    >
+                                        <option value="all">{t('common.all')}</option>
+                                        <option value="active">{t('status.active')}</option>
+                                        <option value="inactive">{t('status.inactive')}</option>
+                                    </Form.Select>
+                                </div>
                             </Col>
 
+                            {/* Work Site Filter */}
                             <Col lg={3} md={6} xs={12}>
-                                <Form.Select
-                                    value={filters.work_site || 'all'}
-                                    onChange={(e) => handleWorkSiteChange(e.target.value)}
-                                    className="filter-select"
-                                >
-                                    {(isSuperAdmin || (accessibleSites !== 'all' && accessibleSites.length > 1)) && (
-                                        <option value="all">{t('common.all')} {t('workSite.workSite')}</option>
-                                    )}
-                                    {workSites
-                                        ?.filter(site => {
-                                            if (!site.is_active) return false;
-                                            // For restricted admins, only show accessible sites
-                                            if (!isSuperAdmin && accessibleSites !== 'all') {
-                                                // console.log('EmployeeFilters - filtering site:', site.site_name, site.site_id, 'hasAccess:', hasAccess);
-                                                return accessibleSites.includes(site.site_id);
-                                            }
-                                            return true;
-                                        })
-                                        .map((site) => (
-                                            <option key={site.site_id} value={site.site_id}>
-                                                {site.site_name}
+                                <div className="filter-group">
+                                    <label className="filter-label">{t('workSite.workSite')}</label>
+                                    <Form.Select
+                                        value={filters.work_site || 'all'}
+                                        onChange={(e) => handleWorkSiteChange(e.target.value)}
+                                        className="filter-select"
+                                    >
+                                        {(isSuperAdmin || (accessibleSites !== 'all' && accessibleSites.length > 1)) && (
+                                            <option value="all">{t('common.all')}</option>
+                                        )}
+                                        {workSites
+                                            ?.filter(site => {
+                                                if (!site.is_active) return false;
+                                                if (!isSuperAdmin && accessibleSites !== 'all') {
+                                                    return accessibleSites.includes(site.site_id);
+                                                }
+                                                return true;
+                                            })
+                                            .map((site) => (
+                                                <option key={site.site_id} value={site.site_id}>
+                                                    {site.site_name}
+                                                </option>
+                                            ))}
+                                        <option value="any">{t('employee.commonWorkSite')}</option>
+                                    </Form.Select>
+                                </div>
+                            </Col>
+
+                            {/* Position Filter */}
+                            <Col lg={3} md={6} xs={12}>
+                                <div className="filter-group">
+                                    <label className="filter-label">{t('employee.position')}</label>
+                                    <Form.Select
+                                        value={filters.position}
+                                        onChange={(e) => handleFilterChange('position', e.target.value)}
+                                        className="filter-select"
+                                        disabled={selectedWorkSite !== 'all' && selectedWorkSite !== 'any' && filteredPositions.length === 0}
+                                    >
+                                        <option value="all">{t('common.all')}</option>
+                                        {filteredPositions.map((position) => (
+                                            <option key={position.pos_id} value={position.pos_id}>
+                                                {position.pos_name}
                                             </option>
                                         ))}
-                                    <option value="any">{t('employee.commonWorkSite')}</option>
-                                </Form.Select>
+                                    </Form.Select>
+                                </div>
                             </Col>
 
-                            {/* Должность */}
+                            {/* Role Filter */}
                             <Col lg={3} md={6} xs={12}>
-                                <Form.Select
-                                    value={filters.position}
-                                    onChange={(e) => handleFilterChange('position', e.target.value)}
-                                    className="filter-select"
-                                    disabled={selectedWorkSite !== 'all' && selectedWorkSite !== 'any' && filteredPositions.length === 0}
-                                >
-                                    <option value="all">{t('common.all')} {t('employee.position')}</option>
-                                    {filteredPositions.map((position) => (
-                                        <option key={position.pos_id} value={position.pos_id}>
-                                            {position.pos_name}
-                                        </option>
-                                    ))}
-                                </Form.Select>
-                            </Col>
-
-                            <Col lg={3} md={6} xs={12}>
-                                <Button
-                                    variant="secondary"
-                                    className="w-100 reset-button"
-                                    onClick={handleReset}
-                                >
-                                    <i className="bi bi-arrow-clockwise me-2"></i>
-                                    {t('common.reset')}
-                                </Button>
+                                <div className="filter-group">
+                                    <label className="filter-label">{t('employee.role')}</label>
+                                    <Form.Select
+                                        value={filters.role}
+                                        onChange={(e) => handleFilterChange('role', e.target.value)}
+                                        className="filter-select"
+                                    >
+                                        <option value="all">{t('common.all')}</option>
+                                        <option value="employee">{t('role.employee')}</option>
+                                        <option value="admin">{t('role.admin')}</option>
+                                    </Form.Select>
+                                </div>
                             </Col>
                         </Row>
                     </Form>
