@@ -1,4 +1,6 @@
 // frontend/src/shared/lib/i18n/locales/en.js
+// noinspection JSNonASCIINames
+
 export const en = {
     admin: {
         administrativeAccess: 'Administrative Access',
@@ -795,8 +797,17 @@ export const en = {
             confirmPassword: 'Confirm New Password',
             updatePassword: 'Update Password',
             passwordMismatch: 'New passwords do not match',
-            passwordTooShort: 'Password must be at least 6 characters long',
+            passwordTooShort: 'Password must be at least 8 characters long',
+            passwordTooWeak: 'Password must contain uppercase, lowercase letters and numbers',
             currentPasswordIncorrect: 'Current password is incorrect',
+            currentPasswordRequired: 'Current password is required',
+            newPasswordRequired: 'New password is required',
+            passwordSameAsCurrent: 'New password must be different from current password',
+            passwordUpdatedSuccess: 'Password updated successfully',
+            passwordUpdateFailed: 'Failed to update password',
+            passwordRequirements: '(min 8 chars, uppercase, lowercase, numbers)',
+            passwordStrong: 'Strong password',
+            passwordMedium: 'Medium strength password',
         },
         notifications: {
             title: 'Email Notifications',

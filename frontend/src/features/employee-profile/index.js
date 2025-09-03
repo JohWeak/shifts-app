@@ -1,16 +1,17 @@
 // frontend/src/features/employee-profile/index.js
 import React, {useEffect, useRef, useState} from 'react';
-import {Alert, Button, Card, Col, Form, FormGroup, Row} from 'react-bootstrap';
+import {Alert, Button, Card, Col, Form, FormGroup, InputGroup, Row} from 'react-bootstrap';
 import {useDispatch, useSelector} from 'react-redux';
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
 import PageHeader from 'shared/ui/components/PageHeader';
 import {loadProfile, updateProfile} from './model/profileSlice';
+import {addNotification} from 'app/model/notificationsSlice';
 import './index.css';
 
 const EmployeeProfile = () => {
     const {t} = useI18n();
     const dispatch = useDispatch();
-    const {user, loading, error, success} = useSelector(state => state.profile);
+    const {user, loading} = useSelector(state => state.profile);
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -36,6 +37,11 @@ const EmployeeProfile = () => {
     const [passwordValidation, setPasswordValidation] = useState('');
     const [showCountryOptions, setShowCountryOptions] = useState(false);
     const [showCityOptions, setShowCityOptions] = useState(false);
+
+    // Password visibility states
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const countryInputRef = useRef(null);
     const cityInputRef = useRef(null);
 
@@ -125,35 +131,106 @@ const EmployeeProfile = () => {
         }));
     };
 
-    const handlePasswordSubmit = (e) => {
-        e.preventDefault();
-        setPasswordValidation('');
+    const handlePasswordSubmit = async () => {
+        try {
+            console.log('Button clicked, starting password change');
+            setPasswordValidation('');
 
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setPasswordValidation(t('profile.security.passwordMismatch'));
-            return;
-        }
-
-        if (passwordData.newPassword.length < 6) {
-            setPasswordValidation(t('profile.security.passwordTooShort'));
-            return;
-        }
-
-        dispatch(updateProfile({
-            currentPassword: passwordData.currentPassword,
-            newPassword: passwordData.newPassword
-        })).then((result) => {
-            if (result.type === 'profile/updateProfile/fulfilled') {
-                setPasswordData({
-                    currentPassword: '',
-                    newPassword: '',
-                    confirmPassword: '',
-                });
-                setShowPasswordChange(false);
-            } else if (result.payload && result.payload.includes('Current password is incorrect')) {
-                setPasswordValidation(t('profile.security.currentPasswordIncorrect'));
+            // Enhanced validation
+            if (!passwordData.currentPassword.trim()) {
+                console.log('Current password validation failed');
+                setPasswordValidation(t('profile.security.currentPasswordRequired'));
+                return;
             }
-        });
+        } catch (error) {
+            console.error('Error in handlePasswordSubmit start:', error);
+            return;
+        }
+
+        try {
+            if (!passwordData.newPassword.trim()) {
+                console.log('New password validation failed');
+                setPasswordValidation(t('profile.security.newPasswordRequired'));
+                return;
+            }
+
+            if (passwordData.newPassword.length < 8) {
+                console.log('Password too short validation failed');
+                setPasswordValidation(t('profile.security.passwordTooShort'));
+                return;
+            }
+
+            // Password strength is visual only, not blocking
+
+            if (passwordData.newPassword !== passwordData.confirmPassword) {
+                console.log('Password mismatch validation failed');
+                setPasswordValidation(t('profile.security.passwordMismatch'));
+                return;
+            }
+
+            if (passwordData.currentPassword === passwordData.newPassword) {
+                console.log('Same password validation failed');
+                setPasswordValidation(t('profile.security.passwordSameAsCurrent'));
+                return;
+            }
+
+            console.log('All validations passed, submitting...');
+        } catch (error) {
+            console.error('Error in validation:', error);
+            setPasswordValidation('Validation error occurred');
+            return;
+        }
+
+        try {
+            await dispatch(updateProfile({
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            })).unwrap();
+
+            dispatch(addNotification({
+                variant: 'success',
+                message: t('profile.security.passwordUpdatedSuccess')
+            }));
+
+            setPasswordData({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: '',
+            });
+            setShowPasswordChange(false);
+            setShowCurrentPassword(false);
+            setShowNewPassword(false);
+            setShowConfirmPassword(false);
+
+        } catch (error) {
+            console.log('Password change error:', error);
+
+            // Extract error message more reliably
+            let errorMessage;
+            if (typeof error === 'string') {
+                errorMessage = error;
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else if (error.data?.message) {
+                errorMessage = error.data.message;
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else {
+                errorMessage = t('profile.security.passwordUpdateFailed');
+            }
+
+            // Show local validation error for current password issues
+            if (errorMessage.includes('Current password is incorrect') ||
+                errorMessage.includes('current password') ||
+                errorMessage.includes('incorrect')) {
+                setPasswordValidation(t('profile.security.currentPasswordIncorrect'));
+            } else {
+                dispatch(addNotification({
+                    variant: 'danger',
+                    message: errorMessage
+                }));
+            }
+        }
     };
 
     const handleCountrySelect = (country) => {
@@ -197,6 +274,41 @@ const EmployeeProfile = () => {
         setShowCityOptions(true);
     };
 
+    // Password strength checker
+    const getPasswordStrength = (password) => {
+        if (password.length < 8) {
+            return {
+                level: 'weak',
+                text: t('profile.security.passwordTooShort'),
+                color: 'danger',
+                variant: 'danger'
+            };
+        }
+
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+        const hasSpecialChars = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+
+        const strength = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChars].filter(Boolean).length;
+
+        if (strength >= 3) {
+            return {
+                level: 'strong',
+                text: t('profile.security.passwordStrong'),
+                color: 'success',
+                variant: 'success'
+            };
+        } else {
+            return {
+                level: 'medium',
+                text: t('profile.security.passwordMedium'),
+                color: 'warning',
+                variant: 'warning'
+            };
+        }
+    };
+
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -223,8 +335,6 @@ const EmployeeProfile = () => {
                 <Col lg={12}>
                     <Card>
                         <Card.Body>
-                            {error && <Alert variant="danger">{error}</Alert>}
-                            {success && <Alert variant="success">{t('profile.updateSuccess')}</Alert>}
 
                             {/* Read-only information */}
                             {user && (
@@ -346,7 +456,7 @@ const EmployeeProfile = () => {
                                                 />
                                                 {showCountryOptions && (
                                                     <div
-                                                        className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
+                                                        className="position-absolute w-100 bg-body border rounded shadow-sm mt-1"
                                                         style={{
                                                             zIndex: 1050,
                                                             maxHeight: '200px',
@@ -357,11 +467,9 @@ const EmployeeProfile = () => {
                                                         {filteredCountries.map((country) => (
                                                             <div
                                                                 key={country}
-                                                                className="px-3 py-2 hover-bg-light cursor-pointer"
+                                                                className="px-3 py-2 hover-bg-body cursor-pointer"
                                                                 style={{cursor: 'pointer'}}
                                                                 onClick={() => handleCountrySelect(country)}
-                                                                onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                                                                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                                             >
                                                                 {country}
                                                             </div>
@@ -394,7 +502,7 @@ const EmployeeProfile = () => {
                                                 />
                                                 {showCityOptions && formData.country && (
                                                     <div
-                                                        className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
+                                                        className="position-absolute w-100 bg-body border rounded shadow-sm mt-1"
                                                         style={{
                                                             zIndex: 1050,
                                                             maxHeight: '200px',
@@ -408,8 +516,6 @@ const EmployeeProfile = () => {
                                                                 className="px-3 py-2 hover-bg-light cursor-pointer"
                                                                 style={{cursor: 'pointer'}}
                                                                 onClick={() => handleCitySelect(city)}
-                                                                onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                                                                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                                                             >
                                                                 {city}
                                                             </div>
@@ -440,15 +546,14 @@ const EmployeeProfile = () => {
                                 {/* Password Change Section */}
                                 <Card className="mb-3">
                                     <Card.Body>
-                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <div className="d-flex justify-content-between align-items-center">
                                             <h6 className="card-title mb-0">
                                                 <i className="bi bi-shield-lock me-2"></i>
                                                 {t('profile.security.title')}
                                             </h6>
                                             <Button
                                                 variant="outline-secondary"
-                                                className="rounded-pill px-4 py-2"
-                                                style={{minHeight: '48px'}}
+                                                className="px-4 py-2"
                                                 onClick={() => {
                                                     setShowPasswordChange(!showPasswordChange);
                                                     if (showPasswordChange) {
@@ -466,7 +571,7 @@ const EmployeeProfile = () => {
                                         </div>
 
                                         {showPasswordChange && (
-                                            <Form onSubmit={handlePasswordSubmit}>
+                                            <div>
                                                 {passwordValidation && (
                                                     <Alert variant="danger" className="mb-3">
                                                         {passwordValidation}
@@ -475,50 +580,95 @@ const EmployeeProfile = () => {
 
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{t('profile.security.currentPassword')}</Form.Label>
-                                                    <Form.Control
-                                                        type="password"
-                                                        name="currentPassword"
-                                                        value={passwordData.currentPassword}
-                                                        onChange={handlePasswordChange}
-                                                        required
-                                                    />
+                                                    <InputGroup>
+                                                        <Form.Control
+                                                            type={showCurrentPassword ? "text" : "password"}
+                                                            name="currentPassword"
+                                                            value={passwordData.currentPassword}
+                                                            onChange={handlePasswordChange}
+                                                            required
+                                                        />
+                                                        <Button
+                                                            variant="outline-secondary"
+                                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                                            style={{
+                                                                borderLeft: 0,
+                                                                borderColor: 'var(--bs-border-color)'
+                                                            }}
+                                                        >
+                                                            <i className={`bi bi-eye${showCurrentPassword ? '-slash' : ''}`}></i>
+                                                        </Button>
+                                                    </InputGroup>
                                                 </Form.Group>
 
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label>{t('profile.security.newPassword')}</Form.Label>
-                                                    <Form.Control
-                                                        type="password"
-                                                        name="newPassword"
-                                                        value={passwordData.newPassword}
-                                                        onChange={handlePasswordChange}
-                                                        required
-                                                    />
+                                                    <Form.Label>
+                                                        {t('profile.security.newPassword')}
+                                                        {passwordData.newPassword && (
+                                                            <small
+                                                                className={`ms-2 text-${getPasswordStrength(passwordData.newPassword).color}`}>
+                                                                <i className={`bi bi-${getPasswordStrength(passwordData.newPassword).level === 'strong' ? 'shield-check' : getPasswordStrength(passwordData.newPassword).level === 'medium' ? 'shield-exclamation' : 'shield-x'} me-1`}></i>
+                                                                {getPasswordStrength(passwordData.newPassword).text}
+                                                            </small>
+                                                        )}
+                                                    </Form.Label>
+                                                    <InputGroup>
+                                                        <Form.Control
+                                                            type={showNewPassword ? "text" : "password"}
+                                                            name="newPassword"
+                                                            value={passwordData.newPassword}
+                                                            onChange={handlePasswordChange}
+                                                            required
+                                                        />
+                                                        <Button
+                                                            variant="outline-secondary"
+                                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                                            style={{
+                                                                borderLeft: 0,
+                                                                borderColor: 'var(--bs-border-color)'
+                                                            }}
+                                                        >
+                                                            <i className={`bi bi-eye${showNewPassword ? '-slash' : ''}`}></i>
+                                                        </Button>
+                                                    </InputGroup>
                                                 </Form.Group>
 
                                                 <Form.Group className="mb-3">
                                                     <Form.Label>{t('profile.security.confirmPassword')}</Form.Label>
-                                                    <Form.Control
-                                                        type="password"
-                                                        name="confirmPassword"
-                                                        value={passwordData.confirmPassword}
-                                                        onChange={handlePasswordChange}
-                                                        required
-                                                    />
+                                                    <InputGroup>
+                                                        <Form.Control
+                                                            type={showConfirmPassword ? "text" : "password"}
+                                                            name="confirmPassword"
+                                                            value={passwordData.confirmPassword}
+                                                            onChange={handlePasswordChange}
+                                                            required
+                                                        />
+                                                        <Button
+                                                            variant="outline-secondary"
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                            style={{
+                                                                borderLeft: 0,
+                                                                borderColor: 'var(--bs-border-color)'
+                                                            }}
+                                                        >
+                                                            <i className={`bi bi-eye${showConfirmPassword ? '-slash' : ''}`}></i>
+                                                        </Button>
+                                                    </InputGroup>
                                                 </Form.Group>
 
                                                 <div className="d-grid">
                                                     <Button
-                                                        type="submit"
+                                                        type="button"
                                                         variant="warning"
-                                                        className="rounded-pill px-4 py-3"
-                                                        style={{minHeight: '50px'}}
+                                                        className="px-4 py-3"
                                                         disabled={loading}
+                                                        onClick={handlePasswordSubmit}
                                                     >
                                                         <i className="bi bi-shield-lock me-2"></i>
                                                         {loading ? t('common.saving') : t('profile.security.updatePassword')}
                                                     </Button>
                                                 </div>
-                                            </Form>
+                                            </div>
                                         )}
                                     </Card.Body>
                                 </Card>
