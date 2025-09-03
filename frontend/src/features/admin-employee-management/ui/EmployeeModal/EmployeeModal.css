@@ -4,6 +4,7 @@
 .employee-modal .modal-dialog {
     margin-bottom: 50px;
 }
+
 .employee-modal .modal-content {
     margin-top: calc(var(--app-navbar-height) + 1rem);
     border: none;
@@ -56,7 +57,6 @@
 }
 
 
-
 /* Dark mode form inputs */
 [data-theme="dark"] .employee-modal .form-control,
 [data-theme="dark"] .employee-modal .form-select {
@@ -77,11 +77,15 @@
 }
 
 .employee-modal .input-group .btn-outline-secondary {
-    border: none;
     border-color: var(--bs-border-color);
     background-color: var(--bs-white);
     color: var(--bs-secondary);
     transition: all var(--transition-fast);
+    border-radius: 0 var(--radius-base) var(--radius-base) 0 !important;
+}
+
+[dir="rtl"] .employee-modal .input-group .btn-outline-secondary {
+    border-radius: var(--radius-base) 0 0 var(--radius-base) !important;
 }
 
 .employee-modal .input-group .btn-outline-secondary:hover {
@@ -121,11 +125,6 @@
 
 .employee-modal .alert-info {
     background-color: rgba(var(--bs-info-rgb), 0.1);
-    color: var(--bs-info);
-}
-
-[data-theme="dark"] .employee-modal .alert-info {
-    background-color: rgba(var(--bs-info-rgb), 0.2);
     color: var(--bs-info);
 }
 
@@ -198,6 +197,7 @@
     justify-content: center;
     z-index: 1000;
 }
+
 .employee-modal .card {
     border: 1px solid var(--bs-border-color);
     box-shadow: 0 -1px 1px 1px rgba(var(--bs-primary-rgb), 0.2) inset;
@@ -226,6 +226,7 @@
 [data-theme="dark"] .employee-modal.loading .modal-body::after {
     background: rgba(0, 0, 0, 0.8);
 }
+
 [data-theme="dark"] .modal .modal-content .form-select {
 
 }
@@ -303,6 +304,7 @@
 [data-theme="dark"] .employee-modal .modal-body::-webkit-scrollbar-thumb:hover {
     background: var(--bs-gray-500);
 }
+
 /* Error state styling */
 .employee-modal .form-control.is-invalid,
 .employee-modal .form-select.is-invalid {
