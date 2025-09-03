@@ -37,7 +37,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
 
     // Check if this is a flexible employee (no work_site assigned) and user is not super admin
-    const isFlexibleEmployee = employee && employee.work_site === null;
+    const isFlexibleEmployee = employee && (employee.work_site_id === null || employee.work_site === null);
     const isFlexibleEditingBlocked = isFlexibleEmployee && !isSuperAdmin;
 
     const [formData, setFormData] = useState({
@@ -202,10 +202,19 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
+            const { admin_work_sites_scope, is_super_admin, ...baseData } = formData;
+            
             const dataToSave = {
-                ...formData,
+                ...baseData,
                 work_site_id: formData.work_site_id === 'any' ? null : formData.work_site_id,
             };
+
+            // Only include admin fields if user is super admin
+            if (isSuperAdmin) {
+                dataToSave.admin_work_sites_scope = admin_work_sites_scope;
+                dataToSave.is_super_admin = is_super_admin;
+            }
+
             onSave(dataToSave);
         }
     };
@@ -226,14 +235,6 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 </Modal.Header>
 
                 <Modal.Body>
-                    {/* Warning for flexible employee editing restriction */}
-                    {isFlexibleEditingBlocked && (
-                        <Alert variant="warning" className="mb-3">
-                            <i className="bi bi-exclamation-triangle me-2"></i>
-                            {t('admin.flexibleEmployeeEditingRestricted', 'Only super administrators can edit flexible employees (employees not assigned to any work site).')}
-                        </Alert>
-                    )}
-
                     {/* Personal Information */}
                     <Card className="mb-4">
                         <Card.Header className="">
@@ -503,107 +504,112 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                         </Card>
                     )}
 
-                    {/* System Information */}
-                    <Card className="mb-4">
-                        <Card.Header className="">
-                            <h6 className="mb-0">
-                                <i className="bi bi-gear me-2"></i>
-                                {t('employee.systemInfo')}
-                            </h6>
-                        </Card.Header>
-                        <Card.Body>
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>
-                                            {t('employee.login')} <span className="text-danger">*</span>
-                                        </Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            value={formData.login}
-                                            onChange={(e) => handleChange('login', e.target.value)}
-                                            isInvalid={!!errors.login}
-                                            disabled={isFlexibleEditingBlocked}
-                                        />
-                                        <Form.Control.Feedback type="invalid">
-                                            {errors.login}
-                                        </Form.Control.Feedback>
-                                    </Form.Group>
-                                </Col>
-
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>
-                                            {t('employee.password')}
-                                            {!employee && <span className="text-danger">*</span>}
-                                        </Form.Label>
-                                        <div className="input-group">
+                    {/* System Information - Hidden for flexible employees when non-super admin */}
+                    {!isFlexibleEditingBlocked && (
+                        <Card className="mb-4">
+                            <Card.Header className="">
+                                <h6 className="mb-0">
+                                    <i className="bi bi-gear me-2"></i>
+                                    {t('employee.systemInfo')}
+                                </h6>
+                            </Card.Header>
+                            <Card.Body>
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>
+                                                {t('employee.login')} <span className="text-danger">*</span>
+                                            </Form.Label>
                                             <Form.Control
-                                                type={showPassword ? 'text' : 'password'}
-                                                value={formData.password}
-                                                onChange={(e) => handleChange('password', e.target.value)}
-                                                isInvalid={!!errors.password}
-                                                placeholder={employee ? t('employee.leaveEmptyToKeep') : ''}
+                                                type="text"
+                                                value={formData.login}
+                                                onChange={(e) => handleChange('login', e.target.value)}
+                                                isInvalid={!!errors.login}
                                                 disabled={isFlexibleEditingBlocked}
                                             />
-                                            <Button
-                                                variant="outline-secondary"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                type="button"
-                                            >
-                                                <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
-                                            </Button>
                                             <Form.Control.Feedback type="invalid">
-                                                {errors.password}
+                                                {errors.login}
                                             </Form.Control.Feedback>
-                                        </div>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
+                                        </Form.Group>
+                                    </Col>
 
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>{t('employee.status')}</Form.Label>
-                                        <Form.Select
-                                            value={formData.status}
-                                            onChange={(e) => handleChange('status', e.target.value)}
-                                            disabled={isFlexibleEditingBlocked}
-                                        >
-                                            <option value="active">{t('status.active')}</option>
-                                            <option value="inactive">{t('status.inactive')}</option>
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>
+                                                {t('employee.password')}
+                                                {!employee && <span className="text-danger">*</span>}
+                                            </Form.Label>
+                                            <div className="input-group">
+                                                <Form.Control
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    value={formData.password}
+                                                    onChange={(e) => handleChange('password', e.target.value)}
+                                                    isInvalid={!!errors.password}
+                                                    placeholder={employee ? t('employee.leaveEmptyToKeep') : ''}
+                                                    disabled={isFlexibleEditingBlocked}
+                                                />
+                                                <Button
+                                                    variant="outline-secondary"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    type="button"
+                                                >
+                                                    <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
+                                                </Button>
+                                                <Form.Control.Feedback type="invalid">
+                                                    {errors.password}
+                                                </Form.Control.Feedback>
+                                            </div>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
 
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>{t('employee.role')}</Form.Label>
-                                        <Form.Select
-                                            value={formData.role}
-                                            onChange={(e) => handleChange('role', e.target.value)}
-                                            disabled={(!isSuperAdmin && formData.role === 'admin') || isFlexibleEditingBlocked}
-                                        >
-                                            <option value="employee">{t('role.employee')}</option>
-                                            {isSuperAdmin && (
-                                                <option value="admin">{t('role.admin')}</option>
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>{t('employee.status')}</Form.Label>
+                                            <Form.Select
+                                                value={formData.status}
+                                                onChange={(e) => handleChange('status', e.target.value)}
+                                                disabled={isFlexibleEditingBlocked}
+                                            >
+                                                <option value="active">{t('status.active')}</option>
+                                                <option value="inactive">{t('status.inactive')}</option>
+                                            </Form.Select>
+                                        </Form.Group>
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>{t('employee.role')}</Form.Label>
+                                            <Form.Select
+                                                value={formData.role}
+                                                onChange={(e) => handleChange('role', e.target.value)}
+                                                disabled={(!isSuperAdmin && formData.role === 'admin') || isFlexibleEditingBlocked}
+                                            >
+                                                <option value="employee">{t('role.employee')}</option>
+                                                {isSuperAdmin && (
+                                                    <option value="admin">{t('role.admin')}</option>
+                                                )}
+                                            </Form.Select>
+                                            {!isSuperAdmin && formData.role === 'admin' && (
+                                                <Form.Text className="text-muted">
+                                                    {t('admin.onlySuperAdminCanChangeRole')}
+                                                </Form.Text>
                                             )}
-                                        </Form.Select>
-                                        {!isSuperAdmin && formData.role === 'admin' && (
-                                            <Form.Text className="text-muted">
-                                                {t('admin.onlySuperAdminCanChangeRole')}
-                                            </Form.Text>
-                                        )}
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                            </Card.Body>
+                        </Card>
+                    )}
 
                     {employee && (
-                        <Alert variant="info" className="mt-3">
-                            <i className="bi bi-info-circle me-2"></i>
-                            {t('employee.editInfo')}
+                        <Alert variant={isFlexibleEditingBlocked ? "warning" : "info"} className="mt-3">
+                            <i className={`bi bi-${isFlexibleEditingBlocked ? 'exclamation-triangle' : 'info-circle'} me-2`}></i>
+                            {isFlexibleEditingBlocked 
+                                ? t('admin.flexibleEmployeeEditingRestricted', 'Only super administrators can edit flexible employees (employees not assigned to any work site).')
+                                : t('employee.editInfo')
+                            }
                         </Alert>
                     )}
                 </Modal.Body>

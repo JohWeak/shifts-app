@@ -1,5 +1,5 @@
 // frontend/src/features/admin-dashboard/index.js
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Badge, Button, Card, Col, Container, Row} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
@@ -28,7 +28,9 @@ const AdminDashboard = () => {
 
     // Check if current user is super admin
     const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
-    const accessibleSites = isSuperAdmin ? 'all' : (user?.admin_work_sites_scope || []);
+    const accessibleSites = useMemo(() => {
+        return isSuperAdmin ? 'all' : (user?.admin_work_sites_scope || []);
+    }, [isSuperAdmin, user?.admin_work_sites_scope]);
 
     // Local state
     const [metrics, setMetrics] = useState({
@@ -63,9 +65,16 @@ const AdminDashboard = () => {
             return accessibleSites.includes(site.site_id);
         }) || [];
 
+        // Filter employees based on admin access
+        const filteredEmployees = employees?.filter(employee => {
+            if (isSuperAdmin || accessibleSites === 'all') return true;
+            // For regular admins, exclude flexible employees (work_site_id = null)
+            return employee.work_site_id !== null && accessibleSites.includes(employee.work_site_id);
+        }) || [];
+
         setMetrics({
-            totalEmployees: employees?.length || 0,
-            activeEmployees: employees?.filter(e => e.status === 'active').length || 0,
+            totalEmployees: filteredEmployees.length,
+            activeEmployees: filteredEmployees.filter(e => e.status === 'active').length,
             totalWorkSites: filteredWorkSites.length,
             activeWorkSites: filteredWorkSites.filter(s => s.is_active).length,
             totalPositions: filteredPositions.length,

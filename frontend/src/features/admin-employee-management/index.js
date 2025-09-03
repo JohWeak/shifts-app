@@ -38,7 +38,7 @@ const EmployeeManagement = () => {
 
 
     const employeesState = useSelector((state) => state.employees);
-    const [sortConfig, setSortConfig] = useState({ field: 'createdAt', order: 'DESC' });
+    const [sortConfig, setSortConfig] = useState({ field: 'role', order: 'ASC' });
 
 
     const {

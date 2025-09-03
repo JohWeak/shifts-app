@@ -40,12 +40,26 @@ const EmployeeList = ({
 
 
     const sortingAccessors = useMemo(() => ({
-        name: (employee) => `${employee.first_name} ${employee.last_name}`,
+        name: (employee) => {
+            // Composite sorting: 1) Admin first, 2) Then by name
+            const roleOrder = employee.role === 'admin' ? '0' : '1';
+            const name = `${employee.first_name} ${employee.last_name}`;
+            return `${roleOrder}-${name}`;
+        },
         workSite: (employee) => employee.work_site_name || employee.workSite?.site_name || t('employee.commonWorkSite'),
         position: (employee) => employee.position_name || employee.defaultPosition?.pos_name || '-',
-        status: (employee) => employee.status,
         role: (employee) => employee.role,
+        status: (employee) => employee.status,
     }), [t]);
+
+    const tableHeaders = useMemo(() => [
+        {key: 'name', label: t('employee.fullName')},
+        {key: 'workSite', label: t('workSite.workSite')},
+        {key: 'position', label: t('employee.position')},
+        {key: 'role', label: t('employee.role')},
+        {key: 'status', label: t('employee.status')},
+        {label: t('common.actions'), isSortable: false, thProps: {className: 'text-center'}},
+    ], [t]);
 
 
     const {sortedItems: sortedEmployees, requestSort, sortConfig} = useSortableData(
@@ -214,42 +228,17 @@ const EmployeeList = ({
                     <Table hover className="data-table mb-0">
                         <thead>
                         <tr>
-                            <SortableHeader
-                                sortKey="name"
-                                sortConfig={sortConfig}
-                                onSort={requestSort}
-                            >
-                                {t('employee.fullName')}
-                            </SortableHeader>
-                            <SortableHeader
-                                sortKey="workSite"
-                                sortConfig={sortConfig}
-                                onSort={requestSort}
-                            >
-                                {t('workSite.workSite')}
-                            </SortableHeader>
-                            <SortableHeader
-                                sortKey="position"
-                                sortConfig={sortConfig}
-                                onSort={requestSort}
-                            >
-                                {t('employee.position')}
-                            </SortableHeader>
-                            <SortableHeader
-                                sortKey="status"
-                                sortConfig={sortConfig}
-                                onSort={requestSort}
-                            >
-                                {t('employee.status')}
-                            </SortableHeader>
-                            <SortableHeader
-                                sortKey="role"
-                                sortConfig={sortConfig}
-                                onSort={requestSort}
-                            >
-                                {t('employee.role')}
-                            </SortableHeader>
-                            <th className="text-center">{t('common.actions')}</th>
+                            {tableHeaders.map(header => (
+                                <SortableHeader
+                                    key={header.key || header.label}
+                                    sortKey={header.key}
+                                    onSort={header.isSortable === false ? null : requestSort}
+                                    sortConfig={sortConfig}
+                                    {...header.thProps}
+                                >
+                                    {header.label}
+                                </SortableHeader>
+                            ))}
                         </tr>
                         </thead>
                         <AnimatePresence mode="wait">
@@ -308,16 +297,21 @@ const EmployeeList = ({
                                             {employee.position_name || employee.defaultPosition?.pos_name || '-'}
                                         </td>
                                         <td>
-                                            <Badge bg={getStatusBadgeVariant(employee.status)}>
-                                                {t(`status.${employee.status}`)}
+                                            <Badge
+                                                bg={employee.role === 'admin' ? 'danger' : 'primary'}
+                                                className="d-flex justify-content-center w-50 text-truncate"
+                                                title={t(`role.${employee.role}`)}
+                                            >
+                                                <span className="text-truncate">{t(`role.${employee.role}`)}</span>
                                             </Badge>
                                         </td>
                                         <td>
                                             <Badge
-                                                bg={employee.role === 'admin' ? 'danger' : 'primary'}
-                                                className="d-flex justify-content-center w-50"
+                                                bg={getStatusBadgeVariant(employee.status)}
+                                                className="d-flex justify-content-center w-50 text-truncate"
+                                                title={t(`status.${employee.status}`)}
                                             >
-                                                {t(`role.${employee.role}`)}
+                                                <span className="text-truncate">{t(`status.${employee.status}`)}</span>
                                             </Badge>
                                         </td>
                                         <td onClick={(e) => e.stopPropagation()} className="text-center">

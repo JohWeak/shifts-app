@@ -51,7 +51,7 @@ const EmployeeFilters = () => {
             return flexiblePositionsCache || [];
         }
         return (allPositions || []).filter(pos => pos.site_id === parseInt(selectedWorkSite));
-    }, [allPositions, selectedWorkSite, isSuperAdmin, accessibleSites, flexiblePositionsCache, t]);
+    }, [allPositions, selectedWorkSite, isSuperAdmin, accessibleSites, flexiblePositionsCache]);
 
     const handleFilterChange = useCallback((field, value) => {
         dispatch(setFilters({[field]: value}));
@@ -125,13 +125,18 @@ const EmployeeFilters = () => {
             dispatch(fetchPositions({}));
         }
 
-        // For restricted admin with access to only one site, auto-select it
-        if (!isSuperAdmin && accessibleSites !== 'all' && accessibleSites.length === 1 &&
-            workSites && workSites.length > 0 && (filters.work_site === 'all' || !filters.work_site)) {
-            const firstAccessibleSite = workSites.find(site => accessibleSites.includes(site.site_id));
-            if (firstAccessibleSite) {
-                handleWorkSiteChange(firstAccessibleSite.site_id.toString());
+        // Auto-select work site based on admin access
+        if (!isSuperAdmin && accessibleSites !== 'all' && workSites && workSites.length > 0 && 
+            (filters.work_site === 'all' || !filters.work_site)) {
+            
+            if (accessibleSites.length === 1) {
+                // If admin has access to only one site, auto-select it
+                const firstAccessibleSite = workSites.find(site => accessibleSites.includes(site.site_id));
+                if (firstAccessibleSite) {
+                    handleWorkSiteChange(firstAccessibleSite.site_id.toString());
+                }
             }
+            // If admin has access to multiple sites, keep "all" as default (already set)
         }
     }, [dispatch, workSites, allPositions, isSuperAdmin, accessibleSites, filters.work_site, handleWorkSiteChange]);
 
@@ -154,7 +159,7 @@ const EmployeeFilters = () => {
     };
 
     return (
-        <Accordion defaultActiveKey="1" className="filters-accordion">
+        <Accordion defaultActiveKey="0" className="filters-accordion">
             <Accordion.Item eventKey="0">
                 <Accordion.Header>
                     <h6 className="mb-0 d-flex align-items-center">
@@ -214,7 +219,7 @@ const EmployeeFilters = () => {
                                         onChange={(e) => handleWorkSiteChange(e.target.value)}
                                         className="filter-select"
                                     >
-                                        {(isSuperAdmin || (accessibleSites !== 'all' && accessibleSites.length > 1)) && (
+                                        {(isSuperAdmin || (accessibleSites !== 'all' && accessibleSites.length > 0)) && (
                                             <option value="all">{t('common.all')}</option>
                                         )}
                                         {workSites

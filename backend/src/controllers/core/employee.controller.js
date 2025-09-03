@@ -1,14 +1,14 @@
 // backend/src/controllers/employee.controller.js
 const db = require('../../models');
-const { Employee, Position, EmployeeConstraint, WorkSite, PositionShift } = db;
+const {Employee, Position, EmployeeConstraint, WorkSite, PositionShift} = db;
 const bcrypt = require('bcryptjs');
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 
 
 // Create new employee
 const create = async (req, res) => {
     try {
-        const { password, admin_work_sites_scope, is_super_admin, ...employeeData } = req.body;
+        const {password, admin_work_sites_scope, is_super_admin, ...employeeData} = req.body;
 
         // Only super admins can create admin users and set admin privileges
         if (employeeData.role === 'admin') {
@@ -51,7 +51,7 @@ const create = async (req, res) => {
         const employee = await Employee.create(employeeData);
 
         const employeeWithAssociations = await Employee.findByPk(employee.emp_id, {
-            attributes: { exclude: ['password'] },
+            attributes: {exclude: ['password']},
             include: [
                 {
                     model: Position,
@@ -127,14 +127,17 @@ const findAll = async (req, res) => {
 
             // Filter employees by accessible work sites
             where[Op.or] = [
-                { work_site_id: { [Op.in]: accessibleSites } },
-                { work_site_id: null }, // Include employees without specific work site assignment
+                {work_site_id: {[Op.in]: accessibleSites}},
+                {work_site_id: null}, // Include employees without specific work site assignment
                 // Include employees whose default position is in accessible sites
                 db.Sequelize.literal(`default_position_id IN (
                     SELECT pos_id FROM positions 
                     WHERE site_id IN (${accessibleSites.join(',')})
                 )`),
             ];
+
+            // Exclude super admins from regular admin view
+            where.is_super_admin = {[Op.or]: [false, null]};
         }
 
         if (status && status !== 'all') {
@@ -154,8 +157,16 @@ const findAll = async (req, res) => {
                 }
                 where.work_site_id = null;
             } else {
+                // For specific work site, override the limited admin conditions
+                if (where[Op.or]) {
+                    delete where[Op.or];
+                }
                 where.work_site_id = work_site;
             }
+        } else if (work_site === 'all' && req.userRole === 'admin' && req.accessibleSites !== 'all') {
+            // For limited admins selecting "all", ensure flexible employees are included
+            // The Op.or condition is already set above (lines 129-137) and includes work_site_id: null
+            // So we don't need to do anything here, just keep the existing condition
         }
 
         if (search) {
@@ -163,24 +174,24 @@ const findAll = async (req, res) => {
             const searchConditions = [
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('first_name')),
-                    { [Op.like]: `%${searchLower}%` },
+                    {[Op.like]: `%${searchLower}%`},
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('last_name')),
-                    { [Op.like]: `%${searchLower}%` },
+                    {[Op.like]: `%${searchLower}%`},
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('email')),
-                    { [Op.like]: `%${searchLower}%` },
+                    {[Op.like]: `%${searchLower}%`},
                 ),
-                { phone: { [Op.like]: `%${search}%` } },
+                {phone: {[Op.like]: `%${search}%`}},
             ];
 
             // If we already have Op.or conditions (like for limited admin), combine them properly
             if (where[Op.or]) {
                 where[Op.and] = [
-                    { [Op.or]: where[Op.or] },
-                    { [Op.or]: searchConditions }
+                    {[Op.or]: where[Op.or]},
+                    {[Op.or]: searchConditions}
                 ];
                 delete where[Op.or];
             } else {
@@ -218,10 +229,10 @@ const findAll = async (req, res) => {
                 order = [['first_name', sortOrder], ['last_name', sortOrder]];
                 break;
             case 'workSite':
-                order = [[{ model: WorkSite, as: 'workSite' }, 'site_name', sortOrder]];
+                order = [[{model: WorkSite, as: 'workSite'}, 'site_name', sortOrder]];
                 break;
             case 'position':
-                order = [[{ model: Position, as: 'defaultPosition' }, 'pos_name', sortOrder]];
+                order = [[{model: Position, as: 'defaultPosition'}, 'pos_name', sortOrder]];
                 break;
             case 'status':
                 order = [['status', sortOrder]];
@@ -233,16 +244,8 @@ const findAll = async (req, res) => {
         // Calculate offset
         const offset = (page - 1) * pageSize;
 
-        // Debug logging for flexible employees
-        if (work_site === 'any') {
-            console.log('=== DEBUGGING FLEXIBLE EMPLOYEES ===');
-            console.log('Where conditions:', JSON.stringify(where, null, 2));
-            console.log('Include where conditions:', JSON.stringify(includeWhere, null, 2));
-            console.log('Position filter:', position);
-        }
-
         // Optimized query with limited field set
-        const { count, rows } = await Employee.findAndCountAll({
+        const {count, rows} = await Employee.findAndCountAll({
             where,
             attributes,
             include: [
@@ -269,15 +272,6 @@ const findAll = async (req, res) => {
                 index: status && work_site ? 'idx_work_site_status' : 'idx_status_created',
             }),
         });
-
-        // Debug logging for flexible employees results
-        if (work_site === 'any') {
-            console.log('=== FLEXIBLE EMPLOYEES QUERY RESULTS ===');
-            console.log('Found', rows.length, 'employees');
-            rows.forEach(emp => {
-                console.log(`Employee: ${emp.first_name} ${emp.last_name}, work_site_id: ${emp.work_site_id}`);
-            });
-        }
 
         // Format response
         const employees = rows.map(emp => ({
@@ -312,7 +306,7 @@ const findAll = async (req, res) => {
 const findOne = async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] },
+            attributes: {exclude: ['password']},
             include: [
                 {
                     model: Position,
@@ -348,11 +342,11 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const { password, admin_work_sites_scope, is_super_admin, ...updateData } = req.body;
+        const {password, admin_work_sites_scope, is_super_admin, ...updateData} = req.body;
 
         // Get the employee being updated to check current role
         const existingEmployee = await Employee.findByPk(req.params.id, {
-            attributes: ['emp_id', 'role', 'admin_work_sites_scope', 'is_super_admin', 'work_site'],
+            attributes: ['emp_id', 'role', 'admin_work_sites_scope', 'is_super_admin', 'work_site_id'],
         });
 
         if (!existingEmployee) {
@@ -363,7 +357,7 @@ const update = async (req, res) => {
         }
 
         // Check if this is a flexible employee (work_site is null) and user is not super admin
-        if (existingEmployee.work_site === null) {
+        if (existingEmployee.work_site_id === null) {
             // Get current user info to check if super admin
             const currentUser = await Employee.findByPk(req.userId, {
                 attributes: ['emp_id', 'is_super_admin'],
@@ -377,9 +371,12 @@ const update = async (req, res) => {
             }
         }
 
-        // If role is being changed to/from admin, or admin fields are being updated
-        if (updateData.role === 'admin' || existingEmployee.role === 'admin' ||
-            admin_work_sites_scope !== undefined || is_super_admin !== undefined) {
+        // If role is being changed to/from admin, or admin fields are being explicitly updated
+        const isModifyingAdminPrivileges = updateData.role === 'admin' || existingEmployee.role === 'admin' ||
+            (admin_work_sites_scope !== undefined && req.body.hasOwnProperty('admin_work_sites_scope')) ||
+            (is_super_admin !== undefined && req.body.hasOwnProperty('is_super_admin'));
+
+        if (isModifyingAdminPrivileges) {
 
             // Get current user info
             const currentUser = await Employee.findByPk(req.userId, {
@@ -421,7 +418,7 @@ const update = async (req, res) => {
         }
         // Update only the passed fields
         const [updated] = await Employee.update(updateData, {
-            where: { emp_id: req.params.id },
+            where: {emp_id: req.params.id},
         });
 
         if (!updated) {
@@ -433,7 +430,7 @@ const update = async (req, res) => {
 
         // Return full employee data with included associations
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] },
+            attributes: {exclude: ['password']},
             include: [
                 {
                     model: Position,
@@ -467,7 +464,7 @@ const deleteEmployee = async (req, res) => {
     try {
         // Get the employee being deleted to check if flexible
         const existingEmployee = await Employee.findByPk(req.params.id, {
-            attributes: ['emp_id', 'work_site'],
+            attributes: ['emp_id', 'work_site_id'],
         });
 
         if (!existingEmployee) {
@@ -478,7 +475,7 @@ const deleteEmployee = async (req, res) => {
         }
 
         // Check if this is a flexible employee (work_site is null) and user is not super admin
-        if (existingEmployee.work_site === null) {
+        if (existingEmployee.work_site_id === null) {
             // Get current user info to check if super admin
             const currentUser = await Employee.findByPk(req.userId, {
                 attributes: ['emp_id', 'is_super_admin'],
@@ -493,7 +490,7 @@ const deleteEmployee = async (req, res) => {
         }
 
         const deleted = await Employee.destroy({
-            where: { emp_id: req.params.id },
+            where: {emp_id: req.params.id},
         });
 
         if (!deleted) {
@@ -520,7 +517,7 @@ const deleteEmployee = async (req, res) => {
 const getConstraints = async (req, res) => {
     try {
         const constraints = await EmployeeConstraint.findAll({
-            where: { emp_id: req.params.id },
+            where: {emp_id: req.params.id},
             include: [{
                 model: db.Shift,
                 as: 'shift',
@@ -706,7 +703,7 @@ const updateProfile = async (req, res) => {
 
             // Hash new password
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            await employee.update({ password: hashedNewPassword });
+            await employee.update({password: hashedNewPassword});
 
             return res.json({
                 success: true,
