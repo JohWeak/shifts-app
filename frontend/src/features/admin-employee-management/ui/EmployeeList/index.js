@@ -255,7 +255,7 @@ const EmployeeList = ({
                                 {sortedEmployees.map((employee) => (
                                     <motion.tr
                                         key={employee.emp_id}
-                                        className={`${employee.status === 'inactive' ? 'inactive-row' : ''} clickable-row`}
+                                        className={`${employee.status === 'inactive' ? 'inactive-row opacity-75' : ''} clickable-row`}
                                         variants={rowVariants}
                                         onClick={() => onEdit(employee)}
                                         style={{cursor: 'pointer'}}

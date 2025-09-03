@@ -142,6 +142,11 @@ const findAll = async (req, res) => {
 
         if (work_site && work_site !== 'all') {
             if (work_site === 'any') {
+                // For flexible employees, override any previous work site conditions
+                // Remove the Op.or condition set for limited admins if it exists
+                if (where[Op.or]) {
+                    delete where[Op.or];
+                }
                 where.work_site_id = null;
             } else {
                 where.work_site_id = work_site;
@@ -150,7 +155,7 @@ const findAll = async (req, res) => {
 
         if (search) {
             const searchLower = search.toLowerCase();
-            where[Op.or] = [
+            const searchConditions = [
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('first_name')),
                     { [Op.like]: `%${searchLower}%` },
@@ -165,12 +170,37 @@ const findAll = async (req, res) => {
                 ),
                 { phone: { [Op.like]: `%${search}%` } },
             ];
+
+            // If we already have Op.or conditions (like for limited admin), combine them properly
+            if (where[Op.or]) {
+                where[Op.and] = [
+                    { [Op.or]: where[Op.or] },
+                    { [Op.or]: searchConditions }
+                ];
+                delete where[Op.or];
+            } else {
+                where[Op.or] = searchConditions;
+            }
         }
 
         // Handle position filter
         if (position && position !== 'all') {
             if (work_site === 'all') {
-                includeWhere.pos_name = position;
+                if (position === 'none') {
+                    // Show employees with no position
+                    where.default_position_id = null;
+                } else {
+                    includeWhere.pos_name = position;
+                }
+            } else if (work_site === 'any') {
+                // For flexible employees (work_site_id = null)
+                if (position === 'none') {
+                    // Show flexible employees with no position
+                    where.default_position_id = null;
+                } else {
+                    // Filter by position name
+                    includeWhere.pos_name = position;
+                }
             } else {
                 where.default_position_id = position;
             }
@@ -198,6 +228,14 @@ const findAll = async (req, res) => {
         // Calculate offset
         const offset = (page - 1) * pageSize;
 
+        // Debug logging for flexible employees
+        if (work_site === 'any') {
+            console.log('=== DEBUGGING FLEXIBLE EMPLOYEES ===');
+            console.log('Where conditions:', JSON.stringify(where, null, 2));
+            console.log('Include where conditions:', JSON.stringify(includeWhere, null, 2));
+            console.log('Position filter:', position);
+        }
+
         // Optimized query with limited field set
         const { count, rows } = await Employee.findAndCountAll({
             where,
@@ -208,7 +246,7 @@ const findAll = async (req, res) => {
                     as: 'defaultPosition',
                     attributes: ['pos_id', 'pos_name'], // Only necessary fields
                     where: Object.keys(includeWhere).length > 0 ? includeWhere : undefined,
-                    required: position && position !== 'all' && work_site === 'all',
+                    required: position && position !== 'all' && position !== 'none' && (work_site === 'all' || work_site === 'any'),
                 },
                 {
                     model: WorkSite,
@@ -226,6 +264,15 @@ const findAll = async (req, res) => {
                 index: status && work_site ? 'idx_work_site_status' : 'idx_status_created',
             }),
         });
+
+        // Debug logging for flexible employees results
+        if (work_site === 'any') {
+            console.log('=== FLEXIBLE EMPLOYEES QUERY RESULTS ===');
+            console.log('Found', rows.length, 'employees');
+            rows.forEach(emp => {
+                console.log(`Employee: ${emp.first_name} ${emp.last_name}, work_site_id: ${emp.work_site_id}`);
+            });
+        }
 
         // Format response
         const employees = rows.map(emp => ({

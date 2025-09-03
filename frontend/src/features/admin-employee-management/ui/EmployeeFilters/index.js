@@ -4,14 +4,14 @@ import { Accordion, Button, Col, Form, Row } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { debounce } from 'lodash';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { setFilters } from '../../model/employeeSlice';
+import { setFilters, clearCache } from '../../model/employeeSlice';
 import { fetchPositions, fetchWorkSites } from 'features/admin-workplace-settings/model/workplaceSlice';
 import './EmployeeFilters.css';
 
 const EmployeeFilters = () => {
     const { t } = useI18n();
     const dispatch = useDispatch();
-    const { filters, employees } = useSelector((state) => state.employees);
+    const { filters, employees, loading } = useSelector((state) => state.employees);
     const { workSites, positions: allPositions } = useSelector((state) => state.workplace);
     const { user } = useSelector((state) => state.auth);
 
@@ -45,22 +45,29 @@ const EmployeeFilters = () => {
             });
             return Array.from(positionMap.values());
         } else if (selectedWorkSite === 'any') {
-            // For flexible employees, get positions from actual flexible employees
+            // For flexible employees, get positions from current flexible employees in the list
             const flexibleEmployeePositions = new Set();
+            let hasFlexibleWithoutPosition = false;
 
-            // Get positions from employees who are flexible (work_site = null/any or no work_site assigned)
+            // Process employees to find truly flexible ones (work_site_id = null)
             (employees || []).forEach(emp => {
-                // Flexible employees are those with work_site_id = null (not undefined, not numbers)
+                // Only process truly flexible employees (work_site_id should be null)
                 const isFlexible = emp.work_site_id === null;
-                // console.log('Employee:', emp.first_name, emp.last_name, 'work_site_id:', emp.work_site_id, 'isFlexible:', isFlexible);
+                if (!isFlexible) {
+                    return;
+                }
+                
+                if (emp.position_name) {
+                    flexibleEmployeePositions.add(emp.position_name);
+                }
+                if (emp.default_position_id && emp.defaultPosition?.pos_name) {
+                    flexibleEmployeePositions.add(emp.defaultPosition.pos_name);
+                }
 
-                if (isFlexible) {
-                    if (emp.position_name) {
-                        flexibleEmployeePositions.add(emp.position_name);
-                    }
-                    if (emp.default_position_id && emp.defaultPosition?.pos_name) {
-                        flexibleEmployeePositions.add(emp.defaultPosition.pos_name);
-                    }
+                // Check for flexible employees without positions
+                const hasNoPosition = !emp.position_name && !emp.default_position_id && !emp.defaultPosition?.pos_name;
+                if (hasNoPosition) {
+                    hasFlexibleWithoutPosition = true;
                 }
             });
 
@@ -69,16 +76,6 @@ const EmployeeFilters = () => {
                 pos_id: posName,
                 pos_name: posName,
             }));
-
-            // Add "no position" option if there are flexible employees without positions
-            const hasFlexibleWithoutPosition = (employees || []).some(emp => {
-                const isFlexible = emp.work_site_id === null;
-                const hasNoPosition = !emp.position_name && !emp.default_position_id && !emp.defaultPosition?.pos_name;
-                console.log('Checking for no position - Employee:', emp.first_name, emp.last_name, 'work_site_id:', emp.work_site_id, 'isFlexible:', isFlexible, 'hasNoPosition:', hasNoPosition);
-                return isFlexible && hasNoPosition;
-            });
-
-            console.log('hasFlexibleWithoutPosition:', hasFlexibleWithoutPosition);
 
             if (hasFlexibleWithoutPosition) {
                 positions.unshift({ pos_id: 'none', pos_name: t('employee.noPosition', 'No Position') });
@@ -95,7 +92,18 @@ const EmployeeFilters = () => {
 
     const handleWorkSiteChange = useCallback((value) => {
         dispatch(setFilters({ work_site: value, position: 'all' }));
+        
+        // Clear employee cache to force fresh data fetch, especially for flexible employees
+        if (value === 'any') {
+            console.log('Clearing employee cache for flexible employees');
+            dispatch(clearCache());
+            // Small delay to allow fresh data to load
+            setTimeout(() => {
+                console.log('Cache cleared, fresh data should be loading...');
+            }, 100);
+        }
     }, [dispatch]);
+
 
     useEffect(() => {
         if (!workSites || workSites.length === 0) {
