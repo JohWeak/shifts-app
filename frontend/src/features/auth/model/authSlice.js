@@ -14,14 +14,22 @@ export const login = createAsyncThunk(
                 password,
             });
 
-            // userData -  { token, user: { id, name, role } })
+            // userData -  { token, id, name, role, is_super_admin?, admin_work_sites_scope? }
             localStorage.setItem('token', userData.token);
             const user = {
-                id: userData.id,
+                emp_id: userData.id,  // Use emp_id to match employee table
+                id: userData.id,      // Keep id for compatibility
                 name: userData.name,
                 email: userData.email,
                 role: userData.role,
             };
+
+            // For admin users, include admin-specific fields
+            if (userData.role === 'admin') {
+                user.is_super_admin = userData.is_super_admin || false;
+                user.admin_work_sites_scope = userData.admin_work_sites_scope || [];
+            }
+
             localStorage.setItem('user', JSON.stringify(user));
 
 

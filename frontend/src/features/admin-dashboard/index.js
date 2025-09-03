@@ -26,6 +26,10 @@ const AdminDashboard = () => {
     const {schedules} = useSelector(state => state.schedule);
     const {positions, workSites} = useSelector(state => state.workplace);
 
+    // Check if current user is super admin
+    const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
+    const accessibleSites = isSuperAdmin ? 'all' : (user?.admin_work_sites_scope || []);
+
     // Local state
     const [metrics, setMetrics] = useState({
         totalEmployees: 0,
@@ -48,17 +52,28 @@ const AdminDashboard = () => {
 
     // Calculate metrics when data changes
     useEffect(() => {
+        // Filter positions and sites based on access rights for restricted admins
+        const filteredPositions = positions?.filter(position => {
+            if (isSuperAdmin || accessibleSites === 'all') return true;
+            return accessibleSites.includes(position.site_id);
+        }) || [];
+
+        const filteredWorkSites = workSites?.filter(site => {
+            if (isSuperAdmin || accessibleSites === 'all') return true;
+            return accessibleSites.includes(site.site_id);
+        }) || [];
+
         setMetrics({
             totalEmployees: employees?.length || 0,
             activeEmployees: employees?.filter(e => e.status === 'active').length || 0,
-            totalWorkSites: workSites?.length || 0,
-            activeWorkSites: workSites?.filter(s => s.is_active).length || 0,
-            totalPositions: positions?.length || 0,
-            activePositions: positions?.filter(p => p.is_active).length || 0,
+            totalWorkSites: filteredWorkSites.length,
+            activeWorkSites: filteredWorkSites.filter(s => s.is_active).length,
+            totalPositions: filteredPositions.length,
+            activePositions: filteredPositions.filter(p => p.is_active).length,
             publishedSchedules: schedules?.filter(s => s.status === 'published').length || 0,
             pendingRequests: 0,
         });
-    }, [employees, workSites, positions, schedules]);
+    }, [employees, workSites, positions, schedules, isSuperAdmin, accessibleSites]);
 
     const isLoading = employeesLoading;
 

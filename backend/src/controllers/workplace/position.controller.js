@@ -1,13 +1,28 @@
 // backend/src/controllers/position.controller.js
 const db = require('../../models');
-const {Position, WorkSite, Employee, PositionShift} = db;
+const { Position, WorkSite, Employee, PositionShift } = db;
 
 // Get all positions with statistics
 const getAllPositions = async (req, res) => {
     try {
-        const {site_id} = req.query;
+        const { site_id } = req.query;
         const where = {};
         if (site_id) where.site_id = site_id;
+
+        // Check access for limited admins - filter by accessible sites
+        if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
+            if (site_id) {
+                // If specific site is requested, check if admin has access
+                if (!req.accessibleSites.includes(parseInt(site_id))) {
+                    return res.status(403).json({
+                        message: 'Access denied to this work site',
+                    });
+                }
+            } else {
+                // If no specific site is requested, only show positions from accessible sites
+                where.site_id = req.accessibleSites;
+            }
+        }
 
         const positions = await Position.findAll({
             where,
@@ -15,27 +30,27 @@ const getAllPositions = async (req, res) => {
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
+                    attributes: ['site_id', 'site_name'],
                 },
                 {
                     model: PositionShift,
                     as: 'shifts',
-                    where: {is_active: true},
+                    where: { is_active: true },
                     required: false,
-                    attributes: ['id']
+                    attributes: ['id'],
                 },
                 {
                     model: Employee,
                     as: 'defaultEmployees',
                     where: {
                         status: 'active',
-                        default_position_id: db.Sequelize.col('Position.pos_id')
+                        default_position_id: db.Sequelize.col('Position.pos_id'),
                     },
                     required: false,
-                    attributes: ['emp_id', 'first_name', 'last_name']
-                }
+                    attributes: ['emp_id', 'first_name', 'last_name'],
+                },
             ],
-            order: [['pos_name', 'ASC']]
+            order: [['pos_name', 'ASC']],
         });
 
         // Counting statistics
@@ -48,7 +63,7 @@ const getAllPositions = async (req, res) => {
                 totalShifts: posData.shifts?.length || 0,
                 totalEmployees: posData.defaultEmployees?.length || 0,
                 shifts: undefined,
-                defaultEmployees: undefined
+                defaultEmployees: undefined,
             };
         });
 
@@ -56,63 +71,63 @@ const getAllPositions = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             message: 'Error fetching positions',
-            error: error.message
+            error: error.message,
         });
     }
 };
 const getPositionDetails = async (req, res) => {
     try {
-        const {positionId} = req.params;
+        const { positionId } = req.params;
         const position = await Position.findByPk(positionId, {
             include: [
                 {
                     model: WorkSite,
                     as: 'workSite',
-                    attributes: ['site_id', 'site_name']
+                    attributes: ['site_id', 'site_name'],
                 },
                 {
                     model: PositionShift,
                     as: 'shifts',
-                    where: {is_active: true},
+                    where: { is_active: true },
                     required: false,
-                    attributes: ['id', 'name', 'start_time', 'end_time', 'color']
+                    attributes: ['id', 'name', 'start_time', 'end_time', 'color'],
                 },
                 {
                     model: Employee,
                     as: 'defaultEmployees',
-                    where: {status: 'active'},
+                    where: { status: 'active' },
                     required: false,
-                    attributes: ['emp_id', 'first_name', 'last_name']
-                }
-            ]
+                    attributes: ['emp_id', 'first_name', 'last_name'],
+                },
+            ],
         });
 
         if (!position) {
-            return res.status(404).json({message: 'Position not found'});
+            return res.status(404).json({ message: 'Position not found' });
         }
 
         res.status(200).json(position);
     } catch (error) {
         res.status(500).json({
             message: 'Error fetching position details',
-            error: error.message
+            error: error.message,
         });
     }
 };
 
 const getPositionsByWorksite = async (req, res) => {
     try {
-        const {worksiteId} = req.params;
+        const { worksiteId } = req.params;
 
         if (!worksiteId) {
-            return res.status(400).send({message: "Worksite ID is required."});
+            return res.status(400).send({ message: 'Worksite ID is required.' });
         }
 
         // Check Work Site access for limited admins
         if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
             if (!req.accessibleSites.includes(parseInt(worksiteId))) {
                 return res.status(403).json({
-                    message: 'Access denied to this work site'
+                    message: 'Access denied to this work site',
                 });
             }
         }
@@ -120,26 +135,26 @@ const getPositionsByWorksite = async (req, res) => {
         const positions = await Position.findAll({
             where: {
                 site_id: worksiteId,
-                is_active: true
+                is_active: true,
             },
-            order: [['pos_name', 'ASC']]
+            order: [['pos_name', 'ASC']],
         });
 
         res.status(200).send(positions);
     } catch (error) {
         res.status(500).send({
-            message: "Error retrieving positions for the worksite.",
-            error: error.message
+            message: 'Error retrieving positions for the worksite.',
+            error: error.message,
         });
     }
 };
 // Create position with support for required_roles
 const createPosition = async (req, res) => {
     try {
-        const {pos_name, site_id, profession, num_of_emp} = req.body;
+        const { pos_name, site_id, profession, num_of_emp } = req.body;
 
         if (!pos_name) {
-            return res.status(400).json({message: 'Position name is required'});
+            return res.status(400).json({ message: 'Position name is required' });
         }
 
         const position = await Position.create({
@@ -147,7 +162,7 @@ const createPosition = async (req, res) => {
             site_id,
             profession,
             num_of_emp,
-            is_active: true
+            is_active: true,
         });
 
         // Fetch created position with workSite info
@@ -155,8 +170,8 @@ const createPosition = async (req, res) => {
             include: [{
                 model: WorkSite,
                 as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }]
+                attributes: ['site_id', 'site_name'],
+            }],
         });
 
         res.status(201).json(createdPosition);
@@ -164,7 +179,7 @@ const createPosition = async (req, res) => {
         console.error('Error creating position:', error);
         res.status(500).json({
             message: 'Error creating position',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -172,13 +187,13 @@ const createPosition = async (req, res) => {
 // Update position
 const updatePosition = async (req, res) => {
     try {
-        const {id} = req.params;
-        const {pos_name, site_id, profession, num_of_emp} = req.body;
+        const { id } = req.params;
+        const { pos_name, site_id, profession, num_of_emp } = req.body;
 
         const position = await Position.findByPk(id);
         if (!position) {
             return res.status(404).json({
-                message: 'Position not found'
+                message: 'Position not found',
             });
         }
 
@@ -186,7 +201,7 @@ const updatePosition = async (req, res) => {
             pos_name,
             site_id,
             profession,
-            num_of_emp
+            num_of_emp,
         });
 
         // Fetch updated position with workSite info
@@ -194,8 +209,8 @@ const updatePosition = async (req, res) => {
             include: [{
                 model: WorkSite,
                 as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }]
+                attributes: ['site_id', 'site_name'],
+            }],
         });
 
         res.json(updatedPosition);
@@ -203,7 +218,7 @@ const updatePosition = async (req, res) => {
         console.error('Error updating position:', error);
         res.status(500).json({
             message: 'Error updating position',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -213,22 +228,22 @@ const deletePosition = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const {id} = req.params;
+        const { id } = req.params;
 
         const position = await Position.findByPk(id, {
             include: [{
                 model: Employee,
                 as: 'defaultEmployees',
-                where: {status: 'active'},
+                where: { status: 'active' },
                 required: false,
-                attributes: ['emp_id', 'first_name', 'last_name', 'status']
-            }]
+                attributes: ['emp_id', 'first_name', 'last_name', 'status'],
+            }],
         });
 
         if (!position) {
             await transaction.rollback();
             return res.status(404).json({
-                message: 'Position not found'
+                message: 'Position not found',
             });
         }
 
@@ -236,7 +251,7 @@ const deletePosition = async (req, res) => {
         const employeeCount = activeEmployees.length;
 
         // We deactivate the position.
-        await position.update({is_active: false}, {transaction});
+        await position.update({ is_active: false }, { transaction });
 
         // We deactivate all employees with this position by default.
         if (employeeCount > 0) {
@@ -245,15 +260,15 @@ const deletePosition = async (req, res) => {
                     status: 'inactive',
                     // Adding metadata to track automatic deactivation.
                     deactivated_by_position: position.pos_id,
-                    deactivated_at: new Date()
+                    deactivated_at: new Date(),
                 },
                 {
                     where: {
                         default_position_id: id,
-                        status: 'active'
+                        status: 'active',
                     },
-                    transaction
-                }
+                    transaction,
+                },
             );
         }
 
@@ -261,14 +276,14 @@ const deletePosition = async (req, res) => {
 
         res.json({
             message: 'Position deactivated successfully',
-            deactivatedEmployees: employeeCount
+            deactivatedEmployees: employeeCount,
         });
     } catch (error) {
         await transaction.rollback();
         console.error('Error deactivating position:', error);
         res.status(500).json({
             message: 'Error deactivating position',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -278,35 +293,35 @@ const restorePosition = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const {id} = req.params;
+        const { id } = req.params;
 
         const position = await Position.findByPk(id);
         if (!position) {
             await transaction.rollback();
             return res.status(404).json({
-                message: 'Position not found'
+                message: 'Position not found',
             });
         }
 
         // Restoring position
-        await position.update({is_active: true}, {transaction});
+        await position.update({ is_active: true }, { transaction });
 
         // Restoring employees who were automatically deactivated by this position.
         const restoredEmployees = await Employee.update(
             {
                 status: 'active',
                 deactivated_by_position: null,
-                deactivated_at: null
+                deactivated_at: null,
             },
             {
                 where: {
                     default_position_id: id,
                     status: 'inactive',
-                    deactivated_by_position: id
+                    deactivated_by_position: id,
                 },
                 transaction,
-                returning: true
-            }
+                returning: true,
+            },
         );
 
         await transaction.commit();
@@ -316,21 +331,21 @@ const restorePosition = async (req, res) => {
             include: [{
                 model: WorkSite,
                 as: 'workSite',
-                attributes: ['site_id', 'site_name']
-            }]
+                attributes: ['site_id', 'site_name'],
+            }],
         });
 
         res.json({
             message: 'Position restored successfully',
             position: restoredPosition,
-            restoredEmployees: restoredEmployees[0]
+            restoredEmployees: restoredEmployees[0],
         });
     } catch (error) {
         await transaction.rollback();
         console.error('Error restoring position:', error);
         res.status(500).json({
             message: 'Error restoring position',
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -342,5 +357,5 @@ module.exports = {
     createPosition,
     updatePosition,
     deletePosition,
-    restorePosition
+    restorePosition,
 };

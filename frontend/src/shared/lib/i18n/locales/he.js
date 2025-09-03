@@ -6,6 +6,8 @@ export const he = {
         accessibleWorkSitesHelp: 'בחר אתרי העבודה שמנהל זה יכול לנהל. השאר ריק עבור סופר אדמין (גישה לכל האתרים).',
         grantSuperAdminPrivileges: 'הענק הרשאות סופר אדמין',
         superAdminHelp: 'לסופר אדמין יש גישה לכל אתרי העבודה והרשאות מערכת מלאות.',
+        onlySuperAdminCanChangeRole: 'רק סופר אדמינים יכולים לשנות תפקידי משתמשים.',
+        flexibleEmployeeEditingRestricted: 'רק סופר אדמינים יכולים לערוך עובדים גמישים (עובדים שאינם משויכים לאתר עבודה ספציפי).',
         requests: {
             title: 'בקשות קבועות',
             employee: 'עובד',

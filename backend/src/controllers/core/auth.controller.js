@@ -75,13 +75,21 @@ const login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        res.status(200).json({
+        const response = {
             id: employee.emp_id,
             name: `${employee.first_name} ${employee.last_name}`,
             email: employee.email,
             role,
             token
-        });
+        };
+
+        // For admin users, include admin-specific fields
+        if (role === 'admin') {
+            response.is_super_admin = employee.is_super_admin || false;
+            response.admin_work_sites_scope = employee.admin_work_sites_scope || [];
+        }
+
+        res.status(200).json(response);
     } catch (error) {
         res.status(500).json({
             message: 'Error during login',

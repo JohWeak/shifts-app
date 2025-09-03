@@ -1,36 +1,44 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeModal/index.js
-import React, { useState, useEffect } from 'react';
-import {Modal, Form, Button, Row, Col, Alert, Card} from 'react-bootstrap';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, Card, Col, Form, Modal, Row } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchWorkSites } from 'features/admin-schedule-management/model/scheduleSlice';
 import { fetchPositions } from 'features/admin-workplace-settings/model/workplaceSlice';
-import { locationData, citiesData } from 'shared/utils/locationData';
+import { citiesData, locationData } from 'shared/utils/locationData';
 
 import './EmployeeModal.css';
 
 const EmployeeModal = ({ show, onHide, onSave, employee }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
-    
+
     // Helper functions for location data
     const getCountries = () => {
         // Get current language from i18n context, fallback to 'en'
         const currentLang = localStorage.getItem('i18n_language') || 'en';
         return Object.keys(locationData[currentLang]?.countries || locationData.en.countries);
     };
-    
+
     const getCountryDisplayName = (countryKey) => {
         const currentLang = localStorage.getItem('i18n_language') || 'en';
         return locationData[currentLang]?.countries[countryKey] || locationData.en.countries[countryKey] || countryKey;
     };
-    
+
     const getCitiesForCountry = (countryKey) => {
         return citiesData[countryKey] || [];
     };
 
     const { workSites } = useSelector((state) => state.schedule || {});
     const { positions } = useSelector((state) => state.workplace || {});
+    const { user } = useSelector((state) => state.auth);
+
+    // Check if current user is super admin
+    const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
+
+    // Check if this is a flexible employee (no work_site assigned) and user is not super admin
+    const isFlexibleEmployee = employee && employee.work_site === null;
+    const isFlexibleEditingBlocked = isFlexibleEmployee && !isSuperAdmin;
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -47,7 +55,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         default_position_id: '',
         work_site_id: 'any',
         admin_work_sites_scope: [],
-        is_super_admin: false
+        is_super_admin: false,
     });
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
@@ -83,7 +91,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 default_position_id: employee.default_position_id || '',
                 work_site_id: employee.work_site_id || 'any',
                 admin_work_sites_scope: employee.admin_work_sites_scope || [],
-                is_super_admin: employee.is_super_admin || false
+                is_super_admin: employee.is_super_admin || false,
             });
             setSelectedWorkSite(employee.work_site_id || 'any');
             if (employee.country) {
@@ -105,7 +113,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 default_position_id: '',
                 work_site_id: 'any',
                 admin_work_sites_scope: [],
-                is_super_admin: false
+                is_super_admin: false,
             });
             setSelectedWorkSite('any');
             setAvailableCities([]);
@@ -127,7 +135,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                         positionNames.add(pos.pos_name);
                         uniquePositions.push({
                             pos_id: pos.pos_id,
-                            pos_name: pos.pos_name
+                            pos_name: pos.pos_name,
                         });
                     }
                 });
@@ -136,7 +144,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         } else {
             // Show ACTIVE positions for specific work site
             return positions.filter(pos =>
-                pos.site_id === parseInt(selectedWorkSite) && pos.is_active
+                pos.site_id === parseInt(selectedWorkSite) && pos.is_active,
             );
         }
     };
@@ -196,7 +204,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
         if (validateForm()) {
             const dataToSave = {
                 ...formData,
-                work_site_id: formData.work_site_id === 'any' ? null : formData.work_site_id
+                work_site_id: formData.work_site_id === 'any' ? null : formData.work_site_id,
             };
             onSave(dataToSave);
         }
@@ -218,6 +226,14 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                 </Modal.Header>
 
                 <Modal.Body>
+                    {/* Warning for flexible employee editing restriction */}
+                    {isFlexibleEditingBlocked && (
+                        <Alert variant="warning" className="mb-3">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            {t('admin.flexibleEmployeeEditingRestricted', 'Only super administrators can edit flexible employees (employees not assigned to any work site).')}
+                        </Alert>
+                    )}
+
                     {/* Personal Information */}
                     <Card className="mb-4">
                         <Card.Header className="">
@@ -238,6 +254,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             value={formData.first_name}
                                             onChange={(e) => handleChange('first_name', e.target.value)}
                                             isInvalid={!!errors.first_name}
+                                            disabled={isFlexibleEditingBlocked}
                                         />
                                         <Form.Control.Feedback type="invalid">
                                             {errors.first_name}
@@ -255,6 +272,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             value={formData.last_name}
                                             onChange={(e) => handleChange('last_name', e.target.value)}
                                             isInvalid={!!errors.last_name}
+                                            disabled={isFlexibleEditingBlocked}
                                         />
                                         <Form.Control.Feedback type="invalid">
                                             {errors.last_name}
@@ -273,6 +291,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             onChange={(e) => handleChange('email', e.target.value)}
                                             isInvalid={!!errors.email}
                                             placeholder={t('employee.emailOptional')}
+                                            disabled={isFlexibleEditingBlocked}
                                         />
                                         <Form.Control.Feedback type="invalid">
                                             {errors.email}
@@ -288,6 +307,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             value={formData.phone}
                                             onChange={(e) => handleChange('phone', e.target.value)}
                                             placeholder={t('employee.phonePlaceholder')}
+                                            disabled={isFlexibleEditingBlocked}
                                         />
                                     </Form.Group>
                                 </Col>
@@ -300,6 +320,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                         <Form.Select
                                             value={formData.country}
                                             onChange={(e) => handleChange('country', e.target.value)}
+                                            disabled={isFlexibleEditingBlocked}
                                         >
                                             <option value="">{t('common.select')}</option>
                                             {getCountries().map((countryKey) => (
@@ -317,7 +338,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                         <Form.Select
                                             value={formData.city}
                                             onChange={(e) => handleChange('city', e.target.value)}
-                                            disabled={!formData.country}
+                                            disabled={!formData.country || isFlexibleEditingBlocked}
                                         >
                                             <option value="">{t('common.select')}</option>
                                             {availableCities.map((city) => (
@@ -337,6 +358,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             value={formData.address}
                                             onChange={(e) => handleChange('address', e.target.value)}
                                             placeholder={t('employee.addressPlaceholder')}
+                                            disabled={isFlexibleEditingBlocked}
                                         />
                                     </Form.Group>
                                 </Col>
@@ -360,6 +382,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                         <Form.Select
                                             value={formData.work_site_id}
                                             onChange={(e) => handleChange('work_site_id', e.target.value)}
+                                            disabled={isFlexibleEditingBlocked}
                                         >
                                             <option value="any">{t('employee.commonWorkSite')}</option>
                                             {workSites
@@ -382,7 +405,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                         <Form.Select
                                             value={formData.default_position_id}
                                             onChange={(e) => handleChange('default_position_id', e.target.value)}
-                                            disabled={!selectedWorkSite || filteredPositions.length === 0}
+                                            disabled={!selectedWorkSite || filteredPositions.length === 0 || isFlexibleEditingBlocked}
                                         >
                                             <option value="">{t('employee.noPosition')}</option>
                                             {filteredPositions.map((position) => (
@@ -403,7 +426,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                     </Card>
 
                     {/* Administrative Access - Only visible for admin role and to super admin */}
-                    {formData.role === 'admin' && (
+                    {formData.role === 'admin' && isSuperAdmin && (
                         <Card className="mb-4">
                             <Card.Header className="">
                                 <h6 className="mb-0">
@@ -430,16 +453,16 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                                                 const siteId = site.site_id;
                                                                 const currentScope = formData.admin_work_sites_scope || [];
                                                                 let newScope;
-                                                                
+
                                                                 if (e.target.checked) {
                                                                     newScope = [...currentScope, siteId];
                                                                 } else {
                                                                     newScope = currentScope.filter(id => id !== siteId);
                                                                 }
-                                                                
-                                                                setFormData(prev => ({ 
-                                                                    ...prev, 
-                                                                    admin_work_sites_scope: newScope 
+
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    admin_work_sites_scope: newScope,
                                                                 }));
                                                             }}
                                                             className="mb-2"
@@ -453,27 +476,29 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                     </Col>
                                 </Row>
 
-                                <Row>
-                                    <Col md={12}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Check
-                                                type="checkbox"
-                                                id="is_super_admin"
-                                                label={
-                                                    <span>
-                                                        <strong>{t('admin.grantSuperAdminPrivileges')}</strong>
-                                                        <br />
-                                                        <small className="text-muted">
-                                                            {t('admin.superAdminHelp')}
-                                                        </small>
-                                                    </span>
-                                                }
-                                                checked={formData.is_super_admin}
-                                                onChange={(e) => handleChange('is_super_admin', e.target.checked)}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
+                                {isSuperAdmin && (
+                                    <Row>
+                                        <Col md={12}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    id="is_super_admin"
+                                                    label={
+                                                        <span>
+                                                            <strong>{t('admin.grantSuperAdminPrivileges')}</strong>
+                                                            <br />
+                                                            <small className="text-muted">
+                                                                {t('admin.superAdminHelp')}
+                                                            </small>
+                                                        </span>
+                                                    }
+                                                    checked={formData.is_super_admin}
+                                                    onChange={(e) => handleChange('is_super_admin', e.target.checked)}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                )}
                             </Card.Body>
                         </Card>
                     )}
@@ -498,6 +523,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                             value={formData.login}
                                             onChange={(e) => handleChange('login', e.target.value)}
                                             isInvalid={!!errors.login}
+                                            disabled={isFlexibleEditingBlocked}
                                         />
                                         <Form.Control.Feedback type="invalid">
                                             {errors.login}
@@ -518,6 +544,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                                 onChange={(e) => handleChange('password', e.target.value)}
                                                 isInvalid={!!errors.password}
                                                 placeholder={employee ? t('employee.leaveEmptyToKeep') : ''}
+                                                disabled={isFlexibleEditingBlocked}
                                             />
                                             <Button
                                                 variant="outline-secondary"
@@ -541,12 +568,10 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                         <Form.Select
                                             value={formData.status}
                                             onChange={(e) => handleChange('status', e.target.value)}
+                                            disabled={isFlexibleEditingBlocked}
                                         >
                                             <option value="active">{t('status.active')}</option>
                                             <option value="inactive">{t('status.inactive')}</option>
-                                            {formData.role === 'admin' && (
-                                                <option value="admin">{t('common.admin')}</option>
-                                            )}
                                         </Form.Select>
                                     </Form.Group>
                                 </Col>
@@ -557,10 +582,18 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                                         <Form.Select
                                             value={formData.role}
                                             onChange={(e) => handleChange('role', e.target.value)}
+                                            disabled={(!isSuperAdmin && formData.role === 'admin') || isFlexibleEditingBlocked}
                                         >
                                             <option value="employee">{t('role.employee')}</option>
-                                            <option value="admin">{t('role.admin')}</option>
+                                            {isSuperAdmin && (
+                                                <option value="admin">{t('role.admin')}</option>
+                                            )}
                                         </Form.Select>
+                                        {!isSuperAdmin && formData.role === 'admin' && (
+                                            <Form.Text className="text-muted">
+                                                {t('admin.onlySuperAdminCanChangeRole')}
+                                            </Form.Text>
+                                        )}
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -579,7 +612,7 @@ const EmployeeModal = ({ show, onHide, onSave, employee }) => {
                     <Button variant="secondary" onClick={onHide}>
                         {t('common.cancel')}
                     </Button>
-                    <Button variant="primary" type="submit">
+                    <Button variant="primary" type="submit" disabled={isFlexibleEditingBlocked}>
                         <i className={`bi bi-${employee ? 'check' : 'plus'}-circle me-1`}></i>
                         {employee ? t('common.save') : t('common.create')}
                     </Button>

@@ -1,18 +1,29 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeFilters/index.js
-import React, {useCallback, useEffect, useMemo} from 'react';
-import {Accordion, Button, Col, Form, Row} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {debounce} from 'lodash';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {setFilters} from '../../model/employeeSlice';
-import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { Accordion, Button, Col, Form, Row } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { debounce } from 'lodash';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { setFilters } from '../../model/employeeSlice';
+import { fetchPositions, fetchWorkSites } from 'features/admin-workplace-settings/model/workplaceSlice';
 import './EmployeeFilters.css';
 
 const EmployeeFilters = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
-    const {filters} = useSelector((state) => state.employees);
-    const {workSites, positions: allPositions} = useSelector((state) => state.workplace);
+    const { filters, employees } = useSelector((state) => state.employees);
+    const { workSites, positions: allPositions } = useSelector((state) => state.workplace);
+    const { user } = useSelector((state) => state.auth);
+
+    // Check if current user is super admin
+    const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
+
+    // Get accessible sites for limited admins
+    const accessibleSites = useMemo(() => {
+        if (isSuperAdmin) return 'all';
+        // console.log('EmployeeFilters - accessibleSites:', sites, 'user:', user);
+        return user?.admin_work_sites_scope || [];
+    }, [user, isSuperAdmin]);
 
     const selectedWorkSite = filters.work_site || 'all';
 
@@ -21,34 +32,90 @@ const EmployeeFilters = () => {
         if (selectedWorkSite === 'all') {
             const positionMap = new Map();
             (allPositions || []).forEach(pos => {
+                // For restricted admins, only show positions from accessible sites
+                if (!isSuperAdmin && accessibleSites !== 'all') {
+                    if (!accessibleSites.includes(pos.site_id)) {
+                        return; // Skip positions from inaccessible sites
+                    }
+                }
+
                 if (!positionMap.has(pos.pos_name)) {
-                    positionMap.set(pos.pos_name, {pos_id: pos.pos_name, pos_name: pos.pos_name});
+                    positionMap.set(pos.pos_name, { pos_id: pos.pos_name, pos_name: pos.pos_name });
                 }
             });
             return Array.from(positionMap.values());
+        } else if (selectedWorkSite === 'any') {
+            // For flexible employees, get positions from actual flexible employees
+            const flexibleEmployeePositions = new Set();
+
+            // Get positions from employees who are flexible (work_site = null/any or no work_site assigned)
+            (employees || []).forEach(emp => {
+                // Flexible employees are those with work_site_id = null (not undefined, not numbers)
+                const isFlexible = emp.work_site_id === null;
+                // console.log('Employee:', emp.first_name, emp.last_name, 'work_site_id:', emp.work_site_id, 'isFlexible:', isFlexible);
+
+                if (isFlexible) {
+                    if (emp.position_name) {
+                        flexibleEmployeePositions.add(emp.position_name);
+                    }
+                    if (emp.default_position_id && emp.defaultPosition?.pos_name) {
+                        flexibleEmployeePositions.add(emp.defaultPosition.pos_name);
+                    }
+                }
+            });
+
+            // Convert to array format
+            const positions = Array.from(flexibleEmployeePositions).map(posName => ({
+                pos_id: posName,
+                pos_name: posName,
+            }));
+
+            // Add "no position" option if there are flexible employees without positions
+            const hasFlexibleWithoutPosition = (employees || []).some(emp => {
+                const isFlexible = emp.work_site_id === null;
+                const hasNoPosition = !emp.position_name && !emp.default_position_id && !emp.defaultPosition?.pos_name;
+                console.log('Checking for no position - Employee:', emp.first_name, emp.last_name, 'work_site_id:', emp.work_site_id, 'isFlexible:', isFlexible, 'hasNoPosition:', hasNoPosition);
+                return isFlexible && hasNoPosition;
+            });
+
+            console.log('hasFlexibleWithoutPosition:', hasFlexibleWithoutPosition);
+
+            if (hasFlexibleWithoutPosition) {
+                positions.unshift({ pos_id: 'none', pos_name: t('employee.noPosition', 'No Position') });
+            }
+
+            return positions;
         }
         return (allPositions || []).filter(pos => pos.site_id === parseInt(selectedWorkSite));
-    }, [allPositions, selectedWorkSite]);
+    }, [allPositions, selectedWorkSite, isSuperAdmin, accessibleSites, employees, t]);
 
     const handleFilterChange = useCallback((field, value) => {
-        dispatch(setFilters({[field]: value}));
+        dispatch(setFilters({ [field]: value }));
+    }, [dispatch]);
+
+    const handleWorkSiteChange = useCallback((value) => {
+        dispatch(setFilters({ work_site: value, position: 'all' }));
     }, [dispatch]);
 
     useEffect(() => {
-        // Загружаем сайты, если их нет
         if (!workSites || workSites.length === 0) {
             dispatch(fetchWorkSites());
         }
-        // Загружаем должности, если их нет
+
         if (!allPositions || allPositions.length === 0) {
             dispatch(fetchPositions({}));
         }
-    }, [dispatch, workSites, allPositions]);
 
+        // For restricted admin with access to only one site, auto-select it
+        if (!isSuperAdmin && accessibleSites !== 'all' && accessibleSites.length === 1 &&
+            workSites && workSites.length > 0 && (filters.work_site === 'all' || !filters.work_site)) {
+            const firstAccessibleSite = workSites.find(site => accessibleSites.includes(site.site_id));
+            if (firstAccessibleSite) {
+                handleWorkSiteChange(firstAccessibleSite.site_id.toString());
+            }
+        }
+    }, [dispatch, workSites, allPositions, isSuperAdmin, accessibleSites, filters.work_site, handleWorkSiteChange]);
 
-    const handleWorkSiteChange = (value) => {
-        dispatch(setFilters({work_site: value, position: 'all'}));
-    };
 
     const debouncedSearch = useMemo(
         () => debounce((value) => {
@@ -97,7 +164,6 @@ const EmployeeFilters = () => {
                                     <option value="all">{t('common.all')} {t('employee.status')}</option>
                                     <option value="active">{t('status.active')}</option>
                                     <option value="inactive">{t('status.inactive')}</option>
-                                    <option value="admin">{t('common.admin')}</option>
                                 </Form.Select>
                             </Col>
 
@@ -107,15 +173,25 @@ const EmployeeFilters = () => {
                                     onChange={(e) => handleWorkSiteChange(e.target.value)}
                                     className="filter-select"
                                 >
-                                    <option value="all">{t('common.all')} {t('workSite.workSite')}</option>
-                                    <option value="any">{t('employee.commonWorkSite')}</option>
+                                    {(isSuperAdmin || (accessibleSites !== 'all' && accessibleSites.length > 1)) && (
+                                        <option value="all">{t('common.all')} {t('workSite.workSite')}</option>
+                                    )}
                                     {workSites
-                                        ?.filter(site => site.is_active)
+                                        ?.filter(site => {
+                                            if (!site.is_active) return false;
+                                            // For restricted admins, only show accessible sites
+                                            if (!isSuperAdmin && accessibleSites !== 'all') {
+                                                // console.log('EmployeeFilters - filtering site:', site.site_name, site.site_id, 'hasAccess:', hasAccess);
+                                                return accessibleSites.includes(site.site_id);
+                                            }
+                                            return true;
+                                        })
                                         .map((site) => (
                                             <option key={site.site_id} value={site.site_id}>
                                                 {site.site_name}
                                             </option>
                                         ))}
+                                    <option value="any">{t('employee.commonWorkSite')}</option>
                                 </Form.Select>
                             </Col>
 
@@ -125,7 +201,7 @@ const EmployeeFilters = () => {
                                     value={filters.position}
                                     onChange={(e) => handleFilterChange('position', e.target.value)}
                                     className="filter-select"
-                                    disabled={selectedWorkSite !== 'all' && filteredPositions.length === 0}
+                                    disabled={selectedWorkSite !== 'all' && selectedWorkSite !== 'any' && filteredPositions.length === 0}
                                 >
                                     <option value="all">{t('common.all')} {t('employee.position')}</option>
                                     {filteredPositions.map((position) => (

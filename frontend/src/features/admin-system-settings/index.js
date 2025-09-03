@@ -1,22 +1,26 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Alert, Button, Card, Col, Container, Form, Row, Spinner} from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader';
 import OptimizationSettings from 'shared/ui/components/OptimizationSettings';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {fetchSystemSettings, setCurrentSite, updateLocalSettings, updateSystemSettings} from './model/settingsSlice';
-import {fetchWorkSites} from '../admin-workplace-settings/model/workplaceSlice';
-import {addNotification} from '../../app/model/notificationsSlice';
-import {motion} from 'motion/react';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { fetchSystemSettings, setCurrentSite, updateLocalSettings, updateSystemSettings } from './model/settingsSlice';
+import { fetchWorkSites } from '../admin-workplace-settings/model/workplaceSlice';
+import { addNotification } from '../../app/model/notificationsSlice';
+import { motion } from 'motion/react';
 
 import './index.css';
 
 const SystemSettings = () => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const dispatch = useDispatch();
 
-    const {systemSettings, loading, error, currentSiteId} = useSelector(state => state.settings);
-    const {workSites = []} = useSelector(state => state.workplace || {});
+    const { systemSettings, loading, error, currentSiteId } = useSelector(state => state.settings);
+    const { workSites = [] } = useSelector(state => state.workplace || {});
+    const { user } = useSelector(state => state.auth);
+
+    // Check if current user is super admin
+    const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
 
     const [localSettings, setLocalSettings] = useState(systemSettings);
     const [selectedSiteId, setSelectedSiteId] = useState(currentSiteId);
@@ -25,8 +29,18 @@ const SystemSettings = () => {
         // Fetch work sites for the selector
         dispatch(fetchWorkSites());
 
+        // For restricted admins, redirect to first accessible site if trying to access global settings
+        if (!isSuperAdmin && !selectedSiteId && workSites.length > 0) {
+            const firstActiveSite = workSites.find(site => site.is_active);
+            if (firstActiveSite) {
+                setSelectedSiteId(firstActiveSite.site_id);
+                dispatch(setCurrentSite(firstActiveSite.site_id));
+                return;
+            }
+        }
+
         // Fetch settings for current site
-        dispatch(fetchSystemSettings({siteId: selectedSiteId})).then((result) => {
+        dispatch(fetchSystemSettings({ siteId: selectedSiteId })).then((result) => {
             if (fetchSystemSettings.rejected.match(result)) {
                 dispatch(addNotification({
                     message: t('settings.fetchError', 'Failed to load settings'),
@@ -34,7 +48,7 @@ const SystemSettings = () => {
                 }));
             }
         });
-    }, [dispatch, t, selectedSiteId]);
+    }, [dispatch, t, selectedSiteId, isSuperAdmin, workSites]);
 
     useEffect(() => {
         if (systemSettings && Object.keys(systemSettings).length > 0) {
@@ -47,7 +61,7 @@ const SystemSettings = () => {
     }, [currentSiteId]);
 
     const handleChange = (field, value) => {
-        setLocalSettings(prev => ({...prev, [field]: value}));
+        setLocalSettings(prev => ({ ...prev, [field]: value }));
     };
 
     const handleSiteChange = (siteId) => {
@@ -62,7 +76,7 @@ const SystemSettings = () => {
 
             const result = await dispatch(updateSystemSettings({
                 settings: localSettings,
-                siteId: selectedSiteId
+                siteId: selectedSiteId,
             }));
 
             if (updateSystemSettings.fulfilled.match(result)) {
@@ -97,8 +111,8 @@ const SystemSettings = () => {
 
     if (loading === 'pending' && localSettings.weekStartDay === undefined) {
         return (
-            <Container className="d-flex justify-content-center align-items-center" style={{minHeight: '60vh'}}>
-                <Spinner animation="border" role="status" aria-label="Loading..."/>
+            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+                <Spinner animation="border" role="status" aria-label="Loading..." />
             </Container>
         );
     }
@@ -114,15 +128,15 @@ const SystemSettings = () => {
                         : t('settings.systemSettings')
                     }
                     subtitle={currentSiteName
-                        ? t('settings.siteSpecificSettingsDesc', {siteName: currentSiteName})
+                        ? t('settings.siteSpecificSettingsDesc', { siteName: currentSiteName })
                         : t('settings.systemSettingsDesc')
                     }
                 >
                     <motion.div
                         className="d-flex gap-2"
-                        initial={{opacity: 0, x: 20}}
-                        animate={{opacity: 1, x: 0}}
-                        transition={{delay: 0.2}}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
                     >
                         <Button
                             variant="outline-secondary"
@@ -145,7 +159,7 @@ const SystemSettings = () => {
                         >
                             {loading === 'pending' ? (
                                 <>
-                                    <Spinner size="sm" className="me-2"/>
+                                    <Spinner size="sm" className="me-2" />
                                     {t('common.saving')}
                                 </>
                             ) : (
@@ -160,9 +174,9 @@ const SystemSettings = () => {
 
                 {/* Site Selector */}
                 <motion.div
-                    initial={{opacity: 0, y: -10}}
-                    animate={{opacity: 1, y: 0}}
-                    transition={{delay: 0.1}}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
                     className="mb-4"
                 >
                     <Card className="settings-card">
@@ -179,8 +193,10 @@ const SystemSettings = () => {
                                             onChange={(e) => handleSiteChange(e.target.value || null)}
                                             className="settings-input"
                                         >
-                                            <option
-                                                value="">{t('settings.globalSettings', 'Global Settings (All Sites)')}</option>
+                                            {isSuperAdmin && (
+                                                <option
+                                                    value="">{t('settings.globalSettings', 'Global Settings (All Sites)')}</option>
+                                            )}
                                             {workSites
                                                 .filter(site => site.is_active)
                                                 .map(site => (
@@ -217,9 +233,9 @@ const SystemSettings = () => {
 
                             {/* Schedule Settings */}
                             <motion.div
-                                initial={{opacity: 0, y: 20}}
-                                animate={{opacity: 1, y: 0}}
-                                transition={{delay: 0.1}}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
                                 className="mb-4"
                             >
                                 <Card className="settings-card">
@@ -405,9 +421,9 @@ const SystemSettings = () => {
 
                             {/* Constraint Settings */}
                             <motion.div
-                                initial={{opacity: 0, y: 20}}
-                                animate={{opacity: 1, y: 0}}
-                                transition={{delay: 0.2}}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
                                 className="mb-4"
                             >
                                 <Card className="settings-card">

@@ -1,14 +1,14 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/index.js
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Alert, Button, Card} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import {useSortableData} from 'shared/hooks/useSortableData';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Card } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useSortableData } from 'shared/hooks/useSortableData';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 
 // Slices & Actions
-import {deletePosition, fetchPositions, restorePosition} from '../../model/workplaceSlice';
-import {useWorkplaceActionHandler} from '../../model/hooks/useWorkplaceActionHandler';
+import { deletePosition, fetchPositions, restorePosition } from '../../model/workplaceSlice';
+import { useWorkplaceActionHandler } from '../../model/hooks/useWorkplaceActionHandler';
 
 // UI Components
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
@@ -20,12 +20,23 @@ import LoadingState from 'shared/ui/components/LoadingState';
 import './PositionsTab.css';
 
 
-const PositionsTab = ({selectedSite}) => {
-    const {t} = useI18n();
+const PositionsTab = ({ selectedSite }) => {
+    const { t } = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const {positions = [], workSites = [], loading} = useSelector(state => state.workplace || {});
+    const { positions = [], workSites = [], loading } = useSelector(state => state.workplace || {});
+    const { user } = useSelector(state => state.auth);
+
+    // Check if current user is super admin
+    const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
+
+    // Get accessible sites for limited admins
+    const accessibleSites = useMemo(() => {
+        if (isSuperAdmin) return 'all';
+        // console.log('PositionsTab - accessibleSites:', sites, 'user:', user);
+        return user?.admin_work_sites_scope || [];
+    }, [user, isSuperAdmin]);
 
     // --- STATE MANAGEMENT ---
     const [showModal, setShowModal] = useState(false);
@@ -41,7 +52,7 @@ const PositionsTab = ({selectedSite}) => {
     const [isClosingPositionId, setIsClosingPositionId] = useState(null);
 
     // --- ACTION HANDLERS using custom hook ---
-    const {execute: confirmDelete, isLoading: isDeleting} = useWorkplaceActionHandler({
+    const { execute: confirmDelete, isLoading: isDeleting } = useWorkplaceActionHandler({
         actionThunk: (id) => deletePosition(id),
         refetchThunk: fetchPositions,
         messages: {
@@ -51,7 +62,7 @@ const PositionsTab = ({selectedSite}) => {
         },
     });
 
-    const {execute: confirmRestore, isLoading: isRestoring} = useWorkplaceActionHandler({
+    const { execute: confirmRestore, isLoading: isRestoring } = useWorkplaceActionHandler({
         actionThunk: (id) => restorePosition(id),
         refetchThunk: fetchPositions,
         messages: {
@@ -66,17 +77,39 @@ const PositionsTab = ({selectedSite}) => {
         if (selectedSite) setFilterSite(selectedSite.site_id.toString());
     }, [selectedSite]);
 
+    // Auto-select first accessible site for restricted admins
+    useEffect(() => {
+        if (!isSuperAdmin && accessibleSites !== 'all' && accessibleSites.length > 0 &&
+            workSites && workSites.length > 0 && !filterSite) {
+            const firstAccessibleSite = workSites.find(site =>
+                site.is_active && accessibleSites.includes(site.site_id),
+            );
+            if (firstAccessibleSite) {
+                setFilterSite(firstAccessibleSite.site_id.toString());
+            }
+        }
+    }, [isSuperAdmin, accessibleSites, workSites, filterSite]);
+
     // --- DATA PREPARATION ---
     const filteredPositions = useMemo(() => {
         if (!Array.isArray(positions)) return [];
         return positions.filter(pos => {
             if (!pos) return false;
+
+            // Check access rights for limited admins
+            if (!isSuperAdmin && accessibleSites !== 'all') {
+                if (!accessibleSites.includes(pos.site_id)) {
+                    // console.log('PositionsTab - filtering position:', pos.pos_name, 'site_id:', pos.site_id);
+                    return false; // Skip positions from inaccessible sites
+                }
+            }
+
             const matchesSearch = pos.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) || pos.profession?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSite = !filterSite || pos.site_id === parseInt(filterSite);
             const matchesActive = showInactive || pos.is_active;
             return matchesSearch && matchesSite && matchesActive;
         });
-    }, [positions, searchTerm, filterSite, showInactive]);
+    }, [positions, searchTerm, filterSite, showInactive, isSuperAdmin, accessibleSites]);
 
     const getSiteName = useCallback((siteId) => {
             return workSites.find(s => s.site_id === siteId)?.site_name || '-';
@@ -93,7 +126,7 @@ const PositionsTab = ({selectedSite}) => {
         status: p => p.is_active ? 0 : 1,
     }), [getSiteName]);
 
-    const {sortedItems: sortedPositions, requestSort, sortConfig} = useSortableData(filteredPositions, {
+    const { sortedItems: sortedPositions, requestSort, sortConfig } = useSortableData(filteredPositions, {
         field: 'status',
         order: 'ASC',
     }, sortingAccessors);
@@ -144,7 +177,7 @@ const PositionsTab = ({selectedSite}) => {
 
     // --- RENDER ---
     if (loading && positions.length === 0) {
-        return <LoadingState/>;
+        return <LoadingState />;
     }
 
     return (
@@ -171,7 +204,15 @@ const PositionsTab = ({selectedSite}) => {
                             }}
                             siteFilter={filterSite}
                             onSiteFilterChange={setFilterSite}
-                            sites={workSites}
+                            sites={workSites.filter(site => {
+                                if (!site.is_active) return false;
+                                // For restricted admins, only show accessible sites
+                                if (!isSuperAdmin && accessibleSites !== 'all') {
+                                    // console.log('PositionsTab - filtering site:', site.site_name, site.site_id, 'hasAccess:', hasAccess);
+                                    return accessibleSites.includes(site.site_id);
+                                }
+                                return true;
+                            })}
                             inactiveSwitchId="show-inactive-positions"
                         />
                         {sortedPositions.length === 0 ? (

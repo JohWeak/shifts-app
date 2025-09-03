@@ -14,13 +14,13 @@ const create = async (req, res) => {
         if (employeeData.role === 'admin') {
             // Get current user info
             const currentUser = await Employee.findByPk(req.userId, {
-                attributes: ['emp_id', 'is_super_admin']
+                attributes: ['emp_id', 'is_super_admin'],
             });
 
             if (!currentUser || (currentUser.emp_id !== 1 && !currentUser.is_super_admin)) {
                 return res.status(403).json({
                     success: false,
-                    message: 'Only super admins can create admin users'
+                    message: 'Only super admins can create admin users',
                 });
             }
 
@@ -101,7 +101,7 @@ const findAll = async (req, res) => {
                 'emp_id', 'first_name', 'last_name', 'email', 'phone',
                 'status', 'role', 'default_position_id', 'work_site_id',
                 'login', 'createdAt', 'updatedAt', 'country', 'city', 'address',
-                'admin_work_sites_scope', 'is_super_admin'
+                'admin_work_sites_scope', 'is_super_admin',
             ];
 
         // Build where clause
@@ -111,7 +111,7 @@ const findAll = async (req, res) => {
         // Add Work Site filtering for limited admins
         if (req.userRole === 'admin' && req.accessibleSites !== 'all') {
             const accessibleSites = req.accessibleSites || [];
-            
+
             if (accessibleSites.length === 0) {
                 // Admin has no accessible sites - return empty result
                 return res.json({
@@ -120,7 +120,7 @@ const findAll = async (req, res) => {
                     total: 0,
                     page: parseInt(page),
                     pageSize: parseInt(pageSize),
-                    totalPages: 0
+                    totalPages: 0,
                 });
             }
 
@@ -132,7 +132,7 @@ const findAll = async (req, res) => {
                 db.Sequelize.literal(`default_position_id IN (
                     SELECT pos_id FROM positions 
                     WHERE site_id IN (${accessibleSites.join(',')})
-                )`)
+                )`),
             ];
         }
 
@@ -300,29 +300,44 @@ const update = async (req, res) => {
 
         // Get the employee being updated to check current role
         const existingEmployee = await Employee.findByPk(req.params.id, {
-            attributes: ['emp_id', 'role', 'admin_work_sites_scope', 'is_super_admin']
+            attributes: ['emp_id', 'role', 'admin_work_sites_scope', 'is_super_admin', 'work_site'],
         });
 
         if (!existingEmployee) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found'
+                message: 'Employee not found',
             });
         }
 
-        // If role is being changed to/from admin, or admin fields are being updated
-        if (updateData.role === 'admin' || existingEmployee.role === 'admin' || 
-            admin_work_sites_scope !== undefined || is_super_admin !== undefined) {
-            
-            // Get current user info
+        // Check if this is a flexible employee (work_site is null) and user is not super admin
+        if (existingEmployee.work_site === null) {
+            // Get current user info to check if super admin
             const currentUser = await Employee.findByPk(req.userId, {
-                attributes: ['emp_id', 'is_super_admin']
+                attributes: ['emp_id', 'is_super_admin'],
             });
 
             if (!currentUser || (currentUser.emp_id !== 1 && !currentUser.is_super_admin)) {
                 return res.status(403).json({
                     success: false,
-                    message: 'Only super admins can modify admin privileges'
+                    message: 'Only super admins can edit flexible employees',
+                });
+            }
+        }
+
+        // If role is being changed to/from admin, or admin fields are being updated
+        if (updateData.role === 'admin' || existingEmployee.role === 'admin' ||
+            admin_work_sites_scope !== undefined || is_super_admin !== undefined) {
+
+            // Get current user info
+            const currentUser = await Employee.findByPk(req.userId, {
+                attributes: ['emp_id', 'is_super_admin'],
+            });
+
+            if (!currentUser || (currentUser.emp_id !== 1 && !currentUser.is_super_admin)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Only super admins can modify admin privileges',
                 });
             }
 
@@ -398,6 +413,33 @@ const update = async (req, res) => {
 // Delete employee
 const deleteEmployee = async (req, res) => {
     try {
+        // Get the employee being deleted to check if flexible
+        const existingEmployee = await Employee.findByPk(req.params.id, {
+            attributes: ['emp_id', 'work_site'],
+        });
+
+        if (!existingEmployee) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found',
+            });
+        }
+
+        // Check if this is a flexible employee (work_site is null) and user is not super admin
+        if (existingEmployee.work_site === null) {
+            // Get current user info to check if super admin
+            const currentUser = await Employee.findByPk(req.userId, {
+                attributes: ['emp_id', 'is_super_admin'],
+            });
+
+            if (!currentUser || (currentUser.emp_id !== 1 && !currentUser.is_super_admin)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Only super admins can delete flexible employees',
+                });
+            }
+        }
+
         const deleted = await Employee.destroy({
             where: { emp_id: req.params.id },
         });
@@ -576,19 +618,19 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { 
-            first_name, 
-            last_name, 
-            email, 
-            phone, 
+        const {
+            first_name,
+            last_name,
+            email,
+            phone,
             login,
             country,
             city,
             address,
-            receive_schedule_emails, 
+            receive_schedule_emails,
             locale,
             currentPassword,
-            newPassword
+            newPassword,
         } = req.body;
 
         const employee = await Employee.findByPk(req.userId);
@@ -609,11 +651,11 @@ const updateProfile = async (req, res) => {
                     message: 'Current password is incorrect',
                 });
             }
-            
+
             // Hash new password
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
             await employee.update({ password: hashedNewPassword });
-            
+
             return res.json({
                 success: true,
                 message: 'Password updated successfully',

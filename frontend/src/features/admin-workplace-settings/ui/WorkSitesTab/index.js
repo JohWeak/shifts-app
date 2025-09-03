@@ -1,12 +1,12 @@
 // frontend/src/features/admin-workplace-settings/ui/WorkSitesTab/index.js
-import React, {useMemo, useState} from 'react';
-import {Button, Card} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import {useSortableData} from 'shared/hooks/useSortableData';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {deleteWorkSite, fetchWorkSites, restoreWorkSite} from '../../model/workplaceSlice';
-import {useWorkplaceActionHandler} from '../../model/hooks/useWorkplaceActionHandler';
+import React, { useMemo, useState } from 'react';
+import { Button, Card } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useSortableData } from 'shared/hooks/useSortableData';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { deleteWorkSite, fetchWorkSites, restoreWorkSite } from '../../model/workplaceSlice';
+import { useWorkplaceActionHandler } from '../../model/hooks/useWorkplaceActionHandler';
 
 // UI Components
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
@@ -17,12 +17,16 @@ import LoadingState from 'shared/ui/components/LoadingState';
 
 import './WorkSitesTab.css';
 
-const WorkSitesTab = ({onSelectSite}) => {
-    const {t} = useI18n();
+const WorkSitesTab = ({ onSelectSite }) => {
+    const { t } = useI18n();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const {workSites = [], loading} = useSelector(state => state.workplace || {});
+    const { workSites = [], loading } = useSelector(state => state.workplace || {});
+    const { user } = useSelector(state => state.auth);
+
+    // Check if user is super admin
+    const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
 
     // --- STATE ---
     const [showModal, setShowModal] = useState(false);
@@ -35,7 +39,7 @@ const WorkSitesTab = ({onSelectSite}) => {
         localStorage.getItem('showInactiveWorkSites') === 'true');
 
     // --- ACTION HANDLERS using custom hook ---
-    const {execute: confirmDelete, isLoading: isDeleting} = useWorkplaceActionHandler({
+    const { execute: confirmDelete, isLoading: isDeleting } = useWorkplaceActionHandler({
         actionThunk: (id) => deleteWorkSite(id),
         refetchThunk: fetchWorkSites,
         messages: {
@@ -45,7 +49,7 @@ const WorkSitesTab = ({onSelectSite}) => {
         },
     });
 
-    const {execute: confirmRestore, isLoading: isRestoring} = useWorkplaceActionHandler({
+    const { execute: confirmRestore, isLoading: isRestoring } = useWorkplaceActionHandler({
         actionThunk: (id) => restoreWorkSite(id),
         refetchThunk: fetchWorkSites,
         messages: {
@@ -74,7 +78,7 @@ const WorkSitesTab = ({onSelectSite}) => {
         employees: s => s.employeeCount || 0,
     }), []);
 
-    const {sortedItems: sortedSites, requestSort, sortConfig} = useSortableData(filteredSites, {
+    const { sortedItems: sortedSites, requestSort, sortConfig } = useSortableData(filteredSites, {
         field: 'status',
         order: 'ASC',
     }, sortingAccessors);
@@ -97,17 +101,19 @@ const WorkSitesTab = ({onSelectSite}) => {
         setShowRestoreConfirm(true);
     };
 
-    const handleViewEmployees = (site) => navigate('/admin/employees', {state: {filters: {work_site: site.site_id.toString()}}});
+    const handleViewEmployees = (site) => navigate('/admin/employees', { state: { filters: { work_site: site.site_id.toString() } } });
 
     // --- RENDER ---
-    if (loading && workSites.length === 0) return <LoadingState/>;
+    if (loading && workSites.length === 0) return <LoadingState />;
 
     return (
         <Card className="workplace-tab-content">
             <Card.Header className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">{t('workplace.worksites.title')}</h5>
-                <Button variant="primary" size="sm" onClick={handleAdd}><i
-                    className="bi bi-plus-circle me-2"></i>{t('workplace.worksites.add')}</Button>
+                {isSuperAdmin && (
+                    <Button variant="primary" size="sm" onClick={handleAdd}><i
+                        className="bi bi-plus-circle me-2"></i>{t('workplace.worksites.add')}</Button>
+                )}
             </Card.Header>
             <Card.Body className="px-0">
                 <WorkPlaceToolbar
