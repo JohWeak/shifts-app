@@ -53,8 +53,31 @@
 [data-theme="dark"] .page-header-card {
     background-color: var(--bs-gray-900);
     border-color: var(--bs-gray-900) !important;
+}
+
+/* Container for crumbs */
+.breadcrumb {
+    font-size: 0.85rem;
+}
+
+/* Ссылка внутри крошки */
+.breadcrumb-item a {
+    color: var(--bs-secondary);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--bs-primary);
+}
 
 
+.breadcrumb-item.active {
+    color: var(--bs-body-color);
+    font-weight: 500;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--bs-border-color);
 }
 
 @media (max-width: 768px) {

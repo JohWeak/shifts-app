@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Card } from 'react-bootstrap';
+import {Badge, Breadcrumb, Card} from 'react-bootstrap';
 import './PageHeader.css';
 
 /**
@@ -9,6 +9,7 @@ import './PageHeader.css';
  * @param {JSX.Element|string} [icon] - Icon. Can be a JSX element or a string with a Bootstrap Icon class.
  * @param {string} [iconColor] - Icon color, if it is passed as a string.
  * @param {object} [badge] - Object for badge: { text: string, variant: string }.
+ * @param breadcrumbs -
  * @param {JSX.Element} [actions] - Buttons or other elements for the right part of the header.
  * @param {JSX.Element} [children] - Alternative to actions.
  * @param {string} [className] - Additional classes for customization.
@@ -19,6 +20,7 @@ const PageHeader = ({
                         icon,
                         iconColor = 'text-primary',
                         badge,
+                        breadcrumbs,
                         actions,
                         children,
                         className = '',
@@ -31,7 +33,30 @@ const PageHeader = ({
         }
         return <span className="me-2 align-middle">{icon}</span>;
     };
+    const renderBreadcrumbs = () => {
+        if (!breadcrumbs || breadcrumbs.length === 0) {
+            return null;
+        }
 
+        return (
+            <Breadcrumb listProps={{className: 'ms-2 mt-3 mb-0'}}>
+                {breadcrumbs.map((crumb, index) => {
+                    const isLast = index === breadcrumbs.length - 1;
+
+                    return (
+                        <Breadcrumb.Item
+                            key={index}
+                            active={isLast}
+                            onClick={!isLast ? crumb.onClick : undefined}
+                            href={!isLast && !crumb.onClick ? crumb.to : '#'}
+                        >
+                            {crumb.text}
+                        </Breadcrumb.Item>
+                    );
+                })}
+            </Breadcrumb>
+        );
+    };
     return (
         <Card className="page-header-card mb-2 mb-md-3">
             <Card.Body>
@@ -59,6 +84,7 @@ const PageHeader = ({
                         )}
                     </div>
                 </div>
+                {renderBreadcrumbs()}
             </Card.Body>
         </Card>
     );

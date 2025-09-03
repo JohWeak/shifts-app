@@ -1,33 +1,26 @@
 // frontend/src/features/admin-employee-management/index.js
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {useLocation, useNavigate} from 'react-router-dom';
 import store from 'app/store/store';
-import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
-import { fetchWorkSites } from '../admin-schedule-management/model/scheduleSlice';
-import { Button, Col, Container, Row } from 'react-bootstrap';
+import {fetchSystemSettings} from '../admin-system-settings/model/settingsSlice';
+import {fetchWorkSites} from '../admin-schedule-management/model/scheduleSlice';
+import {Button, Col, Container, Row} from 'react-bootstrap';
 import PageHeader from 'shared/ui/components/PageHeader';
 import EmployeeList from './ui/EmployeeList';
 import EmployeeModal from './ui/EmployeeModal';
 import EmployeeFilters from './ui/EmployeeFilters';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { addNotification } from 'app/model/notificationsSlice';
-import {
-    clearCache,
-    createEmployee,
-    fetchEmployees,
-    setFilters,
-    setPagination,
-    updateEmployee,
-} from './model/employeeSlice';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {addNotification} from 'app/model/notificationsSlice';
+import {createEmployee, fetchEmployees, setFilters, setPagination, updateEmployee,} from './model/employeeSlice';
 import './index.css';
 
 const EmployeeManagement = () => {
-    const { t } = useI18n();
+    const {t} = useI18n();
     const dispatch = useDispatch();
     const location = useLocation();
-
+    const navigate = useNavigate();
 
     const [showModal, setShowModal] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -38,14 +31,14 @@ const EmployeeManagement = () => {
 
 
     const employeesState = useSelector((state) => state.employees);
-    const [sortConfig, setSortConfig] = useState({ field: 'role', order: 'ASC' });
+    const [sortConfig, setSortConfig] = useState({field: 'role', order: 'ASC'});
 
 
     const {
         employees = [],
         loading = false,
-        filters = { status: 'active', position: 'all', search: '', work_site: 'all' },
-        pagination = { page: 1, pageSize: 20, total: 0 },
+        filters = {status: 'active', position: 'all', search: '', work_site: 'all'},
+        pagination = {page: 1, pageSize: 20, total: 0},
     } = employeesState || {};
 
     const isInitialMount = useRef(true);
@@ -62,8 +55,8 @@ const EmployeeManagement = () => {
 
     // Settings
     useEffect(() => {
-        const { systemSettings } = store.getState().settings;
-        const { workSites } = store.getState().schedule;
+        const {systemSettings} = store.getState().settings;
+        const {workSites} = store.getState().schedule;
 
         if (!systemSettings?.positions?.length) {
             dispatch(fetchSystemSettings());
@@ -105,7 +98,7 @@ const EmployeeManagement = () => {
 
 
     const handleSort = (field, order) => {
-        setSortConfig({ field, order });
+        setSortConfig({field, order});
     };
 
     const handleCreateEmployee = () => {
@@ -229,41 +222,46 @@ const EmployeeManagement = () => {
     };
 
     const handlePageChange = (page) => {
-        dispatch(setPagination({ page }));
+        dispatch(setPagination({page}));
     };
 
     const handlePageSizeChange = (pageSize) => {
-        dispatch(setPagination({ pageSize, page: 1 }));
+        dispatch(setPagination({pageSize, page: 1}));
     };
+
+    const breadcrumbs = useMemo(() => {
+        const origin = location.state?.breadcrumbOrigin;
+        if (!origin) {
+            return null;
+        }
+        return [
+            {
+                text: t('workplace.title'),
+                onClick: () => {
+                    navigate(origin.pathname);
+                }
+            },
+            {
+                text: origin.label,
+                onClick: () => {
+                    navigate(origin.pathname, {
+                        state: {initialTab: origin.tab}
+                    });
+                }
+            },
+            {text: t('employee.management')}
+        ];
+
+    }, [location.state, t, navigate]);
 
     return (
         <div className="employee-management">
             <PageHeader
-                title={t('employee.management')}
-                description={t('employee.managementDescription')}
-                breadcrumbs={[
-                    { text: t('navigation.dashboard'), to: '/admin' },
-                    { text: t('employee.management') },
-                ]}
+                title={t('settings.employeeSettings')}
+                subtitle={t('settings.employeeSettingsSubtitle')}
+                breadcrumbs={breadcrumbs}
                 actions={
-                    <div className="d-flex gap-2">
-                        <Button
-                            variant="outline-secondary"
-                            onClick={() => {
-                                dispatch(clearCache());
-                                dispatch(fetchEmployees({
-                                    ...filters,
-                                    page: pagination.page,
-                                    pageSize: pagination.pageSize,
-                                    sortBy: sortConfig.field,
-                                    sortOrder: sortConfig.order,
-                                }));
-                            }}
-                            disabled={loading}
-                            title={t('common.refresh')}
-                        >
-                            <i className="bi bi-arrow-clockwise"></i>
-                        </Button>
+                    <div>
                         <Button
                             variant="primary"
                             onClick={handleCreateEmployee}
@@ -280,7 +278,7 @@ const EmployeeManagement = () => {
             <Container fluid className="p-0 mt-3">
                 <Row className="">
                     <Col xs={12}>
-                        <EmployeeFilters />
+                        <EmployeeFilters/>
                     </Col>
                     <Col xs={12}>
                         <EmployeeList

@@ -343,12 +343,10 @@ export const useScheduleActions = (schedule = null) => {
                 {scheduleToDelete &&
                     <div className="schedule-info bg-danger bg-opacity-10 p-3 rounded">
                         <p>
-                            <strong>{t('schedule.weekPeriod')}:</strong>
-                            {formatWeekRange(scheduleToDelete.schedule?.start_date, locale)}
+                            <strong>{t('schedule.weekPeriod')}:</strong> {formatWeekRange(scheduleToDelete.schedule?.start_date, locale)}
                         </p>
                         <p>
-                            <strong>{t('schedule.site')}:</strong>
-                            {scheduleToDelete.schedule?.workSite?.site_name || 'N/A'}
+                            <strong>{t('schedule.site')}:</strong> {scheduleToDelete.schedule?.workSite?.site_name || 'N/A'}
                         </p>
                     </div>
                 }

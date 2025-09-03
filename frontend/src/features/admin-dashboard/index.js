@@ -8,6 +8,7 @@ import MetricCard from './components/MetricCard';
 import {fetchEmployees} from 'features/admin-employee-management/model/employeeSlice';
 import {fetchSchedules} from 'features/admin-schedule-management/model/scheduleSlice';
 import {fetchPositions, fetchWorkSites} from 'features/admin-workplace-settings/model/workplaceSlice';
+import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import './AdminDashboard.css';
 import PageHeader from '../../shared/ui/components/PageHeader';
 
@@ -25,6 +26,7 @@ const AdminDashboard = () => {
     const {employees, loading: employeesLoading} = useSelector(state => state.employees);
     const {schedules} = useSelector(state => state.schedule);
     const {positions, workSites} = useSelector(state => state.workplace);
+    const {pendingCount} = useSelector(state => state.adminRequests || {});
 
     // Check if current user is super admin
     const isSuperAdmin = user && (user.emp_id === 1 || user.is_super_admin);
@@ -50,6 +52,7 @@ const AdminDashboard = () => {
         dispatch(fetchWorkSites());
         dispatch(fetchPositions());
         dispatch(fetchSchedules());
+        dispatch(fetchAllRequests());
     }, [dispatch]);
 
     // Calculate metrics when data changes
@@ -164,32 +167,10 @@ const AdminDashboard = () => {
                                             variant="primary"
                                             size="lg"
                                             className="w-100 action-button"
-                                            onClick={() => navigate('/admin/schedules')}
+                                            onClick={() => navigate('/admin/schedules', {state: {openGenerateForm: true}})}
                                         >
                                             <i className="bi bi-calendar-plus"/>
                                             <span>{t('dashboard.quickActions.createSchedule')}</span>
-                                        </Button>
-                                    </Col>
-                                    <Col sm={6} md={4}>
-                                        <Button
-                                            variant="outline-primary"
-                                            size="lg"
-                                            className="w-100 action-button"
-                                            onClick={() => navigate('/admin/employees')}
-                                        >
-                                            <i className="bi bi-person-plus"/>
-                                            <span>{t('dashboard.quickActions.manageEmployees')}</span>
-                                        </Button>
-                                    </Col>
-                                    <Col sm={6} md={4}>
-                                        <Button
-                                            variant="outline-success"
-                                            size="lg"
-                                            className="w-100 action-button"
-                                            onClick={() => navigate('/admin/reports')}
-                                        >
-                                            <i className="bi bi-graph-up"/>
-                                            <span>{t('dashboard.quickActions.viewReports')}</span>
                                         </Button>
                                     </Col>
                                     <Col sm={6} md={4}>
@@ -205,13 +186,45 @@ const AdminDashboard = () => {
                                     </Col>
                                     <Col sm={6} md={4}>
                                         <Button
-                                            variant="outline-warning"
+                                            variant="outline-primary"
                                             size="lg"
                                             className="w-100 action-button"
-                                            onClick={() => navigate('/admin/algorithms')}
+                                            onClick={() => navigate('/admin/employees')}
                                         >
-                                            <i className="bi bi-cpu"/>
-                                            <span>{t('dashboard.quickActions.algorithmSettings')}</span>
+                                            <i className="bi bi-people-fill"/>
+                                            <span>{t('dashboard.quickActions.manageEmployees')}</span>
+                                        </Button>
+                                    </Col>
+
+                                    <Col sm={6} md={4}>
+                                        <Button
+                                            variant="outline-warning"
+                                            size="lg"
+                                            className="w-100 action-button position-relative"
+                                            onClick={() => navigate('/admin/permanent-requests')}
+                                        >
+                                            <i className="bi bi-clipboard-check"/>
+                                            <span>{t('navigation.requests')}</span>
+                                            {pendingCount > 0 && (
+                                                <Badge
+                                                    bg="danger"
+                                                    className="position-absolute top-0 start-100 translate-middle"
+                                                    style={{fontSize: '0.75rem'}}
+                                                >
+                                                    {pendingCount}
+                                                </Badge>
+                                            )}
+                                        </Button>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                        <Button
+                                            variant="outline-success"
+                                            size="lg"
+                                            className="w-100 action-button"
+                                            onClick={() => navigate('/admin/reports')}
+                                        >
+                                            <i className="bi bi-graph-up-arrow"/>
+                                            <span>{t('dashboard.quickActions.viewReports')}</span>
                                         </Button>
                                     </Col>
                                     <Col sm={6} md={4}>
@@ -221,7 +234,7 @@ const AdminDashboard = () => {
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/settings')}
                                         >
-                                            <i className="bi bi-gear"/>
+                                            <i className="bi bi-cpu-fill"/>
                                             <span>{t('dashboard.quickActions.systemSettings')}</span>
                                         </Button>
                                     </Col>
