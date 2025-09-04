@@ -416,6 +416,10 @@ const update = async (req, res) => {
         if (req.body.email === '') {
             updateData.email = null;
         }
+        // Handle empty default_position_id
+        if (req.body.hasOwnProperty('default_position_id') && (req.body.default_position_id === '' || req.body.default_position_id === null)) {
+            updateData.default_position_id = null;
+        }
         // Update only the passed fields
         const [updated] = await Employee.update(updateData, {
             where: {emp_id: req.params.id},

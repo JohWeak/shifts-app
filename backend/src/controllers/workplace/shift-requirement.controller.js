@@ -1,21 +1,21 @@
 // backend/src/controllers/shift-requirement.controller.js
 const db = require('../../models');
-const { ShiftRequirement, PositionShift } = db;
-const { Op } = require('sequelize');
+const {ShiftRequirement, PositionShift} = db;
+const {Op} = require('sequelize');
 
 // Get all requirements for a shift
 const getShiftRequirements = async (req, res) => {
     try {
-        const { shiftId } = req.params;
-        const { dateRange } = req.query;
+        const {shiftId} = req.params;
+        const {dateRange} = req.query;
 
-        const whereCondition = { position_shift_id: shiftId };
+        const whereCondition = {position_shift_id: shiftId};
 
         if (dateRange) {
             const [startDate, endDate] = dateRange.split(',');
             whereCondition[Op.or] = [
                 // Recurring requirements
-                { is_recurring: true },
+                {is_recurring: true},
                 // Specific dates in range
                 {
                     is_recurring: false,
@@ -48,7 +48,7 @@ const getShiftRequirements = async (req, res) => {
 // Create a new requirement
 const createShiftRequirement = async (req, res) => {
     try {
-        const { shiftId } = req.params;
+        const {shiftId} = req.params;
         const {
             day_of_week,
             required_staff_count,
@@ -63,7 +63,7 @@ const createShiftRequirement = async (req, res) => {
         // Validate shift exists
         const shift = await PositionShift.findByPk(shiftId);
         if (!shift) {
-            return res.status(404).json({ message: 'Shift not found' });
+            return res.status(404).json({message: 'Shift not found'});
         }
 
         // Check for duplicates
@@ -78,8 +78,8 @@ const createShiftRequirement = async (req, res) => {
             if (valid_from || valid_until) {
                 existingWhere[Op.or] = [
                     {
-                        valid_from: { [Op.lte]: valid_until || '9999-12-31' },
-                        valid_until: { [Op.gte]: valid_from || '1900-01-01' }
+                        valid_from: {[Op.lte]: valid_until || '9999-12-31'},
+                        valid_until: {[Op.gte]: valid_from || '1900-01-01'}
                     },
                     {
                         valid_from: null,
@@ -92,7 +92,7 @@ const createShiftRequirement = async (req, res) => {
             existingWhere.specific_date = specific_date;
         }
 
-        const existing = await ShiftRequirement.findOne({ where: existingWhere });
+        const existing = await ShiftRequirement.findOne({where: existingWhere});
         if (existing) {
             return res.status(400).json({
                 message: 'Requirement already exists for this period'
@@ -124,12 +124,12 @@ const createShiftRequirement = async (req, res) => {
 // Update a requirement
 const updateShiftRequirement = async (req, res) => {
     try {
-        const { reqId } = req.params;
+        const {requirementId} = req.params;
         const updates = req.body;
 
-        const requirement = await ShiftRequirement.findByPk(reqId);
+        const requirement = await ShiftRequirement.findByPk(requirementId);
         if (!requirement) {
-            return res.status(404).json({ message: 'Requirement not found' });
+            return res.status(404).json({message: 'Requirement not found'});
         }
 
         await requirement.update(updates);
@@ -147,11 +147,11 @@ const updateShiftRequirement = async (req, res) => {
 // Delete a requirement
 const deleteShiftRequirement = async (req, res) => {
     try {
-        const { reqId } = req.params;
+        const {requirementId} = req.params;
 
-        const requirement = await ShiftRequirement.findByPk(reqId);
+        const requirement = await ShiftRequirement.findByPk(requirementId);
         if (!requirement) {
-            return res.status(404).json({ message: 'Requirement not found' });
+            return res.status(404).json({message: 'Requirement not found'});
         }
 
         await requirement.destroy();
@@ -171,8 +171,8 @@ const deleteShiftRequirement = async (req, res) => {
 // Get requirements matrix for a position (all shifts, all days)
 const getPositionRequirementsMatrix = async (req, res) => {
     try {
-        const { positionId } = req.params;
-        const { date } = req.query;
+        const {positionId} = req.params;
+        const {date} = req.query;
 
         const targetDate = date ? new Date(date) : new Date();
 
@@ -187,7 +187,7 @@ const getPositionRequirementsMatrix = async (req, res) => {
                 as: 'requirements',
                 where: {
                     [Op.or]: [
-                        { is_recurring: true },
+                        {is_recurring: true},
                         {
                             is_recurring: false,
                             specific_date: targetDate

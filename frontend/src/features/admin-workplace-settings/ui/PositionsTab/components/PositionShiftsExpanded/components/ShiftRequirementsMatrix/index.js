@@ -1,11 +1,12 @@
 // frontend/src/features/admin-workplace-settings/ui/PositionsTab/components/PositionShiftsExpanded/components/ShiftRequirementsMatrix/index.js
-import React, { useEffect, useState } from 'react';
-import { Alert, Badge, Button, Form, Spinner, Table } from 'react-bootstrap';
-import { isEqual } from 'lodash';
+import React, {useEffect, useMemo, useState} from 'react';
+import {AnimatePresence, motion} from "motion/react";
+import {Alert, Badge, Button, Form, Spinner, Table} from 'react-bootstrap';
+import {isEqual} from 'lodash';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
-import { useDispatch, useSelector } from 'react-redux';
-import { useI18n } from 'shared/lib/i18n/i18nProvider';
-import { useBlocker } from 'react-router-dom';
+import {useDispatch, useSelector} from 'react-redux';
+import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import {useBlocker} from 'react-router-dom';
 
 import {
     createShiftRequirement,
@@ -14,8 +15,8 @@ import {
 } from '../../../../../../model/workplaceSlice';
 import './ShiftRequirementsMatrix.css';
 
-const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }) => {
-    const { t } = useI18n();
+const ShiftRequirementsMatrix = ({positionId, shifts, onUpdate, renderActions}) => {
+    const {t} = useI18n();
     const dispatch = useDispatch();
 
     const {
@@ -28,6 +29,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
     const [localMatrix, setLocalMatrix] = useState(null);
     const [isChanged, setIsChanged] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showButtons, setShowButtons] = useState(false);
 
     // Состояние для модального окна
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -35,13 +37,13 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
 
 
     const daysOfWeek = [
-        { id: 0, name: t('days.sunday'), short: t('days.sun') },
-        { id: 1, name: t('days.monday'), short: t('days.mon') },
-        { id: 2, name: t('days.tuesday'), short: t('days.tue') },
-        { id: 3, name: t('days.wednesday'), short: t('days.wed') },
-        { id: 4, name: t('days.thursday'), short: t('days.thu') },
-        { id: 5, name: t('days.friday'), short: t('days.fri') },
-        { id: 6, name: t('days.saturday'), short: t('days.sat') },
+        {id: 0, name: t('days.sunday'), short: t('days.sun')},
+        {id: 1, name: t('days.monday'), short: t('days.mon')},
+        {id: 2, name: t('days.tuesday'), short: t('days.tue')},
+        {id: 3, name: t('days.wednesday'), short: t('days.wed')},
+        {id: 4, name: t('days.thursday'), short: t('days.thu')},
+        {id: 5, name: t('days.friday'), short: t('days.fri')},
+        {id: 6, name: t('days.saturday'), short: t('days.sat')},
     ];
     // Эффект для блокировки ухода со страницы, если есть изменения
     useEffect(() => {
@@ -64,12 +66,43 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
         }
     }, [localMatrix, reduxMatrix]);
 
-
+    // Логика показа кнопок с задержкой, чтобы избежать мерцания
     useEffect(() => {
-        if (positionId) {
-            dispatch(fetchRequirementsMatrix(positionId));
+        if (isChanged) {
+            // Если есть изменения, показываем кнопки с небольшой задержкой
+            const timeoutId = setTimeout(() => {
+                setShowButtons(true);
+            }, 150);
+            return () => clearTimeout(timeoutId);
+        } else {
+            // Если нет изменений, сразу прячем кнопки
+            setShowButtons(false);
         }
-    }, [positionId, dispatch]);
+    }, [isChanged]);
+
+
+    // Мемоизируем ключевые данные о сменах для стабильности
+    const shiftsKey = useMemo(() => {
+        const key = shifts.map(s => `${s.id}-${s.shift_name}-${s.start_time}-${s.end_time}`).sort().join('|');
+        return key;
+    }, [shifts]);
+
+    // Упрощаем логику - всегда обновляем при первом рендере или изменении shiftsKey
+    useEffect(() => {
+        if (!positionId || !shiftsKey) return;
+
+        // Если у нас есть кэшированная матрица и она содержит те же смены
+        const cachedMatrixShiftsKey = reduxMatrix?.shifts
+            ?.map(s => `${s.id}-${s.name}-${s.start_time}-${s.end_time}`)
+            ?.sort()
+            ?.join('|') || '';
+
+        const needsRefresh = cachedMatrixShiftsKey !== shiftsKey;
+
+        if (needsRefresh) {
+            dispatch(fetchRequirementsMatrix({positionId, forceRefresh: true}));
+        }
+    }, [positionId, shiftsKey, dispatch, reduxMatrix?.shifts]);
 
 
     const handleCellChange = (shiftId, dayOfWeek, value) => {
@@ -153,7 +186,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
 
         try {
             await Promise.all([...changesToUpdate, ...changesToCreate]);
-            dispatch(fetchRequirementsMatrix(positionId));
+            dispatch(fetchRequirementsMatrix({positionId}));
         } catch (err) {
             console.error('Failed to save changes:', err);
         } finally {
@@ -199,10 +232,11 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
         return total;
     };
 
-    if (matrixLoading) {
+    // Показываем спиннер только если нет матрицы вообще (первая загрузка)
+    if (matrixLoading && !reduxMatrix) {
         return (
             <div className="text-center py-5">
-                <Spinner animation="border" />
+                <Spinner animation="border"/>
                 <p className="mt-3">{t('common.loading')}</p>
             </div>
         );
@@ -256,64 +290,76 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
                     </tr>
                     </thead>
                     <tbody>
-                    {localMatrix.shifts.map(shift => (
-                        <tr key={shift.id}>
-                            <td className="shift-cell">
-                                <div className="d-flex align-items-center">
-                                    <div
-                                        className="shift-color-dot me-2"
-                                        style={{ backgroundColor: shift.color }}
-                                    />
-                                    <div>
-                                        <div className="fw-semibold">{shift.name}</div>
-                                        <small className="text-muted">
-                                            {shift.start_time.substring(0, 5)} - {shift.end_time.substring(0, 5)}
-                                        </small>
-                                    </div>
-                                </div>
-                            </td>
-                            {daysOfWeek.map(day => {
-                                const requirement = shift.requirements[day.id];
-
-                                return (
-                                    <td key={day.id} className="requirement-cell">
-                                        <div className="custom-number-input">
-                                            <button
-                                                type="button"
-                                                className="btn-increment"
-                                                onClick={() => handleStepChange(shift.id, day.id, +1)}
-                                                tabIndex="-1"
-                                            >
-                                                +
-                                            </button>
-                                            <Form.Control
-                                                type="number"
-                                                min="0"
-                                                max="99"
-                                                value={requirement?.required_staff || 0}
-                                                onChange={(e) => handleCellChange(shift.id, day.id, e.target.value)}
-                                                className={`requirement-input ${requirement?.required_staff === 0 ? 'non-working' : ''}`}
-                                            />
-
-                                            <button
-                                                type="button"
-                                                className="btn-decrement"
-                                                onClick={() => handleStepChange(shift.id, day.id, -1)}
-                                                tabIndex="-1"
-                                            >
-                                                -
-                                            </button>
+                    <AnimatePresence>
+                        {localMatrix?.shifts.map(shift => (
+                            <motion.tr
+                                key={shift.id}
+                                initial={{opacity: 0, height: 0}}
+                                animate={{opacity: 1, height: "auto"}}
+                                exit={{opacity: 0, height: 0}}
+                                transition={{
+                                    duration: 0.3,
+                                    ease: "easeOut"
+                                }}
+                                className="matrix-row"
+                            >
+                                <td className="shift-cell">
+                                    <div className="d-flex align-items-center">
+                                        <div
+                                            className="shift-color-dot me-2"
+                                            style={{backgroundColor: shift.color}}
+                                        />
+                                        <div>
+                                            <div className="fw-semibold">{shift.name}</div>
+                                            <small className="text-muted">
+                                                {shift.start_time.substring(0, 5)} - {shift.end_time.substring(0, 5)}
+                                            </small>
                                         </div>
-                                    </td>
-                                );
-                            })}
-                            <td className="total-cell">
-                                <Badge bg="secondary" className="total-badge">
-                                    {getTotalForShift(shift)}
-                                </Badge>
-                            </td>
-                        </tr>
-                    ))}
+                                    </div>
+                                </td>
+                                {daysOfWeek.map(day => {
+                                    const requirement = shift.requirements[day.id];
+
+                                    return (
+                                        <td key={day.id} className="requirement-cell">
+                                            <div className="custom-number-input">
+                                                <button
+                                                    type="button"
+                                                    className="btn-increment"
+                                                    onClick={() => handleStepChange(shift.id, day.id, +1)}
+                                                    tabIndex="-1"
+                                                >
+                                                    +
+                                                </button>
+                                                <Form.Control
+                                                    type="number"
+                                                    min="0"
+                                                    max="99"
+                                                    value={requirement?.required_staff || 0}
+                                                    onChange={(e) => handleCellChange(shift.id, day.id, e.target.value)}
+                                                    className={`requirement-input ${requirement?.required_staff === 0 ? 'non-working' : ''}`}
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    className="btn-decrement"
+                                                    onClick={() => handleStepChange(shift.id, day.id, -1)}
+                                                    tabIndex="-1"
+                                                >
+                                                    -
+                                                </button>
+                                            </div>
+                                        </td>
+                                    );
+                                })}
+                                <td className="total-cell">
+                                    <Badge bg="secondary" className="total-badge">
+                                        {getTotalForShift(shift)}
+                                    </Badge>
+                                </td>
+                            </motion.tr>
+                        ))}
+                    </AnimatePresence>
                     </tbody>
                     <tfoot>
                     <tr>
@@ -344,7 +390,7 @@ const ShiftRequirementsMatrix = ({ positionId, shifts, onUpdate, renderActions }
                 </small>
             </div>
             {renderActions && renderActions({
-                isChanged,
+                isChanged: showButtons, // Используем showButtons вместо isChanged для отображения кнопок
                 isSaving,
                 handleSave,
                 handleReset,

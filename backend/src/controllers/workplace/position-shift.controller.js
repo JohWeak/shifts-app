@@ -77,9 +77,21 @@ const createPositionShift = async (req, res) => {
             }
         });
 
+        console.log(`[DEBUG] Creating shift for position_id: ${position_id}`);
+        console.log(`[DEBUG] Position name: ${position.pos_name}`);
+        console.log(`[DEBUG] New shift time: ${start_time} - ${end_time}`);
+        console.log(`[DEBUG] Existing active shifts for this position:`, existingShifts.map(s => ({
+            id: s.id, 
+            name: s.shift_name, 
+            time: `${s.start_time}-${s.end_time}`,
+            position_id: s.position_id
+        })));
+
         // Simple overlap check (can be enhanced)
         for (const shift of existingShifts) {
+            console.log(`[DEBUG] Checking overlap with shift "${shift.shift_name}" (${shift.start_time}-${shift.end_time})`);
             if (checkTimeOverlap(start_time, end_time, shift.start_time, shift.end_time)) {
+                console.log(`[DEBUG] OVERLAP DETECTED with shift "${shift.shift_name}"`);
                 return res.status(400).json({
                     message: 'Shift time overlaps with existing shift',
                     conflictingShift: shift.shift_name

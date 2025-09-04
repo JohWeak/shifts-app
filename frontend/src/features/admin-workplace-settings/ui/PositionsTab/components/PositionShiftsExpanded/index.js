@@ -37,6 +37,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
     const shifts = showInactive
         ? allShifts
         : allShifts.filter(shift => shift.is_active !== false);
+        
 
     const isLoading = shiftsLoading && allShifts.length === 0;
 
@@ -198,7 +199,7 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                             </Nav.Link>
                                         </Nav.Item>
                                         <Nav.Item>
-                                            <Nav.Link eventKey="matrix" disabled={!shifts || shifts.length === 0}>
+                                            <Nav.Link eventKey="matrix" disabled={allShifts.filter(shift => shift.is_active !== false).length === 0}>
                                                 <i className="bi bi-grid-3x3 me-2"></i>
                                                 {t('workplace.shifts.requirementsTab')}
                                             </Nav.Link>
@@ -330,8 +331,8 @@ const PositionShiftsExpanded = ({position, isClosing}) => {
                                         )}
                                         {activeView === 'matrix' && shifts.length > 0 && (
                                             <ShiftRequirementsMatrix
-                                                positionId={position.pos_id}
-                                                shifts={shifts}
+                                                positionId={position?.pos_id}
+                                                shifts={allShifts.filter(shift => shift.is_active !== false)}
                                                 onUpdate={handleMatrixUpdate}
                                                 renderActions={({
                                                                     isChanged,

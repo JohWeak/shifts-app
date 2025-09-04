@@ -175,7 +175,7 @@ const AdminDashboard = () => {
                                     </Col>
                                     <Col sm={6} md={4}>
                                         <Button
-                                            variant="outline-info"
+                                            variant="outline-primary"
                                             size="lg"
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/workplace')}
@@ -186,7 +186,7 @@ const AdminDashboard = () => {
                                     </Col>
                                     <Col sm={6} md={4}>
                                         <Button
-                                            variant="outline-primary"
+                                            variant="outline-info"
                                             size="lg"
                                             className="w-100 action-button"
                                             onClick={() => navigate('/admin/employees')}

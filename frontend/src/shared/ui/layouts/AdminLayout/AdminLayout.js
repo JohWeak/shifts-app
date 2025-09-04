@@ -17,6 +17,7 @@ import './AdminLayout.css';
 const AdminLayout = () => {
     const {t, direction} = useI18n();
     const {pendingCount} = useSelector(state => state.adminRequests);
+    const {user} = useSelector(state => state.auth);
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
@@ -222,7 +223,8 @@ const AdminLayout = () => {
                             <Dropdown.Menu className="user-dropdown-menu shadow">
                                 <Dropdown.Header>
                                     <div className="text-muted small">{t('auth.signedInAs')}</div>
-                                    <div className="fw-semibold">{t('common.admin')}</div>
+                                    <div className="fw-semibold">{user?.name || t('common.admin')}</div>
+                                    <div className="fw-semibold text-muted small">{t('common.admin')}</div>
                                 </Dropdown.Header>
                                 <Dropdown.Divider/>
                                 <Dropdown.Item as={Link} to="/admin/profile">

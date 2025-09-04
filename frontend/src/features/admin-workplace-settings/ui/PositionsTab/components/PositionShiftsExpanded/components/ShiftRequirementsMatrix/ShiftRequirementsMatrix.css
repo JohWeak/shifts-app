@@ -166,6 +166,19 @@
     background-color: #343a40;
 }
 
+/* Анимация для таблицы */
+.requirements-matrix-container .requirements-matrix tbody {
+    transition: all 0.2s ease-in-out;
+}
+
+.requirements-matrix-container .requirements-matrix tfoot {
+    transition: transform 0.2s ease-in-out;
+}
+
+.requirements-matrix-container .requirements-matrix tfoot tr {
+    transition: all 0.2s ease-in-out;
+}
+
 @media (max-width: 768px) {
     .requirement-input {
         font-size: 0.875rem;
