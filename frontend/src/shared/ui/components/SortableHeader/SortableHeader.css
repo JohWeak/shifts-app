@@ -28,10 +28,6 @@
     cursor: pointer;
 }
 
-.sortable-header.is-sortable {
-    user-select: none;
-}
-
 .header-content {
     display: flex;
     justify-content: start;
