@@ -25,6 +25,7 @@ import {
 import { fetchPositions } from '../admin-workplace-settings/model/workplaceSlice';
 import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
 import './index.css';
+import ScheduleManagementSkeleton from './ui/ScheduleManagementSkeleton/ScheduleManagementSkeleton';
 
 const ScheduleManagement = () => {
     const { t, direction } = useI18n();
@@ -36,6 +37,8 @@ const ScheduleManagement = () => {
         schedules,
         workSites,
         workSitesLoading,
+        loading,
+        schedulesLoading,
     } = useSelector((state) => state.schedule);
 
     const { loading: actionsLoading, handleGenerate } = useScheduleActions();
@@ -62,6 +65,21 @@ const ScheduleManagement = () => {
         dispatch(fetchPositions());
         dispatch(fetchSystemSettings());
     }, [dispatch]);
+
+    // Clean up invalid selectedScheduleId when schedules are loaded
+    useEffect(() => {
+        // Only clear invalid IDs, don't auto-load to avoid delays
+        if (selectedScheduleId && schedulesLoading === 'succeeded' && schedules.length > 0) {
+            const scheduleExists = schedules.some(s => s.id === selectedScheduleId);
+            if (!scheduleExists) {
+                // Clear invalid selectedScheduleId
+                dispatch(setSelectedScheduleId(null));
+            }
+        } else if (selectedScheduleId && schedulesLoading === 'succeeded' && schedules.length === 0) {
+            // If schedules loaded successfully but empty, clear invalid selectedScheduleId
+            dispatch(setSelectedScheduleId(null));
+        }
+    }, [selectedScheduleId, schedules, schedulesLoading, dispatch]);
 
     useEffect(() => {
         if (schedules && schedules.length > 0) {
@@ -142,6 +160,11 @@ const ScheduleManagement = () => {
             ? `calc(${panelWidth}% + ${GAP_VALUE})`
             : '0';
         delete contentStyles.marginRight;
+    }
+
+    // Show skeleton only on initial load (when schedules are empty and loading)
+    if (schedulesLoading === 'pending' && schedules.length === 0) {
+        return <ScheduleManagementSkeleton />;
     }
 
     return (
