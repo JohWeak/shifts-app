@@ -266,6 +266,7 @@ const scheduleSlice = createSlice({
 
         // Loading states
         loading: 'idle',
+        schedulesLoading: 'idle', // Separate loading state for schedules list
         workSitesLoading: 'idle',
         recommendationsLoading: 'idle',
 
@@ -273,7 +274,14 @@ const scheduleSlice = createSlice({
         error: null,
 
         // UI States
-        selectedScheduleId: null,
+        selectedScheduleId: (() => {
+            try {
+                const saved = sessionStorage.getItem('selectedScheduleId');
+                return saved ? parseInt(saved, 10) : null;
+            } catch {
+                return null;
+            }
+        })(),
         editingPositions: {},
         pendingChanges: {},
 
@@ -313,6 +321,16 @@ const scheduleSlice = createSlice({
         setSelectedScheduleId(state, action) {
             state.selectedScheduleId = action.payload;
             state.scheduleDetails = null;
+            // Save to sessionStorage
+            try {
+                if (action.payload) {
+                    sessionStorage.setItem('selectedScheduleId', action.payload);
+                } else {
+                    sessionStorage.removeItem('selectedScheduleId');
+                }
+            } catch {
+                // Ignore sessionStorage errors
+            }
         },
         // Synchronous actions for managing editing
         toggleEditPosition(state, action) {
@@ -403,6 +421,12 @@ const scheduleSlice = createSlice({
 
         resetScheduleView(state) {
             state.selectedScheduleId = null;
+            // Remove from sessionStorage
+            try {
+                sessionStorage.removeItem('selectedScheduleId');
+            } catch {
+                // Ignore sessionStorage errors
+            }
         },
 
         clearCache(state, action) {
@@ -436,16 +460,16 @@ const scheduleSlice = createSlice({
         builder
             // Handle fetchSchedules
             .addCase(fetchSchedules.pending, (state) => {
-                state.loading = 'pending';
+                state.schedulesLoading = 'pending';
                 state.error = null;
             })
             .addCase(fetchSchedules.fulfilled, (state, action) => {
-                state.loading = 'succeeded';
+                state.schedulesLoading = 'succeeded';
                 state.schedules = action.payload;
                 state.error = null;
             })
             .addCase(fetchSchedules.rejected, (state, action) => {
-                state.loading = 'failed';
+                state.schedulesLoading = 'failed';
                 state.error = action.payload || 'Failed to fetch schedules';
             })
 
@@ -481,7 +505,12 @@ const scheduleSlice = createSlice({
                 state.loading = 'idle';
                 if (action.payload?.schedule_id) {
                     state.selectedScheduleId = action.payload.schedule_id;
-
+                    // Save to sessionStorage
+                    try {
+                        sessionStorage.setItem('selectedScheduleId', action.payload.schedule_id);
+                    } catch {
+                        // Ignore sessionStorage errors
+                    }
                 }
                 state.error = null;
             })
