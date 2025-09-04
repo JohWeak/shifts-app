@@ -26,6 +26,9 @@
 
 .sortable-header.is-sortable {
     cursor: pointer;
+}
+
+.sortable-header.is-sortable {
     user-select: none;
 }
 
@@ -33,9 +36,12 @@
     display: flex;
     justify-content: start;
     align-items: center;
-    gap: 0.5rem;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+}
+
+.header-content {
+    gap: 0.5rem;
 }
 
 .header-content span {
