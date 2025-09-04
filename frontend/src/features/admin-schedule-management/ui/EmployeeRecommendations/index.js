@@ -38,7 +38,9 @@ const EmployeeRecommendations = ({
 
 
     useEffect(() => {
-        localStorage.setItem('recommendationActiveTab', activeTab);
+        if (activeTab !== 'unavailable') {
+            localStorage.setItem('recommendationActiveTab', activeTab);
+        }
         if (onTabChange) {
             onTabChange(activeTab);
         }
@@ -46,7 +48,9 @@ const EmployeeRecommendations = ({
 
     // Determine the best tab based on recommendations data
     useEffect(() => {
-        if (!recommendations) return;
+        if (recommendationsLoading || !recommendations) {
+            return;
+        }
 
         const savedTab = localStorage.getItem('recommendationActiveTab');
         let bestTab;
@@ -65,13 +69,6 @@ const EmployeeRecommendations = ({
         // Check if saved tab has data
         const hasDataForSavedTab = () => {
             if (!savedTab) return false;
-            if (savedTab === 'unavailable') {
-                const countUnavailable = (recommendations.unavailable_soft?.length || 0) +
-                    (recommendations.unavailable_hard?.length || 0) +
-                    (recommendations.unavailable_busy?.length || 0) +
-                    (recommendations.unavailable_permanent?.length || 0);
-                return countUnavailable > 0;
-            }
             return recommendations[savedTab]?.length > 0;
         };
 
@@ -81,7 +78,7 @@ const EmployeeRecommendations = ({
         } else {
             setActiveTab(bestTab);
         }
-    }, [recommendations]);
+    }, [recommendations, recommendationsLoading]);
 
 
     if (!selectedPosition || !scheduleDetails) {
@@ -96,6 +93,15 @@ const EmployeeRecommendations = ({
         (recommendations?.unavailable_hard?.length || 0) +
         (recommendations?.unavailable_busy?.length || 0) +
         (recommendations?.unavailable_permanent?.length || 0);
+
+    const TabTitle = ({ count, label, variant }) => (
+        <span>
+        <Badge bg={variant} pill className="me-2">
+            {count}
+        </Badge>
+            {label}
+    </span>
+    );
 
     return (
         <div className="employee-recommendations" style={{ containerType: 'inline-size' }}>
@@ -117,32 +123,52 @@ const EmployeeRecommendations = ({
                 <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-3">
                     <Tab
                         eventKey="available"
-                        title={<span><Badge bg="success" pill
-                                            className="me-2">{recommendations?.available?.length || 0}</Badge>{t('employee.tabs.available')}</span>}
+                        title={
+                            <TabTitle
+                                count={recommendations?.available?.length || 0}
+                                label={t('employee.tabs.available')}
+                                variant="success"
+                            />
+                        }
                     >
                         <EmployeeList employees={recommendations?.available} type="available"
                                       onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="unavailable"
-                        title={<span><Badge bg="danger" pill
-                                            className="me-2">{countUnavailable}</Badge>{t('employee.tabs.unavailable')}</span>}
+                        title={
+                            <TabTitle
+                                count={countUnavailable}
+                                label={t('employee.tabs.unavailable')}
+                                variant="danger"
+                            />
+                        }
                     >
                         <UnavailableEmployeeGroups recommendations={recommendations} onItemClick={onEmployeeSelect}
                                                    searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="cross_position"
-                        title={<span><Badge bg="warning" pill
-                                            className="me-2">{recommendations?.cross_position?.length || 0}</Badge>{t('employee.tabs.crossPosition')}</span>}
+                        title={
+                            <TabTitle
+                                count={recommendations?.cross_position?.length || 0}
+                                label={t('employee.tabs.crossPosition')}
+                                variant="warning"
+                            />
+                        }
                     >
                         <EmployeeList employees={recommendations?.cross_position} type="cross_position"
                                       onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
                     </Tab>
                     <Tab
                         eventKey="other_site"
-                        title={<span><Badge bg="info" pill
-                                            className="me-2">{recommendations?.other_site?.length || 0}</Badge>{t('employee.tabs.otherSite')}</span>}
+                        title={
+                            <TabTitle
+                                count={recommendations?.other_site?.length || 0}
+                                label={t('employee.tabs.otherSite')}
+                                variant="info"
+                            />
+                        }
                     >
                         <EmployeeList employees={recommendations?.other_site} type="other_site"
                                       onItemClick={onEmployeeSelect} searchTerm={searchTerm} />
