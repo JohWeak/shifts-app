@@ -252,6 +252,7 @@ export const en = {
         deselectAll: 'Deselect All',
         noEmail: 'No email set',
         logout: 'Logout',
+        value: 'Value',
 
     },
     constraints: {
