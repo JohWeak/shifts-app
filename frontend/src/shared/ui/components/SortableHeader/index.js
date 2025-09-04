@@ -2,7 +2,7 @@
 import React from 'react';
 import './SortableHeader.css';
 
-const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) => {
+const SortableHeader = ({children, sortKey, sortConfig, className, onSort, ...thProps}) => {
 
     const isSortable = !!onSort;
     const isSorted = isSortable && sortConfig?.field === sortKey;
@@ -19,6 +19,7 @@ const SortableHeader = ({ children, sortKey, sortConfig, onSort, ...thProps }) =
         }
     };
     const headerClasses = [
+        className,
         'sortable-header',
         isSortable ? 'is-sortable' : '',
         isSorted ? 'sorted' : '',

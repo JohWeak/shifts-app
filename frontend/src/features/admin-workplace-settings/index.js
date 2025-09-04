@@ -3,7 +3,6 @@ import {Card, Container, Nav, Tab} from 'react-bootstrap';
 import {useDispatch} from 'react-redux';
 import {useLocation} from "react-router-dom";
 import {AnimatePresence, motion} from 'motion/react';
-import LoadingState from 'shared/ui/components/LoadingState';
 import TopProgressBar from '../../shared/ui/components/TopProgressBar';
 
 import {useI18n} from 'shared/lib/i18n/i18nProvider';
@@ -15,6 +14,7 @@ import DisplaySettingsTab from './ui/DisplaySettingsTab';
 import {preloadWorkplaceData} from './model/workplaceSlice';
 
 import './index.css';
+import WorkplaceSettingsSkeleton from "./ui/WorkplaceSettingsSkeleton/WorkplaceSettingsSkeleton";
 
 
 const WorkplaceSettings = () => {
@@ -82,7 +82,7 @@ const WorkplaceSettings = () => {
         return (
             <Container fluid>
                 <TopProgressBar/>
-                <LoadingState/>
+                <WorkplaceSettingsSkeleton/>
             </Container>
         );
     }

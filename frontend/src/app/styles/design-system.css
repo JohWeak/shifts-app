@@ -40,12 +40,14 @@
     --bs-gray-900: #212529;
     --bs-black: #000000;
 
+
     /* Bootstrap Theme Colors */
     --bs-body-bg: #f8f9fa;
     --bs-body-bg-rgb: 248, 249, 250;
     --bs-body-color: #2c3137;
     --bs-body-tertiary: #6c757d;
     --bs-emphasis-color: #000;
+    --bs-unigray: #6c757d;
 
     --bs-border-color: #e9ecef;
     --bs-border-color-translucent: rgba(0, 0, 0, .175);

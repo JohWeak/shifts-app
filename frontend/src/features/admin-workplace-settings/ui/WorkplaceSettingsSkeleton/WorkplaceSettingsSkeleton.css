@@ -1,0 +1,23 @@
+/* frontend/src/features/admin-workplace-settings/ui/WorkplaceSettingsSkeleton/WorkplaceSettingsSkeleton.css */
+
+.skeleton-toolbar .placeholder {
+    height: 38px; /* Match height of Form.Control and Button */
+}
+
+.skeleton-h5 {
+    width: 150px; /* Give the header a defined width */
+}
+
+.workplace-settings-placeholder .table > :not(caption) > * > * {
+    padding: 1rem;
+}
+
+.workplace-settings-placeholder .placeholder {
+    border-radius: var(--radius-sm);
+    background-color: var(--bs-unigray);
+}
+
+.workplace-settings-placeholder .placeholder.btn {
+    background-color: var(--bs-primary);
+    width: 150px;
+}
