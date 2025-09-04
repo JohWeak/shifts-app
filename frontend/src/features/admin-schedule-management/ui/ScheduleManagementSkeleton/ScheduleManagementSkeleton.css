@@ -1,0 +1,22 @@
+/* frontend/src/features/admin-schedule-management/ui/ScheduleManagementSkeleton/ScheduleManagementSkeleton.css */
+
+.skeleton-h5 {
+    width: 150px;
+    height: 1.25rem;
+}
+
+.schedule-management-placeholder {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.schedule-management-placeholder .placeholder {
+    border-radius: var(--radius-sm);
+    background-color: var(--bs-unigray);
+}
+
+.schedule-management-placeholder .placeholder.btn {
+    background-color: var(--bs-primary);
+    width: 200px;
+    height: 38px;
+}
