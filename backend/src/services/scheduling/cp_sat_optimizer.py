@@ -6,29 +6,29 @@ import sys
 from ortools.sat.python import cp_model
 
 
-def _parse_time(time_str):
-    """Convert time format HH:MM:SS to hours"""
+def _parse_time_to_minutes(time_str):
+    """Convert time format HH:MM:SS to total minutes from midnight"""
     parts = time_str.split(':')
-    return int(parts[0]) + int(parts[1]) / 60
+    return int(parts[0]) * 60 + int(parts[1])
 
 
-def _calculate_rest_hours(shift1, shift2, is_next_day=False):
-    """Calculate rest hours between two shifts"""
-    shift1_end = _parse_time(shift1['start_time']) + shift1['duration']
-    shift2_start = _parse_time(shift2['start_time'])
+def _calculate_rest_minutes(shift1, shift2, is_next_day=False):
+    """Calculate rest minutes between two shifts"""
+    shift1_end_minutes = _parse_time_to_minutes(shift1['start_time']) + shift1['duration_minutes']
+    shift2_start_minutes = _parse_time_to_minutes(shift2['start_time'])
+
+    minutes_in_a_day = 24 * 60
 
     if is_next_day:
-        # Shifts on different days
-        if shift1_end > 24:  # Night shift extends to next day
-            shift1_end -= 24
-            rest_hours = shift2_start - shift1_end
+        if shift1_end_minutes > minutes_in_a_day:  # Night shift extends to next day
+            shift1_end_minutes -= minutes_in_a_day
+            rest_minutes = shift2_start_minutes - shift1_end_minutes
         else:
-            rest_hours = (24 - shift1_end) + shift2_start
+            rest_minutes = (minutes_in_a_day - shift1_end_minutes) + shift2_start_minutes
     else:
-        # Shifts on same day
-        rest_hours = shift2_start - shift1_end
+        rest_minutes = shift2_start_minutes - shift1_end_minutes
 
-    return rest_hours
+    return rest_minutes
 
 
 class UniversalShiftSchedulerCP:
@@ -47,32 +47,27 @@ class UniversalShiftSchedulerCP:
         days = data['days']
         constraints = data['constraints']
         settings = data.get('settings', {})
-        # Extract position-shift mapping
         position_shifts_map = data.get('position_shifts_map', {})
 
-        # Get constraints from configuration with UPPERCASE keys
         hard_constraints = settings.get('hard_constraints', {})
         soft_constraints = settings.get('soft_constraints', {})
         optimization_weights = settings.get('optimization_weights', {})
 
-        # Extract all constraint types
         permanent_cannot_work = constraints.get('permanent_cannot_work', [])
         temporary_cannot_work = constraints.get('cannot_work', [])
         prefer_work = constraints.get('prefer_work', [])
-        legal_constraints = constraints.get('legal_constraints', [])
 
         print(f"[Universal CP-SAT] Constraints loaded:")
         print(f"  - Permanent cannot work: {len(permanent_cannot_work)}")
         print(f"  - Temporary cannot work: {len(temporary_cannot_work)}")
         print(f"  - Prefer work: {len(prefer_work)}")
-        print(f"  - Legal constraints: {len(legal_constraints)}")
 
-        # Hard constraints (law) - READ WITH UPPERCASE KEYS
-        max_hours_per_day = hard_constraints.get('MAX_HOURS_PER_DAY', 12)
-        max_hours_per_week = hard_constraints.get('MAX_HOURS_PER_WEEK', 48)
-        min_rest_between_shifts = hard_constraints.get('MIN_REST_BETWEEN_SHIFTS', 11)
-        min_rest_after_night = hard_constraints.get('MIN_REST_AFTER_NIGHT_SHIFT', 12)
-        min_rest_after_regular = hard_constraints.get('MIN_REST_AFTER_REGULAR_SHIFT', 11)
+        # Hard constraints (law) - in MINUTES
+        max_minutes_per_day = hard_constraints.get('MAX_HOURS_PER_DAY', 12) * 60
+        max_minutes_per_week = hard_constraints.get('MAX_HOURS_PER_WEEK', 48) * 60
+        min_rest_minutes_between_shifts = hard_constraints.get('MIN_REST_BETWEEN_SHIFTS', 11) * 60
+        min_rest_minutes_after_night = hard_constraints.get('MIN_REST_AFTER_NIGHT_SHIFT', 12) * 60
+        min_rest_minutes_after_regular = hard_constraints.get('MIN_REST_AFTER_REGULAR_SHIFT', 11) * 60
         max_night_shifts_per_week = hard_constraints.get('MAX_NIGHT_SHIFTS_PER_WEEK', 3)
 
         # Soft constraints (admin settings) - READ WITH UPPERCASE KEYS
@@ -90,7 +85,7 @@ class UniversalShiftSchedulerCP:
         excess_assignment_penalty = optimization_weights.get('EXCESS_ASSIGNMENT_PENALTY', 100)
 
         print(f"[Universal CP-SAT] Configuration from constants:")
-        print(f"  - Max {max_hours_per_day}h/day, min {min_rest_between_shifts}h rest")
+        print(f"  - Max {max_minutes_per_day / 60}h/day, min {min_rest_minutes_between_shifts / 60}h rest")
         print(f"  - Max {max_shifts_per_day} shifts/day, {max_consecutive_work_days} consecutive days")
         print(f"  - Shortage penalty: {shortage_penalty}, Prefer work bonus: {prefer_work_bonus}")
 
@@ -270,39 +265,36 @@ class UniversalShiftSchedulerCP:
         for emp in employees:
             emp_id = emp['emp_id']
             for day_idx in range(len(days)):
-                day_hours = []
+                day_minutes = []
                 day_assignments = []
-
                 for shift in shifts:
                     for position in positions:
-                        if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                            assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
+                        key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                        if key in assignments:
+                            assignment_var = assignments[key]
                             day_assignments.append(assignment_var)
-                            # Account for actual shift duration
-                            day_hours.append(assignment_var * shift['duration'])
+                            ## FIXED ## - Use duration_minutes for calculations
+                            day_minutes.append(assignment_var * shift['duration_minutes'])
 
-                # Hard constraint on hours
-                if day_hours:
-                    self.model.Add(sum(day_hours) <= max_hours_per_day)
-
-                # Soft constraint on number of shifts (usually 1 per day)
+                if day_minutes:
+                    self.model.Add(sum(day_minutes) <= max_minutes_per_day)
                 if day_assignments:
                     self.model.Add(sum(day_assignments) <= max_shifts_per_day)
 
         # 3.2 Maximum hours per week
         for emp in employees:
             emp_id = emp['emp_id']
-            week_hours = []
-
+            week_minutes = []
             for day_idx in range(len(days)):
                 for shift in shifts:
                     for position in positions:
-                        if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
-                            assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
-                            week_hours.append(assignment_var * shift['duration'])
-
-            if week_hours:
-                self.model.Add(sum(week_hours) <= max_hours_per_week)
+                        key = (emp_id, day_idx, shift['shift_id'], position['pos_id'])
+                        if key in assignments:
+                            assignment_var = assignments[key]
+                            ## FIXED ## - Use duration_minutes for calculations
+                            week_minutes.append(assignment_var * shift['duration_minutes'])
+            if week_minutes:
+                self.model.Add(sum(week_minutes) <= max_minutes_per_week)
 
         # 3.3 Minimum rest between shifts on same day
         for emp in employees:
@@ -310,18 +302,15 @@ class UniversalShiftSchedulerCP:
             for day_idx in range(len(days)):
                 for i, shift1 in enumerate(shifts):
                     for j, shift2 in enumerate(shifts):
-                        if i < j:  # Only check different shifts
-                            rest_hours = _calculate_rest_hours(shift1, shift2, False)
-
-                            if rest_hours < min_rest_between_shifts:
-                                # Cannot work both shifts
+                        if i < j:
+                            ## FIXED ## - Use helper function for minutes
+                            rest_minutes = _calculate_rest_minutes(shift1, shift2, False)
+                            if rest_minutes < min_rest_minutes_between_shifts:
                                 for position in positions:
-                                    if ((emp_id, day_idx, shift1['shift_id'], position['pos_id']) in assignments and
-                                            (emp_id, day_idx, shift2['shift_id'], position['pos_id']) in assignments):
-                                        self.model.Add(
-                                            assignments[(emp_id, day_idx, shift1['shift_id'], position['pos_id'])] +
-                                            assignments[(emp_id, day_idx, shift2['shift_id'], position['pos_id'])] <= 1
-                                        )
+                                    key1 = (emp_id, day_idx, shift1['shift_id'], position['pos_id'])
+                                    key2 = (emp_id, day_idx, shift2['shift_id'], position['pos_id'])
+                                    if key1 in assignments and key2 in assignments:
+                                        self.model.Add(assignments[key1] + assignments[key2] <= 1)
 
         # 3.4 Minimum rest between shifts on consecutive days
         for emp in employees:
@@ -329,20 +318,19 @@ class UniversalShiftSchedulerCP:
             for day_idx in range(len(days) - 1):
                 for shift1 in shifts:
                     for shift2 in shifts:
-                        rest_hours = _calculate_rest_hours(shift1, shift2, True)
+                        rest_minutes = _calculate_rest_minutes(shift1, shift2, True)
 
                         # Use appropriate rest requirement based on shift type
-                        required_rest = min_rest_after_night if shift1.get('is_night_shift',
-                                                                           False) else min_rest_after_regular
+                        required_rest = min_rest_minutes_after_night \
+                            if shift1.get('is_night_shift', False) \
+                            else min_rest_minutes_after_regular
 
-                        if rest_hours < required_rest:
+                        if rest_minutes < required_rest:
                             for position in positions:
-                                if ((emp_id, day_idx, shift1['shift_id'], position['pos_id']) in assignments and
-                                        (emp_id, day_idx + 1, shift2['shift_id'], position['pos_id']) in assignments):
-                                    self.model.Add(
-                                        assignments[(emp_id, day_idx, shift1['shift_id'], position['pos_id'])] +
-                                        assignments[(emp_id, day_idx + 1, shift2['shift_id'], position['pos_id'])] <= 1
-                                    )
+                                key1 = (emp_id, day_idx, shift1['shift_id'], position['pos_id'])
+                                key2 = (emp_id, day_idx + 1, shift2['shift_id'], position['pos_id'])
+                                if key1 in assignments and key2 in assignments:
+                                    self.model.Add(assignments[key1] + assignments[key2] <= 1)
 
         # 4. SOFT CONSTRAINTS
 
@@ -442,7 +430,7 @@ class UniversalShiftSchedulerCP:
 
             # Employee works if they have any assignment
             emp_assignments = []
-            total_hours_terms = []
+            total_minutes_terms = []
 
             for day_idx in range(len(days)):
                 for shift in shifts:
@@ -450,17 +438,17 @@ class UniversalShiftSchedulerCP:
                         if (emp_id, day_idx, shift['shift_id'], position['pos_id']) in assignments:
                             assignment_var = assignments[(emp_id, day_idx, shift['shift_id'], position['pos_id'])]
                             emp_assignments.append(assignment_var)
-                            total_hours_terms.append(assignment_var * shift['duration'])
+                            total_minutes_terms.append(assignment_var * shift['duration_minutes'])
 
             if emp_assignments:
                 self.model.AddMaxEquality(emp_works, emp_assignments)
                 unique_employees_working.append(emp_works)
 
                 # Calculate total hours for this employee
-                total_hours = self.model.NewIntVar(0, 200, f'total_hours_{emp_id}')
-                if total_hours_terms:
-                    self.model.Add(total_hours == sum(total_hours_terms))
-                    employee_workload[emp_id] = total_hours
+                total_minutes = self.model.NewIntVar(0, max_minutes_per_week, f'total_minutes_{emp_id}')
+                if total_minutes_terms:
+                    self.model.Add(total_minutes == sum(total_minutes_terms))
+                    employee_workload[emp_id] = total_minutes
 
                 # Efficiency component: penalty for using more employees (stronger when fairness_weight is low)
                 efficiency_penalty = (100 - fairness_weight) / 20  # Scale 0-5
@@ -470,22 +458,22 @@ class UniversalShiftSchedulerCP:
         # 5.5 Fairness component: minimize workload variance (stronger when fairness_weight is high)
         if len(employee_workload) > 1 and fairness_weight > 0:
             # Create variables for workload differences between employees
-            max_workload = self.model.NewIntVar(0, 200, 'max_workload')
-            min_workload = self.model.NewIntVar(0, 200, 'min_workload')
+            max_workload = self.model.NewIntVar(0, max_minutes_per_week, 'max_workload')
+            min_workload = self.model.NewIntVar(0, max_minutes_per_week, 'min_workload')
 
             # Set bounds for max and min workload
-            for emp_id, hours in employee_workload.items():
-                self.model.Add(hours <= max_workload)
-                self.model.Add(hours >= min_workload)
+            for emp_id, minutes in employee_workload.items():
+                self.model.Add(minutes <= max_workload)
+                self.model.Add(minutes >= min_workload)
 
             # Minimize the difference between max and min workload (fairness objective)
-            workload_variance = self.model.NewIntVar(0, 200, 'workload_variance')
+            workload_variance = self.model.NewIntVar(0, max_minutes_per_week, 'workload_variance')
             self.model.Add(workload_variance == max_workload - min_workload)
 
             # Add fairness objective (stronger when fairness_weight is high)
-            fairness_importance = fairness_weight / 10  # Scale 0-10
+            fairness_importance = fairness_weight / 10
             if fairness_importance > 0:
-                objective_terms.append(workload_variance * -fairness_importance)
+                objective_terms.append(workload_variance * -int(fairness_importance))
 
         # Set objective function
         if objective_terms:
@@ -545,7 +533,7 @@ class UniversalShiftSchedulerCP:
             assignment_index = 0
             for emp in employees:
                 emp_id = emp['emp_id']
-                emp_hours = 0
+                emp_total_minutes = 0
                 emp_shifts = 0
 
                 for day_idx, day in enumerate(days):
@@ -562,14 +550,14 @@ class UniversalShiftSchedulerCP:
                                 })
                                 assignment_index += 1
                                 stats['total_assignments'] += 1
-                                emp_hours += shift['duration']
+                                emp_total_minutes += shift['duration_minutes']
                                 emp_shifts += 1
 
                                 if emp.get('default_position_id') == position['pos_id']:
                                     stats['position_matches'] += 1
 
                 if emp_shifts > 0:
-                    stats['hours_per_employee'][emp_id] = emp_hours
+                    stats['hours_per_employee'][emp_id] = emp_total_minutes / 60.0
                     stats['shifts_per_employee'][emp_id] = emp_shifts
 
             # Calculate shortage

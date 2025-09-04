@@ -1,10 +1,10 @@
 // backend/src/services/cp-sat-bridge.service.js
-const { spawn } = require('child_process');
+const {spawn} = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
 const db = require('../../models');
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const CONSTRAINTS = require('../../config/scheduling-constraints');
 
 class CPSATBridge {
@@ -98,13 +98,13 @@ class CPSATBridge {
                     {
                         model: EmployeeConstraint,
                         as: 'constraints',
-                        where: { status: 'active' },
+                        where: {status: 'active'},
                         required: false,
                     },
                     {
                         model: PermanentConstraint,
                         as: 'permanentConstraints',
-                        where: { is_active: true },
+                        where: {is_active: true},
                         required: false,
                         include: [{
                             model: Employee,
@@ -120,7 +120,7 @@ class CPSATBridge {
 
             // Get legal constraints
             const legalConstraints = await LegalConstraint.findAll({
-                where: { is_active: true },
+                where: {is_active: true},
                 transaction,
             });
 
@@ -129,18 +129,18 @@ class CPSATBridge {
                 site_id: siteId,
                 is_active: true,
             };
-            
+
             // Filter by position IDs if provided
             if (positionIds && positionIds.length > 0) {
                 positionWhere.pos_id = positionIds;
             }
-            
+
             const positions = await Position.findAll({
                 where: positionWhere,
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     include: [{
                         model: ShiftRequirement,
@@ -173,6 +173,7 @@ class CPSATBridge {
                         shift_name: posShift.shift_name,
                         start_time: posShift.start_time,
                         duration: posShift.duration_hours || 8,
+                        duration_minutes: Math.round((parseFloat(posShift.duration_hours) || 8) * 60),
                         shift_type: this.determineShiftType(posShift.start_time),
                         is_night_shift: posShift.is_night_shift || false,
                         position_id: position.pos_id,
@@ -277,7 +278,7 @@ class CPSATBridge {
 
                 days.push({
                     date: currentDate.toISOString().split('T')[0],
-                    day_name: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
+                    day_name: currentDate.toLocaleDateString('en-US', {weekday: 'long'}),
                     day_index: i,
                     weekday: currentDate.getDay(),
                 });
@@ -293,7 +294,7 @@ class CPSATBridge {
             );
 
             // Get system settings
-            const systemSettingsData = await SystemSettings.findAll({ transaction });
+            const systemSettingsData = await SystemSettings.findAll({transaction});
             const systemSettings = {};
             systemSettingsData.forEach(setting => {
                 let value = setting.setting_value;
@@ -487,7 +488,7 @@ class CPSATBridge {
      * Get existing assignments for the week
      */
     async getExistingAssignments(employeeIds, weekStart, transaction = null) {
-        const { ScheduleAssignment, PositionShift, Position } = this.db;
+        const {ScheduleAssignment, PositionShift, Position} = this.db;
 
         const weekEnd = dayjs(weekStart).add(6, 'days').format('YYYY-MM-DD');
 
@@ -528,7 +529,7 @@ class CPSATBridge {
             try {
                 // Use backend/temp directory, not src/temp
                 const tempDir = path.join(__dirname, '..', '..', 'temp');
-                await fs.mkdir(tempDir, { recursive: true });
+                await fs.mkdir(tempDir, {recursive: true});
 
                 const tempFileName = `schedule_data_${uuidv4()}.json`;
                 const tempFilePath = path.join(tempDir, tempFileName);
@@ -648,7 +649,7 @@ class CPSATBridge {
      * Save schedule to database
      */
     async saveSchedule(siteId, weekStart, scheduleData, transaction = null) {
-        const { Schedule, ScheduleAssignment } = this.db;
+        const {Schedule, ScheduleAssignment} = this.db;
 
         try {
             const weekEnd = dayjs(weekStart).add(6, 'days');
@@ -664,7 +665,7 @@ class CPSATBridge {
                     algorithm: 'CP-SAT-Python',
                     timezone: 'Asia/Jerusalem',
                 },
-            }, { transaction });
+            }, {transaction});
 
             const assignments = [];
 
@@ -682,7 +683,7 @@ class CPSATBridge {
             }
 
             if (assignments.length > 0) {
-                await ScheduleAssignment.bulkCreate(assignments, { transaction });
+                await ScheduleAssignment.bulkCreate(assignments, {transaction});
             }
 
             console.log(`[CP-SAT Bridge] Saved schedule with ${assignments.length} assignments`);
@@ -714,16 +715,16 @@ class CPSATBridge {
      * Calculate detailed schedule statistics for dashboard
      */
     async calculateDetailedStats(scheduleId, siteId, weekStart, assignments, transaction = null) {
-        const { Position, PositionShift, ShiftRequirement, Employee } = this.db;
+        const {Position, PositionShift, ShiftRequirement, Employee} = this.db;
 
         try {
             // Load positions with requirements
             const positions = await Position.findAll({
-                where: { site_id: siteId, is_active: true },
+                where: {site_id: siteId, is_active: true},
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: { is_active: true },
+                    where: {is_active: true},
                     required: false,
                     include: [{
                         model: ShiftRequirement,
@@ -736,7 +737,7 @@ class CPSATBridge {
 
             // Load employees
             const employees = await Employee.findAll({
-                where: { work_site_id: siteId, status: 'active' },
+                where: {work_site_id: siteId, status: 'active'},
                 attributes: ['emp_id', 'first_name', 'last_name', 'default_position_id'],
                 transaction,
             });
@@ -752,7 +753,7 @@ class CPSATBridge {
                 const dateStr = date.toISOString().split('T')[0];
                 const dayOfWeek = date.getDay();
 
-                requirementsByDay[dateStr] = { required: 0, assigned: 0 };
+                requirementsByDay[dateStr] = {required: 0, assigned: 0};
 
                 positions.forEach(position => {
                     if (!requirementsByPosition[position.pos_id]) {
@@ -949,7 +950,7 @@ class CPSATBridge {
      * Get schedule statistics for the dashboard
      */
     async getScheduleStatistics(scheduleId) {
-        const { ScheduleAssignment, Schedule } = this.db;
+        const {ScheduleAssignment, Schedule} = this.db;
 
         try {
             const schedule = await Schedule.findByPk(scheduleId);
@@ -959,7 +960,7 @@ class CPSATBridge {
             }
 
             const assignments = await ScheduleAssignment.findAll({
-                where: { schedule_id: scheduleId },
+                where: {schedule_id: scheduleId},
                 raw: true,
             });
 
