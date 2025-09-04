@@ -6,8 +6,9 @@
     border: 1px solid var(--bs-border-color);
     border-radius: var(--radius-lg);
     box-shadow: none;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     transition: all var(--transition-base);
+    height: 100%;
 }
 
 .reports-page .summary-card {

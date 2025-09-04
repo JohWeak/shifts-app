@@ -162,8 +162,8 @@ const Reports = () => {
 
             {!loading && stats && (
                 <>
-                    <Row className="mb-4">
-                        <Col md={4} className="mb-3">
+                    <Row className="mb-3">
+                        <Col md={4}>
                             <Card className="summary-card border-primary">
                                 <Card.Body>
                                     <div className="metric-value">{stats.schedules_count}</div>
@@ -171,7 +171,7 @@ const Reports = () => {
                                 </Card.Body>
                             </Card>
                         </Col>
-                        <Col md={4} className="mb-3">
+                        <Col md={4}>
                             <Card className="summary-card border-success">
                                 <Card.Body>
                                     <div className="metric-value">{stats.avg_coverage || 0}%</div>
@@ -179,7 +179,7 @@ const Reports = () => {
                                 </Card.Body>
                             </Card>
                         </Col>
-                        <Col md={4} className="mb-3">
+                        <Col md={4}>
                             <Card className="summary-card border-danger">
                                 <Card.Body>
                                     <div className="metric-value">{stats.total_issues}</div>
@@ -197,7 +197,7 @@ const Reports = () => {
                                     data={chartData}
                                     keys={[t('reports.coverage'), t('reports.issues')]}
                                     indexBy="date"
-                                    margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                                    margin={{ top: 50, right: 130, bottom: 50, left: 50 }}
                                     padding={0.3}
                                     groupMode="grouped"
                                     valueScale={{ type: 'linear' }}
