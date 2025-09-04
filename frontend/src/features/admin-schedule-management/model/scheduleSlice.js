@@ -1,42 +1,43 @@
 // frontend/src/app/store/slices/scheduleSlice.js
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {employeeAPI, scheduleAPI, worksiteAPI} from 'shared/api/apiService';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { employeeAPI, scheduleAPI, worksiteAPI } from 'shared/api/apiService';
 import {
     CACHE_DURATION,
     clearCacheEntry,
     getCacheEntry,
     isCacheEntryValid,
-    setCacheEntry
+    setCacheEntry,
 } from 'shared/lib/cache/cacheUtils';
-import {classifySchedules} from 'shared/lib/utils/scheduleUtils';
+import { classifySchedules } from 'shared/lib/utils/scheduleUtils';
+import { updateShiftColorInDB } from '../../admin-workplace-settings/model/workplaceSlice';
 
 
 // Fetch work sites with unified cache
 export const fetchWorkSites = createAsyncThunk(
     'schedule/fetchWorkSites',
-    async (forceRefresh = false, {getState, rejectWithValue}) => {
+    async (forceRefresh = false, { getState, rejectWithValue }) => {
         const state = getState();
-        const {cache, cacheDurations} = state.schedule;
+        const { cache, cacheDurations } = state.schedule;
 
         // Check cache
         if (!forceRefresh && isCacheEntryValid(cache.workSites, cacheDurations.workSites)) {
             console.log('[Cache] Using cached work sites');
-            return {cached: true, data: cache.workSites.data};
+            return { cached: true, data: cache.workSites.data };
         }
 
         try {
             console.log('[Cache] Fetching fresh work sites');
             const response = await worksiteAPI.fetchWorkSites();
-            return {cached: false, data: response};
+            return { cached: false, data: response };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 export const fetchSchedules = createAsyncThunk(
     'schedule/fetchSchedules',
-    async (_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         try {
             const response = await scheduleAPI.fetchSchedules();
             if (response && response.items) {
@@ -46,37 +47,37 @@ export const fetchSchedules = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 // Fetch schedule details with cache
 export const fetchScheduleDetails = createAsyncThunk(
     'schedule/fetchScheduleDetails',
-    async (scheduleId, {getState, rejectWithValue}) => {
+    async (scheduleId, { getState, rejectWithValue }) => {
         const state = getState();
-        const {cache, cacheDurations} = state.schedule;
+        const { cache, cacheDurations } = state.schedule;
         const cached = getCacheEntry(cache.scheduleDetails, scheduleId);
 
         // Check cache
         if (cached && isCacheEntryValid(cached, cacheDurations.scheduleDetails)) {
             console.log(`[Cache] Using cached details for schedule ${scheduleId}`);
-            return {cached: true, scheduleId, data: cached.data};
+            return { cached: true, scheduleId, data: cached.data };
         }
 
         try {
             console.log(`[Cache] Fetching fresh details for schedule ${scheduleId}`);
             const details = await scheduleAPI.fetchScheduleDetails(scheduleId);
-            return {cached: false, scheduleId, data: details};
+            return { cached: false, scheduleId, data: details };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 
 export const generateSchedule = createAsyncThunk(
     'schedule/generateSchedule',
-    async (settings, {dispatch, rejectWithValue}) => {
+    async (settings, { dispatch, rejectWithValue }) => {
         try {
             const response = await scheduleAPI.generateSchedule(settings);
 
@@ -94,77 +95,77 @@ export const generateSchedule = createAsyncThunk(
             const errorData = error.response?.data || error;
             return rejectWithValue(errorData);
         }
-    }
+    },
 );
 
 export const updateScheduleStatus = createAsyncThunk(
     'schedule/updateScheduleStatus',
-    async ({scheduleId, status}, {rejectWithValue}) => {
+    async ({ scheduleId, status }, { rejectWithValue }) => {
         try {
             return await scheduleAPI.updateScheduleStatus(scheduleId, status); // Return only data
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 
 export const compareAlgorithms = createAsyncThunk(
     'schedule/compareAlgorithms',
-    async (settings, {rejectWithValue}) => {
+    async (settings, { rejectWithValue }) => {
         try {
             return await scheduleAPI.compareAlgorithms(settings);
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 
 export const deleteSchedule = createAsyncThunk(
     'schedule/deleteSchedule',
-    async (scheduleId, {rejectWithValue}) => {
+    async (scheduleId, { rejectWithValue }) => {
         try {
             await scheduleAPI.deleteSchedule(scheduleId);
             return scheduleId;
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 
 export const updateScheduleAssignments = createAsyncThunk(
     'schedule/updateScheduleAssignments',
-    async ({scheduleId, changes}, {rejectWithValue}) => {
+    async ({ scheduleId, changes }, { rejectWithValue }) => {
         try {
             return await scheduleAPI.updateScheduleAssignments(scheduleId, changes);
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 
 export const exportSchedule = createAsyncThunk(
     'schedule/exportSchedule',
-    async ({scheduleId, format}, {rejectWithValue}) => {
+    async ({ scheduleId, format }, { rejectWithValue }) => {
         try {
             await scheduleAPI.exportSchedule(scheduleId, format);
-            return {success: true};
+            return { success: true };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 
 export const fetchRecommendations = createAsyncThunk(
     'schedule/fetchRecommendations',
-    async ({positionId, shiftId, date, scheduleId}, {getState, rejectWithValue}) => {
+    async ({ positionId, shiftId, date, scheduleId }, { getState, rejectWithValue }) => {
         try {
             const state = getState();
-            const {pendingChanges, cache, cacheDurations} = state.schedule;
+            const { pendingChanges, cache, cacheDurations } = state.schedule;
 
             // Create cache key based on parameters
             const cacheKey = `${scheduleId}_${positionId}_${shiftId}_${date}`;
@@ -175,7 +176,7 @@ export const fetchRecommendations = createAsyncThunk(
 
             if (!hasPendingChanges && cached && isCacheEntryValid(cached, cacheDurations.recommendations)) {
                 console.log(`[Cache] Using cached recommendations for ${cacheKey}`);
-                return {cached: true, cacheKey, data: cached.data};
+                return { cached: true, cacheKey, data: cached.data };
             }
 
             const virtualChanges = Object.values(pendingChanges || {}).map(change => ({
@@ -183,7 +184,7 @@ export const fetchRecommendations = createAsyncThunk(
                 emp_id: change.empId,
                 position_id: change.positionId,
                 shift_id: change.shiftId,
-                date: change.date
+                date: change.date,
             }));
 
             console.log(`[Cache] Fetching fresh recommendations for ${cacheKey}`);
@@ -192,25 +193,25 @@ export const fetchRecommendations = createAsyncThunk(
                 positionId,
                 shiftId,
                 date,
-                virtualChanges.length > 0 ? virtualChanges : null
+                virtualChanges.length > 0 ? virtualChanges : null,
             );
 
-            return {cached: false, cacheKey, data: response};
+            return { cached: false, cacheKey, data: response };
         } catch (error) {
             return rejectWithValue(error.response?.message || 'Failed to fetch recommendations');
         }
-    }
+    },
 );
 
 
 // Preload with cache
 export const preloadScheduleDetails = createAsyncThunk(
     'schedule/preloadScheduleDetails',
-    async (_, {getState, dispatch}) => {
+    async (_, { getState, dispatch }) => {
         const state = getState();
-        const {schedules, cache, cacheDurations} = state.schedule;
+        const { schedules, cache, cacheDurations } = state.schedule;
 
-        const {activeSchedules} = classifySchedules(schedules);
+        const { activeSchedules } = classifySchedules(schedules);
         console.log(`[Cache] Preloading details for ${activeSchedules.length} active schedules`);
 
         const batchSize = 3;
@@ -240,8 +241,8 @@ export const preloadScheduleDetails = createAsyncThunk(
         }
 
         console.log(`[Cache] Preloaded ${loadedCount} schedule details`);
-        return {loaded: loadedCount};
-    }
+        return { loaded: loadedCount };
+    },
 );
 
 
@@ -259,7 +260,7 @@ const scheduleSlice = createSlice({
             unavailable_busy: [],
             unavailable_hard: [],
             unavailable_soft: [],
-            unavailable_permanent: []
+            unavailable_permanent: [],
         },
         autofilledChanges: {},
 
@@ -279,20 +280,20 @@ const scheduleSlice = createSlice({
         cache: {
             workSites: null, // { data: [], timestamp: Date.now() }
             scheduleDetails: {}, // { [scheduleId]: { data: details, timestamp: Date.now() } }
-            recommendations: {} // { [cacheKey]: { data: recommendations, timestamp: Date.now() } }
+            recommendations: {}, // { [cacheKey]: { data: recommendations, timestamp: Date.now() } }
         },
 
         // Cache durations for different data types
         cacheDurations: {
             workSites: CACHE_DURATION.EXTRA_LONG,
             scheduleDetails: CACHE_DURATION.LONG,
-            recommendations: CACHE_DURATION.SHORT
-        }
+            recommendations: CACHE_DURATION.SHORT,
+        },
 
     },
     reducers: {
         setLocalShiftColorOverride: (state, action) => {
-            const {shiftId, color} = action.payload;
+            const { shiftId, color } = action.payload;
 
             if (state.scheduleDetails?.shifts) {
                 const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === shiftId);
@@ -329,7 +330,7 @@ const scheduleSlice = createSlice({
             }
         },
         addPendingChange(state, action) {
-            const {key, change} = action.payload;
+            const { key, change } = action.payload;
             state.pendingChanges[key] = change;
 
             // Track if this was an autofilled change
@@ -342,7 +343,7 @@ const scheduleSlice = createSlice({
         },
         addBatchPendingChanges(state, action) {
             const changes = action.payload;
-            changes.forEach(({key, change}) => {
+            changes.forEach(({ key, change }) => {
                 state.pendingChanges[key] = change;
                 if (change.isAutofilled) {
                     state.autofilledChanges[key] = true;
@@ -405,7 +406,7 @@ const scheduleSlice = createSlice({
         },
 
         clearCache(state, action) {
-            const {type, key} = action.payload || {};
+            const { type, key } = action.payload || {};
 
             if (type === 'workSites') {
                 state.cache.workSites = null;
@@ -426,7 +427,7 @@ const scheduleSlice = createSlice({
                 state.cache = {
                     workSites: null,
                     scheduleDetails: {},
-                    recommendations: {}
+                    recommendations: {},
                 };
             }
         },
@@ -517,8 +518,8 @@ const scheduleSlice = createSlice({
                 state.error = null;
             })
             .addCase(updateScheduleAssignments.fulfilled, (state, action) => {
-                const {newEmployees = []} = action.payload;
-                const {changes} = action.meta.arg;
+                const { newEmployees = [] } = action.payload;
+                const { changes } = action.meta.arg;
                 const positionId = changes[0]?.positionId;
 
                 if (!positionId || !state.scheduleDetails) return;
@@ -544,7 +545,7 @@ const scheduleSlice = createSlice({
                             a => a.emp_id === change.empId &&
                                 a.position_id === change.positionId &&
                                 a.shift_id === change.shiftId &&
-                                a.work_date === change.date
+                                a.work_date === change.date,
                         );
 
                         if (existingIndex === -1) {
@@ -557,11 +558,11 @@ const scheduleSlice = createSlice({
                                 employee: employee || {
                                     emp_id: change.empId,
                                     first_name: change.empName?.split(' ')[0] || '',
-                                    last_name: change.empName?.split(' ').slice(1).join(' ') || ''
+                                    last_name: change.empName?.split(' ').slice(1).join(' ') || '',
                                 },
                                 isCrossPosition: change.isCrossPosition,
                                 isCrossSite: change.isCrossSite,
-                                isFlexible: change.isFlexible
+                                isFlexible: change.isFlexible,
                             });
                         }
                     } else if (change.action === 'remove') {
@@ -572,7 +573,7 @@ const scheduleSlice = createSlice({
                                 a.position_id === change.positionId &&
                                 a.shift_id === change.shiftId &&
                                 a.work_date === change.date
-                            )
+                            ),
                         );
                     }
                 });
@@ -595,7 +596,7 @@ const scheduleSlice = createSlice({
                 const position = state.scheduleDetails.positions.find(p => p.pos_id === positionId);
                 if (position) {
                     position.current_assignments = state.scheduleDetails.assignments.filter(
-                        a => a.position_id === positionId
+                        a => a.position_id === positionId,
                     ).length;
                 }
             })
@@ -651,7 +652,7 @@ const scheduleSlice = createSlice({
             })
             .addCase(updateScheduleStatus.fulfilled, (state, action) => {
                 state.loading = 'idle';
-                const {scheduleId, status} = action.meta.arg;
+                const { scheduleId, status } = action.meta.arg;
 
 
                 clearCacheEntry(state.cache.scheduleDetails, scheduleId);
@@ -659,7 +660,7 @@ const scheduleSlice = createSlice({
                 if (scheduleIndex !== -1) {
                     state.schedules[scheduleIndex] = {
                         ...state.schedules[scheduleIndex],
-                        status: status
+                        status: status,
                     };
                 }
                 if (state.scheduleDetails?.schedule?.id === scheduleId) {
@@ -671,6 +672,29 @@ const scheduleSlice = createSlice({
                 state.loading = 'failed';
                 state.error = action.payload;
             })
+
+            // Handle global shift color updates
+            .addCase(updateShiftColorInDB.fulfilled, (state, action) => {
+                const updatedShift = action.payload;
+
+                // Update shift color in scheduleDetails.shifts
+                if (state.scheduleDetails?.shifts) {
+                    const shiftIndex = state.scheduleDetails.shifts.findIndex(s => s.shift_id === updatedShift.shift_id);
+                    if (shiftIndex !== -1) {
+                        state.scheduleDetails.shifts[shiftIndex].color = updatedShift.color;
+                    }
+                }
+
+                // Update shift color in scheduleDetails.positions.shifts
+                if (state.scheduleDetails?.positions) {
+                    state.scheduleDetails.positions.forEach(position => {
+                        const positionShift = position.shifts?.find(s => s.shift_id === updatedShift.shift_id);
+                        if (positionShift) {
+                            positionShift.color = updatedShift.color;
+                        }
+                    });
+                }
+            });
 
     },
 });

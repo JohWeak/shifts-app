@@ -46,12 +46,6 @@
     "postcss": "8.4.31",
     "d3-scale": "4.0.2"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",

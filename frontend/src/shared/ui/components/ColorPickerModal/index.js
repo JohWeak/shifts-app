@@ -30,6 +30,7 @@ const ColorPickerModal = ({
                               initialColor = '#6c757d',
                               title = 'Select Color',
                               onColorChange = null,
+                              onCancel = null,
                               saveMode = 'global',
                               currentTheme = 'light',
                               hasLocalColor = false,
@@ -83,8 +84,8 @@ const ColorPickerModal = ({
     };
 
     const handleCancelAndClose = () => {
-        if (onColorChange) {
-            onColorChange(initialColor);
+        if (onCancel) {
+            onCancel(initialColor);
         }
         onHide();
     };

@@ -1,23 +1,23 @@
 // frontend/src/shared/ui/layouts/AdminLayout/AdminLayout.js
-import React, {useEffect, useRef, useState} from 'react';
-import {Link, useLocation, useNavigate, useOutlet} from 'react-router-dom';
-import {Badge, Button, Container, Dropdown, Nav, Navbar} from 'react-bootstrap';
-import {useDispatch, useSelector} from 'react-redux';
-import {logout} from 'features/auth/model/authSlice';
-import {LanguageSwitch} from '../../components/LanguageSwitch';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useOutlet } from 'react-router-dom';
+import { Badge, Button, Container, Dropdown, Nav, Navbar } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from 'features/auth/model/authSlice';
+import { LanguageSwitch } from '../../components/LanguageSwitch';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import GlobalAlerts from 'shared/ui/components/GlobalAlerts';
 import ThemeToggle from 'shared/ui/components/ThemeToggle';
-import {fetchSchedules, resetScheduleView} from 'features/admin-schedule-management/model/scheduleSlice';
-import {fetchAllRequests} from 'features/admin-permanent-requests/model/adminRequestsSlice';
-import {AnimatePresence, motion} from 'motion/react';
+import { fetchSchedules, resetScheduleView } from 'features/admin-schedule-management/model/scheduleSlice';
+import { fetchAllRequests } from 'features/admin-permanent-requests/model/adminRequestsSlice';
+import { AnimatePresence, motion } from 'motion/react';
 
 import './AdminLayout.css';
 
 const AdminLayout = () => {
-    const {t, direction} = useI18n();
-    const {pendingCount} = useSelector(state => state.adminRequests);
-    const {user} = useSelector(state => state.auth);
+    const { t, direction } = useI18n();
+    const { pendingCount } = useSelector(state => state.adminRequests);
+    const { user } = useSelector(state => state.auth);
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
@@ -142,7 +142,7 @@ const AdminLayout = () => {
         navigate(path);
     };
 
-    const SidebarContent = ({isCompact = false}) => (
+    const SidebarContent = ({ isCompact = false }) => (
         <Nav className="flex-column admin-nav">
             {navigationItems.map(item => (
                 <Nav.Item key={item.key}>
@@ -205,8 +205,8 @@ const AdminLayout = () => {
                     </div>
 
                     <div className="d-flex align-items-center gap-2">
-                        <ThemeToggle variant="icon"/>
-                        <LanguageSwitch/>
+                        <ThemeToggle variant="icon" />
+                        <LanguageSwitch />
 
                         <Dropdown align="end" className="ms-1">
                             <Dropdown.Toggle
@@ -223,15 +223,15 @@ const AdminLayout = () => {
                             <Dropdown.Menu className="user-dropdown-menu shadow">
                                 <Dropdown.Header>
                                     <div className="text-muted small">{t('auth.signedInAs')}</div>
-                                    <div className="fw-semibold">{user?.name || t('common.admin')}</div>
+                                    <div className="fw-semibold">{user?.name}</div>
                                     <div className="fw-semibold text-muted small">{t('common.admin')}</div>
                                 </Dropdown.Header>
-                                <Dropdown.Divider/>
+                                <Dropdown.Divider />
                                 <Dropdown.Item as={Link} to="/admin/profile">
                                     <i className="bi bi-person me-2"></i>
                                     {t('common.profile')}
                                 </Dropdown.Item>
-                                <Dropdown.Divider/>
+                                <Dropdown.Divider />
                                 <Dropdown.Item onClick={handleLogout} className="text-danger">
                                     <i className="bi bi-box-arrow-right me-2"></i>
                                     {t('auth.logout')}
@@ -266,12 +266,12 @@ const AdminLayout = () => {
                     transition={{
                         duration: 0.3,
                         ease: [0.4, 0.0, 0.2, 1],
-                        width: {duration: 0.25},
-                        boxShadow: {duration: 0.2, delay: isSidebarExpanded ? 0.1 : 0},
+                        width: { duration: 0.25 },
+                        boxShadow: { duration: 0.2, delay: isSidebarExpanded ? 0.1 : 0 },
                     }}
                 >
                     <div className="sidebar-content">
-                        <SidebarContent isCompact={true}/>
+                        <SidebarContent isCompact={true} />
                     </div>
                 </motion.div>
 
@@ -281,9 +281,9 @@ const AdminLayout = () => {
                         <motion.main
                             key={location.pathname}
                             className="admin-main-content"
-                            initial={{opacity: 0.4, y: -10}}
-                            animate={{opacity: 1, y: 0}}
-                            exit={{opacity: 0, y: 10}}
+                            initial={{ opacity: 0.4, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
                             transition={{
                                 duration: 0.2,
                                 ease: 'easeInOut',
@@ -295,7 +295,7 @@ const AdminLayout = () => {
                 </div>
             </div>
 
-            <GlobalAlerts/>
+            <GlobalAlerts />
         </div>
     );
 };

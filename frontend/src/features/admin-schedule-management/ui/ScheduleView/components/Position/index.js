@@ -73,6 +73,7 @@ const PositionEditor = ({
         applyColor,
         getShiftColor,
         resetShiftColor,
+        cancelColorChange,
     } = useShiftColor();
     const { highlightedEmployeeId, handleMouseEnter, handleMouseLeave } = useEmployeeHighlight();
     const dnd = useDragAndDrop(isEditing, pendingChanges, assignments);
@@ -292,6 +293,7 @@ const PositionEditor = ({
                 onHide={closeColorPicker}
                 onColorSelect={applyColor}
                 onColorChange={previewColor}
+                onCancel={cancelColorChange}
                 initialColor={colorPickerState.currentColor}
                 title={t('modal.colorPicker.title')}
                 saveMode={colorPickerState.saveMode}
