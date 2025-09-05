@@ -12,6 +12,7 @@ const EmployeeList = ({
                           employees,
                           loading,
                           onEdit,
+                          onEditModal,
                           onDelete,
                           onRestore,
                           pagination,
@@ -319,7 +320,7 @@ const EmployeeList = ({
                                                 variant="link"
                                                 size="sm"
                                                 className="p-1 text-primary me-2"
-                                                onClick={() => onEdit(employee)}
+                                                onClick={() => onEditModal ? onEditModal(employee) : onEdit(employee)}
                                                 title={t('common.edit')}
                                             >
                                                 <i className="bi bi-pencil"></i>

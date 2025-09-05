@@ -33,7 +33,7 @@ import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlic
 import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
 import './index.css';
 
-const ConstraintsSchedule = () => {
+const ConstraintsSchedule = ({ employeeId, hidePageHeader = false }) => {
     const dispatch = useDispatch();
     const { t } = useI18n();
     const isMobile = useMediaQuery('(max-width: 888px)');
@@ -145,9 +145,15 @@ const ConstraintsSchedule = () => {
     useEffect(() => {
         // Компонент сам отвечает за загрузку своих данных.
         // Кеш внутри thunk'а предотвратит лишние запросы.
-        dispatch(fetchWeeklyConstraints());
+        if (employeeId) {
+            // Admin viewing another employee's constraints
+            dispatch(fetchWeeklyConstraints({ employeeId }));
+        } else {
+            // Employee viewing their own constraints
+            dispatch(fetchWeeklyConstraints());
+        }
         dispatch(fetchSystemSettings());
-    }, [dispatch]);
+    }, [dispatch, employeeId]);
 
 
     console.log('[LOG 4] weeklyTemplate:', { weeklyTemplate });
@@ -307,7 +313,10 @@ const ConstraintsSchedule = () => {
                     shift_id: shiftId,
                 })),
         );
-        dispatch(submitWeeklyConstraints({ constraints: formattedConstraints, week_start: weeklyTemplate.weekStart }));
+        dispatch(submitWeeklyConstraints({
+            constraintsData: { constraints: formattedConstraints, week_start: weeklyTemplate.weekStart },
+            employeeId,
+        }));
     };
 
     const getCellStyles = (date, shiftId) => {
@@ -375,10 +384,26 @@ const ConstraintsSchedule = () => {
     };
 
     if (loading) return <LoadingState />;
-    if (error) return <Container className="mt-4"><PageHeader title={t('constraints.title')} /><ErrorMessage
-        error={error} /></Container>;
-    if (!weeklyTemplate) return <Container className="mt-4"><PageHeader title={t('constraints.title')} /><ErrorMessage
-        error={t('constraints.noTemplate')} variant="info" /></Container>;
+    if (error) return (
+        <Container className="mt-4">
+            {!hidePageHeader && <PageHeader title={t('constraints.title')} />}
+            <Card className="p-0 mb-2 mb-md-3 constrains-card">
+                <Card.Body className="d-flex align-items-center justify-content-center" style={{ minHeight: '300px' }}>
+                    <div className="text-center">
+                        <i className="bi bi-exclamation-triangle text-warning fs-1 mb-3 d-block"></i>
+                        <h5 className="text-muted mb-2">{t('constraints.noDataAvailable')}</h5>
+                        <p className="text-muted small">{t('constraints.adminViewMessage')}</p>
+                    </div>
+                </Card.Body>
+            </Card>
+        </Container>
+    );
+    if (!weeklyTemplate) return (
+        <Container className="mt-4">
+            {!hidePageHeader && <PageHeader title={t('constraints.title')} />}
+            <ErrorMessage error={t('constraints.noTemplate')} variant="info" />
+        </Container>
+    );
 
 
     const limitParams = {
@@ -388,11 +413,13 @@ const ConstraintsSchedule = () => {
 
     return (
         <Container fluid className="employee-constraints-container position-relative">
-            <PageHeader
-                icon="shield-fill-check"
-                title={t('constraints.title')}
-                subtitle={t('constraints.subtitle')}
-            />
+            {!hidePageHeader && (
+                <PageHeader
+                    icon="shield-fill-check"
+                    title={t('constraints.title')}
+                    subtitle={t('constraints.subtitle')}
+                />
+            )}
 
             {deadlineInfo && (
                 <Card className="mb-2 deadline-info-card">

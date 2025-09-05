@@ -7,6 +7,8 @@ import { addNotification } from 'app/model/notificationsSlice';
 import {
     addNewRequest,
     deleteRequest,
+    fetchEmployeePermanentConstraintsAsAdmin,
+    fetchEmployeeRequestsAsAdmin,
     fetchMyPermanentConstraints,
     fetchMyRequests,
     markAsViewed,
@@ -23,10 +25,12 @@ import RequestsList from './ui/RequestsList';
 import RequestDetails from './ui/RequestDetails';
 import './index.css';
 
-const EmployeeRequests = () => {
+const EmployeeRequests = ({ employeeId, hidePageHeader = false }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
     const { items: requests, loading, loaded, error } = useSelector(state => state.requests);
+
+    const isViewingAsAdmin = !!employeeId;
 
     const [showForm, setShowForm] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -36,16 +40,24 @@ const EmployeeRequests = () => {
     useEffect(() => {
         const loadRequests = async () => {
             if (!loaded && !loading) {
-                await dispatch(fetchMyRequests());
-                // Также загружаем permanent constraints
-                await dispatch(fetchMyPermanentConstraints());
+                if (isViewingAsAdmin) {
+                    // Admin viewing another employee's requests
+                    await dispatch(fetchEmployeeRequestsAsAdmin(employeeId));
+                    await dispatch(fetchEmployeePermanentConstraintsAsAdmin(employeeId));
+                } else {
+                    // Employee viewing their own requests
+                    await dispatch(fetchMyRequests());
+                    await dispatch(fetchMyPermanentConstraints());
+                }
             }
         };
 
         void loadRequests();
 
-        dispatch(markAsViewed());
-    }, [dispatch, loaded, loading]);
+        if (!isViewingAsAdmin) {
+            dispatch(markAsViewed());
+        }
+    }, [dispatch, loaded, loading, employeeId, isViewingAsAdmin]);
 
     const validRequests = requests.filter(r => r && r.status);
     const hasPendingRequest = validRequests.some(r => r.status === 'pending');
@@ -61,10 +73,10 @@ const EmployeeRequests = () => {
                 dispatch(setRequestLoading(editingRequestId));
 
                 // Удаляем старый запрос
-                await dispatch(deleteRequest(editingRequestId)).unwrap();
+                await dispatch(deleteRequest({ requestId: editingRequestId, employeeId })).unwrap();
 
                 // Отправляем новый запрос
-                const response = await constraintAPI.submitPermanentRequest(requestData);
+                const response = await constraintAPI.submitPermanentRequest(requestData, employeeId);
 
                 // Добавляем новый запрос
                 dispatch(addNewRequest(response.data));
@@ -77,7 +89,7 @@ const EmployeeRequests = () => {
                 // Для нового запроса - существующая логика
                 dispatch(addNewRequest(optimisticRequest));
 
-                const response = await constraintAPI.submitPermanentRequest(requestData);
+                const response = await constraintAPI.submitPermanentRequest(requestData, employeeId);
 
                 dispatch(updateRequest({
                     tempId: optimisticRequest.id,
@@ -121,7 +133,7 @@ const EmployeeRequests = () => {
 
     const handleDeleteRequest = async (request) => {
         try {
-            await dispatch(deleteRequest(request.id)).unwrap();
+            await dispatch(deleteRequest({ requestId: request.id, employeeId })).unwrap();
 
             // Если удаляем из деталей, закрываем их
             if (selectedRequest && selectedRequest.id === request.id) {
@@ -166,6 +178,7 @@ const EmployeeRequests = () => {
                 onBack={handleBackFromDetails}
                 onEdit={handleEditRequest}
                 onDelete={handleDeleteRequest}
+                employeeId={employeeId}
             />
         );
     }
@@ -181,6 +194,7 @@ const EmployeeRequests = () => {
                         setEditingRequest(null);
                     }}
                     initialData={editingRequest}
+                    employeeId={employeeId}
                 />
             </div>
         );
@@ -189,14 +203,16 @@ const EmployeeRequests = () => {
     // Show requests list
     return (
         <Container className="employee-requests-container py-3">
-            <PageHeader
-                icon="bi bi-envelope-fill"
-                title={t('requests.title')}
-                badge={pendingCount > 0 ? {
-                    text: `${pendingCount} ${t('requests.pending')}`,
-                    variant: 'info',
-                } : null}
-            />
+            {!hidePageHeader && (
+                <PageHeader
+                    icon="bi bi-envelope-fill"
+                    title={t('requests.title')}
+                    badge={pendingCount > 0 ? {
+                        text: `${pendingCount} ${t('requests.pending')}`,
+                        variant: 'info',
+                    } : null}
+                />
+            )}
 
             <Card className="employee-requests-card">
                 <Card.Body>

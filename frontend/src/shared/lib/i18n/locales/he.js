@@ -269,6 +269,8 @@ export const he = {
             title: 'הוראות:',
         },
         loading: 'טוען אילוצים...',
+        noDataAvailable: 'אין נתוני מגבלות זמינים',
+        adminViewMessage: 'לעובד הזה עלולות לא להיות מגבלות מוגדרות או שיש בעיה מערכתית.',
         modals: {
             resetMessage: 'האם אתה בטוח שברצונך לאפס את האילוצים השבועיים שלך?',
             resetTitle: 'איפוס אילוצים',
@@ -692,11 +694,15 @@ export const he = {
         },
     },
     navigation: {
+        admin: 'מנהל',
         algorithms: 'אלגוריתמים',
+        archive: 'ארכיון',
+        constraints: 'מגבלות',
         dashboard: 'לוח בקרה',
         employees: 'עובדים',
         home: 'בית',
         reports: 'אנליטיקה',
+        schedule: 'סידור',
         schedules: 'סידורים',
         settings: 'הגדרות',
         title: 'ניווט',
@@ -880,6 +886,7 @@ export const he = {
         activeProcessedRequests: 'בקשות שטופלו (פעילות)',
         inactiveRequests: 'בקשות לא פעילות',
         previousConstraintsWarning: 'שים לב: עם אישור הבקשה, האילוצים הקודמים שלך יהפכו ללא פעילים ויוחלפו בחדשים.',
+        no_position_assigned: 'לא מוקצה תפקיד',
     },
     reports: {
         analyticsAndReports: 'אנליטיקה ודוחות',

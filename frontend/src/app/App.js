@@ -15,6 +15,7 @@ import EmployeeConstraints from '../features/employee-constraints';
 import EmployeeRequests from '../features/employee-requests';
 import EmployeeArchive from '../features/employee-archive';
 import EmployeeManagement from 'features/admin-employee-management';
+import EmployeeView from 'features/admin-employee-management/ui/EmployeeView';
 import EmployeeDashboard from '../features/employee-dashboard';
 import EmployeeProfile from '../features/employee-profile';
 
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
             { path: 'schedules', element: <ScheduleManagement /> },
             { path: 'settings', element: <SystemSettings /> },
             { path: 'employees', element: <EmployeeManagement /> },
+            { path: 'employees/:employeeId', element: <EmployeeView /> },
             { path: 'workplace', element: <WorkplaceSettings /> },
             { path: 'reports', element: <Reports /> },
             { path: 'permanent-requests', element: <AdminPermanentRequests /> },

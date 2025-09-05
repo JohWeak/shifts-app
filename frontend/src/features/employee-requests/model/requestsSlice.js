@@ -1,5 +1,5 @@
 // frontend/src/features/employee-requests/model/requestsSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { constraintAPI } from 'shared/api/apiService';
 
 export const fetchMyRequests = createAsyncThunk(
@@ -11,7 +11,7 @@ export const fetchMyRequests = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to load requests');
         }
-    }
+    },
 );
 
 export const fetchMyPermanentConstraints = createAsyncThunk(
@@ -28,19 +28,44 @@ export const fetchMyPermanentConstraints = createAsyncThunk(
             console.error('[fetchMyPermanentConstraints] Error:', error);
             return rejectWithValue(error.response?.data?.message || 'Failed to load permanent constraints');
         }
-    }
+    },
 );
 
 export const deleteRequest = createAsyncThunk(
     'requests/delete',
-    async (requestId, { rejectWithValue }) => {
+    async ({ requestId, employeeId }, { rejectWithValue }) => {
         try {
-            await constraintAPI.deletePermanentRequest(requestId);
+            await constraintAPI.deletePermanentRequest(requestId, employeeId);
             return requestId;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Failed to delete request');
         }
-    }
+    },
+);
+
+// Admin thunks for viewing specific employee data
+export const fetchEmployeeRequestsAsAdmin = createAsyncThunk(
+    'requests/fetchEmployeeRequestsAsAdmin',
+    async (employeeId, { rejectWithValue }) => {
+        try {
+            const response = await constraintAPI.getEmployeePermanentRequests(employeeId);
+            return response.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to load employee requests');
+        }
+    },
+);
+
+export const fetchEmployeePermanentConstraintsAsAdmin = createAsyncThunk(
+    'requests/fetchEmployeePermanentConstraintsAsAdmin',
+    async (employeeId, { rejectWithValue }) => {
+        try {
+            const data = await constraintAPI.getEmployeePermanentConstraints(employeeId);
+            return data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to load employee permanent constraints');
+        }
+    },
 );
 
 const requestsSlice = createSlice({
@@ -52,7 +77,7 @@ const requestsSlice = createSlice({
         loaded: false,
         error: null,
         loadingRequestId: null,
-        lastViewedAt: localStorage.getItem('requests_last_viewed') || null
+        lastViewedAt: localStorage.getItem('requests_last_viewed') || null,
     },
     reducers: {
         addNewRequest: (state, action) => {
@@ -75,7 +100,15 @@ const requestsSlice = createSlice({
             const now = new Date().toISOString();
             state.lastViewedAt = now;
             localStorage.setItem('requests_last_viewed', now);
-        }
+        },
+        clearRequestsData: (state) => {
+            state.items = [];
+            state.permanentConstraints = [];
+            state.loading = false;
+            state.loaded = false;
+            state.error = null;
+            state.loadingRequestId = null;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -104,8 +137,34 @@ const requestsSlice = createSlice({
             })
             .addCase(fetchMyPermanentConstraints.rejected, (state, action) => {
                 console.error('[requestsSlice] Failed to load permanent constraints:', action.payload);
+            })
+
+            // Admin thunks - reuse existing state fields
+            .addCase(fetchEmployeeRequestsAsAdmin.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchEmployeeRequestsAsAdmin.fulfilled, (state, action) => {
+                state.loading = false;
+                state.loaded = true;
+                state.items = action.payload;
+            })
+            .addCase(fetchEmployeeRequestsAsAdmin.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            .addCase(fetchEmployeePermanentConstraintsAsAdmin.pending, () => {
+                console.log('[requestsSlice] Fetching employee permanent constraints...');
+            })
+            .addCase(fetchEmployeePermanentConstraintsAsAdmin.fulfilled, (state, action) => {
+                console.log('[requestsSlice] Setting employee permanent constraints:', action.payload);
+                state.permanentConstraints = action.payload;
+            })
+            .addCase(fetchEmployeePermanentConstraintsAsAdmin.rejected, (state, action) => {
+                console.error('[requestsSlice] Failed to load employee permanent constraints:', action.payload);
             });
-    }
+    },
 });
 // Селектор для подсчета новых изменений
 export const selectNewUpdatesCount = (state) => {
@@ -115,7 +174,7 @@ export const selectNewUpdatesCount = (state) => {
     return items.filter(r =>
         r.status !== 'pending' &&
         r.reviewed_at &&
-        new Date(r.reviewed_at) > new Date(lastViewedAt)
+        new Date(r.reviewed_at) > new Date(lastViewedAt),
     ).length;
 };
 export const {
@@ -123,7 +182,8 @@ export const {
     updateRequest,
     removeRequest,
     setRequestLoading,
-    markAsViewed
+    markAsViewed,
+    clearRequestsData,
 } = requestsSlice.actions;
 
 export default requestsSlice.reducer;

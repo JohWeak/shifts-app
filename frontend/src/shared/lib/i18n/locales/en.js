@@ -275,6 +275,8 @@ export const en = {
             title: 'Instructions:',
         },
         loading: 'Loading constraints...',
+        noDataAvailable: 'No constraint data available',
+        adminViewMessage: 'This employee may not have any constraints set or there may be a system issue.',
         modals: {
             resetMessage: 'Are you sure you want to reset your weekly constraints?',
             resetTitle: 'Reset Constraints',
@@ -509,6 +511,7 @@ export const en = {
         hireDate: 'Hire Date',
         hourlyRate: 'Hourly Rate',
         importData: 'Import Employees',
+        manageAccountPermissions: 'Manage {name} account and permissions',
         includeInactive: 'Include Inactive',
         languages: 'Languages',
         lastLogin: 'Last Login',
@@ -731,11 +734,15 @@ export const en = {
         },
     },
     navigation: {
+        admin: 'Admin',
         algorithms: 'Algorithms',
+        archive: 'Archive',
+        constraints: 'Constraints',
         dashboard: 'Dashboard',
         employees: 'Employees',
         home: 'Home',
         reports: 'Analytics',
+        schedule: 'Schedule',
         schedules: 'Schedules',
         settings: 'Settings',
         title: 'Navigation',
@@ -1390,6 +1397,7 @@ export const en = {
         activeProcessedRequests: 'Active Processed Requests',
         inactiveRequests: 'Inactive Requests',
         previousConstraintsWarning: 'Note: Upon approval, your previous constraints will become inactive and will be replaced with the new ones.',
+        no_position_assigned: 'No position assigned',
 
 
     },

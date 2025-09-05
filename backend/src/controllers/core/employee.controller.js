@@ -1,14 +1,14 @@
 // backend/src/controllers/employee.controller.js
 const db = require('../../models');
-const {Employee, Position, EmployeeConstraint, WorkSite, PositionShift} = db;
+const { Employee, Position, EmployeeConstraint, WorkSite, PositionShift } = db;
 const bcrypt = require('bcryptjs');
-const {Op} = require('sequelize');
+const { Op } = require('sequelize');
 
 
 // Create new employee
 const create = async (req, res) => {
     try {
-        const {password, admin_work_sites_scope, is_super_admin, ...employeeData} = req.body;
+        const { password, admin_work_sites_scope, is_super_admin, ...employeeData } = req.body;
 
         // Only super admins can create admin users and set admin privileges
         if (employeeData.role === 'admin') {
@@ -51,7 +51,7 @@ const create = async (req, res) => {
         const employee = await Employee.create(employeeData);
 
         const employeeWithAssociations = await Employee.findByPk(employee.emp_id, {
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
@@ -127,8 +127,8 @@ const findAll = async (req, res) => {
 
             // Filter employees by accessible work sites
             where[Op.or] = [
-                {work_site_id: {[Op.in]: accessibleSites}},
-                {work_site_id: null}, // Include employees without specific work site assignment
+                { work_site_id: { [Op.in]: accessibleSites } },
+                { work_site_id: null }, // Include employees without specific work site assignment
                 // Include employees whose default position is in accessible sites
                 db.Sequelize.literal(`default_position_id IN (
                     SELECT pos_id FROM positions 
@@ -137,7 +137,7 @@ const findAll = async (req, res) => {
             ];
 
             // Exclude super admins from regular admin view
-            where.is_super_admin = {[Op.or]: [false, null]};
+            where.is_super_admin = { [Op.or]: [false, null] };
         }
 
         if (status && status !== 'all') {
@@ -174,24 +174,24 @@ const findAll = async (req, res) => {
             const searchConditions = [
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('first_name')),
-                    {[Op.like]: `%${searchLower}%`},
+                    { [Op.like]: `%${searchLower}%` },
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('last_name')),
-                    {[Op.like]: `%${searchLower}%`},
+                    { [Op.like]: `%${searchLower}%` },
                 ),
                 db.Sequelize.where(
                     db.Sequelize.fn('LOWER', db.Sequelize.col('email')),
-                    {[Op.like]: `%${searchLower}%`},
+                    { [Op.like]: `%${searchLower}%` },
                 ),
-                {phone: {[Op.like]: `%${search}%`}},
+                { phone: { [Op.like]: `%${search}%` } },
             ];
 
             // If we already have Op.or conditions (like for limited admin), combine them properly
             if (where[Op.or]) {
                 where[Op.and] = [
-                    {[Op.or]: where[Op.or]},
-                    {[Op.or]: searchConditions}
+                    { [Op.or]: where[Op.or] },
+                    { [Op.or]: searchConditions },
                 ];
                 delete where[Op.or];
             } else {
@@ -229,10 +229,10 @@ const findAll = async (req, res) => {
                 order = [['first_name', sortOrder], ['last_name', sortOrder]];
                 break;
             case 'workSite':
-                order = [[{model: WorkSite, as: 'workSite'}, 'site_name', sortOrder]];
+                order = [[{ model: WorkSite, as: 'workSite' }, 'site_name', sortOrder]];
                 break;
             case 'position':
-                order = [[{model: Position, as: 'defaultPosition'}, 'pos_name', sortOrder]];
+                order = [[{ model: Position, as: 'defaultPosition' }, 'pos_name', sortOrder]];
                 break;
             case 'status':
                 order = [['status', sortOrder]];
@@ -245,7 +245,7 @@ const findAll = async (req, res) => {
         const offset = (page - 1) * pageSize;
 
         // Optimized query with limited field set
-        const {count, rows} = await Employee.findAndCountAll({
+        const { count, rows } = await Employee.findAndCountAll({
             where,
             attributes,
             include: [
@@ -306,7 +306,7 @@ const findAll = async (req, res) => {
 const findOne = async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
@@ -342,7 +342,7 @@ const findOne = async (req, res) => {
 // Update employee
 const update = async (req, res) => {
     try {
-        const {password, admin_work_sites_scope, is_super_admin, ...updateData} = req.body;
+        const { password, admin_work_sites_scope, is_super_admin, ...updateData } = req.body;
 
         // Get the employee being updated to check current role
         const existingEmployee = await Employee.findByPk(req.params.id, {
@@ -422,7 +422,7 @@ const update = async (req, res) => {
         }
         // Update only the passed fields
         const [updated] = await Employee.update(updateData, {
-            where: {emp_id: req.params.id},
+            where: { emp_id: req.params.id },
         });
 
         if (!updated) {
@@ -434,7 +434,7 @@ const update = async (req, res) => {
 
         // Return full employee data with included associations
         const employee = await Employee.findByPk(req.params.id, {
-            attributes: {exclude: ['password']},
+            attributes: { exclude: ['password'] },
             include: [
                 {
                     model: Position,
@@ -494,7 +494,7 @@ const deleteEmployee = async (req, res) => {
         }
 
         const deleted = await Employee.destroy({
-            where: {emp_id: req.params.id},
+            where: { emp_id: req.params.id },
         });
 
         if (!deleted) {
@@ -521,7 +521,7 @@ const deleteEmployee = async (req, res) => {
 const getConstraints = async (req, res) => {
     try {
         const constraints = await EmployeeConstraint.findAll({
-            where: {emp_id: req.params.id},
+            where: { emp_id: req.params.id },
             include: [{
                 model: db.Shift,
                 as: 'shift',
@@ -577,7 +577,14 @@ const addQualification = async (req, res) => {
 };
 const getMyShifts = async (req, res) => {
     try {
-        const empId = req.userId;
+        // Allow admins to view other employees' shifts via emp_id parameter
+        let empId = req.userId;
+        const { emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
 
         const employee = await Employee.findByPk(empId, {
             include: [{
@@ -707,7 +714,7 @@ const updateProfile = async (req, res) => {
 
             // Hash new password
             const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-            await employee.update({password: hashedNewPassword});
+            await employee.update({ password: hashedNewPassword });
 
             return res.json({
                 success: true,

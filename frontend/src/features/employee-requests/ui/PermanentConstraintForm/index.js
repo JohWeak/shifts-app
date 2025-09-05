@@ -9,7 +9,7 @@ import { useShiftColor } from 'shared/hooks/useShiftColor';
 import { useMediaQuery } from 'shared/hooks/useMediaQuery';
 import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
 import { constraintAPI, employeeAPI } from 'shared/api/apiService';
-import { fetchMyPermanentConstraints } from '../../model/requestsSlice';
+import { fetchEmployeePermanentConstraintsAsAdmin, fetchMyPermanentConstraints } from '../../model/requestsSlice';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 import LoadingState from 'shared/ui/components/LoadingState';
 import ErrorMessage from 'shared/ui/components/ErrorMessage';
@@ -20,7 +20,7 @@ import store from '../../../../app/store/store';
 
 const DAYS_OF_WEEK_CANONICAL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null }) => {
+const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null, employeeId = null }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
@@ -51,12 +51,16 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
             try {
                 setLoading(true);
 
-                // Загружаем смены
-                const shiftsResponse = await constraintAPI.getEmployeeShifts();
+                // Загружаем смены (для админского режима или обычного)
+                const shiftsResponse = employeeId
+                    ? await employeeAPI.getEmployeeShifts(employeeId)
+                    : await constraintAPI.getEmployeeShifts();
                 setShifts(shiftsResponse.data?.shifts || []);
 
                 // Загружаем permanent constraints через Redux
-                const constraintsData = await dispatch(fetchMyPermanentConstraints()).unwrap();
+                const constraintsData = employeeId
+                    ? await dispatch(fetchEmployeePermanentConstraintsAsAdmin(employeeId)).unwrap()
+                    : await dispatch(fetchMyPermanentConstraints()).unwrap();
                 console.log('[PermanentConstraintForm] Loaded constraints data:', constraintsData);
 
                 // Временно: проверим что в Redux

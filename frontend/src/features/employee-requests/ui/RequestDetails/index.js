@@ -12,7 +12,7 @@ import { formatDateTime, getDayName } from 'shared/lib/utils/scheduleUtils';
 import { getDayIndex, groupConstraintsByDay } from 'shared/lib/utils/constraintUtils';
 import './RequestDetails.css';
 
-const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
+const RequestDetails = ({ request, onBack, onEdit, onDelete, employeeId = null }) => {
     const { t, locale } = useI18n();
     const dispatch = useDispatch();
     const [shiftsData, setShiftsData] = useState({});
@@ -27,7 +27,9 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
 
     const loadShiftDetails = async () => {
         try {
-            const response = await employeeAPI.getEmployeeShifts();
+            const response = employeeId
+                ? await employeeAPI.getEmployeeShifts(employeeId)
+                : await employeeAPI.getEmployeeShifts();
             const shifts = response.data?.shifts || [];
 
             const shiftsMap = {};

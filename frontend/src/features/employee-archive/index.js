@@ -14,14 +14,23 @@ import {
     fetchEmployeeArchiveMonth,
     fetchEmployeeArchiveSummary,
 } from 'features/employee-dashboard/model/employeeDataSlice';
+import { useEmployeeDataAsAdmin } from 'features/employee-dashboard/model/hooks/useEmployeeDataAsAdmin';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './index.css';
 
 
-const EmployeeArchive = () => {
+const EmployeeArchive = ({ employeeId, hidePageHeader = false }) => {
     const { t } = useI18n();
     const dispatch = useDispatch();
 
+    // Choose data source based on whether we're viewing as admin
+    const isViewingAsAdmin = !!employeeId;
+
+    // Use admin hook only when employeeId is provided
+    const adminData = useEmployeeDataAsAdmin(isViewingAsAdmin ? employeeId : null);
+    const regularEmployeeData = useSelector(state => state.employeeData);
+
+    const employeeData = isViewingAsAdmin ? adminData : regularEmployeeData;
 
     const {
         archiveSummary,
@@ -30,7 +39,7 @@ const EmployeeArchive = () => {
         archiveCache,
         archiveLoading,
         archiveError,
-    } = useSelector(state => state.employeeData);
+    } = employeeData;
 
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
@@ -39,17 +48,26 @@ const EmployeeArchive = () => {
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     useEffect(() => {
-        fetchEmployeeArchiveSummary();
-    }, [dispatch]);
+        if (isViewingAsAdmin && adminData?.loadArchiveSummary) {
+            adminData.loadArchiveSummary();
+        } else if (!isViewingAsAdmin) {
+            dispatch(fetchEmployeeArchiveSummary());
+        }
+    }, [dispatch, isViewingAsAdmin, adminData?.loadArchiveSummary]);
 
     // Загружаем данные для выбранного месяца
     useEffect(() => {
         if (selectedMonth) {
             const year = selectedMonth.getFullYear();
             const month = selectedMonth.getMonth() + 1;
-            dispatch(fetchEmployeeArchiveMonth({ year, month }));
+
+            if (isViewingAsAdmin && adminData?.loadArchiveMonth) {
+                adminData.loadArchiveMonth(year, month);
+            } else if (!isViewingAsAdmin) {
+                dispatch(fetchEmployeeArchiveMonth({ year, month }));
+            }
         }
-    }, [dispatch, selectedMonth]);
+    }, [dispatch, selectedMonth, isViewingAsAdmin, adminData?.loadArchiveMonth]);
 
     const handleMonthChange = (newMonth) => {
         setSelectedMonth(newMonth);
@@ -76,7 +94,7 @@ const EmployeeArchive = () => {
 
     return (
         <Container fluid className="employee-archive-container">
-            {!isMobile && (
+            {!isMobile && !hidePageHeader && (
                 <PageHeader
                     icon="archive-fill"
                     title={t('employee.archive.title')}

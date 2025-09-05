@@ -58,6 +58,10 @@ export const API_ENDPOINTS = {
         RECOMMENDATIONS: `${API_BASE}/employees/recommendations`,
         MY_SHIFTS: `${API_BASE}/employees/my-shifts`,
         PROFILE: `${API_BASE}/employees/profile`,
+        // Admin endpoints for specific employees
+        EMPLOYEE_SHIFTS: (employeeId) => `${API_BASE}/employees/${employeeId}/shifts`,
+        EMPLOYEE_ARCHIVE_SUMMARY: (employeeId) => `${API_BASE}/employees/${employeeId}/archive/summary`,
+        EMPLOYEE_ARCHIVE_MONTH: (employeeId) => `${API_BASE}/employees/${employeeId}/archive/month`,
     },
 
     CONSTRAINTS: {
@@ -72,6 +76,10 @@ export const API_ENDPOINTS = {
         ALL_PERMANENT_REQUESTS: `${API_BASE}/constraints/permanent-requests`,
         PENDING_COUNT: `${API_BASE}/constraints/permanent-requests/count`,
         REVIEW_REQUEST: (requestId) => `${API_BASE}/constraints/permanent-request/${requestId}/review`,
+        // Admin endpoints for specific employees
+        EMPLOYEE_WEEKLY_GRID: (employeeId) => `${API_BASE}/constraints/employee/${employeeId}/weekly-grid`,
+        EMPLOYEE_PERMANENT_REQUESTS: (employeeId) => `${API_BASE}/constraints/employee/${employeeId}/permanent-requests`,
+        EMPLOYEE_PERMANENT_CONSTRAINTS: (employeeId) => `${API_BASE}/constraints/employee/${employeeId}/permanent-constraints`,
     },
 
     SETTINGS: {

@@ -11,22 +11,22 @@ const {
     PermanentConstraint,
 } = db;
 
-const {Op} = require('sequelize');
+const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 
 // Get employee constraints
 const getEmployeeConstraints = async (req, res) => {
     try {
-        const {empId} = req.params;
+        const { empId } = req.params;
         const constraints = await EmployeeConstraint.findAll({
-            where: {emp_id: empId, status: 'active'},
-            include: [{model: PositionShift, as: 'shift'}],
-            order: [['created_at', 'DESC']]
+            where: { emp_id: empId, status: 'active' },
+            include: [{ model: PositionShift, as: 'shift' }],
+            order: [['created_at', 'DESC']],
         });
 
-        res.json({success: true, data: constraints});
+        res.json({ success: true, data: constraints });
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -34,9 +34,9 @@ const getEmployeeConstraints = async (req, res) => {
 const createConstraint = async (req, res) => {
     try {
         const constraint = await EmployeeConstraint.create(req.body);
-        res.status(201).json({success: true, data: constraint});
+        res.status(201).json({ success: true, data: constraint });
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -44,17 +44,17 @@ const createConstraint = async (req, res) => {
 const updateConstraint = async (req, res) => {
     try {
         const [updated] = await EmployeeConstraint.update(req.body, {
-            where: {id: req.params.id}
+            where: { id: req.params.id },
         });
 
         if (!updated) {
-            return res.status(404).json({success: false, message: 'Constraint not found'});
+            return res.status(404).json({ success: false, message: 'Constraint not found' });
         }
 
         const constraint = await EmployeeConstraint.findByPk(req.params.id);
-        res.json({success: true, data: constraint});
+        res.json({ success: true, data: constraint });
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -62,24 +62,30 @@ const updateConstraint = async (req, res) => {
 const deleteConstraint = async (req, res) => {
     try {
         const deleted = await EmployeeConstraint.destroy({
-            where: {id: req.params.id}
+            where: { id: req.params.id },
         });
 
         if (!deleted) {
-            return res.status(404).json({success: false, message: 'Constraint not found'});
+            return res.status(404).json({ success: false, message: 'Constraint not found' });
         }
 
-        res.json({success: true, message: 'Constraint deleted successfully'});
+        res.json({ success: true, message: 'Constraint deleted successfully' });
     } catch (error) {
-        res.status(500).json({success: false, message: error.message});
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // Get a weekly constraints grid
 const getWeeklyConstraintsGrid = async (req, res) => {
     try {
-        const empId = req.userId; // From auth middleware
-        const {weekStart} = req.query;
+        // Allow admins to view other employees' constraints via emp_id parameter
+        let empId = req.userId; // Default to current user from auth middleware
+        const { weekStart, emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
 
         // Calculate week start (default to next Sunday/Monday based on locale, simple startOf('week') is used here)
         const startDate = weekStart ?
@@ -96,17 +102,17 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 include: [{
                     model: PositionShift,
                     as: 'shifts',
-                    where: {is_active: true},
+                    where: { is_active: true },
                     // Explicitly specify which attributes we need
-                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color']
-                }]
-            }]
+                    attributes: ['id', 'shift_name', 'start_time', 'end_time', 'color'],
+                }],
+            }],
         });
 
         if (!employee || !employee.defaultPosition) {
             return res.status(404).json({
                 success: false,
-                message: 'Employee not found or has no default position assigned'
+                message: 'Employee not found or has no default position assigned',
             });
         }
 
@@ -115,10 +121,10 @@ const getWeeklyConstraintsGrid = async (req, res) => {
             where: {
                 emp_id: empId,
                 target_date: {
-                    [Op.between]: [startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD')]
+                    [Op.between]: [startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD')],
                 },
-                status: 'active'
-            }
+                status: 'active',
+            },
         });
 
         const settings = await ScheduleSettings.findOne();
@@ -127,7 +133,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
         for (let i = 0; i < 7; i++) {
             const currentDate = startDate.add(i, 'day');
             const dayConstraints = existingConstraints.filter(c =>
-                dayjs(c.target_date).isSame(currentDate, 'day')
+                dayjs(c.target_date).isSame(currentDate, 'day'),
             );
 
             // CHANGE 1: Update mapping logic
@@ -139,7 +145,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                     color: shift.color,           // Added color (even if frontend overrides it, better to have it)
                     start_time: shift.start_time,
                     duration: shift.duration_hours,
-                    status: constraint ? constraint.constraint_type : 'neutral'
+                    status: constraint ? constraint.constraint_type : 'neutral',
                 };
             });
 
@@ -149,7 +155,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 date: currentDate.format('YYYY-MM-DD'),
                 weekday: currentDate.format('dddd').toLowerCase(),
                 day_status: wholeDayConstraint ? wholeDayConstraint.constraint_type : 'neutral',
-                shifts: dayShifts
+                shifts: dayShifts,
             });
         }
 
@@ -164,17 +170,17 @@ const getWeeklyConstraintsGrid = async (req, res) => {
                 id: employee.emp_id,
                 first_name: employee.first_name,
                 last_name: employee.last_name,
-                position: employee.defaultPosition.pos_name
+                position: employee.defaultPosition.pos_name,
             },
             constraints: {
                 template,
                 limits: {
                     cannot_work_days: settings?.max_cannot_work_days || 2,
-                    prefer_work_days: settings?.max_prefer_work_days || 6
+                    prefer_work_days: settings?.max_prefer_work_days || 6,
                 },
                 already_submitted: alreadySubmitted,
-                can_edit: canEdit
-            }
+                can_edit: canEdit,
+            },
             // Fields shiftTypes and colors removed
         });
 
@@ -182,7 +188,7 @@ const getWeeklyConstraintsGrid = async (req, res) => {
         console.error('Error in getWeeklyConstraintsGrid:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -192,13 +198,21 @@ const submitWeeklyConstraints = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const empId = req.userId;
-        const {constraints, week_start} = req.body;
+        // Allow admins to submit constraints for other employees via emp_id parameter
+        let empId = req.userId;
+        const { emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
+
+        const { constraints, week_start } = req.body;
 
         if (!constraints || !Array.isArray(constraints)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid constraints data'
+                message: 'Invalid constraints data',
             });
         }
 
@@ -211,10 +225,10 @@ const submitWeeklyConstraints = async (req, res) => {
             where: {
                 emp_id: empId,
                 target_date: {
-                    [Op.between]: [startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD')]
-                }
+                    [Op.between]: [startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD')],
+                },
             },
-            transaction
+            transaction,
         });
 
         // Create new constraints
@@ -223,11 +237,11 @@ const submitWeeklyConstraints = async (req, res) => {
             emp_id: empId,
             status: 'active',
             applies_to: 'specific_date',
-            is_permanent: false
+            is_permanent: false,
         }));
 
         if (newConstraints.length > 0) {
-            await EmployeeConstraint.bulkCreate(newConstraints, {transaction});
+            await EmployeeConstraint.bulkCreate(newConstraints, { transaction });
         }
 
         await transaction.commit();
@@ -235,7 +249,7 @@ const submitWeeklyConstraints = async (req, res) => {
         res.json({
             success: true,
             message: 'Constraints submitted successfully',
-            count: newConstraints.length
+            count: newConstraints.length,
         });
 
     } catch (error) {
@@ -243,7 +257,7 @@ const submitWeeklyConstraints = async (req, res) => {
         console.error('Error in submitWeeklyConstraints:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -253,31 +267,31 @@ const submitWeeklyConstraints = async (req, res) => {
 const getPendingRequests = async (req, res) => {
     try {
         const requests = await PermanentConstraintRequest.findAll({
-            where: {status: 'pending'},
+            where: { status: 'pending' },
             include: [
                 {
                     model: Employee,
                     as: 'employee',
-                    attributes: ['emp_id', 'first_name', 'last_name', 'email']
+                    attributes: ['emp_id', 'first_name', 'last_name', 'email'],
                 },
                 {
                     model: PositionShift,
-                    as: 'shift'
-                }
+                    as: 'shift',
+                },
             ],
-            order: [['requested_at', 'ASC']]
+            order: [['requested_at', 'ASC']],
         });
 
         res.json({
             success: true,
-            data: requests
+            data: requests,
         });
 
     } catch (error) {
         console.error('Error in getPendingRequests:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -301,28 +315,28 @@ const getAllPermanentRequests = async (req, res) => {
                     {
                         model: Position,
                         as: 'defaultPosition',
-                        attributes: ['pos_id', 'pos_name']
+                        attributes: ['pos_id', 'pos_name'],
                     },
                     {
                         model: WorkSite,
                         as: 'workSite',
-                        attributes: ['site_id', 'site_name']
-                    }
-                ]
+                        attributes: ['site_id', 'site_name'],
+                    },
+                ],
             }, {
                 model: Employee,
                 as: 'reviewer',
-                attributes: ['emp_id', 'first_name', 'last_name']
+                attributes: ['emp_id', 'first_name', 'last_name'],
             }],
-            order: [['requested_at', 'DESC']]
+            order: [['requested_at', 'DESC']],
         });
 
         // Get all active constraints for all employees
         const activeConstraints = await PermanentConstraint.findAll({
             where: {
-                is_active: true
+                is_active: true,
             },
-            attributes: ['emp_id', 'day_of_week', 'shift_id', 'approved_at']
+            attributes: ['emp_id', 'day_of_week', 'shift_id', 'approved_at'],
         });
 
         // Group active constraints by employees
@@ -343,7 +357,7 @@ const getAllPermanentRequests = async (req, res) => {
             if (requestData.status === 'pending') {
                 return {
                     ...requestData,
-                    is_active: null
+                    is_active: null,
                 };
             }
 
@@ -351,7 +365,7 @@ const getAllPermanentRequests = async (req, res) => {
             if (requestData.status === 'rejected') {
                 return {
                     ...requestData,
-                    is_active: false
+                    is_active: false,
                 };
             }
 
@@ -381,20 +395,20 @@ const getAllPermanentRequests = async (req, res) => {
 
             return {
                 ...requestData,
-                is_active: isActive
+                is_active: isActive,
             };
         });
 
         res.json({
             success: true,
-            data: requestsWithActiveFlag
+            data: requestsWithActiveFlag,
         });
 
     } catch (error) {
         console.error('Error in getAllPermanentRequests:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -404,13 +418,21 @@ const submitPermanentRequest = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const empId = req.userId;
-        const {constraints, message} = req.body;
+        // Allow admins to submit permanent requests for other employees via emp_id parameter
+        let empId = req.userId;
+        const { emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
+
+        const { constraints, message } = req.body;
 
         if (!constraints || !Array.isArray(constraints) || constraints.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: 'No constraints provided'
+                message: 'No constraints provided',
             });
         }
 
@@ -418,14 +440,14 @@ const submitPermanentRequest = async (req, res) => {
         const existingPending = await PermanentConstraintRequest.findOne({
             where: {
                 emp_id: empId,
-                status: 'pending'
-            }
+                status: 'pending',
+            },
         });
 
         if (existingPending) {
             return res.status(400).json({
                 success: false,
-                message: 'You already have a pending request. Please wait for it to be processed.'
+                message: 'You already have a pending request. Please wait for it to be processed.',
             });
         }
 
@@ -434,8 +456,8 @@ const submitPermanentRequest = async (req, res) => {
             emp_id: empId,
             constraints,
             message: message || null,
-            requested_at: new Date()
-        }, {transaction});
+            requested_at: new Date(),
+        }, { transaction });
 
         await transaction.commit();
 
@@ -444,14 +466,14 @@ const submitPermanentRequest = async (req, res) => {
             include: [{
                 model: Employee,
                 as: 'reviewer',
-                attributes: ['emp_id', 'first_name', 'last_name']
-            }]
+                attributes: ['emp_id', 'first_name', 'last_name'],
+            }],
         });
 
         res.json({
             success: true,
             message: 'Request submitted successfully',
-            data: createdRequest
+            data: createdRequest,
         });
 
     } catch (error) {
@@ -459,7 +481,7 @@ const submitPermanentRequest = async (req, res) => {
         console.error('Error in submitPermanentRequest:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -468,33 +490,33 @@ const submitPermanentRequest = async (req, res) => {
 const getUnprocessedRequestsCount = async (req, res) => {
     try {
         // Build where clause for filtering employees by accessible work sites
-        const whereClause = {status: 'pending'};
+        const whereClause = { status: 'pending' };
         let includeEmployee = null;
-        
+
         if (req.accessibleSites && req.accessibleSites !== 'all' && req.accessibleSites.length > 0) {
             includeEmployee = {
                 model: Employee,
                 as: 'employee',
-                where: {work_site_id: req.accessibleSites},
-                attributes: [] // Only needed for filtering, don't select data
+                where: { work_site_id: req.accessibleSites },
+                attributes: [], // Only needed for filtering, don't select data
             };
         }
 
         const count = await PermanentConstraintRequest.count({
             where: whereClause,
-            ...(includeEmployee && { include: [includeEmployee] })
+            ...(includeEmployee && { include: [includeEmployee] }),
         });
 
         res.json({
             success: true,
-            count
+            count,
         });
 
     } catch (error) {
         console.error('Error in getUnprocessedRequestsCount:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -504,29 +526,29 @@ const reviewPermanentRequest = async (req, res) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        const {id} = req.params;
-        const {status, admin_response} = req.body;
+        const { id } = req.params;
+        const { status, admin_response } = req.body;
         const adminId = req.userId;
 
         if (!['approved', 'rejected', 'pending'].includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid status'
+                message: 'Invalid status',
             });
         }
 
         const request = await PermanentConstraintRequest.findByPk(id, {
             include: [{
                 model: Employee,
-                as: 'employee'
-            }]
+                as: 'employee',
+            }],
         });
 
         if (!request) {
             await transaction.rollback();
             return res.status(404).json({
                 success: false,
-                message: 'Request not found'
+                message: 'Request not found',
             });
         }
 
@@ -536,20 +558,20 @@ const reviewPermanentRequest = async (req, res) => {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,
-                    message: 'Access denied to this work site'
+                    message: 'Access denied to this work site',
                 });
             }
         }
 
         const admin = await Employee.findByPk(adminId, {
-            attributes: ['emp_id', 'first_name', 'last_name']
+            attributes: ['emp_id', 'first_name', 'last_name'],
         });
 
         if (!admin) {
             await transaction.rollback();
             return res.status(404).json({
                 success: false,
-                message: 'Admin not found'
+                message: 'Admin not found',
             });
         }
 
@@ -559,7 +581,7 @@ const reviewPermanentRequest = async (req, res) => {
                 await transaction.rollback();
                 return res.status(400).json({
                     success: false,
-                    message: 'Reason is required when returning to pending status'
+                    message: 'Reason is required when returning to pending status',
                 });
             }
         }
@@ -568,22 +590,22 @@ const reviewPermanentRequest = async (req, res) => {
             status,
             admin_response,
             reviewed_at: status !== 'pending' ? new Date() : null,
-            reviewed_by: status !== 'pending' ? adminId : null
-        }, {transaction});
+            reviewed_by: status !== 'pending' ? adminId : null,
+        }, { transaction });
 
         if (status === 'approved' && request.constraints && Array.isArray(request.constraints)) {
             await PermanentConstraint.update(
                 {
                     is_active: false,
-                    deactivated_at: new Date()
+                    deactivated_at: new Date(),
                 },
                 {
                     where: {
                         emp_id: request.emp_id,
-                        is_active: true
+                        is_active: true,
                     },
-                    transaction
-                }
+                    transaction,
+                },
             );
 
             const adminFullName = `${admin.first_name} ${admin.last_name}`.trim();
@@ -598,21 +620,21 @@ const reviewPermanentRequest = async (req, res) => {
                     approved_by: adminId,
                     approved_by_name: adminFullName,
                     approved_at: approvedAt,
-                    is_active: true
-                }, {transaction});
+                    is_active: true,
+                }, { transaction });
             }
         }
 
         if ((status === 'rejected' || status === 'pending') && request.status === 'approved') {
             await PermanentConstraint.update(
-                {is_active: false},
+                { is_active: false },
                 {
                     where: {
                         emp_id: request.emp_id,
-                        approved_at: request.reviewed_at
+                        approved_at: request.reviewed_at,
                     },
-                    transaction
-                }
+                    transaction,
+                },
             );
         }
 
@@ -620,7 +642,7 @@ const reviewPermanentRequest = async (req, res) => {
 
         res.json({
             success: true,
-            message: `Request ${status} successfully`
+            message: `Request ${status} successfully`,
         });
 
     } catch (error) {
@@ -628,7 +650,7 @@ const reviewPermanentRequest = async (req, res) => {
         console.error('Error in reviewPermanentRequest:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -636,25 +658,32 @@ const reviewPermanentRequest = async (req, res) => {
 
 const getMyPermanentRequests = async (req, res) => {
     try {
-        const empId = req.userId;
+        // Allow admins to view other employees' requests via emp_id parameter
+        let empId = req.userId;
+        const { emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
 
         const requests = await PermanentConstraintRequest.findAll({
-            where: {emp_id: empId},
+            where: { emp_id: empId },
             include: [{
                 model: Employee,
                 as: 'reviewer',
-                attributes: ['emp_id', 'first_name', 'last_name']
+                attributes: ['emp_id', 'first_name', 'last_name'],
             }],
-            order: [['requested_at', 'DESC']]
+            order: [['requested_at', 'DESC']],
         });
 
         const activeConstraints = await PermanentConstraint.findAll({
             where: {
                 emp_id: empId,
-                is_active: true
+                is_active: true,
             },
             attributes: ['day_of_week', 'shift_id', 'approved_at'],
-            order: [['approved_at', 'DESC']]
+            order: [['approved_at', 'DESC']],
         });
 
         const activeConstraintsMap = new Map();
@@ -671,14 +700,14 @@ const getMyPermanentRequests = async (req, res) => {
             if (requestData.status === 'pending') {
                 return {
                     ...requestData,
-                    is_active: null
+                    is_active: null,
                 };
             }
 
             if (requestData.status === 'rejected') {
                 return {
                     ...requestData,
-                    is_active: false
+                    is_active: false,
                 };
             }
 
@@ -702,47 +731,54 @@ const getMyPermanentRequests = async (req, res) => {
 
             return {
                 ...requestData,
-                is_active: isActive
+                is_active: isActive,
             };
         });
 
         res.json({
             success: true,
-            data: requestsWithActiveFlag
+            data: requestsWithActiveFlag,
         });
 
     } catch (error) {
         console.error('Error in getMyPermanentRequests:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
 
 const getMyPermanentConstraints = async (req, res) => {
     try {
-        const empId = req.userId;
+        // Allow admins to view other employees' constraints via emp_id parameter
+        let empId = req.userId;
+        const { emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
 
         const constraints = await PermanentConstraint.findAll({
             where: {
                 emp_id: empId,
-                is_active: true
+                is_active: true,
             },
             include: [
                 {
                     model: PositionShift,
                     as: 'shift',
-                    attributes: ['id', 'shift_name']
+                    attributes: ['id', 'shift_name'],
                 },
                 {
                     model: Employee,
                     as: 'approver',
                     attributes: ['emp_id', 'first_name', 'last_name'],
-                    required: false // LEFT JOIN для случаев, когда approved_by = NULL
-                }
+                    required: false, // LEFT JOIN для случаев, когда approved_by = NULL
+                },
             ],
-            order: [['day_of_week', 'ASC'], ['shift_id', 'ASC']]
+            order: [['day_of_week', 'ASC'], ['shift_id', 'ASC']],
         });
 
         // Process data for frontend
@@ -768,14 +804,14 @@ const getMyPermanentConstraints = async (req, res) => {
 
         res.json({
             success: true,
-            data: processedConstraints
+            data: processedConstraints,
         });
 
     } catch (error) {
         console.error('Error in getMyPermanentConstraints:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -789,15 +825,15 @@ const getEmployeeShifts = async (req, res) => {
                 model: Position,
                 include: [{
                     model: PositionShift,
-                    as: 'shifts'
-                }]
-            }]
+                    as: 'shifts',
+                }],
+            }],
         });
 
         if (!employee || !employee.Position) {
             return res.json({
                 success: true,
-                data: {shifts: []}
+                data: { shifts: [] },
             });
         }
 
@@ -805,37 +841,45 @@ const getEmployeeShifts = async (req, res) => {
             success: true,
             data: {
                 position: employee.Position,
-                shifts: employee.Position.shifts || []
-            }
+                shifts: employee.Position.shifts || [],
+            },
         });
 
     } catch (error) {
         console.error('Error in getEmployeeShifts:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
 
 const deletePermanentRequest = async (req, res) => {
     try {
-        const {id} = req.params;
-        const empId = req.userId;
+        const { id } = req.params;
+
+        // Allow admins to delete permanent requests for other employees via emp_id parameter
+        let empId = req.userId;
+        const { emp_id } = req.query;
+
+        // If emp_id is provided and user is admin, use it instead
+        if (emp_id && req.userRole === 'admin') {
+            empId = emp_id;
+        }
 
         // Find the request
         const request = await PermanentConstraintRequest.findOne({
             where: {
                 id,
                 emp_id: empId,
-                status: 'pending' // Only pending requests can be deleted
-            }
+                status: 'pending', // Only pending requests can be deleted
+            },
         });
 
         if (!request) {
             return res.status(404).json({
                 success: false,
-                message: 'Request not found or cannot be deleted'
+                message: 'Request not found or cannot be deleted',
             });
         }
 
@@ -843,14 +887,14 @@ const deletePermanentRequest = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Request deleted successfully'
+            message: 'Request deleted successfully',
         });
 
     } catch (error) {
         console.error('Error in deletePermanentRequest:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };

@@ -48,9 +48,9 @@ const PageHeader = ({
                             key={index}
                             active={isLast}
                             onClick={!isLast ? crumb.onClick : undefined}
-                            href={!isLast && !crumb.onClick ? crumb.to : '#'}
+                            href={!isLast && !crumb.onClick ? (crumb.to || crumb.path) : '#'}
                         >
-                            {crumb.text}
+                            {crumb.text || crumb.label}
                         </Breadcrumb.Item>
                     );
                 })}

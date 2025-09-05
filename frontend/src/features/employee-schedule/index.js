@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Container, Form } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { fetchPositionSchedule } from 'features/employee-dashboard/model/employeeDataSlice';
+import { useEmployeeDataAsAdmin } from 'features/employee-dashboard/model/hooks/useEmployeeDataAsAdmin';
 
 import PageHeader from 'shared/ui/components/PageHeader';
 import LoadingState from 'shared/ui/components/LoadingState';
@@ -16,10 +17,18 @@ import { useShiftColor } from 'shared/hooks/useShiftColor';
 
 import './index.css';
 
-const EmployeeSchedule = () => {
+const EmployeeSchedule = ({ employeeId, hidePageHeader = false }) => {
     const { t, direction } = useI18n();
     const { user } = useSelector(state => state.auth);
     const dispatch = useDispatch();
+
+    // Use admin hook when employeeId is provided, otherwise use regular selector
+    const adminData = useEmployeeDataAsAdmin(employeeId);
+    const regularEmployeeData = useSelector(state => state.employeeData);
+
+    // Choose data source based on whether we're viewing as admin
+    const isViewingAsAdmin = !!employeeId;
+    const employeeData = isViewingAsAdmin ? adminData : regularEmployeeData;
 
 
     const [showFullSchedule, setShowFullSchedule] = useState(() => {
@@ -34,7 +43,7 @@ const EmployeeSchedule = () => {
         positionSchedule,
         positionScheduleLoading,
         positionScheduleError,
-    } = useSelector(state => state.employeeData);
+    } = employeeData;
 
 
     const {
@@ -125,7 +134,9 @@ const EmployeeSchedule = () => {
         );
     };
 
-    const headerActions = hasAssignedPosition ? (
+    const shouldShowToggle = hasAssignedPosition && hasAnyData && !isLoading && !error;
+
+    const headerActions = shouldShowToggle ? (
         <Form.Check
             type="switch"
             id="full-schedule-toggle"
@@ -139,12 +150,22 @@ const EmployeeSchedule = () => {
 
     return (
         <Container fluid className="employee-schedule-container">
-            <PageHeader
-                icon="calendar-week-fill"
-                title={t('employee.schedule.title')}
-                subtitle={t('employee.schedule.subtitle')}
-                actions={headerActions}
-            />
+            {!hidePageHeader && (
+                <PageHeader
+                    icon="calendar-week-fill"
+                    title={t('employee.schedule.title')}
+                    subtitle={t('employee.schedule.subtitle')}
+                    actions={headerActions}
+                />
+            )}
+
+            {/* Show toggle when PageHeader is hidden (admin view) */}
+            {hidePageHeader && headerActions && (
+                <div className="mb-3 d-flex justify-content-end">
+                    {headerActions}
+                </div>
+            )}
+
             {renderContent()}
 
             <ColorPickerModal

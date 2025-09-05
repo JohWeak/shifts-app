@@ -1,7 +1,7 @@
 // frontend/src/features/employee-constraints/model/constraintSlice.js
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {constraintAPI} from 'shared/api/apiService';
-import {addNotification} from 'app/model/notificationsSlice';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { constraintAPI } from 'shared/api/apiService';
+import { addNotification } from 'app/model/notificationsSlice';
 
 const CACHE_DURATION = 10 * 60 * 1000; // 10 минут
 
@@ -12,38 +12,45 @@ const isCacheValid = (timestamp) => {
 
 export const fetchWeeklyConstraints = createAsyncThunk(
     'constraints/fetchWeekly',
-    async ({forceRefresh = false} = {}, {getState, rejectWithValue}) => {
+    async ({ forceRefresh = false, employeeId = null } = {}, { getState, rejectWithValue }) => {
         const state = getState().constraints;
-        if (!forceRefresh && state.weeklyTemplate && isCacheValid(state.lastFetched)) {
-            return {data: state.weeklyTemplate, fromCache: true};
+        if (!forceRefresh && state.weeklyTemplate && isCacheValid(state.lastFetched) && !employeeId) {
+            return { data: state.weeklyTemplate, fromCache: true };
         }
         try {
-            const response = await constraintAPI.getWeeklyConstraints({});
-            return {data: response, fromCache: false};
+            let response;
+            if (employeeId) {
+                // Admin viewing another employee's constraints
+                response = await constraintAPI.getEmployeeWeeklyConstraints(employeeId, {});
+            } else {
+                // Employee viewing their own constraints
+                response = await constraintAPI.getWeeklyConstraints({});
+            }
+            return { data: response, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 // Async thunks
 export const submitWeeklyConstraints = createAsyncThunk(
     'constraints/submitWeeklyConstraints',
-    async (constraintsData, {dispatch}) => {
+    async ({ constraintsData, employeeId }, { dispatch }) => {
         try {
-            const response = await constraintAPI.submitWeeklyConstraints(constraintsData);
+            const response = await constraintAPI.submitWeeklyConstraints(constraintsData, employeeId);
 
             dispatch(addNotification({
                 id: 'constraint-submit-success',
                 message: 'constraints.submitSuccess',
-                variant: 'success'
+                variant: 'success',
             }));
 
             return response;
         } catch (error) {
             throw error;
         }
-    }
+    },
 );
 
 
@@ -74,10 +81,10 @@ const constraintSlice = createSlice({
             state.currentMode = action.payload;
         },
         updateConstraint: (state, action) => {
-            const {date, shiftId, status} = action.payload;
+            const { date, shiftId, status } = action.payload;
 
             if (!state.weeklyConstraints[date]) {
-                state.weeklyConstraints[date] = {day_status: 'neutral', shifts: {}};
+                state.weeklyConstraints[date] = { day_status: 'neutral', shifts: {} };
             }
 
             if (shiftId) {
@@ -114,7 +121,7 @@ const constraintSlice = createSlice({
             const initialConstraints = {};
             if (state.weeklyTemplate) {
                 state.weeklyTemplate.constraints.template.forEach(day => {
-                    initialConstraints[day.date] = {day_status: 'neutral', shifts: {}};
+                    initialConstraints[day.date] = { day_status: 'neutral', shifts: {} };
                     day.shifts.forEach(shift => {
                         initialConstraints[day.date].shifts[shift.shift_id] = 'neutral';
                     });
@@ -140,6 +147,20 @@ const constraintSlice = createSlice({
             state.canEdit = false;
             state.originalConstraintsOnEdit = null;
         },
+        clearConstraintsData: (state) => {
+            state.weeklyTemplate = null;
+            state.weeklyConstraints = {};
+            state.loading = false;
+            state.error = null;
+            state.lastFetched = null;
+            state.submitting = false;
+            state.submitStatus = null;
+            state.limitError = '';
+            state.submitError = null;
+            state.isSubmitted = false;
+            state.canEdit = true;
+            state.originalConstraintsOnEdit = null;
+        },
         submissionInitiated: (state) => {
             state.isSubmitted = true;
             state.submitting = true;
@@ -162,7 +183,7 @@ const constraintSlice = createSlice({
 
                     const initialConstraints = {};
                     templateData.constraints.template.forEach(day => {
-                        initialConstraints[day.date] = {day_status: 'neutral', shifts: {}};
+                        initialConstraints[day.date] = { day_status: 'neutral', shifts: {} };
                         let allSame = true, firstStatus = null;
                         day.shifts.forEach((shift, index) => {
                             const status = shift.status || 'neutral';
@@ -199,7 +220,7 @@ const constraintSlice = createSlice({
                 state.error = action.error.message;
 
             });
-    }
+    },
 });
 
 export const {
@@ -208,7 +229,8 @@ export const {
     resetConstraints,
     enableEditing,
     cancelEditing,
-    submissionInitiated
+    submissionInitiated,
+    clearConstraintsData,
 } = constraintSlice.actions;
 
 export default constraintSlice.reducer;

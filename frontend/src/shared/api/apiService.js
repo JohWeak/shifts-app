@@ -10,8 +10,11 @@ export const authAPI = {
 export const scheduleAPI = {
     fetchSchedules: () => api.get(API_ENDPOINTS.SCHEDULES.BASE),
     fetchScheduleDetails: (scheduleId) => api.get(API_ENDPOINTS.SCHEDULES.DETAILS(scheduleId)),
-    fetchWeeklySchedule: (weekStart) => api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
-        params: weekStart ? { date: weekStart } : {},
+    fetchWeeklySchedule: (weekStart, additionalParams = {}) => api.get(API_ENDPOINTS.SCHEDULES.WEEKLY, {
+        params: {
+            ...(weekStart ? { date: weekStart } : {}),
+            ...additionalParams,
+        },
     }),
     fetchPositionWeeklySchedule: (positionId, weekStart) => api.get(API_ENDPOINTS.SCHEDULES.WEEKLY_BY_POSITION(positionId), {
         params: weekStart ? { date: weekStart } : {},
@@ -102,20 +105,48 @@ export const employeeAPI = {
             },
         });
     },
-    getEmployeeShifts: () => api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS),
+    getEmployeeShifts: (employeeId = null) => api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS, {
+        params: employeeId ? { emp_id: employeeId } : {},
+    }),
     getProfile: () => apiService.get(API_ENDPOINTS.EMPLOYEES.PROFILE),
     updateProfile: (data) => apiService.put(API_ENDPOINTS.EMPLOYEES.PROFILE, data),
+
+    // Admin methods for viewing other employees' data
+    getEmployeeSchedule: (employeeId, params = {}) => api.get(API_ENDPOINTS.EMPLOYEES.MY_SHIFTS, {
+        params: {
+            ...params,
+            emp_id: employeeId,
+        },
+    }),
+    getEmployeeArchiveSummary: (employeeId) => api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_SUMMARY, { params: { emp_id: employeeId } }),
+    getEmployeeArchiveMonth: (employeeId, year, month) => api.get(API_ENDPOINTS.SCHEDULES.EMPLOYEE_ARCHIVE_MONTH, {
+        params: {
+            emp_id: employeeId,
+            year,
+            month,
+        },
+    }),
 };
 
 export const constraintAPI = {
     getWeeklyConstraints: (params) => api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY_GRID, { params }),
-    submitWeeklyConstraints: (data) => api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT_WEEKLY, data),
+    submitWeeklyConstraints: (data, employeeId = null) => api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT_WEEKLY, data, { params: employeeId ? { emp_id: employeeId } : {} }),
     getMyPermanentRequests: () => api.get(API_ENDPOINTS.CONSTRAINTS.MY_PERMANENT_REQUESTS),
-    submitPermanentRequest: (data) => api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT_PERMANENT_REQUEST, data),
+    submitPermanentRequest: (data, employeeId = null) => api.post(API_ENDPOINTS.CONSTRAINTS.SUBMIT_PERMANENT_REQUEST, data, { params: employeeId ? { emp_id: employeeId } : {} }),
     getMyPermanentConstraints: () => api.get(API_ENDPOINTS.CONSTRAINTS.MY_PERMANENT_CONSTRAINTS),
     getAllPermanentRequests: (params = {}) => api.get(API_ENDPOINTS.CONSTRAINTS.ALL_PERMANENT_REQUESTS, { params }),
     reviewRequest: (requestId, data) => api.put(API_ENDPOINTS.CONSTRAINTS.REVIEW_REQUEST(requestId), data),
-    deletePermanentRequest: (requestId) => api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_PERMANENT_REQUEST(requestId)),
+    deletePermanentRequest: (requestId, employeeId = null) => api.delete(API_ENDPOINTS.CONSTRAINTS.DELETE_PERMANENT_REQUEST(requestId), { params: employeeId ? { emp_id: employeeId } : {} }),
+
+    // Admin methods for viewing other employees' data
+    getEmployeeWeeklyConstraints: (employeeId, params) => api.get(API_ENDPOINTS.CONSTRAINTS.WEEKLY_GRID, {
+        params: {
+            ...params,
+            emp_id: employeeId,
+        },
+    }),
+    getEmployeePermanentRequests: (employeeId) => api.get(API_ENDPOINTS.CONSTRAINTS.MY_PERMANENT_REQUESTS, { params: { emp_id: employeeId } }),
+    getEmployeePermanentConstraints: (employeeId) => api.get(API_ENDPOINTS.CONSTRAINTS.MY_PERMANENT_CONSTRAINTS, { params: { emp_id: employeeId } }),
 };
 
 export const positionAPI = {
@@ -141,10 +172,10 @@ export const requirementAPI = {
 
 export const settingsAPI = {
     fetchSystemSettings: (siteId = null) => api.get(API_ENDPOINTS.SETTINGS.SYSTEM, {
-        params: siteId ? { site_id: siteId } : {}
+        params: siteId ? { site_id: siteId } : {},
     }),
     updateSystemSettings: (settings, siteId = null) => api.put(API_ENDPOINTS.SETTINGS.SYSTEM, settings, {
-        params: siteId ? { site_id: siteId } : {}
+        params: siteId ? { site_id: siteId } : {},
     }),
 };
 

@@ -1,9 +1,9 @@
 // frontend/src/features/employee-dashboard/model/employeeDataSlice.js
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {constraintAPI, scheduleAPI} from 'shared/api/apiService';
-import {addNotification} from 'app/model/notificationsSlice';
-import {addWeeks, format, parseISO} from 'date-fns';
-import {CACHE_DURATION} from "../../../shared/lib/cache/cacheUtils";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { constraintAPI, employeeAPI, scheduleAPI } from 'shared/api/apiService';
+import { addNotification } from 'app/model/notificationsSlice';
+import { addWeeks, format, parseISO } from 'date-fns';
+import { CACHE_DURATION } from '../../../shared/lib/cache/cacheUtils';
 // Cache duration in milliseconds
 const CACHE_DURATION_SHORT = CACHE_DURATION.SHORT;
 const CACHE_DURATION_LONG = CACHE_DURATION.LONG;
@@ -16,11 +16,11 @@ const isCacheValid = (timestamp, duration) => {
 };
 export const fetchPersonalSchedule = createAsyncThunk(
     'employeeData/fetchPersonalSchedule',
-    async ({forceRefresh = false}, {getState, rejectWithValue}) => {
-        const {personalSchedule, personalScheduleLastFetched} = getState().employeeData;
+    async ({ forceRefresh = false }, { getState, rejectWithValue }) => {
+        const { personalSchedule, personalScheduleLastFetched } = getState().employeeData;
 
         if (!forceRefresh && personalSchedule && isCacheValid(personalScheduleLastFetched)) {
-            return {data: personalSchedule, fromCache: true};
+            return { data: personalSchedule, fromCache: true };
         }
 
         try {
@@ -33,36 +33,36 @@ export const fetchPersonalSchedule = createAsyncThunk(
                 const nextResponse = await scheduleAPI.fetchWeeklySchedule(nextWeekStart);
                 nextData = nextResponse.data || nextResponse;
             }
-            return {data: {current: currentData, next: nextData}, fromCache: false};
+            return { data: { current: currentData, next: nextData }, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 // Async thunks
 export const fetchEmployeeSchedule = createAsyncThunk(
     'employeeData/fetchSchedule',
-    async ({forceRefresh = false}, {getState, rejectWithValue}) => {
+    async ({ forceRefresh = false }, { getState, rejectWithValue }) => {
         const state = getState().employeeData;
 
         if (!forceRefresh && state.schedule && isCacheValid(state.scheduleLastFetched, CACHE_DURATION_SHORT)) {
-            return {data: state.schedule, fromCache: true};
+            return { data: state.schedule, fromCache: true };
         }
         try {
             const response = await scheduleAPI.fetchWeeklySchedule();
-            return {data: response, fromCache: false};
+            return { data: response, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 export const fetchPositionSchedule = createAsyncThunk(
     'employeeData/fetchPositionSchedule',
-    async ({positionId, forceRefresh = false}, {getState, rejectWithValue}) => {
-        const {positionSchedule, positionScheduleLastFetched} = getState().employeeData;
+    async ({ positionId, forceRefresh = false }, { getState, rejectWithValue }) => {
+        const { positionSchedule, positionScheduleLastFetched } = getState().employeeData;
 
         if (!forceRefresh && positionSchedule && isCacheValid(positionScheduleLastFetched)) {
-            return {data: positionSchedule, fromCache: true};
+            return { data: positionSchedule, fromCache: true };
         }
         try {
             const currentResponse = await scheduleAPI.fetchPositionWeeklySchedule(positionId);
@@ -73,69 +73,129 @@ export const fetchPositionSchedule = createAsyncThunk(
                 const nextWeekStart = format(addWeeks(parseISO(currentData.week.start), 1), 'yyyy-MM-dd');
                 nextData = await scheduleAPI.fetchPositionWeeklySchedule(positionId, nextWeekStart);
             }
-            return {data: {current: currentData, next: nextData}, fromCache: false};
+            return { data: { current: currentData, next: nextData }, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 export const fetchEmployeeConstraints = createAsyncThunk(
     'employeeData/fetchConstraints', // Меняем имя для уникальности
-    async ({forceRefresh = false}, {getState, rejectWithValue}) => {
-        const {constraints, constraintsLastFetched} = getState().employeeData;
+    async ({ forceRefresh = false }, { getState, rejectWithValue }) => {
+        const { constraints, constraintsLastFetched } = getState().employeeData;
         if (!forceRefresh && constraints && isCacheValid(constraintsLastFetched, CACHE_DURATION_LONG)) {
-            return {data: constraints, fromCache: true};
+            return { data: constraints, fromCache: true };
         }
 
         try {
             const response = await constraintAPI.getWeeklyConstraints({});
-            return {data: response, fromCache: false};
+            return { data: response, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message || 'Failed to fetch constraints');
         }
-    }
+    },
 );
 
 export const fetchEmployeeArchiveSummary = createAsyncThunk(
     'employeeData/fetchArchiveSummary',
-    async (_, {getState, rejectWithValue}) => {
+    async (_, { getState, rejectWithValue }) => {
         const state = getState().employeeData;
         if (state.archiveSummary && isCacheValid(state.archiveSummaryLastFetched, CACHE_DURATION_LONG)) {
-            return {data: state.archiveSummary, fromCache: true};
+            return { data: state.archiveSummary, fromCache: true };
         }
         try {
             const response = await scheduleAPI.fetchEmployeeArchiveSummary();
-            return {data: response.data || response, fromCache: false};
+            return { data: response.data || response, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
 );
 
 export const fetchEmployeeArchiveMonth = createAsyncThunk(
     'employeeData/fetchArchiveMonth',
-    async ({year, month}, {getState, rejectWithValue}) => {
+    async ({ year, month }, { getState, rejectWithValue }) => {
         const state = getState().employeeData;
         const cacheKey = `${year}-${month}`;
         const cachedData = state.archiveCache[cacheKey];
 
         // Checking the cache for a specific month
         if (cachedData && isCacheValid(cachedData.timestamp, CACHE_DURATION_LONG)) {
-            return {data: cachedData.data, month, year, fromCache: true};
+            return { data: cachedData.data, month, year, fromCache: true };
         }
         try {
             const response = await scheduleAPI.fetchEmployeeArchiveMonth(year, month);
-            return {data: response.data || response, month, year, fromCache: false};
+            return { data: response.data || response, month, year, fromCache: false };
         } catch (error) {
             return rejectWithValue(error.message);
         }
-    }
+    },
+);
+
+// Admin thunks for viewing specific employee data
+export const fetchEmployeeConstraintsAsAdmin = createAsyncThunk(
+    'employeeData/fetchEmployeeConstraintsAsAdmin',
+    async ({ employeeId, forceRefresh = false }, { getState, rejectWithValue }) => {
+        try {
+            const response = await constraintAPI.getEmployeeWeeklyConstraints(employeeId, {});
+            return { data: response, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch employee constraints');
+        }
+    },
+);
+
+export const fetchEmployeeScheduleAsAdmin = createAsyncThunk(
+    'employeeData/fetchEmployeeScheduleAsAdmin',
+    async ({ employeeId, forceRefresh = false }, { getState, rejectWithValue }) => {
+        try {
+            // Get current week schedule
+            const currentResponse = await scheduleAPI.fetchWeeklySchedule(null, { emp_id: employeeId });
+            const currentData = currentResponse.data || currentResponse;
+            let nextData = null;
+
+            // Get next week schedule if current week has data
+            if (currentData?.week?.start) {
+                const nextWeekStart = format(addWeeks(parseISO(currentData.week.start), 1), 'yyyy-MM-dd');
+                const nextResponse = await scheduleAPI.fetchWeeklySchedule(nextWeekStart, { emp_id: employeeId });
+                nextData = nextResponse.data || nextResponse;
+            }
+
+            return { data: { current: currentData, next: nextData }, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch employee schedule');
+        }
+    },
+);
+
+export const fetchEmployeeArchiveSummaryAsAdmin = createAsyncThunk(
+    'employeeData/fetchEmployeeArchiveSummaryAsAdmin',
+    async ({ employeeId, forceRefresh = false }, { getState, rejectWithValue }) => {
+        try {
+            const response = await employeeAPI.getEmployeeArchiveSummary(employeeId);
+            return { data: response.data || response, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch employee archive summary');
+        }
+    },
+);
+
+export const fetchEmployeeArchiveMonthAsAdmin = createAsyncThunk(
+    'employeeData/fetchEmployeeArchiveMonthAsAdmin',
+    async ({ employeeId, year, month, forceRefresh = false }, { getState, rejectWithValue }) => {
+        try {
+            const response = await employeeAPI.getEmployeeArchiveMonth(employeeId, year, month);
+            return { data: response.data || response, month, year, fromCache: false };
+        } catch (error) {
+            return rejectWithValue(error.message || 'Failed to fetch employee archive month');
+        }
+    },
 );
 
 // Check for schedule updates
 export const checkScheduleUpdates = createAsyncThunk(
     'employeeData/checkUpdates',
-    async (_, {getState, dispatch}) => {
+    async (_, { getState, dispatch }) => {
         try {
             // Use personalSchedule because it contains the main data.
             const currentScheduleData = getState().employeeData.personalSchedule?.current;
@@ -160,20 +220,20 @@ export const checkScheduleUpdates = createAsyncThunk(
                         label: 'common.refresh',
 
                         handler: () => {
-                            dispatch(fetchPersonalSchedule({forceRefresh: true}));
+                            dispatch(fetchPersonalSchedule({ forceRefresh: true }));
 
                             if (currentScheduleData?.employee?.position_id) {
                                 dispatch(fetchPositionSchedule({
                                     positionId: currentScheduleData.employee.position_id,
-                                    forceRefresh: true
+                                    forceRefresh: true,
                                 }));
                             }
-                        }
+                        },
                     },
-                    persistent: true
+                    persistent: true,
                 }));
 
-                return {hasUpdates: true};
+                return { hasUpdates: true };
             }
 
             return null;
@@ -181,7 +241,7 @@ export const checkScheduleUpdates = createAsyncThunk(
             console.error('Error checking schedule updates:', error);
             return null;
         }
-    }
+    },
 );
 
 // Slice
@@ -346,11 +406,68 @@ const employeeDataSlice = createSlice({
                     const cacheKey = `${action.payload.year}-${action.payload.month}`;
                     state.archiveCache[cacheKey] = {
                         data: action.payload.data,
-                        timestamp: Date.now()
+                        timestamp: Date.now(),
                     };
                 }
             })
             .addCase(fetchEmployeeArchiveMonth.rejected, (state, action) => {
+                state.archiveLoading = false;
+                state.archiveError = action.payload;
+            })
+
+            // Admin thunks - reuse existing state fields
+            .addCase(fetchEmployeeScheduleAsAdmin.pending, (state) => {
+                state.personalScheduleLoading = true;
+                state.personalScheduleError = null;
+            })
+            .addCase(fetchEmployeeScheduleAsAdmin.fulfilled, (state, action) => {
+                state.personalScheduleLoading = false;
+                state.personalSchedule = action.payload.data;
+            })
+            .addCase(fetchEmployeeScheduleAsAdmin.rejected, (state, action) => {
+                state.personalScheduleLoading = false;
+                state.personalScheduleError = action.payload;
+            })
+
+            .addCase(fetchEmployeeConstraintsAsAdmin.pending, (state) => {
+                state.constraintsLoading = true;
+                state.constraintsError = null;
+            })
+            .addCase(fetchEmployeeConstraintsAsAdmin.fulfilled, (state, action) => {
+                state.constraintsLoading = false;
+                state.constraints = action.payload.data;
+            })
+            .addCase(fetchEmployeeConstraintsAsAdmin.rejected, (state, action) => {
+                state.constraintsLoading = false;
+                state.constraintsError = action.payload;
+            })
+
+            .addCase(fetchEmployeeArchiveSummaryAsAdmin.pending, (state) => {
+                state.archiveSummaryLoading = true;
+                state.archiveSummaryError = null;
+            })
+            .addCase(fetchEmployeeArchiveSummaryAsAdmin.fulfilled, (state, action) => {
+                state.archiveSummaryLoading = false;
+                state.archiveSummary = action.payload.data;
+            })
+            .addCase(fetchEmployeeArchiveSummaryAsAdmin.rejected, (state, action) => {
+                state.archiveSummaryLoading = false;
+                state.archiveSummaryError = action.payload;
+            })
+
+            .addCase(fetchEmployeeArchiveMonthAsAdmin.pending, (state) => {
+                state.archiveLoading = true;
+                state.archiveError = null;
+            })
+            .addCase(fetchEmployeeArchiveMonthAsAdmin.fulfilled, (state, action) => {
+                state.archiveLoading = false;
+                const cacheKey = `${action.payload.year}-${action.payload.month}`;
+                state.archiveCache[cacheKey] = {
+                    data: action.payload.data,
+                    timestamp: Date.now(),
+                };
+            })
+            .addCase(fetchEmployeeArchiveMonthAsAdmin.rejected, (state, action) => {
                 state.archiveLoading = false;
                 state.archiveError = action.payload;
             })
@@ -361,10 +478,10 @@ const employeeDataSlice = createSlice({
                     state.hasUpdates = true;
                 }
             });
-    }
+    },
 });
 export const selectNewUpdatesCount = (state) => {
-    const {items, lastViewedAt} = state.requests;
+    const { items, lastViewedAt } = state.requests;
     if (!items || items.length === 0) return 0;
 
     if (!lastViewedAt) {
@@ -374,7 +491,7 @@ export const selectNewUpdatesCount = (state) => {
     return items.filter(r =>
         r.status !== 'pending' &&
         r.reviewed_at &&
-        new Date(r.reviewed_at) > new Date(lastViewedAt)
+        new Date(r.reviewed_at) > new Date(lastViewedAt),
     ).length;
 };
 export const {
