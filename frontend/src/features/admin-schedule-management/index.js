@@ -37,7 +37,6 @@ const ScheduleManagement = () => {
         schedules,
         workSites,
         workSitesLoading,
-        loading,
         schedulesLoading,
     } = useSelector((state) => state.schedule);
 
