@@ -46,7 +46,7 @@ const PersonalScheduleView = ({
         }
 
         return (
-            <Card className="week-schedule-section mb-4 ">
+            <Card className="week-schedule-section personal-schedule mb-4 ">
                 <ScheduleHeaderCard
                     className="mb-2"
                     title={weekTitle}

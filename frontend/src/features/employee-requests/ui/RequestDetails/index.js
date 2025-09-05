@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Badge, Button, Card, Container } from 'react-bootstrap';
 import { useI18n } from 'shared/lib/i18n/i18nProvider';
 import { useDispatch, useSelector } from 'react-redux';
-import { constraintAPI } from 'shared/api/apiService';
+import { employeeAPI } from 'shared/api/apiService';
 import { deleteRequest } from '../../model/requestsSlice';
 import StatusBadge from 'shared/ui/components/StatusBadge';
 import LoadingState from 'shared/ui/components/LoadingState';
@@ -27,7 +27,7 @@ const RequestDetails = ({ request, onBack, onEdit, onDelete }) => {
 
     const loadShiftDetails = async () => {
         try {
-            const response = await constraintAPI.getEmployeeShifts();
+            const response = await employeeAPI.getEmployeeShifts();
             const shifts = response.data?.shifts || [];
 
             const shiftsMap = {};

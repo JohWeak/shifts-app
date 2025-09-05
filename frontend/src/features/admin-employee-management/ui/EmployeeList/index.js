@@ -1,11 +1,11 @@
 // frontend/src/features/admin-employee-management/ui/EmployeeList/index.js
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Badge, Button, Card, Form, Pagination, Spinner, Table} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {getStatusBadgeVariant} from 'shared/lib/utils/scheduleUtils';
-import {useSortableData} from 'shared/hooks/useSortableData';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Badge, Button, Card, Form, Pagination, Spinner, Table } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { getStatusBadgeVariant } from 'shared/lib/utils/scheduleUtils';
+import { useSortableData } from 'shared/hooks/useSortableData';
 import SortableHeader from 'shared/ui/components/SortableHeader';
-import {AnimatePresence, motion} from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import './EmployeeList.css';
 
 const EmployeeList = ({
@@ -18,7 +18,7 @@ const EmployeeList = ({
                           onPageChange,
                           onPageSizeChange,
                       }) => {
-    const {t} = useI18n();
+    const { t } = useI18n();
     const isInitialMount = useRef(true);
     const [isAnimating, setIsAnimating] = useState(false);
     const animationTimeout = 5000;
@@ -53,18 +53,18 @@ const EmployeeList = ({
     }), [t]);
 
     const tableHeaders = useMemo(() => [
-        {key: 'name', label: t('employee.fullName')},
-        {key: 'workSite', label: t('workSite.workSite')},
-        {key: 'position', label: t('employee.position')},
-        {key: 'role', label: t('employee.role')},
-        {key: 'status', label: t('employee.status')},
-        {label: t('common.actions'), isSortable: false, thProps: {className: 'text-center'}},
+        { key: 'name', label: t('employee.fullName') },
+        { key: 'workSite', label: t('workSite.workSite') },
+        { key: 'position', label: t('employee.position') },
+        { key: 'role', label: t('employee.role') },
+        { key: 'status', label: t('employee.status') },
+        { label: t('common.actions'), isSortable: false, thProps: { className: 'text-center' } },
     ], [t]);
 
 
-    const {sortedItems: sortedEmployees, requestSort, sortConfig} = useSortableData(
+    const { sortedItems: sortedEmployees, requestSort, sortConfig } = useSortableData(
         dataToRender,
-        {field: 'name', order: 'ASC'},
+        { field: 'name', order: 'ASC' },
         sortingAccessors,
     );
 
@@ -76,11 +76,11 @@ const EmployeeList = ({
     const tableBodyVariants = {
         hidden: {
             opacity: 0,
-            transition: {duration: 0.15},
+            transition: { duration: 0.15 },
         },
         visible: {
             opacity: 1,
-            transition: {duration: 0.15, staggerChildren: 0.04},
+            transition: { duration: 0.15, staggerChildren: 0.04 },
         },
     };
 
@@ -92,7 +92,7 @@ const EmployeeList = ({
         visible: {
             opacity: 1,
             y: 0,
-            transition: {ease: 'easeOut', duration: 0.15},
+            transition: { ease: 'easeOut', duration: 0.15 },
         },
     };
 
@@ -154,7 +154,7 @@ const EmployeeList = ({
                                 );
                             }
                             if (page === pagination.page - 2 || page === pagination.page + 2) {
-                                return <Pagination.Ellipsis key={page} disabled/>;
+                                return <Pagination.Ellipsis key={page} disabled />;
                             }
                             return null;
                         })}
@@ -211,19 +211,19 @@ const EmployeeList = ({
                     {loading && !isInitialMount.current && (
                         <motion.div
                             className="loading-overlay"
-                            initial={{opacity: 0}}
-                            animate={{opacity: 1}}
-                            exit={{opacity: 0}}
-                            transition={{duration: 0.2}}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
                         >
-                            <Spinner animation="border" variant="primary"/>
+                            <Spinner animation="border" variant="primary" />
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 <div
                     className="table-responsive"
-                    style={{overflowY: isAnimating ? 'hidden' : 'auto'}}
+                    style={{ overflowY: isAnimating ? 'hidden' : 'auto' }}
                 >
                     <Table hover className="data-table mb-0">
                         <thead>
@@ -255,13 +255,13 @@ const EmployeeList = ({
                                         className={`${employee.status === 'inactive' ? 'inactive-row opacity-75' : ''} clickable-row`}
                                         variants={rowVariants}
                                         onClick={() => onEdit(employee)}
-                                        style={{cursor: 'pointer'}}
+                                        style={{ cursor: 'pointer' }}
                                     >
                                         <td>
                                             <div className="d-flex align-items-center">
                                                 <div
                                                     className="employee-avatar me-3"
-                                                    style={{cursor: 'pointer'}}
+                                                    style={{ cursor: 'pointer' }}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         if (employee.phone && window.confirm(t('employee.confirmCall', {
@@ -318,7 +318,16 @@ const EmployeeList = ({
                                             <Button
                                                 variant="link"
                                                 size="sm"
-                                                className="p-1 text-danger"
+                                                className="p-1 text-primary me-2"
+                                                onClick={() => onEdit(employee)}
+                                                title={t('common.edit')}
+                                            >
+                                                <i className="bi bi-pencil"></i>
+                                            </Button>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                className="p-1 text-danger me-2"
                                                 onClick={() => employee.status === 'active' ? onDelete(employee) : onRestore(employee)}
                                                 title={employee.status === 'active' ? t('employee.deactivate') : t('employee.restore')}
                                             >

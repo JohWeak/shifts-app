@@ -1,11 +1,11 @@
 // frontend/src/features/employee-constraints/index.js
-import React, {useEffect, useMemo, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Card, Container, Toast, ToastContainer} from 'react-bootstrap';
-import {useI18n} from 'shared/lib/i18n/i18nProvider';
-import {useShiftColor} from 'shared/hooks/useShiftColor';
-import {useMediaQuery} from 'shared/hooks/useMediaQuery';
-import {addNotification, removeNotification} from 'app/model/notificationsSlice';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Card, Container, Toast, ToastContainer } from 'react-bootstrap';
+import { useI18n } from 'shared/lib/i18n/i18nProvider';
+import { useShiftColor } from 'shared/hooks/useShiftColor';
+import { useMediaQuery } from 'shared/hooks/useMediaQuery';
+import { addNotification, removeNotification } from 'app/model/notificationsSlice';
 
 // Components
 import PageHeader from 'shared/ui/components/PageHeader';
@@ -14,7 +14,7 @@ import ErrorMessage from 'shared/ui/components/ErrorMessage';
 import ColorPickerModal from 'shared/ui/components/ColorPickerModal';
 import ConstraintActions from './ui/ConstraintActions';
 import ConstraintGrid from './ui/ConstraintGrid';
-import {ScheduleHeaderCard} from 'features/employee-schedule/ui/ScheduleHeaderCard';
+import { ScheduleHeaderCard } from 'features/employee-schedule/ui/ScheduleHeaderCard';
 import ConfirmationModal from 'shared/ui/components/ConfirmationModal';
 
 // Redux actions & utils
@@ -28,14 +28,14 @@ import {
     submitWeeklyConstraints,
     updateConstraint,
 } from './model/constraintSlice';
-import {fetchSystemSettings} from '../admin-system-settings/model/settingsSlice';
+import { fetchSystemSettings } from '../admin-system-settings/model/settingsSlice';
 
-import {getContrastTextColor, hexToRgba} from 'shared/lib/utils/colorUtils';
+import { getContrastTextColor, hexToRgba } from 'shared/lib/utils/colorUtils';
 import './index.css';
 
 const ConstraintsSchedule = () => {
     const dispatch = useDispatch();
-    const {t} = useI18n();
+    const { t } = useI18n();
     const isMobile = useMediaQuery('(max-width: 888px)');
     const [justChangedCell, setJustChangedCell] = useState(null);
     useEffect(() => {
@@ -49,7 +49,7 @@ const ConstraintsSchedule = () => {
     }, [justChangedCell]);
 
     const [showInstructions, setShowInstructions] = useState(false);
-    const [modalState, setModalState] = useState({show: false, action: null});
+    const [modalState, setModalState] = useState({ show: false, action: null });
     const toggleShowInstructions = () => setShowInstructions(!showInstructions);
 
     const modalConfig = {
@@ -67,8 +67,8 @@ const ConstraintsSchedule = () => {
         },
     };
 
-    const handleShowModal = (action) => setModalState({show: true, action});
-    const handleHideModal = () => setModalState({show: false, action: null});
+    const handleShowModal = (action) => setModalState({ show: true, action });
+    const handleHideModal = () => setModalState({ show: false, action: null });
 
     const handleConfirmModal = () => {
         if (modalState.action === 'reset') {
@@ -108,8 +108,8 @@ const ConstraintsSchedule = () => {
         canEdit,
     } = useSelector(state => state.constraints);
 
-    const {user} = useSelector(state => state.auth);
-    const {systemSettings} = useSelector(state => state.settings);
+    const { user } = useSelector(state => state.auth);
+    const { systemSettings } = useSelector(state => state.settings);
 
     const LIMIT_ERROR_NOTIFICATION_ID = 'constraint-limit-error';
 
@@ -150,7 +150,7 @@ const ConstraintsSchedule = () => {
     }, [dispatch]);
 
 
-    console.log('[LOG 4] weeklyTemplate:', {weeklyTemplate});
+    console.log('[LOG 4] weeklyTemplate:', { weeklyTemplate });
 
     // Calculate deadline info
     const deadlineInfo = useMemo(() => {
@@ -189,17 +189,17 @@ const ConstraintsSchedule = () => {
             day: t(`days.${dayName.toLowerCase()}`),
             time: deadlineTime,
             isPassed,
-            dateTime: deadlineDate
+            dateTime: deadlineDate,
         };
     }, [systemSettings, t]);
 
     const usedCounts = useMemo(() => {
-        const counts = {cannot_work: 0, prefer_work: 0};
+        const counts = { cannot_work: 0, prefer_work: 0 };
         if (!weeklyConstraints) return counts;
 
         const dayHasStatus = (day, status) => Object.values(day.shifts).some(s => s === status);
 
-        const selectedDays = {cannot_work: new Set(), prefer_work: new Set()};
+        const selectedDays = { cannot_work: new Set(), prefer_work: new Set() };
 
         for (const date in weeklyConstraints) {
             const dayData = weeklyConstraints[date];
@@ -233,12 +233,15 @@ const ConstraintsSchedule = () => {
         const dayCount = Object.values(testConstraints).filter(day =>
             Object.values(day.shifts).some(status => status === mode),
         ).length;
-        const limits = weeklyTemplate?.constraints?.limits;
-        if (mode === 'cannot_work' && dayCount > limits?.cannot_work_days) {
-            return t('constraints.errors.maxCannotWork', {max: limits.cannot_work_days});
+
+        const maxCannotWorkDays = systemSettings?.maxCannotWorkDays || weeklyTemplate?.constraints?.limits?.cannot_work_days || 2;
+        const maxPreferWorkDays = systemSettings?.maxPreferWorkDays || weeklyTemplate?.constraints?.limits?.prefer_work_days || 5;
+
+        if (mode === 'cannot_work' && dayCount > maxCannotWorkDays) {
+            return t('constraints.errors.maxCannotWork', { max: maxCannotWorkDays });
         }
-        if (mode === 'prefer_work' && dayCount > limits?.prefer_work_days) {
-            return t('constraints.errors.maxPreferWork', {max: limits.prefer_work_days});
+        if (mode === 'prefer_work' && dayCount > maxPreferWorkDays) {
+            return t('constraints.errors.maxPreferWork', { max: maxPreferWorkDays });
         }
         return null;
     };
@@ -268,7 +271,7 @@ const ConstraintsSchedule = () => {
         const newStatus = (currentStatus === currentMode) ? 'neutral' : currentMode;
         const testConstraints = JSON.parse(JSON.stringify(weeklyConstraints));
         if (!testConstraints[date]) {
-            testConstraints[date] = {day_status: 'neutral', shifts: {}};
+            testConstraints[date] = { day_status: 'neutral', shifts: {} };
         }
         if (shiftId) {
             testConstraints[date].shifts[shiftId] = newStatus;
@@ -289,7 +292,7 @@ const ConstraintsSchedule = () => {
                 return;
             }
         }
-        dispatch(updateConstraint({date, shiftId, status: newStatus}));
+        dispatch(updateConstraint({ date, shiftId, status: newStatus }));
     };
 
     const handleSubmit = () => {
@@ -304,7 +307,7 @@ const ConstraintsSchedule = () => {
                     shift_id: shiftId,
                 })),
         );
-        dispatch(submitWeeklyConstraints({constraints: formattedConstraints, week_start: weeklyTemplate.weekStart}));
+        dispatch(submitWeeklyConstraints({ constraints: formattedConstraints, week_start: weeklyTemplate.weekStart }));
     };
 
     const getCellStyles = (date, shiftId) => {
@@ -360,7 +363,7 @@ const ConstraintsSchedule = () => {
 
     const getShiftHeaderStyle = (shift) => {
         const baseColor = getShiftColor(shift);
-        return {backgroundColor: baseColor, color: getContrastTextColor(baseColor)};
+        return { backgroundColor: baseColor, color: getContrastTextColor(baseColor) };
     };
     // Вычисляет стиль для всей ячейки-заголовка (<th> или <td>)
     const getShiftHeaderCellStyle = (shift) => {
@@ -371,11 +374,11 @@ const ConstraintsSchedule = () => {
         };
     };
 
-    if (loading) return <LoadingState/>;
-    if (error) return <Container className="mt-4"><PageHeader title={t('constraints.title')}/><ErrorMessage
-        error={error}/></Container>;
-    if (!weeklyTemplate) return <Container className="mt-4"><PageHeader title={t('constraints.title')}/><ErrorMessage
-        error={t('constraints.noTemplate')} variant="info"/></Container>;
+    if (loading) return <LoadingState />;
+    if (error) return <Container className="mt-4"><PageHeader title={t('constraints.title')} /><ErrorMessage
+        error={error} /></Container>;
+    if (!weeklyTemplate) return <Container className="mt-4"><PageHeader title={t('constraints.title')} /><ErrorMessage
+        error={t('constraints.noTemplate')} variant="info" /></Container>;
 
 
     const limitParams = {
@@ -399,7 +402,7 @@ const ConstraintsSchedule = () => {
                             <small className={deadlineInfo.isPassed ? 'text-warning' : 'text-muted'}>
                                 {deadlineInfo.isPassed
                                     ? t('constraints.deadline.passed')
-                                    : t('constraints.deadline.info', {day: deadlineInfo.day, time: deadlineInfo.time})
+                                    : t('constraints.deadline.info', { day: deadlineInfo.day, time: deadlineInfo.time })
                                 }
                             </small>
                         </div>
@@ -428,7 +431,7 @@ const ConstraintsSchedule = () => {
                     onShowInstructions={toggleShowInstructions}
                 />
             </Card>
-            <ToastContainer className="p-3 toast-container" style={{zIndex: 1056}}>
+            <ToastContainer className="p-3 toast-container" style={{ zIndex: 1056 }}>
                 <Toast show={showInstructions} onClose={toggleShowInstructions} autohide delay={5000}>
                     <Toast.Header closeButton={true}>
                         <i className="bi bi-info-circle-fill me-2"></i>
