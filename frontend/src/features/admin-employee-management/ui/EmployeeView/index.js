@@ -22,7 +22,7 @@ const EmployeeView = ({ employee: propEmployee }) => {
     const [activeTab, setActiveTab] = useState('schedule');
 
     // Employee data could come from props, location state, or we might need to fetch it
-    const [employee, setEmployee] = useState(propEmployee || location.state?.employee);
+    const [employee] = useState(propEmployee || location.state?.employee);
 
     // Clear cached data when switching between employees
     useClearDataOnEmployeeChange(employeeId);

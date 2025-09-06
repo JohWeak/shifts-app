@@ -53,7 +53,7 @@ const EmployeeArchive = ({ employeeId, hidePageHeader = false }) => {
         } else if (!isViewingAsAdmin) {
             dispatch(fetchEmployeeArchiveSummary());
         }
-    }, [dispatch, isViewingAsAdmin, adminData?.loadArchiveSummary]);
+    }, [dispatch, isViewingAsAdmin, employeeId]);
 
     // Загружаем данные для выбранного месяца
     useEffect(() => {
@@ -67,7 +67,7 @@ const EmployeeArchive = ({ employeeId, hidePageHeader = false }) => {
                 dispatch(fetchEmployeeArchiveMonth({ year, month }));
             }
         }
-    }, [dispatch, selectedMonth, isViewingAsAdmin, adminData?.loadArchiveMonth]);
+    }, [dispatch, selectedMonth, isViewingAsAdmin, employeeId]);
 
     const handleMonthChange = (newMonth) => {
         setSelectedMonth(newMonth);

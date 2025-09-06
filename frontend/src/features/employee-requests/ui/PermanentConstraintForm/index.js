@@ -1,5 +1,5 @@
 // frontend/src/features/employee-requests/ui/PermanentConstraintForm/index.js
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Button, Card, Form, Toast, ToastContainer } from 'react-bootstrap';
 import { X } from 'react-bootstrap-icons';
@@ -75,7 +75,7 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
             }
         };
         void loadData();
-    }, [dispatch, t]);
+    }, [dispatch, t, employeeId]);
 
     // Обновим эффект для инициализации из initialData (при редактировании)
     useEffect(() => {
@@ -138,24 +138,6 @@ const PermanentConstraintForm = ({ onSubmitSuccess, onCancel, initialData = null
             localStorage.setItem('permanent_constraint_message', message);
         }
     }, [message, showMessage]);
-
-    const loadEmployeeShifts = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await employeeAPI.getEmployeeShifts();
-            setShifts(response.data?.shifts || []);
-        } catch (error) {
-            console.error('Error loading shifts:', error);
-            setError(t('requests.load_shifts_error'));
-        } finally {
-            setLoading(false);
-        }
-    }, [t, setShifts, setLoading, setError]);
-
-    useEffect(() => {
-        void loadEmployeeShifts();
-    }, [loadEmployeeShifts]);
 
 
     const fullyBlockedDays = useMemo(() => {
