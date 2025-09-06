@@ -5,6 +5,21 @@
     padding: 1rem;
     max-width: 1200px;
     margin-bottom: 58px;
+    position: relative;
+}
+
+/* Smooth transitions for content changes */
+.employee-schedule-container > div {
+    transform-origin: top center;
+}
+
+/* Toggle animation improvements */
+.full-schedule-toggle {
+    transition: all 0.2s ease-in-out;
+}
+
+.full-schedule-toggle:hover {
+    transform: scale(1.05);
 }
 
 [data-theme="dark"] .employee-schedule-container .page-header-card {
