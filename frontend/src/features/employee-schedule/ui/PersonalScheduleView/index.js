@@ -6,6 +6,7 @@ import { formatShiftTime, formatTableHeaderDate, getDayName } from 'shared/lib/u
 import { getContrastTextColor } from 'shared/lib/utils/colorUtils';
 import { parseISO } from 'date-fns';
 import { ScheduleHeaderCard } from '../ScheduleHeaderCard';
+import WeekEmptyState from '../WeekEmptyState';
 import './PersonalScheduleView.css';
 import CalendarExportModal from '../CalendarExportModal';
 
@@ -165,10 +166,33 @@ const PersonalScheduleView = ({
         );
     };
 
+    // Helper functions to check if week has user shifts
+    const hasUserShiftsInWeek = (weekData) => {
+        if (!weekData || !weekData.schedule) return false;
+        const employee = employeeInfo || weekData.employee;
+        return weekData.schedule.some(day =>
+            day.shifts?.some(shift =>
+                shift.employees?.some(e => e.is_current_user || e.emp_id === employee?.emp_id),
+            ),
+        );
+    };
+
+    const currentWeekHasShifts = hasUserShiftsInWeek(currentWeekData);
+    const nextWeekHasShifts = hasUserShiftsInWeek(nextWeekData);
+
     return (
         <div className="personal-schedule-content">
-            {showCurrentWeek && currentWeekData && renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek'))}
-            {showNextWeek && nextWeekData && renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek'))}
+            {showCurrentWeek && (
+                currentWeekHasShifts ?
+                    renderWeekSchedule(currentWeekData, t('employee.schedule.currentWeek')) :
+                    <WeekEmptyState weekTitle={t('employee.schedule.currentWeek')} variant="current" />
+            )}
+
+            {showNextWeek && (
+                nextWeekHasShifts ?
+                    renderWeekSchedule(nextWeekData, t('employee.schedule.nextWeek')) :
+                    <WeekEmptyState weekTitle={t('employee.schedule.nextWeek')} variant="next" />
+            )}
 
             <CalendarExportModal
                 show={showExportModal}

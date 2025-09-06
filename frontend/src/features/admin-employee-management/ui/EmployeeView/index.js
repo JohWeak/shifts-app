@@ -31,7 +31,7 @@ const EmployeeView = ({ employee: propEmployee }) => {
         // If we don't have employee data and have an employeeId, we might need to fetch it
         // For now, we'll assume it's passed via navigation state or props
         if (!employee && employeeId) {
-            // TODO: Fetch employee data by ID if needed
+            console.warn('Employee data not provided. Consider implementing employee data fetching by ID');
         }
     }, [employee, employeeId]);
 
@@ -87,7 +87,7 @@ const EmployeeView = ({ employee: propEmployee }) => {
     const ActiveComponent = tabConfig.find(tab => tab.key === activeTab)?.component;
 
     return (
-        <Container fluid className="employee-view-container">
+        <Container fluid className="employee-view-container p-0">
             <PageHeader
                 icon="person-gear"
                 title={`${employeeName} Management`}
@@ -95,23 +95,21 @@ const EmployeeView = ({ employee: propEmployee }) => {
                 breadcrumbs={breadcrumbs}
             />
 
-            <Card className="mb-3">
-                <Card.Header className="bg-transparent border-bottom-0">
-                    <Nav variant="tabs" className="card-header-tabs">
-                        {tabConfig.map((tab) => (
-                            <Nav.Item key={tab.key}>
-                                <Nav.Link
-                                    active={activeTab === tab.key}
-                                    onClick={() => setActiveTab(tab.key)}
-                                    className="d-flex align-items-center"
-                                >
-                                    <i className={`bi bi-${tab.icon} me-2`}></i>
-                                    {tab.label}
-                                </Nav.Link>
-                            </Nav.Item>
-                        ))}
-                    </Nav>
-                </Card.Header>
+            <Card className="mb-3 nav-card">
+                <Nav variant="tabs" className="card-tabs">
+                    {tabConfig.map((tab) => (
+                        <Nav.Item key={tab.key}>
+                            <Nav.Link
+                                active={activeTab === tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className="d-flex align-items-center"
+                            >
+                                <i className={`bi bi-${tab.icon} me-2`}></i>
+                                {tab.label}
+                            </Nav.Link>
+                        </Nav.Item>
+                    ))}
+                </Nav>
             </Card>
 
             <div className="employee-content">

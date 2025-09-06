@@ -583,6 +583,7 @@ export const en = {
             noSchedule: 'No Schedule Available',
             noScheduleDesc: 'There are no published schedules for you at this time.',
             noScheduleForThisWeek: 'No schedule available for this week',
+            noScheduleNextWeek: 'No schedule available for next week',
             personalSchedule: 'Personal',
             positionRequired: 'You need to be assigned to a position to view the full schedule',
             positionScheduleWillBeAvailable: 'The full position schedule will be available soon',

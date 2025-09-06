@@ -1,0 +1,46 @@
+/* frontend/src/shared/ui/components/ProtectionMonitor/ProtectionMonitor.css */
+
+.protection-monitor {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1050;
+}
+
+.protection-monitor-toggle {
+    border-radius: 20px;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+.protection-monitor-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 300px;
+    margin-top: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+}
+
+.protection-monitor-panel .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 8px 12px;
+}
+
+.protection-monitor-panel .card-body {
+    padding: 12px;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .protection-monitor {
+        top: 5px;
+        right: 5px;
+    }
+
+    .protection-monitor-panel {
+        width: 250px;
+    }
+}

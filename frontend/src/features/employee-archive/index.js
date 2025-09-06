@@ -14,7 +14,7 @@ import {
     fetchEmployeeArchiveMonth,
     fetchEmployeeArchiveSummary,
 } from 'features/employee-dashboard/model/employeeDataSlice';
-import { useEmployeeDataAsAdmin } from 'features/employee-dashboard/model/hooks/useEmployeeDataAsAdmin';
+import { useEmployeeDataAsAdmin } from 'features/admin-employee-management/model/hooks/useEmployeeDataAsAdmin';
 import { useShiftColor } from 'shared/hooks/useShiftColor';
 import './index.css';
 

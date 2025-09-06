@@ -7,7 +7,8 @@ import employeeReducer from 'features/admin-employee-management/model/employeeSl
 import workplaceReducer from 'features/admin-workplace-settings/model/workplaceSlice';
 import notificationsReducer from '../model/notificationsSlice';
 import constraintReducer from 'features/employee-constraints/model/constraintSlice';
-import employeeDataReducer from 'features/employee-dashboard/model/employeeDataSlice'; // NEW
+import employeeDataReducer from 'features/employee-dashboard/model/employeeDataSlice';
+import adminEmployeeDataReducer from 'features/admin-employee-management/model/adminEmployeeDataSlice';
 import requestsReducer from 'features/employee-requests/model/requestsSlice';
 import adminRequestsReducer from 'features/admin-permanent-requests/model/adminRequestsSlice';
 import profileReducer from '../../features/employee-profile/model/profileSlice';
@@ -22,6 +23,7 @@ export const rootReducer = combineReducers({
     notifications: notificationsReducer,
     constraints: constraintReducer,
     employeeData: employeeDataReducer,
+    adminEmployeeData: adminEmployeeDataReducer,
     requests: requestsReducer,
     adminRequests: adminRequestsReducer,
     profile: profileReducer,

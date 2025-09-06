@@ -549,6 +549,7 @@ export const ru = {
             noSchedule: 'Расписание недоступно',
             noScheduleDesc: 'В данный момент для вас нет опубликованных расписаний.',
             noScheduleForThisWeek: 'На эту неделю нет расписания',
+            noScheduleNextWeek: 'На следующую неделю нет расписания',
             personalSchedule: 'Личное',
             positionRequired: 'Вам необходимо быть привязанным к должности для просмотра полного расписания',
             positionScheduleWillBeAvailable: 'Полное расписание по должности будет доступно в ближайшее время',

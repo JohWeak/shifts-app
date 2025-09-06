@@ -1,0 +1,39 @@
+/* frontend/src/features/employee-schedule/ui/WeekEmptyState/WeekEmptyState.css */
+
+.week-empty-state-card {
+    border: 1px dashed #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.week-empty-header {
+    background-color: #e9ecef;
+    border-bottom: 1px dashed #dee2e6;
+    padding: 0.5rem 1rem;
+}
+
+.week-empty-body {
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.week-empty-icon i {
+    font-size: 1.5rem;
+}
+
+.week-empty-state-card:hover {
+    border-color: #ced4da;
+    background-color: #f1f3f4;
+}
+
+@media (max-width: 768px) {
+    .week-empty-body {
+        min-height: 60px;
+        padding: 1rem 0.5rem !important;
+    }
+
+    .week-empty-icon i {
+        font-size: 1.25rem;
+    }
+}

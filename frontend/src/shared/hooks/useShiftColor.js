@@ -1,5 +1,5 @@
 // frontend/src/shared/hooks/useShiftColor.js
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLocalShiftColorOverride } from '../../features/admin-schedule-management/model/scheduleSlice';
 import ThemeColorService from 'shared/lib/services/ThemeColorService';
@@ -57,7 +57,7 @@ export const useShiftColor = () => {
         });
 
         return () => observer.disconnect();
-    }, [currentTheme, scheduleDetails?.shifts, dispatch]);
+    }, []);  // Remove unstable dependencies
 
     // Save pendingGlobalChanges to sessionStorage whenever it changes
     useEffect(() => {
@@ -72,9 +72,12 @@ export const useShiftColor = () => {
         }
     }, [pendingGlobalChanges]);
 
+    // Create stable reference for shifts to prevent unnecessary effects
+    const shiftsRef = useMemo(() => scheduleDetails?.shifts, [JSON.stringify(scheduleDetails?.shifts)]);
+    
     // Clean up temp colors and pending changes when Redux store updates with new shift colors
     useEffect(() => {
-        if (scheduleDetails?.shifts && (Object.keys(tempShiftColors).length > 0 || Object.keys(pendingGlobalChanges).length > 0)) {
+        if (shiftsRef && (Object.keys(tempShiftColors).length > 0 || Object.keys(pendingGlobalChanges).length > 0)) {
             setTempShiftColors(prev => {
                 const newTempColors = { ...prev };
                 let hasChanges = false;
@@ -82,7 +85,7 @@ export const useShiftColor = () => {
                 // Only clean up temp colors for global saves in light theme
                 // Don't interfere with local color system
                 Object.keys(newTempColors).forEach(shiftId => {
-                    const shift = scheduleDetails.shifts.find(s => s.shift_id === parseInt(shiftId));
+                    const shift = shiftsRef.find(s => s.shift_id === parseInt(shiftId));
                     if (shift && shift.color === newTempColors[shiftId]) {
                         // Only clear if this was likely a global save (in light theme for admin)
                         if (isAdmin && currentTheme === 'light') {
@@ -101,7 +104,7 @@ export const useShiftColor = () => {
                 let hasChanges = false;
 
                 Object.keys(newPendingChanges).forEach(shiftId => {
-                    const shift = scheduleDetails.shifts.find(s => s.shift_id === parseInt(shiftId));
+                    const shift = shiftsRef.find(s => s.shift_id === parseInt(shiftId));
                     if (shift && shift.color === newPendingChanges[shiftId]) {
                         delete newPendingChanges[shiftId];
                         hasChanges = true;
@@ -111,7 +114,7 @@ export const useShiftColor = () => {
                 return hasChanges ? newPendingChanges : prev;
             });
         }
-    }, [scheduleDetails?.shifts, tempShiftColors, pendingGlobalChanges, isAdmin, currentTheme]);
+    }, [shiftsRef, isAdmin, currentTheme]);  // Remove unstable dependencies
 
     const getShiftColor = (shift) => {
         if (!shift) return '#6c757d';
@@ -244,7 +247,8 @@ export const useShiftColor = () => {
         closeColorPicker();
     };
 
-    return {
+    // Memoize the returned object to prevent unnecessary re-renders
+    return useMemo(() => ({
         colorPickerState,
         openColorPicker,
         closeColorPicker,
@@ -259,5 +263,17 @@ export const useShiftColor = () => {
         resetShiftColor: () => resetShiftColor(colorPickerState.shiftId),
         determineSaveMode,
         cancelColorChange,
-    };
+    }), [
+        colorPickerState,
+        openColorPicker,
+        closeColorPicker,
+        previewColor,
+        applyColor,
+        getShiftColor,
+        currentTheme,
+        user?.role,
+        isAdmin,
+        determineSaveMode,
+        cancelColorChange,
+    ]);
 };
